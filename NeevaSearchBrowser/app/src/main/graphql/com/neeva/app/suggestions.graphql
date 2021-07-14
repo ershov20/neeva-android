@@ -1,0 +1,58 @@
+query Suggestions($query: String!) {
+  suggest(q: $query) {
+    querySuggestion {
+      type
+      suggestedQuery
+      boldSpan {
+        startInclusive
+        endExclusive
+      }
+      source
+      annotation {
+        description
+        imageURL
+      }
+    }
+    urlSuggestion {
+      icon {
+        labels
+      }
+      suggestedURL
+      title
+      author
+      timestamp
+      subtitle
+      sourceQueryIndex
+      boldSpan {
+        startInclusive
+        endExclusive
+      }
+    }
+    lenseSuggestion {
+      shortcut
+      description
+    }
+    bangSuggestion {
+      shortcut
+      description
+      domain
+    }
+    activeLensBangInfo {
+      domain
+      shortcut
+      description
+      type
+    }
+  }
+}
+
+query SearchResults($query: String!) {
+  search(q: $query) {
+    resultGroup {
+      result {
+        actionURL
+      }
+    }
+  }
+}
+
