@@ -2,7 +2,6 @@ package com.neeva.app
 
 import android.content.Context
 import android.os.Looper
-import android.webkit.CookieManager
 import com.apollographql.apollo.ApolloClient
 import okhttp3.*
 
@@ -37,7 +36,11 @@ private class AuthCookieJar(val context: Context): CookieJar {
     override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
         val authCookie = Cookie.Builder().name("httpd~login").secure()
             .domain(appHost).expiresAt(Long.MAX_VALUE).value(User.getToken(context = context)).build()
-        return mutableListOf(authCookie)
+        val browserTypeCookie = Cookie.Builder().name("BrowserType").secure()
+            .domain(appHost).expiresAt(Long.MAX_VALUE).value("neeva-android").build()
+        val browserVersionCookie = Cookie.Builder().name("BrowserVersion").secure()
+            .domain(appHost).expiresAt(Long.MAX_VALUE).value("0.0.1").build()
+        return mutableListOf(authCookie, browserTypeCookie, browserVersionCookie)
     }
 
     override fun saveFromResponse(url: HttpUrl, cookies: MutableList<Cookie>) {}
