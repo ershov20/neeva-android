@@ -3,11 +3,8 @@ package com.neeva.app
 import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import com.apollographql.apollo.coroutines.await
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
-class WebClient: WebViewClient() {
+class WebClient(private val webViewModel: WebViewModel): WebViewClient() {
 
     override fun onPageFinished(view: WebView?, url: String?) {
         super.onPageFinished(view, url)
@@ -16,5 +13,11 @@ class WebClient: WebViewClient() {
                 User.setToken(view!!.context.applicationContext, it.split("=").last())
             }
         }
+        webViewModel.onCurrentPageChanged("", view?.title)
+    }
+
+    override fun onPageCommitVisible(view: WebView?, url: String?) {
+        super.onPageCommitVisible(view, url)
+        webViewModel.onCurrentPageChanged(url, view?.title)
     }
 }

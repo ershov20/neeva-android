@@ -1,7 +1,6 @@
 package com.neeva.app
 
 import android.os.Bundle
-import android.webkit.WebView
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -9,23 +8,23 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.ui.theme.NeevaSearchBrowserTheme
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.lifecycle.lifecycleScope
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.*
 import com.apollographql.apollo.coroutines.await
 
 class NeevaActivity : AppCompatActivity() {
-    private val searchTextModel by viewModels<SearchTextModel>()
     private val suggestionsModel by viewModels<SuggestionsViewModel>()
+    private val webModel by viewModels<WebViewModel> {WebViewModelFactory(this)}
+    private val searchTextModel by viewModels<URLBarModel> { UrlBarModelFactory(webModel)}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             NeevaSearchBrowserTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    BrowsingUI(searchTextModel = searchTextModel, suggestionsViewModel = suggestionsModel)
+                    BrowsingUI(searchTextModel, suggestionsModel, webModel)
                 }
             }
         }
@@ -39,36 +38,35 @@ class NeevaActivity : AppCompatActivity() {
                 }
             }
         }
-    }
-}
 
-@Composable
-fun BrowsingUI(searchTextModel: SearchTextModel, suggestionsViewModel: SuggestionsViewModel) {
-    val showSuggestionList: Boolean? by suggestionsViewModel.shouldShowSuggestions.observeAsState()
-    val isEditing: Boolean? by searchTextModel.isEditing.observeAsState()
-    Column() {
-        URLBar(searchTextModel = searchTextModel)
-        Box {
-            LoginScreen()
-            if (isEditing != false && showSuggestionList != false) {
-                SuggestionList(suggestionsViewModel = suggestionsViewModel)
-            }
+        webModel.currentUrl.observe(this) {
+            if (it?.isEmpty() == true) return@observe
+
+            searchTextModel.onCurrentUrlChanged(it)
         }
     }
 }
 
 @Composable
-fun LoginScreen() {
-    val context = LocalContext.current
-    val webViewClient = WebClient()
-
-    AndroidView(
-        factory = {
-            WebView(context).apply {
-                this.webViewClient = webViewClient
-                this.settings.javaScriptEnabled = true
-                this.loadUrl("https://neeva.com/")
+fun BrowsingUI(urlBarModel: URLBarModel,
+               suggestionsViewModel: SuggestionsViewModel,
+               webViewModel: WebViewModel) {
+    val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
+    Column {
+        URLBar(urlBarModel = urlBarModel)
+        Box(modifier = Modifier.weight(1.0f)) {
+            WebPanel(webViewModel)
+            if (isEditing != false) {
+                SuggestionList(suggestionsViewModel, urlBarModel, webViewModel)
             }
-        },
-    )
+        }
+        TabToolbar(
+            TabToolbarModel(
+                {},
+                {},
+                {}
+            ),
+            webViewModel
+        )
+    }
 }
