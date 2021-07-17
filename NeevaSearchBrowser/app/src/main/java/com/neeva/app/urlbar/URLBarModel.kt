@@ -1,4 +1,4 @@
-package com.neeva.app
+package com.neeva.app.urlbar
 
 import android.net.Uri
 import androidx.compose.ui.focus.FocusRequester
@@ -7,6 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.neeva.app.web.WebViewModel
 
 class URLBarModel(private val webViewModel: WebViewModel): ViewModel() {
     private val _text = MutableLiveData("")
@@ -43,6 +44,7 @@ class URLBarModel(private val webViewModel: WebViewModel): ViewModel() {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 class UrlBarModelFactory(webModel: WebViewModel) :
     ViewModelProvider.Factory {
     private val webModel: WebViewModel = webModel

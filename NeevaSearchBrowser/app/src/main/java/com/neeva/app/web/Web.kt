@@ -1,4 +1,4 @@
-package com.neeva.app
+package com.neeva.app.web
 
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
@@ -8,6 +8,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.neeva.app.appSearchURL
 
 
 @Composable
@@ -44,6 +45,11 @@ class WebViewModel(activity: AppCompatActivity): ViewModel() {
     fun goBack() = webView.goBack()
     fun goForward() = webView.goForward()
 
+    fun loadUrl(url: String) {
+        webView.loadUrl(url)
+        webView.requestFocus()
+    }
+
     fun onCurrentPageChanged(url: String?, title: String?) {
         if (url?.isNotEmpty() == true) _currentUrl.value = url
         if (title?.isNotEmpty() == true) _currentTitle.value = title
@@ -52,10 +58,15 @@ class WebViewModel(activity: AppCompatActivity): ViewModel() {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 class WebViewModelFactory(activity: AppCompatActivity) :
     ViewModelProvider.Factory {
     private val activity: AppCompatActivity = activity
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return WebViewModel(activity) as T
     }
+}
+
+fun String.toSearchUrl(): String {
+    return "$appSearchURL?q=${this}&src=nvobar"
 }

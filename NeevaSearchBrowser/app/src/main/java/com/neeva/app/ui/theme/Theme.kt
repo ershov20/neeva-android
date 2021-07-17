@@ -5,30 +5,33 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
-        primary = Purple200,
-        primaryVariant = Purple700,
-        secondary = Teal200
+        primary = BackgroundDark,
+        primaryVariant = FillDark,
+        background = TrayDark,
+        onPrimary = Color.White,
+        onBackground = Color.White,
+        onSecondary = LabelSecondaryDark
 )
 
 private val LightColorPalette = lightColors(
-        primary = Purple500,
-        primaryVariant = Purple700,
-        secondary = Teal200
-
+        primary = BackgroundLight,
+        primaryVariant = FillLight,
+        background = TrayLight,
+        onPrimary = Color.Black,
+        onBackground = Color.Black,
+        onSecondary = LabelSecondaryLight
         /* Other default colors to override
-    background = Color.White,
     surface = Color.White,
-    onPrimary = Color.White,
     onSecondary = Color.Black,
     onBackground = Color.Black,
-    onSurface = Color.Black,
     */
 )
 
 @Composable
-fun NeevaSearchBrowserTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
+fun NeevaTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable() () -> Unit) {
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {

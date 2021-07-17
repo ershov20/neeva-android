@@ -5,9 +5,6 @@ import android.os.Looper
 import com.apollographql.apollo.ApolloClient
 import okhttp3.*
 
-var appHost: String = "neeva.com"
-var appUrl: String = "https://${appHost}/"
-
 private var instance: ApolloClient? = null
 
 fun apolloClient(context: Context): ApolloClient {
@@ -20,7 +17,7 @@ fun apolloClient(context: Context): ApolloClient {
     }
 
     instance = ApolloClient.builder()
-        .serverUrl("${appUrl}graphql")
+        .serverUrl("${appURL}graphql")
         .okHttpClient(
             OkHttpClient.Builder()
                 .addInterceptor(AuthorizationInterceptor(context))

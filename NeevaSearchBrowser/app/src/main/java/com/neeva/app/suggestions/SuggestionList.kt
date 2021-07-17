@@ -1,4 +1,4 @@
-package com.neeva.app
+package com.neeva.app.suggestions
 
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -14,18 +14,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import com.neeva.app.R
+import com.neeva.app.urlbar.URLBarModel
+import com.neeva.app.web.WebViewModel
+import com.neeva.app.web.toSearchUrl
 
 
 @Composable
 fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                    urlBarModel: URLBarModel,
-                   webViewModel: WebViewModel) {
+                   webViewModel: WebViewModel
+) {
     val queryChipSuggestions by suggestionsViewModel.queryChipSuggestions.observeAsState()
     val showSuggestionList: Boolean? by suggestionsViewModel.shouldShowSuggestions.observeAsState()
     val currentURL: String by webViewModel.currentUrl.observeAsState("")
@@ -34,11 +38,16 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colors.primary)
     ) {
         if  (showSuggestionList != false) {
             items(queryChipSuggestions!!) {
-                SuggestionRow(query = it.suggestedQuery)
+                SuggestionRow(
+                    query = it.suggestedQuery,
+                    onClick = {
+                        webViewModel.loadUrl(it.suggestedQuery.toSearchUrl())
+                    }
+                )
             }
         } else {
             item {
@@ -64,7 +73,7 @@ fun CurrentPageRow(url: String, title: String, onEditPressed: () -> Unit) {
             contentDescription = "query icon",
             modifier = Modifier
                 .padding(start = 12.dp),
-            colorFilter = ColorFilter.tint(Color.LightGray)
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
         )
         Column(
             modifier = Modifier.padding(horizontal = 8.dp).weight(1.0f)
@@ -72,12 +81,13 @@ fun CurrentPageRow(url: String, title: String, onEditPressed: () -> Unit) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.onPrimary,
                 maxLines = 1,
             )
             Text(
                 text = Uri.parse(url).authority ?: url,
                 style = MaterialTheme.typography.body2,
-                color = Color.DarkGray,
+                color = MaterialTheme.colors.onSecondary,
                 maxLines = 1,
             )
         }
@@ -89,17 +99,18 @@ fun CurrentPageRow(url: String, title: String, onEditPressed: () -> Unit) {
                 .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                 .requiredSize(48.dp, 48.dp)
                 .clickable { onEditPressed() },
-            colorFilter = ColorFilter.tint(Color.Black)
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
         )
     }
 
 }
 
 @Composable
-fun SuggestionRow(query: String) {
+fun SuggestionRow(query: String, onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .clickable { onClick() }
             .fillMaxWidth()
             .height(58.dp)
     ) {
@@ -109,14 +120,15 @@ fun SuggestionRow(query: String) {
             modifier = Modifier
                 .padding(start = 12.dp)
                 .wrapContentHeight(Alignment.CenterVertically),
-            colorFilter = ColorFilter.tint(Color.LightGray)
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
         )
         Text(
             text = query,
             style = MaterialTheme.typography.body1,
             modifier = Modifier
                 .padding(horizontal = 8.dp)
-                .wrapContentSize(Alignment.CenterStart)
+                .wrapContentSize(Alignment.CenterStart),
+            color = MaterialTheme.colors.onPrimary,
         )
     }
 

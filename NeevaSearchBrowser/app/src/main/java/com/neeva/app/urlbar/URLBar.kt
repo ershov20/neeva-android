@@ -1,4 +1,4 @@
-package com.neeva.app
+package com.neeva.app.urlbar
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,13 +16,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.neeva.app.R
 
 @Composable
 fun URLBar(urlBarModel: URLBarModel) {
@@ -34,13 +34,13 @@ fun URLBar(urlBarModel: URLBarModel) {
             .fillMaxWidth()
             .padding(horizontal = 8.dp)
             .padding(vertical = 10.dp)
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colors.primary)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
-                .background(Color.LightGray)
+                .background(MaterialTheme.colors.primaryVariant)
                 .height(42.dp)
                 .padding(horizontal = 8.dp)
         ) {
@@ -54,7 +54,8 @@ fun URLBar(urlBarModel: URLBarModel) {
                     .wrapContentSize(if (isEditing) Alignment.CenterStart else Alignment.Center),
                 singleLine = true,
                 textStyle = TextStyle(
-                    color = if (text.isNullOrEmpty()) Color.LightGray else Color.Black,
+                    color = if (text.isNullOrEmpty()) MaterialTheme.colors.onSecondary
+                        else MaterialTheme.colors.onPrimary,
                     fontSize = MaterialTheme.typography.body1.fontSize
                 ),
             )
@@ -62,7 +63,9 @@ fun URLBar(urlBarModel: URLBarModel) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .background(Color.LightGray)
+                        .clickable {
+                            urlBarModel.onRequestFocus()
+                        }.background(MaterialTheme.colors.primaryVariant)
                         .matchParentSize()
                         .wrapContentSize(Alignment.Center)
                 ) {
@@ -73,19 +76,16 @@ fun URLBar(urlBarModel: URLBarModel) {
                             modifier = Modifier
                                 .padding(8.dp)
                                 .size(14.dp, 14.dp),
-                            colorFilter = ColorFilter.tint(Color.Black),
+                            colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary),
                             contentScale = ContentScale.Fit
                         )
                     }
                     Text(
                         text = text.ifEmpty { "Search or enter address" },
-                        modifier = Modifier
-                            .clickable {
-                                urlBarModel.onRequestFocus()
-                            },
                         style = MaterialTheme.typography.body1,
                         maxLines = 1,
-                        color = if (text.isEmpty()) Color.DarkGray else Color.Black
+                        color = if (text.isEmpty()) MaterialTheme.colors.onSecondary
+                            else MaterialTheme.colors.onPrimary
                     )
                 }
 

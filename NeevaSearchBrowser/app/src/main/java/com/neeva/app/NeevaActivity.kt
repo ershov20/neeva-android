@@ -8,21 +8,29 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
-import com.neeva.app.ui.theme.NeevaSearchBrowserTheme
+import com.neeva.app.ui.theme.NeevaTheme
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.*
 import com.apollographql.apollo.coroutines.await
+import com.neeva.app.suggestions.SuggestionList
+import com.neeva.app.suggestions.SuggestionsViewModel
+import com.neeva.app.urlbar.URLBar
+import com.neeva.app.urlbar.URLBarModel
+import com.neeva.app.urlbar.UrlBarModelFactory
+import com.neeva.app.web.WebPanel
+import com.neeva.app.web.WebViewModel
+import com.neeva.app.web.WebViewModelFactory
 
 class NeevaActivity : AppCompatActivity() {
     private val suggestionsModel by viewModels<SuggestionsViewModel>()
-    private val webModel by viewModels<WebViewModel> {WebViewModelFactory(this)}
-    private val searchTextModel by viewModels<URLBarModel> { UrlBarModelFactory(webModel)}
+    private val webModel by viewModels<WebViewModel> { WebViewModelFactory(this) }
+    private val searchTextModel by viewModels<URLBarModel> { UrlBarModelFactory(webModel) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NeevaSearchBrowserTheme {
+            NeevaTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     BrowsingUI(searchTextModel, suggestionsModel, webModel)
                 }
@@ -50,7 +58,8 @@ class NeevaActivity : AppCompatActivity() {
 @Composable
 fun BrowsingUI(urlBarModel: URLBarModel,
                suggestionsViewModel: SuggestionsViewModel,
-               webViewModel: WebViewModel) {
+               webViewModel: WebViewModel
+) {
     val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
     Column {
         URLBar(urlBarModel = urlBarModel)

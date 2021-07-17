@@ -1,8 +1,9 @@
-package com.neeva.app
+package com.neeva.app.suggestions
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.neeva.app.SuggestionsQuery
 
 class SuggestionsViewModel: ViewModel() {
     private var _suggestionResponse: SuggestionsQuery.Suggest? = null

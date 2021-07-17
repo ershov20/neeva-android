@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import com.neeva.app.web.WebViewModel
 
 
 class TabToolbarModel(
@@ -34,7 +35,7 @@ fun TabToolbar(model: TabToolbarModel, webViewModel: WebViewModel) {
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
-            .background(MaterialTheme.colors.background),
+            .background(MaterialTheme.colors.primary),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         TabToolbarButton(
@@ -78,7 +79,7 @@ fun TabToolbarButton(
         modifier = Modifier
             .size(48.dp, 48.dp)
             .clickable(enabled) { onClick() },
-        colorFilter = ColorFilter.tint(if (enabled) Color.Black else Color.LightGray)
+        colorFilter = ColorFilter.tint(if (enabled) MaterialTheme.colors.onPrimary else Color.LightGray)
     )
 }
 
