@@ -34,13 +34,18 @@ fun apolloClient(context: Context): ApolloClient {
 
 private class AuthCookieJar(val context: Context): CookieJar {
     override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
-        val authCookie = Cookie.Builder().name("httpd~login").secure()
-            .domain(appHost).expiresAt(Long.MAX_VALUE).value(User.getToken(context = context)).build()
         val browserTypeCookie = Cookie.Builder().name("BrowserType").secure()
             .domain(appHost).expiresAt(Long.MAX_VALUE).value("neeva-android").build()
         val browserVersionCookie = Cookie.Builder().name("BrowserVersion").secure()
             .domain(appHost).expiresAt(Long.MAX_VALUE).value("0.0.1").build()
-        return mutableListOf(authCookie, browserTypeCookie, browserVersionCookie)
+        val cookies = mutableListOf(browserTypeCookie, browserVersionCookie)
+        val token = User.getToken(context = context)
+        if (token != null) {
+            val authCookie = Cookie.Builder().name("httpd~login").secure()
+                .domain(appHost).expiresAt(Long.MAX_VALUE).value(token).build()
+            cookies.add(authCookie)
+        }
+        return cookies
     }
 
     override fun saveFromResponse(url: HttpUrl, cookies: MutableList<Cookie>) {}
