@@ -1,5 +1,6 @@
 package com.neeva.app.web
 
+import android.content.Context
 import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
@@ -9,6 +10,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.neeva.app.appSearchURL
+import com.neeva.app.storage.DomainViewModel
 
 
 @Composable
@@ -20,7 +22,10 @@ fun WebPanel(webViewModel: WebViewModel) {
     )
 }
 
-class WebViewModel(activity: AppCompatActivity): ViewModel() {
+class WebViewModel(
+        context: Context,
+        private val domainViewModel: DomainViewModel
+    ): ViewModel() {
     private val _currentUrl = MutableLiveData("")
     val currentUrl: LiveData<String> = _currentUrl
 
@@ -33,10 +38,12 @@ class WebViewModel(activity: AppCompatActivity): ViewModel() {
     private val _canGoForward = MutableLiveData(false)
     val canGoForward: LiveData<Boolean> = _canGoForward
 
-    private val webClient = WebClient(this)
+    private val webClient = WebClient(this, domainViewModel)
+    private val webNeevaClient = WebNeevaClient(domainViewModel)
     internal val webView by lazy {
-        WebView(activity).apply {
+        WebView(context).apply {
             this.webViewClient = webClient
+            this.webChromeClient = webNeevaClient
             this.settings.javaScriptEnabled = true
             this.loadUrl("https://neeva.com/")
         }
@@ -59,11 +66,12 @@ class WebViewModel(activity: AppCompatActivity): ViewModel() {
 }
 
 @Suppress("UNCHECKED_CAST")
-class WebViewModelFactory(activity: AppCompatActivity) :
+class WebViewModelFactory(activity: AppCompatActivity, domainViewModel: DomainViewModel) :
     ViewModelProvider.Factory {
-    private val activity: AppCompatActivity = activity
+    private val context: Context = activity.applicationContext
+    private val domainModel = domainViewModel
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return WebViewModel(activity) as T
+        return WebViewModel(context, domainModel) as T
     }
 }
 

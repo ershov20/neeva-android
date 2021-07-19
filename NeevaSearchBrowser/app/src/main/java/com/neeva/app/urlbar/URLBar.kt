@@ -23,12 +23,17 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.suggestions.FaviconView
+import com.neeva.app.web.WebViewModel
 
 @Composable
-fun URLBar(urlBarModel: URLBarModel) {
+fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel: DomainViewModel) {
     val text: String by urlBarModel.text.observeAsState("")
     val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
     val showLock: Boolean by urlBarModel.showLock.observeAsState(false)
+    val currentUrl:String by webViewModel.currentUrl.observeAsState("")
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -44,28 +49,36 @@ fun URLBar(urlBarModel: URLBarModel) {
                 .height(42.dp)
                 .padding(horizontal = 8.dp)
         ) {
-            BasicTextField(
-                text,
-                onValueChange = { urlBarModel.onLocationBarTextChanged(it) },
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .matchParentSize()
-                    .onFocusChanged(urlBarModel::onFocusChanged)
-                    .focusRequester(urlBarModel.focusRequester)
-                    .wrapContentSize(if (isEditing) Alignment.CenterStart else Alignment.Center),
-                singleLine = true,
-                textStyle = TextStyle(
-                    color = if (text.isNullOrEmpty()) MaterialTheme.colors.onSecondary
+            ) {
+                FaviconView(domainViewModel = domainViewModel, url = currentUrl, false)
+                BasicTextField(
+                    text,
+                    onValueChange = { urlBarModel.onLocationBarTextChanged(it) },
+                    modifier = Modifier
+                        .padding(start = 8.dp)
+                        .onFocusChanged(urlBarModel::onFocusChanged)
+                        .focusRequester(urlBarModel.focusRequester)
+                        .wrapContentSize(if (isEditing) Alignment.CenterStart else Alignment.Center),
+                    singleLine = true,
+                    textStyle = TextStyle(
+                        color = if (text.isNullOrEmpty()) MaterialTheme.colors.onSecondary
                         else MaterialTheme.colors.onPrimary,
-                    fontSize = MaterialTheme.typography.body1.fontSize
-                ),
-            )
+                        fontSize = MaterialTheme.typography.body1.fontSize
+                    ),
+                )
+            }
             if (!isEditing) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .clickable {
                             urlBarModel.onRequestFocus()
-                        }.background(MaterialTheme.colors.primaryVariant)
+                        }
+                        .background(MaterialTheme.colors.primaryVariant)
                         .matchParentSize()
                         .wrapContentSize(Alignment.Center)
                 ) {

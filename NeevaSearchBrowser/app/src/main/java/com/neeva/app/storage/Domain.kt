@@ -1,0 +1,153 @@
+package com.neeva.app.storage
+
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Base64
+import androidx.annotation.WorkerThread
+import androidx.lifecycle.*
+import androidx.room.*
+import com.neeva.app.NeevaBrowser
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
+import com.neeva.app.R
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+
+
+data class Favicon(
+    val faviconURL: String?,
+    val encodedImage: String?,
+    val width: Int,
+    val height: Int,
+)
+
+fun Bitmap.toFavicon(): Favicon {
+    val baos = ByteArrayOutputStream()
+    this.compress(Bitmap.CompressFormat.PNG, 100, baos)
+    val byteArray: ByteArray = baos.toByteArray()
+    val encoded: String = Base64.encodeToString(byteArray, Base64.DEFAULT)
+    return Favicon(null, encoded, width, height)
+}
+
+
+@Entity(indices = [Index(value = ["domainName"], unique = true)])
+data class Domain(
+    @PrimaryKey (autoGenerate = true) val domainUID: Int = 0,
+    val domainName: String,
+    val providerName: String?,
+    @Embedded val largestFavicon: Favicon?,
+)
+
+@Dao
+interface DomainAccessor {
+    @Query("SELECT * FROM domain")
+    fun getAll(): Flow<List<Domain>>
+
+    @Query("SELECT * FROM domain WHERE domainName LIKE :domainUrl")
+    suspend fun find(domainUrl: String): Domain?
+
+    @Query("SELECT * FROM domain WHERE domainName LIKE :domainUrl")
+    fun listen(domainUrl: String): Flow<Domain?>
+
+    // Returns list of all domains that has a domainName containing the query
+    @Query("SELECT * FROM domain WHERE domainName LIKE '%'||:query||'%'")
+    fun matchesTo(query: String): Flow<List<Domain>>
+
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun add(vararg domains: Domain)
+
+    @Update
+    suspend fun update(vararg domains: Domain)
+
+    @Delete
+    suspend fun delete(domain: Domain)
+}
+
+
+class DomainRepository(private val domainAccessor: DomainAccessor) {
+    val allDomains: Flow<List<Domain>> = domainAccessor.getAll().distinctUntilChanged()
+
+    @WorkerThread
+    fun listen(domainUrl: String): Flow<Domain> {
+        return domainAccessor.listen(domainUrl).filterNotNull().distinctUntilChanged()
+    }
+
+    @WorkerThread
+    fun matchesTo(query: String): Flow<List<Domain>> {
+        return domainAccessor.matchesTo(query).distinctUntilChanged()
+    }
+
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    suspend fun insert(domain: Domain) {
+        domainAccessor.add(domain)
+    }
+
+    @Suppress("RedundantSuspendModifier")
+    @WorkerThread
+    suspend fun updateFaviconFor(url: String, favicon: Favicon) {
+        val domainName = Uri.parse(url).authority ?: return
+        val domain = domainAccessor.find(domainName)
+        if (domain == null) {
+            val newDomain = Domain(
+                domainName = domainName, providerName = null, largestFavicon = favicon
+            )
+            domainAccessor.add(newDomain)
+        } else if (favicon.width > domain.largestFavicon?.width ?: 0) {
+            val newDomain = Domain(
+                domainUID = domain.domainUID, domainName = domainName,
+                providerName = domain.providerName, largestFavicon = favicon
+            )
+            domainAccessor.update(newDomain)
+        }
+    }
+}
+
+class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
+    val allDomains: LiveData<List<Domain>> = repository.allDomains.asLiveData()
+    val defaultFavicon: LiveData<Bitmap> = MutableLiveData(BitmapFactory.decodeResource(
+        NeevaBrowser.context.resources, R.drawable.globe))
+
+    var domainsSuggestions: LiveData<List<Domain>> = MutableLiveData()
+
+    fun updateDomainsSuggestions(query: String) {
+        if (query.isNullOrEmpty()) return
+
+
+        domainsSuggestions = repository.matchesTo(query).asLiveData()
+    }
+
+    fun getFaviconFor(url: String): LiveData<Bitmap> {
+        val domainUrl = Uri.parse(url)?.authority ?: return defaultFavicon
+
+        return repository.listen(domainUrl).map {
+            val encoded = it.largestFavicon?.encodedImage
+            if (encoded.isNullOrEmpty()) {
+                null
+            } else {
+                val byteArray = Base64.decode(encoded, Base64.DEFAULT)
+                BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+            }
+        }.filterNotNull().asLiveData()
+    }
+
+    fun insert(domain: Domain) = viewModelScope.launch {
+        repository.insert(domain)
+    }
+
+    fun updateFaviconFor(url: String, favicon: Favicon) = viewModelScope.launch {
+        repository.updateFaviconFor(url, favicon)
+    }
+}
+
+class DomainViewModelFactory(private val repository: DomainRepository) :
+    ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        @Suppress("UNCHECKED_CAST")
+        return DomainViewModel(repository) as T
+    }
+}
