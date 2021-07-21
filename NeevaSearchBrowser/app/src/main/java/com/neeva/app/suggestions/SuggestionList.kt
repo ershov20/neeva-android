@@ -1,15 +1,13 @@
 package com.neeva.app.suggestions
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -17,7 +15,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
@@ -27,7 +24,7 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.web.WebViewModel
 import com.neeva.app.web.toSearchUrl
-
+import com.neeva.app.widgets.FaviconView
 
 @Composable
 fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
@@ -35,28 +32,46 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                    webViewModel: WebViewModel,
                    domainViewModel: DomainViewModel,
 ) {
-    val queryChipSuggestions by suggestionsViewModel.queryChipSuggestions.observeAsState()
-    val showSuggestionList: Boolean? by suggestionsViewModel.shouldShowSuggestions.observeAsState()
+    val topSuggestions by suggestionsViewModel.topSuggestions.observeAsState(emptyList())
+    val queryRowSuggestions by suggestionsViewModel.queryRowSuggestions.observeAsState(emptyList())
+    val navSuggestions by suggestionsViewModel.navSuggestions.observeAsState(emptyList())
+    val domainSuggestions by domainViewModel.domainsSuggestions.observeAsState(emptyList())
+    val showSuggestionList by suggestionsViewModel.shouldShowSuggestions.observeAsState(false)
     val currentURL: String by webViewModel.currentUrl.observeAsState("")
     val currentTitle: String by webViewModel.currentTitle.observeAsState("")
-    val domainSuggestions by domainViewModel.domainsSuggestions.observeAsState(emptyList())
 
     LazyColumn(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colors.primary)
     ) {
-        if  (showSuggestionList != false) {
-            items(queryChipSuggestions!!) {
-                SuggestionRow(
-                    query = it.suggestedQuery,
-                    onClick = {
-                        webViewModel.loadUrl(it.suggestedQuery.toSearchUrl())
-                    }
+        if  (showSuggestionList) {
+            items(topSuggestions) {
+                NavSuggestView(
+                    navSuggestion = it,
+                    onOpenUrl = webViewModel::loadUrl,
+                    domainViewModel = domainViewModel
+                )
+            }
+            item {
+                QueryChipSuggestions(
+                    suggestionsViewModel = suggestionsViewModel,
+                    onLoadUrl = webViewModel::loadUrl)
+            }
+            items(queryRowSuggestions) {
+                QuerySuggestion(
+                    query = it.query,
+                    onClick = { webViewModel.loadUrl(it.url) })
+            }
+            items(navSuggestions) {
+                NavSuggestView(
+                    navSuggestion = it,
+                    onOpenUrl = webViewModel::loadUrl,
+                    domainViewModel = domainViewModel,
                 )
             }
             items(domainSuggestions) {
-                SuggestionRow(
+                QuerySuggestion(
                     query = it.domainName,
                     onClick = {
                         webViewModel.loadUrl(it.domainName)
@@ -68,6 +83,40 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 CurrentPageRow(domainViewModel, url = currentURL, title = currentTitle) {
                     urlBarModel.onLocationBarTextChanged(currentURL)
                     urlBarModel.onRequestFocus()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun QueryChipSuggestions(suggestionsViewModel: SuggestionsViewModel, onLoadUrl: (String) -> Unit) {
+    val queryChipSuggestions by suggestionsViewModel.queryChipSuggestions.observeAsState(emptyList())
+    val firstRow = queryChipSuggestions.slice(queryChipSuggestions.indices step 2)
+    val secondRow = queryChipSuggestions.slice(1 until queryChipSuggestions.size step 2)
+
+    Column {
+        LazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colors.primary)
+        ) {
+            items(firstRow) {
+                QuerySuggestion(query = it.query, chip = true) {
+                    onLoadUrl(it.url)
+                }
+            }
+        }
+        if (secondRow.isNotEmpty()) {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colors.primary)
+            ) {
+                items(secondRow) {
+                    QuerySuggestion(query = it.query, chip = true) {
+                        onLoadUrl(it.url)
+                    }
                 }
             }
         }
@@ -111,63 +160,6 @@ fun CurrentPageRow(domainViewModel: DomainViewModel, url: String, title: String,
                 .requiredSize(48.dp, 48.dp)
                 .clickable { onEditPressed() },
             colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
-        )
-    }
-
-}
-
-@Composable
-fun SuggestionRow(query: String, onClick: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clickable { onClick() }
-            .fillMaxWidth()
-            .height(58.dp)
-    ) {
-        Image(
-            imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_search_24),
-            contentDescription = "query icon",
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .wrapContentHeight(Alignment.CenterVertically),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
-        )
-        Text(
-            text = query,
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .wrapContentSize(Alignment.CenterStart),
-            color = MaterialTheme.colors.onPrimary,
-        )
-    }
-}
-
-@Composable
-fun FaviconView(domainViewModel: DomainViewModel, url: String, bordered: Boolean = true) {
-    val bitmap: Bitmap? by domainViewModel.getFaviconFor(url).observeAsState(
-        domainViewModel.defaultFavicon.value)
-
-    Box(
-        modifier = Modifier
-            .size(20.dp)
-            .then(
-                if (bordered) {
-                    Modifier.border(
-                        1.dp, MaterialTheme.colors.onSecondary,
-                        RoundedCornerShape(4.dp)
-                    )
-                } else Modifier),
-        Alignment.Center
-    ) {
-        Image(
-            bitmap = bitmap!!.asImageBitmap(),
-            contentDescription = "favicon",
-            modifier = Modifier
-                .size(16.dp)
-                .padding(2.dp),
-            contentScale = ContentScale.FillBounds,
         )
     }
 }

@@ -24,8 +24,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
-import com.neeva.app.suggestions.FaviconView
 import com.neeva.app.web.WebViewModel
+import com.neeva.app.widgets.FaviconView
 
 @Composable
 fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel: DomainViewModel) {

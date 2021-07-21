@@ -1,22 +1,30 @@
 package com.neeva.app.suggestions
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.neeva.app.SuggestionsQuery
+import com.neeva.app.type.QuerySuggestionType
+import com.neeva.app.web.toSearchUrl
+import com.neeva.app.R
+
+class NavSuggestion(val url: String, val label: String, val secondaryLabel: String)
+class ChipSuggestion(val url: String, val query: String)
+class QueryRowSuggestion(val url: String, val query: String, val drawableID: Int)
 
 class SuggestionsViewModel: ViewModel() {
     private var _suggestionResponse: SuggestionsQuery.Suggest? = null
     private val _urlSuggestions = MutableLiveData<List<SuggestionsQuery.UrlSuggestion>>()
     val urlSuggestions: LiveData<List<SuggestionsQuery.UrlSuggestion>> = _urlSuggestions
-    private val _topSuggestions = MutableLiveData<List<SuggestionsQuery.UrlSuggestion>>()
-    val topSuggestions: LiveData<List<SuggestionsQuery.UrlSuggestion>> = _topSuggestions
-    private val _navSuggestions = MutableLiveData<List<SuggestionsQuery.UrlSuggestion>>()
-    val navSuggestions: LiveData<List<SuggestionsQuery.UrlSuggestion>> = _navSuggestions
-    private val _queryChipSuggestions = MutableLiveData<List<SuggestionsQuery.QuerySuggestion>>()
-    val queryChipSuggestions: LiveData<List<SuggestionsQuery.QuerySuggestion>> = _queryChipSuggestions
-    private val _queryRowSuggestions = MutableLiveData<List<SuggestionsQuery.QuerySuggestion>>()
-    val queryRowSuggestions: LiveData<List<SuggestionsQuery.QuerySuggestion>> = _queryRowSuggestions
+    private val _topSuggestions = MutableLiveData<List<NavSuggestion>>()
+    val topSuggestions: LiveData<List<NavSuggestion>> = _topSuggestions
+    private val _navSuggestions = MutableLiveData<List<NavSuggestion>>()
+    val navSuggestions: LiveData<List<NavSuggestion>> = _navSuggestions
+    private val _queryChipSuggestions = MutableLiveData<List<ChipSuggestion>>()
+    val queryChipSuggestions: LiveData<List<ChipSuggestion>> = _queryChipSuggestions
+    private val _queryRowSuggestions = MutableLiveData<List<QueryRowSuggestion>>()
+    val queryRowSuggestions: LiveData<List<QueryRowSuggestion>> = _queryRowSuggestions
 
     private val _shouldShowSuggestions = MutableLiveData<Boolean>(false)
     val shouldShowSuggestions: LiveData<Boolean> = _shouldShowSuggestions
@@ -26,15 +34,53 @@ class SuggestionsViewModel: ViewModel() {
         val urlSuggestionsSplit = suggestionResults.urlSuggestion
             .partition { it.subtitle?.isNotEmpty() ?: false }
         _navSuggestions.value = urlSuggestionsSplit.first.drop(1)
+            .filter { it.subtitle?.isNotEmpty() == true && it.title?.isNotEmpty() == true }
+            .map {
+            NavSuggestion(url = it.suggestedURL,label = it.subtitle!!,
+                secondaryLabel = it.title!!.parseBaseDomain())
+        }
         _urlSuggestions.value = urlSuggestionsSplit.second
         if (urlSuggestionsSplit.first.isNotEmpty()) {
-            _topSuggestions.value = mutableListOf(urlSuggestionsSplit.first.first())
+            val topSuggestion = urlSuggestionsSplit.first.first()
+            if (topSuggestion.title.isNullOrEmpty() || topSuggestion.subtitle.isNullOrEmpty()) {
+                return
+            }
+            _topSuggestions.value = mutableListOf(NavSuggestion(
+                url = topSuggestion.suggestedURL,
+                label = topSuggestion.subtitle!!,
+                secondaryLabel = topSuggestion.title!!.parseBaseDomain()))
         }
         val querySuggestionsSplit = suggestionResults.querySuggestion
-            .partition { it.annotation?.description?.isNotEmpty() ?: false }
+            .partition { it.type != QuerySuggestionType.STANDARD
+                    || it.annotation?.description?.isNotEmpty() == true }
         _queryRowSuggestions.value = querySuggestionsSplit.first
+            .map { it.toQueryRowSuggestion() }
         _queryChipSuggestions.value = querySuggestionsSplit.second
-        _shouldShowSuggestions.value = _suggestionResponse?.urlSuggestion?.isNotEmpty() ?: false
-                || _suggestionResponse?.querySuggestion?.isNotEmpty() ?: false
+            .map { it.toChipSuggestion() }
+        _shouldShowSuggestions.value = _suggestionResponse?.urlSuggestion?.isNotEmpty() == true
+                || _suggestionResponse?.querySuggestion?.isNotEmpty() == true
     }
+}
+
+fun String.parseBaseDomain(): String {
+    // if this is a url, compute the authority and drop www if needed.
+    var authority =  Uri.parse(this).authority ?: this
+    if (authority.startsWith("www")) {
+        authority = authority.substring(4)
+    }
+    return authority
+}
+
+fun SuggestionsQuery.QuerySuggestion.toChipSuggestion() : ChipSuggestion =
+    ChipSuggestion(this.suggestedQuery.toSearchUrl(), this.suggestedQuery)
+
+fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() : QueryRowSuggestion {
+    return QueryRowSuggestion(
+        url = this.suggestedQuery.toSearchUrl(),
+        query = this.suggestedQuery,
+        drawableID = when (this.type) {
+            QuerySuggestionType.STANDARD -> R.drawable.ic_baseline_search_24
+            else -> R.drawable.ic_baseline_search_24
+        }
+    )
 }
