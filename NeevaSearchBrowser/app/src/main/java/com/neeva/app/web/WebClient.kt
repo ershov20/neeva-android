@@ -27,10 +27,9 @@ class WebClient(
 
     override fun onPageCommitVisible(view: WebView?, url: String?) {
         super.onPageCommitVisible(view, url)
-        val domain = Uri.parse(url).authority ?: return
+        if (url.isNullOrEmpty()) return
 
-        domainViewModel.insert(Domain(
-            domainName = domain, providerName = null, largestFavicon = null))
+        domainViewModel.insert(url, view?.title)
         webViewModel.onCurrentPageChanged(url, view?.title)
     }
 }

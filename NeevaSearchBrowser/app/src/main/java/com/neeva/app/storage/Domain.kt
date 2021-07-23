@@ -8,13 +8,13 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.*
 import androidx.room.*
 import com.neeva.app.NeevaBrowser
-import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 import com.neeva.app.R
 import com.neeva.app.suggestions.NavSuggestion
-import com.neeva.app.suggestions.parseBaseDomain
+import com.neeva.app.web.baseDomain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 
 
 data class Favicon(
@@ -53,7 +53,7 @@ interface DomainAccessor {
     fun listen(domainUrl: String): Flow<Domain?>
 
     // Returns list of all domains that has a domainName containing the query
-    @Query("SELECT * FROM domain WHERE domainName LIKE '%'||:query||'%'")
+    @Query("SELECT * FROM domain WHERE domainName LIKE :query||'%'")
     fun matchesTo(query: String): Flow<List<Domain>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -74,8 +74,8 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
     }
 
     @WorkerThread
-    fun listen(domainUrl: String): Flow<Domain> {
-        return domainAccessor.listen(domainUrl).filterNotNull().distinctUntilChanged()
+    fun listen(domainName: String): Flow<Domain> {
+        return domainAccessor.listen(domainName).filterNotNull().distinctUntilChanged()
     }
 
     @WorkerThread
@@ -88,13 +88,17 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun insert(domain: Domain) {
-        domainAccessor.add(domain)
+        if (domainAccessor.find(domain.domainName) != null) {
+            domainAccessor.update(domain)
+        } else {
+            domainAccessor.add(domain)
+        }
     }
 
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     suspend fun updateFaviconFor(url: String, favicon: Favicon) {
-        val domainName = Uri.parse(url).authority ?: return
+        val domainName = Uri.parse(url).baseDomain() ?: return
         val domain = domainAccessor.find(domainName)
         if (domain == null) {
             val newDomain = Domain(
@@ -121,10 +125,16 @@ class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
         repository.matchesTo(it)
     }.asLiveData()
 
-    fun getFaviconFor(url: String): LiveData<Bitmap> {
-        val domainUrl = Uri.parse(url)?.authority ?: return defaultFavicon
+    var autocompletedSuggestion: LiveData<NavSuggestion?> = domainsSuggestions.map {
+        if (it.isEmpty()) return@map null
 
-        return repository.listen(domainUrl).map {
+        it.first()
+    }
+
+    fun getFaviconFor(url: String): LiveData<Bitmap> {
+        val domainName = Uri.parse(url)?.baseDomain() ?: return defaultFavicon
+
+        return repository.listen(domainName).map {
             val encoded = it.largestFavicon?.encodedImage
             if (encoded.isNullOrEmpty()) {
                 null
@@ -137,6 +147,11 @@ class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
 
     fun insert(domain: Domain) = viewModelScope.launch {
         repository.insert(domain)
+    }
+
+    fun insert(url:String, title: String? = null) = viewModelScope.launch {
+        val domainName = Uri.parse(url).baseDomain() ?: return@launch
+        repository.insert(Domain(domainName = domainName, providerName = title, largestFavicon = null))
     }
 
     fun updateFaviconFor(url: String, favicon: Favicon) = viewModelScope.launch {
@@ -153,8 +168,11 @@ class DomainViewModelFactory(private val repository: DomainRepository) :
     }
 }
 
+// TODO: Find a more elegant way to handle this through Uri
+fun Domain.url() : String = "https://www.${this.domainName}"
+
 fun Domain.toNavSuggest() : NavSuggestion  = NavSuggestion(
-    url = "https://${this.domainName}",
-    label = this.providerName ?: "https://${this.domainName}".parseBaseDomain(),
-    secondaryLabel = "https://${this.domainName}".parseBaseDomain()
+    url = this.url(),
+    label = this.providerName ?: this.domainName,
+    secondaryLabel = domainName
 )

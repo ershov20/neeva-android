@@ -12,34 +12,43 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.web.WebViewModel
 import com.neeva.app.widgets.FaviconView
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel: DomainViewModel) {
     val text: String by urlBarModel.text.observeAsState("")
     val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
     val showLock: Boolean by urlBarModel.showLock.observeAsState(false)
     val currentUrl:String by webViewModel.currentUrl.observeAsState("")
+    val autocompletedSuggestion by domainViewModel.autocompletedSuggestion.observeAsState(null)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colors.primary)
             .padding(horizontal = 8.dp)
             .padding(vertical = 10.dp)
-            .background(MaterialTheme.colors.primary)
     ) {
         Box(
             modifier = Modifier
@@ -54,21 +63,43 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
                 modifier = Modifier
                     .matchParentSize()
             ) {
-                FaviconView(domainViewModel = domainViewModel, url = currentUrl, false)
+                FaviconView(
+                    domainViewModel = domainViewModel,
+                    url = autocompletedSuggestion?.url ?: currentUrl,
+                    bordered =false)
                 BasicTextField(
                     text,
                     onValueChange = { urlBarModel.onLocationBarTextChanged(it) },
                     modifier = Modifier
                         .padding(start = 8.dp)
+                        .wrapContentSize(if (isEditing) Alignment.CenterStart else Alignment.Center)
+                        .width(IntrinsicSize.Min)
                         .onFocusChanged(urlBarModel::onFocusChanged)
-                        .focusRequester(urlBarModel.focusRequester)
-                        .wrapContentSize(if (isEditing) Alignment.CenterStart else Alignment.Center),
-                    singleLine = true,
+                        .onKeyEvent {
+                            if (it.key != Key.Enter) return@onKeyEvent false
+                            val url = autocompletedSuggestion?.url ?: return@onKeyEvent false
+                            webViewModel.loadUrl(url)
+                            return@onKeyEvent true
+                        }
+                        .focusRequester(urlBarModel.focusRequester),
+                    maxLines = 1,
                     textStyle = TextStyle(
-                        color = if (text.isNullOrEmpty()) MaterialTheme.colors.onSecondary
+                        color = if (text.isEmpty()) MaterialTheme.colors.onSecondary
                         else MaterialTheme.colors.onPrimary,
                         fontSize = MaterialTheme.typography.body1.fontSize
                     ),
+                )
+                Text(
+                    text = if (!isEditing || text.isEmpty()
+                        || autocompletedSuggestion?.secondaryLabel.isNullOrEmpty()) "" else {
+                            autocompletedSuggestion!!.secondaryLabel.substring(text.length)
+                    },
+                    modifier = Modifier
+                        .background(Color(R.color.selection_highlight)),
+                    style = MaterialTheme.typography.body1,
+                    maxLines = 1,
+                    color = MaterialTheme.colors.onPrimary,
+                    textAlign = TextAlign.Start
                 )
             }
             if (!isEditing) {

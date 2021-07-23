@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.type.QuerySuggestionType
+import com.neeva.app.web.baseDomain
 import com.neeva.app.web.toSearchUrl
 
 class NavSuggestion(val url: String, val label: String, val secondaryLabel: String)
@@ -34,23 +35,13 @@ class SuggestionsViewModel: ViewModel() {
     fun updateWith(suggestionResults: SuggestionsQuery.Suggest) {
         _suggestionResponse = suggestionResults
         val urlSuggestionsSplit = suggestionResults.urlSuggestion
-            .partition { it.subtitle?.isNotEmpty() ?: false }
-        _navSuggestions.value = urlSuggestionsSplit.first.drop(1)
-            .filter { !it.subtitle.isNullOrEmpty() && !it.title.isNullOrEmpty() }
-            .map {
-            NavSuggestion(url = it.suggestedURL,label = it.subtitle!!,
-                secondaryLabel = it.title!!.parseBaseDomain())
-        }
+            .partition { !it.subtitle.isNullOrEmpty() && !it.title.isNullOrEmpty() }
+        _navSuggestions.value = urlSuggestionsSplit.first
+            .drop(1).map { it.toNavSuggestion() }
         _urlSuggestions.value = urlSuggestionsSplit.second
         if (urlSuggestionsSplit.first.isNotEmpty()) {
-            val topSuggestion = urlSuggestionsSplit.first.first()
-            if (topSuggestion.title.isNullOrEmpty() || topSuggestion.subtitle.isNullOrEmpty()) {
-                return
-            }
-            _topSuggestions.value = mutableListOf(NavSuggestion(
-                url = topSuggestion.suggestedURL,
-                label = topSuggestion.subtitle,
-                secondaryLabel = topSuggestion.title.parseBaseDomain()))
+            _topSuggestions.value = mutableListOf(
+                urlSuggestionsSplit.first.first().toNavSuggestion())
         }
         val querySuggestionsSplit = suggestionResults.querySuggestion
             .partition { it.type != QuerySuggestionType.STANDARD
@@ -64,14 +55,9 @@ class SuggestionsViewModel: ViewModel() {
     }
 }
 
-fun String.parseBaseDomain(): String {
-    // if this is a url, compute the authority and drop www if needed.
-    var authority =  Uri.parse(this).authority ?: this
-    if (authority.startsWith("www")) {
-        authority = authority.substring(4)
-    }
-    return authority
-}
+fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() : NavSuggestion =
+    NavSuggestion(url = this.suggestedURL,label = this.subtitle!!,
+        secondaryLabel = Uri.parse(this.title!!).baseDomain() ?: this.title!!)
 
 fun SuggestionsQuery.QuerySuggestion.toChipSuggestion() : ChipSuggestion =
     ChipSuggestion(this.suggestedQuery.toSearchUrl(), this.suggestedQuery)

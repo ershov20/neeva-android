@@ -58,7 +58,8 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                     suggestionsViewModel = suggestionsViewModel,
                     onLoadUrl = webViewModel::loadUrl)
             }
-            items(queryRowSuggestions) {
+            items(queryRowSuggestions,
+            key = { suggestion -> suggestion.url}) {
                 QuerySuggestion(
                     query = it.query,
                     description = it.description,
@@ -67,14 +68,8 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                     row = true,
                     onClick = { webViewModel.loadUrl(it.url)})
             }
-            items(navSuggestions) {
-                NavSuggestView(
-                    navSuggestion = it,
-                    onOpenUrl = webViewModel::loadUrl,
-                    domainViewModel = domainViewModel,
-                )
-            }
-            items(domainSuggestions) {
+            items(navSuggestions + domainSuggestions,
+                key = { suggestion -> suggestion.url }) {
                 NavSuggestView(
                     navSuggestion = it,
                     onOpenUrl = webViewModel::loadUrl,
