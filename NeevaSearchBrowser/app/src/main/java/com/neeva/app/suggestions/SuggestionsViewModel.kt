@@ -4,14 +4,16 @@ import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.web.toSearchUrl
-import com.neeva.app.R
 
 class NavSuggestion(val url: String, val label: String, val secondaryLabel: String)
 class ChipSuggestion(val url: String, val query: String)
-class QueryRowSuggestion(val url: String, val query: String, val drawableID: Int)
+class QueryRowSuggestion(
+    val url: String, val query: String, val description: String?,
+    val imageURL: String?, val drawableID: Int)
 
 class SuggestionsViewModel: ViewModel() {
     private var _suggestionResponse: SuggestionsQuery.Suggest? = null
@@ -34,7 +36,7 @@ class SuggestionsViewModel: ViewModel() {
         val urlSuggestionsSplit = suggestionResults.urlSuggestion
             .partition { it.subtitle?.isNotEmpty() ?: false }
         _navSuggestions.value = urlSuggestionsSplit.first.drop(1)
-            .filter { it.subtitle?.isNotEmpty() == true && it.title?.isNotEmpty() == true }
+            .filter { !it.subtitle.isNullOrEmpty() && !it.title.isNullOrEmpty() }
             .map {
             NavSuggestion(url = it.suggestedURL,label = it.subtitle!!,
                 secondaryLabel = it.title!!.parseBaseDomain())
@@ -47,8 +49,8 @@ class SuggestionsViewModel: ViewModel() {
             }
             _topSuggestions.value = mutableListOf(NavSuggestion(
                 url = topSuggestion.suggestedURL,
-                label = topSuggestion.subtitle!!,
-                secondaryLabel = topSuggestion.title!!.parseBaseDomain()))
+                label = topSuggestion.subtitle,
+                secondaryLabel = topSuggestion.title.parseBaseDomain()))
         }
         val querySuggestionsSplit = suggestionResults.querySuggestion
             .partition { it.type != QuerySuggestionType.STANDARD
@@ -57,8 +59,8 @@ class SuggestionsViewModel: ViewModel() {
             .map { it.toQueryRowSuggestion() }
         _queryChipSuggestions.value = querySuggestionsSplit.second
             .map { it.toChipSuggestion() }
-        _shouldShowSuggestions.value = _suggestionResponse?.urlSuggestion?.isNotEmpty() == true
-                || _suggestionResponse?.querySuggestion?.isNotEmpty() == true
+        _shouldShowSuggestions.value = !_suggestionResponse?.urlSuggestion.isNullOrEmpty()
+                || !_suggestionResponse?.querySuggestion.isNullOrEmpty()
     }
 }
 
@@ -78,8 +80,12 @@ fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() : QueryRowSuggestion
     return QueryRowSuggestion(
         url = this.suggestedQuery.toSearchUrl(),
         query = this.suggestedQuery,
-        drawableID = when (this.type) {
-            QuerySuggestionType.STANDARD -> R.drawable.ic_baseline_search_24
+        description = this.annotation?.description,
+        imageURL = this.annotation?.imageURL,
+        drawableID = when {
+            this.type == QuerySuggestionType.STANDARD -> R.drawable.ic_baseline_search_24
+            this.type == QuerySuggestionType.SEARCHHISTORY -> R.drawable.ic_baseline_history_24
+            !this.annotation?.description.isNullOrEmpty() -> R.drawable.ic_baseline_image_24
             else -> R.drawable.ic_baseline_search_24
         }
     )

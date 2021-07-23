@@ -10,7 +10,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +24,6 @@ import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.web.WebViewModel
-import com.neeva.app.web.toSearchUrl
 import com.neeva.app.widgets.FaviconView
 
 @Composable
@@ -61,7 +61,11 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
             items(queryRowSuggestions) {
                 QuerySuggestion(
                     query = it.query,
-                    onClick = { webViewModel.loadUrl(it.url) })
+                    description = it.description,
+                    imageURL = it.imageURL,
+                    drawableID = it.drawableID,
+                    row = true,
+                    onClick = { webViewModel.loadUrl(it.url)})
             }
             items(navSuggestions) {
                 NavSuggestView(
@@ -71,11 +75,10 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 )
             }
             items(domainSuggestions) {
-                QuerySuggestion(
-                    query = it.domainName,
-                    onClick = {
-                        webViewModel.loadUrl(it.domainName)
-                    }
+                NavSuggestView(
+                    navSuggestion = it,
+                    onOpenUrl = webViewModel::loadUrl,
+                    domainViewModel = domainViewModel,
                 )
             }
         } else {
@@ -102,7 +105,8 @@ fun QueryChipSuggestions(suggestionsViewModel: SuggestionsViewModel, onLoadUrl: 
                 .background(MaterialTheme.colors.primary)
         ) {
             items(firstRow) {
-                QuerySuggestion(query = it.query, chip = true) {
+                QuerySuggestion(
+                    query = it.query) {
                     onLoadUrl(it.url)
                 }
             }
@@ -114,7 +118,7 @@ fun QueryChipSuggestions(suggestionsViewModel: SuggestionsViewModel, onLoadUrl: 
                     .background(MaterialTheme.colors.primary)
             ) {
                 items(secondRow) {
-                    QuerySuggestion(query = it.query, chip = true) {
+                    QuerySuggestion(query = it.query) {
                         onLoadUrl(it.url)
                     }
                 }

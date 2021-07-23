@@ -51,13 +51,16 @@ class NeevaActivity : AppCompatActivity() {
         History.db
 
         searchTextModel.text.observe(this) {
-
             lifecycleScope.launchWhenResumed {
                 val response = apolloClient(this@NeevaActivity.applicationContext).query(
                     SuggestionsQuery(query = it)).await()
                 if (response.data?.suggest != null) {
                     suggestionsModel.updateWith(response.data?.suggest!!)
                 }
+            }
+
+            lifecycleScope.launchWhenResumed {
+                domainsViewModel.textFlow.emit(it)
             }
         }
 

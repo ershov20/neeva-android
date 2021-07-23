@@ -8,13 +8,13 @@ import androidx.annotation.WorkerThread
 import androidx.lifecycle.*
 import androidx.room.*
 import com.neeva.app.NeevaBrowser
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import com.neeva.app.R
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.suggestions.parseBaseDomain
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 
 
 data class Favicon(
@@ -68,7 +68,10 @@ interface DomainAccessor {
 
 
 class DomainRepository(private val domainAccessor: DomainAccessor) {
-    val allDomains: Flow<List<Domain>> = domainAccessor.getAll().distinctUntilChanged()
+    val allDomains: Flow<List<NavSuggestion>> = domainAccessor.getAll()
+        .distinctUntilChanged().map { domainList ->
+        domainList.map { it.toNavSuggest() }
+    }
 
     @WorkerThread
     fun listen(domainUrl: String): Flow<Domain> {
@@ -76,8 +79,10 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
     }
 
     @WorkerThread
-    fun matchesTo(query: String): Flow<List<Domain>> {
-        return domainAccessor.matchesTo(query).distinctUntilChanged()
+    fun matchesTo(query: String): Flow<List<NavSuggestion>> {
+        return domainAccessor.matchesTo(query).distinctUntilChanged().map { domainList ->
+            domainList.map { it.toNavSuggest() }
+        }.flowOn(Dispatchers.Default).conflate()
     }
 
     @Suppress("RedundantSuspendModifier")
@@ -107,18 +112,14 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
 }
 
 class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
-    val allDomains: LiveData<List<Domain>> = repository.allDomains.asLiveData()
+    val allDomains: LiveData<List<NavSuggestion>> = repository.allDomains.asLiveData()
     val defaultFavicon: LiveData<Bitmap> = MutableLiveData(BitmapFactory.decodeResource(
         NeevaBrowser.context.resources, R.drawable.globe))
 
-    var domainsSuggestions: LiveData<List<Domain>> = MutableLiveData()
-
-    fun updateDomainsSuggestions(query: String) {
-        if (query.isNullOrEmpty()) return
-
-
-        domainsSuggestions = repository.matchesTo(query).asLiveData()
-    }
+    val textFlow = MutableStateFlow("")
+    var domainsSuggestions: LiveData<List<NavSuggestion>> = textFlow.flatMapLatest {
+        repository.matchesTo(it)
+    }.asLiveData()
 
     fun getFaviconFor(url: String): LiveData<Bitmap> {
         val domainUrl = Uri.parse(url)?.authority ?: return defaultFavicon
@@ -151,3 +152,9 @@ class DomainViewModelFactory(private val repository: DomainRepository) :
         return DomainViewModel(repository) as T
     }
 }
+
+fun Domain.toNavSuggest() : NavSuggestion  = NavSuggestion(
+    url = "https://${this.domainName}",
+    label = this.providerName ?: "https://${this.domainName}".parseBaseDomain(),
+    secondaryLabel = "https://${this.domainName}".parseBaseDomain()
+)

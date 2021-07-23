@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.widgets.FaviconView
@@ -33,7 +34,9 @@ fun NavSuggestView(domainViewModel: DomainViewModel,
             .height(58.dp)
             .padding(start = 12.dp)
     ) {
-        FaviconView(domainViewModel = domainViewModel, url = navSuggestion.url)
+        Box(modifier = Modifier.padding(4.dp)) {
+            FaviconView(domainViewModel = domainViewModel, url = navSuggestion.url)
+        }
         Column(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
@@ -57,16 +60,18 @@ fun NavSuggestView(domainViewModel: DomainViewModel,
 
 @Composable
 fun QuerySuggestion(query: String,
+                    description: String? = null,
+                    imageURL: String? = null,
                     drawableID: Int = R.drawable.ic_baseline_search_24,
-                    chip: Boolean = false,
+                    row: Boolean = false,
                     onClick: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .padding(8.dp)
             .then(
-                if (chip)
+                if (!row)
                     Modifier
+                        .padding(8.dp)
                         .clip(RoundedCornerShape(20.dp))
                         .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
                         .padding(horizontal = 4.dp)
@@ -75,22 +80,48 @@ fun QuerySuggestion(query: String,
             )
             .clickable { onClick() }
     ) {
-        Image(
-            imageVector = ImageVector.vectorResource(id = drawableID),
-            contentDescription = "query icon",
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .wrapContentHeight(Alignment.CenterVertically),
-            colorFilter = ColorFilter.tint(Color.LightGray)
-        )
-        Text(
-            text = query,
-            style = MaterialTheme.typography.body1,
+        if (!imageURL.isNullOrEmpty()) {
+            Image(
+                painter = rememberImagePainter(
+                    data = imageURL,
+                    builder = {
+                        crossfade(true)
+                    }),
+                contentDescription = "query image",
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .size(36.dp)
+                    .clip(RoundedCornerShape(4.dp))
+            )
+        } else {
+            Image(
+                imageVector = ImageVector.vectorResource(id = drawableID),
+                contentDescription = "query image",
+                modifier = Modifier
+                    .then(if (row) Modifier.padding(horizontal = 12.dp) else Modifier.padding(start = 8.dp))
+                    .wrapContentHeight(Alignment.CenterVertically),
+                colorFilter = ColorFilter.tint(Color.LightGray)
+            )
+        }
+        Column(
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .padding(vertical = 12.dp)
-                .wrapContentSize(Alignment.CenterStart),
-            color = MaterialTheme.colors.onPrimary,
-        )
+        ) {
+            Text(
+                text = query,
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.onPrimary,
+                maxLines = 1,
+            )
+            if (!description.isNullOrEmpty()) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onSecondary,
+                    maxLines = 1,
+                )
+            }
+        }
     }
 }

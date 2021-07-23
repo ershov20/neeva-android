@@ -20,7 +20,8 @@ import com.neeva.app.storage.DomainViewModel
 
 
 @Composable
-fun FaviconView(domainViewModel: DomainViewModel, url: String, bordered: Boolean = true) {
+fun FaviconView(domainViewModel: DomainViewModel,
+                url: String, bordered: Boolean = true,) {
     val bitmap: Bitmap? by domainViewModel.getFaviconFor(url).observeAsState(
         domainViewModel.defaultFavicon.value)
 
