@@ -38,8 +38,11 @@ class WebViewModel(
     private val _canGoForward = MutableLiveData(false)
     val canGoForward: LiveData<Boolean> = _canGoForward
 
+    private val _progress = MutableLiveData(0)
+    val progress: LiveData<Int> = _progress
+
     private val webClient = WebClient(this, domainViewModel)
-    private val webNeevaClient = WebNeevaClient(domainViewModel)
+    private val webNeevaClient = WebNeevaClient(this, domainViewModel)
     internal val webView by lazy {
         WebView(context).apply {
             this.webViewClient = webClient
@@ -51,6 +54,11 @@ class WebViewModel(
 
     fun goBack() = webView.goBack()
     fun goForward() = webView.goForward()
+    fun reload() = webView.reload()
+
+    fun updateProgress(progress: Int) {
+        _progress.value = progress
+    }
 
     fun loadUrl(url: String) {
         webView.loadUrl(url)

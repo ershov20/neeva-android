@@ -73,12 +73,12 @@ fun QuerySuggestion(query: String,
                     Modifier
                         .padding(8.dp)
                         .clip(RoundedCornerShape(20.dp))
+                        .clickable { onClick() }
                         .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
                         .padding(horizontal = 4.dp)
                 else
-                    Modifier.fillMaxWidth()
+                    Modifier.fillMaxWidth().clickable { onClick() }
             )
-            .clickable { onClick() }
     ) {
         if (!imageURL.isNullOrEmpty()) {
             Image(

@@ -4,13 +4,17 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import com.neeva.app.ui.theme.NeevaTheme
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.*
 import com.apollographql.apollo.coroutines.await
 import com.neeva.app.storage.DomainRepository
@@ -53,14 +57,14 @@ class NeevaActivity : AppCompatActivity() {
         searchTextModel.text.observe(this) {
             lifecycleScope.launchWhenResumed {
                 val response = apolloClient(this@NeevaActivity.applicationContext).query(
-                    SuggestionsQuery(query = it)).await()
+                    SuggestionsQuery(query = it.text)).await()
                 if (response.data?.suggest != null) {
                     suggestionsModel.updateWith(response.data?.suggest!!)
                 }
             }
 
             lifecycleScope.launchWhenResumed {
-                domainsViewModel.textFlow.emit(it)
+                domainsViewModel.textFlow.emit(it.text)
             }
         }
 
@@ -69,31 +73,5 @@ class NeevaActivity : AppCompatActivity() {
 
             searchTextModel.onCurrentUrlChanged(it)
         }
-    }
-}
-
-@Composable
-fun BrowsingUI(urlBarModel: URLBarModel,
-               suggestionsViewModel: SuggestionsViewModel,
-               webViewModel: WebViewModel,
-               domainViewModel: DomainViewModel,
-) {
-    val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
-    Column {
-        URLBar(urlBarModel = urlBarModel, webViewModel, domainViewModel)
-        Box(modifier = Modifier.weight(1.0f)) {
-            WebPanel(webViewModel)
-            if (isEditing != false) {
-                SuggestionList(suggestionsViewModel, urlBarModel, webViewModel, domainViewModel)
-            }
-        }
-        TabToolbar(
-            TabToolbarModel(
-                {},
-                {},
-                {}
-            ),
-            webViewModel
-        )
     }
 }

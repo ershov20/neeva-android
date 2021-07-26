@@ -20,16 +20,15 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.TabToolbarButton
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.web.WebViewModel
 import com.neeva.app.widgets.FaviconView
@@ -37,7 +36,8 @@ import com.neeva.app.widgets.FaviconView
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel: DomainViewModel) {
-    val text: String by urlBarModel.text.observeAsState("")
+    val value: TextFieldValue by urlBarModel.text.observeAsState(TextFieldValue("", TextRange.Zero))
+
     val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
     val showLock: Boolean by urlBarModel.showLock.observeAsState(false)
     val currentUrl:String by webViewModel.currentUrl.observeAsState("")
@@ -54,6 +54,20 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
+                .clickable {
+                    if (isEditing && !autocompletedSuggestion?.secondaryLabel.isNullOrEmpty()) {
+                        val completed = autocompletedSuggestion!!.secondaryLabel
+                        urlBarModel.onLocationBarTextChanged(
+                            value.copy(
+                                completed,
+                                TextRange(completed.length, completed.length),
+                                TextRange(completed.length, completed.length)
+                            )
+                        )
+                    } else {
+                        urlBarModel.onRequestFocus()
+                    }
+                }
                 .background(MaterialTheme.colors.primaryVariant)
                 .height(42.dp)
                 .padding(horizontal = 8.dp)
@@ -66,33 +80,30 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
                 FaviconView(
                     domainViewModel = domainViewModel,
                     url = autocompletedSuggestion?.url ?: currentUrl,
-                    bordered =false)
+                    bordered = false)
                 BasicTextField(
-                    text,
-                    onValueChange = { urlBarModel.onLocationBarTextChanged(it) },
+                    value,
+                    onValueChange = { inside: TextFieldValue ->
+                        urlBarModel.onLocationBarTextChanged(inside)
+                    },
                     modifier = Modifier
                         .padding(start = 8.dp)
                         .wrapContentSize(if (isEditing) Alignment.CenterStart else Alignment.Center)
                         .width(IntrinsicSize.Min)
                         .onFocusChanged(urlBarModel::onFocusChanged)
-                        .onKeyEvent {
-                            if (it.key != Key.Enter) return@onKeyEvent false
-                            val url = autocompletedSuggestion?.url ?: return@onKeyEvent false
-                            webViewModel.loadUrl(url)
-                            return@onKeyEvent true
-                        }
                         .focusRequester(urlBarModel.focusRequester),
                     maxLines = 1,
                     textStyle = TextStyle(
-                        color = if (text.isEmpty()) MaterialTheme.colors.onSecondary
+                        color = if (value.text.isEmpty()) MaterialTheme.colors.onSecondary
                         else MaterialTheme.colors.onPrimary,
                         fontSize = MaterialTheme.typography.body1.fontSize
                     ),
                 )
                 Text(
-                    text = if (!isEditing || text.isEmpty()
-                        || autocompletedSuggestion?.secondaryLabel.isNullOrEmpty()) "" else {
-                            autocompletedSuggestion!!.secondaryLabel.substring(text.length)
+                    text = if (!isEditing || value.text.isEmpty()
+                        || autocompletedSuggestion?.secondaryLabel.isNullOrEmpty()
+                        || !autocompletedSuggestion!!.secondaryLabel!!.startsWith(value.text))  "" else {
+                            autocompletedSuggestion!!.secondaryLabel.substring(value.text.length)
                     },
                     modifier = Modifier
                         .background(Color(R.color.selection_highlight)),
@@ -106,31 +117,35 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable {
-                            urlBarModel.onRequestFocus()
-                        }
                         .background(MaterialTheme.colors.primaryVariant)
                         .matchParentSize()
                         .wrapContentSize(Alignment.Center)
                 ) {
+                    Spacer(modifier = Modifier.weight(1.0f))
                     if (showLock) {
                         Image(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_lock_18),
                             contentDescription = "query icon",
                             modifier = Modifier
                                 .padding(8.dp)
-                                .size(14.dp, 14.dp),
+                                .size(14.dp),
                             colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary),
                             contentScale = ContentScale.Fit
                         )
                     }
                     Text(
-                        text = text.ifEmpty { "Search or enter address" },
+                        text = value.text.ifEmpty { "Search or enter address" },
                         style = MaterialTheme.typography.body1,
                         maxLines = 1,
-                        color = if (text.isEmpty()) MaterialTheme.colors.onSecondary
+                        color = if (value.text.isEmpty()) MaterialTheme.colors.onSecondary
                             else MaterialTheme.colors.onPrimary
                     )
+                    Spacer(modifier = Modifier.weight(1.0f))
+                    TabToolbarButton(enabled = true,
+                        resID = R.drawable.ic_baseline_refresh_24,
+                        contentDescription = "refresh button") {
+                        webViewModel.reload()
+                    }
                 }
 
             }

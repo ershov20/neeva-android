@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
@@ -46,12 +47,19 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
             .background(MaterialTheme.colors.primary)
     ) {
         if  (showSuggestionList) {
-            items(topSuggestions) {
+            item {
+                Box(Modifier.height(2.dp).fillMaxWidth().background(MaterialTheme.colors.background))
+            }
+            items(topSuggestions,
+                key = { suggestion -> suggestion.url}) {
                 NavSuggestView(
                     navSuggestion = it,
                     onOpenUrl = webViewModel::loadUrl,
                     domainViewModel = domainViewModel
                 )
+            }
+            item {
+                Box(Modifier.height(8.dp).fillMaxWidth().background(MaterialTheme.colors.background))
             }
             item {
                 QueryChipSuggestions(
@@ -68,6 +76,9 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                     row = true,
                     onClick = { webViewModel.loadUrl(it.url)})
             }
+            item {
+                Box(Modifier.height(8.dp).fillMaxWidth().background(MaterialTheme.colors.background))
+            }
             items(navSuggestions + domainSuggestions,
                 key = { suggestion -> suggestion.url }) {
                 NavSuggestView(
@@ -79,8 +90,9 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
         } else {
             item {
                 CurrentPageRow(domainViewModel, url = currentURL, title = currentTitle) {
-                    urlBarModel.onLocationBarTextChanged(currentURL)
                     urlBarModel.onRequestFocus()
+                    urlBarModel.onLocationBarTextChanged(urlBarModel.text.value!!.copy(currentURL,
+                        TextRange(currentURL.length, currentURL.length)))
                 }
             }
         }

@@ -7,6 +7,7 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.toFavicon
 
 class WebNeevaClient(
+        private val webViewModel: WebViewModel,
         private val domainViewModel: DomainViewModel
     ): WebChromeClient() {
     override fun onReceivedIcon(view: WebView?, icon: Bitmap?) {
@@ -15,5 +16,10 @@ class WebNeevaClient(
         val favicon = icon ?: return
 
         domainViewModel.updateFaviconFor(url, favicon.toFavicon())
+    }
+
+    override fun onProgressChanged(view: WebView?, newProgress: Int) {
+        super.onProgressChanged(view, newProgress)
+        webViewModel.updateProgress(newProgress)
     }
 }
