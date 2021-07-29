@@ -48,7 +48,7 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
             .fillMaxWidth()
             .background(MaterialTheme.colors.primary)
             .padding(horizontal = 8.dp)
-            .padding(vertical = 10.dp)
+            .padding(vertical = 8.dp)
     ) {
         Box(
             modifier = Modifier
@@ -69,7 +69,7 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
                     }
                 }
                 .background(MaterialTheme.colors.primaryVariant)
-                .height(42.dp)
+                .height(40.dp)
                 .padding(horizontal = 8.dp)
         ) {
             Row(

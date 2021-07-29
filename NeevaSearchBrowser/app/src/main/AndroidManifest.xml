@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.neeva.app">
 
+    <queries>
+        <package android:name="org.chromium.weblayer.support" />
+    </queries>
+
     <application
         android:name="com.neeva.app.NeevaBrowser"
         android:allowBackup="true"
@@ -21,6 +25,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data android:name="org.chromium.weblayer.WebLayerPackage"
+            android:value="org.chromium.weblayer.support"/>
     </application>
     <uses-permission android:name="android.permission.INTERNET"/>
 </manifest>

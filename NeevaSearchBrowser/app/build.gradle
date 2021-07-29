@@ -45,6 +45,7 @@ android {
 }
 
 dependencies {
+    implementation project(path: ':weblayer')
     def lifecycle_version = "2.2.0"
 
     implementation 'androidx.core:core-ktx:1.6.0'
