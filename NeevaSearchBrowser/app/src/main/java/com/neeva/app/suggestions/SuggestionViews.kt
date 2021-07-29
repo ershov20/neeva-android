@@ -1,5 +1,6 @@
 package com.neeva.app.suggestions
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -24,7 +25,7 @@ import com.neeva.app.widgets.FaviconView
 
 @Composable
 fun NavSuggestView(domainViewModel: DomainViewModel,
-                   onOpenUrl: (String) -> Unit,
+                   onOpenUrl: (Uri) -> Unit,
                    navSuggestion: NavSuggestion) {
     Row(
         verticalAlignment = Alignment.CenterVertically,

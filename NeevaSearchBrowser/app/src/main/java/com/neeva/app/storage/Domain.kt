@@ -131,8 +131,8 @@ class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
         it.first()
     }
 
-    fun getFaviconFor(url: String): LiveData<Bitmap> {
-        val domainName = Uri.parse(url)?.baseDomain() ?: return defaultFavicon
+    fun getFaviconFor(url: Uri): LiveData<Bitmap> {
+        val domainName = url.baseDomain() ?: return defaultFavicon
 
         return repository.listen(domainName).map {
             val encoded = it.largestFavicon?.encodedImage
@@ -169,7 +169,7 @@ class DomainViewModelFactory(private val repository: DomainRepository) :
 }
 
 // TODO: Find a more elegant way to handle this through Uri
-fun Domain.url() : String = "https://www.${this.domainName}"
+fun Domain.url() : Uri = Uri.parse("https://www.${this.domainName}")
 
 fun Domain.toNavSuggest() : NavSuggestion  = NavSuggestion(
     url = this.url(),

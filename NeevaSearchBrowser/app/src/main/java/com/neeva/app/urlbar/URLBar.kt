@@ -1,5 +1,6 @@
 package com.neeva.app.urlbar
 
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.map
 import com.neeva.app.R
 import com.neeva.app.TabToolbarButton
 import com.neeva.app.storage.DomainViewModel
@@ -40,7 +42,7 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
 
     val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
     val showLock: Boolean by urlBarModel.showLock.observeAsState(false)
-    val currentUrl:String by webViewModel.currentUrl.observeAsState("")
+    val currentUrl: Uri by webViewModel.currentUrl.observeAsState(Uri.parse("about:blank"))
     val autocompletedSuggestion by domainViewModel.autocompletedSuggestion.observeAsState(null)
 
     Box(

@@ -37,7 +37,7 @@ class URLBarModel(private val webViewModel: WebViewModel): ViewModel() {
     fun onFocusChanged(focus: FocusState) {
         _isEditing.value = focus.isFocused
         if (!focus.isFocused) {
-            _text.value = _text.value?.copy(Uri.parse(webViewModel.currentUrl.value)?.baseDomain() ?: "")
+            _text.value = _text.value?.copy(webViewModel.currentUrl.value?.baseDomain() ?: "")
         } else {
             _text.value = _text.value?.copy("")
         }

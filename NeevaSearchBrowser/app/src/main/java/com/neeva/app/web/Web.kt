@@ -28,6 +28,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.appSearchURL
+import com.neeva.app.appURL
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.toFavicon
 import org.chromium.weblayer.*
@@ -76,8 +77,8 @@ class WebViewModel(
         }
     }
 
-    private val _currentUrl = MutableLiveData("")
-    val currentUrl: LiveData<String> = _currentUrl
+    private val _currentUrl = MutableLiveData(Uri.parse("about:blank"))
+    val currentUrl: LiveData<Uri> = _currentUrl
 
     private val _currentTitle = MutableLiveData("")
     val currentTitle: LiveData<String> = _currentTitle
@@ -146,8 +147,7 @@ class WebViewModel(
         _progress.value = progress
     }
 
-    fun loadUrl(input: String) {
-        val uri = getUriFromInput(input) ?: return
+    fun loadUrl(uri: Uri) {
         // Disable intent processing for urls typed in. Allows the user to navigate to app urls.
         val navigateParamsBuilder = NavigateParams.Builder().disableIntentProcessing()
         browser.activeTab?.navigationController?.navigate(uri, navigateParamsBuilder.build())
@@ -203,7 +203,7 @@ class WebViewModel(
             return
         }
 
-        loadUrl("https://neeva.com")
+        loadUrl(Uri.parse(appURL))
     }
 
     private fun registerTabCallbacks(tab: Tab) {
@@ -233,7 +233,7 @@ class WebViewModel(
 
             override fun onVisibleUriChanged(uri: Uri) {
                 super.onVisibleUriChanged(uri)
-                _currentUrl.value = uri.toString()
+                _currentUrl.value = uri
             }
 
             override fun onTitleUpdated(title: String) {
@@ -244,7 +244,7 @@ class WebViewModel(
         tab.registerTabCallback(tabCallback)
         val faviconFetcher = tab.createFaviconFetcher(object : FaviconCallback() {
             override fun onFaviconChanged(favicon: Bitmap?) {
-                val url = currentUrl.value ?: return
+                val url = currentUrl.value.toString() ?: return
                 val icon = favicon ?: return
                 domainViewModel.updateFaviconFor(url, icon.toFavicon())
             }
@@ -254,8 +254,7 @@ class WebViewModel(
 
     private fun unregisterBrowserAndTabCallbacks() {
         browser.unregisterTabListCallback(tabListCallback)
-        val tabs: Set<Tab> = HashSet<Tab>(tabToPerTabState.keys)
-        for (tab in tabs) unregisterTabCallbacks(tab)
+        tabToPerTabState.forEach { unregisterTabCallbacks(it.key) }
         tabToPerTabState.clear()
     }
 
@@ -341,8 +340,4 @@ class WebViewModelFactory(private val activity: NeevaActivity, private val domai
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return WebViewModel(activity, domainModel) as T
     }
-}
-
-fun String.toSearchUrl(): String {
-    return "$appSearchURL?q=${this}&src=nvobar"
 }

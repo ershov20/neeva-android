@@ -17,10 +17,10 @@ import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.web.WebViewModel
 
 @Composable
-fun BrowsingUI(urlBarModel: URLBarModel,
-               suggestionsViewModel: SuggestionsViewModel,
-               webViewModel: WebViewModel,
-               domainViewModel: DomainViewModel,
+fun BrowserUI(urlBarModel: URLBarModel,
+              suggestionsViewModel: SuggestionsViewModel,
+              webViewModel: WebViewModel,
+              domainViewModel: DomainViewModel,
 ) {
     val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
     val progress: Int by webViewModel.progress.observeAsState(0)
@@ -44,9 +44,4 @@ fun BrowsingUI(urlBarModel: URLBarModel,
             }
         }
     }
-}
-
-@Composable
-fun ProgressBar(webViewModel: WebViewModel) {
-
 }

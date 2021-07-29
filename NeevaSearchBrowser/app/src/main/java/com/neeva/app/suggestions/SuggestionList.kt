@@ -38,7 +38,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
     val navSuggestions by suggestionsViewModel.navSuggestions.observeAsState(emptyList())
     val domainSuggestions by domainViewModel.domainsSuggestions.observeAsState(emptyList())
     val showSuggestionList by suggestionsViewModel.shouldShowSuggestions.observeAsState(false)
-    val currentURL: String by webViewModel.currentUrl.observeAsState("")
+    val currentURL: Uri? by webViewModel.currentUrl.observeAsState()
     val currentTitle: String by webViewModel.currentTitle.observeAsState("")
 
     LazyColumn(
@@ -89,10 +89,11 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
             }
         } else {
             item {
-                CurrentPageRow(domainViewModel, url = currentURL, title = currentTitle) {
+                CurrentPageRow(domainViewModel, url = currentURL!!, title = currentTitle) {
                     urlBarModel.onRequestFocus()
-                    urlBarModel.onLocationBarTextChanged(urlBarModel.text.value!!.copy(currentURL,
-                        TextRange(currentURL.length, currentURL.length)))
+                    val currentURLText = currentURL?.toString() ?: return@CurrentPageRow
+                    urlBarModel.onLocationBarTextChanged(urlBarModel.text.value!!.copy(currentURLText,
+                        TextRange(currentURLText.length, currentURLText.length)))
                 }
             }
         }
@@ -100,7 +101,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
 }
 
 @Composable
-fun QueryChipSuggestions(suggestionsViewModel: SuggestionsViewModel, onLoadUrl: (String) -> Unit) {
+fun QueryChipSuggestions(suggestionsViewModel: SuggestionsViewModel, onLoadUrl: (Uri) -> Unit) {
     val queryChipSuggestions by suggestionsViewModel.queryChipSuggestions.observeAsState(emptyList())
     val firstRow = queryChipSuggestions.slice(queryChipSuggestions.indices step 2)
     val secondRow = queryChipSuggestions.slice(1 until queryChipSuggestions.size step 2)
@@ -135,7 +136,7 @@ fun QueryChipSuggestions(suggestionsViewModel: SuggestionsViewModel, onLoadUrl: 
 }
 
 @Composable
-fun CurrentPageRow(domainViewModel: DomainViewModel, url: String, title: String, onEditPressed: () -> Unit) {
+fun CurrentPageRow(domainViewModel: DomainViewModel, url: Uri, title: String, onEditPressed: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -156,7 +157,7 @@ fun CurrentPageRow(domainViewModel: DomainViewModel, url: String, title: String,
                 maxLines = 1,
             )
             Text(
-                text = Uri.parse(url).authority ?: url,
+                text = url.authority ?: url.toString(),
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onSecondary,
                 maxLines = 1,

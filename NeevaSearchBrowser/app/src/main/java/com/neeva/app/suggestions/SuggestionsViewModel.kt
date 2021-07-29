@@ -8,12 +8,12 @@ import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.web.baseDomain
-import com.neeva.app.web.toSearchUrl
+import com.neeva.app.web.toSearchUri
 
-class NavSuggestion(val url: String, val label: String, val secondaryLabel: String)
-class ChipSuggestion(val url: String, val query: String)
+class NavSuggestion(val url: Uri, val label: String, val secondaryLabel: String)
+class ChipSuggestion(val url: Uri, val query: String)
 class QueryRowSuggestion(
-    val url: String, val query: String, val description: String?,
+    val url: Uri, val query: String, val description: String?,
     val imageURL: String?, val drawableID: Int)
 
 class SuggestionsViewModel: ViewModel() {
@@ -38,7 +38,6 @@ class SuggestionsViewModel: ViewModel() {
             .partition { !it.subtitle.isNullOrEmpty() && !it.title.isNullOrEmpty() }
         _navSuggestions.value = urlSuggestionsSplit.first
             .drop(1).map { it.toNavSuggestion() }
-        _urlSuggestions.value = urlSuggestionsSplit.second
         if (urlSuggestionsSplit.first.isNotEmpty()) {
             _topSuggestions.value = mutableListOf(
                 urlSuggestionsSplit.first.first().toNavSuggestion())
@@ -56,15 +55,15 @@ class SuggestionsViewModel: ViewModel() {
 }
 
 fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() : NavSuggestion =
-    NavSuggestion(url = this.suggestedURL,label = this.subtitle!!,
+    NavSuggestion(url = Uri.parse(this.suggestedURL),label = this.subtitle!!,
         secondaryLabel = Uri.parse(this.title!!).baseDomain() ?: this.title!!)
 
 fun SuggestionsQuery.QuerySuggestion.toChipSuggestion() : ChipSuggestion =
-    ChipSuggestion(this.suggestedQuery.toSearchUrl(), this.suggestedQuery)
+    ChipSuggestion(this.suggestedQuery.toSearchUri(), this.suggestedQuery)
 
 fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() : QueryRowSuggestion {
     return QueryRowSuggestion(
-        url = this.suggestedQuery.toSearchUrl(),
+        url = this.suggestedQuery.toSearchUri(),
         query = this.suggestedQuery,
         description = this.annotation?.description,
         imageURL = this.annotation?.imageURL,

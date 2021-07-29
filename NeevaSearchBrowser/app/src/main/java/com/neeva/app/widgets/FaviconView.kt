@@ -1,6 +1,7 @@
 package com.neeva.app.widgets
 
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -21,7 +22,7 @@ import com.neeva.app.storage.DomainViewModel
 
 @Composable
 fun FaviconView(domainViewModel: DomainViewModel,
-                url: String, bordered: Boolean = true,) {
+                url: Uri, bordered: Boolean = true,) {
     val bitmap: Bitmap? by domainViewModel.getFaviconFor(url).observeAsState(
         domainViewModel.defaultFavicon.value)
 

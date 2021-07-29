@@ -1,21 +1,8 @@
 package com.neeva.app
 
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.Point
-import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.text.TextUtils
-import android.util.Patterns
-import android.view.Display
 import android.view.View
-import android.view.WindowManager
-import android.webkit.ValueCallback
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
@@ -23,7 +10,6 @@ import androidx.compose.material.Surface
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.observe
 import com.apollographql.apollo.coroutines.await
 import com.neeva.app.storage.DomainRepository
 import com.neeva.app.storage.DomainViewModel
@@ -37,7 +23,6 @@ import com.neeva.app.urlbar.UrlBarModelFactory
 import com.neeva.app.web.WebViewModel
 import com.neeva.app.web.WebViewModelFactory
 import org.chromium.weblayer.*
-import kotlin.math.roundToInt
 
 class NeevaActivity : AppCompatActivity() {
     private val domainsViewModel by viewModels<DomainViewModel> {
@@ -61,7 +46,7 @@ class NeevaActivity : AppCompatActivity() {
         findViewById<ComposeView>(R.id.browser_ui).setContent {
             NeevaTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    BrowsingUI(urlBarModel, suggestionsModel, webModel, domainsViewModel)
+                    BrowserUI(urlBarModel, suggestionsModel, webModel, domainsViewModel)
                 }
             }
         }
@@ -117,9 +102,9 @@ class NeevaActivity : AppCompatActivity() {
         }
 
         webModel.currentUrl.observe(this) {
-            if (it.isEmpty()) return@observe
+            if (it.toString().isEmpty()) return@observe
 
-            urlBarModel.onCurrentUrlChanged(it)
+            urlBarModel.onCurrentUrlChanged(it.toString())
         }
     }
 
