@@ -10,7 +10,8 @@ class History {
         val db = Room.databaseBuilder(
             NeevaBrowser.context,
             HistoryDatabase::class.java, "HistoryDB"
-        ).fallbackToDestructiveMigration().build()
+        ).createFromAsset("database/cached_domains.db")
+            .fallbackToDestructiveMigration().build()
     }
 }
 

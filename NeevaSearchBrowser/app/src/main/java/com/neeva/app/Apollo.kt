@@ -38,7 +38,7 @@ private class AuthCookieJar(val context: Context): CookieJar {
         val cookies = mutableListOf(browserTypeCookie, browserVersionCookie)
         val token = User.getToken(context = context)
         if (token != null) {
-            val authCookie = Cookie.Builder().name("httpd~login").secure()
+            val authCookie = Cookie.Builder().name(loginCookie).secure()
                 .domain(appHost).expiresAt(Long.MAX_VALUE).value(token).build()
             cookies.add(authCookie)
         }
@@ -56,5 +56,11 @@ private class AuthorizationInterceptor(val context: Context): Interceptor {
             .addHeader("X-Neeva-Client-Version",  "0.0.1")
             .build()
         return chain.proceed(request)
+    }
+}
+
+fun saveLoginCookieFrom(cookie: String) {
+    if (cookie.split("=").first() == loginCookie) {
+        User.setToken(NeevaBrowser.context, cookie.split("=").last())
     }
 }

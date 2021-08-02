@@ -25,10 +25,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.neeva.app.NeevaActivity
+import com.neeva.app.*
 import com.neeva.app.R
-import com.neeva.app.appSearchURL
-import com.neeva.app.appURL
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.toFavicon
 import org.chromium.weblayer.*
@@ -77,7 +75,7 @@ class WebViewModel(
         }
     }
 
-    private val _currentUrl = MutableLiveData(Uri.parse("about:blank"))
+    private val _currentUrl = MutableLiveData(Uri.parse(appURL)!!)
     val currentUrl: LiveData<Uri> = _currentUrl
 
     private val _currentTitle = MutableLiveData("")
@@ -107,6 +105,12 @@ class WebViewModel(
 
         override fun onWillDestroyBrowserAndAllTabs() {
             unregisterBrowserAndTabCallbacks()
+        }
+    }
+
+    private val cookieChangedCallback: CookieChangedCallback = object : CookieChangedCallback() {
+        override fun onCookieChanged(cookie: String, cause: Int) {
+            saveLoginCookieFrom(cookie)
         }
     }
 
@@ -202,7 +206,13 @@ class WebViewModel(
         if (getCurrentDisplayUrl() != null) {
             return
         }
-
+        profile.cookieManager.getCookie(Uri.parse(appURL)) {
+            it?.split("; ")?.forEach { cookie ->
+                saveLoginCookieFrom(cookie)
+            }
+        }
+        profile.cookieManager.addCookieChangedCallback(Uri.parse(appURL),
+            loginCookie, cookieChangedCallback)
         loadUrl(Uri.parse(appURL))
     }
 
@@ -239,6 +249,7 @@ class WebViewModel(
             override fun onTitleUpdated(title: String) {
                 super.onTitleUpdated(title)
                 _currentTitle.value = title
+                domainViewModel.insert(_currentUrl.value.toString(), title)
             }
         }
         tab.registerTabCallback(tabCallback)

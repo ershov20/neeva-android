@@ -7,6 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -25,14 +27,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.map
 import com.neeva.app.R
 import com.neeva.app.TabToolbarButton
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.web.WebViewModel
+import com.neeva.app.web.toSearchUri
 import com.neeva.app.widgets.FaviconView
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -94,17 +97,24 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
                         .width(IntrinsicSize.Min)
                         .onFocusChanged(urlBarModel::onFocusChanged)
                         .focusRequester(urlBarModel.focusRequester),
-                    maxLines = 1,
+                    singleLine = true,
                     textStyle = TextStyle(
                         color = if (value.text.isEmpty()) MaterialTheme.colors.onSecondary
                         else MaterialTheme.colors.onPrimary,
                         fontSize = MaterialTheme.typography.body1.fontSize
                     ),
+                    keyboardOptions = KeyboardOptions (
+                        imeAction = ImeAction.Go,
+                    ),
+                    keyboardActions = KeyboardActions (
+                        onGo = { webViewModel.loadUrl(autocompletedSuggestion?.url ?:
+                            value.text.toSearchUri()) }
+                    ),
                 )
                 Text(
                     text = if (!isEditing || value.text.isEmpty()
                         || autocompletedSuggestion?.secondaryLabel.isNullOrEmpty()
-                        || !autocompletedSuggestion!!.secondaryLabel!!.startsWith(value.text))  "" else {
+                        || !autocompletedSuggestion!!.secondaryLabel.startsWith(value.text))  "" else {
                             autocompletedSuggestion!!.secondaryLabel.substring(value.text.length)
                     },
                     modifier = Modifier
