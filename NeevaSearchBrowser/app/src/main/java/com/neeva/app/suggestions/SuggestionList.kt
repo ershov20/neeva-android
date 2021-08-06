@@ -55,7 +55,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 NavSuggestView(
                     navSuggestion = it,
                     onOpenUrl = webViewModel::loadUrl,
-                    domainViewModel = domainViewModel
+                    faviconData = domainViewModel.getFaviconFor(it.url)
                 )
             }
             item {
@@ -84,7 +84,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 NavSuggestView(
                     navSuggestion = it,
                     onOpenUrl = webViewModel::loadUrl,
-                    domainViewModel = domainViewModel,
+                    faviconData = domainViewModel.getFaviconFor(it.url),
                 )
             }
         } else {
@@ -144,7 +144,7 @@ fun CurrentPageRow(domainViewModel: DomainViewModel, url: Uri, title: String, on
             .height(58.dp)
             .padding(start = 12.dp)
     ) {
-        FaviconView(domainViewModel = domainViewModel, url = url)
+        FaviconView(domainViewModel.getFaviconFor(url))
         Column(
             modifier = Modifier
                 .padding(horizontal = 8.dp)

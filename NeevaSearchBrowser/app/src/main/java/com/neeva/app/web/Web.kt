@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Patterns
 import android.view.Display
@@ -21,21 +22,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import com.neeva.app.*
 import com.neeva.app.R
-import com.neeva.app.storage.DomainViewModel
-import com.neeva.app.storage.toFavicon
+import com.neeva.app.storage.*
+import kotlinx.coroutines.launch
 import org.chromium.weblayer.*
+import java.util.*
+import java.util.concurrent.TimeUnit
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.math.roundToInt
 
 // TODO(yusuf) Lose the dependency on activity here and pass a FullscreenCallbackProvider instead
 class WebViewModel(
         private val activity: NeevaActivity,
-        private val domainViewModel: DomainViewModel
+        private val domainViewModel: DomainViewModel,
+        private val sitesViewModel: SitesViewModel
     ): ViewModel() {
 
     private class PerTabState(
@@ -127,6 +130,18 @@ class WebViewModel(
 
         override fun onNavigationStarted(navigation: Navigation) {
             super.onNavigationStarted(navigation)
+            if (navigation.isSameDocument) return
+            _canGoBack.value = browser.activeTab?.navigationController?.canGoBack()
+            _canGoForward.value = browser.activeTab?.navigationController?.canGoForward()
+
+            val timestamp = Date()
+            val visit = Visit(timestamp = timestamp,
+                visitRootID = DateConverter.fromDate(timestamp)!!, visitType = 0)
+            sitesViewModel.insert(navigation.uri, visit = visit)
+        }
+
+        override fun onNavigationCompleted(navigation: Navigation) {
+            super.onNavigationCompleted(navigation)
             _canGoBack.value = browser.activeTab?.navigationController?.canGoBack()
             _canGoForward.value = browser.activeTab?.navigationController?.canGoForward()
         }
@@ -250,6 +265,7 @@ class WebViewModel(
                 super.onTitleUpdated(title)
                 _currentTitle.value = title
                 domainViewModel.insert(_currentUrl.value.toString(), title)
+                sitesViewModel.insert(url = _currentUrl.value!!, title = title)
             }
         }
         tab.registerTabCallback(tabCallback)
@@ -258,6 +274,7 @@ class WebViewModel(
                 val url = currentUrl.value.toString() ?: return
                 val icon = favicon ?: return
                 domainViewModel.updateFaviconFor(url, icon.toFavicon())
+                sitesViewModel.insert(url = _currentUrl.value!!, favicon = icon.toFavicon())
             }
         })
         tabToPerTabState[tab] = PerTabState(faviconFetcher, tabCallback)
@@ -346,9 +363,11 @@ class WebViewModel(
 }
 
 @Suppress("UNCHECKED_CAST")
-class WebViewModelFactory(private val activity: NeevaActivity, private val domainModel: DomainViewModel) :
+class WebViewModelFactory(private val activity: NeevaActivity,
+                          private val domainModel: DomainViewModel,
+                          private val sitesViewModel: SitesViewModel) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return WebViewModel(activity, domainModel) as T
+        return WebViewModel(activity, domainModel, sitesViewModel = sitesViewModel) as T
     }
 }

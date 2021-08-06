@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -83,8 +84,7 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
                     .matchParentSize()
             ) {
                 FaviconView(
-                    domainViewModel = domainViewModel,
-                    url = autocompletedSuggestion?.url ?: currentUrl,
+                    domainViewModel.getFaviconFor(autocompletedSuggestion?.url ?: currentUrl),
                     bordered = false)
                 BasicTextField(
                     value,
@@ -109,7 +109,7 @@ fun URLBar(urlBarModel: URLBarModel, webViewModel: WebViewModel, domainViewModel
                     keyboardActions = KeyboardActions (
                         onGo = { webViewModel.loadUrl(autocompletedSuggestion?.url ?:
                             value.text.toSearchUri()) }
-                    ),
+                    )
                 )
                 Text(
                     text = if (!isEditing || value.text.isEmpty()

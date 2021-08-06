@@ -17,14 +17,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
 import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.storage.Favicon
 
 
 @Composable
-fun FaviconView(domainViewModel: DomainViewModel,
-                url: Uri, bordered: Boolean = true,) {
-    val bitmap: Bitmap? by domainViewModel.getFaviconFor(url).observeAsState(
-        domainViewModel.defaultFavicon.value)
+fun FaviconView(bitmapData: LiveData<Bitmap>, bordered: Boolean = true,) {
+    val bitmap: Bitmap by bitmapData.observeAsState(Favicon.defaultFavicon)
 
     Box(
         modifier = Modifier
@@ -40,7 +40,7 @@ fun FaviconView(domainViewModel: DomainViewModel,
         Alignment.Center
     ) {
         Image(
-            bitmap = bitmap!!.asImageBitmap(),
+            bitmap = bitmap.asImageBitmap(),
             contentDescription = "favicon",
             modifier = Modifier
                 .size(16.dp)

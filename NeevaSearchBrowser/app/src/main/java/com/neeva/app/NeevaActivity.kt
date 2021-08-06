@@ -2,6 +2,7 @@ package com.neeva.app
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.os.SystemClock
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -11,10 +12,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.apollographql.apollo.coroutines.await
-import com.neeva.app.storage.DomainRepository
-import com.neeva.app.storage.DomainViewModel
-import com.neeva.app.storage.DomainViewModelFactory
-import com.neeva.app.storage.History
+import com.neeva.app.storage.*
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBar
@@ -22,15 +20,20 @@ import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
 import com.neeva.app.web.WebViewModel
 import com.neeva.app.web.WebViewModelFactory
+import kotlinx.coroutines.launch
 import org.chromium.weblayer.*
+import java.util.concurrent.TimeUnit
 
 class NeevaActivity : AppCompatActivity() {
     private val domainsViewModel by viewModels<DomainViewModel> {
         DomainViewModelFactory(DomainRepository(History.db.fromDomains()))
     }
+    private val sitesViewModel by viewModels<SitesViewModel> {
+        SitesViewModelFactory(SitesRepository(History.db.fromSites()))
+    }
     private val suggestionsModel by viewModels<SuggestionsViewModel>()
     private val webModel by viewModels<WebViewModel> {
-        WebViewModelFactory(this, domainsViewModel)
+        WebViewModelFactory(this, domainsViewModel, sitesViewModel)
     }
     private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(webModel) }
 

@@ -3,6 +3,7 @@ package com.neeva.app.storage
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import com.neeva.app.NeevaBrowser
 
 class History {
@@ -11,11 +12,14 @@ class History {
             NeevaBrowser.context,
             HistoryDatabase::class.java, "HistoryDB"
         ).createFromAsset("database/cached_domains.db")
-            .fallbackToDestructiveMigration().build()
+            .fallbackToDestructiveMigration()
+            .build()
     }
 }
 
-@Database(entities = [Domain::class], version = 1)
+@Database(entities = [Domain::class, Site::class, Visit::class], version = 6)
+@TypeConverters(DateConverter::class)
 abstract class HistoryDatabase : RoomDatabase() {
     abstract fun fromDomains(): DomainAccessor
+    abstract fun fromSites(): SitesWithVisitsAccessor
 }

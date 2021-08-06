@@ -16,23 +16,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 
-
-data class Favicon(
-    val faviconURL: String?,
-    val encodedImage: String?,
-    val width: Int,
-    val height: Int,
-)
-
-fun Bitmap.toFavicon(): Favicon {
-    val baos = ByteArrayOutputStream()
-    this.compress(Bitmap.CompressFormat.PNG, 100, baos)
-    val byteArray: ByteArray = baos.toByteArray()
-    val encoded: String = Base64.encodeToString(byteArray, Base64.DEFAULT)
-    return Favicon(null, encoded, width, height)
-}
-
-
 @Entity(indices = [Index(value = ["domainName"], unique = true)])
 data class Domain(
     @PrimaryKey (autoGenerate = true) val domainUID: Int = 0,
@@ -117,8 +100,6 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
 
 class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
     val allDomains: LiveData<List<NavSuggestion>> = repository.allDomains.asLiveData()
-    val defaultFavicon: LiveData<Bitmap> = MutableLiveData(BitmapFactory.decodeResource(
-        NeevaBrowser.context.resources, R.drawable.globe))
 
     val textFlow = MutableStateFlow("")
     var domainsSuggestions: LiveData<List<NavSuggestion>> = textFlow.flatMapLatest {
@@ -132,17 +113,9 @@ class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
     }
 
     fun getFaviconFor(url: Uri): LiveData<Bitmap> {
-        val domainName = url.baseDomain() ?: return defaultFavicon
-
-        return repository.listen(domainName).map {
-            val encoded = it.largestFavicon?.encodedImage
-            if (encoded.isNullOrEmpty()) {
-                null
-            } else {
-                val byteArray = Base64.decode(encoded, Base64.DEFAULT)
-                BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-            }
-        }.filterNotNull().asLiveData()
+        val domainName = url.baseDomain() ?: return MutableLiveData(Favicon.defaultFavicon)
+        return repository.listen(domainName)
+            .mapNotNull { it.largestFavicon?.toBitmap()}.asLiveData()
     }
 
     fun insert(domain: Domain) = viewModelScope.launch {

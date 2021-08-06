@@ -1,5 +1,6 @@
 package com.neeva.app.suggestions
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.LiveData
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
@@ -24,7 +26,7 @@ import com.neeva.app.widgets.FaviconView
 
 
 @Composable
-fun NavSuggestView(domainViewModel: DomainViewModel,
+fun NavSuggestView(faviconData: LiveData<Bitmap>,
                    onOpenUrl: (Uri) -> Unit,
                    navSuggestion: NavSuggestion) {
     Row(
@@ -36,7 +38,7 @@ fun NavSuggestView(domainViewModel: DomainViewModel,
             .padding(start = 12.dp)
     ) {
         Box(modifier = Modifier.padding(4.dp)) {
-            FaviconView(domainViewModel = domainViewModel, url = navSuggestion.url)
+            FaviconView(faviconData)
         }
         Column(
             modifier = Modifier
