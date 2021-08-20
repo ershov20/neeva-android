@@ -24,13 +24,13 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.web.WebViewModel
+import com.neeva.app.web.WebLayerModel
 import com.neeva.app.widgets.FaviconView
 
 @Composable
 fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                    urlBarModel: URLBarModel,
-                   webViewModel: WebViewModel,
+                   webLayerModel: WebLayerModel,
                    domainViewModel: DomainViewModel,
 ) {
     val topSuggestions by suggestionsViewModel.topSuggestions.observeAsState(emptyList())
@@ -38,8 +38,8 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
     val navSuggestions by suggestionsViewModel.navSuggestions.observeAsState(emptyList())
     val domainSuggestions by domainViewModel.domainsSuggestions.observeAsState(emptyList())
     val showSuggestionList by suggestionsViewModel.shouldShowSuggestions.observeAsState(false)
-    val currentURL: Uri? by webViewModel.currentUrl.observeAsState()
-    val currentTitle: String by webViewModel.currentTitle.observeAsState("")
+    val currentURL: Uri? by webLayerModel.currentUrl.observeAsState()
+    val currentTitle: String by webLayerModel.currentTitle.observeAsState("")
 
     LazyColumn(
         modifier = Modifier
@@ -54,7 +54,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 key = { suggestion -> suggestion.url}) {
                 NavSuggestView(
                     navSuggestion = it,
-                    onOpenUrl = webViewModel::loadUrl,
+                    onOpenUrl = webLayerModel::loadUrl,
                     faviconData = domainViewModel.getFaviconFor(it.url)
                 )
             }
@@ -64,7 +64,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
             item {
                 QueryChipSuggestions(
                     suggestionsViewModel = suggestionsViewModel,
-                    onLoadUrl = webViewModel::loadUrl)
+                    onLoadUrl = webLayerModel::loadUrl)
             }
             items(queryRowSuggestions,
             key = { suggestion -> suggestion.url}) {
@@ -74,7 +74,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                     imageURL = it.imageURL,
                     drawableID = it.drawableID,
                     row = true,
-                    onClick = { webViewModel.loadUrl(it.url)})
+                    onClick = { webLayerModel.loadUrl(it.url)})
             }
             item {
                 Box(Modifier.height(8.dp).fillMaxWidth().background(MaterialTheme.colors.background))
@@ -83,7 +83,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 key = { suggestion -> suggestion.url }) {
                 NavSuggestView(
                     navSuggestion = it,
-                    onOpenUrl = webViewModel::loadUrl,
+                    onOpenUrl = webLayerModel::loadUrl,
                     faviconData = domainViewModel.getFaviconFor(it.url),
                 )
             }

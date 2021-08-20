@@ -5,6 +5,8 @@ import android.os.SystemClock
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.*
 import androidx.room.*
+import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.web.baseDomain
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
@@ -168,6 +170,12 @@ class SitesViewModel(private val repository: SitesRepository) : ViewModel() {
     }
 }
 
+fun Site.toNavSuggest() : NavSuggestion = NavSuggestion(
+    url = Uri.parse(this.siteURL),
+    label = this.metadata?.title ?: Uri.parse(this.siteURL).baseDomain() ?: this.siteURL,
+    secondaryLabel = Uri.parse(this.siteURL).baseDomain() ?: this.siteURL
+)
+
 class SitesViewModelFactory(private val repository: SitesRepository) :
     ViewModelProvider.Factory {
 
@@ -176,8 +184,3 @@ class SitesViewModelFactory(private val repository: SitesRepository) :
         return SitesViewModel(repository) as T
     }
 }
-
-
-
-
-

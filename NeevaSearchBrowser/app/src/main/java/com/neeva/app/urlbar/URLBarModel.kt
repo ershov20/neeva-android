@@ -1,19 +1,17 @@
 package com.neeva.app.urlbar
 
 import android.net.Uri
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import com.neeva.app.web.WebViewModel
+import androidx.lifecycle.*
+import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.web.WebLayerModel
 import com.neeva.app.web.baseDomain
+import kotlinx.coroutines.flow.*
 
-class URLBarModel(private val webViewModel: WebViewModel): ViewModel() {
+class URLBarModel(private val webLayerModel: WebLayerModel): ViewModel() {
     private val _text = MutableLiveData(TextFieldValue("", TextRange.Zero))
     val text: LiveData<TextFieldValue> = _text
 
@@ -23,7 +21,12 @@ class URLBarModel(private val webViewModel: WebViewModel): ViewModel() {
     private val _showLock = MutableLiveData(false)
     val showLock: LiveData<Boolean> = _showLock
 
+    lateinit var autocompletedSuggestion: LiveData<NavSuggestion?>
+
     val focusRequester = FocusRequester()
+
+    val onGo = webLayerModel::loadUrl
+    val onReload = webLayerModel::reload
 
     fun onLocationBarTextChanged(newValue: TextFieldValue) {
         if (isEditing.value == true) _text.value = newValue
@@ -37,7 +40,7 @@ class URLBarModel(private val webViewModel: WebViewModel): ViewModel() {
     fun onFocusChanged(focus: FocusState) {
         _isEditing.value = focus.isFocused
         if (!focus.isFocused) {
-            _text.value = _text.value?.copy(webViewModel.currentUrl.value?.baseDomain() ?: "")
+            _text.value = _text.value?.copy(webLayerModel.currentUrl.value?.baseDomain() ?: "")
         } else {
             _text.value = _text.value?.copy("")
         }
@@ -49,9 +52,9 @@ class URLBarModel(private val webViewModel: WebViewModel): ViewModel() {
 }
 
 @Suppress("UNCHECKED_CAST")
-class UrlBarModelFactory(webModel: WebViewModel) :
+class UrlBarModelFactory(webModel: WebLayerModel) :
     ViewModelProvider.Factory {
-    private val webModel: WebViewModel = webModel
+    private val webModel: WebLayerModel = webModel
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return URLBarModel(webModel) as T
     }

@@ -1,41 +1,32 @@
 package com.neeva.app.web
 
-import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.SystemClock
 import android.text.TextUtils
 import android.util.Patterns
 import android.view.Display
 import android.view.View
 import android.view.WindowManager
 import android.webkit.ValueCallback
-import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.neeva.app.*
 import com.neeva.app.R
 import com.neeva.app.storage.*
-import kotlinx.coroutines.launch
 import org.chromium.weblayer.*
 import java.util.*
-import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.math.roundToInt
 
 // TODO(yusuf) Lose the dependency on activity here and pass a FullscreenCallbackProvider instead
-class WebViewModel(
+class WebLayerModel(
         private val activity: NeevaActivity,
         private val domainViewModel: DomainViewModel,
         private val sitesViewModel: SitesViewModel
@@ -160,7 +151,9 @@ class WebViewModel(
 
     fun goBack() = browser.activeTab?.navigationController?.goBack()
     fun goForward() = browser.activeTab?.navigationController?.goForward()
-    fun reload() = browser.activeTab?.navigationController?.reload()
+    fun reload() {
+        browser.activeTab?.navigationController?.reload()
+    }
 
     fun updateProgress(progress: Int) {
         _progress.value = progress
@@ -368,6 +361,6 @@ class WebViewModelFactory(private val activity: NeevaActivity,
                           private val sitesViewModel: SitesViewModel) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return WebViewModel(activity, domainModel, sitesViewModel = sitesViewModel) as T
+        return WebLayerModel(activity, domainModel, sitesViewModel = sitesViewModel) as T
     }
 }

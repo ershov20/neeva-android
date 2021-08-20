@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.neeva.app.web.WebViewModel
+import com.neeva.app.web.WebLayerModel
 
 
 class TabToolbarModel(
@@ -26,9 +26,9 @@ class TabToolbarModel(
 )
 
 @Composable
-fun TabToolbar(model: TabToolbarModel, webViewModel: WebViewModel) {
-    val canGoBack: Boolean? by webViewModel.canGoBack.observeAsState()
-    val canGoForward: Boolean? by webViewModel.canGoForward.observeAsState()
+fun TabToolbar(model: TabToolbarModel, webLayerModel: WebLayerModel) {
+    val canGoBack: Boolean? by webLayerModel.canGoBack.observeAsState()
+    val canGoForward: Boolean? by webLayerModel.canGoForward.observeAsState()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -42,13 +42,13 @@ fun TabToolbar(model: TabToolbarModel, webViewModel: WebViewModel) {
             enabled = canGoBack ?: false,
             resID = R.drawable.ic_baseline_arrow_back_24,
             contentDescription = "back button",
-            onClick = { webViewModel.goBack() }
+            onClick = { webLayerModel.goBack() }
         )
         TabToolbarButton(
             enabled = canGoForward ?: false,
             resID = R.drawable.ic_baseline_arrow_forward_24,
             contentDescription = "forward button"
-        ) { webViewModel.goForward() }
+        ) { webLayerModel.goForward() }
         NeevaMenuButton(onClick = model.onNeevaMenu)
         TabToolbarButton(
             true,
