@@ -1,0 +1,53 @@
+package com.neeva.app.settings
+
+import android.net.Uri
+import com.neeva.app.*
+
+object SettingsMainData {
+    val groups = listOf(
+        SettingsGroupData("Neeva",
+            listOf(
+                SettingsRowData("Account Settings", SettingsRowType.LINK, Uri.parse(appSettingsURL)),
+                SettingsRowData("Connected Apps", SettingsRowType.LINK, Uri.parse(appConnectionsURL)),
+                SettingsRowData("Invite your friends!", SettingsRowType.LINK, Uri.parse(appReferralURL)),
+            )
+        ),
+        SettingsGroupData("Privacy",
+            listOf(
+                SettingsRowData("Privacy Policy", SettingsRowType.LINK, Uri.parse(appPrivacyURL)),
+            )
+        ),
+        SettingsGroupData("Support",
+            listOf(
+                SettingsRowData("Welcome Tours", SettingsRowType.LINK, Uri.parse(appWelcomeToursURL)),
+                SettingsRowData("Help Center", SettingsRowType.LINK, Uri.parse(appHelpCenterURL)),
+            )
+        ),
+        SettingsGroupData("About",
+            listOf(
+                SettingsRowData("Neeva Browser 0.0.1", SettingsRowType.LABEL),
+                SettingsRowData("Terms", SettingsRowType.LINK, Uri.parse(appTermsURL)),
+            )
+        )
+    )
+}
+
+
+data class SettingsGroupData(
+    val label: String,
+    val rows: List<SettingsRowData>
+)
+
+data class SettingsRowData(
+    val title: String,
+    val type: SettingsRowType,
+    val url: Uri? = null,
+    val togglePreferenceKey: String? = null,
+)
+
+enum class SettingsRowType {
+    LABEL,
+    LINK,
+    TOGGLE,
+    NAVIGATION
+}

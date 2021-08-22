@@ -35,6 +35,8 @@ class NeevaActivity : AppCompatActivity() {
     }
     private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(webModel) }
 
+    private val appNavModel by viewModels<AppNavModel>()
+
     private val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
     private val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
 
@@ -60,11 +62,18 @@ class NeevaActivity : AppCompatActivity() {
                 }
             }
         }
+        findViewById<ComposeView>(R.id.app_nav).setContent {
+            NeevaTheme {
+                Surface(color = MaterialTheme.colors.background) {
+                    AppNav(model = appNavModel)
+                }
+            }
+        }
         bottomControls = this.layoutInflater.inflate(R.layout.bottom_controls, null)
         bottomControls.findViewById<ComposeView>(R.id.tab_toolbar).setContent {
             NeevaTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    TabToolbar(TabToolbarModel({}, {}, {}), webModel)
+                    TabToolbar(TabToolbarModel({ appNavModel.setVisibility(true) }, {}, {}), webModel)
                 }
             }
         }
@@ -113,6 +122,8 @@ class NeevaActivity : AppCompatActivity() {
 
             it.first()
         }
+
+        appNavModel.onOpenUrl = webModel::loadUrl
     }
 
     private fun getOrCreateBrowserFragment(savedInstanceState: Bundle?): Fragment {
