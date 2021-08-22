@@ -1,0 +1,60 @@
+query ListSpaces($kind: ListSpacesKind = All) {
+  listSpaces(input: {kind: $kind}) {
+    requestID
+    space {
+      pageMetadata {
+        pageID
+      }
+      space {
+        name
+        lastModifiedTs
+        userACL {
+          acl
+        }
+        acl {
+          userID
+        }
+        hasPublicACL
+        thumbnail
+        thumbnailSize {
+          height
+          width
+        }
+        resultCount
+        isDefaultSpace
+      }
+    }
+  }
+}
+
+query GetSpacesData($ids: [String!]) {
+  getSpace(input: { ids: $ids }) {
+    space {
+      pageMetadata {
+        pageID
+      }
+      space {
+        entities {
+          spaceEntity {
+            url
+            title
+            snippet
+            thumbnail
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation AddToSpace($input: AddSpaceResultByURLInput!) {
+  entityId: addSpaceResultByURL(input: $input)
+}
+
+mutation CreateSpace($name: String!) {
+  createSpace(input: { name: $name })
+}
+
+mutation DeleteSpaceResultByURL($input: DeleteSpaceResultByURLInput!) {
+  deleteSpaceResultByURL(input: $input)
+}

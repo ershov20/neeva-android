@@ -97,6 +97,10 @@ class NeevaActivity : AppCompatActivity() {
         // DB warmup
         History.db
 
+        lifecycleScope.launchWhenResumed {
+            NeevaUserInfo.fetch()
+        }
+
         urlBarModel.text.observe(this) {
             lifecycleScope.launchWhenResumed {
                 val response = apolloClient(this@NeevaActivity.applicationContext).query(

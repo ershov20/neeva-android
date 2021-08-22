@@ -9,9 +9,18 @@ query Suggestions($query: String!) {
       }
       source
       annotation {
+        annotationType
         description
         imageURL
-      }
+        stockInfo {
+          companyName
+          ticker
+          currentPrice
+          changeFromPreviousClose
+          percentChangeFromPreviousClose
+          fetchedAtTime
+        }
+     }
     }
     urlSuggestion {
       icon {
