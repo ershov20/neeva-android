@@ -1,5 +1,6 @@
 package com.neeva.app.settings
 
+import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,21 +11,47 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
+import com.neeva.app.AppNavState
 import com.neeva.app.R
+
+@OptIn(ExperimentalAnimationApi::class,
+    androidx.compose.foundation.ExperimentalFoundationApi::class
+)
+@Composable
+fun SettingsContainer(appNavModel: AppNavModel) {
+    val state: AppNavState by appNavModel.state.observeAsState(AppNavState.HIDDEN)
+    val density = LocalDensity.current
+    AnimatedVisibility(
+        visible = state == AppNavState.SETTINGS,
+        enter = slideInHorizontally(
+            initialOffsetX = { with(density) { 600.dp.roundToPx() } },
+        ),
+        exit = slideOutHorizontally(
+            targetOffsetX = { with(density) { 600.dp.roundToPx() } }
+        )
+    ) {
+        SettingsMain(appNavModel = appNavModel)
+    }
+}
 
 @ExperimentalFoundationApi
 @Composable
 fun SettingsMain(appNavModel: AppNavModel) {
     LazyColumn(
-        Modifier.fillMaxSize()
+        Modifier
+            .background(MaterialTheme.colors.background)
+            .fillMaxSize()
     ) {
         stickyHeader {
             Row(modifier = Modifier
@@ -39,7 +66,7 @@ fun SettingsMain(appNavModel: AppNavModel) {
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .size(48.dp, 48.dp)
-                        .clickable { appNavModel.setVisibility(false)},
+                        .clickable { appNavModel.setContentState(AppNavState.HIDDEN) },
                     colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
                 )
                 Text(
@@ -85,7 +112,7 @@ fun SettingsRow(data: SettingsRowData, appNavModel: AppNavModel) {
         .background(MaterialTheme.colors.primary)
         .then(if (data.type == SettingsRowType.LINK) Modifier.clickable {
             appNavModel.onOpenUrl(data.url!!)
-            appNavModel.setVisibility(false)
+            appNavModel.setContentState(AppNavState.HIDDEN)
         } else Modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -1,13 +1,17 @@
 package com.neeva.app.storage
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Base64
+import androidx.lifecycle.asLiveData
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.coroutines.await
 import com.neeva.app.*
+import com.neeva.app.type.AddSpaceResultByURLInput
+import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.last
 
 data class SpaceEntityData(
     val url: Uri,
@@ -31,6 +35,49 @@ data class Space(
 
     var contentURLs: Set<Uri>? = null
     var contentData: List<SpaceEntityData>? = null
+
+    fun thumbnailAsBitmap() : Bitmap {
+        val encoded = thumbnail ?: return Favicon.defaultFavicon
+        if (!thumbnail.startsWith("data:image/jpeg;base64,")) return Favicon.defaultFavicon
+        val byteArray = Base64.decode(encoded.substring("data:image/jpeg;base64,".length), Base64.DEFAULT)
+        return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+    }
+
+    suspend fun addOrRemove(url: Uri, title: String, description: String? = null) {
+        if (contentURLs?.contains(url) == true) {
+            val response = apolloClient(NeevaBrowser.context).mutate(
+                DeleteSpaceResultByURLMutation(input =
+                DeleteSpaceResultByURLInput(
+                    spaceID = id,
+                    url = url.toString(),
+                )
+                )
+            ).await()
+
+            response.data?.deleteSpaceResultByURL.let {
+                // TODO Add a toast here
+                android.util.Log.i("Spaces","Deleted item from space")
+            }
+        } else {
+            val response = apolloClient(NeevaBrowser.context).mutate(
+                AddToSpaceMutation(input =
+                AddSpaceResultByURLInput(
+                    spaceID = id,
+                    url = url.toString(),
+                    title = title,
+                    data = description?.let { Input.fromNullable(it)} ?: Input.absent(),
+                    mediaType = Input.fromNullable("text/plain"),
+                    snapshotExpected = Input.fromNullable(false)
+                )
+                )
+            ).await()
+
+            response.data?.entityId.let {
+                // TODO Add a toast here
+                android.util.Log.i("Spaces","Added item to space with id=$it")
+            }
+        }
+    }
 }
 
 class SpaceStore {
@@ -43,8 +90,8 @@ class SpaceStore {
         REFRESHING,
         FAILED
     }
-
-    var allSpaces = listOf<Space>()
+    var allSpacesFlow = MutableStateFlow(listOf<Space>())
+    var allSpaces = allSpacesFlow.asLiveData()
     private var urlToSpacesMap = HashMap<Uri, ArrayList<Space>>()
     val stateFlow = MutableStateFlow(State.READY)
 
@@ -57,14 +104,14 @@ class SpaceStore {
         if (response.hasErrors()) stateFlow.emit(State.FAILED)
         response.data?.listSpaces?.let { listSpaces ->
             val oldSpaceMap = HashMap<String, Space>()
-            allSpaces.forEach { oldSpaceMap[it.id] = it }
+            allSpaces.value?.forEach { oldSpaceMap[it.id] = it }
 
             // Clear to avoid holding stale data. Will be rebuilt below.
             urlToSpacesMap = HashMap()
 
             var spacesToFetch = arrayListOf<Space>()
 
-            allSpaces = listSpaces.space.map { listSpacesQuery ->
+            val spaceList = listSpaces.space.map { listSpacesQuery ->
                 val id = listSpacesQuery.pageMetadata?.pageID ?: return@map null
                 val space = listSpacesQuery.space ?: return@map null
                 val name = space.name ?: return@map null
@@ -96,6 +143,8 @@ class SpaceStore {
 
                 newSpace
             }.filterNotNull()
+
+            allSpacesFlow.emit(spaceList)
 
             val response = apolloClient(NeevaBrowser.context).query(
                 GetSpacesDataQuery(Input.fromNullable(spacesToFetch.map { it.id }))

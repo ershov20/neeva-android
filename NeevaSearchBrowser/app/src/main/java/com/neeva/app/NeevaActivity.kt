@@ -7,11 +7,13 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import com.apollographql.apollo.coroutines.await
+import com.neeva.app.neeva_menu.NeevaMenuData
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
@@ -64,8 +66,8 @@ class NeevaActivity : AppCompatActivity() {
         }
         findViewById<ComposeView>(R.id.app_nav).setContent {
             NeevaTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    AppNav(model = appNavModel)
+                Surface(color = Color.Transparent) {
+                    AppNav(appNavModel, webModel)
                 }
             }
         }
@@ -73,7 +75,10 @@ class NeevaActivity : AppCompatActivity() {
         bottomControls.findViewById<ComposeView>(R.id.tab_toolbar).setContent {
             NeevaTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    TabToolbar(TabToolbarModel({ appNavModel.setVisibility(true) }, {}, {}), webModel)
+                    TabToolbar(TabToolbarModel(
+                        { appNavModel.setContentState(AppNavState.NEEVA_MENU) },
+                        { appNavModel.setContentState(AppNavState.ADD_TO_SPACE) },
+                        {}), webModel)
                 }
             }
         }
@@ -127,7 +132,10 @@ class NeevaActivity : AppCompatActivity() {
             it.first()
         }
 
+        // TODO: Move these to CompositionLocal
         appNavModel.onOpenUrl = webModel::loadUrl
+        NeevaMenuData.updateState = appNavModel::setContentState
+        NeevaMenuData.loadURL = webModel::loadUrl
     }
 
     private fun getOrCreateBrowserFragment(savedInstanceState: Bundle?): Fragment {
