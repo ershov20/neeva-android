@@ -62,6 +62,17 @@ fun NavSuggestView(faviconData: LiveData<Bitmap>,
 }
 
 @Composable
+fun QueryRowSuggestion(suggestion: QueryRowSuggestion, onLoadUrl: (Uri) -> Unit) {
+    QuerySuggestion(
+        query = suggestion.query,
+        description = suggestion.description,
+        imageURL = suggestion.imageURL,
+        drawableID = suggestion.drawableID,
+        row = true,
+        onClick = { onLoadUrl(suggestion.url)})
+}
+
+@Composable
 fun QuerySuggestion(query: String,
                     description: String? = null,
                     imageURL: String? = null,

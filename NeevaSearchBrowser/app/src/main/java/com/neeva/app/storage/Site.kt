@@ -5,7 +5,10 @@ import android.os.SystemClock
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.*
 import androidx.room.*
+import com.neeva.app.R
+import com.neeva.app.appSearchURL
 import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.web.baseDomain
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -146,7 +149,7 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
 
 class SitesViewModel(private val repository: SitesRepository) : ViewModel() {
     companion object {
-        private const val LIMIT_TO_FREQUENT_SITES = 5
+        private const val LIMIT_TO_FREQUENT_SITES = 40
         private val HISTORY_WINDOW = TimeUnit.DAYS.toMillis(7)
     }
 
@@ -175,6 +178,17 @@ fun Site.toNavSuggest() : NavSuggestion = NavSuggestion(
     label = this.metadata?.title ?: Uri.parse(this.siteURL).baseDomain() ?: this.siteURL,
     secondaryLabel = Uri.parse(this.siteURL).baseDomain() ?: this.siteURL
 )
+
+fun Site.toSearchSuggest() : QueryRowSuggestion? {
+    if (!siteURL.startsWith(appSearchURL)) return null
+    val query = Uri.parse(this.siteURL).getQueryParameter("q") ?: return null
+
+    return QueryRowSuggestion(
+        url = Uri.parse(this.siteURL),
+        query =  query,
+        drawableID = R.drawable.ic_baseline_history_24
+    )
+}
 
 class SitesViewModelFactory(private val repository: SitesRepository) :
     ViewModelProvider.Factory {

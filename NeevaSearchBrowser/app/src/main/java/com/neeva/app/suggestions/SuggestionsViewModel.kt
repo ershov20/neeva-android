@@ -13,8 +13,8 @@ import com.neeva.app.web.toSearchUri
 class NavSuggestion(val url: Uri, val label: String, val secondaryLabel: String)
 class ChipSuggestion(val url: Uri, val query: String)
 class QueryRowSuggestion(
-    val url: Uri, val query: String, val description: String?,
-    val imageURL: String?, val drawableID: Int)
+    val url: Uri, val query: String, val description: String? = null,
+    val imageURL: String? = null, val drawableID: Int)
 
 class SuggestionsViewModel: ViewModel() {
     private var _suggestionResponse: SuggestionsQuery.Suggest? = null

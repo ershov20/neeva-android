@@ -1,9 +1,6 @@
 package com.neeva.app.spaces
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -24,19 +21,16 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
-import com.neeva.app.neeva_menu.NeevaMenuContent
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.web.WebLayerModel
 import com.neeva.app.widgets.OverlaySheet
-import com.neeva.app.widgets.OverlaySheetHeightConfig
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -52,6 +46,7 @@ fun AddToSpaceSheet(appNavModel: AppNavModel, webLayerModel: WebLayerModel) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AddToSpaceUI(webLayerModel: WebLayerModel, onDismiss: () -> Unit) {
+    val scope = rememberCoroutineScope()
     val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.asLiveData().observeAsState(emptyList())
     var filter: String by remember { mutableStateOf("") }
     LazyColumn {
@@ -83,27 +78,25 @@ fun AddToSpaceUI(webLayerModel: WebLayerModel, onDismiss: () -> Unit) {
         }
 
         items(spaces) {
-            AddToSpaceRow(space = it, webLayerModel, onDismiss)
+            SpaceRow(space = it, webLayerModel) {
+                scope.launch {
+                    it.addOrRemove(
+                        webLayerModel.currentUrl.value!!,
+                        title = webLayerModel.currentTitle.value!!
+                    )
+                    onDismiss()
+                }
+            }
         }
     }
 }
 
 @Composable
-fun AddToSpaceRow(space: Space, webLayerModel: WebLayerModel, onDismiss: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val spaceHasUrl: Boolean by remember {
-        mutableStateOf(space.contentURLs?.contains(webLayerModel.currentUrl.value) == true)
-    }
+fun SpaceRow(space: Space, webLayerModel: WebLayerModel? = null, onClick: () -> Unit) {
     val thumbnail: ImageBitmap = space.thumbnailAsBitmap().asImageBitmap()
     Row(modifier = Modifier
         .clickable {
-            scope.launch {
-                space.addOrRemove(
-                    webLayerModel.currentUrl.value!!,
-                    title = webLayerModel.currentTitle.value!!
-                )
-                onDismiss()
-            }
+            onClick()
         }
         .padding(horizontal = 16.dp)
         .padding(vertical = 4.dp)
@@ -144,16 +137,22 @@ fun AddToSpaceRow(space: Space, webLayerModel: WebLayerModel, onDismiss: () -> U
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Image(
-            imageVector = ImageVector.vectorResource(id =
+
+        if (webLayerModel != null) {
+            val spaceHasUrl: Boolean by remember {
+                mutableStateOf(space.contentURLs?.contains(webLayerModel.currentUrl.value) == true)
+            }
+            Image(
+                imageVector = ImageVector.vectorResource(id =
                 if (spaceHasUrl)
                     R.drawable.ic_baseline_bookmark_24
                 else R.drawable.ic_baseline_bookmark_border_24 ),
-            contentDescription = "Url in space indicator",
-            contentScale = ContentScale.Inside,
-            modifier = Modifier.size(48.dp, 48.dp),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
-        )
+                contentDescription = "Url in space indicator",
+                contentScale = ContentScale.Inside,
+                modifier = Modifier.size(48.dp, 48.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
+            )
+        }
     }
 }
 

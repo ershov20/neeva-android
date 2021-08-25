@@ -6,10 +6,12 @@ import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
+import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.web.WebLayerModel
 import com.neeva.app.web.baseDomain
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class URLBarModel(private val webLayerModel: WebLayerModel): ViewModel() {
     private val _text = MutableLiveData(TextFieldValue("", TextRange.Zero))
@@ -43,6 +45,9 @@ class URLBarModel(private val webLayerModel: WebLayerModel): ViewModel() {
             _text.value = _text.value?.copy(webLayerModel.currentUrl.value?.baseDomain() ?: "")
         } else {
             _text.value = _text.value?.copy("")
+            viewModelScope.launch {
+                SpaceStore.shared.refresh()
+            }
         }
     }
 

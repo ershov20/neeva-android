@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.storage.SitesViewModel
 import com.neeva.app.suggestions.SuggestionList
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.urlbar.URLBarModel
@@ -21,6 +22,7 @@ fun BrowserUI(urlBarModel: URLBarModel,
               suggestionsViewModel: SuggestionsViewModel,
               webLayerModel: WebLayerModel,
               domainViewModel: DomainViewModel,
+              sitesViewModel: SitesViewModel,
 ) {
     val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
     val progress: Int by webLayerModel.progress.observeAsState(0)
@@ -40,7 +42,8 @@ fun BrowserUI(urlBarModel: URLBarModel,
         }
         if (isEditing != false) {
             Box(modifier = Modifier.weight(1.0f)) {
-                SuggestionList(suggestionsViewModel, urlBarModel, webLayerModel, domainViewModel)
+                SuggestionList(suggestionsViewModel, urlBarModel, webLayerModel,
+                    domainViewModel, sitesViewModel)
             }
         }
     }

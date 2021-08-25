@@ -21,17 +21,23 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.asLiveData
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.storage.SitesViewModel
+import com.neeva.app.storage.Space
+import com.neeva.app.storage.SpaceStore
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.web.WebLayerModel
 import com.neeva.app.widgets.FaviconView
+import com.neeva.app.zeroQuery.ZeroQuery
 
 @Composable
 fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                    urlBarModel: URLBarModel,
                    webLayerModel: WebLayerModel,
                    domainViewModel: DomainViewModel,
+                   sitesViewModel: SitesViewModel
 ) {
     val topSuggestions by suggestionsViewModel.topSuggestions.observeAsState(emptyList())
     val queryRowSuggestions by suggestionsViewModel.queryRowSuggestions.observeAsState(emptyList())
@@ -41,14 +47,18 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
     val currentURL: Uri? by webLayerModel.currentUrl.observeAsState()
     val currentTitle: String by webLayerModel.currentTitle.observeAsState("")
 
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.primary)
-    ) {
-        if  (showSuggestionList) {
+    if  (showSuggestionList) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colors.primary)
+        ) {
             item {
-                Box(Modifier.height(2.dp).fillMaxWidth().background(MaterialTheme.colors.background))
+                Box(
+                    Modifier
+                        .height(2.dp)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colors.background))
             }
             items(topSuggestions,
                 key = { suggestion -> suggestion.url}) {
@@ -59,7 +69,11 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 )
             }
             item {
-                Box(Modifier.height(8.dp).fillMaxWidth().background(MaterialTheme.colors.background))
+                Box(
+                    Modifier
+                        .height(8.dp)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colors.background))
             }
             item {
                 QueryChipSuggestions(
@@ -68,16 +82,14 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
             }
             items(queryRowSuggestions,
             key = { suggestion -> suggestion.url}) {
-                QuerySuggestion(
-                    query = it.query,
-                    description = it.description,
-                    imageURL = it.imageURL,
-                    drawableID = it.drawableID,
-                    row = true,
-                    onClick = { webLayerModel.loadUrl(it.url)})
+                QueryRowSuggestion(suggestion = it, onLoadUrl = webLayerModel::loadUrl)
             }
             item {
-                Box(Modifier.height(8.dp).fillMaxWidth().background(MaterialTheme.colors.background))
+                Box(
+                    Modifier
+                        .height(8.dp)
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colors.background))
             }
             items(navSuggestions + domainSuggestions,
                 key = { suggestion -> suggestion.url }) {
@@ -87,15 +99,19 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                     faviconData = domainViewModel.getFaviconFor(it.url),
                 )
             }
-        } else {
-            item {
-                CurrentPageRow(domainViewModel, url = currentURL!!, title = currentTitle) {
+        }
+    } else {
+        ZeroQuery(webLayerModel = webLayerModel, sitesViewModel = sitesViewModel) {
+            CurrentPageRow(
+                domainViewModel = domainViewModel,
+                url = currentURL!!, title = currentTitle,
+                onEditPressed = {
                     urlBarModel.onRequestFocus()
                     val currentURLText = currentURL?.toString() ?: return@CurrentPageRow
                     urlBarModel.onLocationBarTextChanged(urlBarModel.text.value!!.copy(currentURLText,
                         TextRange(currentURLText.length, currentURLText.length)))
                 }
-            }
+            )
         }
     }
 }
@@ -135,8 +151,11 @@ fun QueryChipSuggestions(suggestionsViewModel: SuggestionsViewModel, onLoadUrl: 
     }
 }
 
+
 @Composable
 fun CurrentPageRow(domainViewModel: DomainViewModel, url: Uri, title: String, onEditPressed: () -> Unit) {
+    val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.asLiveData().observeAsState(emptyList())
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier

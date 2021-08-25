@@ -51,7 +51,8 @@ class NeevaActivity : AppCompatActivity() {
         findViewById<ComposeView>(R.id.browser_ui).setContent {
             NeevaTheme {
                 Surface(color = MaterialTheme.colors.background) {
-                    BrowserUI(urlBarModel, suggestionsModel, webModel, domainsViewModel)
+                    BrowserUI(urlBarModel, suggestionsModel,
+                        webModel, domainsViewModel, sitesViewModel)
                 }
             }
         }
