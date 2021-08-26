@@ -1,6 +1,5 @@
 package com.neeva.app.zeroQuery
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -19,19 +18,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import com.neeva.app.appURL
+import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.history.toSearchSuggest
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.web.WebLayerModel
 import com.neeva.app.web.baseDomain
 import com.neeva.app.widgets.CollapsingState
-import com.neeva.app.widgets.FaviconView
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
 import java.util.*
@@ -39,14 +37,14 @@ import java.util.*
 @Composable
 fun ZeroQuery(
     webLayerModel: WebLayerModel,
-    sitesViewModel: SitesViewModel,
+    historyViewModel: HistoryViewModel,
     topContent: @Composable() (LazyItemScope.() -> Unit) = {},
 ) {
     val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.asLiveData().observeAsState(emptyList())
-    val suggestedQueries: List<QueryRowSuggestion> by sitesViewModel.frequentSites.map { siteList ->
+    val suggestedQueries: List<QueryRowSuggestion> by historyViewModel.frequentSites.map { siteList ->
         siteList.mapNotNull { it.toSearchSuggest() }.take(3)
     }.observeAsState(emptyList())
-    val suggestedSites: List<Site> by sitesViewModel.frequentSites.observeAsState(emptyList())
+    val suggestedSites: List<Site> by historyViewModel.frequentSites.observeAsState(emptyList())
 
     LazyColumn() {
         item {

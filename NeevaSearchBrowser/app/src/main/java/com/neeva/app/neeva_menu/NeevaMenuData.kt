@@ -53,7 +53,9 @@ object NeevaMenuData {
             label = "History",
             contentDescription = "History Button",
             imageResourceID = R.drawable.ic_baseline_history_24,
-            onClick = {}
+            onClick = {
+                updateState(AppNavState.HISTORY)
+            }
         ),
         NeevaMenuItemData(
             label = "Downloads",

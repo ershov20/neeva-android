@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
 import com.neeva.app.*
 import com.neeva.app.R
+import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.*
 import org.chromium.weblayer.*
 import java.util.*
@@ -29,7 +30,7 @@ import kotlin.math.roundToInt
 class WebLayerModel(
         private val activity: NeevaActivity,
         private val domainViewModel: DomainViewModel,
-        private val sitesViewModel: SitesViewModel
+        private val historyViewModel: HistoryViewModel
     ): ViewModel() {
 
     private class PerTabState(
@@ -128,7 +129,7 @@ class WebLayerModel(
             val timestamp = Date()
             val visit = Visit(timestamp = timestamp,
                 visitRootID = DateConverter.fromDate(timestamp)!!, visitType = 0)
-            sitesViewModel.insert(navigation.uri, visit = visit)
+            historyViewModel.insert(navigation.uri, visit = visit)
         }
 
         override fun onNavigationCompleted(navigation: Navigation) {
@@ -258,7 +259,7 @@ class WebLayerModel(
                 super.onTitleUpdated(title)
                 _currentTitle.value = title
                 domainViewModel.insert(_currentUrl.value.toString(), title)
-                sitesViewModel.insert(url = _currentUrl.value!!, title = title)
+                historyViewModel.insert(url = _currentUrl.value!!, title = title)
             }
         }
         tab.registerTabCallback(tabCallback)
@@ -267,7 +268,7 @@ class WebLayerModel(
                 val url = currentUrl.value.toString() ?: return
                 val icon = favicon ?: return
                 domainViewModel.updateFaviconFor(url, icon.toFavicon())
-                sitesViewModel.insert(url = _currentUrl.value!!, favicon = icon.toFavicon())
+                historyViewModel.insert(url = _currentUrl.value!!, favicon = icon.toFavicon())
             }
         })
         tabToPerTabState[tab] = PerTabState(faviconFetcher, tabCallback)
@@ -358,9 +359,9 @@ class WebLayerModel(
 @Suppress("UNCHECKED_CAST")
 class WebViewModelFactory(private val activity: NeevaActivity,
                           private val domainModel: DomainViewModel,
-                          private val sitesViewModel: SitesViewModel) :
+                          private val historyViewModel: HistoryViewModel) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return WebLayerModel(activity, domainModel, sitesViewModel = sitesViewModel) as T
+        return WebLayerModel(activity, domainModel, historyViewModel = historyViewModel) as T
     }
 }

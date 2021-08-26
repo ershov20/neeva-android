@@ -13,6 +13,8 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import com.apollographql.apollo.coroutines.await
+import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.history.HistoryViewModelFactory
 import com.neeva.app.neeva_menu.NeevaMenuData
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.SuggestionsViewModel
@@ -28,12 +30,12 @@ class NeevaActivity : AppCompatActivity() {
     private val domainsViewModel by viewModels<DomainViewModel> {
         DomainViewModelFactory(DomainRepository(History.db.fromDomains()))
     }
-    private val sitesViewModel by viewModels<SitesViewModel> {
-        SitesViewModelFactory(SitesRepository(History.db.fromSites()))
+    private val historyViewModel by viewModels<HistoryViewModel> {
+        HistoryViewModelFactory(SitesRepository(History.db.fromSites()))
     }
     private val suggestionsModel by viewModels<SuggestionsViewModel>()
     private val webModel by viewModels<WebLayerModel> {
-        WebViewModelFactory(this, domainsViewModel, sitesViewModel)
+        WebViewModelFactory(this, domainsViewModel, historyViewModel)
     }
     private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(webModel) }
 
@@ -52,7 +54,7 @@ class NeevaActivity : AppCompatActivity() {
             NeevaTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     BrowserUI(urlBarModel, suggestionsModel,
-                        webModel, domainsViewModel, sitesViewModel)
+                        webModel, domainsViewModel, historyViewModel)
                 }
             }
         }
@@ -68,7 +70,7 @@ class NeevaActivity : AppCompatActivity() {
         findViewById<ComposeView>(R.id.app_nav).setContent {
             NeevaTheme {
                 Surface(color = Color.Transparent) {
-                    AppNav(appNavModel, webModel)
+                    AppNav(appNavModel, webModel, historyViewModel, domainsViewModel)
                 }
             }
         }

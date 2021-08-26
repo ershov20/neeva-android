@@ -23,8 +23,8 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
 import com.neeva.app.R
+import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.DomainViewModel
-import com.neeva.app.storage.SitesViewModel
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.urlbar.URLBarModel
@@ -37,7 +37,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                    urlBarModel: URLBarModel,
                    webLayerModel: WebLayerModel,
                    domainViewModel: DomainViewModel,
-                   sitesViewModel: SitesViewModel
+                   historyViewModel: HistoryViewModel
 ) {
     val topSuggestions by suggestionsViewModel.topSuggestions.observeAsState(emptyList())
     val queryRowSuggestions by suggestionsViewModel.queryRowSuggestions.observeAsState(emptyList())
@@ -101,7 +101,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
             }
         }
     } else {
-        ZeroQuery(webLayerModel = webLayerModel, sitesViewModel = sitesViewModel) {
+        ZeroQuery(webLayerModel = webLayerModel, historyViewModel = historyViewModel) {
             CurrentPageRow(
                 domainViewModel = domainViewModel,
                 url = currentURL!!, title = currentTitle,

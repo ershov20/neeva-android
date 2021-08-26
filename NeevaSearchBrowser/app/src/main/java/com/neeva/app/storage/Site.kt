@@ -1,7 +1,6 @@
 package com.neeva.app.storage
 
 import android.net.Uri
-import android.os.SystemClock
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.*
 import androidx.room.*
@@ -82,6 +81,9 @@ interface SitesWithVisitsAccessor {
     @Query("SELECT * FROM visit WHERE timestamp > :thresholdTime ORDER BY timestamp DESC")
     fun getVisitsAfter(thresholdTime: Date): Flow<List<Visit>>
 
+    @Query("SELECT * FROM visit WHERE timestamp > :from AND timestamp < :to ORDER BY timestamp DESC")
+    fun getVisitsWithin(from: Date, to: Date): Flow<List<Visit>>
+
     @Query("SELECT * FROM site WHERE lastVisitTimestamp > :thresholdTime ORDER BY visitCount DESC LIMIT :limit")
     fun getFrequentSitesAfter(thresholdTime: Date, limit: Int): Flow<List<Site>>
 
@@ -116,6 +118,12 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
         }.distinctUntilChanged()
 
     @WorkerThread
+    fun getHistoryWithin(from: Date, to:Date): Flow<List<Pair<Site, Visit>>> =
+        sitesAccessor.getVisitsWithin(from = from, to = to).map { list ->
+            list.mapNotNull { Pair(sitesAccessor.get(it.visitedSiteUID)!!, it) }
+        }.distinctUntilChanged()
+
+    @WorkerThread
     fun getFrequentSitesAfter(thresholdTime: Date, limit: Int): Flow<List<Site>> =
         sitesAccessor.getFrequentSitesAfter(thresholdTime, limit).distinctUntilChanged()
 
@@ -144,57 +152,5 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
             sitesAccessor.add(it.copy(
                 visitedSiteUID = sitesAccessor.find(site.siteURL)?.siteUID ?: 0))
         }
-    }
-}
-
-class SitesViewModel(private val repository: SitesRepository) : ViewModel() {
-    companion object {
-        private const val LIMIT_TO_FREQUENT_SITES = 40
-        private val HISTORY_WINDOW = TimeUnit.DAYS.toMillis(7)
-    }
-
-    val allDomains: LiveData<List<Site>> = repository.allSites.asLiveData()
-    val allVisits: LiveData<List<Visit>> = repository.allVisits.asLiveData()
-
-    // This assures we see history for the last week starting from last app start. We can emit
-    // new values to this if we want different windows.
-    private val historyRefresh: MutableStateFlow<Date> =
-        MutableStateFlow(Date(System.currentTimeMillis() - HISTORY_WINDOW))
-
-    val history = historyRefresh.flatMapLatest { repository.getHistoryAfter(it) }.asLiveData()
-
-    val frequentSites = historyRefresh.flatMapLatest {
-        repository.getFrequentSitesAfter(it, LIMIT_TO_FREQUENT_SITES)
-    }.asLiveData()
-
-    fun insert(url: Uri, title: String? = null, favicon: Favicon? = null, visit: Visit? = null)
-    = viewModelScope.launch {
-        repository.insert(url, title, favicon, visit)
-    }
-}
-
-fun Site.toNavSuggest() : NavSuggestion = NavSuggestion(
-    url = Uri.parse(this.siteURL),
-    label = this.metadata?.title ?: Uri.parse(this.siteURL).baseDomain() ?: this.siteURL,
-    secondaryLabel = Uri.parse(this.siteURL).baseDomain() ?: this.siteURL
-)
-
-fun Site.toSearchSuggest() : QueryRowSuggestion? {
-    if (!siteURL.startsWith(appSearchURL)) return null
-    val query = Uri.parse(this.siteURL).getQueryParameter("q") ?: return null
-
-    return QueryRowSuggestion(
-        url = Uri.parse(this.siteURL),
-        query =  query,
-        drawableID = R.drawable.ic_baseline_history_24
-    )
-}
-
-class SitesViewModelFactory(private val repository: SitesRepository) :
-    ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        @Suppress("UNCHECKED_CAST")
-        return SitesViewModel(repository) as T
     }
 }
