@@ -14,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -32,7 +33,7 @@ fun FaviconView(bitmapData: LiveData<Bitmap>, bordered: Boolean = true,) {
             .then(
                 if (bordered) {
                     Modifier.border(
-                        1.dp, MaterialTheme.colors.onSecondary,
+                        1.dp, Color.LightGray,
                         RoundedCornerShape(4.dp)
                     )
                 } else Modifier

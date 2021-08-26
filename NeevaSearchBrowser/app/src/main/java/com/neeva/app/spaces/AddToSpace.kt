@@ -60,7 +60,7 @@ fun AddToSpaceUI(webLayerModel: WebLayerModel, onDismiss: () -> Unit) {
             ) {
                 Text(
                     "Save to Spaces",
-                    style = MaterialTheme.typography.h6,
+                    style = MaterialTheme.typography.h4,
                     color = MaterialTheme.colors.onPrimary,
                     maxLines = 1,
                 )
@@ -114,7 +114,7 @@ fun SpaceRow(space: Space, webLayerModel: WebLayerModel? = null, onClick: () -> 
         Text(
             text = space.name,
             modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.subtitle1,
+            style = MaterialTheme.typography.h4,
             color = MaterialTheme.colors.onPrimary,
             maxLines = 1,
         )

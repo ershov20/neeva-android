@@ -23,16 +23,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
-import com.neeva.app.settings.SettingsMain
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.Visit
 import com.neeva.app.suggestions.NavSuggestView
 import com.neeva.app.suggestions.NavSuggestion
-import com.neeva.app.web.WebLayerModel
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.collapsibleHeaderItems
 
@@ -100,7 +97,7 @@ fun HistoryUI(appNavModel: AppNavModel, historyViewModel: HistoryViewModel, doma
                 Text(
                     text = "History",
                     modifier = Modifier.padding(8.dp),
-                    style = MaterialTheme.typography.h5,
+                    style = MaterialTheme.typography.h3,
                     color = MaterialTheme.colors.onPrimary,
                     maxLines = 1,
                 )

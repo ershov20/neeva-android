@@ -72,7 +72,7 @@ fun SettingsMain(appNavModel: AppNavModel) {
                 Text(
                     text = "Settings",
                     modifier = Modifier.padding(8.dp),
-                    style = MaterialTheme.typography.h5,
+                    style = MaterialTheme.typography.h3,
                     color = MaterialTheme.colors.onPrimary,
                     maxLines = 1,
                 )
@@ -90,7 +90,7 @@ fun SettingsMain(appNavModel: AppNavModel) {
                 ) {
                     Text(
                         text = it.label,
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.h4,
                         color = MaterialTheme.colors.onPrimary,
                         maxLines = 1,
                     )
@@ -119,7 +119,7 @@ fun SettingsRow(data: SettingsRowData, appNavModel: AppNavModel) {
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = data.title,
-            style = MaterialTheme.typography.subtitle1,
+            style = MaterialTheme.typography.h3,
             color = MaterialTheme.colors.onPrimary,
             maxLines = 1,
         )

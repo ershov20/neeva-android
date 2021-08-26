@@ -82,7 +82,7 @@ fun AutocompleteTextField(
             ),
             keyboardActions = KeyboardActions (
                 onGo = { urlBarModel.onGo(autocompletedSuggestion?.url ?:
-                value.text.toSearchUri()) },
+                Uri.parse(value.text) ?: value.text.toSearchUri()) },
             ),
             cursorBrush = SolidColor(if (showingAutocomplete) Color.Unspecified else Color.Black),
         )

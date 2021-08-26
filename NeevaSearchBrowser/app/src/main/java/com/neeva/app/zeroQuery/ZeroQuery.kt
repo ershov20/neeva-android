@@ -72,7 +72,7 @@ fun ZeroQuery(
                             bitmap = bitmap.asImageBitmap(),
                             contentDescription = "Suggested Site",
                             modifier = Modifier
-                                .size(32.dp)
+                                .size(36.dp)
                                 .padding(2.dp),
                             contentScale = ContentScale.FillBounds,
                         )
@@ -80,7 +80,7 @@ fun ZeroQuery(
                             text = siteName,
                             modifier = Modifier.padding(top = 8.dp).padding(horizontal = 8.dp),
                             style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onPrimary,
+                            color = MaterialTheme.colors.onSecondary,
                             maxLines = 1,
                         )
                     }
@@ -89,7 +89,7 @@ fun ZeroQuery(
         }
 
         collapsibleHeaderItems(
-            label = "Suggested Searches",
+            label = "Searches",
             startingState = CollapsingState.SHOW_COMPACT,
             items = suggestedQueries,
         ) { search ->
@@ -97,7 +97,7 @@ fun ZeroQuery(
         }
 
         collapsibleHeaderItems(
-            label = "Suggested Spaces",
+            label = "Spaces",
             startingState = CollapsingState.SHOW_COMPACT,
             items = spaces.subList(0, minOf(3, spaces.size)),
         ) { space ->

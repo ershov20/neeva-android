@@ -80,7 +80,7 @@ fun CollapsibleHeader(
         Text(
             text = label,
             modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.h4,
             color = MaterialTheme.colors.onPrimary,
             maxLines = 1,
         )

@@ -170,13 +170,13 @@ fun CurrentPageRow(domainViewModel: DomainViewModel, url: Uri, title: String, on
                 .weight(1.0f)
         ) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.body1,
+                text = url.toString(),
+                style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onPrimary,
                 maxLines = 1,
             )
             Text(
-                text = url.authority ?: url.toString(),
+                text = "Edit current url",
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onSecondary,
                 maxLines = 1,
@@ -190,7 +190,7 @@ fun CurrentPageRow(domainViewModel: DomainViewModel, url: Uri, title: String, on
                 .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
                 .requiredSize(48.dp, 48.dp)
                 .clickable { onEditPressed() },
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
+            colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
         )
     }
 }
