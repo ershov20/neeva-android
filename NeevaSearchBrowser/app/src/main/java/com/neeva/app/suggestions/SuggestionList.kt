@@ -22,30 +22,36 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
+import androidx.lifecycle.map
 import com.neeva.app.R
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.web.WebLayerModel
+import com.neeva.app.web.SelectedTabModel
 import com.neeva.app.widgets.FaviconView
 import com.neeva.app.zeroQuery.ZeroQuery
+import com.neeva.app.zeroQuery.ZeroQueryViewModel
 
 @Composable
 fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                    urlBarModel: URLBarModel,
-                   webLayerModel: WebLayerModel,
+                   selectedTabModel: SelectedTabModel,
                    domainViewModel: DomainViewModel,
-                   historyViewModel: HistoryViewModel
+                   historyViewModel: HistoryViewModel,
+                   zeroQueryViewModel: ZeroQueryViewModel
 ) {
     val topSuggestions by suggestionsViewModel.topSuggestions.observeAsState(emptyList())
     val queryRowSuggestions by suggestionsViewModel.queryRowSuggestions.observeAsState(emptyList())
     val navSuggestions by suggestionsViewModel.navSuggestions.observeAsState(emptyList())
     val domainSuggestions by domainViewModel.domainsSuggestions.observeAsState(emptyList())
     val showSuggestionList by suggestionsViewModel.shouldShowSuggestions.observeAsState(false)
-    val currentURL: Uri? by webLayerModel.currentUrl.observeAsState()
-    val currentTitle: String by webLayerModel.currentTitle.observeAsState("")
+    val currentURL: Uri? by selectedTabModel.currentUrl.observeAsState()
+    val currentTitle: String by selectedTabModel.currentTitle.observeAsState("")
+    val loadUrl: (Uri) -> Unit by zeroQueryViewModel.isLazyTab.map { isLazyTab ->
+            { uri:Uri -> selectedTabModel.loadUrl(uri, isLazyTab)}
+        }.observeAsState { uri:Uri -> selectedTabModel.loadUrl(uri)}
 
     if  (showSuggestionList) {
         LazyColumn(
@@ -64,7 +70,7 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 key = { suggestion -> suggestion.url}) {
                 NavSuggestView(
                     navSuggestion = it,
-                    onOpenUrl = webLayerModel::loadUrl,
+                    onOpenUrl = loadUrl,
                     faviconData = domainViewModel.getFaviconFor(it.url)
                 )
             }
@@ -78,11 +84,11 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
             item {
                 QueryChipSuggestions(
                     suggestionsViewModel = suggestionsViewModel,
-                    onLoadUrl = webLayerModel::loadUrl)
+                    onLoadUrl = loadUrl)
             }
             items(queryRowSuggestions,
             key = { suggestion -> suggestion.url}) {
-                QueryRowSuggestion(suggestion = it, onLoadUrl = webLayerModel::loadUrl)
+                QueryRowSuggestion(suggestion = it, onLoadUrl = loadUrl)
             }
             item {
                 Box(
@@ -95,13 +101,17 @@ fun SuggestionList(suggestionsViewModel: SuggestionsViewModel,
                 key = { suggestion -> suggestion.url }) {
                 NavSuggestView(
                     navSuggestion = it,
-                    onOpenUrl = webLayerModel::loadUrl,
+                    onOpenUrl = loadUrl,
                     faviconData = domainViewModel.getFaviconFor(it.url),
                 )
             }
         }
     } else {
-        ZeroQuery(webLayerModel = webLayerModel, historyViewModel = historyViewModel) {
+        ZeroQuery(
+            selectedTabModel = selectedTabModel,
+            historyViewModel = historyViewModel,
+            zeroQueryViewModel = zeroQueryViewModel
+        ) {
             CurrentPageRow(
                 domainViewModel = domainViewModel,
                 url = currentURL!!, title = currentTitle,

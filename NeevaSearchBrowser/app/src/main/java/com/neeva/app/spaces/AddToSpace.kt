@@ -29,15 +29,16 @@ import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
+import com.neeva.app.web.SelectedTabModel
 import com.neeva.app.web.WebLayerModel
 import com.neeva.app.widgets.OverlaySheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AddToSpaceSheet(appNavModel: AppNavModel, webLayerModel: WebLayerModel) {
+fun AddToSpaceSheet(appNavModel: AppNavModel, selectedTabModel: SelectedTabModel) {
     OverlaySheet(appNavModel = appNavModel, visibleState = AppNavState.ADD_TO_SPACE) {
-        AddToSpaceUI(webLayerModel) {
+        AddToSpaceUI(selectedTabModel) {
             appNavModel.setContentState(AppNavState.HIDDEN)
         }
     }
@@ -45,7 +46,7 @@ fun AddToSpaceSheet(appNavModel: AppNavModel, webLayerModel: WebLayerModel) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AddToSpaceUI(webLayerModel: WebLayerModel, onDismiss: () -> Unit) {
+fun AddToSpaceUI(selectedTabModel: SelectedTabModel, onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
     val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.asLiveData().observeAsState(emptyList())
     var filter: String by remember { mutableStateOf("") }
@@ -78,11 +79,11 @@ fun AddToSpaceUI(webLayerModel: WebLayerModel, onDismiss: () -> Unit) {
         }
 
         items(spaces) {
-            SpaceRow(space = it, webLayerModel) {
+            SpaceRow(space = it, selectedTabModel) {
                 scope.launch {
                     it.addOrRemove(
-                        webLayerModel.currentUrl.value!!,
-                        title = webLayerModel.currentTitle.value!!
+                        selectedTabModel.currentUrl.value!!,
+                        title = selectedTabModel.currentTitle.value!!
                     )
                     onDismiss()
                 }
@@ -92,7 +93,7 @@ fun AddToSpaceUI(webLayerModel: WebLayerModel, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun SpaceRow(space: Space, webLayerModel: WebLayerModel? = null, onClick: () -> Unit) {
+fun SpaceRow(space: Space, selectedTabModel: SelectedTabModel? = null, onClick: () -> Unit) {
     val thumbnail: ImageBitmap = space.thumbnailAsBitmap().asImageBitmap()
     Row(modifier = Modifier
         .clickable {
@@ -138,9 +139,9 @@ fun SpaceRow(space: Space, webLayerModel: WebLayerModel? = null, onClick: () -> 
         }
         Spacer(modifier = Modifier.weight(1f))
 
-        if (webLayerModel != null) {
+        if (selectedTabModel != null) {
             val spaceHasUrl: Boolean by remember {
-                mutableStateOf(space.contentURLs?.contains(webLayerModel.currentUrl.value) == true)
+                mutableStateOf(space.contentURLs?.contains(selectedTabModel.currentUrl.value) == true)
             }
             Image(
                 imageVector = ImageVector.vectorResource(id =

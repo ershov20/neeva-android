@@ -112,7 +112,8 @@ class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
         it.first()
     }
 
-    fun getFaviconFor(url: Uri): LiveData<Bitmap> {
+    fun getFaviconFor(uri: Uri?): LiveData<Bitmap> {
+        val url = uri ?: return MutableLiveData(Favicon.defaultFavicon)
         val domainName = url.baseDomain() ?: return MutableLiveData(Favicon.defaultFavicon)
         return repository.listen(domainName)
             .mapNotNull { it.largestFavicon?.toBitmap()}.asLiveData()

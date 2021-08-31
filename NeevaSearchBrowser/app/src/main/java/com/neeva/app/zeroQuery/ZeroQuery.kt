@@ -27,6 +27,7 @@ import com.neeva.app.history.toSearchSuggest
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.QueryRowSuggestion
+import com.neeva.app.web.SelectedTabModel
 import com.neeva.app.web.WebLayerModel
 import com.neeva.app.web.baseDomain
 import com.neeva.app.widgets.CollapsingState
@@ -36,7 +37,8 @@ import java.util.*
 
 @Composable
 fun ZeroQuery(
-    webLayerModel: WebLayerModel,
+    zeroQueryViewModel: ZeroQueryViewModel,
+    selectedTabModel: SelectedTabModel,
     historyViewModel: HistoryViewModel,
     topContent: @Composable() (LazyItemScope.() -> Unit) = {},
 ) {
@@ -45,6 +47,9 @@ fun ZeroQuery(
         siteList.mapNotNull { it.toSearchSuggest() }.take(3)
     }.observeAsState(emptyList())
     val suggestedSites: List<Site> by historyViewModel.frequentSites.observeAsState(emptyList())
+    val loadUrl: (Uri) -> Unit by zeroQueryViewModel.isLazyTab.map { isLazyTab ->
+            { uri:Uri -> selectedTabModel.loadUrl(uri, isLazyTab)}
+        }.observeAsState { }
 
     LazyColumn() {
         item {
@@ -64,9 +69,11 @@ fun ZeroQuery(
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(horizontal = 8.dp).clickable {
-                            webLayerModel.loadUrl(Uri.parse(site.siteURL))
-                        }
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .clickable {
+                                loadUrl(Uri.parse(site.siteURL))
+                            }
                     ) {
                         Image(
                             bitmap = bitmap.asImageBitmap(),
@@ -78,7 +85,9 @@ fun ZeroQuery(
                         )
                         Text(
                             text = siteName,
-                            modifier = Modifier.padding(top = 8.dp).padding(horizontal = 8.dp),
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .padding(horizontal = 8.dp),
                             style = MaterialTheme.typography.body2,
                             color = MaterialTheme.colors.onSecondary,
                             maxLines = 1,
@@ -93,7 +102,7 @@ fun ZeroQuery(
             startingState = CollapsingState.SHOW_COMPACT,
             items = suggestedQueries,
         ) { search ->
-            QueryRowSuggestion(suggestion = search, onLoadUrl = webLayerModel::loadUrl)
+            QueryRowSuggestion(suggestion = search, onLoadUrl = loadUrl)
         }
 
         collapsibleHeaderItems(
@@ -102,7 +111,7 @@ fun ZeroQuery(
             items = spaces.subList(0, minOf(3, spaces.size)),
         ) { space ->
             SpaceRow(space = space) {
-                webLayerModel.loadUrl(space.url)
+                loadUrl(space.url)
             }
         }
     }

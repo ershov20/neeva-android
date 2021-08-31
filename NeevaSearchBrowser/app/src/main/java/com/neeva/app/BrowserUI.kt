@@ -15,17 +15,20 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.suggestions.SuggestionList
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.urlbar.URLBarModel
+import com.neeva.app.web.SelectedTabModel
 import com.neeva.app.web.WebLayerModel
+import com.neeva.app.zeroQuery.ZeroQueryViewModel
 
 @Composable
 fun BrowserUI(urlBarModel: URLBarModel,
               suggestionsViewModel: SuggestionsViewModel,
-              webLayerModel: WebLayerModel,
+              selectedTabModel: SelectedTabModel,
               domainViewModel: DomainViewModel,
               historyViewModel: HistoryViewModel,
+              zeroQueryViewModel: ZeroQueryViewModel
 ) {
     val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
-    val progress: Int by webLayerModel.progress.observeAsState(0)
+    val progress: Int by selectedTabModel.progress.observeAsState(0)
     Column {
         Box {
             Box(Modifier.height(1.dp).fillMaxWidth().background(MaterialTheme.colors.background))
@@ -42,8 +45,8 @@ fun BrowserUI(urlBarModel: URLBarModel,
         }
         if (isEditing != false) {
             Box(modifier = Modifier.weight(1.0f)) {
-                SuggestionList(suggestionsViewModel, urlBarModel, webLayerModel,
-                    domainViewModel, historyViewModel)
+                SuggestionList(suggestionsViewModel, urlBarModel, selectedTabModel,
+                    domainViewModel, historyViewModel, zeroQueryViewModel)
             }
         }
     }

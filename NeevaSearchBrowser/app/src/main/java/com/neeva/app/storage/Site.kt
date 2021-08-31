@@ -54,7 +54,7 @@ data class SiteWithVisits(
         parentColumn = "siteUID",
         entityColumn = "visitedSiteUID"
     )
-    val sites: List<Visit>
+    val visits: List<Visit>
 )
 
 object DateConverter {

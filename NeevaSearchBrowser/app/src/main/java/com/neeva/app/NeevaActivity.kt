@@ -22,9 +22,14 @@ import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
+import com.neeva.app.web.SelectedTabModel
+import com.neeva.app.web.SelectedTabModelFactory
 import com.neeva.app.web.WebLayerModel
 import com.neeva.app.web.WebViewModelFactory
-import org.chromium.weblayer.*
+import com.neeva.app.zeroQuery.ZeroQueryModelFactory
+import com.neeva.app.zeroQuery.ZeroQueryViewModel
+import org.chromium.weblayer.UnsupportedVersionException
+import org.chromium.weblayer.WebLayer
 
 class NeevaActivity : AppCompatActivity() {
     private val domainsViewModel by viewModels<DomainViewModel> {
@@ -37,11 +42,21 @@ class NeevaActivity : AppCompatActivity() {
     private val webModel by viewModels<WebLayerModel> {
         WebViewModelFactory(this, domainsViewModel, historyViewModel)
     }
-    private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(webModel) }
+
+    private val selectedTabModel by viewModels<SelectedTabModel> {
+        SelectedTabModelFactory(
+            webModel.selectedTabFlow, webModel::registerTabCallbacks, webModel::createTabFor)
+    }
+
+    private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(selectedTabModel) }
+    private val zeroQueryViewModel by viewModels<ZeroQueryViewModel> {
+        ZeroQueryModelFactory(urlBarModel)
+    }
 
     private val appNavModel by viewModels<AppNavModel>()
 
     private val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
+    private val PERSISTENCE_ID = "Neeva_Browser"
     private val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
 
     private lateinit var bottomControls: View
@@ -54,7 +69,7 @@ class NeevaActivity : AppCompatActivity() {
             NeevaTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     BrowserUI(urlBarModel, suggestionsModel,
-                        webModel, domainsViewModel, historyViewModel)
+                        selectedTabModel, domainsViewModel, historyViewModel, zeroQueryViewModel)
                 }
             }
         }
@@ -70,7 +85,10 @@ class NeevaActivity : AppCompatActivity() {
         findViewById<ComposeView>(R.id.app_nav).setContent {
             NeevaTheme {
                 Surface(color = Color.Transparent) {
-                    AppNav(appNavModel, webModel, historyViewModel, domainsViewModel)
+                    AppNav(
+                        appNavModel, selectedTabModel, historyViewModel,
+                        domainsViewModel, webModel, zeroQueryViewModel
+                    )
                 }
             }
         }
@@ -81,7 +99,10 @@ class NeevaActivity : AppCompatActivity() {
                     TabToolbar(TabToolbarModel(
                         { appNavModel.setContentState(AppNavState.NEEVA_MENU) },
                         { appNavModel.setContentState(AppNavState.ADD_TO_SPACE) },
-                        {}), webModel)
+                        {
+                            appNavModel.setContentState(AppNavState.CARD_GRID)
+                        }
+                    ), selectedTabModel)
                 }
             }
         }
@@ -123,7 +144,7 @@ class NeevaActivity : AppCompatActivity() {
             }
         }
 
-        webModel.currentUrl.observe(this) {
+        selectedTabModel.currentUrl.observe(this) {
             if (it.toString().isEmpty()) return@observe
 
             urlBarModel.onCurrentUrlChanged(it.toString())
@@ -136,9 +157,9 @@ class NeevaActivity : AppCompatActivity() {
         }
 
         // TODO: Move these to CompositionLocal
-        appNavModel.onOpenUrl = webModel::loadUrl
-        NeevaMenuData.updateState = appNavModel::setContentState
-        NeevaMenuData.loadURL = webModel::loadUrl
+        appNavModel.onOpenUrl = { selectedTabModel.loadUrl(it) }
+            NeevaMenuData.updateState = appNavModel::setContentState
+            NeevaMenuData.loadURL = { selectedTabModel.loadUrl(it) }
     }
 
     private fun getOrCreateBrowserFragment(savedInstanceState: Bundle?): Fragment {
@@ -151,8 +172,7 @@ class NeevaActivity : AppCompatActivity() {
                 return fragments[0]
             }
         }
-        val profileName = NON_INCOGNITO_PROFILE_NAME
-        val fragment = WebLayer.createBrowserFragment(profileName)
+        val fragment = WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
         val transaction = fragmentManager.beginTransaction()
         transaction.add(R.id.weblayer, fragment)
 
@@ -168,6 +188,20 @@ class NeevaActivity : AppCompatActivity() {
         webLayer.isRemoteDebuggingEnabled = true
         val fragment: Fragment = getOrCreateBrowserFragment(savedInstanceState)
 
-        webModel.onWebLayerReady(fragment, bottomControls)
+        webModel.onWebLayerReady(fragment, bottomControls, savedInstanceState)
+    }
+
+    override fun onBackPressed() {
+        if (selectedTabModel.canGoBack.value == true) {
+            selectedTabModel.goBack()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        webModel.onSaveInstanceState(outState)
     }
 }

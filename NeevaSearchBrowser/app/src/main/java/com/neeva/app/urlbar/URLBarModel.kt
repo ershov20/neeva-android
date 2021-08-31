@@ -8,12 +8,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.web.SelectedTabModel
 import com.neeva.app.web.WebLayerModel
 import com.neeva.app.web.baseDomain
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-class URLBarModel(private val webLayerModel: WebLayerModel): ViewModel() {
+class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {
     private val _text = MutableLiveData(TextFieldValue("", TextRange.Zero))
     val text: LiveData<TextFieldValue> = _text
 
@@ -27,8 +28,8 @@ class URLBarModel(private val webLayerModel: WebLayerModel): ViewModel() {
 
     val focusRequester = FocusRequester()
 
-    val onGo = webLayerModel::loadUrl
-    val onReload = webLayerModel::reload
+    val onGo = { url: Uri -> selectedTabModel.loadUrl(url) }
+    val onReload = selectedTabModel::reload
 
     fun onLocationBarTextChanged(newValue: TextFieldValue) {
         if (isEditing.value == true) _text.value = newValue
@@ -42,7 +43,7 @@ class URLBarModel(private val webLayerModel: WebLayerModel): ViewModel() {
     fun onFocusChanged(focus: FocusState) {
         _isEditing.value = focus.isFocused
         if (!focus.isFocused) {
-            _text.value = _text.value?.copy(webLayerModel.currentUrl.value?.baseDomain() ?: "")
+            _text.value = _text.value?.copy(selectedTabModel.currentUrl.value?.baseDomain() ?: "")
         } else {
             _text.value = _text.value?.copy("")
             viewModelScope.launch {
@@ -57,10 +58,9 @@ class URLBarModel(private val webLayerModel: WebLayerModel): ViewModel() {
 }
 
 @Suppress("UNCHECKED_CAST")
-class UrlBarModelFactory(webModel: WebLayerModel) :
+class UrlBarModelFactory(private val selectedTabModel: SelectedTabModel) :
     ViewModelProvider.Factory {
-    private val webModel: WebLayerModel = webModel
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return URLBarModel(webModel) as T
+        return URLBarModel(selectedTabModel) as T
     }
 }

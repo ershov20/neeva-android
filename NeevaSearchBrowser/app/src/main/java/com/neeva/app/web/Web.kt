@@ -5,10 +5,9 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.TextUtils
-import android.util.Patterns
 import android.view.Display
 import android.view.View
 import android.view.WindowManager
@@ -20,11 +19,10 @@ import com.neeva.app.*
 import com.neeva.app.R
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.*
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 import org.chromium.weblayer.*
 import java.util.*
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.math.roundToInt
 
 // TODO(yusuf) Lose the dependency on activity here and pass a FullscreenCallbackProvider instead
 class WebLayerModel(
@@ -33,10 +31,14 @@ class WebLayerModel(
         private val historyViewModel: HistoryViewModel
     ): ViewModel() {
 
+    private val KEY_PREVIOUS_TAB_GUIDS = "previousTabGuids"
+
     private class PerTabState(
         val faviconFetcher: FaviconFetcher,
         val tabCallback: TabCallback
     )
+
+    val selectedTabFlow = MutableStateFlow<Pair<Tab?, Tab?>>(Pair(null, null))
 
     private class FullscreenCallbackImpl(var activity: NeevaActivity) : FullscreenCallback() {
         private var mSystemVisibilityToRestore = 0
@@ -70,36 +72,55 @@ class WebLayerModel(
         }
     }
 
-    private val _currentUrl = MutableLiveData(Uri.parse(appURL)!!)
-    val currentUrl: LiveData<Uri> = _currentUrl
-
-    private val _currentTitle = MutableLiveData("")
-    val currentTitle: LiveData<String> = _currentTitle
-
-    private val _canGoBack = MutableLiveData(false)
-    val canGoBack: LiveData<Boolean> = _canGoBack
-
-    private val _canGoForward = MutableLiveData(false)
-    val canGoForward: LiveData<Boolean> = _canGoForward
-
-    private val _progress = MutableLiveData(0)
-    val progress: LiveData<Int> = _progress
-
+    private var uriRequestForNewTab: Uri? = null
+    private var lastSavedInstanceState: Bundle? = null
 
     private lateinit var profile: Profile
     private lateinit var browser: Browser
 
     private val tabListCallback = object : TabListCallback() {
         override fun onActiveTabChanged(activeTab: Tab?) {
-            //TODO Set url and update favicon! Right now, we don't change tabs...
+            viewModelScope.launch {
+                val previous = selectedTabFlow.asLiveData().value?.second
+                selectedTabFlow.emit(Pair(previous, activeTab))
+            }
         }
 
         override fun onTabRemoved(tab: Tab) {
-            closeTab(tab)
+            onTabClosed(tab)
+        }
+
+        override fun onTabAdded(tab: Tab) {
+            _tabList.value?.add(tab)
+            _tabList.value = _tabList.value
+            registerTabCallbacks(tab)
+            uriRequestForNewTab?.let {
+                selectTab(tab)
+                tab.navigationController.navigate(it)
+                uriRequestForNewTab = null
+            }
         }
 
         override fun onWillDestroyBrowserAndAllTabs() {
             unregisterBrowserAndTabCallbacks()
+        }
+    }
+
+    private val navigationCallback = object : NavigationCallback() {
+        override fun onNavigationStarted(navigation: Navigation) {
+            if (navigation.isSameDocument) return
+
+            val timestamp = Date()
+            val visit = Visit(timestamp = timestamp,
+                visitRootID = DateConverter.fromDate(timestamp)!!, visitType = 0)
+            historyViewModel.insert(navigation.uri, visit = visit)
+        }
+    }
+
+    private val browserRestoreCallback: BrowserRestoreCallback = object : BrowserRestoreCallback() {
+        override fun onRestoreCompleted() {
+            super.onRestoreCompleted()
+            restorePreviousTabList(lastSavedInstanceState);
         }
     }
 
@@ -109,64 +130,20 @@ class WebLayerModel(
         }
     }
 
-    private val newTabCallback: NewTabCallback = object : NewTabCallback() {
-        override fun onNewTab(newTab: Tab, @NewTabType type: Int) {
-            onTabAddedImpl(newTab)
-        }
-    }
-
-    private val navigationCallback = object : NavigationCallback() {
-        override fun onLoadProgressChanged(progress: Double) {
-            updateProgress((100 * progress).roundToInt())
-        }
-
-        override fun onNavigationStarted(navigation: Navigation) {
-            super.onNavigationStarted(navigation)
-            if (navigation.isSameDocument) return
-            _canGoBack.value = browser.activeTab?.navigationController?.canGoBack()
-            _canGoForward.value = browser.activeTab?.navigationController?.canGoForward()
-
-            val timestamp = Date()
-            val visit = Visit(timestamp = timestamp,
-                visitRootID = DateConverter.fromDate(timestamp)!!, visitType = 0)
-            historyViewModel.insert(navigation.uri, visit = visit)
-        }
-
-        override fun onNavigationCompleted(navigation: Navigation) {
-            super.onNavigationCompleted(navigation)
-            _canGoBack.value = browser.activeTab?.navigationController?.canGoBack()
-            _canGoForward.value = browser.activeTab?.navigationController?.canGoForward()
-        }
-    }
-
-    private val errorPageCallback = object : ErrorPageCallback() {
-        override fun onBackToSafety(): Boolean {
-            //context.onBackPressed()
-            return true
-        }
-    }
-
+    private val _tabList = MutableLiveData(ArrayList<Tab>())
+    val tabList: LiveData<ArrayList<Tab>> = _tabList
     private var fullscreenCallback: FullscreenCallbackImpl? = null
-    private val previousTabList: ArrayList<Tab> = ArrayList()
     private val tabToPerTabState: HashMap<Tab, PerTabState> = HashMap()
 
-    fun goBack() = browser.activeTab?.navigationController?.goBack()
-    fun goForward() = browser.activeTab?.navigationController?.goForward()
-    fun reload() {
-        browser.activeTab?.navigationController?.reload()
+    fun onSaveInstanceState(outState: Bundle) {
+        // Store the stack of previous tab GUIDs that are used to set the next active tab when a tab
+        // closes. Also used to setup various callbacks again on restore.
+        val previousTabGuids = tabList.value?.map { it.guid }?.toTypedArray()
+        outState.putStringArray(KEY_PREVIOUS_TAB_GUIDS, previousTabGuids)
     }
 
-    fun updateProgress(progress: Int) {
-        _progress.value = progress
-    }
-
-    fun loadUrl(uri: Uri) {
-        // Disable intent processing for urls typed in. Allows the user to navigate to app urls.
-        val navigateParamsBuilder = NavigateParams.Builder().disableIntentProcessing()
-        browser.activeTab?.navigationController?.navigate(uri, navigateParamsBuilder.build())
-    }
-
-    fun onWebLayerReady(fragment: Fragment, bottomControls: View) {
+    fun onWebLayerReady(fragment: Fragment, bottomControls: View, savedInstanceState: Bundle?) {
+        lastSavedInstanceState = savedInstanceState
         // Have WebLayer Shell retain the fragment instance to simulate the behavior of
         // external embedders (note that if this is changed, then WebLayer Shell should handle
         // rotations and resizes itself via its manifest, as otherwise the user loses all state
@@ -200,21 +177,18 @@ class WebLayerModel(
                 }, 3000)
             }
         })
+
         profile.setTablessOpenUrlCallback(object : OpenUrlCallback() {
             override fun getBrowserForNewTab(): Browser {
                 return browser
             }
 
             override fun onTabAdded(tab: Tab) {
-                onTabAddedImpl(tab)
+                registerTabCallbacks(tab)
             }
         })
-        browser.activeTab?.let { registerTabCallbacks(it) }
         browser.setBottomView(bottomControls)
-        browser.registerTabListCallback(tabListCallback)
-        if (getCurrentDisplayUrl() != null) {
-            return
-        }
+        browser.registerBrowserRestoreCallback(browserRestoreCallback)
         profile.cookieManager.getCookie(Uri.parse(appURL)) {
             it?.split("; ")?.forEach { cookie ->
                 saveLoginCookieFrom(cookie)
@@ -222,11 +196,28 @@ class WebLayerModel(
         }
         profile.cookieManager.addCookieChangedCallback(Uri.parse(appURL),
             loginCookie, cookieChangedCallback)
-        loadUrl(Uri.parse(appURL))
+
+        browser.registerTabListCallback(tabListCallback)
     }
 
-    private fun registerTabCallbacks(tab: Tab) {
-        tab.setNewTabCallback(newTabCallback)
+    private fun restorePreviousTabList(savedInstanceState: Bundle?) {
+        if (savedInstanceState == null) return
+        val previousTabGuids = savedInstanceState.getStringArray(KEY_PREVIOUS_TAB_GUIDS) ?: return
+        val currentTabMap: MutableMap<String, Tab> = HashMap()
+        browser.tabs.forEach { currentTabMap[it.guid] = it }
+        previousTabGuids.forEach {
+            val tab = currentTabMap[it] ?: return
+            _tabList.value?.add(tab)
+            registerTabCallbacks(tab)
+        }
+    }
+
+    fun createTabFor(uri: Uri) {
+        uriRequestForNewTab = uri
+        browser.createTab()
+    }
+
+    fun registerTabCallbacks(tab: Tab) {
         when {
             fullscreenCallback != null -> tab.fullscreenCallback = fullscreenCallback
             tab.fullscreenCallback != null -> {
@@ -240,7 +231,6 @@ class WebLayerModel(
 
         }
         tab.navigationController.registerNavigationCallback(navigationCallback)
-        tab.setErrorPageCallback(errorPageCallback)
         val tabCallback: TabCallback = object : TabCallback() {
             override fun bringTabToFront() {
                 tab.browser.setActiveTab(tab)
@@ -250,25 +240,17 @@ class WebLayerModel(
                 activity.startActivity(intent)
             }
 
-            override fun onVisibleUriChanged(uri: Uri) {
-                super.onVisibleUriChanged(uri)
-                _currentUrl.value = uri
-            }
-
             override fun onTitleUpdated(title: String) {
-                super.onTitleUpdated(title)
-                _currentTitle.value = title
-                domainViewModel.insert(_currentUrl.value.toString(), title)
-                historyViewModel.insert(url = _currentUrl.value!!, title = title)
+                domainViewModel.insert(tab.currentDisplayUrl.toString(), title)
+                historyViewModel.insert(url = tab.currentDisplayUrl!!, title = title)
             }
         }
         tab.registerTabCallback(tabCallback)
         val faviconFetcher = tab.createFaviconFetcher(object : FaviconCallback() {
             override fun onFaviconChanged(favicon: Bitmap?) {
-                val url = currentUrl.value.toString() ?: return
                 val icon = favicon ?: return
-                domainViewModel.updateFaviconFor(url, icon.toFavicon())
-                historyViewModel.insert(url = _currentUrl.value!!, favicon = icon.toFavicon())
+                domainViewModel.updateFaviconFor(tab.currentDisplayUrl.toString(), icon.toFavicon())
+                historyViewModel.insert(url = tab.currentDisplayUrl!!, favicon = icon.toFavicon())
             }
         })
         tabToPerTabState[tab] = PerTabState(faviconFetcher, tabCallback)
@@ -276,6 +258,7 @@ class WebLayerModel(
 
     private fun unregisterBrowserAndTabCallbacks() {
         browser.unregisterTabListCallback(tabListCallback)
+        browser.unregisterBrowserRestoreCallback(browserRestoreCallback)
         tabToPerTabState.forEach { unregisterTabCallbacks(it.key) }
         tabToPerTabState.clear()
     }
@@ -283,78 +266,58 @@ class WebLayerModel(
     private fun unregisterTabCallbacks(tab: Tab) {
         // Do not unset FullscreenCallback here which is called from onDestroy, since
         // unsetting FullscreenCallback also exits fullscreen.
-        tab.setNewTabCallback(null)
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
-        tab.setErrorPageCallback(null)
         val perTabState: PerTabState = tabToPerTabState[tab]!!
         tab.unregisterTabCallback(perTabState.tabCallback)
         perTabState.faviconFetcher.destroy()
         tabToPerTabState.remove(tab)
     }
 
-    private fun onTabAddedImpl(newTab: Tab) {
-        registerTabCallbacks(newTab)
-        browser.activeTab?.let { previousTabList.add(it) }
-        browser.setActiveTab(newTab)
+    fun selectTab(tab: Tab) {
+        browser.activeTab?.let {
+            it.setNewTabCallback(null)
+            it.setErrorPageCallback(null)
+        }
+        browser.setActiveTab(tab)
     }
 
-    private fun closeTab(tab: Tab) {
-        previousTabList.remove(tab)
-        if (browser.activeTab == null && previousTabList.isNotEmpty()) {
-            browser.setActiveTab(previousTabList.removeAt(previousTabList.size - 1))
-        }
+    private fun onTabClosed(tab: Tab) {
+        _tabList.value?.remove(tab)
         unregisterTabCallbacks(tab)
+        if (browser.activeTab == null && tabList.value?.isNotEmpty() == true) {
+            val size = tabList.value?.size ?: return
+            _tabList.value?.removeAt(size - 1)?.let { browser.setActiveTab(it) }
+        }
     }
 
     private fun getDefaultDisplay(): Display {
         val windowManager = activity.getSystemService(AppCompatActivity.WINDOW_SERVICE) as WindowManager
         return windowManager.defaultDisplay
     }
+}
 
-    /* Returns the Url for the current tab as a String, or null if there is no
-     * current tab. */
-    private fun getCurrentDisplayUrl(): String? {
-        val tab = browser.activeTab ?: return null
-        val navigationController = tab.navigationController
+val Tab.currentDisplayUrl: Uri?
+    get() {
+        val navigationController = navigationController
         if (navigationController.navigationListSize == 0) return null
 
         return navigationController.getNavigationEntryDisplayUri(
-            navigationController.navigationListCurrentIndex).toString()
+            navigationController.navigationListCurrentIndex)
     }
 
-    /**
-     * Given input which may be empty, null, a URL, or search terms, this forms a URI suitable for
-     * loading in a tab.
-     * @param input The text.
-     * @return A valid URL.
-     */
-    private fun getUriFromInput(input: String): Uri? {
-        if (TextUtils.isEmpty(input)) {
-            return Uri.parse("https://neeva.com")
-        }
+val Tab.currentDisplayTitle: String?
+    get() {
+        val navigationController = navigationController
+        if (navigationController.navigationListSize == 0) return null
 
-        // WEB_URL doesn't match port numbers. Special case "localhost:" to aid
-        // testing where a port is remapped.
-        // Use WEB_URL first to ensure this matches urls such as 'https.'
-        if (Patterns.WEB_URL.matcher(input).matches() || input.startsWith("http://localhost:")) {
-            // WEB_URL matches relative urls (relative meaning no scheme), but this branch is only
-            // interested in absolute urls. Fall through if no scheme is supplied.
-            val uri = Uri.parse(input)
-            if (!uri.isRelative) return uri
-        }
-        if (input.startsWith("www.") || input.indexOf(":") == -1) {
-            val url = "http://$input"
-            if (Patterns.WEB_URL.matcher(url).matches()) {
-                return Uri.parse(url)
-            }
-        }
-        return Uri.parse(appSearchURL)
-            .buildUpon()
-            .appendQueryParameter("q", input)
-            .appendQueryParameter("src", "nvobar")
-            .build()
+        return navigationController.getNavigationEntryTitle(
+            navigationController.navigationListCurrentIndex)
     }
-}
+
+val Tab.isSelected: Boolean
+    get() {
+        return browser.activeTab == this
+    }
 
 @Suppress("UNCHECKED_CAST")
 class WebViewModelFactory(private val activity: NeevaActivity,

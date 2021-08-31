@@ -10,6 +10,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.neeva.app.card.CardsContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.history.HistoryUI
 import com.neeva.app.history.HistoryViewModel
@@ -19,7 +20,9 @@ import com.neeva.app.settings.SettingsMain
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.SpaceStore
+import com.neeva.app.web.SelectedTabModel
 import com.neeva.app.web.WebLayerModel
+import com.neeva.app.zeroQuery.ZeroQueryViewModel
 import kotlinx.coroutines.launch
 
 class AppNavModel: ViewModel() {
@@ -43,18 +46,26 @@ class AppNavModel: ViewModel() {
 @Composable
 fun AppNav(
     model: AppNavModel,
-    webLayerModel: WebLayerModel,
+    selectedTabModel: SelectedTabModel,
     historyViewModel: HistoryViewModel,
-    domainViewModel: DomainViewModel
+    domainViewModel: DomainViewModel,
+    webLayerModel: WebLayerModel,
+    zeroQueryViewModel: ZeroQueryViewModel
 ) {
     Box {
-        AddToSpaceSheet(appNavModel = model, webLayerModel = webLayerModel)
+        AddToSpaceSheet(appNavModel = model, selectedTabModel = selectedTabModel)
         NeevaMenuSheet(appNavModel = model)
         SettingsContainer(appNavModel = model)
         HistoryContainer(
             appNavModel = model,
             historyViewModel = historyViewModel,
             domainViewModel = domainViewModel)
+        CardsContainer(
+            appNavModel = model,
+            webLayerModel = webLayerModel,
+            domainViewModel = domainViewModel,
+            zeroQueryViewModel = zeroQueryViewModel
+        )
     }
 }
 
@@ -63,5 +74,6 @@ enum class AppNavState {
     SETTINGS,
     ADD_TO_SPACE,
     NEEVA_MENU,
-    HISTORY
+    HISTORY,
+    CARD_GRID
 }
