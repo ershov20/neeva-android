@@ -1,7 +1,6 @@
-package com.neeva.app.web
+package com.neeva.app.browsing
 
 import android.net.Uri
-import android.text.TextUtils
 import android.util.Patterns
 import com.neeva.app.appSearchURL
 

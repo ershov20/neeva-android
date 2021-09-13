@@ -1,4 +1,4 @@
-package com.neeva.app.web
+package com.neeva.app.browsing
 
 import android.content.Intent
 import android.graphics.Bitmap
@@ -19,8 +19,10 @@ import com.neeva.app.*
 import com.neeva.app.R
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.chromium.weblayer.*
 import java.util.*
 
@@ -120,7 +122,15 @@ class WebLayerModel(
     private val browserRestoreCallback: BrowserRestoreCallback = object : BrowserRestoreCallback() {
         override fun onRestoreCompleted() {
             super.onRestoreCompleted()
+
             restorePreviousTabList(lastSavedInstanceState);
+            if (browser.tabs.count() == 1
+                && browser.activeTab == browser.tabs.first()
+                && browser.activeTab?.navigationController?.navigationListCurrentIndex == -1) {
+                browser.activeTab?.navigationController?.navigate(Uri.parse(appURL))
+            } else if (browser.tabs.isEmpty()) {
+                createTabFor(Uri.parse(appURL))
+            }
         }
     }
 
@@ -286,8 +296,10 @@ class WebLayerModel(
         unregisterTabCallbacks(tab)
         if (browser.activeTab == null && tabList.value?.isNotEmpty() == true) {
             val size = tabList.value?.size ?: return
-            _tabList.value?.removeAt(size - 1)?.let { browser.setActiveTab(it) }
+            _tabList.value?.get(size - 1)?.let { browser.setActiveTab(it) }
         }
+
+        _tabList.value = _tabList.value
     }
 
     private fun getDefaultDisplay(): Display {
@@ -295,29 +307,6 @@ class WebLayerModel(
         return windowManager.defaultDisplay
     }
 }
-
-val Tab.currentDisplayUrl: Uri?
-    get() {
-        val navigationController = navigationController
-        if (navigationController.navigationListSize == 0) return null
-
-        return navigationController.getNavigationEntryDisplayUri(
-            navigationController.navigationListCurrentIndex)
-    }
-
-val Tab.currentDisplayTitle: String?
-    get() {
-        val navigationController = navigationController
-        if (navigationController.navigationListSize == 0) return null
-
-        return navigationController.getNavigationEntryTitle(
-            navigationController.navigationListCurrentIndex)
-    }
-
-val Tab.isSelected: Boolean
-    get() {
-        return browser.activeTab == this
-    }
 
 @Suppress("UNCHECKED_CAST")
 class WebViewModelFactory(private val activity: NeevaActivity,

@@ -16,8 +16,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.neeva.app.web.SelectedTabModel
-import com.neeva.app.web.WebLayerModel
+import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.widgets.Button
 
 
 class TabToolbarModel(
@@ -39,49 +39,31 @@ fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
             .background(MaterialTheme.colors.primary),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        TabToolbarButton(
+        Button(
             enabled = canGoBack ?: false,
             resID = R.drawable.ic_baseline_arrow_back_24,
             contentDescription = "back button",
             onClick = { selectedTabModel.goBack() }
         )
-        TabToolbarButton(
+        Button(
             enabled = canGoForward ?: false,
             resID = R.drawable.ic_baseline_arrow_forward_24,
             contentDescription = "forward button"
         ) { selectedTabModel.goForward() }
         NeevaMenuButton(onClick = model.onNeevaMenu)
-        TabToolbarButton(
+        Button(
             true,
             resID = R.drawable.ic_baseline_bookmark_border_24,
             contentDescription = "save to space",
             onClick = model.onAddToSpace
         )
-        TabToolbarButton(
+        Button(
             true,
             resID = R.drawable.ic_baseline_grid_view_24,
             contentDescription = "switch tabs",
             onClick = model.onTabSwitcher
         )
     }
-}
-
-@Composable
-fun TabToolbarButton(
-    enabled: Boolean,
-    resID: Int,
-    contentDescription: String,
-    onClick: () -> Unit
-) {
-    Image(
-        imageVector = ImageVector.vectorResource(id = resID),
-        contentDescription = contentDescription,
-        contentScale = ContentScale.Inside,
-        modifier = Modifier
-            .size(48.dp, 48.dp)
-            .clickable(enabled) { onClick() },
-        colorFilter = ColorFilter.tint(if (enabled) MaterialTheme.colors.onPrimary else Color.LightGray)
-    )
 }
 
 @Composable

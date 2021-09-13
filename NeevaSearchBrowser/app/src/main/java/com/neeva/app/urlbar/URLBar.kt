@@ -22,8 +22,8 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.TabToolbarButton
 import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.widgets.Button
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -100,7 +100,7 @@ fun LocationLabel(urlBarModel: URLBarModel) {
             else MaterialTheme.colors.onPrimary
         )
         Spacer(modifier = Modifier.weight(1.0f))
-        TabToolbarButton(enabled = true,
+        Button(enabled = true,
             resID = R.drawable.ic_baseline_refresh_24,
             contentDescription = "refresh button",
             onClick = { urlBarModel.onReload() }

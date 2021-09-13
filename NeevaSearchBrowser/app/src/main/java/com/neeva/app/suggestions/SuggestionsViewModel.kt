@@ -7,8 +7,8 @@ import androidx.lifecycle.ViewModel
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.type.QuerySuggestionType
-import com.neeva.app.web.baseDomain
-import com.neeva.app.web.toSearchUri
+import com.neeva.app.browsing.baseDomain
+import com.neeva.app.browsing.toSearchUri
 
 class NavSuggestion(val url: Uri, val label: String, val secondaryLabel: String)
 class ChipSuggestion(val url: Uri, val query: String)

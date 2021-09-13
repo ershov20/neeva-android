@@ -22,10 +22,10 @@ import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
-import com.neeva.app.web.SelectedTabModel
-import com.neeva.app.web.SelectedTabModelFactory
-import com.neeva.app.web.WebLayerModel
-import com.neeva.app.web.WebViewModelFactory
+import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.SelectedTabModelFactory
+import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.browsing.WebViewModelFactory
 import com.neeva.app.zeroQuery.ZeroQueryModelFactory
 import com.neeva.app.zeroQuery.ZeroQueryViewModel
 import org.chromium.weblayer.UnsupportedVersionException

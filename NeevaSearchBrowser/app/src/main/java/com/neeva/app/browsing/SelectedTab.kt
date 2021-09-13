@@ -1,4 +1,4 @@
-package com.neeva.app.web
+package com.neeva.app.browsing
 
 import android.net.Uri
 import androidx.lifecycle.*
@@ -61,7 +61,7 @@ class SelectedTabModel(
     }
 
     fun loadUrl(uri: Uri, newTab: Boolean = false) {
-        if (newTab) {
+        if (newTab || _selectedTab.value == null) {
             createTabFor(uri)
             return
         }

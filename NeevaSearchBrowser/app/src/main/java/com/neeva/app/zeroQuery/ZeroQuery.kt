@@ -27,9 +27,8 @@ import com.neeva.app.history.toSearchSuggest
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.QueryRowSuggestion
-import com.neeva.app.web.SelectedTabModel
-import com.neeva.app.web.WebLayerModel
-import com.neeva.app.web.baseDomain
+import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.baseDomain
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
@@ -56,63 +55,71 @@ fun ZeroQuery(
             topContent()
         }
 
-        collapsibleHeaderItem(
-            label = "Suggested Sites",
-            startingState = CollapsingState.SHOW_COMPACT,
-        ) {
-            LazyRow(modifier = Modifier.padding(16.dp)) {
-                items(suggestedSites.filterNot { it.siteURL.contains(appURL) }
-                    .subList(0, minOf(suggestedSites.size, 8))) { site ->
-                    val bitmap = site.largestFavicon?.toBitmap() ?: Favicon.defaultFavicon
-                    val siteName = Uri.parse(site.siteURL).baseDomain().toString()
-                        .split(".").first()
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .padding(horizontal = 8.dp)
-                            .clickable {
-                                loadUrl(Uri.parse(site.siteURL))
-                            }
-                    ) {
-                        Image(
-                            bitmap = bitmap.asImageBitmap(),
-                            contentDescription = "Suggested Site",
+        if (suggestedSites.isNotEmpty()) {
+            collapsibleHeaderItem(
+                label = "Suggested Sites",
+                startingState = CollapsingState.SHOW_COMPACT,
+            ) {
+                LazyRow(modifier = Modifier.padding(16.dp)) {
+                    items(suggestedSites.filterNot { it.siteURL.contains(appURL) }
+                        .subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
+                        val bitmap = site.largestFavicon?.toBitmap() ?: Favicon.defaultFavicon
+                        val siteName = Uri.parse(site.siteURL).baseDomain().toString()
+                            .split(".").first()
+                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .size(36.dp)
-                                .padding(2.dp),
-                            contentScale = ContentScale.FillBounds,
-                        )
-                        Text(
-                            text = siteName,
-                            modifier = Modifier
-                                .padding(top = 8.dp)
-                                .padding(horizontal = 8.dp),
-                            style = MaterialTheme.typography.body2,
-                            color = MaterialTheme.colors.onSecondary,
-                            maxLines = 1,
-                        )
+                                .padding(horizontal = 8.dp)
+                                .clickable {
+                                    loadUrl(Uri.parse(site.siteURL))
+                                }
+                        ) {
+                            Image(
+                                bitmap = bitmap.asImageBitmap(),
+                                contentDescription = "Suggested Site",
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .padding(2.dp),
+                                contentScale = ContentScale.FillBounds,
+                            )
+                            Text(
+                                text = siteName,
+                                modifier = Modifier
+                                    .padding(top = 8.dp)
+                                    .padding(horizontal = 8.dp),
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onSecondary,
+                                maxLines = 1,
+                            )
+                        }
                     }
                 }
             }
         }
 
-        collapsibleHeaderItems(
-            label = "Searches",
-            startingState = CollapsingState.SHOW_COMPACT,
-            items = suggestedQueries,
-        ) { search ->
-            QueryRowSuggestion(suggestion = search, onLoadUrl = loadUrl)
-        }
 
-        collapsibleHeaderItems(
-            label = "Spaces",
-            startingState = CollapsingState.SHOW_COMPACT,
-            items = spaces.subList(0, minOf(3, spaces.size)),
-        ) { space ->
-            SpaceRow(space = space) {
-                loadUrl(space.url)
+        if (suggestedQueries.isNotEmpty()) {
+            collapsibleHeaderItems(
+                label = "Searches",
+                startingState = CollapsingState.SHOW_COMPACT,
+                items = suggestedQueries,
+            ) { search ->
+                QueryRowSuggestion(suggestion = search, onLoadUrl = loadUrl)
             }
         }
+
+        if (spaces.isNotEmpty()) {
+            collapsibleHeaderItems(
+                label = "Spaces",
+                startingState = CollapsingState.SHOW_COMPACT,
+                items = spaces.subList(0, minOf(3, spaces.size)),
+            ) { space ->
+                SpaceRow(space = space) {
+                    loadUrl(space.url)
+                }
+            }
+        }
+
     }
 }

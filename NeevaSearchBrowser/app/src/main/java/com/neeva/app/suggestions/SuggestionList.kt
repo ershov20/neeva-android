@@ -29,7 +29,7 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.web.SelectedTabModel
+import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.widgets.FaviconView
 import com.neeva.app.zeroQuery.ZeroQuery
 import com.neeva.app.zeroQuery.ZeroQueryViewModel

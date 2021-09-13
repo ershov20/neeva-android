@@ -29,8 +29,7 @@ import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
-import com.neeva.app.web.SelectedTabModel
-import com.neeva.app.web.WebLayerModel
+import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.widgets.OverlaySheet
 import kotlinx.coroutines.launch
 

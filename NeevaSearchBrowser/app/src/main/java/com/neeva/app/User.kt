@@ -8,11 +8,11 @@ import androidx.security.crypto.MasterKey
 object User {
     private const val KEY_TOKEN = "TOKEN"
     private fun preferences(context: Context): SharedPreferences {
-        val masterKeyAlias: String = MasterKey.DEFAULT_MASTER_KEY_ALIAS
+        val masterKeyAlias: String = "Neeva_master_key"
 
         return EncryptedSharedPreferences.create(
             context,
-            "encrypted_shared_prefs",
+            "secret_shared_prefs",
             MasterKey(context, masterKeyAlias),
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM

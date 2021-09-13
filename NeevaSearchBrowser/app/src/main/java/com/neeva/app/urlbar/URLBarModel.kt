@@ -8,10 +8,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.NavSuggestion
-import com.neeva.app.web.SelectedTabModel
-import com.neeva.app.web.WebLayerModel
-import com.neeva.app.web.baseDomain
-import kotlinx.coroutines.flow.*
+import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.baseDomain
 import kotlinx.coroutines.launch
 
 class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {

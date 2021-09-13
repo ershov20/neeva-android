@@ -26,12 +26,12 @@ import androidx.lifecycle.LiveData
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
-import com.neeva.app.TabToolbarButton
 import com.neeva.app.storage.DomainViewModel
-import com.neeva.app.web.WebLayerModel
-import com.neeva.app.web.currentDisplayTitle
-import com.neeva.app.web.currentDisplayUrl
-import com.neeva.app.web.isSelected
+import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.browsing.currentDisplayTitle
+import com.neeva.app.browsing.currentDisplayUrl
+import com.neeva.app.browsing.isSelected
+import com.neeva.app.widgets.Button
 import com.neeva.app.widgets.FaviconView
 import com.neeva.app.zeroQuery.ZeroQueryViewModel
 import org.chromium.weblayer.Tab
@@ -71,8 +71,11 @@ fun CardList(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            items(tabs) {
-                TabListRow(
+            items(
+                items = tabs,
+                key = { tab -> tab.guid }
+            ) {
+                TabListRow(tabs,
                     tab = it,
                     faviconData = domainViewModel.getFaviconFor(it.currentDisplayUrl)
                 ) {
@@ -88,12 +91,12 @@ fun CardList(
                 .height(56.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TabToolbarButton(enabled = true, resID = R.drawable.ic_baseline_add_24, contentDescription = "New Tab") {
+            Button(enabled = true, resID = R.drawable.ic_baseline_add_24, contentDescription = "New Tab") {
                 zeroQueryViewModel.openLazyTab()
                 appNavModel.setContentState(AppNavState.HIDDEN)
             }
             Spacer(modifier = Modifier.weight(1f))
-            TabToolbarButton(enabled = true, resID = R.drawable.ic_baseline_close_24, contentDescription = "Done") {
+            Button(enabled = true, resID = R.drawable.ic_baseline_close_24, contentDescription = "Done") {
                 appNavModel.setContentState(AppNavState.HIDDEN)
             }
         }
@@ -101,7 +104,9 @@ fun CardList(
 }
 
 @Composable
-fun TabListRow(tab: Tab, faviconData: LiveData<Bitmap>, onClick: () -> Unit) {
+fun TabListRow(tabs: ArrayList<Tab>,
+    tab: Tab, faviconData: LiveData<Bitmap>, onClick: () -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -128,5 +133,9 @@ fun TabListRow(tab: Tab, faviconData: LiveData<Bitmap>, onClick: () -> Unit) {
             color = MaterialTheme.colors.onPrimary,
             maxLines = 1,
         )
+        Button(enabled = true, resID = R.drawable.ic_baseline_close_24, contentDescription = "Close tab") {
+            tabs.remove(tab)
+            tab.dispatchBeforeUnloadAndClose()
+        }
     }
 }

@@ -15,8 +15,7 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.suggestions.SuggestionList
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.web.SelectedTabModel
-import com.neeva.app.web.WebLayerModel
+import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.zeroQuery.ZeroQueryViewModel
 
 @Composable

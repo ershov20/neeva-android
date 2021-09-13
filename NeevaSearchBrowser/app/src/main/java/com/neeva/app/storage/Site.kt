@@ -4,15 +4,8 @@ import android.net.Uri
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.*
 import androidx.room.*
-import com.neeva.app.R
-import com.neeva.app.appSearchURL
-import com.neeva.app.suggestions.NavSuggestion
-import com.neeva.app.suggestions.QueryRowSuggestion
-import com.neeva.app.web.baseDomain
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 enum class EntityType {
     UNKNOWN, ARTICLE, PRODUCT

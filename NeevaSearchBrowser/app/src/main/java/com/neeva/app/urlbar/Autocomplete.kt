@@ -31,7 +31,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
 import com.neeva.app.R
 import com.neeva.app.appURL
-import com.neeva.app.web.toSearchUri
+import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.widgets.FaviconView
 
 @Composable

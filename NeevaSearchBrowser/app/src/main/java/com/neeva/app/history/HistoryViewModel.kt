@@ -10,7 +10,7 @@ import com.neeva.app.storage.SitesRepository
 import com.neeva.app.storage.Visit
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.QueryRowSuggestion
-import com.neeva.app.web.baseDomain
+import com.neeva.app.browsing.baseDomain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map

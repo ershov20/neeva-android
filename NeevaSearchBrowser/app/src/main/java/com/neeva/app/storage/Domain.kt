@@ -1,20 +1,15 @@
 package com.neeva.app.storage
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Base64
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.*
 import androidx.room.*
-import com.neeva.app.NeevaBrowser
-import com.neeva.app.R
 import com.neeva.app.suggestions.NavSuggestion
-import com.neeva.app.web.baseDomain
+import com.neeva.app.browsing.baseDomain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.io.ByteArrayOutputStream
 
 @Entity(indices = [Index(value = ["domainName"], unique = true)])
 data class Domain(
