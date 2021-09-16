@@ -45,7 +45,8 @@ fun ZeroQuery(
     val suggestedQueries: List<QueryRowSuggestion> by historyViewModel.frequentSites.map { siteList ->
         siteList.mapNotNull { it.toSearchSuggest() }.take(3)
     }.observeAsState(emptyList())
-    val suggestedSites: List<Site> by historyViewModel.frequentSites.observeAsState(emptyList())
+    val suggestedSites: List<Site> by historyViewModel.frequentSites.map { sites ->
+        sites.filterNot { it.siteURL.contains(appURL) } }.observeAsState(emptyList())
     val loadUrl: (Uri) -> Unit by zeroQueryViewModel.isLazyTab.map { isLazyTab ->
             { uri:Uri -> selectedTabModel.loadUrl(uri, isLazyTab)}
         }.observeAsState { }
@@ -61,8 +62,7 @@ fun ZeroQuery(
                 startingState = CollapsingState.SHOW_COMPACT,
             ) {
                 LazyRow(modifier = Modifier.padding(16.dp)) {
-                    items(suggestedSites.filterNot { it.siteURL.contains(appURL) }
-                        .subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
+                    items(suggestedSites.subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
                         val bitmap = site.largestFavicon?.toBitmap() ?: Favicon.defaultFavicon
                         val siteName = Uri.parse(site.siteURL).baseDomain().toString()
                             .split(".").first()
