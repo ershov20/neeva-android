@@ -100,6 +100,7 @@ class NeevaActivity : AppCompatActivity() {
                         { appNavModel.setContentState(AppNavState.NEEVA_MENU) },
                         { appNavModel.setContentState(AppNavState.ADD_TO_SPACE) },
                         {
+                            webModel.onGridShown()
                             appNavModel.setContentState(AppNavState.CARD_GRID)
                         }
                     ), selectedTabModel)

@@ -2,10 +2,12 @@ package com.neeva.app.browsing
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.view.Display
@@ -19,12 +21,12 @@ import com.neeva.app.*
 import com.neeva.app.R
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.chromium.weblayer.*
+import java.io.*
 import java.util.*
+
 
 // TODO(yusuf) Lose the dependency on activity here and pass a FullscreenCallbackProvider instead
 class WebLayerModel(
@@ -86,6 +88,7 @@ class WebLayerModel(
                 val previous = selectedTabFlow.asLiveData().value?.second
                 selectedTabFlow.emit(Pair(previous, activeTab))
             }
+            tabList.value?.forEach { it.isSelected = it.id == activeTab?.guid }
         }
 
         override fun onTabRemoved(tab: Tab) {
@@ -95,6 +98,7 @@ class WebLayerModel(
         override fun onTabAdded(tab: Tab) {
             _tabList.value?.add(tab)
             _tabList.value = _tabList.value
+
             registerTabCallbacks(tab)
             uriRequestForNewTab?.let {
                 selectTab(tab)
@@ -141,14 +145,19 @@ class WebLayerModel(
     }
 
     private val _tabList = MutableLiveData(ArrayList<Tab>())
-    val tabList: LiveData<ArrayList<Tab>> = _tabList
+    val tabList: LiveData<List<BrowserPrimitive>> = _tabList.map { tabList ->
+        tabList.map {
+            BrowserPrimitive(it.guid, url = it.currentDisplayUrl,
+            title = it.currentDisplayTitle, isSelected =  it.isSelected)
+        }
+    }
     private var fullscreenCallback: FullscreenCallbackImpl? = null
     private val tabToPerTabState: HashMap<Tab, PerTabState> = HashMap()
 
     fun onSaveInstanceState(outState: Bundle) {
         // Store the stack of previous tab GUIDs that are used to set the next active tab when a tab
         // closes. Also used to setup various callbacks again on restore.
-        val previousTabGuids = tabList.value?.map { it.guid }?.toTypedArray()
+        val previousTabGuids = tabList.value?.map { it.id }?.toTypedArray()
         outState.putStringArray(KEY_PREVIOUS_TAB_GUIDS, previousTabGuids)
     }
 
@@ -253,6 +262,11 @@ class WebLayerModel(
             override fun onTitleUpdated(title: String) {
                 domainViewModel.insert(tab.currentDisplayUrl.toString(), title)
                 historyViewModel.insert(url = tab.currentDisplayUrl!!, title = title)
+                tabList.value?.find { it.id == tab.guid }?.title = tab.currentDisplayTitle
+            }
+
+            override fun onVisibleUriChanged(uri: Uri) {
+                tabList.value?.find { it.id == tab.guid }?.url = tab.currentDisplayUrl
             }
         }
         tab.registerTabCallback(tabCallback)
@@ -283,20 +297,58 @@ class WebLayerModel(
         tabToPerTabState.remove(tab)
     }
 
+    fun onGridShown() {
+        browser.activeTab?.captureAndSaveScreenshot()
+    }
+
+    fun select(primitive: BrowserPrimitive) {
+        val tab = _tabList.value?.first { it.guid == primitive.id } ?: return
+        selectTab(tab)
+    }
+
+    fun close(primitive: BrowserPrimitive) {
+        val tab = _tabList.value?.first { it.guid == primitive.id } ?: return
+        tab.dispatchBeforeUnloadAndClose()
+    }
+
     fun selectTab(tab: Tab) {
-        browser.activeTab?.let {
-            it.setNewTabCallback(null)
-            it.setErrorPageCallback(null)
+        browser.activeTab?.let { activeTab ->
+            activeTab.setNewTabCallback(null)
+            activeTab.setErrorPageCallback(null)
+            activeTab.captureAndSaveScreenshot()
         }
         browser.setActiveTab(tab)
     }
 
+    private fun Tab.captureAndSaveScreenshot() {
+        captureScreenShot(0.5f) { thumbnail, _ ->
+            val dir = File("${NeevaBrowser.context.filesDir}/tab_screenshots")
+            dir.mkdirs()
+
+            val fileName = "tab_${guid}.jpg"
+            val uri = Uri.parse("file://${dir}/${fileName}")
+
+            val file = File(dir, fileName)
+            if (file.exists()) file.delete()
+            try {
+                val out = FileOutputStream(file)
+                thumbnail?.compress(CompressFormat.JPEG, 100, out)
+                out.flush()
+                out.close()
+                tabList.value?.find { it.id == guid }?.thumbnailUri = uri
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     private fun onTabClosed(tab: Tab) {
+        val index = _tabList.value?.indexOf(tab)
         _tabList.value?.remove(tab)
         unregisterTabCallbacks(tab)
-        if (browser.activeTab == null && tabList.value?.isNotEmpty() == true) {
-            val size = tabList.value?.size ?: return
-            _tabList.value?.get(size - 1)?.let { browser.setActiveTab(it) }
+        if (browser.activeTab == null && index != null && tabList.value?.isNotEmpty() == true) {
+            val indexToSelect = if (index == 0) 0 else index - 1
+            _tabList.value?.get(indexToSelect)?.let { browser.setActiveTab(it) }
         }
 
         _tabList.value = _tabList.value
@@ -317,3 +369,11 @@ class WebViewModelFactory(private val activity: NeevaActivity,
         return WebLayerModel(activity, domainModel, historyViewModel = historyViewModel) as T
     }
 }
+
+data class BrowserPrimitive(
+    val id: String,
+    var thumbnailUri: Uri? = Uri.parse("file://${NeevaBrowser.context.filesDir}/tab_screenshots/tab_${id}.jpg"),
+    var url: Uri?,
+    var title: String?,
+    var isSelected: Boolean
+)

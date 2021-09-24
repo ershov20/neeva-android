@@ -12,7 +12,7 @@ object User {
 
         return EncryptedSharedPreferences.create(
             context,
-            "secret_shared_prefs",
+            "enc_shared_prefs",
             MasterKey(context, masterKeyAlias),
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
