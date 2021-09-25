@@ -26,6 +26,8 @@ import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.browsing.SelectedTabModelFactory
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.WebViewModelFactory
+import com.neeva.app.card.CardViewModel
+import com.neeva.app.card.CardViewModelFactory
 import com.neeva.app.zeroQuery.ZeroQueryModelFactory
 import com.neeva.app.zeroQuery.ZeroQueryViewModel
 import org.chromium.weblayer.UnsupportedVersionException
@@ -45,12 +47,15 @@ class NeevaActivity : AppCompatActivity() {
 
     private val selectedTabModel by viewModels<SelectedTabModel> {
         SelectedTabModelFactory(
-            webModel.selectedTabFlow, webModel::registerTabCallbacks, webModel::createTabFor)
+            webModel.selectedTabFlow, webModel::registerNewTab, webModel::createTabFor)
     }
 
     private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(selectedTabModel) }
     private val zeroQueryViewModel by viewModels<ZeroQueryViewModel> {
         ZeroQueryModelFactory(urlBarModel)
+    }
+    private val cardViewModel by viewModels<CardViewModel> {
+        CardViewModelFactory(webModel.tabList)
     }
 
     private val appNavModel by viewModels<AppNavModel>()
@@ -87,7 +92,7 @@ class NeevaActivity : AppCompatActivity() {
                 Surface(color = Color.Transparent) {
                     AppNav(
                         appNavModel, selectedTabModel, historyViewModel,
-                        domainsViewModel, webModel, zeroQueryViewModel
+                        domainsViewModel, webModel, zeroQueryViewModel, cardViewModel
                     )
                 }
             }

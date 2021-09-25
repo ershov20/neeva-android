@@ -18,6 +18,7 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.card.CardViewModel
 import com.neeva.app.zeroQuery.ZeroQueryViewModel
 import kotlinx.coroutines.launch
 
@@ -46,7 +47,8 @@ fun AppNav(
     historyViewModel: HistoryViewModel,
     domainViewModel: DomainViewModel,
     webLayerModel: WebLayerModel,
-    zeroQueryViewModel: ZeroQueryViewModel
+    zeroQueryViewModel: ZeroQueryViewModel,
+    cardViewModel: CardViewModel
 ) {
     Box {
         AddToSpaceSheet(appNavModel = model, selectedTabModel = selectedTabModel)
@@ -60,7 +62,8 @@ fun AppNav(
             appNavModel = model,
             webLayerModel = webLayerModel,
             domainViewModel = domainViewModel,
-            zeroQueryViewModel = zeroQueryViewModel
+            zeroQueryViewModel = zeroQueryViewModel,
+            cardViewModel = cardViewModel
         )
     }
 }

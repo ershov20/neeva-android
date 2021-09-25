@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -21,6 +22,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.map
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.widgets.Button
@@ -28,9 +30,7 @@ import com.neeva.app.widgets.Button
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun URLBar(urlBarModel: URLBarModel, domainViewModel: DomainViewModel) {
-    val value: TextFieldValue by urlBarModel.text.observeAsState(TextFieldValue("", TextRange.Zero))
     val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
-    val autocompletedSuggestion by domainViewModel.autocompletedSuggestion.observeAsState(null)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -42,36 +42,24 @@ fun URLBar(urlBarModel: URLBarModel, domainViewModel: DomainViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(24.dp))
-                .clickable {
-                    if (isEditing && !autocompletedSuggestion?.secondaryLabel.isNullOrEmpty()) {
-                        val completed = autocompletedSuggestion!!.secondaryLabel
-                        urlBarModel.onLocationBarTextChanged(
-                            value.copy(
-                                completed,
-                                TextRange(completed.length, completed.length),
-                                TextRange(completed.length, completed.length)
-                            )
-                        )
-                    } else {
-                        urlBarModel.onRequestFocus()
-                    }
-                }
                 .background(MaterialTheme.colors.primaryVariant)
                 .height(40.dp)
                 .padding(horizontal = 8.dp)
         ) {
             AutocompleteTextField(urlBarModel, domainViewModel::getFaviconFor)
             if (!isEditing) {
-                LocationLabel(urlBarModel)
+                LocationLabel(urlBarModel, domainViewModel)
             }
         }
     }
 }
 
 @Composable
-fun LocationLabel(urlBarModel: URLBarModel) {
+fun LocationLabel(urlBarModel: URLBarModel, domainViewModel: DomainViewModel) {
     val showLock: Boolean by urlBarModel.showLock.observeAsState(false)
     val value: TextFieldValue by urlBarModel.text.observeAsState(TextFieldValue("", TextRange.Zero))
+    val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
+    val autocompletedSuggestion by domainViewModel.autocompletedSuggestion.observeAsState(null)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -79,6 +67,9 @@ fun LocationLabel(urlBarModel: URLBarModel) {
             .wrapContentSize(Alignment.Center)
             .height(40.dp)
             .fillMaxWidth()
+            .clickable(!isEditing || autocompletedSuggestion?.secondaryLabel.isNullOrEmpty()) {
+                urlBarModel.onRequestFocus()
+            }
     ) {
         Spacer(modifier = Modifier.weight(1.0f))
         if (showLock) {

@@ -9,6 +9,7 @@ import com.neeva.app.SuggestionsQuery
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.browsing.toSearchUri
+import java.lang.Integer.min
 
 class NavSuggestion(val url: Uri, val label: String, val secondaryLabel: String)
 class ChipSuggestion(val url: Uri, val query: String)
@@ -42,13 +43,8 @@ class SuggestionsViewModel: ViewModel() {
             _topSuggestions.value = mutableListOf(
                 urlSuggestionsSplit.first.first().toNavSuggestion())
         }
-        val querySuggestionsSplit = suggestionResults.querySuggestion
-            .partition { it.type != QuerySuggestionType.STANDARD
-                    || it.annotation?.description?.isNotEmpty() == true }
-        _queryRowSuggestions.value = querySuggestionsSplit.first
-            .map { it.toQueryRowSuggestion() }
-        _queryChipSuggestions.value = querySuggestionsSplit.second
-            .map { it.toChipSuggestion() }
+        _queryRowSuggestions.value = suggestionResults.querySuggestion
+            .map { it.toQueryRowSuggestion() }.subList(0, min(suggestionResults.querySuggestion.size, 3))
         _shouldShowSuggestions.value = !_suggestionResponse?.urlSuggestion.isNullOrEmpty()
                 || !_suggestionResponse?.querySuggestion.isNullOrEmpty()
     }
@@ -68,6 +64,7 @@ fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() : QueryRowSuggestion
         description = this.annotation?.description,
         imageURL = this.annotation?.imageURL,
         drawableID = when {
+            this.annotation?.annotationType == "Calculator" -> R.drawable.ic_baseline_calculate_24
             this.type == QuerySuggestionType.STANDARD -> R.drawable.ic_baseline_search_24
             this.type == QuerySuggestionType.SEARCHHISTORY -> R.drawable.ic_baseline_history_24
             !this.annotation?.description.isNullOrEmpty() -> R.drawable.ic_baseline_image_24

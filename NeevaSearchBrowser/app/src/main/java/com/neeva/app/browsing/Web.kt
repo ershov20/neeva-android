@@ -1,5 +1,8 @@
 package com.neeva.app.browsing
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
@@ -7,13 +10,13 @@ import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.os.Handler
 import android.os.Looper
-import android.view.Display
-import android.view.View
-import android.view.WindowManager
+import android.text.TextUtils
+import android.view.*
+import android.view.ContextMenu.ContextMenuInfo
 import android.webkit.ValueCallback
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.*
@@ -76,6 +79,89 @@ class WebLayerModel(
         }
     }
 
+    private class ContextMenuCreator(
+        var webLayerModel: WebLayerModel,
+        var params: ContextMenuParams? = null,
+        var tab: Tab? = null,
+        var context: Context? = null,
+    ): View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
+        val MENU_ID_COPY_LINK_URI = 1
+        val MENU_ID_COPY_LINK_TEXT = 2
+        val MENU_ID_DOWNLOAD_IMAGE = 3
+        val MENU_ID_DOWNLOAD_VIDEO = 4
+        val MENU_ID_DOWNLOAD_LINK = 5
+        val MENU_ID_OPEN_IN_NEW_TAB = 6
+
+
+        override fun onCreateContextMenu(
+            menu: ContextMenu, v: View, menuInfo: ContextMenuInfo?
+        ) {
+            context = v.context
+            menu.add(params!!.pageUri.toString())
+            if (params!!.linkUri != null) {
+                val openNewTabItem =
+                    menu.add(Menu.NONE, MENU_ID_OPEN_IN_NEW_TAB, Menu.NONE, "Open in new tab")
+                openNewTabItem.setOnMenuItemClickListener(this)
+            }
+            if (params!!.linkUri != null) {
+                val copyLinkUriItem =
+                    menu.add(Menu.NONE, MENU_ID_COPY_LINK_URI, Menu.NONE, "Copy link address")
+                copyLinkUriItem.setOnMenuItemClickListener(this)
+            }
+            if (!TextUtils.isEmpty(params!!.linkText)) {
+                val copyLinkTextItem =
+                    menu.add(Menu.NONE, MENU_ID_COPY_LINK_TEXT, Menu.NONE, "Copy link text")
+                copyLinkTextItem.setOnMenuItemClickListener(this)
+            }
+            if (params!!.canDownload) {
+                if (params!!.isImage) {
+                    val downloadImageItem = menu.add(
+                        Menu.NONE, MENU_ID_DOWNLOAD_IMAGE, Menu.NONE, "Download image"
+                    )
+                    downloadImageItem.setOnMenuItemClickListener(this)
+                } else if (params!!.isVideo) {
+                    val downloadVideoItem = menu.add(
+                        Menu.NONE, MENU_ID_DOWNLOAD_VIDEO, Menu.NONE, "Download video"
+                    )
+                    downloadVideoItem.setOnMenuItemClickListener(this)
+                } else if (params!!.linkUri != null) {
+                    val downloadVideoItem =
+                        menu.add(Menu.NONE, MENU_ID_DOWNLOAD_LINK, Menu.NONE, "Download link")
+                    downloadVideoItem.setOnMenuItemClickListener(this)
+                }
+            }
+            if (!TextUtils.isEmpty(params!!.titleOrAltText)) {
+                val altTextView = TextView(context)
+                altTextView.text = params!!.titleOrAltText
+                menu.setHeaderView(altTextView)
+            }
+            v.setOnCreateContextMenuListener(null)
+        }
+
+        override fun onMenuItemClick(item: MenuItem): Boolean {
+            val clipboard =
+                context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            when (item.itemId) {
+                MENU_ID_OPEN_IN_NEW_TAB -> webLayerModel.createTabFor(params!!.linkUri!!)
+                MENU_ID_COPY_LINK_URI -> clipboard.setPrimaryClip(
+                    ClipData.newPlainText("link address", params!!.linkUri.toString())
+                )
+                MENU_ID_COPY_LINK_TEXT -> clipboard.setPrimaryClip(
+                    ClipData.newPlainText(
+                        "link text",
+                        params!!.linkText
+                    )
+                )
+                MENU_ID_DOWNLOAD_IMAGE, MENU_ID_DOWNLOAD_VIDEO, MENU_ID_DOWNLOAD_LINK -> tab!!.download(
+                    params
+                )
+                else -> {
+                }
+            }
+            return true
+        }
+    }
+
     private var uriRequestForNewTab: Uri? = null
     private var lastSavedInstanceState: Bundle? = null
 
@@ -92,7 +178,15 @@ class WebLayerModel(
         }
 
         override fun onTabRemoved(tab: Tab) {
-            onTabClosed(tab)
+            val index = _tabList.value?.indexOf(tab)
+            _tabList.value?.remove(tab)
+            unregisterTabCallbacks(tab)
+            if (browser.activeTab == null && index != null && tabList.value?.isNotEmpty() == true) {
+                val indexToSelect = if (index == 0) 0 else index - 1
+                _tabList.value?.get(indexToSelect)?.let { browser.setActiveTab(it) }
+            }
+
+            _tabList.value = _tabList.value
         }
 
         override fun onTabAdded(tab: Tab) {
@@ -236,6 +330,13 @@ class WebLayerModel(
         browser.createTab()
     }
 
+    fun registerNewTab(tab: Tab, @NewTabType type: Int) {
+        registerTabCallbacks(tab)
+        if (type == NewTabType.FOREGROUND_TAB) {
+            selectTab(tab)
+        }
+    }
+
     fun registerTabCallbacks(tab: Tab) {
         when {
             fullscreenCallback != null -> tab.fullscreenCallback = fullscreenCallback
@@ -267,6 +368,15 @@ class WebLayerModel(
 
             override fun onVisibleUriChanged(uri: Uri) {
                 tabList.value?.find { it.id == tab.guid }?.url = tab.currentDisplayUrl
+            }
+
+            override fun showContextMenu(params: ContextMenuParams) {
+                if (tab != browser.activeTab) return
+                val webLayerView: View? = activity.supportFragmentManager.fragments[0].view
+                webLayerView?.setOnCreateContextMenuListener(
+                    ContextMenuCreator(this@WebLayerModel, params, tab)
+                )
+                webLayerView?.showContextMenu()
             }
         }
         tab.registerTabCallback(tabCallback)
@@ -340,18 +450,6 @@ class WebLayerModel(
                 e.printStackTrace()
             }
         }
-    }
-
-    private fun onTabClosed(tab: Tab) {
-        val index = _tabList.value?.indexOf(tab)
-        _tabList.value?.remove(tab)
-        unregisterTabCallbacks(tab)
-        if (browser.activeTab == null && index != null && tabList.value?.isNotEmpty() == true) {
-            val indexToSelect = if (index == 0) 0 else index - 1
-            _tabList.value?.get(indexToSelect)?.let { browser.setActiveTab(it) }
-        }
-
-        _tabList.value = _tabList.value
     }
 
     private fun getDefaultDisplay(): Display {

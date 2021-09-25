@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import android.view.View
 import androidx.lifecycle.*
 import com.neeva.app.appURL
 import kotlinx.coroutines.flow.*
@@ -9,7 +10,7 @@ import kotlin.math.roundToInt
 
 class SelectedTabModel(
     selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
-    private val registerTabCallbacks: (Tab) -> Unit,
+    private val registerNewTab: (Tab, Int) -> Unit,
     private val createTabFor: (Uri) -> Unit,
 ): ViewModel() {
 
@@ -72,7 +73,7 @@ class SelectedTabModel(
 
     private val newTabCallback: NewTabCallback = object : NewTabCallback() {
         override fun onNewTab(newTab: Tab, @NewTabType type: Int) {
-            registerTabCallbacks(newTab)
+            registerNewTab(newTab, type)
         }
     }
 
@@ -130,11 +131,11 @@ class SelectedTabModel(
 @Suppress("UNCHECKED_CAST")
 class SelectedTabModelFactory(
     private val selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
-    private val registerTabCallbacks: (Tab) -> Unit,
+    private val registerNewTab: (Tab, Int) -> Unit,
     private val createTabFor: (Uri) -> Unit
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return SelectedTabModel(selectedTabFlow, registerTabCallbacks, createTabFor) as T
+        return SelectedTabModel(selectedTabFlow, registerNewTab, createTabFor) as T
     }
 }

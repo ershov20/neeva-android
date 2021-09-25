@@ -3,6 +3,7 @@ package com.neeva.app.urlbar
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -46,6 +47,7 @@ fun AutocompleteTextField(
         val autocompleteText = urlBarModel.autocompletedSuggestion.value?.secondaryLabel ?: return@map false
         isEditing && it.text.isNotEmpty() && autocompleteText.isNotEmpty()
                 && autocompleteText.startsWith(it.text) && !lastEditWasDeletion
+                && autocompletedSuggestion!!.secondaryLabel.length != value.text.length
     }.observeAsState(false)
 
     Row(
@@ -53,6 +55,26 @@ fun AutocompleteTextField(
         modifier = Modifier
             .height(40.dp)
             .fillMaxWidth()
+            .clickable(isEditing) {
+                if (showingAutocomplete) {
+                    val completed = autocompletedSuggestion!!.secondaryLabel
+                    urlBarModel.onLocationBarTextChanged(
+                        value.copy(
+                            completed,
+                            TextRange(completed.length, completed.length),
+                            TextRange(completed.length, completed.length)
+                        )
+                    )
+                } else {
+                    urlBarModel.onLocationBarTextChanged(
+                        value.copy(
+                            value.text,
+                            TextRange(value.text.length, value.text.length),
+                            TextRange(value.text.length, value.text.length)
+                        )
+                    )
+                }
+            }
     ) {
         FaviconView(
             getFaviconFor(

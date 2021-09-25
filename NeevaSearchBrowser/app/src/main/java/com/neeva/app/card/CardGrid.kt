@@ -1,28 +1,23 @@
 package com.neeva.app.card
 
 import android.graphics.Bitmap
-import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,6 +35,7 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.widgets.Button
 import com.neeva.app.widgets.FaviconView
 import com.neeva.app.zeroQuery.ZeroQueryViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -47,7 +43,8 @@ fun CardsContainer(
     appNavModel: AppNavModel,
     webLayerModel: WebLayerModel,
     domainViewModel: DomainViewModel,
-    zeroQueryViewModel: ZeroQueryViewModel
+    zeroQueryViewModel: ZeroQueryViewModel,
+    cardViewModel: CardViewModel
 ) {
     val state: AppNavState by appNavModel.state.observeAsState(AppNavState.HIDDEN)
     AnimatedVisibility(
@@ -55,25 +52,29 @@ fun CardsContainer(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        CardList(webLayerModel, domainViewModel, appNavModel, zeroQueryViewModel)
+        CardGrid(webLayerModel, domainViewModel, appNavModel, zeroQueryViewModel, cardViewModel)
     }
 }
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardList(
+fun CardGrid(
     webLayerModel: WebLayerModel,
     domainViewModel: DomainViewModel,
     appNavModel: AppNavModel,
-    zeroQueryViewModel: ZeroQueryViewModel
+    zeroQueryViewModel: ZeroQueryViewModel,
+    cardViewModel: CardViewModel
 ) {
     val tabs: List<BrowserPrimitive> by webLayerModel.tabList.observeAsState(ArrayList())
+    val listState: LazyListState by cardViewModel.listState.observeAsState(LazyListState())
+
     Column(modifier = Modifier
         .fillMaxSize()
         .background(MaterialTheme.colors.background)) {
         LazyVerticalGrid(
             cells = GridCells.Fixed(2),
+            state = listState,
             contentPadding = PaddingValues(20.dp),
             modifier = Modifier
                 .fillMaxWidth()
@@ -81,17 +82,21 @@ fun CardList(
         ) {
             items( tabs
             ) { tab ->
-                TabListRow(
+                TabCard(
                     tab = tab,
                     faviconData = domainViewModel.getFaviconFor(tab.url),
                     onSelect = {
                         webLayerModel.select(tab)
+
                         appNavModel.setContentState(AppNavState.HIDDEN)
                     },
                     onClose = { webLayerModel.close(tab) })
             }
         }
-        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(Color.LightGray))
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .height(1.dp)
+            .background(Color.LightGray))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -111,13 +116,11 @@ fun CardList(
 }
 
 @Composable
-fun TabListRow(
+fun TabCard(
     tab: BrowserPrimitive, faviconData: LiveData<Bitmap>, onSelect: () -> Unit, onClose: () -> Unit
 ) {
-    val thumbnailUri: Uri? by remember { mutableStateOf(tab.thumbnailUri) }
     Column(modifier = Modifier.padding(bottom = 20.dp)) {
         Box(modifier = Modifier
-            .clickable { onSelect() }
             .then(
                 if (tab.isSelected)
                     Modifier.border(
@@ -138,7 +141,9 @@ fun TabListRow(
                 modifier = Modifier
                     .width(156.dp)
                     .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White)
+                    .shadow(2.dp, shape = RoundedCornerShape(12.dp))
+                    .clickable { onSelect() }
             )
             Box(
                 modifier = Modifier

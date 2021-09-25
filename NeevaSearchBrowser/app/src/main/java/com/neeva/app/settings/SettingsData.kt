@@ -25,7 +25,10 @@ object SettingsMainData {
         ),
         SettingsGroupData("About",
             listOf(
-                SettingsRowData("Neeva Browser 0.0.1", SettingsRowType.LABEL),
+                SettingsRowData("Neeva Browser ${
+                    NeevaBrowser.context.packageManager.getPackageInfo(
+                        NeevaBrowser.context.packageName, 0).versionName}",
+                    SettingsRowType.LABEL),
                 SettingsRowData("Terms", SettingsRowType.LINK, Uri.parse(appTermsURL)),
             )
         )
