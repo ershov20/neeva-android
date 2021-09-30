@@ -5,7 +5,7 @@
 package org.chromium.weblayer;
 
 final class WebLayerClientVersionConstants {
-    public static final String PRODUCT_VERSION = "92.0.4515.105";
+    public static final String PRODUCT_VERSION = "94.0.4606.61";
 
-    public static final int PRODUCT_MAJOR_VERSION = 92;
+    public static final int PRODUCT_MAJOR_VERSION = 94;
 }
