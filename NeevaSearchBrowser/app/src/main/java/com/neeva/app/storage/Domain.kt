@@ -5,8 +5,8 @@ import android.net.Uri
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.*
 import androidx.room.*
-import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.browsing.baseDomain
+import com.neeva.app.suggestions.NavSuggestion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -107,9 +107,8 @@ class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
         it.first()
     }
 
-    fun getFaviconFor(uri: Uri?): LiveData<Bitmap> {
-        val url = uri ?: return MutableLiveData(Favicon.defaultFavicon)
-        val domainName = url.baseDomain() ?: return MutableLiveData(Favicon.defaultFavicon)
+    fun getFaviconFor(uri: Uri?): LiveData<Bitmap?> {
+        val domainName = uri?.baseDomain() ?: return MutableLiveData()
         return repository.listen(domainName)
             .mapNotNull { it.largestFavicon?.toBitmap()}.asLiveData()
     }

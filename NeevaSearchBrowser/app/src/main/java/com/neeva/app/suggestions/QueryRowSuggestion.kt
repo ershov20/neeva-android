@@ -1,6 +1,5 @@
 package com.neeva.app.suggestions
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -17,67 +16,33 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
-import com.neeva.app.widgets.FaviconView
-
-
-@Composable
-fun NavSuggestView(faviconData: LiveData<Bitmap>,
-                   onOpenUrl: (Uri) -> Unit,
-                   navSuggestion: NavSuggestion) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clickable { onOpenUrl(navSuggestion.url) }
-            .fillMaxWidth()
-            .height(58.dp)
-            .padding(start = 12.dp)
-    ) {
-        Box(modifier = Modifier.padding(4.dp)) {
-            FaviconView(faviconData)
-        }
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1.0f)
-        ) {
-            Text(
-                text = navSuggestion.label,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onPrimary,
-                maxLines = 1,
-            )
-            Text(
-                text = navSuggestion.secondaryLabel,
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onSecondary,
-                maxLines = 1,
-            )
-        }
-    }
-}
+import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun QueryRowSuggestion(suggestion: QueryRowSuggestion, onLoadUrl: (Uri) -> Unit) {
-    QuerySuggestion(
+    QueryRowSuggestion(
         query = suggestion.query,
         description = suggestion.description,
         imageURL = suggestion.imageURL,
         drawableID = suggestion.drawableID,
         row = true,
-        onClick = { onLoadUrl(suggestion.url)})
+        onClick = { onLoadUrl(suggestion.url) }
+    )
 }
 
 @Composable
-fun QuerySuggestion(query: String,
-                    description: String? = null,
-                    imageURL: String? = null,
-                    drawableID: Int = R.drawable.ic_baseline_search_24,
-                    row: Boolean = false,
-                    onClick: () -> Unit) {
+fun QueryRowSuggestion(
+    query: String,
+    description: String? = null,
+    imageURL: String? = null,
+    drawableID: Int = R.drawable.ic_baseline_search_24,
+    row: Boolean = false,
+    onClick: () -> Unit
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -90,7 +55,9 @@ fun QuerySuggestion(query: String,
                         .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
                         .padding(horizontal = 4.dp)
                 else
-                    Modifier.fillMaxWidth().clickable { onClick() }
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { onClick() }
             )
     ) {
         if (!imageURL.isNullOrEmpty()) {
@@ -111,7 +78,13 @@ fun QuerySuggestion(query: String,
                 imageVector = ImageVector.vectorResource(id = drawableID),
                 contentDescription = "query image",
                 modifier = Modifier
-                    .then(if (row) Modifier.padding(horizontal = 12.dp) else Modifier.padding(start = 8.dp))
+                    .then(
+                        if (row) {
+                            Modifier.padding(horizontal = 12.dp)
+                        } else {
+                            Modifier.padding(start = 8.dp)
+                        }
+                    )
                     .wrapContentHeight(Alignment.CenterVertically),
                 colorFilter = ColorFilter.tint(Color.LightGray)
             )
@@ -136,5 +109,53 @@ fun QuerySuggestion(query: String,
                 )
             }
         }
+    }
+}
+
+@Preview(name = "1x font size")
+@Preview(name = "2x font size", fontScale = 2.0f)
+@Composable
+fun QuerySuggestion_PreviewNoImageUrl() {
+    NeevaTheme {
+        QueryRowSuggestion(
+            query = "search query",
+            description = "Suggestion description",
+            imageURL = null,
+            drawableID = R.drawable.ic_baseline_search_24,
+            row = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "No description, 1x font size")
+@Preview(name = "No description, 2x font size", fontScale = 2.0f)
+@Composable
+fun QuerySuggestion_PreviewNoImageUrlNoDescription() {
+    NeevaTheme {
+        QueryRowSuggestion(
+            query = "search query",
+            description = null,
+            imageURL = null,
+            drawableID = R.drawable.ic_baseline_search_24,
+            row = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(name = "No description, not row, 1x font size")
+@Preview(name = "No description, not row, 2x font size", fontScale = 2.0f)
+@Composable
+fun QuerySuggestion_PreviewNoImageUrlNoDescriptionNotRow() {
+    NeevaTheme {
+        QueryRowSuggestion(
+            query = "search query",
+            description = null,
+            imageURL = null,
+            drawableID = R.drawable.ic_baseline_search_24,
+            row = false,
+            onClick = {}
+        )
     }
 }

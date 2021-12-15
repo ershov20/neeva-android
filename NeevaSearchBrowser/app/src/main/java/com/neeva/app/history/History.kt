@@ -1,5 +1,6 @@
 package com.neeva.app.history
 
+import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInHorizontally
@@ -28,7 +29,6 @@ import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.Visit
-import com.neeva.app.suggestions.NavSuggestView
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.collapsibleHeaderItems
@@ -105,36 +105,33 @@ fun HistoryUI(appNavModel: AppNavModel, historyViewModel: HistoryViewModel, doma
         }
 
         collapsibleHeaderItems("Today", CollapsingState.SHOW_COMPACT, items = historyToday) {
-            NavSuggestView(
-                faviconData = domainViewModel.getFaviconFor(it.first.url),
-                onOpenUrl = { uri ->
-                    appNavModel.onOpenUrl(uri)
-                    appNavModel.setContentState(AppNavState.HIDDEN)
-                },
-                navSuggestion = it.first
-            )
+            NavigationSuggestion(appNavModel, domainViewModel, it.first)
         }
 
         collapsibleHeaderItems("Yesterday", CollapsingState.SHOW_COMPACT, items = historyYesterday) {
-            NavSuggestView(
-                faviconData = domainViewModel.getFaviconFor(it.first.url),
-                onOpenUrl = { uri ->
-                    appNavModel.onOpenUrl(uri)
-                    appNavModel.setContentState(AppNavState.HIDDEN)
-                },
-                navSuggestion = it.first
-            )
+            NavigationSuggestion(appNavModel, domainViewModel, it.first)
         }
 
         collapsibleHeaderItems("This Week", CollapsingState.SHOW_COMPACT, items = historyThisWeek) {
-            NavSuggestView(
-                faviconData = domainViewModel.getFaviconFor(it.first.url),
-                onOpenUrl = { uri ->
-                    appNavModel.onOpenUrl(uri)
-                    appNavModel.setContentState(AppNavState.HIDDEN)
-                },
-                navSuggestion = it.first
-            )
+            NavigationSuggestion(appNavModel, domainViewModel, it.first)
         }
     }
+}
+
+@Composable
+fun NavigationSuggestion(
+    appNavModel: AppNavModel,
+    domainViewModel: DomainViewModel,
+    navSuggestion: NavSuggestion
+) {
+    val bitmap: Bitmap? by domainViewModel.getFaviconFor(navSuggestion.url).observeAsState()
+
+    NavSuggestion(
+        faviconData = bitmap,
+        onOpenUrl = { uri ->
+            appNavModel.onOpenUrl(uri)
+            appNavModel.setContentState(AppNavState.HIDDEN)
+        },
+        navSuggestion = navSuggestion
+    )
 }

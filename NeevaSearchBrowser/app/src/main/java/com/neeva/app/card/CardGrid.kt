@@ -32,6 +32,7 @@ import com.neeva.app.R
 import com.neeva.app.browsing.BrowserPrimitive
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.storage.Favicon
 import com.neeva.app.widgets.Button
 import com.neeva.app.widgets.FaviconView
 import com.neeva.app.zeroQuery.ZeroQueryViewModel
@@ -82,9 +83,11 @@ fun CardGrid(
         ) {
             items( tabs
             ) { tab ->
+                val favicon: Bitmap? by domainViewModel.getFaviconFor(tab.url).observeAsState()
+
                 TabCard(
                     tab = tab,
-                    faviconData = domainViewModel.getFaviconFor(tab.url),
+                    faviconData = favicon,
                     onSelect = {
                         webLayerModel.select(tab)
 
@@ -117,7 +120,10 @@ fun CardGrid(
 
 @Composable
 fun TabCard(
-    tab: BrowserPrimitive, faviconData: LiveData<Bitmap>, onSelect: () -> Unit, onClose: () -> Unit
+    tab: BrowserPrimitive,
+    faviconData: Bitmap?,
+    onSelect: () -> Unit,
+    onClose: () -> Unit
 ) {
     Column(modifier = Modifier.padding(bottom = 20.dp)) {
         Box(modifier = Modifier

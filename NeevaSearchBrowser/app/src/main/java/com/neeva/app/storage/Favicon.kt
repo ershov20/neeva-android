@@ -14,8 +14,9 @@ data class Favicon(
     val height: Int,
 ) {
     companion object {
-        val defaultFavicon: Bitmap = BitmapFactory.decodeResource(
-            NeevaBrowser.context.resources, R.drawable.globe)
+        val defaultFavicon: Bitmap by lazy {
+            BitmapFactory.decodeResource(NeevaBrowser.context.resources, R.drawable.globe)
+        }
     }
 }
 

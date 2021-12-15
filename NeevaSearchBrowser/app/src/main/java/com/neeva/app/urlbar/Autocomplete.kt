@@ -40,7 +40,7 @@ import com.neeva.app.widgets.FaviconView
 
 @Composable
 fun AutocompleteTextField(
-    urlBarModel: URLBarModel, getFaviconFor: (Uri) -> LiveData<Bitmap>
+    urlBarModel: URLBarModel, getFaviconFor: (Uri) -> LiveData<Bitmap?>
 ) {
     val autocompletedSuggestion by urlBarModel.autocompletedSuggestion.observeAsState(null)
     val value: TextFieldValue by urlBarModel.text.observeAsState(TextFieldValue("", TextRange.Zero))
@@ -85,15 +85,15 @@ fun AutocompleteTextField(
                 }
             }
     ) {
-        FaviconView(
-            getFaviconFor(
-                autocompletedSuggestion?.url ?: Uri.parse(value.text) ?: Uri.parse(appURL)),
-            bordered = false)
+        val url = autocompletedSuggestion?.url ?: Uri.parse(value.text) ?: Uri.parse(appURL)
+        val bitmap: Bitmap? by getFaviconFor(url).observeAsState()
+        FaviconView(bitmap = bitmap, bordered = false)
+
         BasicTextField(
             value,
             onValueChange = { inside: TextFieldValue ->
                 lastEditWasDeletion = inside.text.length < value.text.length
-                urlBarModel.onLocationBarTextChanged(inside, )
+                urlBarModel.onLocationBarTextChanged(inside)
             },
             modifier = Modifier
                 .padding(start = 8.dp)
