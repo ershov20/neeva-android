@@ -198,10 +198,18 @@ class NeevaActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (selectedTabModel.canGoBack.value == true) {
-            selectedTabModel.goBack()
-        } else {
-            super.onBackPressed()
+        when {
+            appNavModel.state.value != null && appNavModel.state.value != AppNavState.HIDDEN -> {
+                appNavModel.setContentState(AppNavState.HIDDEN)
+            }
+
+            selectedTabModel.canGoBack.value == true -> {
+                selectedTabModel.goBack()
+            }
+
+            else -> {
+                super.onBackPressed()
+            }
         }
     }
 
