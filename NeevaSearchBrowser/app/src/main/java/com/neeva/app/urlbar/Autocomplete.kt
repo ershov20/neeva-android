@@ -18,6 +18,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -49,6 +52,12 @@ fun AutocompleteTextField(
                 && autocompleteText.startsWith(it.text) && !lastEditWasDeletion
                 && autocompletedSuggestion!!.secondaryLabel.length != value.text.length
     }.observeAsState(false)
+
+    val onGoLambda = {
+        urlBarModel.onGo(
+            autocompletedSuggestion?.url ?: Uri.parse(value.text) ?: value.text.toSearchUri()
+        )
+    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -92,28 +101,40 @@ fun AutocompleteTextField(
                 .width(IntrinsicSize.Min)
                 .adjustIntrinsicWidth()
                 .onFocusChanged(urlBarModel::onFocusChanged)
-                .focusRequester(urlBarModel.focusRequester),
+                .focusRequester(urlBarModel.focusRequester)
+                .onPreviewKeyEvent {
+                    if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
+                        // If we're seeing a hardware enter key, intercept it to prevent adding a newline to the URL.
+                        onGoLambda.invoke()
+                        true
+                    } else {
+                        false
+                    }
+                },
             singleLine = true,
             textStyle = TextStyle(
-                color = if (value.text.isEmpty()) MaterialTheme.colors.onSecondary
-                else MaterialTheme.colors.onPrimary,
+                color = if (value.text.isEmpty()) {
+                    MaterialTheme.colors.onSecondary
+                } else {
+                    MaterialTheme.colors.onPrimary
+                },
                 fontSize = MaterialTheme.typography.body1.fontSize
             ),
             keyboardOptions = KeyboardOptions (
                 imeAction = ImeAction.Go,
             ),
             keyboardActions = KeyboardActions (
-                onGo = { urlBarModel.onGo(autocompletedSuggestion?.url ?:
-                Uri.parse(value.text) ?: value.text.toSearchUri()) },
+                onGo = { onGoLambda.invoke() },
             ),
             cursorBrush = SolidColor(if (showingAutocomplete) Color.Unspecified else Color.Black),
         )
         Text(
             text = if (showingAutocomplete) {
                 autocompletedSuggestion!!.secondaryLabel.substring(value.text.length)
-            } else "",
-            modifier = Modifier
-                .background(Color(R.color.selection_highlight)),
+            } else {
+                ""
+            },
+            modifier = Modifier.background(Color(R.color.selection_highlight)),
             style = MaterialTheme.typography.body1,
             maxLines = 1,
             color = MaterialTheme.colors.onPrimary,
