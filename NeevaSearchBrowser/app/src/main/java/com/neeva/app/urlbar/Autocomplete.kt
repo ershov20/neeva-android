@@ -2,6 +2,7 @@ package com.neeva.app.urlbar
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Patterns
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,8 +19,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.text.TextRange
@@ -55,7 +54,27 @@ fun AutocompleteTextField(
 
     val onGoLambda = {
         urlBarModel.onGo(
-            autocompletedSuggestion?.url ?: Uri.parse(value.text) ?: value.text.toSearchUri()
+            when {
+                autocompletedSuggestion?.url != null -> {
+                    autocompletedSuggestion!!.url
+                }
+
+                // Try to figure out if the user typed in a query or a URL.
+                // TODO(dan.alcantara): This won't always work, especially if the site doesn't have
+                //                      an https equivalent.  We should either figure out something
+                //                      more robust or do what iOS does (for consistency).
+                Patterns.WEB_URL.matcher(value.text).matches() -> {
+                    var uri = Uri.parse(value.text)
+                    if (uri.scheme.isNullOrEmpty()) {
+                        uri = uri.buildUpon().scheme("https").build()
+                    }
+                    uri
+                }
+
+                else -> {
+                    value.text.toSearchUri()
+                }
+            }
         )
     }
 
