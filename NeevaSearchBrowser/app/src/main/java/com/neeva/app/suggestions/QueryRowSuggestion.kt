@@ -2,7 +2,6 @@ package com.neeva.app.suggestions
 
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,10 +27,8 @@ fun QueryRowSuggestion(suggestion: QueryRowSuggestion, onLoadUrl: (Uri) -> Unit)
         query = suggestion.query,
         description = suggestion.description,
         imageURL = suggestion.imageURL,
-        drawableID = suggestion.drawableID,
-        row = true,
-        onClick = { onLoadUrl(suggestion.url) }
-    )
+        drawableID = suggestion.drawableID
+    ) { onLoadUrl(suggestion.url) }
 }
 
 @Composable
@@ -40,75 +37,74 @@ fun QueryRowSuggestion(
     description: String? = null,
     imageURL: String? = null,
     drawableID: Int = R.drawable.ic_baseline_search_24,
-    row: Boolean = false,
     onClick: () -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Box(
         modifier = Modifier
-            .then(
-                if (!row)
-                    Modifier
-                        .padding(8.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .clickable { onClick() }
-                        .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
-                        .padding(horizontal = 4.dp)
-                else
-                    Modifier
-                        .fillMaxWidth()
-                        .clickable { onClick() }
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(
+                horizontal = 12.dp,
+                vertical = 8.dp
             )
     ) {
-        if (!imageURL.isNullOrEmpty()) {
-            Image(
-                painter = rememberImagePainter(
-                    data = imageURL,
-                    builder = {
-                        crossfade(true)
-                    }),
-                contentDescription = "query image",
-                modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(4.dp))
-            )
-        } else {
-            Image(
-                imageVector = ImageVector.vectorResource(id = drawableID),
-                contentDescription = "query image",
-                modifier = Modifier
-                    .then(
-                        if (row) {
-                            Modifier.padding(horizontal = 12.dp)
-                        } else {
-                            Modifier.padding(start = 8.dp)
-                        }
-                    )
-                    .wrapContentHeight(Alignment.CenterVertically),
-                colorFilter = ColorFilter.tint(Color.LightGray)
-            )
-        }
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .padding(vertical = 12.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(start = 8.dp)
         ) {
-            Text(
-                text = query,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onPrimary,
-                maxLines = 1,
-            )
-            if (!description.isNullOrEmpty()) {
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSecondary,
-                    maxLines = 1,
+            val iconModifier = Modifier.size(20.dp)
+
+            if (!imageURL.isNullOrEmpty()) {
+                Image(
+                    painter = rememberImagePainter(
+                        data = imageURL,
+                        builder = { crossfade(true) }
+                    ),
+                    contentDescription = null,
+                    modifier = iconModifier.clip(RoundedCornerShape(4.dp))
+                )
+            } else {
+                Image(
+                    imageVector = ImageVector.vectorResource(id = drawableID),
+                    contentDescription = null,
+                    modifier = iconModifier,
+                    colorFilter = ColorFilter.tint(Color.LightGray)
                 )
             }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column(modifier = Modifier.weight(1.0f)) {
+                Text(
+                    text = query,
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onPrimary,
+                    maxLines = 1,
+                )
+                if (!description.isNullOrEmpty()) {
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onSecondary,
+                        maxLines = 1,
+                    )
+                }
+            }
         }
+    }
+}
+
+@Preview(name = "Image URL non-null, 1x font size")
+@Preview(name = "Image URL non-null, 2x font size", fontScale = 2.0f)
+@Composable
+fun QuerySuggestion_PreviewWithImageUrl() {
+    NeevaTheme {
+        QueryRowSuggestion(
+            query = "search query",
+            description = "Suggestion description",
+            imageURL = "https://www.neeva.com/favicon.png",
+            drawableID = R.drawable.ic_baseline_search_24
+        ) {}
     }
 }
 
@@ -121,10 +117,8 @@ fun QuerySuggestion_PreviewNoImageUrl() {
             query = "search query",
             description = "Suggestion description",
             imageURL = null,
-            drawableID = R.drawable.ic_baseline_search_24,
-            row = true,
-            onClick = {}
-        )
+            drawableID = R.drawable.ic_baseline_search_24
+        ) {}
     }
 }
 
@@ -137,25 +131,7 @@ fun QuerySuggestion_PreviewNoImageUrlNoDescription() {
             query = "search query",
             description = null,
             imageURL = null,
-            drawableID = R.drawable.ic_baseline_search_24,
-            row = true,
-            onClick = {}
-        )
-    }
-}
-
-@Preview(name = "No description, not row, 1x font size")
-@Preview(name = "No description, not row, 2x font size", fontScale = 2.0f)
-@Composable
-fun QuerySuggestion_PreviewNoImageUrlNoDescriptionNotRow() {
-    NeevaTheme {
-        QueryRowSuggestion(
-            query = "search query",
-            description = null,
-            imageURL = null,
-            drawableID = R.drawable.ic_baseline_search_24,
-            row = false,
-            onClick = {}
-        )
+            drawableID = R.drawable.ic_baseline_search_24
+        ) {}
     }
 }

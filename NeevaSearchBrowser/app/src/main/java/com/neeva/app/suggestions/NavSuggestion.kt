@@ -20,34 +20,37 @@ fun NavSuggestion(
     onOpenUrl: (Uri) -> Unit,
     navSuggestion: NavSuggestion
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Box(
         modifier = Modifier
-            .clickable { onOpenUrl(navSuggestion.url) }
             .fillMaxWidth()
-            .height(58.dp)
-            .padding(start = 12.dp)
+            .clickable { onOpenUrl(navSuggestion.url) }
+            .padding(
+                horizontal = 12.dp,
+                vertical = 10.dp
+            )
     ) {
-        Box(modifier = Modifier.padding(4.dp)) {
-            FaviconView(faviconData)
-        }
-        Column(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1.0f)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(start = 8.dp)
         ) {
-            Text(
-                text = navSuggestion.label,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onPrimary,
-                maxLines = 1,
-            )
-            Text(
-                text = navSuggestion.secondaryLabel,
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onSecondary,
-                maxLines = 1,
-            )
+            FaviconView(faviconData)
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            Column(modifier = Modifier.weight(1.0f)) {
+                Text(
+                    text = navSuggestion.label,
+                    style = MaterialTheme.typography.body1,
+                    color = MaterialTheme.colors.onPrimary,
+                    maxLines = 1,
+                )
+                Text(
+                    text = navSuggestion.secondaryLabel,
+                    style = MaterialTheme.typography.body2,
+                    color = MaterialTheme.colors.onSecondary,
+                    maxLines = 1,
+                )
+            }
         }
     }
 }
