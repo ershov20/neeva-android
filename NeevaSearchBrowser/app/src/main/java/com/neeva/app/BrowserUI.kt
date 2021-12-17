@@ -1,7 +1,10 @@
 package com.neeva.app
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -10,21 +13,20 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.suggestions.SuggestionList
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.browsing.SelectedTabModel
-import com.neeva.app.zeroQuery.ZeroQueryViewModel
 
 @Composable
-fun BrowserUI(urlBarModel: URLBarModel,
-              suggestionsViewModel: SuggestionsViewModel,
-              selectedTabModel: SelectedTabModel,
-              domainViewModel: DomainViewModel,
-              historyViewModel: HistoryViewModel,
-              zeroQueryViewModel: ZeroQueryViewModel
+fun BrowserUI(
+    urlBarModel: URLBarModel,
+    suggestionsViewModel: SuggestionsViewModel,
+    selectedTabModel: SelectedTabModel,
+    domainViewModel: DomainViewModel,
+    historyViewModel: HistoryViewModel
 ) {
     val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
     val progress: Int by selectedTabModel.progress.observeAsState(0)
@@ -45,7 +47,7 @@ fun BrowserUI(urlBarModel: URLBarModel,
         if (isEditing != false) {
             Box(modifier = Modifier.weight(1.0f)) {
                 SuggestionList(suggestionsViewModel, urlBarModel, selectedTabModel,
-                    domainViewModel, historyViewModel, zeroQueryViewModel)
+                    domainViewModel, historyViewModel)
             }
         }
     }

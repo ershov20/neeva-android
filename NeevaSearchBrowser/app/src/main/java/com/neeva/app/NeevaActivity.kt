@@ -13,6 +13,12 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import com.apollographql.apollo.coroutines.await
+import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.SelectedTabModelFactory
+import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.browsing.WebViewModelFactory
+import com.neeva.app.card.CardViewModel
+import com.neeva.app.card.CardViewModelFactory
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.history.HistoryViewModelFactory
 import com.neeva.app.neeva_menu.NeevaMenuData
@@ -22,18 +28,16 @@ import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
-import com.neeva.app.browsing.SelectedTabModel
-import com.neeva.app.browsing.SelectedTabModelFactory
-import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.browsing.WebViewModelFactory
-import com.neeva.app.card.CardViewModel
-import com.neeva.app.card.CardViewModelFactory
-import com.neeva.app.zeroQuery.ZeroQueryModelFactory
-import com.neeva.app.zeroQuery.ZeroQueryViewModel
 import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
 
 class NeevaActivity : AppCompatActivity() {
+    companion object {
+        private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
+        private const val PERSISTENCE_ID = "Neeva_Browser"
+        private const val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
+    }
+
     private val domainsViewModel by viewModels<DomainViewModel> {
         DomainViewModelFactory(DomainRepository(History.db.fromDomains()))
     }
@@ -51,18 +55,11 @@ class NeevaActivity : AppCompatActivity() {
     }
 
     private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(selectedTabModel) }
-    private val zeroQueryViewModel by viewModels<ZeroQueryViewModel> {
-        ZeroQueryModelFactory(urlBarModel)
-    }
     private val cardViewModel by viewModels<CardViewModel> {
         CardViewModelFactory(webModel.tabList)
     }
 
     private val appNavModel by viewModels<AppNavModel>()
-
-    private val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
-    private val PERSISTENCE_ID = "Neeva_Browser"
-    private val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
 
     private lateinit var bottomControls: View
 
@@ -74,7 +71,7 @@ class NeevaActivity : AppCompatActivity() {
             NeevaTheme {
                 Surface(color = MaterialTheme.colors.background) {
                     BrowserUI(urlBarModel, suggestionsModel,
-                        selectedTabModel, domainsViewModel, historyViewModel, zeroQueryViewModel)
+                        selectedTabModel, domainsViewModel, historyViewModel)
                 }
             }
         }
@@ -92,7 +89,7 @@ class NeevaActivity : AppCompatActivity() {
                 Surface(color = Color.Transparent) {
                     AppNav(
                         appNavModel, selectedTabModel, historyViewModel,
-                        domainsViewModel, webModel, zeroQueryViewModel, cardViewModel
+                        domainsViewModel, webModel, urlBarModel, cardViewModel
                     )
                 }
             }

@@ -53,7 +53,7 @@ fun AutocompleteTextField(
     }.observeAsState(false)
 
     val onGoLambda = {
-        urlBarModel.onGo(
+        urlBarModel.loadUrl(
             when {
                 autocompletedSuggestion?.url != null -> {
                     autocompletedSuggestion!!.url

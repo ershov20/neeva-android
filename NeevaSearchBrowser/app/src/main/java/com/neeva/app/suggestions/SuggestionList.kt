@@ -15,14 +15,12 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.map
 import com.neeva.app.R
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.zeroQuery.ZeroQuery
-import com.neeva.app.zeroQuery.ZeroQueryViewModel
 
 @Composable
 fun SuggestionList(
@@ -30,20 +28,15 @@ fun SuggestionList(
     urlBarModel: URLBarModel,
     selectedTabModel: SelectedTabModel,
     domainViewModel: DomainViewModel,
-    historyViewModel: HistoryViewModel,
-    zeroQueryViewModel: ZeroQueryViewModel
+    historyViewModel: HistoryViewModel
 ) {
     val topSuggestion by suggestionsViewModel.topSuggestion.observeAsState()
     val queryRowSuggestions by suggestionsViewModel.queryRowSuggestions.observeAsState(emptyList())
     val navSuggestions by suggestionsViewModel.navSuggestions.observeAsState(emptyList())
     val domainSuggestions by domainViewModel.domainsSuggestions.observeAsState(emptyList())
     val showSuggestionList by suggestionsViewModel.shouldShowSuggestions.observeAsState(false)
-    val currentURL: Uri? by selectedTabModel.currentUrl.observeAsState()
-    val loadUrl: (Uri) -> Unit by zeroQueryViewModel.isLazyTab
-        .map { isLazyTab ->
-            { uri: Uri -> selectedTabModel.loadUrl(uri, isLazyTab) }
-        }
-        .observeAsState { uri:Uri -> selectedTabModel.loadUrl(uri) }
+    val currentURL: Uri by selectedTabModel.currentUrl.observeAsState(Uri.EMPTY)
+    val isLazyTab: Boolean by urlBarModel.isLazyTab.observeAsState(false)
 
     if (showSuggestionList) {
         val urlSuggestions = navSuggestions + domainSuggestions
@@ -72,7 +65,7 @@ fun SuggestionList(
                 item {
                     QueryRowSuggestion(
                         suggestion = queryRowSuggestion,
-                        onLoadUrl = loadUrl,
+                        onLoadUrl = urlBarModel::loadUrl,
                         onEditUrl = { updateUrlBarContents(urlBarModel, queryRowSuggestion.query) }
                     )
                 }
@@ -84,7 +77,7 @@ fun SuggestionList(
                     val bitmap: Bitmap? by domainViewModel.getFaviconFor(it.url).observeAsState()
                     NavSuggestion(
                         faviconData = bitmap,
-                        onOpenUrl = loadUrl,
+                        onOpenUrl = urlBarModel::loadUrl,
                         navSuggestion = it
                     )
                 }
@@ -109,7 +102,7 @@ fun SuggestionList(
                     val bitmap: Bitmap? by domainViewModel.getFaviconFor(it.url).observeAsState()
                     NavSuggestion(
                         faviconData = bitmap,
-                        onOpenUrl = loadUrl,
+                        onOpenUrl = urlBarModel::loadUrl,
                         navSuggestion = it
                     )
                 }
@@ -117,15 +110,19 @@ fun SuggestionList(
         }
     } else {
         ZeroQuery(
-            selectedTabModel = selectedTabModel,
-            historyViewModel = historyViewModel,
-            zeroQueryViewModel = zeroQueryViewModel
+            urlBarModel = urlBarModel,
+            historyViewModel = historyViewModel
         ) {
-            CurrentPageRow(
-                domainViewModel = domainViewModel,
-                url = currentURL!!
-            ) {
-                updateUrlBarContents(urlBarModel, currentURL?.toString() ?: return@CurrentPageRow)
+            if (!isLazyTab) {
+                CurrentPageRow(
+                    domainViewModel = domainViewModel,
+                    url = currentURL
+                ) {
+                    updateUrlBarContents(
+                        urlBarModel,
+                        currentURL.toString() ?: return@CurrentPageRow
+                    )
+                }
             }
         }
     }

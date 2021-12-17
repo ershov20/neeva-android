@@ -24,13 +24,36 @@ class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {
 
     lateinit var autocompletedSuggestion: LiveData<NavSuggestion?>
 
+    private var _isLazyTab = MutableLiveData(false)
+    val isLazyTab: LiveData<Boolean> = _isLazyTab
+
     val focusRequester = FocusRequester()
 
-    val onGo = { url: Uri -> selectedTabModel.loadUrl(url) }
     val onReload = selectedTabModel::reload
+
+    init {
+        // TODO(dan.alcantara): Rethink how lazy tab opening works.
+        isEditing.observeForever {
+            _isLazyTab.value = _isLazyTab.value == true && it
+        }
+    }
+
+    /**
+     * Prepare to open a new tab.  This mechanism doesn't create a new tab until the user actually
+     * navigates somewhere or performs a query.
+     */
+    fun openLazyTab() {
+        onCurrentUrlChanged("")
+        onRequestFocus()
+        _isLazyTab.value = true
+    }
 
     fun onLocationBarTextChanged(newValue: TextFieldValue) {
         if (isEditing.value == true) _text.value = newValue
+    }
+
+    fun loadUrl(url: Uri) {
+        selectedTabModel.loadUrl(url, _isLazyTab.value == true)
     }
 
     fun onCurrentUrlChanged(newUrl: String) {

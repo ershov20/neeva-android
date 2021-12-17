@@ -12,7 +12,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,13 +23,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
 import com.neeva.app.appURL
+import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.baseDomain
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.history.toSearchSuggest
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.QueryRowSuggestion
-import com.neeva.app.browsing.SelectedTabModel
-import com.neeva.app.browsing.baseDomain
+import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
@@ -36,8 +38,7 @@ import java.util.*
 
 @Composable
 fun ZeroQuery(
-    zeroQueryViewModel: ZeroQueryViewModel,
-    selectedTabModel: SelectedTabModel,
+    urlBarModel: URLBarModel,
     historyViewModel: HistoryViewModel,
     topContent: @Composable() (LazyItemScope.() -> Unit) = {},
 ) {
@@ -47,11 +48,8 @@ fun ZeroQuery(
     }.observeAsState(emptyList())
     val suggestedSites: List<Site> by historyViewModel.frequentSites.map { sites ->
         sites.filterNot { it.siteURL.contains(appURL) } }.observeAsState(emptyList())
-    val loadUrl: (Uri) -> Unit by zeroQueryViewModel.isLazyTab.map { isLazyTab ->
-            { uri:Uri -> selectedTabModel.loadUrl(uri, isLazyTab)}
-        }.observeAsState { }
 
-    LazyColumn() {
+    LazyColumn {
         item {
             topContent()
         }
@@ -71,9 +69,7 @@ fun ZeroQuery(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .padding(horizontal = 8.dp)
-                                .clickable {
-                                    loadUrl(Uri.parse(site.siteURL))
-                                }
+                                .clickable { urlBarModel.loadUrl(Uri.parse(site.siteURL)) }
                         ) {
                             Image(
                                 bitmap = bitmap.asImageBitmap(),
@@ -106,7 +102,7 @@ fun ZeroQuery(
             ) { search ->
                 QueryRowSuggestion(
                     suggestion = search,
-                    onLoadUrl = loadUrl,
+                    onLoadUrl = urlBarModel::loadUrl,
                     onEditUrl = null
                 )
             }
@@ -119,7 +115,7 @@ fun ZeroQuery(
                 items = spaces.subList(0, minOf(3, spaces.size)),
             ) { space ->
                 SpaceRow(space = space) {
-                    loadUrl(space.url)
+                    urlBarModel.loadUrl(space.url)
                 }
             }
         }

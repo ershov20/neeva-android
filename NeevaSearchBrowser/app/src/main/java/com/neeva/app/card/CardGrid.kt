@@ -7,12 +7,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,9 +35,9 @@ import com.neeva.app.R
 import com.neeva.app.browsing.BrowserPrimitive
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.Button
 import com.neeva.app.widgets.FaviconView
-import com.neeva.app.zeroQuery.ZeroQueryViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -41,7 +45,7 @@ fun CardsContainer(
     appNavModel: AppNavModel,
     webLayerModel: WebLayerModel,
     domainViewModel: DomainViewModel,
-    zeroQueryViewModel: ZeroQueryViewModel,
+    urlBarModel: URLBarModel,
     cardViewModel: CardViewModel
 ) {
     val state: AppNavState by appNavModel.state.observeAsState(AppNavState.HIDDEN)
@@ -50,7 +54,7 @@ fun CardsContainer(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        CardGrid(webLayerModel, domainViewModel, appNavModel, zeroQueryViewModel, cardViewModel)
+        CardGrid(webLayerModel, domainViewModel, appNavModel, urlBarModel, cardViewModel)
     }
 }
 
@@ -61,7 +65,7 @@ fun CardGrid(
     webLayerModel: WebLayerModel,
     domainViewModel: DomainViewModel,
     appNavModel: AppNavModel,
-    zeroQueryViewModel: ZeroQueryViewModel,
+    urlBarModel: URLBarModel,
     cardViewModel: CardViewModel
 ) {
     val tabs: List<BrowserPrimitive> by webLayerModel.tabList.observeAsState(ArrayList())
@@ -78,8 +82,7 @@ fun CardGrid(
                 .fillMaxWidth()
                 .weight(1f)
         ) {
-            items( tabs
-            ) { tab ->
+            items(tabs) { tab ->
                 val favicon: Bitmap? by domainViewModel.getFaviconFor(tab.url).observeAsState()
 
                 TabCard(
@@ -104,7 +107,7 @@ fun CardGrid(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(enabled = true, resID = R.drawable.ic_baseline_add_24, contentDescription = "New Tab") {
-                zeroQueryViewModel.openLazyTab()
+                urlBarModel.openLazyTab()
                 appNavModel.setContentState(AppNavState.HIDDEN)
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -144,7 +147,6 @@ fun TabCard(
                 modifier = Modifier
                     .width(156.dp)
                     .height(200.dp)
-                    .background(Color.White)
                     .shadow(2.dp, shape = RoundedCornerShape(12.dp))
                     .clickable { onSelect() }
             )

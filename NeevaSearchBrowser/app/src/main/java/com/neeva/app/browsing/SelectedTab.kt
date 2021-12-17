@@ -14,7 +14,7 @@ class SelectedTabModel(
     private val createTabFor: (Uri) -> Unit,
 ): ViewModel() {
 
-    private val _currentUrl = MutableLiveData(Uri.parse(appURL)!!)
+    private val _currentUrl = MutableLiveData(Uri.parse(appURL))
     val currentUrl: LiveData<Uri> = _currentUrl
 
     private val _currentTitle = MutableLiveData("")
