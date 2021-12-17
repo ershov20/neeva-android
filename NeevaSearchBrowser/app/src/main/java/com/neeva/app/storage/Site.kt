@@ -125,13 +125,18 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
     @Transaction
     suspend fun insert(url: Uri, title: String? = null, favicon: Favicon? = null, visit: Visit? = null) {
         var site = sitesAccessor.find(url.toString())
-        if (site !=  null) {
+        if (site != null) {
             val metadata = site.metadata?.copy(title = title) ?: SiteMetadata(title = title)
             val largest = if (site.largestFavicon != null)
                 site.largestFavicon!! larger favicon else favicon
-            sitesAccessor.update(site.copy(metadata = metadata, largestFavicon = largest,
-                visitCount = if (visit != null) site.visitCount + 1 else site.visitCount,
-                lastVisitTimestamp = visit?.timestamp ?: site.lastVisitTimestamp))
+            sitesAccessor.update(
+                site.copy(
+                    metadata = metadata,
+                    largestFavicon = largest,
+                    visitCount = if (visit != null) site.visitCount + 1 else site.visitCount,
+                    lastVisitTimestamp = visit?.timestamp ?: site.lastVisitTimestamp
+                )
+            )
         } else {
             site = Site(
                 siteURL = url.toString(),

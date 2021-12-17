@@ -70,7 +70,11 @@ fun SuggestionList(
 
             queryRowSuggestions.forEachIndexed { index, queryRowSuggestion ->
                 item {
-                    QueryRowSuggestion(suggestion = queryRowSuggestion, onLoadUrl = loadUrl)
+                    QueryRowSuggestion(
+                        suggestion = queryRowSuggestion,
+                        onLoadUrl = loadUrl,
+                        onEditUrl = { updateUrlBarContents(urlBarModel, queryRowSuggestion.query) }
+                    )
                 }
 
                 items(
@@ -121,17 +125,20 @@ fun SuggestionList(
                 domainViewModel = domainViewModel,
                 url = currentURL!!
             ) {
-                urlBarModel.onRequestFocus()
-                val currentURLText = currentURL?.toString() ?: return@CurrentPageRow
-                urlBarModel.onLocationBarTextChanged(
-                    urlBarModel.text.value!!.copy(
-                        currentURLText,
-                        TextRange(currentURLText.length, currentURLText.length)
-                    )
-                )
+                updateUrlBarContents(urlBarModel, currentURL?.toString() ?: return@CurrentPageRow)
             }
         }
     }
+}
+
+private fun updateUrlBarContents(urlBarModel: URLBarModel, newContents: String) {
+    urlBarModel.onRequestFocus()
+    urlBarModel.onLocationBarTextChanged(
+        urlBarModel.text.value!!.copy(
+            newContents,
+            TextRange(newContents.length, newContents.length)
+        )
+    )
 }
 
 @Composable

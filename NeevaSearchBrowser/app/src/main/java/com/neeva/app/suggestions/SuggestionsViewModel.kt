@@ -60,7 +60,6 @@ class SuggestionsViewModel: ViewModel() {
 
         _queryRowSuggestions.value = suggestionResults.querySuggestion
             .map { it.toQueryRowSuggestion() }
-            .subList(0, min(suggestionResults.querySuggestion.size, 3))
 
         _shouldShowSuggestions.value = !suggestionResponse?.urlSuggestion.isNullOrEmpty()
                 || !suggestionResponse?.querySuggestion.isNullOrEmpty()

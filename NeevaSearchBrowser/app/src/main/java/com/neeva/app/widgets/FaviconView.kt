@@ -21,9 +21,13 @@ import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun FaviconView(bitmap: Bitmap?, bordered: Boolean = true) {
+fun FaviconView(
+    bitmap: Bitmap?,
+    modifier: Modifier = Modifier,
+    bordered: Boolean = true
+) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(20.dp)
             .then(
                 if (bordered) {

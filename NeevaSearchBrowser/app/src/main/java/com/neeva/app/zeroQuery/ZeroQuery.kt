@@ -98,14 +98,17 @@ fun ZeroQuery(
             }
         }
 
-
         if (suggestedQueries.isNotEmpty()) {
             collapsibleHeaderItems(
                 label = "Searches",
                 startingState = CollapsingState.SHOW_COMPACT,
                 items = suggestedQueries,
             ) { search ->
-                QueryRowSuggestion(suggestion = search, onLoadUrl = loadUrl)
+                QueryRowSuggestion(
+                    suggestion = search,
+                    onLoadUrl = loadUrl,
+                    onEditUrl = null
+                )
             }
         }
 

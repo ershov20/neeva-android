@@ -24,7 +24,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
 import coil.compose.rememberImagePainter
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
@@ -32,11 +31,9 @@ import com.neeva.app.R
 import com.neeva.app.browsing.BrowserPrimitive
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.storage.DomainViewModel
-import com.neeva.app.storage.Favicon
 import com.neeva.app.widgets.Button
 import com.neeva.app.widgets.FaviconView
 import com.neeva.app.zeroQuery.ZeroQueryViewModel
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
