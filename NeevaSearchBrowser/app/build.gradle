@@ -50,11 +50,16 @@ android {
 
 dependencies {
     implementation project(path: ':weblayer')
-    def lifecycle_version = "2.3.1"
 
-    implementation 'androidx.core:core-ktx:1.6.0'
+    // https://github.com/neevaco/neeva-android/issues/54:
+    // Pulling this dependency in allows us to define the constant @integer/google_play_services_version
+    // in our Android Manifest.  We use the GMS version that matches the value we used when building
+    // the WebLayerSupport APK, which was version 17.0.0.
+    implementation "com.google.android.gms:play-services-base:$play_services_version"
+
+    implementation 'androidx.activity:activity-compose:1.3.1'
     implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'com.google.android.material:material:1.4.0'
+    implementation 'androidx.core:core-ktx:1.6.0'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
@@ -62,21 +67,21 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-    implementation 'androidx.activity:activity-compose:1.3.1'
+    implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
     implementation 'com.apollographql.apollo:apollo-runtime:2.5.5'
     implementation 'com.apollographql.apollo:apollo-coroutines-support:2.5.5'
-    implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
-    implementation("io.coil-kt:coil-compose:1.3.0")
+    implementation 'com.google.android.material:material:1.4.0'
+    implementation "io.coil-kt:coil-compose:1.3.0"
+
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 
     // Room
-    def room_version = "2.3.0"
-    implementation("androidx.room:room-runtime:$room_version")
+    implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     kapt("androidx.room:room-compiler:$room_version")
-    implementation("androidx.room:room-ktx:$room_version")
-    testImplementation("androidx.room:room-testing:$room_version")
+    implementation "androidx.room:room-ktx:$room_version"
+    testImplementation "androidx.room:room-testing:$room_version"
 }
