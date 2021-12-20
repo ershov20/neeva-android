@@ -6,10 +6,10 @@ import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.*
-import com.neeva.app.storage.SpaceStore
-import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.browsing.baseDomain
+import com.neeva.app.storage.SpaceStore
+import com.neeva.app.suggestions.NavSuggestion
 import kotlinx.coroutines.launch
 
 class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {
@@ -29,11 +29,9 @@ class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {
 
     val focusRequester = FocusRequester()
 
-    val onReload = selectedTabModel::reload
-
     init {
         // TODO(dan.alcantara): Rethink how lazy tab opening works.
-        isEditing.observeForever {
+        _isEditing.observeForever {
             _isLazyTab.value = _isLazyTab.value == true && it
         }
     }
@@ -48,8 +46,10 @@ class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {
         _isLazyTab.value = true
     }
 
+    fun onReload() = selectedTabModel.reload()
+
     fun onLocationBarTextChanged(newValue: TextFieldValue) {
-        if (isEditing.value == true) _text.value = newValue
+        if (_isEditing.value == true) _text.value = newValue
     }
 
     fun loadUrl(url: Uri) {
