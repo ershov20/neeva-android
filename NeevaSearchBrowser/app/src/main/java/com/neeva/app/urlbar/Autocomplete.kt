@@ -39,8 +39,8 @@ import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.map
+import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.R
-import com.neeva.app.appURL
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme

@@ -1,7 +1,14 @@
 package com.neeva.app.settings
 
 import android.net.Uri
-import com.neeva.app.*
+import com.neeva.app.NeevaBrowser
+import com.neeva.app.NeevaConstants.appConnectionsURL
+import com.neeva.app.NeevaConstants.appHelpCenterURL
+import com.neeva.app.NeevaConstants.appPrivacyURL
+import com.neeva.app.NeevaConstants.appReferralURL
+import com.neeva.app.NeevaConstants.appSettingsURL
+import com.neeva.app.NeevaConstants.appTermsURL
+import com.neeva.app.NeevaConstants.appWelcomeToursURL
 
 object SettingsMainData {
     val groups = listOf(

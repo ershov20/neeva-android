@@ -3,6 +3,9 @@ package com.neeva.app
 import android.content.Context
 import android.os.Looper
 import com.apollographql.apollo.ApolloClient
+import com.neeva.app.NeevaConstants.appHost
+import com.neeva.app.NeevaConstants.appURL
+import com.neeva.app.NeevaConstants.loginCookie
 import okhttp3.*
 
 private var instance: ApolloClient? = null

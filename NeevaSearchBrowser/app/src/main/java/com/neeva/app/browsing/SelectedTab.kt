@@ -1,10 +1,10 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
-import android.view.View
 import androidx.lifecycle.*
-import com.neeva.app.appURL
-import kotlinx.coroutines.flow.*
+import com.neeva.app.NeevaConstants.appURL
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
 import org.chromium.weblayer.*
 import kotlin.math.roundToInt
 
@@ -29,17 +29,20 @@ class SelectedTabModel(
     private val _progress = MutableLiveData(0)
     val progress: LiveData<Int> = _progress
 
-    private val _selectedTab: MutableLiveData<Tab?> = MutableLiveData(null)
+    private var selectedTab: Tab? = null
 
     init {
         selectedTabFlow.filter { it.second != null }.asLiveData().observeForever { pair ->
             val previousTab = pair.first
             val activeTab = pair.second!!
+            selectedTab = activeTab
 
             previousTab?.unregisterTabCallback(selectedTabCallback)
             previousTab?.navigationController?.unregisterNavigationCallback(selectedTabNavigationCallback)
+
             activeTab.registerTabCallback(selectedTabCallback)
             activeTab.navigationController.registerNavigationCallback(selectedTabNavigationCallback)
+
             activeTab.setNewTabCallback(newTabCallback)
             activeTab.setErrorPageCallback(errorPageCallback)
 
@@ -52,23 +55,22 @@ class SelectedTabModel(
 
             _currentUrl.value = navController.getNavigationEntryDisplayUri(index)
             _currentTitle.value = navController.getNavigationEntryTitle(index)
-
-            _selectedTab.value = activeTab
         }
     }
 
     fun reload() {
-        _selectedTab.value?.navigationController?.reload()
+        selectedTab?.navigationController?.reload()
     }
 
     fun loadUrl(uri: Uri, newTab: Boolean = false) {
-        if (newTab || _selectedTab.value == null) {
+        if (newTab || selectedTab == null) {
             createTabFor(uri)
             return
         }
+
         // Disable intent processing for urls typed in. Allows the user to navigate to app urls.
         val navigateParamsBuilder = NavigateParams.Builder().disableIntentProcessing()
-        _selectedTab.value?.navigationController?.navigate(uri, navigateParamsBuilder.build())
+        selectedTab?.navigationController?.navigate(uri, navigateParamsBuilder.build())
     }
 
     private val newTabCallback: NewTabCallback = object : NewTabCallback() {
@@ -95,13 +97,13 @@ class SelectedTabModel(
         override fun onNavigationStarted(navigation: Navigation) {
             if (navigation.isSameDocument) return
 
-            _canGoBack.value = _selectedTab.value?.navigationController?.canGoBack()
-            _canGoForward.value = _selectedTab.value?.navigationController?.canGoForward()
+            _canGoBack.value = selectedTab?.navigationController?.canGoBack()
+            _canGoForward.value = selectedTab?.navigationController?.canGoForward()
         }
 
         override fun onNavigationCompleted(navigation: Navigation) {
-            _canGoBack.value = _selectedTab.value?.navigationController?.canGoBack()
-            _canGoForward.value = _selectedTab.value?.navigationController?.canGoForward()
+            _canGoBack.value = selectedTab?.navigationController?.canGoBack()
+            _canGoForward.value = selectedTab?.navigationController?.canGoForward()
         }
     }
 
@@ -113,17 +115,17 @@ class SelectedTabModel(
     }
 
     fun goBack() {
-        _selectedTab.value?.navigationController?.goBack()
+        selectedTab?.navigationController?.goBack()
 
-        _canGoBack.value = _selectedTab.value?.navigationController?.canGoBack()
-        _canGoForward.value = _selectedTab.value?.navigationController?.canGoForward()
+        _canGoBack.value = selectedTab?.navigationController?.canGoBack()
+        _canGoForward.value = selectedTab?.navigationController?.canGoForward()
     }
 
     fun goForward() {
-        _selectedTab.value?.navigationController?.goForward()
+        selectedTab?.navigationController?.goForward()
 
-        _canGoBack.value = _selectedTab.value?.navigationController?.canGoBack()
-        _canGoForward.value = _selectedTab.value?.navigationController?.canGoForward()
+        _canGoBack.value = selectedTab?.navigationController?.canGoBack()
+        _canGoForward.value = selectedTab?.navigationController?.canGoForward()
     }
 }
 

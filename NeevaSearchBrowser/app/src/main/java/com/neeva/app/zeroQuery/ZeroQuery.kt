@@ -22,8 +22,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.map
-import com.neeva.app.appURL
-import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.history.toSearchSuggest

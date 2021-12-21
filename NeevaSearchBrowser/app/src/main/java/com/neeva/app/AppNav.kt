@@ -31,12 +31,14 @@ class AppNavModel: ViewModel() {
     fun setContentState(state: AppNavState) {
         _state.value = state
 
-        if(state == AppNavState.ADD_TO_SPACE) {
+        if (state == AppNavState.ADD_TO_SPACE) {
             viewModelScope.launch {
                 SpaceStore.shared.refresh()
             }
         }
     }
+
+    fun showBrowser() = setContentState(AppNavState.HIDDEN)
 }
 
 @OptIn(ExperimentalFoundationApi::class)

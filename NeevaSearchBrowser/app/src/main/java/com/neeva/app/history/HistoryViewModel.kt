@@ -2,15 +2,15 @@ package com.neeva.app.history
 
 import android.net.Uri
 import androidx.lifecycle.*
+import com.neeva.app.NeevaConstants.appSearchURL
 import com.neeva.app.R
-import com.neeva.app.appSearchURL
+import com.neeva.app.browsing.baseDomain
 import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.SitesRepository
 import com.neeva.app.storage.Visit
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.QueryRowSuggestion
-import com.neeva.app.browsing.baseDomain
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map

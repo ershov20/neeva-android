@@ -1,8 +1,11 @@
 package com.neeva.app
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.graphics.Point
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
@@ -13,10 +16,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import com.apollographql.apollo.coroutines.await
-import com.neeva.app.browsing.SelectedTabModel
-import com.neeva.app.browsing.SelectedTabModelFactory
-import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.browsing.WebViewModelFactory
+import com.neeva.app.browsing.*
 import com.neeva.app.card.CardViewModel
 import com.neeva.app.card.CardViewModelFactory
 import com.neeva.app.history.HistoryViewModel
@@ -28,10 +28,13 @@ import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
+import org.chromium.weblayer.ContextMenuParams
+import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
+import java.lang.ref.WeakReference
 
-class NeevaActivity : AppCompatActivity() {
+class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     companion object {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
         private const val PERSISTENCE_ID = "Neeva_Browser"
@@ -46,7 +49,7 @@ class NeevaActivity : AppCompatActivity() {
     }
     private val suggestionsModel by viewModels<SuggestionsViewModel>()
     private val webModel by viewModels<WebLayerModel> {
-        WebViewModelFactory(this, domainsViewModel, historyViewModel)
+        WebViewModelFactory(domainsViewModel, historyViewModel)
     }
 
     private val selectedTabModel by viewModels<SelectedTabModel> {
@@ -56,7 +59,7 @@ class NeevaActivity : AppCompatActivity() {
 
     private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(selectedTabModel) }
     private val cardViewModel by viewModels<CardViewModel> {
-        CardViewModelFactory(webModel.tabList)
+        CardViewModelFactory(webModel.orderedTabList)
     }
 
     private val appNavModel by viewModels<AppNavModel>()
@@ -66,6 +69,8 @@ class NeevaActivity : AppCompatActivity() {
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        webModel.browserCallbacks = WeakReference(this)
+
         setContentView(R.layout.main)
         findViewById<ComposeView>(R.id.browser_ui).setContent {
             NeevaTheme {
@@ -114,13 +119,8 @@ class NeevaActivity : AppCompatActivity() {
             // If activity is re-created during process restart, FragmentManager attaches
             // BrowserFragment immediately, resulting in synchronous init. By the time this line
             // executes, the synchronous init has already happened.
-            WebLayer.loadAsync(
-                application
-            ) { webLayer: WebLayer ->
-                onWebLayerReady(
-                    webLayer,
-                    savedInstanceState
-                )
+            WebLayer.loadAsync(application) { webLayer: WebLayer ->
+                onWebLayerReady(webLayer, savedInstanceState)
             }
         } catch (e: UnsupportedVersionException) {
             throw RuntimeException("Failed to initialize WebLayer", e)
@@ -189,8 +189,8 @@ class NeevaActivity : AppCompatActivity() {
     private fun onWebLayerReady(webLayer: WebLayer, savedInstanceState: Bundle?) {
         if (isFinishing || isDestroyed) return
         webLayer.isRemoteDebuggingEnabled = true
-        val fragment: Fragment = getOrCreateBrowserFragment(savedInstanceState)
 
+        val fragment: Fragment = getOrCreateBrowserFragment(savedInstanceState)
         webModel.onWebLayerReady(fragment, bottomControls, savedInstanceState)
     }
 
@@ -214,5 +214,64 @@ class NeevaActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
 
         webModel.onSaveInstanceState(outState)
+    }
+
+    override fun onEnterFullscreen(): Int {
+        // This avoids an extra resize.
+        val attrs: WindowManager.LayoutParams = window.attributes
+        attrs.flags = attrs.flags or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
+        window.attributes = attrs
+        val decorView: View = window.decorView
+
+        // Caching the system ui visibility is ok for shell, but likely not ok for
+        // real code.
+        val systemVisibilityToRestore = decorView.systemUiVisibility
+        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                or View.SYSTEM_UI_FLAG_LOW_PROFILE or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+
+        return systemVisibilityToRestore
+    }
+
+    override fun onExitFullscreen(systemVisibilityToRestore: Int) {
+        val decorView: View = window.decorView
+        decorView.systemUiVisibility = systemVisibilityToRestore
+        val attrs: WindowManager.LayoutParams = window.attributes
+        if (attrs.flags and WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS != 0) {
+            attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS.inv()
+            window.attributes = attrs
+        }
+    }
+
+    override fun bringToForeground() {
+        appNavModel.showBrowser()
+
+        val intent = Intent(this, NeevaActivity::class.java)
+        intent.action = Intent.ACTION_MAIN
+        startActivity(intent)
+    }
+
+    override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
+        // TODO(dan.alcantara): This is fragile.  Should figure out a better way to do this, or use
+        //                      tags instead of indexing at the very least.
+        val webLayerView: View? = supportFragmentManager.fragments[0].view
+        webLayerView?.apply {
+            setOnCreateContextMenuListener(
+                WebLayerModel.ContextMenuCreator(webModel, contextMenuParams, tab)
+            )
+
+            showContextMenu()
+        }
+    }
+
+    override fun getDisplaySize(): Point {
+        val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        val display = windowManager.defaultDisplay
+        val point = Point()
+        display.getRealSize(point)
+        return point
     }
 }

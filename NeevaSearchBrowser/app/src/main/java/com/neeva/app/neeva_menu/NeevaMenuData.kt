@@ -2,8 +2,8 @@ package com.neeva.app.neeva_menu
 
 import android.net.Uri
 import com.neeva.app.AppNavState
-import com.neeva.app.appSpacesURL
-import com.neeva.app.appURL
+import com.neeva.app.NeevaConstants.appSpacesURL
+import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.R
 
 data class NeevaMenuItemData(

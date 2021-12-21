@@ -68,7 +68,7 @@ fun CardGrid(
     urlBarModel: URLBarModel,
     cardViewModel: CardViewModel
 ) {
-    val tabs: List<BrowserPrimitive> by webLayerModel.tabList.observeAsState(ArrayList())
+    val tabs: List<BrowserPrimitive> by webLayerModel.orderedTabList.observeAsState(ArrayList())
     val listState: LazyListState by cardViewModel.listState.observeAsState(LazyListState())
 
     Column(modifier = Modifier

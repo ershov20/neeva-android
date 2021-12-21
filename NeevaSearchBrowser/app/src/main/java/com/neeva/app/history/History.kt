@@ -36,7 +36,7 @@ import com.neeva.app.widgets.collapsibleHeaderItems
 
 @OptIn(
     ExperimentalAnimationApi::class,
-    androidx.compose.foundation.ExperimentalFoundationApi::class
+    ExperimentalFoundationApi::class
 )
 @Composable
 fun HistoryContainer(

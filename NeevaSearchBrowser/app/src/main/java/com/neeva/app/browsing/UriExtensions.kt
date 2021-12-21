@@ -2,7 +2,7 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import android.util.Patterns
-import com.neeva.app.appSearchURL
+import com.neeva.app.NeevaConstants.appSearchURL
 
 fun Uri.baseDomain() : String? {
     val authority = this.authority ?: return null
