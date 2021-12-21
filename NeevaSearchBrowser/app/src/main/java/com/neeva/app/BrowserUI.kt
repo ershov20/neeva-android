@@ -18,6 +18,7 @@ import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.suggestions.SuggestionList
 import com.neeva.app.suggestions.SuggestionsViewModel
+import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
 
 @Composable
@@ -31,6 +32,7 @@ fun BrowserUI(
     val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
     val progress: Int by selectedTabModel.progress.observeAsState(0)
     Column {
+        URLBar(urlBarModel, domainViewModel)
         Box {
             Box(Modifier.height(1.dp).fillMaxWidth().background(MaterialTheme.colors.background))
             if (progress != 100) {

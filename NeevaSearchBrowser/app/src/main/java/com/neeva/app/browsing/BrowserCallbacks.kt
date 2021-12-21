@@ -29,4 +29,7 @@ interface BrowserCallbacks {
 
     /** Called when the bottom bar needs to be translated from its current location as the user scrolls. */
     fun onBottomBarOffsetChanged(offset: Int)
+
+    /** Called when the top bar needs to be translated from its current location as the user scrolls. */
+    fun onTopBarOffsetChanged(offset: Int)
 }

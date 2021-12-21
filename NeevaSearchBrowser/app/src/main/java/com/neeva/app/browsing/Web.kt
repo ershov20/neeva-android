@@ -234,9 +234,13 @@ class WebLayerModel(
         }
     }
 
-    private val bottomControlsOffsetCallback: BrowserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
+    private val browserControlsOffsetCallback: BrowserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
         override fun onBottomViewOffsetChanged(offset: Int) {
             browserCallbacks.get()?.onBottomBarOffsetChanged(offset)
+        }
+
+        override fun onTopViewOffsetChanged(offset: Int) {
+            browserCallbacks.get()?.onTopBarOffsetChanged(offset)
         }
     }
 
@@ -256,6 +260,7 @@ class WebLayerModel(
 
     fun onWebLayerReady(
         fragment: Fragment,
+        topControlsPlaceholder: View,
         bottomControlsPlaceholder: View,
         savedInstanceState: Bundle?
     ) {
@@ -289,10 +294,14 @@ class WebLayerModel(
         // and listen for the scrolling offsets, which we then apply to the real bottom toolbar.
         // This is a valid use case according to the BrowserControlsOffsetCallback.
         browser.setBottomView(bottomControlsPlaceholder)
+        browser.setTopView(topControlsPlaceholder)
+        topControlsPlaceholder.layoutParams.height =
+            fragment.context?.resources?.getDimensionPixelSize(com.neeva.app.R.dimen.top_toolbar_height) ?: 0
+        topControlsPlaceholder.requestLayout()
         bottomControlsPlaceholder.layoutParams.height =
             fragment.context?.resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
         bottomControlsPlaceholder.requestLayout()
-        browser.registerBrowserControlsOffsetCallback(bottomControlsOffsetCallback)
+        browser.registerBrowserControlsOffsetCallback(browserControlsOffsetCallback)
 
         browser.registerBrowserRestoreCallback(browserRestoreCallback)
         profile.cookieManager.getCookie(Uri.parse(appURL)) {
@@ -380,7 +389,7 @@ class WebLayerModel(
     private fun unregisterBrowserAndTabCallbacks() {
         browser.unregisterTabListCallback(tabListCallback)
         browser.unregisterBrowserRestoreCallback(browserRestoreCallback)
-        browser.unregisterBrowserControlsOffsetCallback(bottomControlsOffsetCallback)
+        browser.unregisterBrowserControlsOffsetCallback(browserControlsOffsetCallback)
         tabToPerTabState.forEach { unregisterTabCallbacks(it.key) }
         tabToPerTabState.clear()
     }

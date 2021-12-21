@@ -10,6 +10,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
@@ -65,10 +67,12 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
      * View provided to WebLayer that allows us to receive information about when the bottom toolbar
      * needs to be scrolled off.  We provide a placeholder instead of the real view because WebLayer
      * appears to have a bug that prevents the bottom view from rendering correctly.
-     * TODO(dan.alcantara): Revisit this once we move past WebLaer/Chromium v94.
+     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v94.
      */
     private lateinit var bottomControlPlaceholder: View
+    private lateinit var topControlPlaceholder: View
     private lateinit var bottomControls: View
+    private lateinit var browserUI: View
 
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,23 +80,20 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         webModel.browserCallbacks = WeakReference(this)
 
         setContentView(R.layout.main)
-        findViewById<ComposeView>(R.id.browser_ui).setContent {
-            NeevaTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    BrowserUI(urlBarModel, suggestionsModel,
-                        selectedTabModel, domainsViewModel, historyViewModel)
+        browserUI = findViewById<ComposeView>(R.id.browser_ui).apply {
+            setContent {
+                NeevaTheme {
+                    Surface(color = MaterialTheme.colors.background) {
+                        BrowserUI(
+                            urlBarModel, suggestionsModel,
+                            selectedTabModel, domainsViewModel, historyViewModel
+                        )
+                    }
                 }
             }
         }
-        findViewById<ComposeView>(R.id.browser_ui).background = null
+        browserUI.background = null
 
-        findViewById<ComposeView>(R.id.omnibox).setContent {
-            NeevaTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    URLBar(urlBarModel, domainsViewModel)
-                }
-            }
-        }
         findViewById<ComposeView>(R.id.app_nav).setContent {
             NeevaTheme {
                 Surface(color = Color.Transparent) {
@@ -103,24 +104,27 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 }
             }
         }
-
+        topControlPlaceholder = layoutInflater.inflate(R.layout.fake_top_controls, null)
         bottomControlPlaceholder = layoutInflater.inflate(R.layout.fake_bottom_controls, null)
 
         bottomControls = findViewById<ComposeView>(R.id.tab_toolbar).apply {
             setContent {
                 NeevaTheme {
                     Surface(color = MaterialTheme.colors.background) {
-                        TabToolbar(
-                            TabToolbarModel(
-                                { appNavModel.setContentState(AppNavState.NEEVA_MENU) },
-                                { appNavModel.setContentState(AppNavState.ADD_TO_SPACE) },
-                                {
-                                    webModel.onGridShown()
-                                    appNavModel.setContentState(AppNavState.CARD_GRID)
-                                }
-                            ),
-                            selectedTabModel
-                        )
+                        val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
+                        if (!isEditing) {
+                            TabToolbar(
+                                TabToolbarModel(
+                                    { appNavModel.setContentState(AppNavState.NEEVA_MENU) },
+                                    { appNavModel.setContentState(AppNavState.ADD_TO_SPACE) },
+                                    {
+                                        webModel.onGridShown()
+                                        appNavModel.setContentState(AppNavState.CARD_GRID)
+                                    }
+                                ),
+                                selectedTabModel
+                            )
+                        }
                     }
                 }
             }
@@ -205,6 +209,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         val fragment: Fragment = getOrCreateBrowserFragment(savedInstanceState)
         webModel.onWebLayerReady(
             fragment,
+            topControlPlaceholder,
             bottomControlPlaceholder,
             savedInstanceState
         )
@@ -294,5 +299,10 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     override fun onBottomBarOffsetChanged(offset: Int) {
         // Move the real bar when WebLayer says that the fake one is moving.
         bottomControls.translationY = offset.toFloat()
+    }
+
+    override fun onTopBarOffsetChanged(offset: Int) {
+        // Move the real bar when WebLayer says that the fake one is moving.
+        browserUI.translationY = offset.toFloat()
     }
 }
