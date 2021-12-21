@@ -26,4 +26,7 @@ interface BrowserCallbacks {
 
     /** Returns the display size to use for the browser. */
     fun getDisplaySize(): Point
+
+    /** Called when the bottom bar needs to be translated from its current location as the user scrolls. */
+    fun onBottomBarOffsetChanged(offset: Int)
 }

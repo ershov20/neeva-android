@@ -28,10 +28,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
-import org.chromium.weblayer.ContextMenuParams
-import org.chromium.weblayer.Tab
-import org.chromium.weblayer.UnsupportedVersionException
-import org.chromium.weblayer.WebLayer
+import org.chromium.weblayer.*
 import java.lang.ref.WeakReference
 
 class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
@@ -64,6 +61,13 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
     private val appNavModel by viewModels<AppNavModel>()
 
+    /**
+     * View provided to WebLayer that allows us to receive information about when the bottom toolbar
+     * needs to be scrolled off.  We provide a placeholder instead of the real view because WebLayer
+     * appears to have a bug that prevents the bottom view from rendering correctly.
+     * TODO(dan.alcantara): Revisit this once we move past WebLaer/Chromium v94.
+     */
+    private lateinit var bottomControlPlaceholder: View
     private lateinit var bottomControls: View
 
     @SuppressLint("ResourceAsColor")
@@ -99,21 +103,29 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 }
             }
         }
-        bottomControls = this.layoutInflater.inflate(R.layout.bottom_controls, null)
-        bottomControls.findViewById<ComposeView>(R.id.tab_toolbar).setContent {
-            NeevaTheme {
-                Surface(color = MaterialTheme.colors.background) {
-                    TabToolbar(TabToolbarModel(
-                        { appNavModel.setContentState(AppNavState.NEEVA_MENU) },
-                        { appNavModel.setContentState(AppNavState.ADD_TO_SPACE) },
-                        {
-                            webModel.onGridShown()
-                            appNavModel.setContentState(AppNavState.CARD_GRID)
-                        }
-                    ), selectedTabModel)
+
+        bottomControlPlaceholder = layoutInflater.inflate(R.layout.fake_bottom_controls, null)
+
+        bottomControls = findViewById<ComposeView>(R.id.tab_toolbar).apply {
+            setContent {
+                NeevaTheme {
+                    Surface(color = MaterialTheme.colors.background) {
+                        TabToolbar(
+                            TabToolbarModel(
+                                { appNavModel.setContentState(AppNavState.NEEVA_MENU) },
+                                { appNavModel.setContentState(AppNavState.ADD_TO_SPACE) },
+                                {
+                                    webModel.onGridShown()
+                                    appNavModel.setContentState(AppNavState.CARD_GRID)
+                                }
+                            ),
+                            selectedTabModel
+                        )
+                    }
                 }
             }
         }
+
         try {
             // This ensures asynchronous initialization of WebLayer on first start of activity.
             // If activity is re-created during process restart, FragmentManager attaches
@@ -191,7 +203,11 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         webLayer.isRemoteDebuggingEnabled = true
 
         val fragment: Fragment = getOrCreateBrowserFragment(savedInstanceState)
-        webModel.onWebLayerReady(fragment, bottomControls, savedInstanceState)
+        webModel.onWebLayerReady(
+            fragment,
+            bottomControlPlaceholder,
+            savedInstanceState
+        )
     }
 
     override fun onBackPressed() {
@@ -273,5 +289,10 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         val point = Point()
         display.getRealSize(point)
         return point
+    }
+
+    override fun onBottomBarOffsetChanged(offset: Int) {
+        // Move the real bar when WebLayer says that the fake one is moving.
+        bottomControls.translationY = offset.toFloat()
     }
 }

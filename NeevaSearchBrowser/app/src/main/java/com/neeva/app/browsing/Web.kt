@@ -234,6 +234,12 @@ class WebLayerModel(
         }
     }
 
+    private val bottomControlsOffsetCallback: BrowserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
+        override fun onBottomViewOffsetChanged(offset: Int) {
+            browserCallbacks.get()?.onBottomBarOffsetChanged(offset)
+        }
+    }
+
     private var tabList = TabList()
     val orderedTabList: LiveData<List<BrowserPrimitive>>
         get() = tabList.orderedTabList
@@ -248,7 +254,11 @@ class WebLayerModel(
         outState.putStringArray(KEY_PREVIOUS_TAB_GUIDS, previousTabGuids)
     }
 
-    fun onWebLayerReady(fragment: Fragment, bottomControls: View, savedInstanceState: Bundle?) {
+    fun onWebLayerReady(
+        fragment: Fragment,
+        bottomControlsPlaceholder: View,
+        savedInstanceState: Bundle?
+    ) {
         lastSavedInstanceState = savedInstanceState
         // Have WebLayer Shell retain the fragment instance to simulate the behavior of
         // external embedders (note that if this is changed, then WebLayer Shell should handle
@@ -273,7 +283,17 @@ class WebLayerModel(
             }
         })
 
-        browser.setBottomView(bottomControls)
+        // There appears to be a bug in WebLayer that prevents the bottom bar from being rendered,
+        // and also prevents Composables from being re-rendered when their state changes.  To get
+        // around this, we pass in a fake view that is the same height as the real bottom toolbar
+        // and listen for the scrolling offsets, which we then apply to the real bottom toolbar.
+        // This is a valid use case according to the BrowserControlsOffsetCallback.
+        browser.setBottomView(bottomControlsPlaceholder)
+        bottomControlsPlaceholder.layoutParams.height =
+            fragment.context?.resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
+        bottomControlsPlaceholder.requestLayout()
+        browser.registerBrowserControlsOffsetCallback(bottomControlsOffsetCallback)
+
         browser.registerBrowserRestoreCallback(browserRestoreCallback)
         profile.cookieManager.getCookie(Uri.parse(appURL)) {
             it?.split("; ")?.forEach { cookie ->
@@ -360,6 +380,7 @@ class WebLayerModel(
     private fun unregisterBrowserAndTabCallbacks() {
         browser.unregisterTabListCallback(tabListCallback)
         browser.unregisterBrowserRestoreCallback(browserRestoreCallback)
+        browser.unregisterBrowserControlsOffsetCallback(bottomControlsOffsetCallback)
         tabToPerTabState.forEach { unregisterTabCallbacks(it.key) }
         tabToPerTabState.clear()
     }

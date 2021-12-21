@@ -10,15 +10,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.widgets.Button
-
 
 class TabToolbarModel(
     val onNeevaMenu: () -> Unit,
@@ -35,7 +33,7 @@ fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(dimensionResource(id = R.dimen.bottom_toolbar_height))
             .background(MaterialTheme.colors.primary),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
@@ -43,13 +41,14 @@ fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
             enabled = canGoBack ?: false,
             resID = R.drawable.ic_baseline_arrow_back_24,
             contentDescription = "back button",
-            onClick = { selectedTabModel.goBack() }
+            onClick = selectedTabModel::goBack
         )
         Button(
             enabled = canGoForward ?: false,
             resID = R.drawable.ic_baseline_arrow_forward_24,
-            contentDescription = "forward button"
-        ) { selectedTabModel.goForward() }
+            contentDescription = "forward button",
+            onClick = selectedTabModel::goForward
+        )
         NeevaMenuButton(onClick = model.onNeevaMenu)
         Button(
             true,
