@@ -27,7 +27,6 @@ import com.neeva.app.neeva_menu.NeevaMenuData
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
 import org.chromium.weblayer.*
@@ -52,8 +51,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     }
 
     private val selectedTabModel by viewModels<SelectedTabModel> {
-        SelectedTabModelFactory(
-            webModel.selectedTabFlow, webModel::registerNewTab, webModel::createTabFor)
+        SelectedTabModelFactory(webModel.selectedTabFlow, webModel::createTabFor)
     }
 
     private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(selectedTabModel) }
@@ -305,4 +303,6 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         // Move the real bar when WebLayer says that the fake one is moving.
         browserUI.translationY = offset.toFloat()
     }
+
+    override fun reloadCurrentTab() = selectedTabModel.reload()
 }

@@ -7,6 +7,8 @@ import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.TextUtils
 import android.view.ContextMenu
 import android.view.ContextMenu.ContextMenuInfo
@@ -14,9 +16,12 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
@@ -27,12 +32,12 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.Visit
 import com.neeva.app.storage.toFavicon
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.launch
 import org.chromium.weblayer.*
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 import java.util.*
+import kotlin.collections.set
 
 class WebLayerModel(
     private val domainViewModel: DomainViewModel,
@@ -160,10 +165,8 @@ class WebLayerModel(
 
     private val tabListCallback = object : TabListCallback() {
         override fun onActiveTabChanged(activeTab: Tab?) {
-            viewModelScope.launch {
-                val previous = selectedTabFlow.asLiveData().value?.second
-                selectedTabFlow.emit(Pair(previous, activeTab))
-            }
+            val previousTab = selectedTabFlow.value.second
+            selectedTabFlow.tryEmit(Pair(previousTab, activeTab))
             tabList.updatedSelectedTab(activeTab?.guid)
         }
 
@@ -174,6 +177,7 @@ class WebLayerModel(
             unregisterTabCallbacks(tab)
 
             // Don't switch tabs unless there isn't one currently selected.
+            // TODO(dan.alcantara): If this is a child tab, switch back to the one that spawned it.
             if (browser.activeTab == null) {
                 if (orderedTabList.value?.isNotEmpty() == true) {
                     browser.setActiveTab(tabList.getTab(newIndex))
@@ -186,9 +190,8 @@ class WebLayerModel(
         }
 
         override fun onTabAdded(tab: Tab) {
-            tabList.add(tab)
+            onNewTabAdded(tab)
 
-            registerTabCallbacks(tab)
             uriRequestForNewTab?.let {
                 selectTab(tab)
                 tab.navigationController.navigate(it)
@@ -322,14 +325,18 @@ class WebLayerModel(
         browser.tabs.forEach { currentTabMap[it.guid] = it }
         previousTabGuids.forEach {
             val tab = currentTabMap[it] ?: return
-            tabList.add(tab)
-            registerTabCallbacks(tab)
+            onNewTabAdded(tab)
         }
     }
 
     fun createTabFor(uri: Uri) {
         uriRequestForNewTab = uri
         browser.createTab()
+    }
+
+    private fun onNewTabAdded(tab: Tab) {
+        tabList.add(tab)
+        registerTabCallbacks(tab)
     }
 
     fun registerNewTab(tab: Tab, @NewTabType type: Int) {
@@ -355,6 +362,8 @@ class WebLayerModel(
 
         tab.navigationController.registerNavigationCallback(navigationCallback)
         val tabCallback: TabCallback = object : TabCallback() {
+            var consecutiveCrashes = 0
+
             override fun bringTabToFront() {
                 tab.browser.setActiveTab(tab)
                 browserCallbacks.get()?.bringToForeground()
@@ -374,8 +383,58 @@ class WebLayerModel(
                 if (tab != browser.activeTab) return
                 browserCallbacks.get()?.showContextMenuForTab(params, tab)
             }
+
+            override fun onRenderProcessGone() {
+                consecutiveCrashes++
+
+                if (consecutiveCrashes < 3) {
+                    browserCallbacks.get()?.let {
+                        if (BuildConfig.DEBUG) {
+                            Toast.makeText(
+                                NeevaBrowser.context,
+                                "Renderer crashed.  Automatically reloading",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        // We have to delay the reload because onRenderProcessGone() is called synchronously.
+                        Handler(Looper.getMainLooper()).post {
+                            it.reloadCurrentTab()
+                        }
+                    }
+                } else {
+                    consecutiveCrashes = 0
+
+                    if (BuildConfig.DEBUG) {
+                        Toast.makeText(
+                            NeevaBrowser.context,
+                            "Renderer crashed too many times.  Must reload manually",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
         }
         tab.registerTabCallback(tabCallback)
+
+        val errorPageCallback = object : ErrorPageCallback() {
+            // TODO(dan.alcantara): I don't know if we should be overriding this.
+            override fun onBackToSafety(): Boolean {
+                tab.navigationController.goBack()
+                return true
+            }
+
+            // TODO(dan.alcantara): Although this should be showing the default error page, it
+            //                      doesn't work.
+            override fun getErrorPage(navigation: Navigation): ErrorPage? = null
+        }
+        tab.setErrorPageCallback(errorPageCallback)
+
+        val newTabCallback: NewTabCallback = object : NewTabCallback() {
+            override fun onNewTab(newTab: Tab, @NewTabType type: Int) = registerNewTab(newTab, type)
+        }
+        tab.setNewTabCallback(newTabCallback)
+
         val faviconFetcher = tab.createFaviconFetcher(object : FaviconCallback() {
             override fun onFaviconChanged(favicon: Bitmap?) {
                 val icon = favicon ?: return
@@ -398,10 +457,14 @@ class WebLayerModel(
         // Do not unset FullscreenCallback here which is called from onDestroy, since
         // unsetting FullscreenCallback also exits fullscreen.
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
+
         val perTabState: PerTabState = tabToPerTabState[tab]!!
         tab.unregisterTabCallback(perTabState.tabCallback)
         perTabState.faviconFetcher.destroy()
         tabToPerTabState.remove(tab)
+
+        tab.setErrorPageCallback(null)
+        tab.setNewTabCallback(null)
     }
 
     fun onGridShown() {
@@ -419,11 +482,7 @@ class WebLayerModel(
     }
 
     fun selectTab(tab: Tab) {
-        browser.activeTab?.takeUnless { it.isDestroyed }?.let { activeTab ->
-            activeTab.setNewTabCallback(null)
-            activeTab.setErrorPageCallback(null)
-            activeTab.captureAndSaveScreenshot()
-        }
+        browser.activeTab?.takeUnless { it.isDestroyed }?.captureAndSaveScreenshot()
         browser.setActiveTab(tab)
     }
 

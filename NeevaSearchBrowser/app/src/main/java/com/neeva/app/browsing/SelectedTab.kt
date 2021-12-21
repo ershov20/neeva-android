@@ -4,13 +4,14 @@ import android.net.Uri
 import androidx.lifecycle.*
 import com.neeva.app.NeevaConstants.appURL
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 import org.chromium.weblayer.*
 import kotlin.math.roundToInt
 
 class SelectedTabModel(
     selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
-    private val registerNewTab: (Tab, Int) -> Unit,
     private val createTabFor: (Uri) -> Unit,
 ): ViewModel() {
 
@@ -32,29 +33,30 @@ class SelectedTabModel(
     private var selectedTab: Tab? = null
 
     init {
-        selectedTabFlow.filter { it.second != null }.asLiveData().observeForever { pair ->
-            val previousTab = pair.first
-            val activeTab = pair.second!!
-            selectedTab = activeTab
+        viewModelScope.launch {
+            selectedTabFlow.filter { it.second != null }.collect { pair ->
+                val previousTab = pair.first
+                val activeTab = pair.second!!
+                selectedTab = activeTab
 
-            previousTab?.unregisterTabCallback(selectedTabCallback)
-            previousTab?.navigationController?.unregisterNavigationCallback(selectedTabNavigationCallback)
+                previousTab?.apply {
+                    unregisterTabCallback(selectedTabCallback)
+                    navigationController.unregisterNavigationCallback(selectedTabNavigationCallback)
+                }
 
-            activeTab.registerTabCallback(selectedTabCallback)
-            activeTab.navigationController.registerNavigationCallback(selectedTabNavigationCallback)
+                activeTab.apply {
+                    registerTabCallback(selectedTabCallback)
+                    navigationController.registerNavigationCallback(selectedTabNavigationCallback)
+                }
 
-            activeTab.setNewTabCallback(newTabCallback)
-            activeTab.setErrorPageCallback(errorPageCallback)
+                val navController = activeTab.navigationController
+                val index = navController.navigationListCurrentIndex
 
-            val navController = activeTab.navigationController
-            val index = navController.navigationListCurrentIndex
-
-            if (index == -1) {
-                return@observeForever
+                if (index != -1) {
+                    _currentUrl.value = navController.getNavigationEntryDisplayUri(index)
+                    _currentTitle.value = navController.getNavigationEntryTitle(index)
+                }
             }
-
-            _currentUrl.value = navController.getNavigationEntryDisplayUri(index)
-            _currentTitle.value = navController.getNavigationEntryTitle(index)
         }
     }
 
@@ -71,12 +73,6 @@ class SelectedTabModel(
         // Disable intent processing for urls typed in. Allows the user to navigate to app urls.
         val navigateParamsBuilder = NavigateParams.Builder().disableIntentProcessing()
         selectedTab?.navigationController?.navigate(uri, navigateParamsBuilder.build())
-    }
-
-    private val newTabCallback: NewTabCallback = object : NewTabCallback() {
-        override fun onNewTab(newTab: Tab, @NewTabType type: Int) {
-            registerNewTab(newTab, type)
-        }
     }
 
     private val selectedTabCallback: TabCallback = object : TabCallback() {
@@ -107,13 +103,6 @@ class SelectedTabModel(
         }
     }
 
-    private val errorPageCallback = object : ErrorPageCallback() {
-        override fun onBackToSafety(): Boolean {
-            goBack()
-            return true
-        }
-    }
-
     fun goBack() {
         selectedTab?.navigationController?.goBack()
 
@@ -133,11 +122,10 @@ class SelectedTabModel(
 @Suppress("UNCHECKED_CAST")
 class SelectedTabModelFactory(
     private val selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
-    private val registerNewTab: (Tab, Int) -> Unit,
     private val createTabFor: (Uri) -> Unit
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return SelectedTabModel(selectedTabFlow, registerNewTab, createTabFor) as T
+        return SelectedTabModel(selectedTabFlow, createTabFor) as T
     }
 }
