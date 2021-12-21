@@ -32,14 +32,19 @@ data class Space(
     val isPublic : Boolean,
     val userACL : SpaceACLLevel,
 ) {
+    companion object {
+        val defaultThumbnail: Bitmap by lazy {
+            BitmapFactory.decodeResource(NeevaBrowser.context.resources, R.drawable.spaces)
+        }
+    }
     val url: Uri = Uri.parse("$appSpacesURL/$id")
 
     var contentURLs: Set<Uri>? = null
     var contentData: List<SpaceEntityData>? = null
 
     fun thumbnailAsBitmap() : Bitmap {
-        val encoded = thumbnail ?: return Favicon.defaultFavicon
-        if (!thumbnail.startsWith("data:image/jpeg;base64,")) return Favicon.defaultFavicon
+        val encoded = thumbnail ?: return defaultThumbnail
+        if (!thumbnail.startsWith("data:image/jpeg;base64,")) return defaultThumbnail
         val byteArray = Base64.decode(encoded.substring("data:image/jpeg;base64,".length), Base64.DEFAULT)
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
