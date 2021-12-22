@@ -5,13 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.neeva.app.NeevaActivity
-import com.neeva.app.browsing.BrowserPrimitive
-import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.history.HistoryViewModel
-import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.browsing.TabInfo
 
-class CardViewModel(private val tabsList: LiveData<List<BrowserPrimitive>>): ViewModel() {
+class CardViewModel(tabsList: LiveData<List<TabInfo>>): ViewModel() {
     private val _listState = MutableLiveData<LazyListState>()
     val listState: LiveData<LazyListState> = _listState
 
@@ -24,12 +20,13 @@ class CardViewModel(private val tabsList: LiveData<List<BrowserPrimitive>>): Vie
             _listState.value = LazyListState(index)
         }
     }
-}
 
-@Suppress("UNCHECKED_CAST")
-class CardViewModelFactory(private val tabsList: LiveData<List<BrowserPrimitive>>) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return CardViewModel(tabsList) as T
+    companion object {
+        class CardViewModelFactory(private val tabsList: LiveData<List<TabInfo>>) : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return CardViewModel(tabsList) as T
+            }
+        }
     }
 }

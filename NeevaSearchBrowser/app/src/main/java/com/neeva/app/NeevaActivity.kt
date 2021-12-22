@@ -18,9 +18,11 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.map
 import com.apollographql.apollo.coroutines.await
-import com.neeva.app.browsing.*
+import com.neeva.app.browsing.BrowserCallbacks
+import com.neeva.app.browsing.ContextMenuCreator
+import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardViewModel
-import com.neeva.app.card.CardViewModelFactory
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.history.HistoryViewModelFactory
 import com.neeva.app.neeva_menu.NeevaMenuData
@@ -29,7 +31,10 @@ import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
-import org.chromium.weblayer.*
+import org.chromium.weblayer.ContextMenuParams
+import org.chromium.weblayer.Tab
+import org.chromium.weblayer.UnsupportedVersionException
+import org.chromium.weblayer.WebLayer
 import java.lang.ref.WeakReference
 
 class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
@@ -47,16 +52,19 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     }
     private val suggestionsModel by viewModels<SuggestionsViewModel>()
     private val webModel by viewModels<WebLayerModel> {
-        WebViewModelFactory(domainsViewModel, historyViewModel)
+        WebLayerModel.Companion.WebLayerModelFactory(domainsViewModel, historyViewModel)
     }
 
     private val selectedTabModel by viewModels<SelectedTabModel> {
-        SelectedTabModelFactory(webModel.selectedTabFlow, webModel::createTabFor)
+        SelectedTabModel.Companion.SelectedTabModelFactory(
+            webModel.selectedTabFlow,
+            webModel::createTabFor
+        )
     }
 
     private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(selectedTabModel) }
     private val cardViewModel by viewModels<CardViewModel> {
-        CardViewModelFactory(webModel.orderedTabList)
+        CardViewModel.Companion.CardViewModelFactory(webModel.orderedTabList)
     }
 
     private val appNavModel by viewModels<AppNavModel>()
@@ -278,8 +286,10 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         //                      tags instead of indexing at the very least.
         val webLayerView: View? = supportFragmentManager.fragments[0].view
         webLayerView?.apply {
+            // Need to use the NeevaActivity as the context because the WebLayerView doesn't have
+            // access to the correct resources.
             setOnCreateContextMenuListener(
-                WebLayerModel.ContextMenuCreator(webModel, contextMenuParams, tab)
+                ContextMenuCreator(webModel, contextMenuParams, tab, this@NeevaActivity)
             )
 
             showContextMenu()
@@ -304,5 +314,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         browserUI.translationY = offset.toFloat()
     }
 
-    override fun reloadCurrentTab() = selectedTabModel.reload()
+    override fun reloadTab(tab: Tab?) {
+        tab?.navigationController?.reload() ?: selectedTabModel.reload()
+    }
 }

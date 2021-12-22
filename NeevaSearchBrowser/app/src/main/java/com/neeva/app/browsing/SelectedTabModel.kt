@@ -14,6 +14,17 @@ class SelectedTabModel(
     selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
     private val createTabFor: (Uri) -> Unit,
 ): ViewModel() {
+    companion object {
+        class SelectedTabModelFactory(
+            private val selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
+            private val createTabFor: (Uri) -> Unit
+        ) : ViewModelProvider.Factory {
+            @Suppress("UNCHECKED_CAST")
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return SelectedTabModel(selectedTabFlow, createTabFor) as T
+            }
+        }
+    }
 
     private val _currentUrl = MutableLiveData(Uri.parse(appURL))
     val currentUrl: LiveData<Uri> = _currentUrl
@@ -36,7 +47,7 @@ class SelectedTabModel(
         viewModelScope.launch {
             selectedTabFlow.filter { it.second != null }.collect { pair ->
                 val previousTab = pair.first
-                val activeTab = pair.second!!
+                val activeTab = pair.second
                 selectedTab = activeTab
 
                 previousTab?.apply {
@@ -44,17 +55,16 @@ class SelectedTabModel(
                     navigationController.unregisterNavigationCallback(selectedTabNavigationCallback)
                 }
 
-                activeTab.apply {
+                activeTab?.apply {
                     registerTabCallback(selectedTabCallback)
                     navigationController.registerNavigationCallback(selectedTabNavigationCallback)
-                }
-
-                val navController = activeTab.navigationController
-                val index = navController.navigationListCurrentIndex
-
-                if (index != -1) {
-                    _currentUrl.value = navController.getNavigationEntryDisplayUri(index)
-                    _currentTitle.value = navController.getNavigationEntryTitle(index)
+                    navigationController.apply {
+                        val index = navigationListCurrentIndex
+                        if (index != -1) {
+                            _currentUrl.value = getNavigationEntryDisplayUri(index)
+                            _currentTitle.value = getNavigationEntryTitle(index)
+                        }
+                    }
                 }
             }
         }
@@ -115,17 +125,5 @@ class SelectedTabModel(
 
         _canGoBack.value = selectedTab?.navigationController?.canGoBack()
         _canGoForward.value = selectedTab?.navigationController?.canGoForward()
-    }
-}
-
-
-@Suppress("UNCHECKED_CAST")
-class SelectedTabModelFactory(
-    private val selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
-    private val createTabFor: (Uri) -> Unit
-) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return SelectedTabModel(selectedTabFlow, createTabFor) as T
     }
 }

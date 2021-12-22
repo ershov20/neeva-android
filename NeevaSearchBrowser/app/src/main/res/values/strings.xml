@@ -3,4 +3,8 @@
     <string name="neeva_search">Neeva Search</string>
     <string name="edit_current_url">Edit current URL</string>
     <string name="cancel">Cancel</string>
+
+    <string name="download_image">Download image</string>
+    <string name="download_video">Download video</string>
+    <string name="download_link">Download link</string>
 </resources>

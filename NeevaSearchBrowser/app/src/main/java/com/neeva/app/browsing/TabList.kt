@@ -10,9 +10,9 @@ import org.chromium.weblayer.Tab
  */
 class TabList {
     private val currentTabs: MutableList<Tab> = mutableListOf()
-    private val currentPrimitives: MutableMap<String, BrowserPrimitive> = mutableMapOf()
+    private val currentPrimitives: MutableMap<String, TabInfo> = mutableMapOf()
 
-    val orderedTabList = MutableLiveData<List<BrowserPrimitive>>()
+    val orderedTabList = MutableLiveData<List<TabInfo>>()
 
     fun indexOf(tab: Tab) = currentTabs.indexOf(tab)
     fun findTab(id: String) = currentTabs.firstOrNull { it.guid == id }
@@ -21,7 +21,7 @@ class TabList {
     fun add(tab: Tab) {
         currentTabs.add(tab)
 
-        currentPrimitives[tab.guid] = BrowserPrimitive(
+        currentPrimitives[tab.guid] = TabInfo(
             id = tab.guid,
             url = tab.currentDisplayUrl,
             title = tab.currentDisplayTitle,

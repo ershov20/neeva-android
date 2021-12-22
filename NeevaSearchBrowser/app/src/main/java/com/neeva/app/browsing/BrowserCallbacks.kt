@@ -33,6 +33,6 @@ interface BrowserCallbacks {
     /** Called when the top bar needs to be translated from its current location as the user scrolls. */
     fun onTopBarOffsetChanged(offset: Int)
 
-    /** Reloads the current tab. */
-    fun reloadCurrentTab()
+    /** Reloads the given tab, or the current one if null is passed in. */
+    fun reloadTab(tab: Tab? = null)
 }

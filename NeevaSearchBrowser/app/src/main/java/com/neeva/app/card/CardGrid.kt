@@ -32,7 +32,7 @@ import coil.compose.rememberImagePainter
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
-import com.neeva.app.browsing.BrowserPrimitive
+import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.urlbar.URLBarModel
@@ -68,7 +68,7 @@ fun CardGrid(
     urlBarModel: URLBarModel,
     cardViewModel: CardViewModel
 ) {
-    val tabs: List<BrowserPrimitive> by webLayerModel.orderedTabList.observeAsState(ArrayList())
+    val tabs: List<TabInfo> by webLayerModel.orderedTabList.observeAsState(ArrayList())
     val listState: LazyListState by cardViewModel.listState.observeAsState(LazyListState())
 
     Column(modifier = Modifier
@@ -120,7 +120,7 @@ fun CardGrid(
 
 @Composable
 fun TabCard(
-    tab: BrowserPrimitive,
+    tab: TabInfo,
     faviconData: Bitmap?,
     onSelect: () -> Unit,
     onClose: () -> Unit

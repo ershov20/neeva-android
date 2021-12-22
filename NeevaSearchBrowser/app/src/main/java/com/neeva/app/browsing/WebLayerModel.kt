@@ -1,22 +1,9 @@
 package com.neeva.app.browsing
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.Bitmap.CompressFormat
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.text.TextUtils
-import android.view.ContextMenu
-import android.view.ContextMenu.ContextMenuInfo
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
-import android.widget.TextView
-import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LiveData
@@ -34,7 +21,6 @@ import com.neeva.app.storage.toFavicon
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.chromium.weblayer.*
 import java.io.File
-import java.io.FileOutputStream
 import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.collections.set
@@ -45,15 +31,32 @@ class WebLayerModel(
 ): ViewModel() {
     companion object {
         private const val KEY_PREVIOUS_TAB_GUIDS = "previousTabGuids"
-        const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
+        private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
+
+        fun getTabScreenshotDirectory(): File {
+            return File(NeevaBrowser.context.filesDir, DIRECTORY_TAB_SCREENSHOTS)
+        }
+
+        fun getTabScreenshotFileUri(id: String): Uri {
+            return File(getTabScreenshotDirectory(), "tab_$id.jpg").toUri()
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        class WebLayerModelFactory(
+            private val domainModel: DomainViewModel,
+            private val historyViewModel: HistoryViewModel
+        ) : ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return WebLayerModel(domainModel, historyViewModel) as T
+            }
+        }
     }
 
     var browserCallbacks: WeakReference<BrowserCallbacks> = WeakReference(null)
 
-    private class PerTabState(
-        val faviconFetcher: FaviconFetcher,
-        val tabCallback: TabCallback
-    )
+    private class PerTabState(val faviconFetcher: FaviconFetcher, vararg callbacks: TabCallback) {
+        val tabCallbacks: MutableList<TabCallback> = callbacks.toMutableList()
+    }
 
     val selectedTabFlow = MutableStateFlow<Pair<Tab?, Tab?>>(Pair(null, null))
 
@@ -68,92 +71,6 @@ class WebLayerModel(
 
         override fun onExitFullscreen() {
             browserCallbacks.get()?.onExitFullscreen(mSystemVisibilityToRestore)
-        }
-    }
-
-    class ContextMenuCreator(
-        var webLayerModel: WebLayerModel,
-        var params: ContextMenuParams,
-        var tab: Tab? = null,
-        var context: Context? = null,
-    ): View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
-        companion object {
-            private const val MENU_ID_COPY_LINK_URI = 1
-            private const val MENU_ID_COPY_LINK_TEXT = 2
-            private const val MENU_ID_DOWNLOAD_IMAGE = 3
-            private const val MENU_ID_DOWNLOAD_VIDEO = 4
-            private const val MENU_ID_DOWNLOAD_LINK = 5
-            private const val MENU_ID_OPEN_IN_NEW_TAB = 6
-        }
-
-        override fun onCreateContextMenu(
-            menu: ContextMenu,
-            v: View,
-            menuInfo: ContextMenuInfo?
-        ) {
-            context = v.context
-            menu.add(params.pageUri.toString())
-            if (params.linkUri != null) {
-                val openNewTabItem =
-                    menu.add(Menu.NONE, MENU_ID_OPEN_IN_NEW_TAB, Menu.NONE, "Open in new tab")
-                openNewTabItem.setOnMenuItemClickListener(this)
-            }
-            if (params.linkUri != null) {
-                val copyLinkUriItem =
-                    menu.add(Menu.NONE, MENU_ID_COPY_LINK_URI, Menu.NONE, "Copy link address")
-                copyLinkUriItem.setOnMenuItemClickListener(this)
-            }
-            if (!TextUtils.isEmpty(params.linkText)) {
-                val copyLinkTextItem =
-                    menu.add(Menu.NONE, MENU_ID_COPY_LINK_TEXT, Menu.NONE, "Copy link text")
-                copyLinkTextItem.setOnMenuItemClickListener(this)
-            }
-            if (params.canDownload) {
-                if (params.isImage) {
-                    val downloadImageItem = menu.add(
-                        Menu.NONE, MENU_ID_DOWNLOAD_IMAGE, Menu.NONE, "Download image"
-                    )
-                    downloadImageItem.setOnMenuItemClickListener(this)
-                } else if (params.isVideo) {
-                    val downloadVideoItem = menu.add(
-                        Menu.NONE, MENU_ID_DOWNLOAD_VIDEO, Menu.NONE, "Download video"
-                    )
-                    downloadVideoItem.setOnMenuItemClickListener(this)
-                } else if (params.linkUri != null) {
-                    val downloadVideoItem =
-                        menu.add(Menu.NONE, MENU_ID_DOWNLOAD_LINK, Menu.NONE, "Download link")
-                    downloadVideoItem.setOnMenuItemClickListener(this)
-                }
-            }
-            if (!TextUtils.isEmpty(params.titleOrAltText)) {
-                val altTextView = TextView(context)
-                altTextView.text = params.titleOrAltText
-                menu.setHeaderView(altTextView)
-            }
-            v.setOnCreateContextMenuListener(null)
-        }
-
-        override fun onMenuItemClick(item: MenuItem): Boolean {
-            val clipboard =
-                context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-            when (item.itemId) {
-                MENU_ID_OPEN_IN_NEW_TAB -> webLayerModel.createTabFor(params.linkUri!!)
-                MENU_ID_COPY_LINK_URI -> clipboard.setPrimaryClip(
-                    ClipData.newPlainText("link address", params.linkUri.toString())
-                )
-                MENU_ID_COPY_LINK_TEXT -> clipboard.setPrimaryClip(
-                    ClipData.newPlainText(
-                        "link text",
-                        params.linkText
-                    )
-                )
-                MENU_ID_DOWNLOAD_IMAGE, MENU_ID_DOWNLOAD_VIDEO, MENU_ID_DOWNLOAD_LINK -> tab!!.download(
-                    params
-                )
-                else -> {
-                }
-            }
-            return true
         }
     }
 
@@ -209,8 +126,11 @@ class WebLayerModel(
             if (navigation.isSameDocument) return
 
             val timestamp = Date()
-            val visit = Visit(timestamp = timestamp,
-                visitRootID = DateConverter.fromDate(timestamp)!!, visitType = 0)
+            val visit = Visit(
+                timestamp = timestamp,
+                visitRootID = DateConverter.fromDate(timestamp)!!,
+                visitType = 0
+            )
             historyViewModel.insert(navigation.uri, visit = visit)
         }
     }
@@ -227,6 +147,18 @@ class WebLayerModel(
                 browser.activeTab?.navigationController?.navigate(Uri.parse(appURL))
             } else if (browser.tabs.isEmpty()) {
                 createTabFor(Uri.parse(appURL))
+            }
+        }
+
+        private fun restorePreviousTabList(savedInstanceState: Bundle?) {
+            savedInstanceState ?: return
+
+            val previousTabGuids = savedInstanceState.getStringArray(KEY_PREVIOUS_TAB_GUIDS) ?: return
+            val currentTabMap: MutableMap<String, Tab> = HashMap()
+            browser.tabs.forEach { currentTabMap[it.guid] = it }
+            previousTabGuids.forEach {
+                val tab = currentTabMap[it] ?: return
+                onNewTabAdded(tab)
             }
         }
     }
@@ -248,7 +180,7 @@ class WebLayerModel(
     }
 
     private var tabList = TabList()
-    val orderedTabList: LiveData<List<BrowserPrimitive>>
+    val orderedTabList: LiveData<List<TabInfo>>
         get() = tabList.orderedTabList
 
     private var fullscreenCallback: FullscreenCallbackImpl? = null
@@ -297,13 +229,15 @@ class WebLayerModel(
         // and listen for the scrolling offsets, which we then apply to the real bottom toolbar.
         // This is a valid use case according to the BrowserControlsOffsetCallback.
         browser.setBottomView(bottomControlsPlaceholder)
+        bottomControlsPlaceholder.layoutParams.height =
+            fragment.context?.resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
+        bottomControlsPlaceholder.requestLayout()
+
         browser.setTopView(topControlsPlaceholder)
         topControlsPlaceholder.layoutParams.height =
             fragment.context?.resources?.getDimensionPixelSize(com.neeva.app.R.dimen.top_toolbar_height) ?: 0
         topControlsPlaceholder.requestLayout()
-        bottomControlsPlaceholder.layoutParams.height =
-            fragment.context?.resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
-        bottomControlsPlaceholder.requestLayout()
+
         browser.registerBrowserControlsOffsetCallback(browserControlsOffsetCallback)
 
         browser.registerBrowserRestoreCallback(browserRestoreCallback)
@@ -316,17 +250,6 @@ class WebLayerModel(
             loginCookie, cookieChangedCallback)
 
         browser.registerTabListCallback(tabListCallback)
-    }
-
-    private fun restorePreviousTabList(savedInstanceState: Bundle?) {
-        if (savedInstanceState == null) return
-        val previousTabGuids = savedInstanceState.getStringArray(KEY_PREVIOUS_TAB_GUIDS) ?: return
-        val currentTabMap: MutableMap<String, Tab> = HashMap()
-        browser.tabs.forEach { currentTabMap[it.guid] = it }
-        previousTabGuids.forEach {
-            val tab = currentTabMap[it] ?: return
-            onNewTabAdded(tab)
-        }
     }
 
     fun createTabFor(uri: Uri) {
@@ -362,8 +285,6 @@ class WebLayerModel(
 
         tab.navigationController.registerNavigationCallback(navigationCallback)
         val tabCallback: TabCallback = object : TabCallback() {
-            var consecutiveCrashes = 0
-
             override fun bringTabToFront() {
                 tab.browser.setActiveTab(tab)
                 browserCallbacks.get()?.bringToForeground()
@@ -383,39 +304,11 @@ class WebLayerModel(
                 if (tab != browser.activeTab) return
                 browserCallbacks.get()?.showContextMenuForTab(params, tab)
             }
-
-            override fun onRenderProcessGone() {
-                consecutiveCrashes++
-
-                if (consecutiveCrashes < 3) {
-                    browserCallbacks.get()?.let {
-                        if (BuildConfig.DEBUG) {
-                            Toast.makeText(
-                                NeevaBrowser.context,
-                                "Renderer crashed.  Automatically reloading",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-
-                        // We have to delay the reload because onRenderProcessGone() is called synchronously.
-                        Handler(Looper.getMainLooper()).post {
-                            it.reloadCurrentTab()
-                        }
-                    }
-                } else {
-                    consecutiveCrashes = 0
-
-                    if (BuildConfig.DEBUG) {
-                        Toast.makeText(
-                            NeevaBrowser.context,
-                            "Renderer crashed too many times.  Must reload manually",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
-            }
         }
         tab.registerTabCallback(tabCallback)
+
+        val crashTabCallback = CrashTabCallback(tab)
+        tab.registerTabCallback(crashTabCallback)
 
         val errorPageCallback = object : ErrorPageCallback() {
             // TODO(dan.alcantara): I don't know if we should be overriding this.
@@ -442,7 +335,7 @@ class WebLayerModel(
                 historyViewModel.insert(url = tab.currentDisplayUrl!!, favicon = icon.toFavicon())
             }
         })
-        tabToPerTabState[tab] = PerTabState(faviconFetcher, tabCallback)
+        tabToPerTabState[tab] = PerTabState(faviconFetcher, tabCallback, crashTabCallback)
     }
 
     private fun unregisterBrowserAndTabCallbacks() {
@@ -458,79 +351,26 @@ class WebLayerModel(
         // unsetting FullscreenCallback also exits fullscreen.
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
 
-        val perTabState: PerTabState = tabToPerTabState[tab]!!
-        tab.unregisterTabCallback(perTabState.tabCallback)
-        perTabState.faviconFetcher.destroy()
+        tabToPerTabState[tab]?.apply {
+            tabCallbacks.forEach(tab::unregisterTabCallback)
+            faviconFetcher.destroy()
+        }
         tabToPerTabState.remove(tab)
 
         tab.setErrorPageCallback(null)
         tab.setNewTabCallback(null)
     }
 
-    fun onGridShown() {
-        browser.activeTab?.captureAndSaveScreenshot()
-    }
+    fun onGridShown() = browser.activeTab?.captureAndSaveScreenshot(tabList)
 
-    fun select(primitive: BrowserPrimitive) {
-        val tab = tabList.findTab(primitive.id) ?: return
-        selectTab(tab)
-    }
-
-    fun close(primitive: BrowserPrimitive) {
-        val tab = tabList.findTab(primitive.id) ?: return
-        tab.dispatchBeforeUnloadAndClose()
-    }
+    fun select(primitive: TabInfo) = tabList.findTab(primitive.id)?.let { selectTab(it) }
+    fun close(primitive: TabInfo) = tabList.findTab(primitive.id)?.dispatchBeforeUnloadAndClose()
 
     fun selectTab(tab: Tab) {
-        browser.activeTab?.takeUnless { it.isDestroyed }?.captureAndSaveScreenshot()
+        // Screenshot the previous tab right before it is replaced to keep it as fresh as possible.
+        browser.activeTab?.takeUnless { it.isDestroyed }?.captureAndSaveScreenshot(tabList)
+
         browser.setActiveTab(tab)
     }
-
-    private fun Tab.captureAndSaveScreenshot() {
-        // TODO(dan.alcantara): There appears to be a race condition that results in the Tab being
-        //                      destroyed (and unusable by WebLayer) before this is called.
-        if (isDestroyed) return
-
-        captureScreenShot(0.5f) { thumbnail, _ ->
-            val dir = File(NeevaBrowser.context.filesDir, DIRECTORY_TAB_SCREENSHOTS)
-            dir.mkdirs()
-
-            val file = File(dir, "tab_$guid.jpg")
-            if (file.exists()) file.delete()
-
-            try {
-                val out = FileOutputStream(file)
-                thumbnail?.compress(CompressFormat.JPEG, 100, out)
-                out.flush()
-                out.close()
-                tabList.updateThumbnailUri(guid, file.toUri())
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 }
 
-@Suppress("UNCHECKED_CAST")
-class WebViewModelFactory(
-    private val domainModel: DomainViewModel,
-    private val historyViewModel: HistoryViewModel
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return WebLayerModel(
-            domainModel,
-            historyViewModel = historyViewModel
-        ) as T
-    }
-}
-
-data class BrowserPrimitive(
-    val id: String,
-    val thumbnailUri: Uri? = File(
-        File(NeevaBrowser.context.filesDir, WebLayerModel.DIRECTORY_TAB_SCREENSHOTS),
-        "tab_$id.jpg"
-    ).toUri(),
-    val url: Uri?,
-    val title: String?,
-    val isSelected: Boolean
-)
