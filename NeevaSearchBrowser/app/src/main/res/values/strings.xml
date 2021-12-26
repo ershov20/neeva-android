@@ -7,4 +7,11 @@
     <string name="download_image">Download image</string>
     <string name="download_video">Download video</string>
     <string name="download_link">Download link</string>
+
+    <string name="toolbar_go_back">Go back</string>
+    <string name="toolbar_go_forward">Go forward</string>
+    <string name="toolbar_save_to_space">Save to space</string>
+    <string name="toolbar_tab_switcher">Manage your tabs</string>
+    <string name="toolbar_neeva_menu">Open main menu</string>
+
 </resources>

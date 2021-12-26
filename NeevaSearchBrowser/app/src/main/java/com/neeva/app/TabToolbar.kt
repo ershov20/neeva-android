@@ -6,13 +6,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.SelectedTabModel
@@ -26,8 +27,7 @@ class TabToolbarModel(
 
 @Composable
 fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
-    val canGoBack: Boolean? by selectedTabModel.canGoBack.observeAsState()
-    val canGoForward: Boolean? by selectedTabModel.canGoForward.observeAsState()
+    val navigationInfo by selectedTabModel.navigationInfoFlow.collectAsState(SelectedTabModel.NavigationInfo())
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -38,28 +38,28 @@ fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         Button(
-            enabled = canGoBack ?: false,
+            enabled = navigationInfo.canGoBackward,
             resID = R.drawable.ic_baseline_arrow_back_24,
-            contentDescription = "back button",
+            contentDescription = stringResource(id = R.string.toolbar_go_back),
             onClick = selectedTabModel::goBack
         )
         Button(
-            enabled = canGoForward ?: false,
+            enabled = navigationInfo.canGoForward,
             resID = R.drawable.ic_baseline_arrow_forward_24,
-            contentDescription = "forward button",
+            contentDescription = stringResource(id = R.string.toolbar_go_forward),
             onClick = selectedTabModel::goForward
         )
         NeevaMenuButton(onClick = model.onNeevaMenu)
         Button(
             true,
             resID = R.drawable.ic_baseline_bookmark_border_24,
-            contentDescription = "save to space",
+            contentDescription = stringResource(R.string.toolbar_save_to_space),
             onClick = model.onAddToSpace
         )
         Button(
             true,
             resID = R.drawable.ic_baseline_grid_view_24,
-            contentDescription = "switch tabs",
+            contentDescription = stringResource(R.string.toolbar_tab_switcher),
             onClick = model.onTabSwitcher
         )
     }
@@ -69,7 +69,7 @@ fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
 fun NeevaMenuButton(onClick: () -> Unit) {
     Image(
         imageVector = ImageVector.vectorResource(id = R.drawable.ic_neeva_logo),
-        contentDescription = "neeva menu",
+        contentDescription = stringResource(id = R.string.toolbar_neeva_menu),
         contentScale = ContentScale.Inside,
         modifier = Modifier
             .clickable { onClick() }

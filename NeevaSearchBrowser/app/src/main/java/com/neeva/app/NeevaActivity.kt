@@ -31,6 +31,7 @@ import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.UrlBarModelFactory
+import kotlinx.coroutines.flow.collect
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
@@ -42,6 +43,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
         private const val PERSISTENCE_ID = "Neeva_Browser"
         private const val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
+        private const val WEBLAYER_FRAGMENT_TAG = "WebLayer Fragment"
     }
 
     private val domainsViewModel by viewModels<DomainViewModel> {
@@ -169,10 +171,12 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             }
         }
 
-        selectedTabModel.currentUrl.observe(this) {
-            if (it.toString().isEmpty()) return@observe
-
-            urlBarModel.onCurrentUrlChanged(it.toString())
+        lifecycleScope.launchWhenCreated {
+            selectedTabModel.urlFlow.collect {
+                if (it.toString().isNotBlank()) {
+                    urlBarModel.onCurrentUrlChanged(it.toString())
+                }
+            }
         }
 
         urlBarModel.autocompletedSuggestion = domainsViewModel.domainsSuggestions.map {
@@ -183,23 +187,19 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
         // TODO: Move these to CompositionLocal
         appNavModel.onOpenUrl = { selectedTabModel.loadUrl(it) }
-            NeevaMenuData.updateState = appNavModel::setContentState
-            NeevaMenuData.loadURL = { selectedTabModel.loadUrl(it) }
+        NeevaMenuData.updateState = appNavModel::setContentState
+        NeevaMenuData.loadURL = { selectedTabModel.loadUrl(it) }
     }
 
-    private fun getOrCreateBrowserFragment(savedInstanceState: Bundle?): Fragment {
-        val fragmentManager = supportFragmentManager
-        if (savedInstanceState != null) {
-            // FragmentManager could have re-created the fragment.
-            val fragments = fragmentManager.fragments
-            check(fragments.size <= 1) { "More than one fragment added, shouldn't happen" }
-            if (fragments.size == 1) {
-                return fragments[0]
-            }
+    private fun getOrCreateBrowserFragment(): Fragment {
+        // Check if the Fragment was already created by a previous instance of the NeevaActivity.
+        supportFragmentManager.findFragmentByTag(WEBLAYER_FRAGMENT_TAG)?.apply {
+            return this
         }
+
         val fragment = WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
-        val transaction = fragmentManager.beginTransaction()
-        transaction.add(R.id.weblayer, fragment)
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.add(R.id.weblayer, fragment, WEBLAYER_FRAGMENT_TAG)
 
         // Note the commitNow() instead of commit(). We want the fragment to get attached to
         // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
@@ -212,7 +212,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         if (isFinishing || isDestroyed) return
         webLayer.isRemoteDebuggingEnabled = true
 
-        val fragment: Fragment = getOrCreateBrowserFragment(savedInstanceState)
+        val fragment: Fragment = getOrCreateBrowserFragment()
         webModel.onWebLayerReady(
             fragment,
             topControlPlaceholder,
@@ -223,11 +223,15 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
     override fun onBackPressed() {
         when {
+            webModel.canExitFullscreen() -> {
+                webModel.exitFullscreen()
+            }
+
             appNavModel.state.value != null && appNavModel.state.value != AppNavState.HIDDEN -> {
                 appNavModel.setContentState(AppNavState.HIDDEN)
             }
 
-            selectedTabModel.canGoBack.value == true -> {
+            selectedTabModel.navigationInfoFlow.value.canGoBackward -> {
                 selectedTabModel.goBack()
             }
 
@@ -282,10 +286,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     }
 
     override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
-        // TODO(dan.alcantara): This is fragile.  Should figure out a better way to do this, or use
-        //                      tags instead of indexing at the very least.
-        val webLayerView: View? = supportFragmentManager.fragments[0].view
-        webLayerView?.apply {
+        supportFragmentManager.findFragmentByTag(WEBLAYER_FRAGMENT_TAG)?.view?.apply {
             // Need to use the NeevaActivity as the context because the WebLayerView doesn't have
             // access to the correct resources.
             setOnCreateContextMenuListener(

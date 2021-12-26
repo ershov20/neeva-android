@@ -2,8 +2,8 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import androidx.lifecycle.*
-import com.neeva.app.NeevaConstants.appURL
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
@@ -14,6 +14,11 @@ class SelectedTabModel(
     selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
     private val createTabFor: (Uri) -> Unit,
 ): ViewModel() {
+    data class NavigationInfo(
+        val canGoBackward: Boolean = false,
+        val canGoForward: Boolean = false
+    )
+
     companion object {
         class SelectedTabModelFactory(
             private val selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
@@ -26,20 +31,17 @@ class SelectedTabModel(
         }
     }
 
-    private val _currentUrl = MutableLiveData(Uri.parse(appURL))
-    val currentUrl: LiveData<Uri> = _currentUrl
+    private val _urlFlow = MutableStateFlow(Uri.EMPTY)
+    val urlFlow: StateFlow<Uri> = _urlFlow
 
-    private val _currentTitle = MutableLiveData("")
-    val currentTitle: LiveData<String> = _currentTitle
+    private val _titleFlow = MutableStateFlow("")
+    val titleFlow: StateFlow<String> = _titleFlow
 
-    private val _canGoBack = MutableLiveData(false)
-    val canGoBack: LiveData<Boolean> = _canGoBack
+    private val _navigationInfoFlow = MutableStateFlow(NavigationInfo(false, false))
+    val navigationInfoFlow: StateFlow<NavigationInfo> = _navigationInfoFlow
 
-    private val _canGoForward = MutableLiveData(false)
-    val canGoForward: LiveData<Boolean> = _canGoForward
-
-    private val _progress = MutableLiveData(0)
-    val progress: LiveData<Int> = _progress
+    private val _progressFlow = MutableStateFlow(0)
+    val progressFlow: StateFlow<Int> = _progressFlow
 
     private var selectedTab: Tab? = null
 
@@ -61,8 +63,8 @@ class SelectedTabModel(
                     navigationController.apply {
                         val index = navigationListCurrentIndex
                         if (index != -1) {
-                            _currentUrl.value = getNavigationEntryDisplayUri(index)
-                            _currentTitle.value = getNavigationEntryTitle(index)
+                            _urlFlow.value = getNavigationEntryDisplayUri(index)
+                            _titleFlow.value = getNavigationEntryTitle(index)
                         }
                     }
                 }
@@ -87,43 +89,43 @@ class SelectedTabModel(
 
     private val selectedTabCallback: TabCallback = object : TabCallback() {
         override fun onVisibleUriChanged(uri: Uri) {
-            _currentUrl.value = uri
+            _urlFlow.value = uri
         }
 
         override fun onTitleUpdated(title: String) {
-            _currentTitle.value = title
+            _titleFlow.value = title
         }
     }
 
     private val selectedTabNavigationCallback = object : NavigationCallback() {
         override fun onLoadProgressChanged(progress: Double) {
-            _progress.value = (100 * progress).roundToInt()
+            _progressFlow.value = (100 * progress).roundToInt()
         }
 
         override fun onNavigationStarted(navigation: Navigation) {
             if (navigation.isSameDocument) return
-
-            _canGoBack.value = selectedTab?.navigationController?.canGoBack()
-            _canGoForward.value = selectedTab?.navigationController?.canGoForward()
+            updateNavigationInfo()
         }
 
         override fun onNavigationCompleted(navigation: Navigation) {
-            _canGoBack.value = selectedTab?.navigationController?.canGoBack()
-            _canGoForward.value = selectedTab?.navigationController?.canGoForward()
+            updateNavigationInfo()
         }
     }
 
     fun goBack() {
         selectedTab?.navigationController?.goBack()
-
-        _canGoBack.value = selectedTab?.navigationController?.canGoBack()
-        _canGoForward.value = selectedTab?.navigationController?.canGoForward()
+        updateNavigationInfo()
     }
 
     fun goForward() {
         selectedTab?.navigationController?.goForward()
+        updateNavigationInfo()
+    }
 
-        _canGoBack.value = selectedTab?.navigationController?.canGoBack()
-        _canGoForward.value = selectedTab?.navigationController?.canGoForward()
+    private fun updateNavigationInfo() {
+        _navigationInfoFlow.value = NavigationInfo(
+            selectedTab?.navigationController?.canGoBack() ?: false,
+            selectedTab?.navigationController?.canGoForward() ?: false
+        )
     }
 }

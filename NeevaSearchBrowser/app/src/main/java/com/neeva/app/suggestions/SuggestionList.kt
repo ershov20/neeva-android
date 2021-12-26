@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -35,7 +36,7 @@ fun SuggestionList(
     val navSuggestions by suggestionsViewModel.navSuggestions.observeAsState(emptyList())
     val domainSuggestions by domainViewModel.domainsSuggestions.observeAsState(emptyList())
     val showSuggestionList by suggestionsViewModel.shouldShowSuggestions.observeAsState(false)
-    val currentURL: Uri by selectedTabModel.currentUrl.observeAsState(Uri.EMPTY)
+    val currentURL: Uri by selectedTabModel.urlFlow.collectAsState(Uri.EMPTY)
     val isLazyTab: Boolean by urlBarModel.isLazyTab.observeAsState(false)
 
     if (showSuggestionList) {

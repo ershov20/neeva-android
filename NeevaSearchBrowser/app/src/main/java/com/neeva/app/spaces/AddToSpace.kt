@@ -78,11 +78,14 @@ fun AddToSpaceUI(selectedTabModel: SelectedTabModel, onDismiss: () -> Unit) {
         }
 
         items(spaces) {
+            val title = selectedTabModel.titleFlow.collectAsState("")
+
             SpaceRow(space = it, selectedTabModel) {
+                title
                 scope.launch {
                     it.addOrRemove(
-                        selectedTabModel.currentUrl.value!!,
-                        title = selectedTabModel.currentTitle.value!!
+                        selectedTabModel.urlFlow.value,
+                        title = title.value
                     )
                     onDismiss()
                 }
@@ -140,13 +143,16 @@ fun SpaceRow(space: Space, selectedTabModel: SelectedTabModel? = null, onClick: 
 
         if (selectedTabModel != null) {
             val spaceHasUrl: Boolean by remember {
-                mutableStateOf(space.contentURLs?.contains(selectedTabModel.currentUrl.value) == true)
+                mutableStateOf(space.contentURLs?.contains(selectedTabModel.urlFlow.value) == true)
             }
             Image(
-                imageVector = ImageVector.vectorResource(id =
-                if (spaceHasUrl)
-                    R.drawable.ic_baseline_bookmark_24
-                else R.drawable.ic_baseline_bookmark_border_24 ),
+                imageVector = ImageVector.vectorResource(
+                    if (spaceHasUrl) {
+                        R.drawable.ic_baseline_bookmark_24
+                    } else {
+                        R.drawable.ic_baseline_bookmark_border_24
+                    }
+                ),
                 contentDescription = "Url in space indicator",
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.size(48.dp, 48.dp),

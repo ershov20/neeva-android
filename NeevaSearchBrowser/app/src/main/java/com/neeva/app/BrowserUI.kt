@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -30,11 +31,16 @@ fun BrowserUI(
     historyViewModel: HistoryViewModel
 ) {
     val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
-    val progress: Int by selectedTabModel.progress.observeAsState(0)
+    val progress: Int by selectedTabModel.progressFlow.collectAsState(initial = 0)
+
     Column {
         URLBar(urlBarModel, domainViewModel)
         Box {
-            Box(Modifier.height(1.dp).fillMaxWidth().background(MaterialTheme.colors.background))
+            Box(
+                Modifier
+                    .height(1.dp)
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colors.background))
             if (progress != 100) {
                 LinearProgressIndicator(
                     progress = progress / 100.0f,

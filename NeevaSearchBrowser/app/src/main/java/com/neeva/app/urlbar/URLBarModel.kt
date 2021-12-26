@@ -64,7 +64,7 @@ class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {
     fun onFocusChanged(focus: FocusState) {
         _isEditing.value = focus.isFocused
         if (!focus.isFocused) {
-            _text.value = _text.value?.copy(selectedTabModel.currentUrl.value?.baseDomain() ?: "")
+            _text.value = _text.value?.copy(selectedTabModel.urlFlow.value.baseDomain() ?: "")
         } else {
             _text.value = _text.value?.copy("")
             viewModelScope.launch {

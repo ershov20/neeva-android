@@ -61,17 +61,23 @@ class WebLayerModel(
     val selectedTabFlow = MutableStateFlow<Pair<Tab?, Tab?>>(Pair(null, null))
 
     private inner class FullscreenCallbackImpl : FullscreenCallback() {
-        private var mSystemVisibilityToRestore = 0
+        private var systemVisibilityToRestore = 0
+        private var exitFullscreenRunnable: Runnable? = null
 
         override fun onEnterFullscreen(exitFullscreenRunnable: Runnable) {
+            this.exitFullscreenRunnable = exitFullscreenRunnable
             browserCallbacks.get()?.onEnterFullscreen()?.let {
-                mSystemVisibilityToRestore = it
+                systemVisibilityToRestore = it
             }
         }
 
         override fun onExitFullscreen() {
-            browserCallbacks.get()?.onExitFullscreen(mSystemVisibilityToRestore)
+            this.exitFullscreenRunnable = null
+            browserCallbacks.get()?.onExitFullscreen(systemVisibilityToRestore)
         }
+
+        fun canExitFullscreen() = exitFullscreenRunnable != null
+        fun exitFullscreen() = exitFullscreenRunnable?.run()
     }
 
     private var uriRequestForNewTab: Uri? = null
@@ -183,7 +189,7 @@ class WebLayerModel(
     val orderedTabList: LiveData<List<TabInfo>>
         get() = tabList.orderedTabList
 
-    private var fullscreenCallback: FullscreenCallbackImpl? = null
+    private var fullscreenCallback = FullscreenCallbackImpl()
     private val tabToPerTabState: HashMap<Tab, PerTabState> = HashMap()
 
     fun onSaveInstanceState(outState: Bundle) {
@@ -270,20 +276,9 @@ class WebLayerModel(
     }
 
     fun registerTabCallbacks(tab: Tab) {
-        when {
-            fullscreenCallback != null -> tab.fullscreenCallback = fullscreenCallback
-
-            tab.fullscreenCallback != null -> {
-                fullscreenCallback = tab.fullscreenCallback as FullscreenCallbackImpl
-            }
-
-            else -> {
-                fullscreenCallback = FullscreenCallbackImpl()
-                tab.fullscreenCallback = fullscreenCallback
-            }
-        }
-
+        tab.fullscreenCallback = fullscreenCallback
         tab.navigationController.registerNavigationCallback(navigationCallback)
+
         val tabCallback: TabCallback = object : TabCallback() {
             override fun bringTabToFront() {
                 tab.browser.setActiveTab(tab)
@@ -360,6 +355,9 @@ class WebLayerModel(
         tab.setErrorPageCallback(null)
         tab.setNewTabCallback(null)
     }
+
+    fun canExitFullscreen() = fullscreenCallback.canExitFullscreen()
+    fun exitFullscreen() = fullscreenCallback.exitFullscreen()
 
     fun onGridShown() = browser.activeTab?.captureAndSaveScreenshot(tabList)
 
