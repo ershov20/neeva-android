@@ -1,6 +1,9 @@
 package com.neeva.app.settings
 
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -11,8 +14,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -25,12 +28,13 @@ import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
 
-@OptIn(ExperimentalAnimationApi::class,
-    androidx.compose.foundation.ExperimentalFoundationApi::class
+@OptIn(
+    ExperimentalAnimationApi::class,
+    ExperimentalFoundationApi::class
 )
 @Composable
 fun SettingsContainer(appNavModel: AppNavModel) {
-    val state: AppNavState by appNavModel.state.observeAsState(AppNavState.HIDDEN)
+    val state: AppNavState by appNavModel.state.collectAsState(AppNavState.BROWSER)
     val density = LocalDensity.current
     AnimatedVisibility(
         visible = state == AppNavState.SETTINGS,
@@ -66,7 +70,7 @@ fun SettingsMain(appNavModel: AppNavModel) {
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .size(48.dp, 48.dp)
-                        .clickable { appNavModel.setContentState(AppNavState.HIDDEN) },
+                        .clickable { appNavModel.showBrowser() },
                     colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
                 )
                 Text(
@@ -110,10 +114,13 @@ fun SettingsRow(data: SettingsRowData, appNavModel: AppNavModel) {
         .fillMaxWidth()
         .height(56.dp)
         .background(MaterialTheme.colors.primary)
-        .then(if (data.type == SettingsRowType.LINK) Modifier.clickable {
-            appNavModel.onOpenUrl(data.url!!)
-            appNavModel.setContentState(AppNavState.HIDDEN)
-        } else Modifier),
+        .then(
+            if (data.type == SettingsRowType.LINK && data.url != null) {
+                Modifier.clickable { appNavModel.openUrl(data.url) }
+            } else {
+                Modifier
+            }
+        ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Spacer(modifier = Modifier.width(16.dp))

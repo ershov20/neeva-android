@@ -25,7 +25,6 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardViewModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.history.HistoryViewModelFactory
-import com.neeva.app.neeva_menu.NeevaMenuData
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
@@ -69,7 +68,9 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         CardViewModel.Companion.CardViewModelFactory(webModel.orderedTabList)
     }
 
-    private val appNavModel by viewModels<AppNavModel>()
+    private val appNavModel by viewModels<AppNavModel> {
+        AppNavModel.Companion.AppNavModelFactory(selectedTabModel::loadUrl)
+    }
 
     /**
      * View provided to WebLayer that allows us to receive information about when the bottom toolbar
@@ -123,11 +124,11 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                         if (!isEditing) {
                             TabToolbar(
                                 TabToolbarModel(
-                                    { appNavModel.setContentState(AppNavState.NEEVA_MENU) },
-                                    { appNavModel.setContentState(AppNavState.ADD_TO_SPACE) },
+                                    appNavModel::showNeevaMenu,
+                                    appNavModel::showAddToSpace,
                                     {
                                         webModel.onGridShown()
-                                        appNavModel.setContentState(AppNavState.CARD_GRID)
+                                        appNavModel.showCardGrid()
                                     }
                                 ),
                                 selectedTabModel
@@ -184,11 +185,6 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
             it.first()
         }
-
-        // TODO: Move these to CompositionLocal
-        appNavModel.onOpenUrl = { selectedTabModel.loadUrl(it) }
-        NeevaMenuData.updateState = appNavModel::setContentState
-        NeevaMenuData.loadURL = { selectedTabModel.loadUrl(it) }
     }
 
     private fun getOrCreateBrowserFragment(): Fragment {
@@ -213,6 +209,13 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         webLayer.isRemoteDebuggingEnabled = true
 
         val fragment: Fragment = getOrCreateBrowserFragment()
+
+        // Have WebLayer Shell retain the fragment instance to simulate the behavior of
+        // external embedders (note that if this is changed, then WebLayer Shell should handle
+        // rotations and resizes itself via its manifest, as otherwise the user loses all state
+        // when the shell is rotated in the foreground).
+        fragment.retainInstance = true
+
         webModel.onWebLayerReady(
             fragment,
             topControlPlaceholder,
@@ -227,8 +230,8 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 webModel.exitFullscreen()
             }
 
-            appNavModel.state.value != null && appNavModel.state.value != AppNavState.HIDDEN -> {
-                appNavModel.setContentState(AppNavState.HIDDEN)
+            appNavModel.state.value != null && appNavModel.state.value != AppNavState.BROWSER -> {
+                appNavModel.showBrowser()
             }
 
             selectedTabModel.navigationInfoFlow.value.canGoBackward -> {
@@ -287,7 +290,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
     override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
         supportFragmentManager.findFragmentByTag(WEBLAYER_FRAGMENT_TAG)?.view?.apply {
-            // Need to use the NeevaActivity as the context because the WebLayerView doesn't have
+            // Need to use the NeevaActivity as the context because the WebLayer View doesn't have
             // access to the correct resources.
             setOnCreateContextMenuListener(
                 ContextMenuCreator(webModel, contextMenuParams, tab, this@NeevaActivity)

@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -29,7 +29,7 @@ fun OverlaySheet(
     config: OverlaySheetHeightConfig = OverlaySheetHeightConfig.HALF_SCREEN,
     content: @Composable () -> Unit,
 ) {
-    val state: AppNavState by appNavModel.state.observeAsState(AppNavState.HIDDEN)
+    val state: AppNavState by appNavModel.state.collectAsState(AppNavState.BROWSER)
     val density = LocalDensity.current
 
     AnimatedVisibility(
@@ -47,7 +47,7 @@ fun OverlaySheet(
                 .background(Color.Transparent)
         ) {
             Spacer(modifier = Modifier
-                .clickable { appNavModel.setContentState(AppNavState.HIDDEN) }
+                .clickable { appNavModel.showBrowser() }
                 .fillMaxWidth()
                 .then(
                     when (config) {

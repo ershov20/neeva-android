@@ -19,6 +19,7 @@ import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.Visit
 import com.neeva.app.storage.toFavicon
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.chromium.weblayer.*
 import java.io.File
 import java.lang.ref.WeakReference
@@ -30,7 +31,6 @@ class WebLayerModel(
     private val historyViewModel: HistoryViewModel
 ): ViewModel() {
     companion object {
-        private const val KEY_PREVIOUS_TAB_GUIDS = "previousTabGuids"
         private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
 
         fun getTabScreenshotDirectory(): File {
@@ -58,38 +58,17 @@ class WebLayerModel(
         val tabCallbacks: MutableList<TabCallback> = callbacks.toMutableList()
     }
 
-    val selectedTabFlow = MutableStateFlow<Pair<Tab?, Tab?>>(Pair(null, null))
-
-    private inner class FullscreenCallbackImpl : FullscreenCallback() {
-        private var systemVisibilityToRestore = 0
-        private var exitFullscreenRunnable: Runnable? = null
-
-        override fun onEnterFullscreen(exitFullscreenRunnable: Runnable) {
-            this.exitFullscreenRunnable = exitFullscreenRunnable
-            browserCallbacks.get()?.onEnterFullscreen()?.let {
-                systemVisibilityToRestore = it
-            }
-        }
-
-        override fun onExitFullscreen() {
-            this.exitFullscreenRunnable = null
-            browserCallbacks.get()?.onExitFullscreen(systemVisibilityToRestore)
-        }
-
-        fun canExitFullscreen() = exitFullscreenRunnable != null
-        fun exitFullscreen() = exitFullscreenRunnable?.run()
-    }
+    private val _selectedTabFlow = MutableStateFlow<Pair<Tab?, Tab?>>(Pair(null, null))
+    val selectedTabFlow: StateFlow<Pair<Tab?, Tab?>> = _selectedTabFlow
 
     private var uriRequestForNewTab: Uri? = null
-    private var lastSavedInstanceState: Bundle? = null
 
-    private lateinit var profile: Profile
     private lateinit var browser: Browser
 
     private val tabListCallback = object : TabListCallback() {
         override fun onActiveTabChanged(activeTab: Tab?) {
-            val previousTab = selectedTabFlow.value.second
-            selectedTabFlow.tryEmit(Pair(previousTab, activeTab))
+            val previousTab = _selectedTabFlow.value.second
+            _selectedTabFlow.tryEmit(Pair(previousTab, activeTab))
             tabList.updatedSelectedTab(activeTab?.guid)
         }
 
@@ -127,6 +106,10 @@ class WebLayerModel(
         }
     }
 
+    private val newTabCallback: NewTabCallback = object : NewTabCallback() {
+        override fun onNewTab(newTab: Tab, @NewTabType type: Int) = registerNewTab(newTab, type)
+    }
+
     private val navigationCallback = object : NavigationCallback() {
         override fun onNavigationStarted(navigation: Navigation) {
             if (navigation.isSameDocument) return
@@ -141,41 +124,9 @@ class WebLayerModel(
         }
     }
 
-    private val browserRestoreCallback: BrowserRestoreCallback = object : BrowserRestoreCallback() {
-        override fun onRestoreCompleted() {
-            super.onRestoreCompleted()
+    private var tabListRestorer: BrowserRestoreCallbackImpl? = null
 
-            restorePreviousTabList(lastSavedInstanceState);
-            if (browser.tabs.count() == 1
-                && browser.activeTab == browser.tabs.first()
-                && browser.activeTab?.navigationController?.navigationListCurrentIndex == -1
-            ) {
-                browser.activeTab?.navigationController?.navigate(Uri.parse(appURL))
-            } else if (browser.tabs.isEmpty()) {
-                createTabFor(Uri.parse(appURL))
-            }
-        }
-
-        private fun restorePreviousTabList(savedInstanceState: Bundle?) {
-            savedInstanceState ?: return
-
-            val previousTabGuids = savedInstanceState.getStringArray(KEY_PREVIOUS_TAB_GUIDS) ?: return
-            val currentTabMap: MutableMap<String, Tab> = HashMap()
-            browser.tabs.forEach { currentTabMap[it.guid] = it }
-            previousTabGuids.forEach {
-                val tab = currentTabMap[it] ?: return
-                onNewTabAdded(tab)
-            }
-        }
-    }
-
-    private val cookieChangedCallback: CookieChangedCallback = object : CookieChangedCallback() {
-        override fun onCookieChanged(cookie: String, cause: Int) {
-            saveLoginCookieFrom(cookie)
-        }
-    }
-
-    private val browserControlsOffsetCallback: BrowserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
+    private val browserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
         override fun onBottomViewOffsetChanged(offset: Int) {
             browserCallbacks.get()?.onBottomBarOffsetChanged(offset)
         }
@@ -189,14 +140,15 @@ class WebLayerModel(
     val orderedTabList: LiveData<List<TabInfo>>
         get() = tabList.orderedTabList
 
-    private var fullscreenCallback = FullscreenCallbackImpl()
+    private var fullscreenCallback = FullscreenCallbackImpl(
+        { browserCallbacks.get()?.onEnterFullscreen() },
+        { flags -> browserCallbacks.get()?.onExitFullscreen(flags) }
+    )
+
     private val tabToPerTabState: HashMap<Tab, PerTabState> = HashMap()
 
     fun onSaveInstanceState(outState: Bundle) {
-        // Store the stack of previous tab GUIDs that are used to set the next active tab when a tab
-        // closes. Also used to setup various callbacks again on restore.
-        val previousTabGuids = orderedTabList.value?.map { it.id }?.toTypedArray()
-        outState.putStringArray(KEY_PREVIOUS_TAB_GUIDS, previousTabGuids)
+        tabListRestorer?.onSaveInstanceState(outState, orderedTabList.value)
     }
 
     fun onWebLayerReady(
@@ -205,29 +157,11 @@ class WebLayerModel(
         bottomControlsPlaceholder: View,
         savedInstanceState: Bundle?
     ) {
-        lastSavedInstanceState = savedInstanceState
-        // Have WebLayer Shell retain the fragment instance to simulate the behavior of
-        // external embedders (note that if this is changed, then WebLayer Shell should handle
-        // rotations and resizes itself via its manifest, as otherwise the user loses all state
-        // when the shell is rotated in the foreground).
-        fragment.retainInstance = true
         browser = Browser.fromFragment(fragment)!!
 
         browserCallbacks.get()?.getDisplaySize()?.let { windowSize ->
             browser.setMinimumSurfaceSize(windowSize.x, windowSize.y)
         }
-
-        profile = browser.profile
-
-        profile.setTablessOpenUrlCallback(object : OpenUrlCallback() {
-            override fun getBrowserForNewTab(): Browser {
-                return browser
-            }
-
-            override fun onTabAdded(tab: Tab) {
-                registerTabCallbacks(tab)
-            }
-        })
 
         // There appears to be a bug in WebLayer that prevents the bottom bar from being rendered,
         // and also prevents Composables from being re-rendered when their state changes.  To get
@@ -245,17 +179,41 @@ class WebLayerModel(
         topControlsPlaceholder.requestLayout()
 
         browser.registerBrowserControlsOffsetCallback(browserControlsOffsetCallback)
-
-        browser.registerBrowserRestoreCallback(browserRestoreCallback)
-        profile.cookieManager.getCookie(Uri.parse(appURL)) {
-            it?.split("; ")?.forEach { cookie ->
-                saveLoginCookieFrom(cookie)
-            }
-        }
-        profile.cookieManager.addCookieChangedCallback(Uri.parse(appURL),
-            loginCookie, cookieChangedCallback)
-
         browser.registerTabListCallback(tabListCallback)
+
+        tabListRestorer = BrowserRestoreCallbackImpl(
+            savedInstanceState,
+            browser,
+            { createTabFor(Uri.parse(appURL)) },
+            this::onNewTabAdded
+        ).also {
+            browser.registerBrowserRestoreCallback(it)
+        }
+
+        browser.profile.setTablessOpenUrlCallback(
+            object : OpenUrlCallback() {
+                override fun getBrowserForNewTab() = browser
+                override fun onTabAdded(tab: Tab) = registerTabCallbacks(tab)
+            }
+        )
+
+        browser.profile.cookieManager.apply {
+            getCookie(Uri.parse(appURL)) {
+                it?.split("; ")?.forEach { cookie ->
+                    saveLoginCookieFrom(cookie)
+                }
+            }
+
+            addCookieChangedCallback(
+                Uri.parse(appURL),
+                loginCookie,
+                object : CookieChangedCallback() {
+                    override fun onCookieChanged(cookie: String, cause: Int) {
+                        saveLoginCookieFrom(cookie)
+                    }
+                }
+            )
+        }
     }
 
     fun createTabFor(uri: Uri) {
@@ -278,6 +236,9 @@ class WebLayerModel(
     fun registerTabCallbacks(tab: Tab) {
         tab.fullscreenCallback = fullscreenCallback
         tab.navigationController.registerNavigationCallback(navigationCallback)
+
+        tab.setErrorPageCallback(ErrorCallbackImpl(tab))
+        tab.setNewTabCallback(newTabCallback)
 
         val tabCallback: TabCallback = object : TabCallback() {
             override fun bringTabToFront() {
@@ -305,24 +266,6 @@ class WebLayerModel(
         val crashTabCallback = CrashTabCallback(tab)
         tab.registerTabCallback(crashTabCallback)
 
-        val errorPageCallback = object : ErrorPageCallback() {
-            // TODO(dan.alcantara): I don't know if we should be overriding this.
-            override fun onBackToSafety(): Boolean {
-                tab.navigationController.goBack()
-                return true
-            }
-
-            // TODO(dan.alcantara): Although this should be showing the default error page, it
-            //                      doesn't work.
-            override fun getErrorPage(navigation: Navigation): ErrorPage? = null
-        }
-        tab.setErrorPageCallback(errorPageCallback)
-
-        val newTabCallback: NewTabCallback = object : NewTabCallback() {
-            override fun onNewTab(newTab: Tab, @NewTabType type: Int) = registerNewTab(newTab, type)
-        }
-        tab.setNewTabCallback(newTabCallback)
-
         val faviconFetcher = tab.createFaviconFetcher(object : FaviconCallback() {
             override fun onFaviconChanged(favicon: Bitmap?) {
                 val icon = favicon ?: return
@@ -335,8 +278,9 @@ class WebLayerModel(
 
     private fun unregisterBrowserAndTabCallbacks() {
         browser.unregisterTabListCallback(tabListCallback)
-        browser.unregisterBrowserRestoreCallback(browserRestoreCallback)
+        tabListRestorer?.let { browser.unregisterBrowserRestoreCallback(it) }
         browser.unregisterBrowserControlsOffsetCallback(browserControlsOffsetCallback)
+
         tabToPerTabState.forEach { unregisterTabCallbacks(it.key) }
         tabToPerTabState.clear()
     }

@@ -1,7 +1,9 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
@@ -11,7 +13,7 @@ import org.chromium.weblayer.*
 import kotlin.math.roundToInt
 
 class SelectedTabModel(
-    selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
+    selectedTabFlow: StateFlow<Pair<Tab?, Tab?>>,
     private val createTabFor: (Uri) -> Unit,
 ): ViewModel() {
     data class NavigationInfo(
@@ -21,7 +23,7 @@ class SelectedTabModel(
 
     companion object {
         class SelectedTabModelFactory(
-            private val selectedTabFlow: MutableStateFlow<Pair<Tab?, Tab?>>,
+            private val selectedTabFlow: StateFlow<Pair<Tab?, Tab?>>,
             private val createTabFor: (Uri) -> Unit
         ) : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")

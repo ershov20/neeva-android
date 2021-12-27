@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -38,7 +39,8 @@ fun CardsContainer(
     urlBarModel: URLBarModel,
     cardViewModel: CardViewModel
 ) {
-    val state: AppNavState by appNavModel.state.observeAsState(AppNavState.HIDDEN)
+    val state: AppNavState by appNavModel.state.collectAsState(AppNavState.BROWSER)
+
     AnimatedVisibility(
         visible = state == AppNavState.CARD_GRID,
         enter = fadeIn(),
@@ -81,8 +83,7 @@ fun CardGrid(
                     faviconData = favicon,
                     onSelect = {
                         webLayerModel.select(tab)
-
-                        appNavModel.setContentState(AppNavState.HIDDEN)
+                        appNavModel.showBrowser()
                     },
                     onClose = { webLayerModel.close(tab) })
             }
@@ -99,11 +100,11 @@ fun CardGrid(
         ) {
             Button(enabled = true, resID = R.drawable.ic_baseline_add_24, contentDescription = "New Tab") {
                 urlBarModel.openLazyTab()
-                appNavModel.setContentState(AppNavState.HIDDEN)
+                appNavModel.showBrowser()
             }
             Spacer(modifier = Modifier.weight(1f))
             Button(enabled = true, resID = R.drawable.ic_baseline_close_24, contentDescription = "Done") {
-                appNavModel.setContentState(AppNavState.HIDDEN)
+                appNavModel.showBrowser()
             }
         }
     }

@@ -1,9 +1,5 @@
 package com.neeva.app.neeva_menu
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,15 +13,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
@@ -33,20 +26,20 @@ import com.neeva.app.AppNavState
 import com.neeva.app.widgets.OverlaySheet
 import com.neeva.app.widgets.OverlaySheetHeightConfig
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun NeevaMenuSheet(appNavModel: AppNavModel) {
     OverlaySheet(
         appNavModel = appNavModel,
         visibleState = AppNavState.NEEVA_MENU,
-        config = OverlaySheetHeightConfig.WRAP_CONTENT) {
-        NeevaMenuContent()
+        config = OverlaySheetHeightConfig.WRAP_CONTENT
+    ) {
+        NeevaMenuContent(onMenuItem = appNavModel::onMenuItem)
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun NeevaMenuContent() {
+fun NeevaMenuContent(onMenuItem: (NeevaMenuItemId) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -59,7 +52,10 @@ fun NeevaMenuContent() {
                 .fillMaxWidth(),
         ) {
             items(NeevaMenuData.data.subList(0, 4)) { itemData ->
-                NeevaMenuRectangleItem(itemData = itemData)
+                NeevaMenuRectangleItem(
+                    itemData = itemData,
+                    onMenuItem = onMenuItem
+                )
             }
         }
 
@@ -71,20 +67,26 @@ fun NeevaMenuContent() {
                 .background(MaterialTheme.colors.primary)
         ) {
             items(NeevaMenuData.data.subList(4, NeevaMenuData.data.size)) { itemData ->
-                NeevaMenuRow(itemData = itemData)
+                NeevaMenuRow(
+                    itemData = itemData,
+                    onMenuItem = onMenuItem
+                )
             }
         }
     }
 }
 
 @Composable
-fun NeevaMenuRectangleItem(itemData: NeevaMenuItemData) {
+fun NeevaMenuRectangleItem(
+    itemData: NeevaMenuItemData,
+    onMenuItem: (NeevaMenuItemId) -> Unit
+) {
     Column(
         modifier = Modifier
             .padding(8.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colors.primary)
-            .clickable { itemData.onClick() }
+            .clickable { onMenuItem(itemData.id) }
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -105,11 +107,14 @@ fun NeevaMenuRectangleItem(itemData: NeevaMenuItemData) {
 }
 
 @Composable
-fun NeevaMenuRow(itemData: NeevaMenuItemData) {
+fun NeevaMenuRow(
+    itemData: NeevaMenuItemData,
+    onMenuItem: (NeevaMenuItemId) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { itemData.onClick() },
+            .clickable { onMenuItem(itemData.id) },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(

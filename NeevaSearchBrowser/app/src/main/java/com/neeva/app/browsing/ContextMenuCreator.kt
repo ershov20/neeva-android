@@ -13,7 +13,7 @@ import org.chromium.weblayer.Tab
 class ContextMenuCreator(
     var webLayerModel: WebLayerModel,
     var params: ContextMenuParams,
-    var tab: Tab?,
+    var tab: Tab,
     var context: Context
 ): View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
     companion object {
@@ -116,7 +116,7 @@ class ContextMenuCreator(
             }
 
             MENU_ID_DOWNLOAD_IMAGE, MENU_ID_DOWNLOAD_VIDEO, MENU_ID_DOWNLOAD_LINK -> {
-                tab?.download(params)
+                tab.download(params)
             }
         }
 

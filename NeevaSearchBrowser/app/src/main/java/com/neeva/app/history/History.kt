@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -44,7 +45,7 @@ fun HistoryContainer(
     historyViewModel: HistoryViewModel,
     domainViewModel: DomainViewModel
 ) {
-    val state: AppNavState by appNavModel.state.observeAsState(AppNavState.HIDDEN)
+    val state: AppNavState by appNavModel.state.collectAsState(AppNavState.BROWSER)
     val density = LocalDensity.current
     AnimatedVisibility(
         visible = state == AppNavState.HISTORY,
@@ -91,7 +92,7 @@ fun HistoryUI(appNavModel: AppNavModel, historyViewModel: HistoryViewModel, doma
                     contentScale = ContentScale.Inside,
                     modifier = Modifier
                         .size(48.dp, 48.dp)
-                        .clickable { appNavModel.setContentState(AppNavState.HIDDEN) },
+                        .clickable { appNavModel.showBrowser() },
                     colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
                 )
                 Text(
@@ -128,10 +129,7 @@ fun NavigationSuggestion(
 
     NavSuggestion(
         faviconData = bitmap,
-        onOpenUrl = { uri ->
-            appNavModel.onOpenUrl(uri)
-            appNavModel.setContentState(AppNavState.HIDDEN)
-        },
+        onOpenUrl = appNavModel::openUrl,
         navSuggestion = navSuggestion
     )
 }

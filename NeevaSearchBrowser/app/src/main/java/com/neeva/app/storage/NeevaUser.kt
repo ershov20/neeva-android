@@ -12,9 +12,10 @@ data class NeevaUserInfo (
     val displayName: String? = null,
     val email: String? = null,
     val pictureUrl: Uri? = null,
-    var isLoading: Boolean = false,
     val ssoProvider: SSOProvider = SSOProvider.UNKNOWN
 ) {
+    private var isLoading: Boolean = false
+
     companion object {
         var shared = NeevaUserInfo()
 

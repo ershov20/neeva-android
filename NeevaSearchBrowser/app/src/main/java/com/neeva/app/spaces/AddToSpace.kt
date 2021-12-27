@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 fun AddToSpaceSheet(appNavModel: AppNavModel, selectedTabModel: SelectedTabModel) {
     OverlaySheet(appNavModel = appNavModel, visibleState = AppNavState.ADD_TO_SPACE) {
         AddToSpaceUI(selectedTabModel) {
-            appNavModel.setContentState(AppNavState.HIDDEN)
+            appNavModel.showBrowser()
         }
     }
 }

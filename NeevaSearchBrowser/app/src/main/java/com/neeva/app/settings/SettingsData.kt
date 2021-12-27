@@ -42,7 +42,6 @@ object SettingsMainData {
     )
 }
 
-
 data class SettingsGroupData(
     val label: String,
     val rows: List<SettingsRowData>

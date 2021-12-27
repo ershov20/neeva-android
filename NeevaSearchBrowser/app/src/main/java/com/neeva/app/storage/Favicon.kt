@@ -18,6 +18,24 @@ data class Favicon(
             BitmapFactory.decodeResource(NeevaBrowser.context.resources, R.drawable.globe)
         }
     }
+
+    fun toBitmap(): Bitmap? {
+        val encoded = this.encodedImage
+        return if (encoded.isNullOrEmpty()) {
+            null
+        } else {
+            val byteArray = Base64.decode(encoded, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        }
+    }
+
+    infix fun larger(given: Favicon?) : Favicon {
+        return when {
+            given == null -> this
+            given.width > this.width -> given
+            else -> this
+        }
+    }
 }
 
 fun Bitmap.toFavicon(): Favicon {
@@ -26,22 +44,4 @@ fun Bitmap.toFavicon(): Favicon {
     val byteArray: ByteArray = baos.toByteArray()
     val encoded: String = Base64.encodeToString(byteArray, Base64.DEFAULT)
     return Favicon(null, encoded, width, height)
-}
-
-fun Favicon.toBitmap(): Bitmap? {
-    val encoded = this.encodedImage
-    return if (encoded.isNullOrEmpty()) {
-        null
-    } else {
-        val byteArray = Base64.decode(encoded, Base64.DEFAULT)
-        BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-    }
-}
-
-infix fun Favicon.larger(given: Favicon?) : Favicon {
-    return when {
-        given == null -> this
-        given.width > this.width -> given
-        else -> this
-    }
 }
