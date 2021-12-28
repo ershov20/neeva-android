@@ -1,0 +1,59 @@
+# Following the steps outlined by: https://circleci.com/docs/2.0/language-android/
+
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+version: 2.1
+
+# Declare the orbs you wish to use.
+# Android orb docs are available here:  https://circleci.com/developer/orbs/orb/circleci/android
+orbs:
+  android: circleci/android@2.0.0
+
+jobs:
+  run-unit-tests:
+    docker:
+      - image: circleci/android:api-28
+    steps:
+      - checkout
+
+      - android/restore-build-cache
+      - android/restore-gradle-cache
+
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+
+      - android/save-gradle-cache
+      - android/save-build-cache
+
+      - android/run-tests:
+          test-command: ./gradlew lint test
+
+      - run:
+          name: Creating directory for artifacts
+          command: mkdir -p artifacts
+      
+      - run:
+          name: Saving lint results
+          command: cp app/build/reports/lint-results-debug.html artifacts
+
+      - store_artifacts:
+          path: artifacts
+
+workflows:
+  test-workflow:
+    jobs:
+      - run-unit-tests
+
+#      - android/build:
+#          executor:
+#            name: android/android-machine 
+#            # Tag selected from: https://circleci.com/developer/images/image/cimg/android#image-tags
+#            tag: 2021.10.1
+
+#      - android/run-ui-tests:
+#          system-image: system-images;android-28;default;x86 
+#          executor:
+#              name: android/android-machine 
+#              # Tag selected from: https://circleci.com/developer/images/image/cimg/android#image-tags
+#              tag: 2021.10.1
