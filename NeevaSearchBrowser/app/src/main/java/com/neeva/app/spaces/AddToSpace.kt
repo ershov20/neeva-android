@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,13 +22,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.asLiveData
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
+import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
-import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.widgets.OverlaySheet
 import kotlinx.coroutines.launch
 
@@ -47,8 +45,8 @@ fun AddToSpaceSheet(appNavModel: AppNavModel, selectedTabModel: SelectedTabModel
 @Composable
 fun AddToSpaceUI(selectedTabModel: SelectedTabModel, onDismiss: () -> Unit) {
     val scope = rememberCoroutineScope()
-    val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.asLiveData().observeAsState(emptyList())
-    var filter: String by remember { mutableStateOf("") }
+    val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.collectAsState(emptyList())
+
     LazyColumn {
         stickyHeader {
             Row(

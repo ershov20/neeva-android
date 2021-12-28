@@ -3,6 +3,7 @@
     <string name="neeva_search">Neeva Search</string>
     <string name="edit_current_url">Edit current URL</string>
     <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
 
     <string name="download_image">Download image</string>
     <string name="download_video">Download video</string>
@@ -14,4 +15,8 @@
     <string name="toolbar_tab_switcher">Manage your tabs</string>
     <string name="toolbar_neeva_menu">Open main menu</string>
 
+    <string name="history">History</string>
+    <string name="history_today">Today</string>
+    <string name="history_yesterday">Yesterday</string>
+    <string name="history_this_week">This week</string>
 </resources>

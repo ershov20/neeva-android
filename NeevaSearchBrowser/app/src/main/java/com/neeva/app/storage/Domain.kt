@@ -48,7 +48,7 @@ interface DomainAccessor {
 class DomainRepository(private val domainAccessor: DomainAccessor) {
     val allDomains: Flow<List<NavSuggestion>> = domainAccessor.getAll()
         .distinctUntilChanged().map { domainList ->
-        domainList.map { it.toNavSuggest() }
+        domainList.map { it.toNavSuggestion() }
     }
 
     @WorkerThread
@@ -59,7 +59,7 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
     @WorkerThread
     fun matchesTo(query: String): Flow<List<NavSuggestion>> {
         return domainAccessor.matchesTo(query).distinctUntilChanged().map { domainList ->
-            domainList.map { it.toNavSuggest() }
+            domainList.map { it.toNavSuggestion() }
         }.flowOn(Dispatchers.Default).conflate()
     }
 
@@ -139,7 +139,7 @@ class DomainViewModelFactory(private val repository: DomainRepository) :
 // TODO: Find a more elegant way to handle this through Uri
 fun Domain.url() : Uri = Uri.parse("https://www.${this.domainName}")
 
-fun Domain.toNavSuggest() : NavSuggestion  = NavSuggestion(
+fun Domain.toNavSuggestion() : NavSuggestion  = NavSuggestion(
     url = this.url(),
     label = this.providerName ?: this.domainName,
     secondaryLabel = domainName

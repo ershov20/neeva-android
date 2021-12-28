@@ -11,66 +11,54 @@ import com.neeva.app.storage.SitesRepository
 import com.neeva.app.storage.Visit
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.QueryRowSuggestion
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.ZoneOffset
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-
 class HistoryViewModel(private val repository: SitesRepository) : ViewModel() {
     companion object {
-        private const val LIMIT_TO_FREQUENT_SITES = 40
+        private const val MAX_FREQUENT_SITES = 40
+
         private val HISTORY_WINDOW = TimeUnit.DAYS.toMillis(7)
-        private fun startOfDay() =
-            Date.from(LocalDate.now().atStartOfDay().toInstant(ZoneOffset.UTC))
-        private fun startOfYesterday() =
-            Date.from(LocalDate.now().atStartOfDay().minusDays(1).toInstant(ZoneOffset.UTC))
-        private fun startOfWeek() =
-            Date.from(LocalDate.now().atStartOfDay().minusDays(6).toInstant(ZoneOffset.UTC))
+        private val HISTORY_START_DATE = Date(System.currentTimeMillis() - HISTORY_WINDOW)
     }
 
     val allDomains: LiveData<List<Site>> = repository.allSites.asLiveData()
     val allVisits: LiveData<List<Visit>> = repository.allVisits.asLiveData()
 
-    // This assures we see history for the last week starting from last app start. We can emit
-    // new values to this if we want different windows.
-    private val historyRefresh: MutableStateFlow<Date> =
-        MutableStateFlow(startOfWeek())
+    /**
+     * Tracks all history from |HISTORY_START_DATE| going forward.  While HISTORY_START_DATE is a
+     * constant value that won't be updated until the app is reopened, we can manually filter the
+     * list later with the actual timeframes we're interested in.
+     */
+    val historyWithinRange: Flow<List<Site>> =
+        repository.getHistoryAfter(HISTORY_START_DATE)
 
-    // A state flow for fetching history for a designated time window
-    private val historyFetch: MutableStateFlow<Pair<Date, Date>> =
-        MutableStateFlow(Pair(Date(System.currentTimeMillis() - HISTORY_WINDOW), Date()))
+    val frequentSites: Flow<List<Site>> =
+        repository.getFrequentSitesAfter(HISTORY_START_DATE, MAX_FREQUENT_SITES)
 
-    val history = historyRefresh.flatMapLatest { repository.getHistoryAfter(it) }.asLiveData()
-    val historyToday = repository.getHistoryWithin(startOfDay(), Date()).map { historyList ->
-        historyList.map { Pair(it.first.toNavSuggest(), it.second) }
-    }.asLiveData()
-    val historyYesterday = repository.getHistoryWithin(startOfYesterday(), startOfDay()).map { historyList ->
-        historyList.map { Pair(it.first.toNavSuggest(), it.second) }
-    }.asLiveData()
-    val historyThisWeek = repository.getHistoryWithin(startOfWeek(), startOfYesterday()).map { historyList ->
-        historyList.map { Pair(it.first.toNavSuggest(), it.second) }
-    }.asLiveData()
-
-    val frequentSites = historyRefresh.flatMapLatest {
-        repository.getFrequentSitesAfter(it, LIMIT_TO_FREQUENT_SITES)
-    }.asLiveData()
-
-    fun insert(url: Uri, title: String? = null, favicon: Favicon? = null, visit: Visit? = null)
-            = viewModelScope.launch {
-        repository.insert(url, title, favicon, visit)
+    fun insert(
+        url: Uri,
+        title: String? = null,
+        favicon: Favicon? = null,
+        visit: Visit? = null
+    ) {
+        viewModelScope.launch {
+            repository.insert(url, title, favicon, visit)
+        }
     }
 }
 
-fun Site.toNavSuggest() : NavSuggestion = NavSuggestion(
-    url = Uri.parse(this.siteURL),
-    label = this.metadata?.title ?: Uri.parse(this.siteURL).baseDomain() ?: this.siteURL,
-    secondaryLabel = Uri.parse(this.siteURL).baseDomain() ?: this.siteURL
-)
+fun Site.toNavSuggestion() : NavSuggestion {
+    val uri = Uri.parse(this.siteURL)
+
+    return NavSuggestion(
+        url = uri,
+        label = this.metadata?.title ?: uri.baseDomain() ?: this.siteURL,
+        secondaryLabel = uri.toString()
+    )
+}
 
 fun Site.toSearchSuggest() : QueryRowSuggestion? {
     if (!siteURL.startsWith(appSearchURL)) return null

@@ -2,9 +2,10 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import androidx.annotation.WorkerThread
-import androidx.lifecycle.*
 import androidx.room.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import java.util.*
 
 enum class EntityType {
@@ -106,15 +107,13 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
 
     @WorkerThread
     fun getHistoryAfter(thresholdTime: Date): Flow<List<Site>> =
-        sitesAccessor.getVisitsAfter(thresholdTime).map { list ->
-            list.mapNotNull { sitesAccessor.get(it.visitedSiteUID) }
-        }.distinctUntilChanged()
-
-    @WorkerThread
-    fun getHistoryWithin(from: Date, to:Date): Flow<List<Pair<Site, Visit>>> =
-        sitesAccessor.getVisitsWithin(from = from, to = to).map { list ->
-            list.mapNotNull { Pair(sitesAccessor.get(it.visitedSiteUID)!!, it) }
-        }.distinctUntilChanged()
+        sitesAccessor.getVisitsAfter(thresholdTime)
+            .map { list ->
+                list.mapNotNull {
+                    sitesAccessor.get(it.visitedSiteUID)
+                }
+            }
+            .distinctUntilChanged()
 
     @WorkerThread
     fun getFrequentSitesAfter(thresholdTime: Date, limit: Int): Flow<List<Site>> =
@@ -123,12 +122,28 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
     @Suppress("RedundantSuspendModifier")
     @WorkerThread
     @Transaction
-    suspend fun insert(url: Uri, title: String? = null, favicon: Favicon? = null, visit: Visit? = null) {
+    suspend fun insert(
+        url: Uri,
+        title: String? = null,
+        favicon: Favicon? = null,
+        visit: Visit? = null
+    ) {
         var site = sitesAccessor.find(url.toString())
+
         if (site != null) {
-            val metadata = site.metadata?.copy(title = title) ?: SiteMetadata(title = title)
-            val largest = if (site.largestFavicon != null)
-                site.largestFavicon!! larger favicon else favicon
+            val metadata: SiteMetadata = site.metadata?.let {
+                // Don't delete a title if we are trying to update an existing entry.  We may be
+                // trying to update an entry from a place where it's not available.
+                if (title != null) {
+                    it.copy(title = title)
+                } else {
+                    it
+                }
+            } ?: SiteMetadata(title = title)
+
+            // Keep the biggest favicon we find.
+            val largest = site.largestFavicon?.let { it larger favicon } ?: favicon
+
             sitesAccessor.update(
                 site.copy(
                     metadata = metadata,

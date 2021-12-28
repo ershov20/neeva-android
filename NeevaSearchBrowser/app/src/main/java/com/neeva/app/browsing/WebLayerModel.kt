@@ -54,7 +54,11 @@ class WebLayerModel(
 
     var browserCallbacks: WeakReference<BrowserCallbacks> = WeakReference(null)
 
-    private class PerTabState(val faviconFetcher: FaviconFetcher, vararg callbacks: TabCallback) {
+    private class PerTabState(
+        val faviconFetcher: FaviconFetcher,
+        val navigationCallback: NavigationCallback,
+        vararg callbacks: TabCallback
+    ) {
         val tabCallbacks: MutableList<TabCallback> = callbacks.toMutableList()
     }
 
@@ -108,20 +112,6 @@ class WebLayerModel(
 
     private val newTabCallback: NewTabCallback = object : NewTabCallback() {
         override fun onNewTab(newTab: Tab, @NewTabType type: Int) = registerNewTab(newTab, type)
-    }
-
-    private val navigationCallback = object : NavigationCallback() {
-        override fun onNavigationStarted(navigation: Navigation) {
-            if (navigation.isSameDocument) return
-
-            val timestamp = Date()
-            val visit = Visit(
-                timestamp = timestamp,
-                visitRootID = DateConverter.fromDate(timestamp)!!,
-                visitType = 0
-            )
-            historyViewModel.insert(navigation.uri, visit = visit)
-        }
     }
 
     private var tabListRestorer: BrowserRestoreCallbackImpl? = null
@@ -235,10 +225,40 @@ class WebLayerModel(
 
     fun registerTabCallbacks(tab: Tab) {
         tab.fullscreenCallback = fullscreenCallback
-        tab.navigationController.registerNavigationCallback(navigationCallback)
-
         tab.setErrorPageCallback(ErrorCallbackImpl(tab))
         tab.setNewTabCallback(newTabCallback)
+
+        val navigationCallback = object : NavigationCallback() {
+            var visitToCommit: Visit? = null
+
+            override fun onNavigationStarted(navigation: Navigation) {
+                if (navigation.isSameDocument) return
+
+                // TODO(dan.alcantara): Why is visitType set to 0 here?
+                val timestamp = Date()
+                visitToCommit = Visit(
+                    timestamp = timestamp,
+                    visitRootID = DateConverter.fromDate(timestamp)!!,
+                    visitType = 0
+                )
+            }
+
+            override fun onNavigationCompleted(navigation: Navigation) = commitVisit(navigation)
+            override fun onNavigationFailed(navigation: Navigation) = commitVisit(navigation)
+
+            fun commitVisit(navigation: Navigation) {
+                visitToCommit?.let { visit ->
+                    historyViewModel.insert(
+                        url = navigation.uri,
+                        title = tab.currentDisplayTitle,
+                        visit = visit
+                    )
+
+                    visitToCommit = null
+                }
+            }
+        }
+        tab.navigationController.registerNavigationCallback(navigationCallback)
 
         val tabCallback: TabCallback = object : TabCallback() {
             override fun bringTabToFront() {
@@ -248,7 +268,11 @@ class WebLayerModel(
 
             override fun onTitleUpdated(title: String) {
                 domainViewModel.insert(tab.currentDisplayUrl.toString(), title)
-                historyViewModel.insert(url = tab.currentDisplayUrl!!, title = title)
+
+                tab.currentDisplayUrl?.let {
+                    historyViewModel.insert(url = it, title = title)
+                }
+
                 tabList.updateTabTitle(tab.guid, tab.currentDisplayTitle)
             }
 
@@ -269,11 +293,24 @@ class WebLayerModel(
         val faviconFetcher = tab.createFaviconFetcher(object : FaviconCallback() {
             override fun onFaviconChanged(favicon: Bitmap?) {
                 val icon = favicon ?: return
+
                 domainViewModel.updateFaviconFor(tab.currentDisplayUrl.toString(), icon.toFavicon())
-                historyViewModel.insert(url = tab.currentDisplayUrl!!, favicon = icon.toFavicon())
+
+                tab.currentDisplayUrl?.let { currentUrl ->
+                    historyViewModel.insert(
+                        url = currentUrl,
+                        title = tab.currentDisplayTitle,
+                        favicon = icon.toFavicon()
+                    )
+                }
             }
         })
-        tabToPerTabState[tab] = PerTabState(faviconFetcher, tabCallback, crashTabCallback)
+        tabToPerTabState[tab] = PerTabState(
+            faviconFetcher,
+            navigationCallback,
+            tabCallback,
+            crashTabCallback
+        )
     }
 
     private fun unregisterBrowserAndTabCallbacks() {
@@ -288,9 +325,9 @@ class WebLayerModel(
     private fun unregisterTabCallbacks(tab: Tab) {
         // Do not unset FullscreenCallback here which is called from onDestroy, since
         // unsetting FullscreenCallback also exits fullscreen.
-        tab.navigationController.unregisterNavigationCallback(navigationCallback)
-
         tabToPerTabState[tab]?.apply {
+            tab.navigationController.unregisterNavigationCallback(navigationCallback)
+
             tabCallbacks.forEach(tab::unregisterTabCallback)
             faviconFetcher.destroy()
         }

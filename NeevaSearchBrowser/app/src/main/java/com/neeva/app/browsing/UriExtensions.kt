@@ -1,5 +1,7 @@
 package com.neeva.app.browsing
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.net.Uri
 import android.util.Patterns
 import com.neeva.app.NeevaConstants.appSearchURL
@@ -36,4 +38,13 @@ fun String.toSearchUri(): Uri {
         .appendQueryParameter("q", this)
         .appendQueryParameter("src", "nvobar")
         .build()
+}
+
+/** Generates a single-colored Bitmap from the given Uri. */
+fun Uri?.toFaviconBitmap(): Bitmap {
+    val color = hashCode().or(0xff000000.toInt())
+    val bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    canvas.drawColor(color)
+    return bitmap
 }

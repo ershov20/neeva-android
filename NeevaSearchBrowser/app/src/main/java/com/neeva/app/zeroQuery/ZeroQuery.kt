@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -21,18 +22,21 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.asLiveData
-import androidx.lifecycle.map
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.history.toSearchSuggest
 import com.neeva.app.spaces.SpaceRow
-import com.neeva.app.storage.*
+import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.Site
+import com.neeva.app.storage.Space
+import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
+import kotlinx.coroutines.flow.map
 import java.util.*
 
 @Composable
@@ -42,11 +46,22 @@ fun ZeroQuery(
     topContent: @Composable() (LazyItemScope.() -> Unit) = {},
 ) {
     val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.asLiveData().observeAsState(emptyList())
-    val suggestedQueries: List<QueryRowSuggestion> by historyViewModel.frequentSites.map { siteList ->
-        siteList.mapNotNull { it.toSearchSuggest() }.take(3)
-    }.observeAsState(emptyList())
-    val suggestedSites: List<Site> by historyViewModel.frequentSites.map { sites ->
-        sites.filterNot { it.siteURL.contains(appURL) } }.observeAsState(emptyList())
+
+    /** Takes the top 3 suggestions for display to the user. */
+    val suggestedQueries: List<QueryRowSuggestion> by historyViewModel.frequentSites
+        .map { siteList ->
+            siteList.mapNotNull { it.toSearchSuggest() }.take(3)
+        }
+        .collectAsState(emptyList())
+
+    val suggestedSites: List<Site> by historyViewModel.frequentSites
+        .map { sites ->
+            // Assume that anything pointing at https://www.neeva.com should not be recommended to
+            // the user.  This includes search suggestions and Spaces, e.g.
+            sites.filterNot {
+                it.siteURL.contains(appURL)
+            }
+        }.collectAsState(emptyList())
 
     LazyColumn {
         item {
