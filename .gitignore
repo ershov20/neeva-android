@@ -23,12 +23,16 @@ Thumbs.db
 .DS_Store
 
 # Android Studio
-*.iml
-.idea
+/build
+/captures
+.DS_Store
+.cxx
+.externalNativeBuild
 .gradle
-build/
+.idea
+*.iml
 .navigation
-captures/
+local.properties
 output.json 
 
 #NDK
