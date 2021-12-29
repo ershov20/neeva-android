@@ -8,10 +8,13 @@ import com.neeva.app.NeevaBrowser
 
 class History {
     companion object {
-        val db = Room.databaseBuilder(
-            NeevaBrowser.context,
-            HistoryDatabase::class.java, "HistoryDB"
-        ).createFromAsset("database/cached_domains.db")
+        val db = Room
+            .databaseBuilder(
+                NeevaBrowser.context,
+                HistoryDatabase::class.java,
+                "HistoryDB"
+            )
+            .createFromAsset("database/cached_domains.db")
             .fallbackToDestructiveMigration()
             .build()
     }

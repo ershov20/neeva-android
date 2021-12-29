@@ -41,16 +41,18 @@ import com.neeva.app.R
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.storage.Favicon
 import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun AutocompleteTextField(
+    suggestionsViewModel: SuggestionsViewModel,
     urlBarModel: URLBarModel,
     getFaviconFlow: (Uri) -> Flow<Favicon?>
 ) {
-    val autocompletedSuggestion by urlBarModel.autocompletedSuggestion.collectAsState()
+    val autocompletedSuggestion by suggestionsViewModel.autocompleteSuggestion.collectAsState()
     val urlBarText: TextFieldValue by urlBarModel.text.collectAsState()
     val urlBarIsBeingEdited: Boolean by urlBarModel.isEditing.collectAsState()
 
@@ -201,8 +203,8 @@ fun AutocompleteTextField(
     }
 }
 
-@Preview("Default, 1x scale")
-@Preview("Default, 2x scale", fontScale = 2.0f)
+@Preview("Default, 1x scale", locale = "en")
+@Preview("Default, 2x scale", locale = "en", fontScale = 2.0f)
 @Composable
 fun AutocompleteTextField_Preview() {
     NeevaTheme {
@@ -219,8 +221,26 @@ fun AutocompleteTextField_Preview() {
     }
 }
 
-@Preview("Not editing, 1x scale")
-@Preview("Not editing, 2x scale", fontScale = 2.0f)
+@Preview("Default, Hebrew, 1x scale", locale = "he")
+@Preview("Default, Hebrew, 2x scale", locale = "he", fontScale = 2.0f)
+@Composable
+fun AutocompleteTextField_PreviewHebrew() {
+    NeevaTheme {
+        AutocompleteTextField(
+            autocompletedSuggestion = "עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרה",
+            value = TextFieldValue(text = "חמש עשרה"),
+            bitmap = null,
+            focusRequester = FocusRequester(),
+            onLocationEdited = {},
+            onLocationReplaced = {},
+            onFocusChanged = {},
+            onLoadUrl = {}
+        )
+    }
+}
+
+@Preview("Not editing, 1x scale", locale = "en")
+@Preview("Not editing, 2x scale", locale = "en", fontScale = 2.0f)
 @Composable
 fun AutocompleteTextField_PreviewNoSuggestion() {
     NeevaTheme {

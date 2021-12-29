@@ -1,12 +1,11 @@
 plugins {
     id 'com.android.application'
-    id('org.jetbrains.kotlin.android').version("1.5.21")
-    id("com.apollographql.apollo").version("2.5.5")
+    id('org.jetbrains.kotlin.android').version("$kotlin_version")
+    id("com.apollographql.apollo").version("$apollo_version")
 }
 
 android {
-    compileSdk 30
-    buildToolsVersion "30.0.3"
+    compileSdk 31
 
     apply plugin: 'kotlin-kapt'
 
@@ -39,7 +38,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         freeCompilerArgs = [
-            '-Xopt-in=kotlin.RequiresOptIn'
+            '-Xopt-in=kotlin.RequiresOptIn'     // Needed for the experimental Compose functions
         ]
     }
     buildFeatures {
@@ -72,34 +71,35 @@ dependencies {
     // the WebLayerSupport APK, which was version 17.0.0.
     implementation "com.google.android.gms:play-services-base:$play_services_version"
 
-    implementation 'androidx.activity:activity-compose:1.3.1'
-    implementation 'androidx.appcompat:appcompat:1.3.1'
-    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'androidx.core:core-ktx:1.7.0'
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.ui:ui-tooling:$compose_version"
     implementation "androidx.compose.runtime:runtime:$compose_version"
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
-    implementation 'com.apollographql.apollo:apollo-runtime:2.5.5'
-    implementation 'com.apollographql.apollo:apollo-coroutines-support:2.5.5'
+    implementation "com.apollographql.apollo:apollo-runtime:$apollo_version"
+    implementation "com.apollographql.apollo:apollo-coroutines-support:$apollo_version"
     implementation 'com.google.android.material:material:1.4.0'
     implementation "io.coil-kt:coil-compose:1.3.0"
 
-    testImplementation 'junit:junit:4.+'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.6'
     testImplementation "io.strikt:strikt-core:$strikt_version"
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
 
-    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
-    kapt("androidx.room:room-compiler:$room_version")
+    kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     testImplementation "androidx.room:room-testing:$room_version"
 }

@@ -13,12 +13,6 @@ import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun CurrentPageRow(domainViewModel: DomainViewModel, url: Uri, onEditPressed: () -> Unit) {
-    val favicon: Favicon? by domainViewModel.getFaviconFlow(url).collectAsState(null)
-    CurrentPageRow(favicon = favicon?.toBitmap(), url = url, onEditPressed = onEditPressed)
-}
-
-@Composable
 fun CurrentPageRow(
     favicon: Bitmap?,
     url: Uri,
@@ -33,8 +27,10 @@ fun CurrentPageRow(
     )
 }
 
-@Preview("Light, 1x font scale")
-@Preview("Light, 2x font scale", fontScale = 2.0f)
+@Preview("Light, 1x font scale", locale = "en")
+@Preview("Light, 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("Light, Hebrew, 1x font scale", locale = "he")
+@Preview("Light, Hebrew, 2x font scale", locale = "he", fontScale = 2.0f)
 @Composable
 fun CurrentPageRow_PreviewLight() {
     NeevaTheme(darkTheme = false) {
@@ -45,8 +41,8 @@ fun CurrentPageRow_PreviewLight() {
     }
 }
 
-@Preview("Dark, 1x font scale")
-@Preview("Dark, 2x font scale", fontScale = 2.0f)
+@Preview("Dark, 1x font scale", locale = "en")
+@Preview("Dark, 2x font scale", locale = "en", fontScale = 2.0f)
 @Composable
 fun CurrentPageRow_PreviewDark() {
     NeevaTheme(darkTheme = true) {

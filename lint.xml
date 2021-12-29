@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <issue id="DuplicateStrings" />
+    <issue id="ExpensiveAssertion" severity="error" />
+    <issue id="ImplicitSamInstance" severity="error" />
+    <issue id="KotlinPropertyAccess" />
+    <issue id="NoHardKeywords" />
+</lint>

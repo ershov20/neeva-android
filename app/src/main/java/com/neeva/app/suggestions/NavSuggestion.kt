@@ -3,11 +3,29 @@ package com.neeva.app.suggestions
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.browsing.toFavicon
+import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
+import kotlinx.coroutines.flow.Flow
+
+@Composable
+fun NavSuggestion(
+    faviconProvider: (Uri) -> Flow<Favicon?>,
+    onOpenUrl: (Uri) -> Unit,
+    navSuggestion: NavSuggestion
+) {
+    val favicon: Favicon? by faviconProvider(navSuggestion.url).collectAsState(null)
+    NavSuggestion(
+        faviconData = favicon?.toBitmap(),
+        onOpenUrl = onOpenUrl,
+        navSuggestion = navSuggestion
+    )
+}
 
 @Composable
 fun NavSuggestion(

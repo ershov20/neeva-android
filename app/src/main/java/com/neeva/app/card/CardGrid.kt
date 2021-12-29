@@ -97,7 +97,7 @@ fun CardGrid(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
+                .defaultMinSize(minHeight = 56.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(enabled = true, resID = R.drawable.ic_baseline_add_24, contentDescription = "New Tab") {

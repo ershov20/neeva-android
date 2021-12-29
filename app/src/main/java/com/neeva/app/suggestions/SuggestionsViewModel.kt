@@ -2,14 +2,19 @@ package com.neeva.app.suggestions
 
 import android.net.Uri
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.browsing.toSearchUri
+import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.Site
 import com.neeva.app.type.QuerySuggestionType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 data class NavSuggestion(
     val url: Uri,
@@ -18,36 +23,44 @@ data class NavSuggestion(
     val queryIndex: Int? = null
 )
 
-data class ChipSuggestion(
-    val url: Uri,
-    val query: String
-)
-
 data class QueryRowSuggestion(
     val url: Uri,
     val query: String,
+    val drawableID: Int,
     val description: String? = null,
-    val imageURL: String? = null,
-    val drawableID: Int
+    val imageURL: String? = null
 )
 
-class SuggestionsViewModel: ViewModel() {
+data class Suggestions(
+    val autocompleteSuggestion: NavSuggestion? = null,
+    val queryRowSuggestions: List<QueryRowSuggestion> = emptyList(),
+    val navSuggestions: List<NavSuggestion> = emptyList(),
+    val shouldShowSuggestions: Boolean = false
+)
+
+/** Maintains a list of suggestions from the backend that correspond to the current query. */
+class SuggestionsViewModel(
+    historyViewModel: HistoryViewModel
+): ViewModel() {
     private var suggestionResponse: SuggestionsQuery.Suggest? = null
 
-    private val _urlSuggestions = MutableStateFlow<List<SuggestionsQuery.UrlSuggestion>>(emptyList())
-    val urlSuggestions: StateFlow<List<SuggestionsQuery.UrlSuggestion>> = _urlSuggestions
+    private val _suggestionFlow = MutableStateFlow(Suggestions())
+    val suggestionFlow: StateFlow<Suggestions> = _suggestionFlow
 
-    private val _topSuggestion = MutableStateFlow<NavSuggestion?>(null)
-    val topSuggestion: StateFlow<NavSuggestion?> = _topSuggestion
+    private val _autocompleteSuggestion = MutableStateFlow<NavSuggestion?>(null)
+    val autocompleteSuggestion: StateFlow<NavSuggestion?> = _autocompleteSuggestion
 
-    private val _navSuggestions = MutableStateFlow<List<NavSuggestion>>(emptyList())
-    val navSuggestions: StateFlow<List<NavSuggestion>> = _navSuggestions
+    init {
+        viewModelScope.launch {
+            historyViewModel.siteSuggestions.collect { suggestions ->
+                _autocompleteSuggestion.value = suggestions.firstOrNull()?.toNavSuggestion()
 
-    private val _queryRowSuggestions = MutableStateFlow<List<QueryRowSuggestion>>(emptyList())
-    val queryRowSuggestions: StateFlow<List<QueryRowSuggestion>> = _queryRowSuggestions
-
-    private val _shouldShowSuggestions = MutableStateFlow(false)
-    val shouldShowSuggestions: StateFlow<Boolean> = _shouldShowSuggestions
+                _suggestionFlow.value = _suggestionFlow.value.copy(
+                    autocompleteSuggestion = _autocompleteSuggestion.value
+                )
+            }
+        }
+    }
 
     fun updateWith(suggestionResults: SuggestionsQuery.Suggest) {
         suggestionResponse = suggestionResults
@@ -55,14 +68,23 @@ class SuggestionsViewModel: ViewModel() {
             .partition { !it.subtitle.isNullOrEmpty() && !it.title.isNullOrEmpty() }
         val viewableSuggestions = urlSuggestionsSplit.first
 
-        _navSuggestions.value = viewableSuggestions.map { it.toNavSuggestion() }
-        _topSuggestion.value = null
+        _suggestionFlow.value = Suggestions(
+            autocompleteSuggestion = autocompleteSuggestion.value,
+            queryRowSuggestions = suggestionResults.querySuggestion.map { it.toQueryRowSuggestion() },
+            navSuggestions = viewableSuggestions.map { it.toNavSuggestion() },
+            shouldShowSuggestions =
+                !suggestionResponse?.urlSuggestion.isNullOrEmpty()
+                    || !suggestionResponse?.querySuggestion.isNullOrEmpty()
+        )
+    }
 
-        _queryRowSuggestions.value = suggestionResults.querySuggestion
-            .map { it.toQueryRowSuggestion() }
-
-        _shouldShowSuggestions.value = !suggestionResponse?.urlSuggestion.isNullOrEmpty()
-                || !suggestionResponse?.querySuggestion.isNullOrEmpty()
+    class SuggestionsViewModelFactory(
+        private val historyViewModel: HistoryViewModel
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            @Suppress("UNCHECKED_CAST")
+            return SuggestionsViewModel(historyViewModel) as T
+        }
     }
 }
 
@@ -73,23 +95,18 @@ fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() = NavSuggestion(
     queryIndex = sourceQueryIndex
 )
 
-fun SuggestionsQuery.QuerySuggestion.toChipSuggestion() = ChipSuggestion(
-    suggestedQuery.toSearchUri(),
-    suggestedQuery
-)
-
 fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() = QueryRowSuggestion(
     url = this.suggestedQuery.toSearchUri(),
     query = this.suggestedQuery,
-    description = this.annotation?.description,
-    imageURL = this.annotation?.imageURL,
     drawableID = when {
         this.annotation?.annotationType == "Calculator" -> R.drawable.ic_baseline_calculate_24
         this.type == QuerySuggestionType.STANDARD -> R.drawable.ic_baseline_search_24
         this.type == QuerySuggestionType.SEARCHHISTORY -> R.drawable.ic_baseline_history_24
         !this.annotation?.description.isNullOrEmpty() -> R.drawable.ic_baseline_image_24
         else -> R.drawable.ic_baseline_search_24
-    }
+    },
+    description = this.annotation?.description,
+    imageURL = this.annotation?.imageURL
 )
 
 fun Site.toNavSuggestion() : NavSuggestion {

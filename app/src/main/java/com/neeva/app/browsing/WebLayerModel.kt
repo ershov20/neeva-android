@@ -11,10 +11,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
+import com.neeva.app.history.DomainViewModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.storage.DateConverter
-import com.neeva.app.history.DomainViewModel
 import com.neeva.app.storage.Visit
 import com.neeva.app.storage.toFavicon
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,7 +84,7 @@ class WebLayerModel(
             // Don't switch tabs unless there isn't one currently selected.
             // TODO(dan.alcantara): If this is a child tab, switch back to the one that spawned it.
             if (browser.activeTab == null) {
-                if (orderedTabList.value?.isNotEmpty() == true) {
+                if (orderedTabList.value.isNotEmpty()) {
                     browser.setActiveTab(tabList.getTab(newIndex))
                 } else {
                     createTabFor(Uri.parse(appURL))
@@ -137,7 +137,7 @@ class WebLayerModel(
     private val tabToPerTabState: HashMap<Tab, PerTabState> = HashMap()
 
     fun onSaveInstanceState(outState: Bundle) {
-        tabListRestorer?.onSaveInstanceState(outState, orderedTabList.value)
+        BrowserRestoreCallbackImpl.onSaveInstanceState(outState, orderedTabList.value.map { it.id })
     }
 
     fun onWebLayerReady(

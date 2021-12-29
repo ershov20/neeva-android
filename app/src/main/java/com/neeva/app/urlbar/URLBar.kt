@@ -16,9 +16,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.neeva.app.history.DomainViewModel
+import com.neeva.app.suggestions.SuggestionsViewModel
 
 @Composable
-fun URLBar(urlBarModel: URLBarModel, domainViewModel: DomainViewModel) {
+fun URLBar(
+    suggestionsViewModel: SuggestionsViewModel,
+    urlBarModel: URLBarModel,
+    domainViewModel: DomainViewModel
+) {
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
     val showLock: Boolean by urlBarModel.showLock.collectAsState()
     val value: TextFieldValue by urlBarModel.text.collectAsState()
@@ -38,7 +43,7 @@ fun URLBar(urlBarModel: URLBarModel, domainViewModel: DomainViewModel) {
                 .height(40.dp)
                 .padding(horizontal = 8.dp)
         ) {
-            AutocompleteTextField(urlBarModel, domainViewModel::getFaviconFlow)
+            AutocompleteTextField(suggestionsViewModel, urlBarModel, domainViewModel::getFaviconFlow)
 
             // We need to have both the AutocompleteTextField and the LocationLabel in the URLBar
             // at the same time because the AutocompleteTextField is the thing that must be focused

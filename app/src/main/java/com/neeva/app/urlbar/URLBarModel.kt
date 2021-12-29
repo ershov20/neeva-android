@@ -13,12 +13,9 @@ import com.neeva.app.browsing.baseDomain
 import com.neeva.app.history.DomainViewModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.SpaceStore
-import com.neeva.app.suggestions.NavSuggestion
-import com.neeva.app.suggestions.toNavSuggestion
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 class URLBarModel(
@@ -35,10 +32,6 @@ class URLBarModel(
     private val _showLock = MutableStateFlow(false)
     val showLock: StateFlow<Boolean> = _showLock
 
-    // TODO(dan.alcantara): Untangle this and put it in SuggestionsViewModel.
-    private val _autocompletedSuggestion = MutableStateFlow<NavSuggestion?>(null)
-    val autocompletedSuggestion: StateFlow<NavSuggestion?> = _autocompletedSuggestion
-
     private var _isLazyTab = MutableStateFlow(false)
     val isLazyTab: StateFlow<Boolean> = _isLazyTab
 
@@ -50,7 +43,7 @@ class URLBarModel(
     init {
         viewModelScope.launch {
             _isEditing.collect {
-                _isLazyTab.value = _isLazyTab.value == true && it
+                _isLazyTab.value = _isLazyTab.value && it
             }
         }
 
@@ -59,12 +52,6 @@ class URLBarModel(
                 if (it.toString().isNotBlank()) {
                     onCurrentUrlChanged(it.toString())
                 }
-            }
-        }
-
-        viewModelScope.launch {
-            historyViewModel.siteSuggestions.collect { suggestions ->
-                _autocompletedSuggestion.value = suggestions.firstOrNull()?.toNavSuggestion()
             }
         }
     }
@@ -90,7 +77,7 @@ class URLBarModel(
     }
 
     fun loadUrl(url: Uri) {
-        selectedTabModel.loadUrl(url, _isLazyTab.value == true)
+        selectedTabModel.loadUrl(url, _isLazyTab.value)
     }
 
     private fun onCurrentUrlChanged(newUrl: String) {
@@ -111,7 +98,6 @@ class URLBarModel(
     }
 
     private fun updateTextValue(newValue: TextFieldValue) {
-        android.util.Log.e("dfalcantara", "Updating text value: $newValue")
         _text.value = newValue
 
         // Pull new suggestions from the database according to what's currently in the URL bar.

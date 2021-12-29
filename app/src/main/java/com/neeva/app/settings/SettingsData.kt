@@ -11,6 +11,7 @@ import com.neeva.app.NeevaConstants.appTermsURL
 import com.neeva.app.NeevaConstants.appWelcomeToursURL
 
 object SettingsMainData {
+    // TODO(dan.alcantara): These strings should be in strings.xml, not hard-coded here.
     val groups = listOf(
         SettingsGroupData("Neeva",
             listOf(
@@ -32,10 +33,7 @@ object SettingsMainData {
         ),
         SettingsGroupData("About",
             listOf(
-                SettingsRowData("Neeva Browser ${
-                    NeevaBrowser.context.packageManager.getPackageInfo(
-                        NeevaBrowser.context.packageName, 0).versionName}",
-                    SettingsRowType.LABEL),
+                SettingsRowData("Neeva Browser ${NeevaBrowser.versionString}", SettingsRowType.LABEL),
                 SettingsRowData("Terms", SettingsRowType.LINK, Uri.parse(appTermsURL)),
             )
         )

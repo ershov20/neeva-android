@@ -56,7 +56,9 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         HistoryViewModel.Companion.HistoryViewModelFactory(SitesRepository(History.db.fromSites()))
     }
 
-    private val suggestionsModel by viewModels<SuggestionsViewModel>()
+    private val suggestionsModel by viewModels<SuggestionsViewModel> {
+        SuggestionsViewModel.SuggestionsViewModelFactory(historyViewModel)
+    }
 
     private val webModel by viewModels<WebLayerModel> {
         WebLayerModel.Companion.WebLayerModelFactory(domainViewModel, historyViewModel)
