@@ -2,12 +2,11 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import com.apollographql.apollo.coroutines.await
-import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.apolloClient
 
-data class NeevaUserInfo (
+data class NeevaUser (
     val id: String? = null,
     val displayName: String? = null,
     val email: String? = null,
@@ -17,23 +16,23 @@ data class NeevaUserInfo (
     private var isLoading: Boolean = false
 
     companion object {
-        var shared = NeevaUserInfo()
+        var shared = NeevaUser()
 
         suspend fun fetch() {
             shared.isLoading = true
-            val response = apolloClient(NeevaBrowser.context).query(
-                UserInfoQuery()
-            ).await()
+            val response = apolloClient(NeevaBrowser.context)
+                .query(UserInfoQuery())
+                .await()
 
             response.data?.user?.let { userQuery ->
-                shared = NeevaUserInfo(
+                shared = NeevaUser(
                     id = userQuery.id,
                     displayName = userQuery.profile.displayName,
                     email = userQuery.profile.email,
                     pictureUrl = Uri.parse(userQuery.profile.pictureURL),
-                    ssoProvider = SSOProvider.values().firstOrNull {
-                        it.url == userQuery.authProvider
-                    } ?: SSOProvider.UNKNOWN
+                    ssoProvider = SSOProvider.values()
+                        .firstOrNull { it.url == userQuery.authProvider }
+                        ?: SSOProvider.UNKNOWN
                 )
                 shared.isLoading = false
             }

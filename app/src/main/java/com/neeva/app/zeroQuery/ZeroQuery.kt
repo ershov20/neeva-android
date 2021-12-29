@@ -15,19 +15,19 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.asLiveData
+import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.appURL
+import com.neeva.app.R
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.history.HistoryViewModel
-import com.neeva.app.history.toSearchSuggest
 import com.neeva.app.spaces.SpaceRow
-import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
@@ -45,7 +45,7 @@ fun ZeroQuery(
     historyViewModel: HistoryViewModel,
     topContent: @Composable() (LazyItemScope.() -> Unit) = {},
 ) {
-    val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.asLiveData().observeAsState(emptyList())
+    val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.collectAsState()
 
     /** Takes the top 3 suggestions for display to the user. */
     val suggestedQueries: List<QueryRowSuggestion> by historyViewModel.frequentSites
@@ -63,6 +63,10 @@ fun ZeroQuery(
             }
         }.collectAsState(emptyList())
 
+    val searchesLabel = stringResource(id = R.string.searches)
+    val spacesLabel = stringResource(id = R.string.spaces)
+    val suggestedSitesLabel = stringResource(id = R.string.suggested_sites)
+
     LazyColumn {
         item {
             topContent()
@@ -70,12 +74,12 @@ fun ZeroQuery(
 
         if (suggestedSites.isNotEmpty()) {
             collapsibleHeaderItem(
-                label = "Suggested Sites",
+                label = suggestedSitesLabel,
                 startingState = CollapsingState.SHOW_COMPACT,
             ) {
                 LazyRow(modifier = Modifier.padding(16.dp)) {
                     items(suggestedSites.subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
-                        val bitmap = site.largestFavicon?.toBitmap() ?: Favicon.defaultFavicon
+                        val bitmap = site.largestFavicon?.toBitmap()
                         val siteName = Uri.parse(site.siteURL).baseDomain().toString()
                             .split(".").first()
                             .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
@@ -85,14 +89,24 @@ fun ZeroQuery(
                                 .padding(horizontal = 8.dp)
                                 .clickable { urlBarModel.loadUrl(Uri.parse(site.siteURL)) }
                         ) {
-                            Image(
-                                bitmap = bitmap.asImageBitmap(),
-                                contentDescription = "Suggested Site",
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .padding(2.dp),
-                                contentScale = ContentScale.FillBounds,
-                            )
+                            val imageModifier = Modifier
+                                .size(36.dp)
+                                .padding(2.dp)
+                            if (bitmap == null) {
+                                Image(
+                                    painter = painterResource(id = R.drawable.globe),
+                                    contentDescription = null,
+                                    modifier = imageModifier,
+                                    contentScale = ContentScale.FillBounds,
+                                )
+                            } else {
+                                Image(
+                                    bitmap = bitmap.asImageBitmap(),
+                                    contentDescription = null,
+                                    modifier = imageModifier,
+                                    contentScale = ContentScale.FillBounds,
+                                )
+                            }
                             Text(
                                 text = siteName,
                                 modifier = Modifier
@@ -110,7 +124,7 @@ fun ZeroQuery(
 
         if (suggestedQueries.isNotEmpty()) {
             collapsibleHeaderItems(
-                label = "Searches",
+                label = searchesLabel,
                 startingState = CollapsingState.SHOW_COMPACT,
                 items = suggestedQueries,
             ) { search ->
@@ -124,7 +138,7 @@ fun ZeroQuery(
 
         if (spaces.isNotEmpty()) {
             collapsibleHeaderItems(
-                label = "Spaces",
+                label = spacesLabel,
                 startingState = CollapsingState.SHOW_COMPACT,
                 items = spaces.subList(0, minOf(3, spaces.size)),
             ) { space ->
@@ -135,4 +149,15 @@ fun ZeroQuery(
         }
 
     }
+}
+
+fun Site.toSearchSuggest() : QueryRowSuggestion? {
+    if (!siteURL.startsWith(NeevaConstants.appSearchURL)) return null
+    val query = Uri.parse(this.siteURL).getQueryParameter("q") ?: return null
+
+    return QueryRowSuggestion(
+        url = Uri.parse(this.siteURL),
+        query =  query,
+        drawableID = R.drawable.ic_baseline_history_24
+    )
 }

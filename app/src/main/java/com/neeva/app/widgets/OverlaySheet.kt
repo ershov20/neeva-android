@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 
-
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun OverlaySheet(
@@ -29,7 +28,7 @@ fun OverlaySheet(
     config: OverlaySheetHeightConfig = OverlaySheetHeightConfig.HALF_SCREEN,
     content: @Composable () -> Unit,
 ) {
-    val state: AppNavState by appNavModel.state.collectAsState(AppNavState.BROWSER)
+    val state: AppNavState by appNavModel.state.collectAsState()
     val density = LocalDensity.current
 
     AnimatedVisibility(

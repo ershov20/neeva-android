@@ -1,6 +1,5 @@
 package com.neeva.app.history
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,8 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -20,15 +19,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.neeva.app.R
-import com.neeva.app.browsing.toFaviconBitmap
+import com.neeva.app.browsing.toFavicon
+import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.Site
 import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.collapsibleHeaderItems
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.*
@@ -38,7 +39,7 @@ fun HistoryUI(
     history: List<Site>,
     onClose: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
-    faviconProvider: (Uri?) -> LiveData<Bitmap?>,
+    faviconProvider: (Uri?) -> Flow<Favicon?>,
     now: LocalDate = LocalDate.now()
 ) {
     // Bucket the history by their timestamps.
@@ -107,7 +108,8 @@ fun HistoryUI(
                 CollapsingState.SHOW_COMPACT,
                 items = historyToday
             ) {
-                val bitmap: Bitmap? by faviconProvider(it.url).observeAsState()
+                val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
+                val bitmap = favicon?.toBitmap()
                 NavSuggestion(bitmap, onOpenUrl, it)
             }
 
@@ -116,7 +118,8 @@ fun HistoryUI(
                 CollapsingState.SHOW_COMPACT,
                 items = historyYesterday
             ) {
-                val bitmap: Bitmap? by faviconProvider(it.url).observeAsState()
+                val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
+                val bitmap = favicon?.toBitmap()
                 NavSuggestion(bitmap, onOpenUrl, it)
             }
 
@@ -125,7 +128,8 @@ fun HistoryUI(
                 CollapsingState.SHOW_COMPACT,
                 items = historyThisWeek
             ) {
-                val bitmap: Bitmap? by faviconProvider(it.url).observeAsState()
+                val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
+                val bitmap = favicon?.toBitmap()
                 NavSuggestion(bitmap, onOpenUrl, it)
             }
         }
@@ -193,7 +197,7 @@ fun HistoryUI_Preview() {
             history = history,
             onClose = {},
             onOpenUrl = {},
-            faviconProvider = { MutableLiveData(it.toFaviconBitmap()) },
+            faviconProvider = { MutableStateFlow(it.toFavicon()) },
             now = now
         )
     }

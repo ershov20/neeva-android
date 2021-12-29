@@ -34,7 +34,7 @@ import com.neeva.app.R
 )
 @Composable
 fun SettingsContainer(appNavModel: AppNavModel) {
-    val state: AppNavState by appNavModel.state.collectAsState(AppNavState.BROWSER)
+    val state: AppNavState by appNavModel.state.collectAsState()
     val density = LocalDensity.current
     AnimatedVisibility(
         visible = state == AppNavState.SETTINGS,

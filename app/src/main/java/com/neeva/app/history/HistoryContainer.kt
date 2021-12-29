@@ -12,7 +12,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
-import com.neeva.app.storage.DomainViewModel
 import com.neeva.app.storage.Site
 
 @OptIn(
@@ -25,7 +24,7 @@ fun HistoryContainer(
     historyViewModel: HistoryViewModel,
     domainViewModel: DomainViewModel
 ) {
-    val state: AppNavState by appNavModel.state.collectAsState(AppNavState.BROWSER)
+    val state: AppNavState by appNavModel.state.collectAsState()
     val history: List<Site> by historyViewModel.historyWithinRange.collectAsState(emptyList())
 
     val density = LocalDensity.current
@@ -42,7 +41,7 @@ fun HistoryContainer(
             history = history,
             onClose = appNavModel::showBrowser,
             onOpenUrl = appNavModel::openUrl,
-            faviconProvider = domainViewModel::getFaviconFor
+            faviconProvider = domainViewModel::getFaviconFlow
         )
     }
 }

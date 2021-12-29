@@ -5,6 +5,8 @@ import android.graphics.Canvas
 import android.net.Uri
 import android.util.Patterns
 import com.neeva.app.NeevaConstants.appSearchURL
+import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.toFavicon
 
 fun Uri.baseDomain() : String? {
     val authority = this.authority ?: return null
@@ -41,10 +43,10 @@ fun String.toSearchUri(): Uri {
 }
 
 /** Generates a single-colored Bitmap from the given Uri. */
-fun Uri?.toFaviconBitmap(): Bitmap {
+fun Uri?.toFavicon(): Favicon {
     val color = hashCode().or(0xff000000.toInt())
     val bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
     canvas.drawColor(color)
-    return bitmap
+    return bitmap.toFavicon()
 }

@@ -10,13 +10,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.history.HistoryViewModel
-import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.history.DomainViewModel
 import com.neeva.app.suggestions.SuggestionList
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.urlbar.URLBar
@@ -30,8 +29,8 @@ fun BrowserUI(
     domainViewModel: DomainViewModel,
     historyViewModel: HistoryViewModel
 ) {
-    val isEditing: Boolean? by urlBarModel.isEditing.observeAsState()
-    val progress: Int by selectedTabModel.progressFlow.collectAsState(initial = 0)
+    val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
+    val progress: Int by selectedTabModel.progressFlow.collectAsState()
 
     Column {
         URLBar(urlBarModel, domainViewModel)
@@ -52,7 +51,8 @@ fun BrowserUI(
                 )
             }
         }
-        if (isEditing != false) {
+
+        if (isEditing) {
             Box(modifier = Modifier.weight(1.0f)) {
                 SuggestionList(suggestionsViewModel, urlBarModel, selectedTabModel,
                     domainViewModel, historyViewModel)

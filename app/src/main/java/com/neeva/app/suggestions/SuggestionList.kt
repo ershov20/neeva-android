@@ -12,14 +12,14 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.history.HistoryViewModel
-import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.history.DomainViewModel
+import com.neeva.app.storage.Favicon
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.zeroQuery.ZeroQuery
 
@@ -31,13 +31,13 @@ fun SuggestionList(
     domainViewModel: DomainViewModel,
     historyViewModel: HistoryViewModel
 ) {
-    val topSuggestion by suggestionsViewModel.topSuggestion.observeAsState()
-    val queryRowSuggestions by suggestionsViewModel.queryRowSuggestions.observeAsState(emptyList())
-    val navSuggestions by suggestionsViewModel.navSuggestions.observeAsState(emptyList())
-    val domainSuggestions by domainViewModel.domainsSuggestions.observeAsState(emptyList())
-    val showSuggestionList by suggestionsViewModel.shouldShowSuggestions.observeAsState(false)
-    val currentURL: Uri by selectedTabModel.urlFlow.collectAsState(Uri.EMPTY)
-    val isLazyTab: Boolean by urlBarModel.isLazyTab.observeAsState(false)
+    val topSuggestion by urlBarModel.autocompletedSuggestion.collectAsState()
+    val queryRowSuggestions by suggestionsViewModel.queryRowSuggestions.collectAsState()
+    val navSuggestions by suggestionsViewModel.navSuggestions.collectAsState()
+    val domainSuggestions by domainViewModel.domainSuggestions.collectAsState()
+    val showSuggestionList by suggestionsViewModel.shouldShowSuggestions.collectAsState()
+    val currentURL: Uri by selectedTabModel.urlFlow.collectAsState()
+    val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
 
     if (showSuggestionList) {
         val urlSuggestions = navSuggestions + domainSuggestions
@@ -53,6 +53,17 @@ fun SuggestionList(
                         .height(2.dp)
                         .fillMaxWidth()
                         .background(MaterialTheme.colors.background))
+            }
+
+            topSuggestion?.let {
+                item {
+                    val favicon: Favicon? by domainViewModel.getFaviconFlow(it.url).collectAsState(null)
+                    NavSuggestion(
+                        faviconData = favicon?.toBitmap(),
+                        onOpenUrl = urlBarModel::loadUrl,
+                        navSuggestion = it
+                    )
+                }
             }
 
             item { SuggestionDivider() }
@@ -75,9 +86,9 @@ fun SuggestionList(
                     urlSuggestions.filter { it.queryIndex == index },
                     { "${it.url} ${it.queryIndex}" }
                 ) {
-                    val bitmap: Bitmap? by domainViewModel.getFaviconFor(it.url).observeAsState()
+                    val favicon: Favicon? by domainViewModel.getFaviconFlow(it.url).collectAsState(null)
                     NavSuggestion(
-                        faviconData = bitmap,
+                        faviconData = favicon?.toBitmap(),
                         onOpenUrl = urlBarModel::loadUrl,
                         navSuggestion = it
                     )
@@ -100,9 +111,9 @@ fun SuggestionList(
                     unassociatedSuggestions,
                     { "${it.url} ${it.queryIndex}" }
                 ) {
-                    val bitmap: Bitmap? by domainViewModel.getFaviconFor(it.url).observeAsState()
+                    val favicon: Favicon? by domainViewModel.getFaviconFlow(it.url).collectAsState(null)
                     NavSuggestion(
-                        faviconData = bitmap,
+                        faviconData = favicon?.toBitmap(),
                         onOpenUrl = urlBarModel::loadUrl,
                         navSuggestion = it
                     )
@@ -119,10 +130,7 @@ fun SuggestionList(
                     domainViewModel = domainViewModel,
                     url = currentURL
                 ) {
-                    updateUrlBarContents(
-                        urlBarModel,
-                        currentURL.toString() ?: return@CurrentPageRow
-                    )
+                    updateUrlBarContents(urlBarModel, currentURL.toString())
                 }
             }
         }
@@ -132,7 +140,7 @@ fun SuggestionList(
 private fun updateUrlBarContents(urlBarModel: URLBarModel, newContents: String) {
     urlBarModel.onRequestFocus()
     urlBarModel.onLocationBarTextChanged(
-        urlBarModel.text.value!!.copy(
+        urlBarModel.text.value.copy(
             newContents,
             TextRange(newContents.length, newContents.length)
         )

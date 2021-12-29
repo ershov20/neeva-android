@@ -1,15 +1,15 @@
 package com.neeva.app.suggestions
 
 import android.net.Uri
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.browsing.toSearchUri
+import com.neeva.app.storage.Site
 import com.neeva.app.type.QuerySuggestionType
-import java.lang.Integer.min
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 data class NavSuggestion(
     val url: Uri,
@@ -34,20 +34,20 @@ data class QueryRowSuggestion(
 class SuggestionsViewModel: ViewModel() {
     private var suggestionResponse: SuggestionsQuery.Suggest? = null
 
-    private val _urlSuggestions = MutableLiveData<List<SuggestionsQuery.UrlSuggestion>>()
-    val urlSuggestions: LiveData<List<SuggestionsQuery.UrlSuggestion>> = _urlSuggestions
+    private val _urlSuggestions = MutableStateFlow<List<SuggestionsQuery.UrlSuggestion>>(emptyList())
+    val urlSuggestions: StateFlow<List<SuggestionsQuery.UrlSuggestion>> = _urlSuggestions
 
-    private val _topSuggestion = MutableLiveData<NavSuggestion?>()
-    val topSuggestion: LiveData<NavSuggestion?> = _topSuggestion
+    private val _topSuggestion = MutableStateFlow<NavSuggestion?>(null)
+    val topSuggestion: StateFlow<NavSuggestion?> = _topSuggestion
 
-    private val _navSuggestions = MutableLiveData<List<NavSuggestion>>()
-    val navSuggestions: LiveData<List<NavSuggestion>> = _navSuggestions
+    private val _navSuggestions = MutableStateFlow<List<NavSuggestion>>(emptyList())
+    val navSuggestions: StateFlow<List<NavSuggestion>> = _navSuggestions
 
-    private val _queryRowSuggestions = MutableLiveData<List<QueryRowSuggestion>>()
-    val queryRowSuggestions: LiveData<List<QueryRowSuggestion>> = _queryRowSuggestions
+    private val _queryRowSuggestions = MutableStateFlow<List<QueryRowSuggestion>>(emptyList())
+    val queryRowSuggestions: StateFlow<List<QueryRowSuggestion>> = _queryRowSuggestions
 
-    private val _shouldShowSuggestions = MutableLiveData<Boolean>(false)
-    val shouldShowSuggestions: LiveData<Boolean> = _shouldShowSuggestions
+    private val _shouldShowSuggestions = MutableStateFlow(false)
+    val shouldShowSuggestions: StateFlow<Boolean> = _shouldShowSuggestions
 
     fun updateWith(suggestionResults: SuggestionsQuery.Suggest) {
         suggestionResponse = suggestionResults
@@ -91,3 +91,13 @@ fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() = QueryRowSuggestion
         else -> R.drawable.ic_baseline_search_24
     }
 )
+
+fun Site.toNavSuggestion() : NavSuggestion {
+    val uri = Uri.parse(this.siteURL)
+
+    return NavSuggestion(
+        url = uri,
+        label = this.metadata?.title ?: uri.baseDomain() ?: this.siteURL,
+        secondaryLabel = uri.toString()
+    )
+}

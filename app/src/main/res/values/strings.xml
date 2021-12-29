@@ -5,6 +5,10 @@
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
 
+    <string name="suggested_sites">Suggested sites</string>
+    <string name="searches">Searches</string>
+    <string name="spaces">Spaces</string>
+
     <string name="download_image">Download image</string>
     <string name="download_video">Download video</string>
     <string name="download_link">Download link</string>
@@ -19,4 +23,8 @@
     <string name="history_today">Today</string>
     <string name="history_yesterday">Yesterday</string>
     <string name="history_this_week">This week</string>
+
+    <string name="debug_long_string_english_primary" translatable="false">String that is a really long string and stuff and extends for a while</string>
+    <string name="debug_long_string_english_secondary" translatable="false">Secondary string that is also a really long string and stuff and extends for a while</string>
+    <string name="debug_long_string_hebrew" translatable="false">אחת שתיים שלוש ארבע חמש שש שבע שמונה תשע עשר אחת עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרה</string>
 </resources>

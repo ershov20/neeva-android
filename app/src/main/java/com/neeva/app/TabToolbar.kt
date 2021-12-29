@@ -27,7 +27,7 @@ class TabToolbarModel(
 
 @Composable
 fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
-    val navigationInfo by selectedTabModel.navigationInfoFlow.collectAsState(SelectedTabModel.NavigationInfo())
+    val navigationInfo by selectedTabModel.navigationInfoFlow.collectAsState()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,

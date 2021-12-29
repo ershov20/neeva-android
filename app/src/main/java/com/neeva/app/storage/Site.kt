@@ -81,6 +81,9 @@ interface SitesWithVisitsAccessor {
     @Query("SELECT * FROM site WHERE lastVisitTimestamp > :thresholdTime ORDER BY visitCount DESC LIMIT :limit")
     fun getFrequentSitesAfter(thresholdTime: Date, limit: Int): Flow<List<Site>>
 
+    @Query("SELECT * FROM site WHERE siteURL LIKE '%'||:query||'%' ORDER BY visitCount DESC LIMIT :limit")
+    fun getQuerySuggestions(query: String, limit: Int = 1): List<Site>
+
     @Transaction
     @Query("SELECT * FROM site")
     fun getSitesWithVisits(): List<SiteWithVisits>
@@ -99,6 +102,53 @@ interface SitesWithVisitsAccessor {
 
     @Query("SELECT * FROM site WHERE siteUID LIKE :uid")
     suspend fun get(uid: Int): Site?
+
+    @Transaction
+    suspend fun upsert(
+        url: Uri,
+        title: String? = null,
+        favicon: Favicon? = null,
+        visit: Visit? = null
+    ) {
+        var site = find(url.toString())
+
+        if (site != null) {
+            val metadata: SiteMetadata = site.metadata?.let {
+                // Don't delete a title if we are trying to update an existing entry.  We may be
+                // trying to update an entry from a place where it's not available.
+                if (title != null) {
+                    it.copy(title = title)
+                } else {
+                    it
+                }
+            } ?: SiteMetadata(title = title)
+
+            // Keep the biggest favicon we find.
+            val largest = Favicon.bestFavicon(site.largestFavicon, favicon)
+
+            site = site.copy(
+                metadata = metadata,
+                largestFavicon = largest,
+                visitCount = if (visit != null) site.visitCount + 1 else site.visitCount,
+                lastVisitTimestamp = visit?.timestamp ?: site.lastVisitTimestamp
+            )
+            update(site)
+        } else {
+            site = Site(
+                siteURL = url.toString(),
+                metadata = SiteMetadata(title = title),
+                largestFavicon = favicon,
+                lastVisitTimestamp = visit?.timestamp ?: Date()
+            )
+            add(site)
+        }
+
+        visit?.let {
+            add(
+                it.copy(visitedSiteUID = find(site.siteURL)?.siteUID ?: 0)
+            )
+        }
+    }
 }
 
 class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
@@ -119,51 +169,15 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
     fun getFrequentSitesAfter(thresholdTime: Date, limit: Int): Flow<List<Site>> =
         sitesAccessor.getFrequentSitesAfter(thresholdTime, limit).distinctUntilChanged()
 
-    @Suppress("RedundantSuspendModifier")
     @WorkerThread
-    @Transaction
+    fun getQuerySuggestions(query: String): List<Site> {
+        return sitesAccessor.getQuerySuggestions(query)
+    }
+
     suspend fun insert(
         url: Uri,
         title: String? = null,
         favicon: Favicon? = null,
         visit: Visit? = null
-    ) {
-        var site = sitesAccessor.find(url.toString())
-
-        if (site != null) {
-            val metadata: SiteMetadata = site.metadata?.let {
-                // Don't delete a title if we are trying to update an existing entry.  We may be
-                // trying to update an entry from a place where it's not available.
-                if (title != null) {
-                    it.copy(title = title)
-                } else {
-                    it
-                }
-            } ?: SiteMetadata(title = title)
-
-            // Keep the biggest favicon we find.
-            val largest = site.largestFavicon?.let { it larger favicon } ?: favicon
-
-            sitesAccessor.update(
-                site.copy(
-                    metadata = metadata,
-                    largestFavicon = largest,
-                    visitCount = if (visit != null) site.visitCount + 1 else site.visitCount,
-                    lastVisitTimestamp = visit?.timestamp ?: site.lastVisitTimestamp
-                )
-            )
-        } else {
-            site = Site(
-                siteURL = url.toString(),
-                metadata = SiteMetadata(title = title),
-                largestFavicon = favicon,
-                lastVisitTimestamp = visit?.timestamp ?: Date())
-            sitesAccessor.add(site)
-        }
-
-        visit?.let {
-            sitesAccessor.add(it.copy(
-                visitedSiteUID = sitesAccessor.find(site.siteURL)?.siteUID ?: 0))
-        }
-    }
+    ) = sitesAccessor.upsert(url, title, favicon, visit)
 }

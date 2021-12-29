@@ -5,40 +5,75 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.*
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.browsing.baseDomain
+import com.neeva.app.history.DomainViewModel
+import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.suggestions.toNavSuggestion
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
-class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {
-    private val _text = MutableLiveData(TextFieldValue("", TextRange.Zero))
-    val text: LiveData<TextFieldValue> = _text
+class URLBarModel(
+    private val selectedTabModel: SelectedTabModel,
+    private val domainViewModel: DomainViewModel,
+    private val historyViewModel: HistoryViewModel
+): ViewModel() {
+    private val _text = MutableStateFlow(TextFieldValue("", TextRange.Zero))
+    val text: StateFlow<TextFieldValue> = _text
 
-    private val _isEditing = MutableLiveData(false)
-    val isEditing: LiveData<Boolean> = _isEditing
+    private val _isEditing = MutableStateFlow(false)
+    val isEditing: StateFlow<Boolean> = _isEditing
 
-    private val _showLock = MutableLiveData(false)
-    val showLock: LiveData<Boolean> = _showLock
+    private val _showLock = MutableStateFlow(false)
+    val showLock: StateFlow<Boolean> = _showLock
 
-    lateinit var autocompletedSuggestion: LiveData<NavSuggestion?>
+    // TODO(dan.alcantara): Untangle this and put it in SuggestionsViewModel.
+    private val _autocompletedSuggestion = MutableStateFlow<NavSuggestion?>(null)
+    val autocompletedSuggestion: StateFlow<NavSuggestion?> = _autocompletedSuggestion
 
-    private var _isLazyTab = MutableLiveData(false)
-    val isLazyTab: LiveData<Boolean> = _isLazyTab
+    private var _isLazyTab = MutableStateFlow(false)
+    val isLazyTab: StateFlow<Boolean> = _isLazyTab
 
+    // TODO(dan.alcantara): This shouldn't be here, but is because of the way the URL bar comprises
+    //                      two different Composables and because of how the URL bar can be focused
+    //                      from around the app.  We should rethink this.
     val focusRequester = FocusRequester()
 
     init {
-        // TODO(dan.alcantara): Rethink how lazy tab opening works.
-        _isEditing.observeForever {
-            _isLazyTab.value = _isLazyTab.value == true && it
+        viewModelScope.launch {
+            _isEditing.collect {
+                _isLazyTab.value = _isLazyTab.value == true && it
+            }
+        }
+
+        viewModelScope.launch {
+            selectedTabModel.urlFlow.collect {
+                if (it.toString().isNotBlank()) {
+                    onCurrentUrlChanged(it.toString())
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            historyViewModel.siteSuggestions.collect { suggestions ->
+                _autocompletedSuggestion.value = suggestions.firstOrNull()?.toNavSuggestion()
+            }
         }
     }
 
     /**
      * Prepare to open a new tab.  This mechanism doesn't create a new tab until the user actually
      * navigates somewhere or performs a query.
+     *
+     * TODO(dan.alcantara): Rethink how lazy tab opening works.
      */
     fun openLazyTab() {
         onCurrentUrlChanged("")
@@ -49,39 +84,56 @@ class URLBarModel(private val selectedTabModel: SelectedTabModel): ViewModel() {
     fun onReload() = selectedTabModel.reload()
 
     fun onLocationBarTextChanged(newValue: TextFieldValue) {
-        if (_isEditing.value == true) _text.value = newValue
+        if (_isEditing.value) {
+            updateTextValue(newValue)
+        }
     }
 
     fun loadUrl(url: Uri) {
         selectedTabModel.loadUrl(url, _isLazyTab.value == true)
     }
 
-    fun onCurrentUrlChanged(newUrl: String) {
-        _text.value = _text.value?.copy(Uri.parse(newUrl)?.baseDomain() ?: "")
+    private fun onCurrentUrlChanged(newUrl: String) {
+        updateTextValue(_text.value.copy(Uri.parse(newUrl)?.baseDomain() ?: ""))
         _showLock.value = Uri.parse(newUrl).scheme.equals("https")
     }
 
     fun onFocusChanged(focus: FocusState) {
         _isEditing.value = focus.isFocused
         if (!focus.isFocused) {
-            _text.value = _text.value?.copy(selectedTabModel.urlFlow.value.baseDomain() ?: "")
+            updateTextValue(_text.value.copy(selectedTabModel.urlFlow.value.baseDomain() ?: ""))
         } else {
-            _text.value = _text.value?.copy("")
+            updateTextValue(_text.value.copy(""))
             viewModelScope.launch {
                 SpaceStore.shared.refresh()
             }
         }
     }
 
+    private fun updateTextValue(newValue: TextFieldValue) {
+        android.util.Log.e("dfalcantara", "Updating text value: $newValue")
+        _text.value = newValue
+
+        // Pull new suggestions from the database according to what's currently in the URL bar.
+        domainViewModel.updateSuggestionQuery(newValue.text)
+        historyViewModel.updateSuggestionQuery(newValue.text)
+    }
+
     fun onRequestFocus() {
         focusRequester.requestFocus()
     }
-}
 
-@Suppress("UNCHECKED_CAST")
-class UrlBarModelFactory(private val selectedTabModel: SelectedTabModel) :
-    ViewModelProvider.Factory {
-    override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-        return URLBarModel(selectedTabModel) as T
+    companion object {
+        @Suppress("UNCHECKED_CAST")
+        class URLBarModelFactory(
+            private val selectedTabModel: SelectedTabModel,
+            private val domainViewModel: DomainViewModel,
+            private val historyViewModel: HistoryViewModel
+        ) :
+            ViewModelProvider.Factory {
+            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+                return URLBarModel(selectedTabModel, domainViewModel, historyViewModel) as T
+            }
+        }
     }
 }

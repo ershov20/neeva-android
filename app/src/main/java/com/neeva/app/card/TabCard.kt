@@ -19,16 +19,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun TabCard(
     tab: TabInfo,
@@ -70,7 +73,7 @@ fun TabCard(
             ) {
                 Image(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_close_24),
-                    contentDescription = "Close tab",
+                    contentDescription = stringResource(id = R.string.close),
                     contentScale = ContentScale.Inside,
                     colorFilter = ColorFilter.tint(Color.White)
                 )
@@ -98,8 +101,8 @@ fun TabCard(
     }
 }
 
-@Preview("Not selected, 1x scale")
-@Preview("Not selected, 2x scale", fontScale = 2.0f)
+@Preview("Not selected, 1x scale", locale = "en")
+@Preview("Not selected, 2x scale", locale = "en", fontScale = 2.0f)
 @Composable
 fun TabCard_PreviewIsNotSelected() {
     NeevaTheme {
@@ -108,7 +111,7 @@ fun TabCard_PreviewIsNotSelected() {
                 id = "unimportant",
                 thumbnailUri = null,
                 url = Uri.parse("https://www.reddit.com"),
-                title = "This is a long tab title that just keeps going and going and going and going",
+                title = stringResource(id = R.string.debug_long_string_english_primary),
                 isSelected = false
             ),
             faviconData = null,
@@ -118,8 +121,28 @@ fun TabCard_PreviewIsNotSelected() {
     }
 }
 
-@Preview("Selected, 1x scale")
-@Preview("Selected, 2x scale", fontScale = 2.0f)
+@Preview("RTL, Not selected, 1x scale", locale = "he")
+@Preview("RTL, Not selected, 2x scale", locale = "he", fontScale = 2.0f)
+@Composable
+fun TabCard_PreviewIsNotSelectedHebrew() {
+    NeevaTheme {
+        TabCard(
+            tab = TabInfo(
+                id = "unimportant",
+                thumbnailUri = null,
+                url = Uri.parse("https://www.reddit.com"),
+                title = stringResource(id = R.string.debug_long_string_hebrew),
+                isSelected = false
+            ),
+            faviconData = null,
+            onSelect = {},
+            onClose = {}
+        )
+    }
+}
+
+@Preview("Selected, 1x scale", locale = "en")
+@Preview("Selected, 2x scale", locale = "en", fontScale = 2.0f)
 @Composable
 fun TabCard_PreviewIsSelected() {
     NeevaTheme {
@@ -128,7 +151,7 @@ fun TabCard_PreviewIsSelected() {
                 id = "unimportant",
                 thumbnailUri = null,
                 url = Uri.parse("https://www.reddit.com"),
-                title = "This is a long tab title that just keeps going and going and going and going",
+                title = stringResource(id = R.string.debug_long_string_english_primary),
                 isSelected = true
             ),
             faviconData = null,

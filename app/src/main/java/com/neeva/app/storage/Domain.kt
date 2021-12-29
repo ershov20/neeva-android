@@ -1,15 +1,14 @@
 package com.neeva.app.storage
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.annotation.WorkerThread
-import androidx.lifecycle.*
 import androidx.room.*
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.suggestions.NavSuggestion
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 
 @Entity(indices = [Index(value = ["domainName"], unique = true)])
 data class Domain(
@@ -32,7 +31,7 @@ interface DomainAccessor {
 
     // Returns list of all domains that has a domainName containing the query
     @Query("SELECT * FROM domain WHERE domainName LIKE :query||'%'")
-    fun matchesTo(query: String): Flow<List<Domain>>
+    fun matchesTo(query: String): List<Domain>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun add(vararg domains: Domain)
@@ -42,14 +41,45 @@ interface DomainAccessor {
 
     @Delete
     suspend fun delete(domain: Domain)
-}
 
+    @Transaction
+    suspend fun updateFavicon(url: String, favicon: Favicon) {
+        val domainName = Uri.parse(url).baseDomain() ?: return
+        val domain = find(domainName)
+        if (domain == null) {
+            add(
+                Domain(
+                    domainName = domainName,
+                    providerName = null,
+                    largestFavicon = favicon
+                )
+            )
+        } else {
+            update(
+                domain.copy(
+                    domainName = domainName,
+                    largestFavicon = Favicon.bestFavicon(favicon, domain.largestFavicon)
+                )
+            )
+        }
+    }
+
+    @Transaction
+    suspend fun upsert(domain: Domain) {
+        if (find(domain.domainName) == null) {
+            add(domain)
+        } else {
+            update(domain)
+        }
+    }
+}
 
 class DomainRepository(private val domainAccessor: DomainAccessor) {
     val allDomains: Flow<List<NavSuggestion>> = domainAccessor.getAll()
-        .distinctUntilChanged().map { domainList ->
-        domainList.map { it.toNavSuggestion() }
-    }
+        .distinctUntilChanged()
+        .map { domainList ->
+            domainList.map { it.toNavSuggestion() }
+        }
 
     @WorkerThread
     fun listen(domainName: String): Flow<Domain> {
@@ -57,83 +87,13 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
     }
 
     @WorkerThread
-    fun matchesTo(query: String): Flow<List<NavSuggestion>> {
-        return domainAccessor.matchesTo(query).distinctUntilChanged().map { domainList ->
-            domainList.map { it.toNavSuggestion() }
-        }.flowOn(Dispatchers.Default).conflate()
+    fun queryNavSuggestions(query: String): List<NavSuggestion> {
+        return domainAccessor.matchesTo(query).map { domain -> domain.toNavSuggestion() }
     }
 
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
-    suspend fun insert(domain: Domain) {
-        if (domainAccessor.find(domain.domainName) != null) {
-            domainAccessor.update(domain)
-        } else {
-            domainAccessor.add(domain)
-        }
-    }
+    suspend fun insert(domain: Domain) = domainAccessor.upsert(domain)
 
-    @Suppress("RedundantSuspendModifier")
-    @WorkerThread
-    suspend fun updateFaviconFor(url: String, favicon: Favicon) {
-        val domainName = Uri.parse(url).baseDomain() ?: return
-        val domain = domainAccessor.find(domainName)
-        if (domain == null) {
-            val newDomain = Domain(
-                domainName = domainName, providerName = null, largestFavicon = favicon
-            )
-            domainAccessor.add(newDomain)
-        } else if (favicon.width > domain.largestFavicon?.width ?: 0) {
-            val newDomain = Domain(
-                domainUID = domain.domainUID, domainName = domainName,
-                providerName = domain.providerName, largestFavicon = favicon
-            )
-            domainAccessor.update(newDomain)
-        }
-    }
-}
-
-class DomainViewModel(private val repository: DomainRepository) : ViewModel() {
-    val allDomains: LiveData<List<NavSuggestion>> = repository.allDomains.asLiveData()
-
-    val textFlow = MutableStateFlow("")
-    var domainsSuggestions: LiveData<List<NavSuggestion>> = textFlow.flatMapLatest {
-        repository.matchesTo(it)
-    }.asLiveData()
-
-    var autocompletedSuggestion: LiveData<NavSuggestion?> = domainsSuggestions.map {
-        if (it.isEmpty()) return@map null
-
-        it.first()
-    }
-
-    fun getFaviconFor(uri: Uri?): LiveData<Bitmap?> {
-        val domainName = uri?.baseDomain() ?: return MutableLiveData()
-        return repository.listen(domainName)
-            .mapNotNull { it.largestFavicon?.toBitmap()}.asLiveData()
-    }
-
-    fun insert(domain: Domain) = viewModelScope.launch {
-        repository.insert(domain)
-    }
-
-    fun insert(url:String, title: String? = null) = viewModelScope.launch {
-        val domainName = Uri.parse(url).baseDomain() ?: return@launch
-        repository.insert(Domain(domainName = domainName, providerName = title, largestFavicon = null))
-    }
-
-    fun updateFaviconFor(url: String, favicon: Favicon) = viewModelScope.launch {
-        repository.updateFaviconFor(url, favicon)
-    }
-}
-
-class DomainViewModelFactory(private val repository: DomainRepository) :
-    ViewModelProvider.Factory {
-
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        @Suppress("UNCHECKED_CAST")
-        return DomainViewModel(repository) as T
-    }
+    suspend fun updateFaviconFor(url: String, favicon: Favicon) = domainAccessor.updateFavicon(url, favicon)
 }
 
 // TODO: Find a more elegant way to handle this through Uri

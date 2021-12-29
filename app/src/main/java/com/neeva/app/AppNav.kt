@@ -16,7 +16,7 @@ import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.NeevaMenuSheet
 import com.neeva.app.settings.SettingsContainer
 import com.neeva.app.spaces.AddToSpaceSheet
-import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.history.DomainViewModel
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.flow.MutableStateFlow

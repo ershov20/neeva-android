@@ -1,28 +1,31 @@
 package com.neeva.app.card
 
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.*
 import com.neeva.app.browsing.TabInfo
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-class CardViewModel(tabsList: LiveData<List<TabInfo>>): ViewModel() {
-    private val _listState = MutableLiveData<LazyListState>()
-    val listState: LiveData<LazyListState> = _listState
+class CardViewModel(tabsList: StateFlow<List<TabInfo>>): ViewModel() {
+    private val _listState = MutableStateFlow(LazyListState())
+    val listState: StateFlow<LazyListState> = _listState
 
     init {
-        tabsList.observeForever { tabList ->
-            var index = tabList.indexOfFirst { it.isSelected }
-            if (index == -1) {
-                index = 0
+        viewModelScope.launch {
+            tabsList.collect { tabList ->
+                var index = tabList.indexOfFirst { it.isSelected }
+                if (index == -1) {
+                    index = 0
+                }
+                _listState.value = LazyListState(index)
             }
-            _listState.value = LazyListState(index)
         }
     }
 
     companion object {
-        class CardViewModelFactory(private val tabsList: LiveData<List<TabInfo>>) : ViewModelProvider.Factory {
+        class CardViewModelFactory(private val tabsList: StateFlow<List<TabInfo>>) : ViewModelProvider.Factory {
             @Suppress("UNCHECKED_CAST")
             override fun <T : ViewModel?> create(modelClass: Class<T>): T {
                 return CardViewModel(tabsList) as T

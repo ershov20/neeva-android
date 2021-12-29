@@ -13,7 +13,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -37,42 +36,48 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.map
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.R
 import com.neeva.app.browsing.toSearchUri
+import com.neeva.app.storage.Favicon
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
+import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun AutocompleteTextField(
-    urlBarModel: URLBarModel, getFaviconFor: (Uri) -> LiveData<Bitmap?>
+    urlBarModel: URLBarModel,
+    getFaviconFlow: (Uri) -> Flow<Favicon?>
 ) {
-    val autocompletedSuggestion by urlBarModel.autocompletedSuggestion.observeAsState(null)
-    val value: TextFieldValue by urlBarModel.text.observeAsState(TextFieldValue("", TextRange.Zero))
+    val autocompletedSuggestion by urlBarModel.autocompletedSuggestion.collectAsState()
+    val urlBarText: TextFieldValue by urlBarModel.text.collectAsState()
+    val urlBarIsBeingEdited: Boolean by urlBarModel.isEditing.collectAsState()
+
     var lastEditWasDeletion by remember { mutableStateOf(false) }
 
-    val showingAutocomplete: Boolean by urlBarModel.text.map {
-        val autocompleteText =
-            urlBarModel.autocompletedSuggestion.value?.secondaryLabel ?: return@map false
-        it.text.isNotEmpty()
-                && autocompleteText.isNotEmpty()
-                && autocompleteText.startsWith(it.text)
-                && !lastEditWasDeletion
-                && autocompletedSuggestion!!.secondaryLabel.length != value.text.length
-    }.observeAsState(false)
+    val url = autocompletedSuggestion?.url ?: Uri.parse(urlBarText.text) ?: Uri.parse(appURL)
+    val favicon: Favicon? by getFaviconFlow(url).collectAsState(null)
+    val bitmap = favicon?.toBitmap()
 
-    val url = autocompletedSuggestion?.url ?: Uri.parse(value.text) ?: Uri.parse(appURL)
-    val bitmap: Bitmap? by getFaviconFor(url).observeAsState()
+    // Don't bother calculating what the suggestion should be if the bar isn't visible.
+    val autocompleteText = if (urlBarIsBeingEdited) {
+        getAutocompleteText(autocompletedSuggestion, urlBarText.text)
+    } else {
+        null
+    }
+    val showingAutocomplete: Boolean =
+        urlBarText.text.isNotBlank()
+                && !autocompleteText.isNullOrBlank()
+                && !lastEditWasDeletion
+                && autocompletedSuggestion!!.secondaryLabel.length > urlBarText.text.length
 
     AutocompleteTextField(
-        autocompletedSuggestion = autocompletedSuggestion?.secondaryLabel?.takeIf { showingAutocomplete },
-        value = value,
+        autocompletedSuggestion = autocompleteText.takeIf { showingAutocomplete },
+        value = urlBarText,
         bitmap = bitmap,
         onLocationEdited = { textFieldValue ->
-            lastEditWasDeletion = textFieldValue.text.length < value.text.length
+            lastEditWasDeletion = textFieldValue.text.length < urlBarText.text.length
             urlBarModel.onLocationBarTextChanged(textFieldValue)
         },
         onLocationReplaced = { textFieldValue ->
@@ -80,7 +85,9 @@ fun AutocompleteTextField(
         },
         focusRequester = urlBarModel.focusRequester,
         onFocusChanged = urlBarModel::onFocusChanged,
-        onLoadUrl = { urlBarModel.loadUrl(getUrlToLoad(autocompletedSuggestion, value.text)) }
+        onLoadUrl = {
+            urlBarModel.loadUrl(getUrlToLoad(autocompletedSuggestion, urlBarText.text))
+        }
     )
 }
 
@@ -230,25 +237,66 @@ fun AutocompleteTextField_PreviewNoSuggestion() {
     }
 }
 
-internal fun getUrlToLoad(autocompletedSuggestion: NavSuggestion?, urlBarContents: String): Uri = when {
-    autocompletedSuggestion?.url != null -> {
-        autocompletedSuggestion.url
+/**
+ * Determines if what is in the URL bar can in any way be related to the autocomplete suggestion.
+ *
+ * This applies a bunch of hand wavy heuristics, including chopping off "https://www" and checking
+ * if there's a straight match.
+ */
+internal fun getAutocompleteText(
+    autocompletedSuggestion: NavSuggestion?,
+    urlBarContents: String
+): String? {
+    if (urlBarContents.isBlank()) return null
+
+    // Check if we have a direct match.
+    val autocompleteText = autocompletedSuggestion?.secondaryLabel?.takeIf { it.isNotBlank() } ?: return null
+    if (autocompleteText.startsWith(urlBarContents)) {
+        return autocompleteText
     }
 
-    // Try to figure out if the user typed in a query or a URL.
-    // TODO(dan.alcantara): This won't always work, especially if the site doesn't have
-    //                      an https equivalent.  We should either figure out something
-    //                      more robust or do what iOS does (for consistency).
-    Patterns.WEB_URL.matcher(urlBarContents).matches() -> {
-        var uri = Uri.parse(urlBarContents)
-        if (uri.scheme.isNullOrEmpty()) {
-            uri = uri.buildUpon().scheme("https").build()
+    // Check if the URL could possibly start with what has already been typed in.
+    val autocompleteUri = autocompletedSuggestion.url.toString()
+
+    val withoutScheme = autocompleteUri
+        .takeIf { it.startsWith("https://") }
+        ?.replaceFirst("https://", "")
+        ?.takeIf { it.startsWith(urlBarContents) }
+    if (withoutScheme != null) return withoutScheme
+
+    val withoutWww = autocompleteUri
+        .takeIf { it.startsWith("https://www.") }
+        ?.replaceFirst("https://www.", "")
+        ?.takeIf { it.startsWith(urlBarContents) }
+    if (withoutWww != null) return withoutWww
+
+    return null
+}
+
+internal fun getUrlToLoad(
+    autocompletedSuggestion: NavSuggestion?,
+    urlBarContents: String
+): Uri {
+    return when {
+        autocompletedSuggestion?.url != null -> {
+            autocompletedSuggestion.url
         }
-        uri
-    }
 
-    else -> {
-        urlBarContents.toSearchUri()
+        // Try to figure out if the user typed in a query or a URL.
+        // TODO(dan.alcantara): This won't always work, especially if the site doesn't have
+        //                      an https equivalent.  We should either figure out something
+        //                      more robust or do what iOS does (for consistency).
+        Patterns.WEB_URL.matcher(urlBarContents).matches() -> {
+            var uri = Uri.parse(urlBarContents)
+            if (uri.scheme.isNullOrEmpty()) {
+                uri = uri.buildUpon().scheme("https").build()
+            }
+            uri
+        }
+
+        else -> {
+            urlBarContents.toSearchUri()
+        }
     }
 }
 

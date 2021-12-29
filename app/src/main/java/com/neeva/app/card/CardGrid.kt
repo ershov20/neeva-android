@@ -16,7 +16,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,7 +25,8 @@ import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.history.DomainViewModel
+import com.neeva.app.storage.Favicon
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.Button
 
@@ -39,7 +39,7 @@ fun CardsContainer(
     urlBarModel: URLBarModel,
     cardViewModel: CardViewModel
 ) {
-    val state: AppNavState by appNavModel.state.collectAsState(AppNavState.BROWSER)
+    val state: AppNavState by appNavModel.state.collectAsState()
 
     AnimatedVisibility(
         visible = state == AppNavState.CARD_GRID,
@@ -60,8 +60,8 @@ fun CardGrid(
     urlBarModel: URLBarModel,
     cardViewModel: CardViewModel
 ) {
-    val tabs: List<TabInfo> by webLayerModel.orderedTabList.observeAsState(ArrayList())
-    val listState: LazyListState by cardViewModel.listState.observeAsState(LazyListState())
+    val tabs: List<TabInfo> by webLayerModel.orderedTabList.collectAsState()
+    val listState: LazyListState by cardViewModel.listState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -76,16 +76,18 @@ fun CardGrid(
                 .weight(1f)
         ) {
             items(tabs) { tab ->
-                val favicon: Bitmap? by domainViewModel.getFaviconFor(tab.url).observeAsState()
+                val favicon: Favicon? by domainViewModel.getFaviconFlow(tab.url).collectAsState(null)
+                val bitmap = favicon?.toBitmap()
 
                 TabCard(
                     tab = tab,
-                    faviconData = favicon,
+                    faviconData = bitmap,
                     onSelect = {
                         webLayerModel.select(tab)
                         appNavModel.showBrowser()
                     },
-                    onClose = { webLayerModel.close(tab) })
+                    onClose = { webLayerModel.close(tab) }
+                )
             }
         }
         Box(modifier = Modifier

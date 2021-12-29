@@ -3,18 +3,19 @@ package com.neeva.app.suggestions
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.history.DomainViewModel
+import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun CurrentPageRow(domainViewModel: DomainViewModel, url: Uri, onEditPressed: () -> Unit) {
-    val favicon: Bitmap? by domainViewModel.getFaviconFor(url).observeAsState()
-    CurrentPageRow(favicon = favicon, url = url, onEditPressed = onEditPressed)
+    val favicon: Favicon? by domainViewModel.getFaviconFlow(url).collectAsState(null)
+    CurrentPageRow(favicon = favicon?.toBitmap(), url = url, onEditPressed = onEditPressed)
 }
 
 @Composable

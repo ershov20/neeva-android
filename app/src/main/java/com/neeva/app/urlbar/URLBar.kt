@@ -9,20 +9,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import com.neeva.app.storage.DomainViewModel
+import com.neeva.app.history.DomainViewModel
 
 @Composable
 fun URLBar(urlBarModel: URLBarModel, domainViewModel: DomainViewModel) {
-    val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
-    val showLock: Boolean by urlBarModel.showLock.observeAsState(false)
-    val value: TextFieldValue by urlBarModel.text.observeAsState(TextFieldValue("", TextRange.Zero))
+    val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
+    val showLock: Boolean by urlBarModel.showLock.collectAsState()
+    val value: TextFieldValue by urlBarModel.text.collectAsState()
 
     Box(
         modifier = Modifier
@@ -39,7 +38,7 @@ fun URLBar(urlBarModel: URLBarModel, domainViewModel: DomainViewModel) {
                 .height(40.dp)
                 .padding(horizontal = 8.dp)
         ) {
-            AutocompleteTextField(urlBarModel, domainViewModel::getFaviconFor)
+            AutocompleteTextField(urlBarModel, domainViewModel::getFaviconFlow)
 
             // We need to have both the AutocompleteTextField and the LocationLabel in the URLBar
             // at the same time because the AutocompleteTextField is the thing that must be focused

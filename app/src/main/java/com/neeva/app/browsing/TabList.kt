@@ -1,7 +1,8 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
-import androidx.lifecycle.MutableLiveData
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import org.chromium.weblayer.Tab
 
 /**
@@ -12,7 +13,8 @@ class TabList {
     private val currentTabs: MutableList<Tab> = mutableListOf()
     private val currentPrimitives: MutableMap<String, TabInfo> = mutableMapOf()
 
-    val orderedTabList = MutableLiveData<List<TabInfo>>()
+    private val _orderedTabList = MutableStateFlow<List<TabInfo>>(emptyList())
+    val orderedTabList: StateFlow<List<TabInfo>> = _orderedTabList
 
     fun indexOf(tab: Tab) = currentTabs.indexOf(tab)
     fun findTab(id: String) = currentTabs.firstOrNull { it.guid == id }
@@ -30,13 +32,13 @@ class TabList {
             isSelected =  tab.isSelected
         )
 
-        updateLiveData()
+        updateFlow()
     }
 
     fun remove(tab: Tab) {
         currentTabs.remove(tab)
         currentPrimitives.remove(tab.guid)
-        updateLiveData()
+        updateFlow()
     }
 
     fun updatedSelectedTab(selectedTabId: String?) {
@@ -51,31 +53,31 @@ class TabList {
             }
         }
 
-        updateLiveData()
+        updateFlow()
     }
 
     fun updateTabTitle(tabId: String, newTitle: String?) {
         val existingTab = currentPrimitives[tabId] ?: return
         if (existingTab.title == newTitle) return
         currentPrimitives[tabId] = existingTab.copy(title = newTitle)
-        updateLiveData()
+        updateFlow()
     }
 
     fun updateUrl(tabId: String, newUrl: Uri?) {
         val existingTab = currentPrimitives[tabId] ?: return
         if (existingTab.url == newUrl) return
         currentPrimitives[tabId] = existingTab.copy(url = newUrl)
-        updateLiveData()
+        updateFlow()
     }
 
     fun updateThumbnailUri(tabId: String, newThumbnailUri: Uri?) {
         val existingTab = currentPrimitives[tabId] ?: return
         if (existingTab.thumbnailUri == newThumbnailUri) return
         currentPrimitives[tabId] = existingTab.copy(thumbnailUri = newThumbnailUri)
-        updateLiveData()
+        updateFlow()
     }
 
-    private fun updateLiveData() {
-        orderedTabList.value = currentTabs.map { currentPrimitives[it.guid]!! }
+    private fun updateFlow() {
+        _orderedTabList.value = currentTabs.map { currentPrimitives[it.guid]!! }
     }
 }

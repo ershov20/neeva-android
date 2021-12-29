@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
-import androidx.lifecycle.asLiveData
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.coroutines.await
 import com.neeva.app.*
@@ -96,21 +95,22 @@ class SpaceStore {
         REFRESHING,
         FAILED
     }
-    var allSpacesFlow = MutableStateFlow(listOf<Space>())
-    var allSpaces = allSpacesFlow.asLiveData()
+    val allSpacesFlow = MutableStateFlow<List<Space>>(emptyList())
     private var urlToSpacesMap = HashMap<Uri, ArrayList<Space>>()
     val stateFlow = MutableStateFlow(State.READY)
 
     @OptIn(ExperimentalStdlibApi::class)
     suspend fun refresh() {
         stateFlow.emit(State.REFRESHING)
-        val response = apolloClient(NeevaBrowser.context).query(
-            ListSpacesQuery()
-        ).await()
+        val response = apolloClient(NeevaBrowser.context)
+            .query(ListSpacesQuery())
+            .await()
+
         if (response.hasErrors()) stateFlow.emit(State.FAILED)
+
         response.data?.listSpaces?.let { listSpaces ->
             val oldSpaceMap = HashMap<String, Space>()
-            allSpaces.value?.forEach { oldSpaceMap[it.id] = it }
+            allSpacesFlow.value.forEach { oldSpaceMap[it.id] = it }
 
             // Clear to avoid holding stale data. Will be rebuilt below.
             urlToSpacesMap = HashMap()
@@ -130,7 +130,7 @@ class SpaceStore {
                     thumbnail = space.thumbnail,
                     resultCount = space.resultCount ?: 0,
                     isDefaultSpace = space.isDefaultSpace ?: false,
-                    isShared = space.acl?.map { it.userID }?.any { it == NeevaUserInfo.shared.id }
+                    isShared = space.acl?.map { it.userID }?.any { it == NeevaUser.shared.id }
                         ?: false,
                     isPublic = space.hasPublicACL ?: false,
                     userACL = userACL

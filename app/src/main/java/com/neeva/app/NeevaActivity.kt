@@ -10,26 +10,27 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.map
 import com.apollographql.apollo.coroutines.await
 import com.neeva.app.browsing.BrowserCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardViewModel
+import com.neeva.app.history.DomainViewModel
 import com.neeva.app.history.HistoryViewModel
-import com.neeva.app.history.HistoryViewModelFactory
-import com.neeva.app.storage.*
+import com.neeva.app.storage.DomainRepository
+import com.neeva.app.storage.History
+import com.neeva.app.storage.NeevaUser
+import com.neeva.app.storage.SitesRepository
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.urlbar.UrlBarModelFactory
 import kotlinx.coroutines.flow.collect
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
@@ -45,15 +46,20 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         private const val WEBLAYER_FRAGMENT_TAG = "WebLayer Fragment"
     }
 
-    private val domainsViewModel by viewModels<DomainViewModel> {
-        DomainViewModelFactory(DomainRepository(History.db.fromDomains()))
+    // TODO(dan.alcantara): We should either be using Dagger or decoupling all of these ViewModels
+    //                      from each other.
+    private val domainViewModel by viewModels<DomainViewModel> {
+        DomainViewModel.Companion.DomainViewModelFactory(DomainRepository(History.db.fromDomains()))
     }
+
     private val historyViewModel by viewModels<HistoryViewModel> {
-        HistoryViewModelFactory(SitesRepository(History.db.fromSites()))
+        HistoryViewModel.Companion.HistoryViewModelFactory(SitesRepository(History.db.fromSites()))
     }
+
     private val suggestionsModel by viewModels<SuggestionsViewModel>()
+
     private val webModel by viewModels<WebLayerModel> {
-        WebLayerModel.Companion.WebLayerModelFactory(domainsViewModel, historyViewModel)
+        WebLayerModel.Companion.WebLayerModelFactory(domainViewModel, historyViewModel)
     }
 
     private val selectedTabModel by viewModels<SelectedTabModel> {
@@ -63,7 +69,14 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         )
     }
 
-    private val urlBarModel by viewModels<URLBarModel> { UrlBarModelFactory(selectedTabModel) }
+    private val urlBarModel by viewModels<URLBarModel> {
+        URLBarModel.Companion.URLBarModelFactory(
+            selectedTabModel,
+            domainViewModel,
+            historyViewModel
+        )
+    }
+
     private val cardViewModel by viewModels<CardViewModel> {
         CardViewModel.Companion.CardViewModelFactory(webModel.orderedTabList)
     }
@@ -76,7 +89,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
      * View provided to WebLayer that allows us to receive information about when the bottom toolbar
      * needs to be scrolled off.  We provide a placeholder instead of the real view because WebLayer
      * appears to have a bug that prevents the bottom view from rendering correctly.
-     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v94.
+     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v96.
      */
     private lateinit var bottomControlPlaceholder: View
     private lateinit var topControlPlaceholder: View
@@ -95,7 +108,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                     Surface(color = MaterialTheme.colors.background) {
                         BrowserUI(
                             urlBarModel, suggestionsModel,
-                            selectedTabModel, domainsViewModel, historyViewModel
+                            selectedTabModel, domainViewModel, historyViewModel
                         )
                     }
                 }
@@ -108,7 +121,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 Surface(color = Color.Transparent) {
                     AppNav(
                         appNavModel, selectedTabModel, historyViewModel,
-                        domainsViewModel, webModel, urlBarModel, cardViewModel
+                        domainViewModel, webModel, urlBarModel, cardViewModel
                     )
                 }
             }
@@ -120,7 +133,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             setContent {
                 NeevaTheme {
                     Surface(color = MaterialTheme.colors.background) {
-                        val isEditing: Boolean by urlBarModel.isEditing.observeAsState(false)
+                        val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
                         if (!isEditing) {
                             TabToolbar(
                                 TabToolbarModel(
@@ -151,39 +164,23 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             throw RuntimeException("Failed to initialize WebLayer", e)
         }
 
-        // DB warmup
+        // Warm up the database.
         History.db
 
-        lifecycleScope.launchWhenResumed {
-            NeevaUserInfo.fetch()
+        lifecycleScope.launchWhenCreated {
+            NeevaUser.fetch()
         }
 
-        urlBarModel.text.observe(this) {
-            lifecycleScope.launchWhenResumed {
-                val response = apolloClient(this@NeevaActivity.applicationContext).query(
-                    SuggestionsQuery(query = it.text)).await()
+        lifecycleScope.launchWhenCreated {
+            // Every time the contents of the URL bar changes, fire off a query to the backend.
+            urlBarModel.text.collect {
+                val response = apolloClient(this@NeevaActivity.applicationContext)
+                    .query(SuggestionsQuery(query = it.text))
+                    .await()
                 if (response.data?.suggest != null) {
                     suggestionsModel.updateWith(response.data?.suggest!!)
                 }
             }
-
-            lifecycleScope.launchWhenResumed {
-                domainsViewModel.textFlow.emit(it.text)
-            }
-        }
-
-        lifecycleScope.launchWhenCreated {
-            selectedTabModel.urlFlow.collect {
-                if (it.toString().isNotBlank()) {
-                    urlBarModel.onCurrentUrlChanged(it.toString())
-                }
-            }
-        }
-
-        urlBarModel.autocompletedSuggestion = domainsViewModel.domainsSuggestions.map {
-            if (it.isEmpty()) return@map null
-
-            it.first()
         }
     }
 
@@ -230,7 +227,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 webModel.exitFullscreen()
             }
 
-            appNavModel.state.value != null && appNavModel.state.value != AppNavState.BROWSER -> {
+            appNavModel.state.value != AppNavState.BROWSER -> {
                 appNavModel.showBrowser()
             }
 
@@ -257,15 +254,15 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         window.attributes = attrs
         val decorView: View = window.decorView
 
-        // Caching the system ui visibility is ok for shell, but likely not ok for
-        // real code.
+        // Caching the system ui visibility is ok for shell, but likely not ok for real code.
         val systemVisibilityToRestore = decorView.systemUiVisibility
         decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                or View.SYSTEM_UI_FLAG_LOW_PROFILE or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION      // hide nav bar
+                or View.SYSTEM_UI_FLAG_FULLSCREEN           // hide status bar
+                or View.SYSTEM_UI_FLAG_LOW_PROFILE
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
 
         return systemVisibilityToRestore
     }
