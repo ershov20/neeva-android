@@ -221,8 +221,8 @@ fun AutocompleteTextField_Preview() {
     }
 }
 
-@Preview("Default, Hebrew, 1x scale", locale = "he")
-@Preview("Default, Hebrew, 2x scale", locale = "he", fontScale = 2.0f)
+@Preview("Default, RTL, 1x scale", locale = "he")
+@Preview("Default, RTL, 2x scale", locale = "he", fontScale = 2.0f)
 @Composable
 fun AutocompleteTextField_PreviewHebrew() {
     NeevaTheme {

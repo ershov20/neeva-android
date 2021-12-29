@@ -10,11 +10,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.widgets.Button
@@ -68,7 +67,7 @@ fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
 @Composable
 fun NeevaMenuButton(onClick: () -> Unit) {
     Image(
-        imageVector = ImageVector.vectorResource(id = R.drawable.ic_neeva_logo),
+        painter = painterResource(R.drawable.ic_neeva_logo),
         contentDescription = stringResource(id = R.string.toolbar_neeva_menu),
         contentScale = ContentScale.Inside,
         modifier = Modifier

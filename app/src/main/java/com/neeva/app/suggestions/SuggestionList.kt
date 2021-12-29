@@ -113,8 +113,8 @@ fun SuggestionList_PreviewFullyLoaded() {
         SuggestionList(
             topSuggestion = NavSuggestion(
                 url = Uri.parse("https://www.reddit.com"),
-                label = stringResource(R.string.debug_long_string_english_primary),
-                secondaryLabel = stringResource(R.string.debug_long_string_english_secondary)
+                label = stringResource(R.string.debug_long_string_primary),
+                secondaryLabel = stringResource(R.string.debug_long_string_secondary)
             ),
             queryRowSuggestions = listOf(
                 QueryRowSuggestion(
@@ -137,19 +137,19 @@ fun SuggestionList_PreviewFullyLoaded() {
                 NavSuggestion(
                     url = Uri.parse("Suggestion 1"),
                     label = "Suggestion 1 for query 3",
-                    secondaryLabel = stringResource(R.string.debug_long_string_english_secondary),
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary),
                     queryIndex = 2
                 ),
                 NavSuggestion(
                     url = Uri.parse("Suggestion 2"),
                     label = "Suggestion 2 for query 3",
-                    secondaryLabel = stringResource(R.string.debug_long_string_english_secondary),
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary),
                     queryIndex = 2
                 ),
                 NavSuggestion(
                     url = Uri.parse("Suggestion 3"),
                     label = "Suggestion 1 for query 1",
-                    secondaryLabel = stringResource(R.string.debug_long_string_english_secondary),
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary),
                     queryIndex = 0
                 ),
                 NavSuggestion(

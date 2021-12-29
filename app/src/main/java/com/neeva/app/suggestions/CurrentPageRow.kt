@@ -29,8 +29,8 @@ fun CurrentPageRow(
 
 @Preview("Light, 1x font scale", locale = "en")
 @Preview("Light, 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("Light, Hebrew, 1x font scale", locale = "he")
-@Preview("Light, Hebrew, 2x font scale", locale = "he", fontScale = 2.0f)
+@Preview("Light, RTL, 1x font scale", locale = "he")
+@Preview("Light, RTL, 2x font scale", locale = "he", fontScale = 2.0f)
 @Composable
 fun CurrentPageRow_PreviewLight() {
     NeevaTheme(darkTheme = false) {

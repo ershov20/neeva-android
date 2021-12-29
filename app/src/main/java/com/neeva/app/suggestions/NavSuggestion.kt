@@ -43,6 +43,8 @@ fun NavSuggestion(
 
 @Preview(name = "1x font size", locale = "en")
 @Preview(name = "2x font size", locale = "en", fontScale = 2.0f)
+@Preview(name = "RTL, 1x font size", locale = "he")
+@Preview(name = "RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
 fun NavSuggestion_Preview() {
     NeevaTheme {
@@ -51,25 +53,8 @@ fun NavSuggestion_Preview() {
             onOpenUrl = {},
             navSuggestion = NavSuggestion(
                 url = Uri.parse("https://www.neeva.com"),
-                label = stringResource(id = R.string.debug_long_string_english_primary),
-                secondaryLabel = stringResource(id = R.string.debug_long_string_english_secondary)
-            )
-        )
-    }
-}
-
-@Preview(name = "RTL, 1x font size", locale = "he")
-@Preview(name = "RTL, 2x font size", locale = "he", fontScale = 2.0f)
-@Composable
-fun NavSuggestion_PreviewHebrew() {
-    NeevaTheme {
-        NavSuggestion(
-            faviconData = null,
-            onOpenUrl = {},
-            navSuggestion = NavSuggestion(
-                url = Uri.parse("https://www.neeva.com"),
-                label = stringResource(id = R.string.debug_long_string_hebrew),
-                secondaryLabel = stringResource(id = R.string.debug_long_string_hebrew)
+                label = stringResource(id = R.string.debug_long_string_primary),
+                secondaryLabel = stringResource(id = R.string.debug_long_string_secondary)
             )
         )
     }

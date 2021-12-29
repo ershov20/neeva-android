@@ -1,5 +1,7 @@
 package com.neeva.app.neeva_menu
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import com.neeva.app.R
 
 enum class NeevaMenuItemId {
@@ -13,47 +15,43 @@ enum class NeevaMenuItemId {
 
 data class NeevaMenuItemData(
     val id: NeevaMenuItemId,
-    val label: String,
-    val contentDescription: String,
-    val imageResourceID: Int
+    @StringRes val labelId: Int,
+    @DrawableRes val imageResourceID: Int
 )
 
 object NeevaMenuData {
-    val data: List<NeevaMenuItemData> = listOf(
+    val tiles: List<NeevaMenuItemData> = listOf(
         NeevaMenuItemData(
             id = NeevaMenuItemId.HOME,
-            label = "Home",
-            contentDescription = "Home Button",
+            labelId = R.string.home,
             imageResourceID = R.drawable.ic_baseline_home_24
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SPACES,
-            label = "Spaces",
-            contentDescription = "Spaces Button",
+            labelId = R.string.spaces,
             imageResourceID = R.drawable.ic_baseline_bookmarks_24
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SETTINGS,
-            label = "Settings",
-            contentDescription = "Settings Button",
+            labelId = R.string.settings,
             imageResourceID = R.drawable.ic_baseline_settings_24
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.FEEDBACK,
-            label = "Feedback",
-            contentDescription = "Feedback Button",
+            labelId = R.string.feedback,
             imageResourceID = R.drawable.ic_baseline_feedback_24
-        ),
+        )
+    )
+
+    val rows: List<NeevaMenuItemData> = listOf(
         NeevaMenuItemData(
             id = NeevaMenuItemId.HISTORY,
-            label = "History",
-            contentDescription = "History Button",
+            labelId = R.string.history,
             imageResourceID = R.drawable.ic_baseline_history_24
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.DOWNLOADS,
-            label = "Downloads",
-            contentDescription = "Downloads Button",
+            labelId = R.string.downloads,
             imageResourceID = R.drawable.ic_baseline_download_24
         ),
     )

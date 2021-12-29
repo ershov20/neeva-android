@@ -5,6 +5,10 @@
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
 
+    <string name="downloads">Downloads</string>
+    <string name="feedback">Feedback</string>
+    <string name="history">History</string>
+    <string name="home">Home</string>
     <string name="suggested_sites">Suggested sites</string>
     <string name="searches">Searches</string>
     <string name="settings">Settings</string>
@@ -20,12 +24,7 @@
     <string name="toolbar_tab_switcher">Manage your tabs</string>
     <string name="toolbar_neeva_menu">Open main menu</string>
 
-    <string name="history">History</string>
     <string name="history_today">Today</string>
     <string name="history_yesterday">Yesterday</string>
     <string name="history_this_week">This week</string>
-
-    <string name="debug_long_string_english_primary" translatable="false">String that is a really long string and stuff and extends for a while</string>
-    <string name="debug_long_string_english_secondary" translatable="false">Secondary string that is also a really long string and stuff and extends for a while</string>
-    <string name="debug_long_string_hebrew" translatable="false">אחת שתיים שלוש ארבע חמש שש שבע שמונה תשע עשר אחת עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרה</string>
 </resources>

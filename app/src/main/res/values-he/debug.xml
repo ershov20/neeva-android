@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="debug_long_string_primary" translatable="false">אחת שתיים שלוש ארבע חמש שש שבע שמונה תשע עשר אחת עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרה</string>
+    <string name="debug_long_string_secondary" translatable="false">עשר אחת עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרהאחת שתיים שלוש ארבע חמש שש שבע שמונה תשע</string>
+</resources>

@@ -60,28 +60,14 @@ fun SettingsRow(data: SettingsRowData, openUrl: (Uri) -> Unit) {
 
 @Preview(name = "Link, 1x font size", locale = "en")
 @Preview(name = "Link, 2x font size", locale = "en", fontScale = 2.0f)
+@Preview(name = "Link, RTL, 1x font size", locale = "he")
+@Preview(name = "Link, RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
 fun SettingsRow_PreviewLink() {
     NeevaTheme {
         SettingsRow(
             data = SettingsRowData(
-                stringResource(R.string.debug_long_string_english_primary),
-                SettingsRowType.LINK,
-                Uri.parse("")
-            ),
-            openUrl = {}
-        )
-    }
-}
-
-@Preview(name = "Link, RTL, 1x font size", locale = "he")
-@Preview(name = "Link, RTL, 2x font size", locale = "he", fontScale = 2.0f)
-@Composable
-fun SettingsRow_PreviewLinkRTL() {
-    NeevaTheme {
-        SettingsRow(
-            data = SettingsRowData(
-                stringResource(R.string.debug_long_string_hebrew),
+                stringResource(R.string.debug_long_string_primary),
                 SettingsRowType.LINK,
                 Uri.parse("")
             ),
@@ -97,7 +83,7 @@ fun SettingsRow_PreviewLabel() {
     NeevaTheme {
         SettingsRow(
             data = SettingsRowData(
-                stringResource(R.string.debug_long_string_english_primary),
+                stringResource(R.string.debug_long_string_primary),
                 SettingsRowType.LABEL
             ),
             openUrl = {}

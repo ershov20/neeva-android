@@ -103,6 +103,8 @@ fun TabCard(
 
 @Preview("Not selected, 1x scale", locale = "en")
 @Preview("Not selected, 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("RTL, Not selected, 1x scale", locale = "he")
+@Preview("RTL, Not selected, 2x scale", locale = "he", fontScale = 2.0f)
 @Composable
 fun TabCard_PreviewIsNotSelected() {
     NeevaTheme {
@@ -111,27 +113,7 @@ fun TabCard_PreviewIsNotSelected() {
                 id = "unimportant",
                 thumbnailUri = null,
                 url = Uri.parse("https://www.reddit.com"),
-                title = stringResource(id = R.string.debug_long_string_english_primary),
-                isSelected = false
-            ),
-            faviconData = null,
-            onSelect = {},
-            onClose = {}
-        )
-    }
-}
-
-@Preview("RTL, Not selected, 1x scale", locale = "he")
-@Preview("RTL, Not selected, 2x scale", locale = "he", fontScale = 2.0f)
-@Composable
-fun TabCard_PreviewIsNotSelectedHebrew() {
-    NeevaTheme {
-        TabCard(
-            tab = TabInfo(
-                id = "unimportant",
-                thumbnailUri = null,
-                url = Uri.parse("https://www.reddit.com"),
-                title = stringResource(id = R.string.debug_long_string_hebrew),
+                title = stringResource(id = R.string.debug_long_string_primary),
                 isSelected = false
             ),
             faviconData = null,
@@ -151,7 +133,7 @@ fun TabCard_PreviewIsSelected() {
                 id = "unimportant",
                 thumbnailUri = null,
                 url = Uri.parse("https://www.reddit.com"),
-                title = stringResource(id = R.string.debug_long_string_english_primary),
+                title = stringResource(id = R.string.debug_long_string_primary),
                 isSelected = true
             ),
             faviconData = null,

@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
@@ -124,7 +125,7 @@ fun SpaceRow(space: Space, selectedTabModel: SelectedTabModel? = null, onClick: 
         )
         if (space.isPublic) {
             Image(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_link_24),
+                painter = painterResource(id = R.drawable.ic_baseline_link_24),
                 contentDescription = "Url in space indicator",
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.size(48.dp, 48.dp),
@@ -133,7 +134,7 @@ fun SpaceRow(space: Space, selectedTabModel: SelectedTabModel? = null, onClick: 
         }
         if (space.isShared) {
             Image(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_people_24),
+                painter = painterResource(id = R.drawable.ic_baseline_people_24),
                 contentDescription = "Url in space indicator",
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.size(48.dp, 48.dp),
@@ -147,7 +148,7 @@ fun SpaceRow(space: Space, selectedTabModel: SelectedTabModel? = null, onClick: 
                 mutableStateOf(space.contentURLs?.contains(selectedTabModel.urlFlow.value) == true)
             }
             Image(
-                imageVector = ImageVector.vectorResource(
+                painter = painterResource(
                     if (spaceHasUrl) {
                         R.drawable.ic_baseline_bookmark_24
                     } else {
