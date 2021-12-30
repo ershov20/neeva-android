@@ -22,7 +22,6 @@ class TabList {
 
     fun add(tab: Tab) {
         if (currentTabs.contains(tab)) return
-
         currentTabs.add(tab)
 
         currentPrimitives[tab.guid] = TabInfo(
