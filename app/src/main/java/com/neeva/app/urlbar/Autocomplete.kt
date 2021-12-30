@@ -68,14 +68,14 @@ fun AutocompleteTextField(
     } else {
         null
     }
-    val showingAutocomplete: Boolean =
+    val autocompleteIsValid: Boolean =
         urlBarText.text.isNotBlank()
                 && !autocompleteText.isNullOrBlank()
                 && !lastEditWasDeletion
-                && autocompletedSuggestion!!.secondaryLabel.length > urlBarText.text.length
+                && autocompleteText.length > urlBarText.text.length
 
     AutocompleteTextField(
-        autocompletedSuggestion = autocompleteText.takeIf { showingAutocomplete },
+        autocompletedSuggestion = autocompleteText.takeIf { autocompleteIsValid },
         value = urlBarText,
         bitmap = bitmap,
         onLocationEdited = { textFieldValue ->
@@ -88,7 +88,12 @@ fun AutocompleteTextField(
         focusRequester = urlBarModel.focusRequester,
         onFocusChanged = urlBarModel::onFocusChanged,
         onLoadUrl = {
-            urlBarModel.loadUrl(getUrlToLoad(autocompletedSuggestion, urlBarText.text))
+            urlBarModel.loadUrl(
+                getUrlToLoad(
+                    autocompletedSuggestion.takeIf { autocompleteIsValid },
+                    urlBarText.text
+                )
+            )
         }
     )
 }
@@ -293,6 +298,12 @@ internal fun getAutocompleteText(
     return null
 }
 
+/**
+ * Returns which URL should be loaded when the user submits their text.
+ *
+ * This always prioritizes any provided autocompleted suggestion, so callers should ensure that what
+ * is provided is a valid suggestion for the current query.
+ */
 internal fun getUrlToLoad(
     autocompletedSuggestion: NavSuggestion?,
     urlBarContents: String
