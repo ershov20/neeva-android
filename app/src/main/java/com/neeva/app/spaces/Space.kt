@@ -65,15 +65,14 @@ data class Space(
             }
         } else {
             val response = apolloClient(NeevaBrowser.context).mutate(
-                AddToSpaceMutation(input =
-                AddSpaceResultByURLInput(
-                    spaceID = id,
-                    url = url.toString(),
-                    title = title,
-                    data = description?.let { Input.fromNullable(it)} ?: Input.absent(),
-                    mediaType = Input.fromNullable("text/plain"),
-                    snapshotExpected = Input.fromNullable(false)
-                )
+                AddToSpaceMutation(
+                    input = AddSpaceResultByURLInput(
+                        spaceID = id,
+                        url = url.toString(),
+                        title = title,
+                        data = description?.let { Input.fromNullable(it)} ?: Input.absent(),
+                        mediaType = Input.fromNullable("text/plain")
+                    )
                 )
             ).await()
 

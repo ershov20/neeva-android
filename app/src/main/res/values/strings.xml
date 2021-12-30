@@ -2,6 +2,7 @@
     <string name="app_name">Neeva Search &amp; Browser</string>
     <string name="neeva_search">Neeva Search</string>
     <string name="edit_current_url">Edit current URL</string>
+    <string name="edit_content_description">Edit</string>
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
 

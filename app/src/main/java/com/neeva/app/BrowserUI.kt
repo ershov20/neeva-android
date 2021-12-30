@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.history.DomainViewModel
-import com.neeva.app.suggestions.SuggestionList
+import com.neeva.app.suggestions.SuggestionPane
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
@@ -54,7 +54,7 @@ fun BrowserUI(
 
         if (isEditing) {
             Box(modifier = Modifier.weight(1.0f)) {
-                SuggestionList(suggestionsViewModel, urlBarModel, selectedTabModel,
+                SuggestionPane(suggestionsViewModel, urlBarModel, selectedTabModel,
                     domainViewModel, historyViewModel)
             }
         }

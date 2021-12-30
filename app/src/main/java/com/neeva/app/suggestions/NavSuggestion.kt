@@ -33,7 +33,7 @@ fun NavSuggestion(
     onOpenUrl: (Uri) -> Unit,
     navSuggestion: NavSuggestion
 ) {
-    SuggestionRow(
+    NavSuggestionRow(
         primaryLabel = navSuggestion.label,
         onTapRow = { onOpenUrl.invoke(navSuggestion.url) },
         secondaryLabel = navSuggestion.secondaryLabel,

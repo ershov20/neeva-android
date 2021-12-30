@@ -3,13 +3,9 @@ package com.neeva.app.suggestions
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.history.DomainViewModel
-import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -18,7 +14,7 @@ fun CurrentPageRow(
     url: Uri,
     onEditPressed: () -> Unit
 ) {
-    SuggestionRow(
+    NavSuggestionRow(
         primaryLabel = url.toString(),
         onTapRow = { onEditPressed.invoke() },
         secondaryLabel = stringResource(id = R.string.edit_current_url),

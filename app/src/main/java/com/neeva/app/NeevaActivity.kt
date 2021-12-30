@@ -16,7 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.apollographql.apollo.coroutines.await
 import com.neeva.app.browsing.BrowserCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.SelectedTabModel
@@ -31,7 +30,6 @@ import com.neeva.app.storage.SitesRepository
 import com.neeva.app.suggestions.SuggestionsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.urlbar.URLBarModel
-import kotlinx.coroutines.flow.collect
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
@@ -56,10 +54,6 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         HistoryViewModel.Companion.HistoryViewModelFactory(SitesRepository(History.db.fromSites()))
     }
 
-    private val suggestionsModel by viewModels<SuggestionsViewModel> {
-        SuggestionsViewModel.SuggestionsViewModelFactory(historyViewModel)
-    }
-
     private val webModel by viewModels<WebLayerModel> {
         WebLayerModel.Companion.WebLayerModelFactory(domainViewModel, historyViewModel)
     }
@@ -77,6 +71,10 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             domainViewModel,
             historyViewModel
         )
+    }
+
+    private val suggestionsModel by viewModels<SuggestionsViewModel> {
+        SuggestionsViewModel.SuggestionsViewModelFactory(historyViewModel, urlBarModel)
     }
 
     private val cardViewModel by viewModels<CardViewModel> {
@@ -171,18 +169,6 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
         lifecycleScope.launchWhenCreated {
             NeevaUser.fetch()
-        }
-
-        lifecycleScope.launchWhenCreated {
-            // Every time the contents of the URL bar changes, fire off a query to the backend.
-            urlBarModel.text.collect {
-                val response = apolloClient(this@NeevaActivity.applicationContext)
-                    .query(SuggestionsQuery(query = it.text))
-                    .await()
-                if (response.data?.suggest != null) {
-                    suggestionsModel.updateWith(response.data?.suggest!!)
-                }
-            }
         }
     }
 

@@ -32,6 +32,7 @@ import com.neeva.app.storage.Site
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.QueryRowSuggestion
+import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.collapsibleHeaderItem
@@ -128,7 +129,7 @@ fun ZeroQuery(
                 startingState = CollapsingState.SHOW_COMPACT,
                 items = suggestedQueries,
             ) { search ->
-                QueryRowSuggestion(
+                QuerySuggestionRow(
                     suggestion = search,
                     onLoadUrl = urlBarModel::loadUrl,
                     onEditUrl = null

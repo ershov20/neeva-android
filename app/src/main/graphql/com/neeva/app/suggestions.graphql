@@ -20,6 +20,12 @@ query Suggestions($query: String!) {
           percentChangeFromPreviousClose
           fetchedAtTime
         }
+        dictionaryInfo {
+          shortDefinition
+          phoneticSpelling
+          lexicalCategory
+          word
+        }
      }
     }
     urlSuggestion {

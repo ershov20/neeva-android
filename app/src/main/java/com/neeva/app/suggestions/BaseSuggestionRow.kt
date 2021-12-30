@@ -2,20 +2,20 @@ package com.neeva.app.suggestions
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
@@ -24,28 +24,38 @@ import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
+/**
+ * Base skeleton for everything that can be displayed as a suggestion in UI.  Callers must provide
+ * a Composable [mainContent] that applies the provided modifier in order for it to properly take
+ * the fully available width in the row.
+ */
 @OptIn(ExperimentalCoilApi::class)
 @Composable
-fun SuggestionRow(
-    primaryLabel: String,
+fun BaseSuggestionRow(
     onTapRow: () -> Unit,
-    secondaryLabel: String? = null,
+    onTapRowContentDescription: String? = null,
     onTapEdit: (() -> Unit)? = null,
     faviconData: Bitmap? = null,
     imageURL: String? = null,
-    drawableID: Int? = null
+    drawableID: Int? = null,
+    drawableTint: Color? = null,
+    mainContent: @Composable (modifier: Modifier) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onTapRow.invoke() }
+            .clickable(
+                onClickLabel = onTapRowContentDescription
+            ) {
+                onTapRow.invoke()
+            }
             .padding(
                 horizontal = 12.dp,
                 vertical = 10.dp
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val iconModifier = Modifier.padding(start = 8.dp)
+        val iconModifier = Modifier
         when {
             !imageURL.isNullOrBlank() -> {
                 Image(
@@ -54,16 +64,18 @@ fun SuggestionRow(
                         builder = { crossfade(true) }
                     ),
                     contentDescription = null,
-                    modifier = iconModifier.size(20.dp).clip(RoundedCornerShape(4.dp))
+                    modifier = iconModifier
+                        .size(20.dp)
+                        .clip(RoundedCornerShape(4.dp))
                 )
             }
 
             drawableID != null -> {
                 Image(
-                    imageVector = ImageVector.vectorResource(id = drawableID),
+                    painter = painterResource(drawableID),
                     contentDescription = null,
                     modifier = iconModifier.size(20.dp),
-                    colorFilter = ColorFilter.tint(Color.LightGray)
+                    colorFilter = drawableTint?.let { ColorFilter.tint(it) }
                 )
             }
 
@@ -75,69 +87,58 @@ fun SuggestionRow(
             }
         }
 
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(12.dp))
 
-        Column(modifier = Modifier.weight(1.0f)) {
-            Text(
-                text = primaryLabel,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onPrimary,
-                maxLines = 1,
-                modifier = Modifier.fillMaxWidth()
-            )
-            secondaryLabel?.let {
-                Text(
-                    text = secondaryLabel,
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSecondary,
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
+        mainContent(Modifier.weight(1.0f))
 
         if (onTapEdit != null) {
             Image(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_north_west_24),
+                painter = painterResource(id = R.drawable.ic_baseline_north_west_24),
                 contentDescription = null,
                 contentScale = ContentScale.Inside,
                 modifier = Modifier
-                    .sizeIn(minWidth = 48.dp, minHeight = 48.dp)
-                    .requiredSize(48.dp, 48.dp)
-                    .clickable { onTapEdit.invoke() },
+                    .size(48.dp)
+                    .clickable(
+                        onClickLabel = stringResource(R.string.edit_content_description)
+                    ) {
+                        onTapEdit()
+                    },
                 colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
             )
         }
     }
 }
 
-@Preview("No edit, 1x")
-@Preview("No edit, 2x", fontScale = 2.0f)
+@Preview("No edit, 1x", locale = "en")
+@Preview("No edit, 2x", locale = "en", fontScale = 2.0f)
+@Preview("No edit, RTL, 1x", locale = "he")
+@Preview("No edit, RTL, 2x", locale = "he", fontScale = 2.0f)
 @Composable
-fun SuggestionRow_Preview() {
+fun BaseSuggestionRow_Preview() {
     NeevaTheme {
-        SuggestionRow(
-            primaryLabel = "Primary label",
+        BaseSuggestionRow(
             onTapRow = {},
-            secondaryLabel = "Secondary label",
             onTapEdit = null,
             faviconData = null
-        )
+        ) {
+            Box(modifier = it.background(Color.Magenta).height(56.dp))
+        }
     }
 }
 
-@Preview("No edit, 1x")
-@Preview("No edit, 2x", fontScale = 2.0f)
-@Preview
+@Preview("With edit, 1x")
+@Preview("With edit, 2x", fontScale = 2.0f)
+@Preview("With edit, RTL, 1x", locale = "he")
+@Preview("With edit, RTL, 2x", locale = "he", fontScale = 2.0f)
 @Composable
-fun SuggestionRow_PreviewEditable() {
+fun BaseSuggestionRow_PreviewEditable() {
     NeevaTheme {
-        SuggestionRow(
-            primaryLabel = "Primary label",
+        BaseSuggestionRow(
             onTapRow = {},
-            secondaryLabel = "Secondary label",
-            onTapEdit = { },
+            onTapEdit = {},
             faviconData = null
-        )
+        ) {
+            Box(modifier = it.background(Color.Magenta).height(56.dp))
+        }
     }
 }

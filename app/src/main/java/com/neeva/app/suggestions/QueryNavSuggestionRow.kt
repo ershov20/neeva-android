@@ -1,44 +1,30 @@
 package com.neeva.app.suggestions
 
-import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun QueryRowSuggestion(
-    suggestion: QueryRowSuggestion,
-    onLoadUrl: (Uri) -> Unit,
-    onEditUrl: (() -> Unit)? = null
-) {
-    QueryRowSuggestion(
-        query = suggestion.query,
-        description = suggestion.description,
-        imageURL = suggestion.imageURL,
-        drawableID = suggestion.drawableID,
-        onTapRow = { onLoadUrl(suggestion.url) },
-        onEditUrl = onEditUrl
-    )
-}
-
-@Composable
-fun QueryRowSuggestion(
+fun QueryNavSuggestionRow(
     query: String,
     description: String? = null,
     imageURL: String? = null,
     drawableID: Int = R.drawable.ic_baseline_search_24,
+    drawableTint: Color? = null,
     onTapRow: () -> Unit,
     onEditUrl: (() -> Unit)? = null
 ) {
-    SuggestionRow(
+    NavSuggestionRow(
         primaryLabel = query,
         onTapRow = { onTapRow.invoke() },
         secondaryLabel = description,
         onTapEdit = onEditUrl,
         faviconData = null,
         imageURL = imageURL,
-        drawableID = drawableID
+        drawableID = drawableID,
+        drawableTint = drawableTint
     )
 }
 
@@ -47,11 +33,12 @@ fun QueryRowSuggestion(
 @Composable
 fun QuerySuggestion_PreviewWithImageUrl() {
     NeevaTheme {
-        QueryRowSuggestion(
+        QueryNavSuggestionRow(
             query = "search query",
             description = "Suggestion description",
             imageURL = "https://www.neeva.com/favicon.png",
             drawableID = R.drawable.ic_baseline_search_24,
+            drawableTint = Color.LightGray,
             onTapRow = {},
             onEditUrl = {}
         )
@@ -63,11 +50,12 @@ fun QuerySuggestion_PreviewWithImageUrl() {
 @Composable
 fun QuerySuggestion_PreviewNoImageUrl() {
     NeevaTheme {
-        QueryRowSuggestion(
+        QueryNavSuggestionRow(
             query = "search query",
             description = "Suggestion description",
             imageURL = null,
             drawableID = R.drawable.ic_baseline_search_24,
+            drawableTint = Color.LightGray,
             onTapRow = {},
             onEditUrl = {}
         )
@@ -79,11 +67,12 @@ fun QuerySuggestion_PreviewNoImageUrl() {
 @Composable
 fun QuerySuggestion_PreviewNoImageUrlNoDescription() {
     NeevaTheme {
-        QueryRowSuggestion(
+        QueryNavSuggestionRow(
             query = "search query",
             description = null,
             imageURL = null,
             drawableID = R.drawable.ic_baseline_search_24,
+            drawableTint = Color.LightGray,
             onTapRow = {},
             onEditUrl = {}
         )
@@ -95,11 +84,12 @@ fun QuerySuggestion_PreviewNoImageUrlNoDescription() {
 @Composable
 fun QuerySuggestion_PreviewNoImageUrlNoEdit() {
     NeevaTheme {
-        QueryRowSuggestion(
+        QueryNavSuggestionRow(
             query = "search query",
             description = "Suggestion description",
             imageURL = null,
             drawableID = R.drawable.ic_baseline_search_24,
+            drawableTint = Color.LightGray,
             onTapRow = {},
             onEditUrl = null
         )
@@ -111,7 +101,7 @@ fun QuerySuggestion_PreviewNoImageUrlNoEdit() {
 @Composable
 fun QuerySuggestion_PreviewNoImageUrlNoDescriptionNoEdit() {
     NeevaTheme {
-        QueryRowSuggestion(
+        QueryNavSuggestionRow(
             query = "search query",
             description = null,
             imageURL = null,

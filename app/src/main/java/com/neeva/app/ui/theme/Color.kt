@@ -11,3 +11,5 @@ val FillDark = Color(0xFFDCDDDF)
 val LabelSecondaryLight = Color(0xFF8A8A8E)
 val LabelSecondaryDark = Color(0xFFF3F3F9)
 
+// TODO(dan.alcantara): Need to shove this into the material theme so we can specify a dark mode.
+val SuggestionDrawableTint = Color.LightGray

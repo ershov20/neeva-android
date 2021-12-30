@@ -23,7 +23,8 @@ import kotlinx.coroutines.flow.flowOf
 fun SuggestionList(
     topSuggestion: NavSuggestion?,
     queryRowSuggestions: List<QueryRowSuggestion>,
-    urlSuggestions: List<NavSuggestion>,
+    queryNavSuggestions: List<NavSuggestion>,
+    historySuggestions: List<NavSuggestion>,
     faviconProvider: (Uri?) -> Flow<Favicon?>,
     onOpenUrl: (Uri) -> Unit,
     onEditUrl: (String) -> Unit
@@ -47,44 +48,64 @@ fun SuggestionList(
             }
         }
 
-        item { SuggestionDivider() }
-
-        // Display all queries with their associated navigations.
-        item {
-            SuggestionSectionHeader(stringRes = R.string.neeva_search)
-        }
-
-        queryRowSuggestions.forEachIndexed { index, queryRowSuggestion ->
-            item {
-                QueryRowSuggestion(
-                    suggestion = queryRowSuggestion,
-                    onLoadUrl = onOpenUrl,
-                    onEditUrl = { onEditUrl(queryRowSuggestion.query) }
-                )
-            }
-
-            items(
-                urlSuggestions.filter { it.queryIndex == index },
-                { "${it.url} ${it.queryIndex}" }
-            ) {
-                NavSuggestion(faviconProvider, onOpenUrl, it)
-            }
-
-            if (index != queryRowSuggestions.size - 1) {
-                item { SuggestionDivider() }
-            }
-        }
-
-        // Display all the suggestions that are unassociated with a query that was displayed.
-        // This might happen because we show only the top 3 possible queries.
-        val unassociatedSuggestions = urlSuggestions.filter {
-            it.queryIndex == null || it.queryIndex >= queryRowSuggestions.size
-        }
-        if (unassociatedSuggestions.isNotEmpty()) {
+        // Display search results.
+        if (queryRowSuggestions.isNotEmpty() || queryNavSuggestions.isNotEmpty()) {
             item { SuggestionDivider() }
 
+            // Display all queries with their associated navigations.
+            item {
+                SuggestionSectionHeader(stringRes = R.string.neeva_search)
+            }
+
+            queryRowSuggestions.forEachIndexed { index, queryRowSuggestion ->
+                item {
+                    QuerySuggestionRow(
+                        suggestion = queryRowSuggestion,
+                        onLoadUrl = onOpenUrl,
+                        onEditUrl = { onEditUrl(queryRowSuggestion.query) }
+                    )
+                }
+
+                items(
+                    queryNavSuggestions.filter { it.queryIndex == index },
+                    { "${it.url} ${it.queryIndex}" }
+                ) {
+                    NavSuggestion(faviconProvider, onOpenUrl, it)
+                }
+
+                if (index != queryRowSuggestions.size - 1) {
+                    item { SuggestionDivider() }
+                }
+            }
+
+            // Display all the suggestions that are unassociated with a query that was displayed.
+            // This might happen because we show only the top 3 possible queries.
+            val unassociatedSuggestions = queryNavSuggestions.filter {
+                it.queryIndex == null || it.queryIndex >= queryRowSuggestions.size
+            }
+            if (unassociatedSuggestions.isNotEmpty()) {
+                item { SuggestionDivider() }
+
+                items(
+                    unassociatedSuggestions,
+                    { "${it.url} ${it.queryIndex}" }
+                ) {
+                    NavSuggestion(faviconProvider, onOpenUrl, it)
+                }
+            }
+        }
+
+        // Display results from the user's navigation history.
+        if (historySuggestions.isNotEmpty()) {
+            item { SuggestionDivider() }
+
+            // Display all queries with their associated navigations.
+            item {
+                SuggestionSectionHeader(stringRes = R.string.history)
+            }
+
             items(
-                unassociatedSuggestions,
+                historySuggestions,
                 { "${it.url} ${it.queryIndex}" }
             ) {
                 NavSuggestion(faviconProvider, onOpenUrl, it)
@@ -133,7 +154,7 @@ fun SuggestionList_PreviewFullyLoaded() {
                     drawableID = R.drawable.ic_baseline_search_24
                 ),
             ),
-            urlSuggestions = listOf(
+            queryNavSuggestions = listOf(
                 NavSuggestion(
                     url = Uri.parse("Suggestion 1"),
                     label = "Suggestion 1 for query 3",
@@ -161,6 +182,23 @@ fun SuggestionList_PreviewFullyLoaded() {
                     url = Uri.parse("Suggestion 5"),
                     label = "Unassociated suggestion #2",
                     secondaryLabel = "Suggestion 5"
+                ),
+            ),
+            historySuggestions = listOf(
+                NavSuggestion(
+                    url = Uri.parse("Suggestion 1"),
+                    label = "History suggestion 1",
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary)
+                ),
+                NavSuggestion(
+                    url = Uri.parse("Suggestion 2"),
+                    label = "History suggestion 2",
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary)
+                ),
+                NavSuggestion(
+                    url = Uri.parse("Suggestion 3"),
+                    label = "History suggestion 3",
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary)
                 ),
             ),
             faviconProvider = { flowOf(null) },
