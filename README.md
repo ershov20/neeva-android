@@ -10,6 +10,12 @@ While the repo solidifies, please look look at the following links:
 * [CircleCI dashboard (for test results)](https://app.circleci.com/pipelines/github/neevaco/neeva-android?filter=all)
 * [Play Store console](https://play.google.com/console/u/0/developers/6544928132232754928/app-list)
 
+Before opening Android Studio, run:
+```
+$ ./bootstrap.sh
+```
+Or do "File > Sync Project with Gradle Files" within Android Studio after running the above command.
+
 # Updating GraphQL files and `schema.json`
 You can get the build an updated `schema.json` file from the monorepo:
 ```

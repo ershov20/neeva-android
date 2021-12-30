@@ -50,7 +50,6 @@ android {
     apollo {
         generateKotlinModels.set(true)
     }
-
     // Ignore a bunch of files with the same that libraries may include but are completely useless
     // for the APK.
     packagingOptions {
@@ -60,10 +59,15 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE'
     }
+    // Chromium expects to be able to mmap these assets.
+    aaptOptions {
+        noCompress "dat", "bin", "pak"
+    }
 }
 
 dependencies {
     implementation project(path: ':weblayer')
+    implementation project(path: ':chromium:gen:org__chromium__weblayer__support')
 
     // https://github.com/neevaco/neeva-android/issues/54:
     // Pulling this dependency in allows us to define the constant @integer/google_play_services_version

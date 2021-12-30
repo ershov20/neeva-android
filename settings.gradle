@@ -20,3 +20,7 @@ dependencyResolutionManagement {
 rootProject.name = "Neeva Search & Browser"
 include ':app'
 include ':weblayer'
+
+file('chromium/gen').eachDir { dir ->
+  include ":chromium:gen:${dir.name}"
+}

@@ -16,6 +16,10 @@ jobs:
     steps:
       - checkout
 
+      - run:
+          name: Bootstrap
+          command: ./bootstrap.sh
+
       - android/restore-build-cache
       - android/restore-gradle-cache
 

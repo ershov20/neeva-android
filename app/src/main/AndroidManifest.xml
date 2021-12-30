@@ -31,7 +31,7 @@
         </activity>
 
         <meta-data android:name="org.chromium.weblayer.WebLayerPackage"
-            android:value="org.chromium.weblayer.support"/>
+            android:value="com.neeva.app" />
 
         <meta-data
             android:name="com.google.android.gms.version"
