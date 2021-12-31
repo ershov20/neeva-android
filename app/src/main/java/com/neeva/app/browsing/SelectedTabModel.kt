@@ -52,6 +52,10 @@ class SelectedTabModel(
                     navigationController.unregisterNavigationCallback(selectedTabNavigationCallback)
                 }
 
+                // We don't have a way to update the load progress without monitoring the tab, so
+                // hide the bar.
+                _progressFlow.value = 100
+
                 activeTab?.apply {
                     registerTabCallback(selectedTabCallback)
                     navigationController.registerNavigationCallback(selectedTabNavigationCallback)
@@ -63,6 +67,9 @@ class SelectedTabModel(
                         }
                     }
                 }
+
+                // Update the back and forth buttons to match the current active tab.
+                updateNavigationInfo()
             }
         }
     }
@@ -98,7 +105,6 @@ class SelectedTabModel(
         }
 
         override fun onNavigationStarted(navigation: Navigation) {
-            if (navigation.isSameDocument) return
             updateNavigationInfo()
         }
 
