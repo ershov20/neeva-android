@@ -5,6 +5,7 @@ import android.net.Uri
 /** Information required to render a Tab in the UI. */
 data class TabInfo(
     val id: String,
+    val parentTabId: String? = null,
     val thumbnailUri: Uri? = WebLayerModel.getTabScreenshotFileUri(id),
     val url: Uri?,
     val title: String?,

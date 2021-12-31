@@ -11,10 +11,10 @@ import org.chromium.weblayer.Tab
 
 /** Creates a context menu for a link that has been long-pressed. */
 class ContextMenuCreator(
-    var webLayerModel: WebLayerModel,
-    var params: ContextMenuParams,
-    var tab: Tab,
-    var context: Context
+    private val webLayerModel: WebLayerModel,
+    private val params: ContextMenuParams,
+    private val tab: Tab,
+    private val context: Context
 ): View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
     companion object {
         private const val MENU_ID_COPY_LINK_URI = 1
@@ -100,7 +100,9 @@ class ContextMenuCreator(
 
         when (item.itemId) {
             MENU_ID_OPEN_IN_NEW_TAB -> {
-                params.linkUri?.let { webLayerModel.createTabFor(it) }
+                params.linkUri?.let {
+                    webLayerModel.createTabWithUri(it, parentTabId = tab.guid)
+                }
             }
 
             MENU_ID_COPY_LINK_URI -> {

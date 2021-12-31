@@ -59,9 +59,9 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     }
 
     private val selectedTabModel by viewModels<SelectedTabModel> {
-        SelectedTabModel.Companion.SelectedTabModelFactory(
+        SelectedTabModel.SelectedTabModelFactory(
             webModel.selectedTabFlow,
-            webModel::createTabFor
+            webModel::createTabWithUri
         )
     }
 
@@ -82,7 +82,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     }
 
     private val appNavModel by viewModels<AppNavModel> {
-        AppNavModel.Companion.AppNavModelFactory(selectedTabModel::loadUrl)
+        AppNavModel.AppNavModelFactory(selectedTabModel::loadUrl)
     }
 
     /**
@@ -221,6 +221,10 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
             selectedTabModel.navigationInfoFlow.value.canGoBackward -> {
                 selectedTabModel.goBack()
+            }
+
+            webModel.closeActiveChildTab() -> {
+                return
             }
 
             else -> {

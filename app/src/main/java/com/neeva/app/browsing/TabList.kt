@@ -19,6 +19,7 @@ class TabList {
     fun indexOf(tab: Tab) = currentTabs.indexOf(tab)
     fun findTab(id: String) = currentTabs.firstOrNull { it.guid == id }
     fun getTab(index: Int) = currentTabs[index]
+    fun getTabInfo(id: String) = currentPrimitives[id]
 
     fun add(tab: Tab) {
         if (currentTabs.contains(tab)) return
@@ -34,10 +35,12 @@ class TabList {
         updateFlow()
     }
 
-    fun remove(tab: Tab) {
+    /** Removes the given Tab from the list.  If we had a corresponding TabInfo, it is returned. */
+    fun remove(tab: Tab): TabInfo? {
         currentTabs.remove(tab)
-        currentPrimitives.remove(tab.guid)
+        val childInfo = currentPrimitives.remove(tab.guid)
         updateFlow()
+        return childInfo
     }
 
     fun updatedSelectedTab(selectedTabId: String?) {
@@ -73,6 +76,13 @@ class TabList {
         val existingTab = currentPrimitives[tabId] ?: return
         if (existingTab.thumbnailUri == newThumbnailUri) return
         currentPrimitives[tabId] = existingTab.copy(thumbnailUri = newThumbnailUri)
+        updateFlow()
+    }
+
+    fun updateParentTabId(tabId: String, parentTabId: String?) {
+        val existingTab = currentPrimitives[tabId] ?: return
+        if (existingTab.parentTabId == parentTabId) return
+        currentPrimitives[tabId] = existingTab.copy(parentTabId = parentTabId)
         updateFlow()
     }
 

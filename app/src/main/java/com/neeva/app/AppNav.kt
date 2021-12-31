@@ -24,22 +24,13 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AppNavModel(
-    private val onOpenUrl: (Uri) -> Unit
+    private val onOpenUrl: (Uri, Boolean) -> Unit
 ): ViewModel() {
-    companion object {
-        @Suppress("UNCHECKED_CAST")
-        class AppNavModelFactory(private val onOpenUrl: (Uri) -> Unit) : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return AppNavModel(onOpenUrl) as T
-            }
-        }
-    }
-
     private val _state = MutableStateFlow(AppNavState.BROWSER)
     val state: StateFlow<AppNavState> = _state
 
     fun openUrl(uri: Uri) {
-        onOpenUrl(uri)
+        onOpenUrl(uri, true)
         showBrowser()
     }
 
@@ -83,6 +74,13 @@ class AppNavModel(
             else -> {
                 // Unimplemented screens.
             }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class AppNavModelFactory(private val onOpenUrl: (Uri, Boolean) -> Unit) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return AppNavModel(onOpenUrl) as T
         }
     }
 }

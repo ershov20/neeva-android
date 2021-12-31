@@ -14,24 +14,12 @@ import kotlin.math.roundToInt
 
 class SelectedTabModel(
     selectedTabFlow: StateFlow<Pair<Tab?, Tab?>>,
-    private val createTabFor: (Uri) -> Unit,
+    private val tabCreator: TabCreator
 ): ViewModel() {
     data class NavigationInfo(
         val canGoBackward: Boolean = false,
         val canGoForward: Boolean = false
     )
-
-    companion object {
-        class SelectedTabModelFactory(
-            private val selectedTabFlow: StateFlow<Pair<Tab?, Tab?>>,
-            private val createTabFor: (Uri) -> Unit
-        ) : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return SelectedTabModel(selectedTabFlow, createTabFor) as T
-            }
-        }
-    }
 
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     val urlFlow: StateFlow<Uri> = _urlFlow
@@ -39,7 +27,12 @@ class SelectedTabModel(
     private val _titleFlow = MutableStateFlow("")
     val titleFlow: StateFlow<String> = _titleFlow
 
-    private val _navigationInfoFlow = MutableStateFlow(NavigationInfo(false, false))
+    private val _navigationInfoFlow = MutableStateFlow(
+        NavigationInfo(
+            canGoBackward = false,
+            canGoForward = false
+        )
+    )
     val navigationInfoFlow: StateFlow<NavigationInfo> = _navigationInfoFlow
 
     private val _progressFlow = MutableStateFlow(0)
@@ -80,7 +73,7 @@ class SelectedTabModel(
 
     fun loadUrl(uri: Uri, newTab: Boolean = false) {
         if (newTab || selectedTab == null) {
-            createTabFor(uri)
+            tabCreator.createTabWithUri(uri, parentTabId = null)
             return
         }
 
@@ -129,5 +122,15 @@ class SelectedTabModel(
             selectedTab?.navigationController?.canGoBack() ?: false,
             selectedTab?.navigationController?.canGoForward() ?: false
         )
+    }
+
+    class SelectedTabModelFactory(
+        private val selectedTabFlow: StateFlow<Pair<Tab?, Tab?>>,
+        private val tabCreator: TabCreator
+    ) : ViewModelProvider.Factory {
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return SelectedTabModel(selectedTabFlow, tabCreator) as T
+        }
     }
 }

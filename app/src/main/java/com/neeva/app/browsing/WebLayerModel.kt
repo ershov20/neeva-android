@@ -56,7 +56,11 @@ class WebLayerModel(
     private val _selectedTabFlow = MutableStateFlow<Pair<Tab?, Tab?>>(Pair(null, null))
     val selectedTabFlow: StateFlow<Pair<Tab?, Tab?>> = _selectedTabFlow
 
-    private var uriRequestForNewTab: Uri? = null
+    data class CreateNewTabInfo(
+        val uri: Uri,
+        val parentTabId: String? = null
+    )
+    private var newTabInfo: CreateNewTabInfo? = null
 
     private lateinit var browser: Browser
 
@@ -69,17 +73,25 @@ class WebLayerModel(
 
         override fun onTabRemoved(tab: Tab) {
             val newIndex = (tabList.indexOf(tab) - 1).coerceAtLeast(0)
-            tabList.remove(tab)
+            val tabInfo = tabList.remove(tab)
+            val parentTab = tabInfo?.parentTabId?.let { tabList.findTab(it) }
 
             unregisterTabCallbacks(tab)
 
-            // Don't switch tabs unless there isn't one currently selected.
-            // TODO(dan.alcantara): If this is a child tab, switch back to the one that spawned it.
-            if (browser.activeTab == null) {
-                if (orderedTabList.value.isNotEmpty()) {
+            // If the tab that was removed wasn't the active tab, don't switch tabs.
+            if (browser.activeTab != null) return
+
+            when {
+                parentTab != null -> {
+                    browser.setActiveTab(parentTab)
+                }
+
+                orderedTabList.value.isNotEmpty() -> {
                     browser.setActiveTab(tabList.getTab(newIndex))
-                } else {
-                    createTabFor(Uri.parse(appURL))
+                }
+
+                else -> {
+                    createTabWithUri(Uri.parse(appURL), parentTabId = null)
                     browser.setActiveTab(tabList.getTab(newIndex))
                     browserCallbacks.get()?.bringToForeground()
                 }
@@ -89,20 +101,17 @@ class WebLayerModel(
         override fun onTabAdded(tab: Tab) {
             onNewTabAdded(tab)
 
-            uriRequestForNewTab?.let {
+            newTabInfo?.let {
                 selectTab(tab)
-                tab.navigationController.navigate(it)
-                uriRequestForNewTab = null
+                tabList.updateParentTabId(tab.guid, parentTabId = it.parentTabId)
+                tab.navigationController.navigate(it.uri)
+                newTabInfo = null
             }
         }
 
         override fun onWillDestroyBrowserAndAllTabs() {
             unregisterBrowserAndTabCallbacks()
         }
-    }
-
-    private val newTabCallback: NewTabCallback = object : NewTabCallback() {
-        override fun onNewTab(newTab: Tab, @NewTabType type: Int) = registerNewTab(newTab, type)
     }
 
     private var isBrowserCallbacksInitialized = false
@@ -173,7 +182,7 @@ class WebLayerModel(
                 tabListRestorer = BrowserRestoreCallbackImpl(
                     savedInstanceState,
                     browser,
-                    { createTabFor(Uri.parse(appURL)) },
+                    { createTabWithUri(Uri.parse(appURL), parentTabId = null) },
                     this::onNewTabAdded
                 )
             }
@@ -209,8 +218,14 @@ class WebLayerModel(
         }
     }
 
-    fun createTabFor(uri: Uri) {
-        uriRequestForNewTab = uri
+    /**
+     * Creates a new tab and shows the given [uri].
+     *
+     * Because [Browser] only allows you to create a Tab without a URL, we save the URL for when
+     * the [TabListCallback] tells us the new tab has been added.
+     */
+    fun createTabWithUri(uri: Uri, parentTabId: String?) {
+        newTabInfo = CreateNewTabInfo(uri, parentTabId)
         browser.createTab()
     }
 
@@ -229,9 +244,12 @@ class WebLayerModel(
         registerTabCallbacks(tab)
 
         when (type) {
-            NewTabType.FOREGROUND_TAB -> selectTab(tab)
-            NewTabType.NEW_POPUP -> selectTab(tab)
-            NewTabType.NEW_WINDOW -> selectTab(tab)
+            NewTabType.FOREGROUND_TAB,
+            NewTabType.NEW_POPUP,
+            NewTabType.NEW_WINDOW -> {
+                selectTab(tab)
+            }
+
             else -> { /* Do nothing. */ }
         }
     }
@@ -281,6 +299,22 @@ class WebLayerModel(
     }
 
     /**
+     * Closes the active Tab if it is a child of another Tab.
+     *
+     * @return True if the tab was the child of an existing Tab.
+     */
+    fun closeActiveChildTab(): Boolean {
+        return browser.activeTab
+            ?.let { activeTab ->
+                val tabInfo = tabList.getTabInfo(activeTab.guid)
+                tabInfo?.parentTabId?.let {
+                    close(tabInfo)
+                    true
+                }
+            } ?: false
+    }
+
+    /**
      * Encapsulates all callbacks related to a particular Tab's operation.
      *
      * Consumers must call [unregisterCallbacks] when the Tab's callbacks are no longer necessary.
@@ -308,6 +342,13 @@ class WebLayerModel(
                 }
             }
         })
+
+        private val newTabCallback: NewTabCallback = object : NewTabCallback() {
+            override fun onNewTab(newTab: Tab, @NewTabType type: Int) {
+                tabList.updateParentTabId(newTab.guid, parentTabId = tab.guid)
+                registerNewTab(newTab, type)
+            }
+        }
 
         /**
          * Triggered whenever a navigation occurs in the Tab.  Navigations do not occur when [Tab]
