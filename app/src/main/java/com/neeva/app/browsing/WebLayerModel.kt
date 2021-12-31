@@ -219,10 +219,20 @@ class WebLayerModel(
         registerTabCallbacks(tab)
     }
 
+    /**
+     * Registers all the callbacks that are necessary for the Tab when it is opened.
+     *
+     * @param tab Tab that was just created.  It will be added to the [TabList] via another callback.
+     * @param type Type of tab being opened.  Most cases result in foregrounding the tab.
+     */
     fun registerNewTab(tab: Tab, @NewTabType type: Int) {
         registerTabCallbacks(tab)
-        if (type == NewTabType.FOREGROUND_TAB) {
-            selectTab(tab)
+
+        when (type) {
+            NewTabType.FOREGROUND_TAB -> selectTab(tab)
+            NewTabType.NEW_POPUP -> selectTab(tab)
+            NewTabType.NEW_WINDOW -> selectTab(tab)
+            else -> { /* Do nothing. */ }
         }
     }
 
