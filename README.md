@@ -15,6 +15,14 @@ While the repo solidifies, please look look at the following links:
 * [CircleCI dashboard (for test results)](https://app.circleci.com/pipelines/github/neevaco/neeva-android?filter=all)
 * [Play Store console](https://play.google.com/console/u/0/developers/6544928132232754928/app-list)
 
+# Prerequisites
+
+In addition to installing and setting up Android Studio, make sure you have installed
+[git-lfs](https://git-lfs.github.com/) via:
+```
+$ brew install git-lfs
+```
+
 # Repository setup
 
 When you first checkout the repository, or when a new version of Chromium has been checked in, you must run this command before opening Android Studio:

@@ -12,9 +12,15 @@ orbs:
 jobs:
   run-unit-tests:
     docker:
-      - image: circleci/android:api-28
+      - image: circleci/android:api-30
     steps:
       - checkout
+
+      - run:
+          name: Install git-lfs
+          command: |
+            sudo apt-get update
+            sudo apt-get install git-lfs
 
       - run:
           name: Bootstrap
