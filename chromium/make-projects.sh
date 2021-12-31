@@ -103,15 +103,19 @@ expand_macro_with_file_contents() {
 }
 
 make_list_of_jars() {
-    # Exclude jars here.
-    exclude_pattern='third_party/android|junit|espresso|ub-uiautomator|weblayer/shell'
-    find $unpacked_dir/jars/obj -name \*.jar | \
+    # Exclude jars here
+    exclude_pattern='third_party/android|junit|espresso|ub-uiautomator|weblayer/(shell|public|browser.*interfaces)'
+
+    list=$(find $unpacked_dir/jars/obj -name \*.jar | \
         egrep -v $exclude_pattern | \
         # Skip duplicates.
         fgrep -v "third_party/blink/public/mojom/frame/frame_java.processed.jar" | \
-        fgrep -v "third_party/blink/public/mojom/dom_storage/dom_storage_java.processed.jar" | \
-        fgrep -v "components/android_autofill/browser/java.processed.jar" | \
-        fgrep -v "components/android_autofill/browser/test_support/component_autofill_provider_java_test_support.processed.jar"
+        fgrep -v "third_party/blink/public/mojom/dom_storage/dom_storage_java.processed.jar")
+
+    # Include these back
+    list="$list $unpacked_dir/jars/obj/third_party/android_deps/chromium_play_services_availability_java.processed.jar"
+
+    echo $list
 }
 
 make_weblayer_support_proj() {
