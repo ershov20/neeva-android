@@ -81,22 +81,25 @@ class SuggestionsModel(
         }
     }
 
-    private suspend fun onUrlBarChanged(newValue: String, isEditing: Boolean) {
+    internal suspend fun onUrlBarChanged(newValue: String, isEditing: Boolean) {
         // Because the URL bar text changes whenever the user navigates somewhere, we will end up
         // firing a wasted query.  Make sure the user is actively typing something in.
         if (!isEditing) return
 
         // If the query is blank, don't bother firing the query.
-        var result: SuggestionsQuery.Suggest? = null
+        var result: SuggestionsQuery.Data? = null
         if (newValue.isNotBlank()) {
             val query = apolloClient.query(SuggestionsQuery(query = newValue))
 
             try {
                 val response = query.execute()
-                result = response.data?.suggest
+                result = response.data
+
+                if (result == null || response.hasErrors()) {
+                    Log.e(TAG, "Failed to parse response.  Has errors: ${response.hasErrors()}")
+                }
             } catch (e: RuntimeException) {
-                Log.e(TAG, "Caught runtime exception while performing query.  Keeping previous result", e)
-                return
+                Log.e(TAG, "Caught runtime exception while performing query.  Removing suggestions", e)
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to perform query.  Removing suggestions", e)
             }
@@ -105,7 +108,8 @@ class SuggestionsModel(
         updateWith(result)
     }
 
-    private fun updateWith(suggestionResults: SuggestionsQuery.Suggest?) {
+    private fun updateWith(suggestionResultsData: SuggestionsQuery.Data?) {
+        val suggestionResults = suggestionResultsData?.suggest
         if (suggestionResults == null) {
             // Clear out all the suggestions.
             _suggestionFlow.value = Suggestions(
