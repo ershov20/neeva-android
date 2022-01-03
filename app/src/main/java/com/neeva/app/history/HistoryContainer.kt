@@ -21,8 +21,7 @@ import com.neeva.app.storage.Site
 @Composable
 fun HistoryContainer(
     appNavModel: AppNavModel,
-    historyViewModel: HistoryViewModel,
-    domainViewModel: DomainViewModel
+    historyViewModel: HistoryViewModel
 ) {
     val state: AppNavState by appNavModel.state.collectAsState()
     val history: List<Site> by historyViewModel.historyWithinRange.collectAsState(emptyList())
@@ -41,7 +40,7 @@ fun HistoryContainer(
             history = history,
             onClose = appNavModel::showBrowser,
             onOpenUrl = appNavModel::openUrl,
-            faviconProvider = domainViewModel::getFaviconFlow
+            faviconProvider = historyViewModel::getFaviconFlow
         )
     }
 }

@@ -8,16 +8,18 @@ import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
-import com.neeva.app.history.DomainViewModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.storage.DateConverter
 import com.neeva.app.storage.Visit
 import com.neeva.app.storage.toFavicon
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.neeva.app.suggestions.SuggestionsModel
+import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.flow.StateFlow
 import org.chromium.weblayer.*
 import java.io.File
@@ -25,9 +27,16 @@ import java.lang.ref.WeakReference
 import java.util.*
 import kotlin.collections.set
 
+/**
+ * Manages and maintains the interface between the Neeva browser and WebLayer.
+ *
+ * The WebLayer [Browser] maintains a set of [Tab]s that we are supposed to keep track of.  These
+ * classes must be monitored using various callbacks that fire whenever a new tab is opened, or
+ * whenever the current tab changes (e.g.).
+ */
 class WebLayerModel(
-    private val domainViewModel: DomainViewModel,
-    private val historyViewModel: HistoryViewModel
+    private val historyViewModel: HistoryViewModel,
+    apolloClient: ApolloClient
 ): ViewModel() {
     companion object {
         private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
@@ -39,35 +48,27 @@ class WebLayerModel(
         fun getTabScreenshotFileUri(id: String): Uri {
             return File(getTabScreenshotDirectory(), "tab_$id.jpg").toUri()
         }
-
-        @Suppress("UNCHECKED_CAST")
-        class WebLayerModelFactory(
-            private val domainModel: DomainViewModel,
-            private val historyViewModel: HistoryViewModel
-        ) : ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return WebLayerModel(domainModel, historyViewModel) as T
-            }
-        }
     }
 
     var browserCallbacks: WeakReference<BrowserCallbacks> = WeakReference(null)
-
-    private val _selectedTabFlow = MutableStateFlow<Pair<Tab?, Tab?>>(Pair(null, null))
-    val selectedTabFlow: StateFlow<Pair<Tab?, Tab?>> = _selectedTabFlow
 
     data class CreateNewTabInfo(
         val uri: Uri,
         val parentTabId: String? = null
     )
+    /**
+     * Keeps track of data that must be applied to the next tab that is created.  This is necessary
+     * because the [Browser] doesn't allow you to create a tab and navigate to somewhere in the same
+     * call.  Rather, the [Browser] creates the tab asynchronously and we are expected to detect
+     * when it is opened.
+     */
     private var newTabInfo: CreateNewTabInfo? = null
 
     private lateinit var browser: Browser
 
     private val tabListCallback = object : TabListCallback() {
         override fun onActiveTabChanged(activeTab: Tab?) {
-            val previousTab = _selectedTabFlow.value.second
-            _selectedTabFlow.tryEmit(Pair(previousTab, activeTab))
+            activeTabModel.onActiveTabChanged(activeTab)
             tabList.updatedSelectedTab(activeTab?.guid)
         }
 
@@ -136,7 +137,21 @@ class WebLayerModel(
         { flags -> browserCallbacks.get()?.onExitFullscreen(flags) }
     )
 
-    private val tabToTabCallbacks: HashMap<Tab, TabCallbacks> = HashMap()
+    private val tabCallbackMap: HashMap<Tab, TabCallbacks> = HashMap()
+
+    val activeTabModel = ActiveTabModel(this::createTabWithUri)
+
+    val urlBarModel = URLBarModel(viewModelScope, activeTabModel) {
+        // Pull new suggestions from the database according to what's currently in the URL bar.
+        historyViewModel.updateSuggestionQuery(it)
+    }
+
+    val suggestionsModel = SuggestionsModel(
+        viewModelScope,
+        historyViewModel,
+        urlBarModel,
+        apolloClient
+    )
 
     fun onSaveInstanceState(outState: Bundle) {
         BrowserRestoreCallbackImpl.onSaveInstanceState(outState, orderedTabList.value.map { it.id })
@@ -254,14 +269,17 @@ class WebLayerModel(
         }
     }
 
+    /**
+     * Takes a newly created [tab] and registers all the callbacks we need to keep track of and
+     * manipulate its state.  Calling this function when the tab's callbacks were already registered
+     * results in a no-op.
+     */
     fun registerTabCallbacks(tab: Tab) {
-        // Avoid double-registering callbacks.  A telltale sign of this happening is the context
-        // menu rapidly appearing and then disappearing, which happens when two ContextMenuCallback
-        // instances have been registered and they both try to show the context menu.
-        if (tabToTabCallbacks[tab] != null) return
-        tabToTabCallbacks[tab] = TabCallbacks(tab)
+        if (tabCallbackMap[tab] != null) return
+        tabCallbackMap[tab] = TabCallbacks(tab)
     }
 
+    /** Removes all the callbacks that are set up to interact with WebLayer. */
     private fun unregisterBrowserAndTabCallbacks() {
         if (isBrowserCallbacksInitialized) {
             browser.unregisterTabListCallback(tabListCallback)
@@ -272,14 +290,14 @@ class WebLayerModel(
 
         // Avoid a ConcurrentModificationException by iterating on a copy of the keys rather than
         // the map itself.
-        tabToTabCallbacks.keys.toList().forEach { unregisterTabCallbacks(it) }
-        tabToTabCallbacks.clear()
+        tabCallbackMap.keys.toList().forEach { unregisterTabCallbacks(it) }
+        tabCallbackMap.clear()
     }
 
     private fun unregisterTabCallbacks(tab: Tab) {
-        tabToTabCallbacks[tab]?.let {
+        tabCallbackMap[tab]?.let {
             it.unregisterCallbacks()
-            tabToTabCallbacks.remove(tab)
+            tabCallbackMap.remove(tab)
         }
     }
 
@@ -288,8 +306,8 @@ class WebLayerModel(
 
     fun onGridShown() = browser.activeTab?.captureAndSaveScreenshot(tabList)
 
-    fun select(primitive: TabInfo) = tabList.findTab(primitive.id)?.let { selectTab(it) }
-    fun close(primitive: TabInfo) = tabList.findTab(primitive.id)?.dispatchBeforeUnloadAndClose()
+    fun selectTab(primitive: TabInfo) = tabList.findTab(primitive.id)?.let { selectTab(it) }
+    fun closeTab(primitive: TabInfo) = tabList.findTab(primitive.id)?.dispatchBeforeUnloadAndClose()
 
     fun selectTab(tab: Tab) {
         // Screenshot the previous tab right before it is replaced to keep it as fresh as possible.
@@ -299,7 +317,8 @@ class WebLayerModel(
     }
 
     /**
-     * Closes the active Tab if it is a child of another Tab.
+     * Closes the active Tab if it is a child of another Tab.  No-op if the active tab is not a
+     * child of another Tab.
      *
      * @return True if the tab was the child of an existing Tab.
      */
@@ -308,7 +327,7 @@ class WebLayerModel(
             ?.let { activeTab ->
                 val tabInfo = tabList.getTabInfo(activeTab.guid)
                 tabInfo?.parentTabId?.let {
-                    close(tabInfo)
+                    closeTab(tabInfo)
                     true
                 }
             } ?: false
@@ -328,7 +347,7 @@ class WebLayerModel(
             override fun onFaviconChanged(favicon: Bitmap?) {
                 val icon = favicon ?: return
 
-                domainViewModel.updateFaviconFor(
+                historyViewModel.updateFaviconFor(
                     tab.currentDisplayUrl.toString(),
                     icon.toFavicon()
                 )
@@ -402,13 +421,11 @@ class WebLayerModel(
             }
 
             override fun onTitleUpdated(title: String) {
-                domainViewModel.insert(tab.currentDisplayUrl.toString(), title)
-
                 tab.currentDisplayUrl?.let {
                     historyViewModel.insert(url = it, title = title)
                 }
 
-                tabList.updateTabTitle(tab.guid, tab.currentDisplayTitle)
+                tabList.updateTabTitle(tab.guid, title)
             }
 
             override fun onVisibleUriChanged(uri: Uri) {
@@ -445,6 +462,16 @@ class WebLayerModel(
             tab.navigationController.unregisterNavigationCallback(navigationCallback)
             tab.unregisterTabCallback(tabCallback)
             tab.unregisterTabCallback(crashTabCallback)
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    class WebLayerModelFactory(
+        private val historyViewModel: HistoryViewModel,
+        private val apolloClient: ApolloClient
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
+            return WebLayerModel(historyViewModel, apolloClient) as T
         }
     }
 }

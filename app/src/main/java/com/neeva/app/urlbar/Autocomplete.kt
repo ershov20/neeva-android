@@ -26,7 +26,6 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -41,22 +40,24 @@ import com.neeva.app.R
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.storage.Favicon
 import com.neeva.app.suggestions.NavSuggestion
-import com.neeva.app.suggestions.SuggestionsViewModel
+import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun AutocompleteTextField(
-    suggestionsViewModel: SuggestionsViewModel,
+    suggestionsModel: SuggestionsModel,
     urlBarModel: URLBarModel,
     getFaviconFlow: (Uri) -> Flow<Favicon?>
 ) {
-    val autocompletedSuggestion by suggestionsViewModel.autocompleteSuggestion.collectAsState()
-    val urlBarText: TextFieldValue by urlBarModel.text.collectAsState()
+    val autocompletedSuggestion by suggestionsModel.autocompleteSuggestion.collectAsState()
+    val urlBarText: TextFieldValue by urlBarModel.textFieldValue.collectAsState()
     val urlBarIsBeingEdited: Boolean by urlBarModel.isEditing.collectAsState()
 
     var lastEditWasDeletion by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+    urlBarModel.focusRequester = focusRequester
 
     val url = autocompletedSuggestion?.url ?: Uri.parse(urlBarText.text) ?: Uri.parse(appURL)
     val favicon: Favicon? by getFaviconFlow(url).collectAsState(null)
@@ -82,11 +83,9 @@ fun AutocompleteTextField(
             lastEditWasDeletion = textFieldValue.text.length < urlBarText.text.length
             urlBarModel.onLocationBarTextChanged(textFieldValue)
         },
-        onLocationReplaced = { textFieldValue ->
-            urlBarModel.onLocationBarTextChanged(textFieldValue)
-        },
-        focusRequester = urlBarModel.focusRequester,
-        onFocusChanged = urlBarModel::onFocusChanged,
+        onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
+        focusRequester = focusRequester,
+        onFocusChanged = { urlBarModel.onFocusChanged(it.isFocused) },
         onLoadUrl = {
             urlBarModel.loadUrl(
                 getUrlToLoad(
@@ -105,7 +104,7 @@ fun AutocompleteTextField(
     bitmap: Bitmap?,
     focusRequester: FocusRequester,
     onLocationEdited: (TextFieldValue) -> Unit,
-    onLocationReplaced: (TextFieldValue) -> Unit,
+    onLocationReplaced: (String) -> Unit,
     onFocusChanged: (FocusState) -> Unit,
     onLoadUrl: () -> Unit,
 ) {
@@ -114,16 +113,13 @@ fun AutocompleteTextField(
         modifier = Modifier
             .defaultMinSize(minHeight = 40.dp)
             .fillMaxWidth()
-            .clickable {
-                val newValue = autocompletedSuggestion ?: value.text
-                onLocationReplaced.invoke(
-                    TextFieldValue(
-                        newValue,
-                        TextRange(newValue.length, newValue.length),
-                        TextRange(newValue.length, newValue.length)
-                    )
-                )
-            }
+            .then(
+                // If the user clicks on the URL bar while a suggestion is displayed, make it the
+                // new current query.
+                autocompletedSuggestion?.let {
+                    Modifier.clickable { onLocationReplaced(it) }
+                } ?: Modifier
+            )
     ) {
         FaviconView(bitmap = bitmap, bordered = false)
 
@@ -196,7 +192,7 @@ fun AutocompleteTextField(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(40.dp)
-                .clickable { onLocationReplaced.invoke(TextFieldValue("")) }
+                .clickable { onLocationReplaced("") }
                 .padding(8.dp)
         ) {
             Image(

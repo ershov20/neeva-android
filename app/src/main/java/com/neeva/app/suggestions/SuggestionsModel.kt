@@ -1,23 +1,20 @@
 package com.neeva.app.suggestions
 
 import android.net.Uri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo.coroutines.await
-import com.neeva.app.NeevaBrowser
+import android.util.Log
+import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
-import com.neeva.app.apolloClient
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.Site
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.urlbar.URLBarModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
 data class NavSuggestion(
@@ -45,10 +42,16 @@ data class Suggestions(
 )
 
 /** Maintains a list of suggestions from the backend that correspond to the current query. */
-class SuggestionsViewModel(
+class SuggestionsModel(
+    coroutineScope: CoroutineScope,
     historyViewModel: HistoryViewModel,
-    urlBarModel: URLBarModel
-): ViewModel() {
+    private val urlBarModel: URLBarModel,
+    private val apolloClient: ApolloClient
+) {
+    companion object {
+        val TAG = SuggestionsModel::class.simpleName
+    }
+
     private val _suggestionFlow = MutableStateFlow(Suggestions())
     val suggestionFlow: StateFlow<Suggestions> = _suggestionFlow
 
@@ -56,7 +59,7 @@ class SuggestionsViewModel(
     val autocompleteSuggestion: StateFlow<NavSuggestion?> = _autocompleteSuggestion
 
     init {
-        viewModelScope.launch {
+        coroutineScope.launch {
             historyViewModel.siteSuggestions.collect { suggestions ->
                 _autocompleteSuggestion.value = suggestions.firstOrNull()?.toNavSuggestion()
 
@@ -66,26 +69,40 @@ class SuggestionsViewModel(
             }
         }
 
-        viewModelScope.launch {
+        coroutineScope.launch {
             // Every time the contents of the URL bar changes, try to fire a query to the backend.
-            urlBarModel.text.collect { textEditValue ->
-                // Because the URL bar text changes whenever the user navigates somewhere, we will
-                // end up firing a wasted query at the backend.  Make sure the user is actively
-                // typing something in.
-                if (!urlBarModel.isEditing.value) return@collect
-
-                // If the query is blank, don't bother firing the query.
-                var result: SuggestionsQuery.Suggest? = null
-                if (textEditValue.text.isNotBlank()) {
-                    val response = apolloClient(NeevaBrowser.context)
-                        .query(SuggestionsQuery(query = textEditValue.text))
-                        .await()
-                    result = response.data?.suggest
+            urlBarModel.textFieldValue
+                .combine(urlBarModel.isEditing) { textFieldValue, isEditing ->
+                    Pair(textFieldValue.text, isEditing)
                 }
+                .collect { (urlBarValue, isEditing) ->
+                    onUrlBarChanged(urlBarValue, isEditing)
+                }
+        }
+    }
 
-                updateWith(result)
+    private suspend fun onUrlBarChanged(newValue: String, isEditing: Boolean) {
+        // Because the URL bar text changes whenever the user navigates somewhere, we will end up
+        // firing a wasted query.  Make sure the user is actively typing something in.
+        if (!isEditing) return
+
+        // If the query is blank, don't bother firing the query.
+        var result: SuggestionsQuery.Suggest? = null
+        if (newValue.isNotBlank()) {
+            val query = apolloClient.query(SuggestionsQuery(query = newValue))
+
+            try {
+                val response = query.execute()
+                result = response.data?.suggest
+            } catch (e: RuntimeException) {
+                Log.e(TAG, "Caught runtime exception while performing query.  Keeping previous result", e)
+                return
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to perform query.  Removing suggestions", e)
             }
         }
+
+        updateWith(result)
     }
 
     private fun updateWith(suggestionResults: SuggestionsQuery.Suggest?) {
@@ -106,16 +123,6 @@ class SuggestionsViewModel(
             navSuggestions = viewableSuggestions.map { it.toNavSuggestion() }
         )
     }
-
-    class SuggestionsViewModelFactory(
-        private val historyViewModel: HistoryViewModel,
-        private val urlBarModel: URLBarModel
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            @Suppress("UNCHECKED_CAST")
-            return SuggestionsViewModel(historyViewModel, urlBarModel) as T
-        }
-    }
 }
 
 fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() = NavSuggestion(
@@ -129,8 +136,8 @@ fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() = QueryRowSuggestion
     url = this.suggestedQuery.toSearchUri(),
     query = this.suggestedQuery,
     drawableID = when {
-        this.type == QuerySuggestionType.STANDARD -> R.drawable.ic_baseline_search_24
-        this.type == QuerySuggestionType.SEARCHHISTORY -> R.drawable.ic_baseline_history_24
+        this.type == QuerySuggestionType.Standard -> R.drawable.ic_baseline_search_24
+        this.type == QuerySuggestionType.SearchHistory -> R.drawable.ic_baseline_history_24
         !this.annotation?.description.isNullOrEmpty() -> R.drawable.ic_baseline_image_24
         else -> R.drawable.ic_baseline_search_24
     },

@@ -2,29 +2,37 @@ package com.neeva.app.urlbar
 
 import android.net.Uri
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
-import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.baseDomain
-import com.neeva.app.history.DomainViewModel
-import com.neeva.app.history.HistoryViewModel
-import com.neeva.app.storage.SpaceStore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
+/**
+ * Maintains logic required to provide a URL bar to the user.  There is a single URL bar that is
+ * used across all tabs.
+ *
+ * When the user asks to create a new tab from the CardGrid UI, we don't actually create the tab
+ * until the user has chosen to enter a query/URL or select an item from the suggested list.  This
+ * "lazy tab" state means that we have to be careful to avoid mutating the state of the currently
+ * active tab.
+ *
+ * TODO(dan.alcantara): Audit how lazy tab opening works.
+ */
 class URLBarModel(
-    private val selectedTabModel: SelectedTabModel,
-    private val domainViewModel: DomainViewModel,
-    private val historyViewModel: HistoryViewModel
-): ViewModel() {
-    private val _text = MutableStateFlow(TextFieldValue("", TextRange.Zero))
-    val text: StateFlow<TextFieldValue> = _text
+    coroutineScope: CoroutineScope,
+    private val activeTabModel: ActiveTabModel,
+    private val onTextChanged: (String) -> Unit
+) {
+    /**
+     * Tracks the text displayed in the URL bar.  We need to use TextFieldValue to correctly keep
+     * track of where the cursor is supposed to be when editing.
+     */
+    private val _text = MutableStateFlow(TextFieldValue(""))
+    val textFieldValue: StateFlow<TextFieldValue> = _text
 
     private val _isEditing = MutableStateFlow(false)
     val isEditing: StateFlow<Boolean> = _isEditing
@@ -35,20 +43,11 @@ class URLBarModel(
     private var _isLazyTab = MutableStateFlow(false)
     val isLazyTab: StateFlow<Boolean> = _isLazyTab
 
-    // TODO(dan.alcantara): This shouldn't be here, but is because of the way the URL bar comprises
-    //                      two different Composables and because of how the URL bar can be focused
-    //                      from around the app.  We should rethink this.
-    val focusRequester = FocusRequester()
+    var focusRequester: FocusRequester? = null
 
     init {
-        viewModelScope.launch {
-            _isEditing.collect {
-                _isLazyTab.value = _isLazyTab.value && it
-            }
-        }
-
-        viewModelScope.launch {
-            selectedTabModel.urlFlow.collect {
+        coroutineScope.launch {
+            activeTabModel.urlFlow.collect {
                 if (it.toString().isNotBlank()) {
                     onCurrentUrlChanged(it.toString())
                 }
@@ -59,8 +58,6 @@ class URLBarModel(
     /**
      * Prepare to open a new tab.  This mechanism doesn't create a new tab until the user actually
      * navigates somewhere or performs a query.
-     *
-     * TODO(dan.alcantara): Rethink how lazy tab opening works.
      */
     fun openLazyTab() {
         onCurrentUrlChanged("")
@@ -68,58 +65,51 @@ class URLBarModel(
         _isLazyTab.value = true
     }
 
-    fun onReload() = selectedTabModel.reload()
+    fun loadUrl(url: Uri) = activeTabModel.loadUrl(url, _isLazyTab.value)
+    fun reload() = activeTabModel.reload()
 
+    /** Completely replaces what is displayed in the URL bar for user editing. */
+    fun replaceLocationBarText(newValue: String) {
+        onRequestFocus()
+        onLocationBarTextChanged(
+            textFieldValue.value.copy(
+                newValue,
+                TextRange(newValue.length, newValue.length)
+            )
+        )
+    }
+
+    /** Updates what is displayed in the URL bar as the user edits it. */
     fun onLocationBarTextChanged(newValue: TextFieldValue) {
         if (_isEditing.value) {
             updateTextValue(newValue)
         }
     }
 
-    fun loadUrl(url: Uri) {
-        selectedTabModel.loadUrl(url, _isLazyTab.value)
-    }
-
     private fun onCurrentUrlChanged(newUrl: String) {
-        updateTextValue(_text.value.copy(Uri.parse(newUrl)?.baseDomain() ?: ""))
-        _showLock.value = Uri.parse(newUrl).scheme.equals("https")
+        val uri = Uri.parse(newUrl)
+        updateTextValue(_text.value.copy(uri.baseDomain() ?: ""))
+        _showLock.value = uri.scheme.equals("https")
     }
 
-    fun onFocusChanged(focus: FocusState) {
-        _isEditing.value = focus.isFocused
-        if (!focus.isFocused) {
-            updateTextValue(_text.value.copy(selectedTabModel.urlFlow.value.baseDomain() ?: ""))
+    fun onFocusChanged(isFocused: Boolean) {
+        _isEditing.value = isFocused
+        _isLazyTab.value = _isLazyTab.value && _isEditing.value
+        if (!isFocused) {
+            // The user has unfocused the bar.  Show the domain for the currently loaded webpage.
+            updateTextValue(_text.value.copy(activeTabModel.urlFlow.value.baseDomain() ?: ""))
         } else {
+            // The user has started editing the contents of the bar.  Clear it out.
             updateTextValue(_text.value.copy(""))
-            viewModelScope.launch {
-                SpaceStore.shared.refresh()
-            }
         }
     }
 
     private fun updateTextValue(newValue: TextFieldValue) {
         _text.value = newValue
-
-        // Pull new suggestions from the database according to what's currently in the URL bar.
-        domainViewModel.updateSuggestionQuery(newValue.text)
-        historyViewModel.updateSuggestionQuery(newValue.text)
+        onTextChanged(newValue.text)
     }
 
     fun onRequestFocus() {
-        focusRequester.requestFocus()
-    }
-
-    companion object {
-        @Suppress("UNCHECKED_CAST")
-        class URLBarModelFactory(
-            private val selectedTabModel: SelectedTabModel,
-            private val domainViewModel: DomainViewModel,
-            private val historyViewModel: HistoryViewModel
-        ) :
-            ViewModelProvider.Factory {
-            override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-                return URLBarModel(selectedTabModel, domainViewModel, historyViewModel) as T
-            }
-        }
+        focusRequester?.requestFocus()
     }
 }

@@ -4,37 +4,25 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.neeva.app.storage.Favicon
-import com.neeva.app.storage.Site
-import com.neeva.app.storage.SitesRepository
-import com.neeva.app.storage.Visit
+import com.neeva.app.browsing.baseDomain
+import com.neeva.app.storage.*
+import com.neeva.app.suggestions.NavSuggestion
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
 
-/**
- * Provides access to the user's navigation history.
- *
- * TODO(dan.alcantara): Should this be combined with DomainViewModel?  Seems like they're both
- *                      dealing with history in some way.
- */
-class HistoryViewModel(private val repository: SitesRepository) : ViewModel() {
+/** Provides access to the user's navigation history. */
+class HistoryViewModel(
+    private val sitesRepository: SitesRepository,
+    private val domainRepository: DomainRepository
+) : ViewModel() {
     companion object {
         private const val MAX_FREQUENT_SITES = 40
 
         private val HISTORY_WINDOW = TimeUnit.DAYS.toMillis(7)
         private val HISTORY_START_DATE = Date(System.currentTimeMillis() - HISTORY_WINDOW)
-
-        class HistoryViewModelFactory(private val repository: SitesRepository) : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                @Suppress("UNCHECKED_CAST")
-                return HistoryViewModel(repository) as T
-            }
-        }
     }
 
     /**
@@ -43,14 +31,35 @@ class HistoryViewModel(private val repository: SitesRepository) : ViewModel() {
      * list later with the actual timeframes we're interested in.
      */
     val historyWithinRange: Flow<List<Site>> =
-        repository.getHistoryAfter(HISTORY_START_DATE)
+        sitesRepository.getHistoryAfter(HISTORY_START_DATE)
 
     val frequentSites: Flow<List<Site>> =
-        repository.getFrequentSitesAfter(HISTORY_START_DATE, MAX_FREQUENT_SITES)
+        sitesRepository.getFrequentSitesAfter(HISTORY_START_DATE, MAX_FREQUENT_SITES)
 
     private val _siteSuggestions = MutableStateFlow<List<Site>>(emptyList())
     val siteSuggestions: StateFlow<List<Site>> = _siteSuggestions
 
+    private val _domainSuggestions = MutableStateFlow<List<NavSuggestion>>(emptyList())
+    val domainSuggestions: StateFlow<List<NavSuggestion>> = _domainSuggestions
+
+    /** Updates the query that is being used to fetch history and domain name suggestions. */
+    fun updateSuggestionQuery(currentInput: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _siteSuggestions.value = sitesRepository.getQuerySuggestions(currentInput)
+            _domainSuggestions.value = domainRepository.queryNavSuggestions(currentInput)
+        }
+    }
+
+    /** Returns a Flow that emits the best Favicon for the given Uri. */
+    fun getFaviconFlow(uri: Uri?): Flow<Favicon?> {
+        val domainName = uri?.baseDomain() ?: return flowOf(null)
+        return domainRepository
+            .listen(domainName)
+            .map { it.largestFavicon }
+            .distinctUntilChanged()
+    }
+
+    /** Inserts or updates an item into the history. */
     fun insert(
         url: Uri,
         title: String? = null,
@@ -58,13 +67,34 @@ class HistoryViewModel(private val repository: SitesRepository) : ViewModel() {
         visit: Visit? = null
     ) {
         viewModelScope.launch {
-            repository.insert(url, title, favicon, visit)
+            sitesRepository.insert(url, title, favicon, visit)
+
+            url.baseDomain()?.let { domainName ->
+                domainRepository.insert(
+                    Domain(
+                        domainName = domainName,
+                        providerName = title,
+                        largestFavicon = null
+                    )
+                )
+            }
         }
     }
 
-    fun updateSuggestionQuery(currentInput: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _siteSuggestions.value = repository.getQuerySuggestions(currentInput)
+    /** Updates the [Favicon] for the given [url]. */
+    fun updateFaviconFor(url: String, favicon: Favicon) {
+        viewModelScope.launch {
+            domainRepository.updateFaviconFor(url, favicon)
+        }
+    }
+
+    class HistoryViewModelFactory(
+        private val sitesRepository: SitesRepository,
+        private val domainRepository: DomainRepository
+    ) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            @Suppress("UNCHECKED_CAST")
+            return HistoryViewModel(sitesRepository, domainRepository) as T
         }
     }
 }

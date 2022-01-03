@@ -18,18 +18,10 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.neeva.app.browsing.BrowserCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
-import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.card.CardViewModel
-import com.neeva.app.history.DomainViewModel
 import com.neeva.app.history.HistoryViewModel
-import com.neeva.app.storage.DomainRepository
-import com.neeva.app.storage.History
-import com.neeva.app.storage.NeevaUser
-import com.neeva.app.storage.SitesRepository
-import com.neeva.app.suggestions.SuggestionsViewModel
+import com.neeva.app.storage.*
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.urlbar.URLBarModel
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
@@ -44,45 +36,22 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         private const val WEBLAYER_FRAGMENT_TAG = "WebLayer Fragment"
     }
 
-    // TODO(dan.alcantara): We should either be using Dagger or decoupling all of these ViewModels
-    //                      from each other.
-    private val domainViewModel by viewModels<DomainViewModel> {
-        DomainViewModel.Companion.DomainViewModelFactory(DomainRepository(History.db.fromDomains()))
-    }
-
     private val historyViewModel by viewModels<HistoryViewModel> {
-        HistoryViewModel.Companion.HistoryViewModelFactory(SitesRepository(History.db.fromSites()))
+        HistoryViewModel.HistoryViewModelFactory(
+            SitesRepository(History.db.fromSites()),
+            DomainRepository(History.db.fromDomains())
+        )
     }
 
     private val webModel by viewModels<WebLayerModel> {
-        WebLayerModel.Companion.WebLayerModelFactory(domainViewModel, historyViewModel)
-    }
-
-    private val selectedTabModel by viewModels<SelectedTabModel> {
-        SelectedTabModel.SelectedTabModelFactory(
-            webModel.selectedTabFlow,
-            webModel::createTabWithUri
+        WebLayerModel.WebLayerModelFactory(
+            historyViewModel,
+            apolloClient(application)
         )
-    }
-
-    private val urlBarModel by viewModels<URLBarModel> {
-        URLBarModel.Companion.URLBarModelFactory(
-            selectedTabModel,
-            domainViewModel,
-            historyViewModel
-        )
-    }
-
-    private val suggestionsModel by viewModels<SuggestionsViewModel> {
-        SuggestionsViewModel.SuggestionsViewModelFactory(historyViewModel, urlBarModel)
-    }
-
-    private val cardViewModel by viewModels<CardViewModel> {
-        CardViewModel.Companion.CardViewModelFactory(webModel.orderedTabList)
     }
 
     private val appNavModel by viewModels<AppNavModel> {
-        AppNavModel.AppNavModelFactory(selectedTabModel::loadUrl)
+        AppNavModel.AppNavModelFactory(webModel.activeTabModel::loadUrl)
     }
 
     /**
@@ -107,8 +76,8 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 NeevaTheme {
                     Surface(color = MaterialTheme.colors.background) {
                         BrowserUI(
-                            urlBarModel, suggestionsModel,
-                            selectedTabModel, domainViewModel, historyViewModel
+                            webModel.urlBarModel, webModel.suggestionsModel,
+                            webModel.activeTabModel, historyViewModel
                         )
                     }
                 }
@@ -120,8 +89,8 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             NeevaTheme {
                 Surface(color = Color.Transparent) {
                     AppNav(
-                        appNavModel, selectedTabModel, historyViewModel,
-                        domainViewModel, webModel, urlBarModel, cardViewModel
+                        appNavModel, historyViewModel,
+                        webModel, webModel.urlBarModel
                     )
                 }
             }
@@ -133,7 +102,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             setContent {
                 NeevaTheme {
                     Surface(color = MaterialTheme.colors.background) {
-                        val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
+                        val isEditing: Boolean by webModel.urlBarModel.isEditing.collectAsState()
                         if (!isEditing) {
                             TabToolbar(
                                 TabToolbarModel(
@@ -144,7 +113,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                                         appNavModel.showCardGrid()
                                     }
                                 ),
-                                selectedTabModel
+                                webModel.activeTabModel
                             )
                         }
                     }
@@ -169,6 +138,12 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
         lifecycleScope.launchWhenCreated {
             NeevaUser.fetch()
+        }
+
+        lifecycleScope.launchWhenCreated {
+            webModel.urlBarModel.isEditing.collect { isEditing ->
+                if (isEditing) SpaceStore.shared.refresh()
+            }
         }
     }
 
@@ -219,8 +194,8 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 appNavModel.showBrowser()
             }
 
-            selectedTabModel.navigationInfoFlow.value.canGoBackward -> {
-                selectedTabModel.goBack()
+            webModel.activeTabModel.navigationInfoFlow.value.canGoBackward -> {
+                webModel.activeTabModel.goBack()
             }
 
             webModel.closeActiveChildTab() -> {
@@ -305,9 +280,5 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     override fun onTopBarOffsetChanged(offset: Int) {
         // Move the real bar when WebLayer says that the fake one is moving.
         browserUI.translationY = offset.toFloat()
-    }
-
-    override fun reloadTab(tab: Tab?) {
-        tab?.navigationController?.reload() ?: selectedTabModel.reload()
     }
 }

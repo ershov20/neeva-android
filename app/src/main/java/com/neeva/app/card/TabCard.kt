@@ -39,7 +39,11 @@ fun TabCard(
     onSelect: () -> Unit,
     onClose: () -> Unit
 ) {
-    Column(modifier = Modifier.padding(10.dp)) {
+    Column(
+        modifier = Modifier
+            .padding(10.dp)
+            .clickable { onSelect() }
+    ) {
         Box(
             modifier = Modifier.then(
                 if (tab.isSelected) {
@@ -60,7 +64,6 @@ fun TabCard(
                     .fillMaxWidth()
                     .height(200.dp)
                     .shadow(2.dp, shape = RoundedCornerShape(12.dp))
-                    .clickable { onSelect() }
             )
             Box(
                 modifier = Modifier

@@ -4,8 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
-import com.apollographql.apollo.api.Input
-import com.apollographql.apollo.coroutines.await
+import com.apollographql.apollo3.api.Optional
 import com.neeva.app.*
 import com.neeva.app.NeevaConstants.appSpacesURL
 import com.neeva.app.type.AddSpaceResultByURLInput
@@ -50,31 +49,32 @@ data class Space(
 
     suspend fun addOrRemove(url: Uri, title: String, description: String? = null) {
         if (contentURLs?.contains(url) == true) {
-            val response = apolloClient(NeevaBrowser.context).mutate(
-                DeleteSpaceResultByURLMutation(input =
-                DeleteSpaceResultByURLInput(
-                    spaceID = id,
-                    url = url.toString(),
+            val response = apolloClient(NeevaBrowser.context).mutation(
+                DeleteSpaceResultByURLMutation(
+                    input = DeleteSpaceResultByURLInput(
+                        spaceID = id,
+                        url = url.toString(),
+                    )
                 )
-                )
-            ).await()
+            ).execute()
 
             response.data?.deleteSpaceResultByURL.let {
                 // TODO Add a toast here
                 android.util.Log.i("Spaces","Deleted item from space")
             }
         } else {
-            val response = apolloClient(NeevaBrowser.context).mutate(
+            val response = apolloClient(NeevaBrowser.context).mutation(
                 AddToSpaceMutation(
                     input = AddSpaceResultByURLInput(
                         spaceID = id,
                         url = url.toString(),
                         title = title,
-                        data = description?.let { Input.fromNullable(it)} ?: Input.absent(),
-                        mediaType = Input.fromNullable("text/plain")
+                        data = description?.let { Optional.presentIfNotNull(it) }
+                            ?: Optional.Absent,
+                        mediaType = Optional.presentIfNotNull("text/plain")
                     )
                 )
-            ).await()
+            ).execute()
 
             response.data?.entityId.let {
                 // TODO Add a toast here
@@ -103,7 +103,7 @@ class SpaceStore {
         stateFlow.emit(State.REFRESHING)
         val response = apolloClient(NeevaBrowser.context)
             .query(ListSpacesQuery())
-            .await()
+            .execute()
 
         if (response.hasErrors()) stateFlow.emit(State.FAILED)
 
@@ -151,11 +151,11 @@ class SpaceStore {
 
             allSpacesFlow.emit(spaceList)
 
-            val response = apolloClient(NeevaBrowser.context).query(
-                GetSpacesDataQuery(Input.fromNullable(spacesToFetch.map { it.id }))
-            ).await()
+            val spacesDataResponse = apolloClient(NeevaBrowser.context)
+                .query(GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id })))
+                .execute()
 
-            response.data?.getSpace?.space?.let { it ->
+            spacesDataResponse.data?.getSpace?.space?.let { it ->
                 it.forEach { spaceQuery ->
                     val entityQueries = spaceQuery.space?.entities ?: return@let
                     val entities = entityQueries.map { entityQuery ->

@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
-import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.widgets.OverlaySheet
@@ -34,10 +34,10 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AddToSpaceSheet(appNavModel: AppNavModel, selectedTabModel: SelectedTabModel) {
+fun AddToSpaceSheet(appNavModel: AppNavModel, activeTabModel: ActiveTabModel) {
     OverlaySheet(appNavModel = appNavModel, visibleState = AppNavState.ADD_TO_SPACE) {
         AddToSpaceUI(
-            selectedTabModel,
+            activeTabModel,
             onDismiss = { appNavModel.showBrowser() }
         )
     }
@@ -46,7 +46,7 @@ fun AddToSpaceSheet(appNavModel: AppNavModel, selectedTabModel: SelectedTabModel
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AddToSpaceUI(
-    selectedTabModel: SelectedTabModel,
+    activeTabModel: ActiveTabModel,
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -81,12 +81,12 @@ fun AddToSpaceUI(
         }
 
         items(spaces) {
-            val title = selectedTabModel.titleFlow.collectAsState()
+            val title = activeTabModel.titleFlow.collectAsState()
 
-            SpaceRow(space = it, selectedTabModel) {
+            SpaceRow(space = it, activeTabModel) {
                 scope.launch {
                     it.addOrRemove(
-                        selectedTabModel.urlFlow.value,
+                        activeTabModel.urlFlow.value,
                         title = title.value
                     )
                     onDismiss()
@@ -97,7 +97,7 @@ fun AddToSpaceUI(
 }
 
 @Composable
-fun SpaceRow(space: Space, selectedTabModel: SelectedTabModel? = null, onClick: () -> Unit) {
+fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -> Unit) {
     val thumbnail: ImageBitmap = space.thumbnailAsBitmap().asImageBitmap()
     Row(modifier = Modifier
         .clickable {
@@ -143,9 +143,9 @@ fun SpaceRow(space: Space, selectedTabModel: SelectedTabModel? = null, onClick: 
         }
         Spacer(modifier = Modifier.weight(1f))
 
-        if (selectedTabModel != null) {
+        if (activeTabModel != null) {
             val spaceHasUrl: Boolean by remember {
-                mutableStateOf(space.contentURLs?.contains(selectedTabModel.urlFlow.value) == true)
+                mutableStateOf(space.contentURLs?.contains(activeTabModel.urlFlow.value) == true)
             }
             Image(
                 painter = painterResource(

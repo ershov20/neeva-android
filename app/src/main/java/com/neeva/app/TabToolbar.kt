@@ -15,7 +15,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.neeva.app.browsing.SelectedTabModel
+import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.widgets.Button
 
 class TabToolbarModel(
@@ -25,8 +25,8 @@ class TabToolbarModel(
 )
 
 @Composable
-fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
-    val navigationInfo by selectedTabModel.navigationInfoFlow.collectAsState()
+fun TabToolbar(model: TabToolbarModel, activeTabModel: ActiveTabModel) {
+    val navigationInfo by activeTabModel.navigationInfoFlow.collectAsState()
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -40,13 +40,13 @@ fun TabToolbar(model: TabToolbarModel, selectedTabModel: SelectedTabModel) {
             enabled = navigationInfo.canGoBackward,
             resID = R.drawable.ic_baseline_arrow_back_24,
             contentDescription = stringResource(id = R.string.toolbar_go_back),
-            onClick = selectedTabModel::goBack
+            onClick = activeTabModel::goBack
         )
         Button(
             enabled = navigationInfo.canGoForward,
             resID = R.drawable.ic_baseline_arrow_forward_24,
             contentDescription = stringResource(id = R.string.toolbar_go_forward),
-            onClick = selectedTabModel::goForward
+            onClick = activeTabModel::goForward
         )
         NeevaMenuButton(onClick = model.onNeevaMenu)
         Button(

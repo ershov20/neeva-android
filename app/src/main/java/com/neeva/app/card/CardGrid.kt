@@ -7,14 +7,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,19 +22,21 @@ import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.history.DomainViewModel
+import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.Favicon
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.Button
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import org.chromium.weblayer.Tab
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CardsContainer(
     appNavModel: AppNavModel,
     webLayerModel: WebLayerModel,
-    domainViewModel: DomainViewModel,
-    urlBarModel: URLBarModel,
-    cardViewModel: CardViewModel
+    historyViewModel: HistoryViewModel,
+    urlBarModel: URLBarModel
 ) {
     val state: AppNavState by appNavModel.state.collectAsState()
 
@@ -45,22 +45,30 @@ fun CardsContainer(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        CardGrid(webLayerModel, domainViewModel, appNavModel, urlBarModel, cardViewModel)
+        // Reset the scroll state of the LazyVerticalGrid every time the active tab changes.
+        // TODO(dan.alcantara): We'll need to investigate how this should work with tab groups
+        //                      and child tabs.
+        val activeTab: Tab? by webLayerModel.activeTabModel.activeTabFlow.collectAsState()
+        val activeTabIndex = activeTab?.guid
+            ?.let { guid -> webLayerModel.orderedTabList.value.indexOfFirst { it.id == guid } }
+            ?.coerceAtLeast(0)
+            ?: 0
+        val listState = LazyListState(activeTabIndex)
+
+        CardGrid(webLayerModel, historyViewModel, appNavModel, urlBarModel, listState)
     }
 }
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardGrid(
     webLayerModel: WebLayerModel,
-    domainViewModel: DomainViewModel,
+    historyViewModel: HistoryViewModel,
     appNavModel: AppNavModel,
     urlBarModel: URLBarModel,
-    cardViewModel: CardViewModel
+    listState: LazyListState
 ) {
     val tabs: List<TabInfo> by webLayerModel.orderedTabList.collectAsState()
-    val listState: LazyListState by cardViewModel.listState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -75,17 +83,17 @@ fun CardGrid(
                 .weight(1f)
         ) {
             items(tabs) { tab ->
-                val favicon: Favicon? by domainViewModel.getFaviconFlow(tab.url).collectAsState(null)
+                val favicon: Favicon? by historyViewModel.getFaviconFlow(tab.url).collectAsState(null)
                 val bitmap = favicon?.toBitmap()
 
                 TabCard(
                     tab = tab,
                     faviconData = bitmap,
                     onSelect = {
-                        webLayerModel.select(tab)
+                        webLayerModel.selectTab(tab)
                         appNavModel.showBrowser()
                     },
-                    onClose = { webLayerModel.close(tab) }
+                    onClose = { webLayerModel.closeTab(tab) }
                 )
             }
         }

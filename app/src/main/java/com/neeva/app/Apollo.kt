@@ -2,7 +2,8 @@ package com.neeva.app
 
 import android.content.Context
 import android.os.Looper
-import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.network.okHttpClient
 import com.neeva.app.NeevaConstants.appHost
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
@@ -19,7 +20,7 @@ fun apolloClient(context: Context): ApolloClient {
         return instance!!
     }
 
-    instance = ApolloClient.builder()
+    instance = ApolloClient.Builder()
         .serverUrl("${appURL}graphql")
         .okHttpClient(
             OkHttpClient.Builder()
@@ -48,7 +49,7 @@ private class AuthCookieJar(val context: Context): CookieJar {
         return cookies
     }
 
-    override fun saveFromResponse(url: HttpUrl, cookies: MutableList<Cookie>) {}
+    override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
 }
 
 private class AuthorizationInterceptor(val context: Context): Interceptor {

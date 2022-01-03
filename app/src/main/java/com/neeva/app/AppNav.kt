@@ -6,9 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.neeva.app.browsing.SelectedTabModel
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.card.CardViewModel
 import com.neeva.app.card.CardsContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.history.HistoryViewModel
@@ -16,7 +14,6 @@ import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.NeevaMenuSheet
 import com.neeva.app.settings.SettingsContainer
 import com.neeva.app.spaces.AddToSpaceSheet
-import com.neeva.app.history.DomainViewModel
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -88,17 +85,14 @@ class AppNavModel(
 @Composable
 fun AppNav(
     model: AppNavModel,
-    selectedTabModel: SelectedTabModel,
     historyViewModel: HistoryViewModel,
-    domainViewModel: DomainViewModel,
     webLayerModel: WebLayerModel,
-    urlBarModel: URLBarModel,
-    cardViewModel: CardViewModel
+    urlBarModel: URLBarModel
 ) {
     Box {
         AddToSpaceSheet(
             appNavModel = model,
-            selectedTabModel = selectedTabModel
+            activeTabModel = webLayerModel.activeTabModel
         )
 
         NeevaMenuSheet(appNavModel = model)
@@ -107,16 +101,14 @@ fun AppNav(
 
         HistoryContainer(
             appNavModel = model,
-            historyViewModel = historyViewModel,
-            domainViewModel = domainViewModel
+            historyViewModel = historyViewModel
         )
 
         CardsContainer(
             appNavModel = model,
             webLayerModel = webLayerModel,
-            domainViewModel = domainViewModel,
-            urlBarModel = urlBarModel,
-            cardViewModel = cardViewModel
+            historyViewModel = historyViewModel,
+            urlBarModel = urlBarModel
         )
     }
 }

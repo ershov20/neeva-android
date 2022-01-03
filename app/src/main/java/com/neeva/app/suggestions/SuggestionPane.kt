@@ -5,8 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.text.TextRange
-import com.neeva.app.browsing.SelectedTabModel
-import com.neeva.app.history.DomainViewModel
+import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.Site
@@ -16,18 +15,17 @@ import kotlinx.coroutines.flow.map
 
 @Composable
 fun SuggestionPane(
-    suggestionsViewModel: SuggestionsViewModel,
+    suggestionsModel: SuggestionsModel,
     urlBarModel: URLBarModel,
-    selectedTabModel: SelectedTabModel,
-    domainViewModel: DomainViewModel,
+    activeTabModel: ActiveTabModel,
     historyViewModel: HistoryViewModel
 ) {
-    val isUrlBarBlank: Boolean by urlBarModel.text.map { it.text.isBlank() }.collectAsState(true)
+    val isUrlBarBlank: Boolean by urlBarModel.textFieldValue.map { it.text.isBlank() }.collectAsState(true)
     val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
-    val domainSuggestions by domainViewModel.domainSuggestions.collectAsState()
+    val domainSuggestions by historyViewModel.domainSuggestions.collectAsState()
     val siteSuggestions by historyViewModel.siteSuggestions.collectAsState()
-    val currentURL: Uri by selectedTabModel.urlFlow.collectAsState()
-    val suggestions by suggestionsViewModel.suggestionFlow.collectAsState()
+    val currentURL: Uri by activeTabModel.urlFlow.collectAsState()
+    val suggestions by suggestionsModel.suggestionFlow.collectAsState()
 
     val topSuggestion = suggestions.autocompleteSuggestion
     val queryRowSuggestions = suggestions.queryRowSuggestions
@@ -54,7 +52,7 @@ fun SuggestionPane(
             queryRowSuggestions = queryRowSuggestions,
             queryNavSuggestions = queryNavSuggestions,
             historySuggestions = historySuggestions,
-            faviconProvider = domainViewModel::getFaviconFlow,
+            faviconProvider = historyViewModel::getFaviconFlow,
             onOpenUrl = urlBarModel::loadUrl
         ) {
             updateUrlBarContents(urlBarModel, it)
@@ -65,7 +63,7 @@ fun SuggestionPane(
             historyViewModel = historyViewModel
         ) {
             if (!isLazyTab) {
-                val favicon: Favicon? by domainViewModel.getFaviconFlow(currentURL).collectAsState(null)
+                val favicon: Favicon? by historyViewModel.getFaviconFlow(currentURL).collectAsState(null)
                 CurrentPageRow(favicon = favicon?.toBitmap(), url = currentURL) {
                     updateUrlBarContents(urlBarModel, currentURL.toString())
                 }
@@ -88,11 +86,5 @@ internal fun determineHistorySuggestions(
 
 /** Updates what is being displayed in the URL bar to match the given string and focuses it for editing. */
 private fun updateUrlBarContents(urlBarModel: URLBarModel, newContents: String) {
-    urlBarModel.onRequestFocus()
-    urlBarModel.onLocationBarTextChanged(
-        urlBarModel.text.value.copy(
-            newContents,
-            TextRange(newContents.length, newContents.length)
-        )
-    )
+    urlBarModel.replaceLocationBarText(newContents)
 }

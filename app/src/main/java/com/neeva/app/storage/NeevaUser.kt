@@ -1,7 +1,6 @@
 package com.neeva.app.storage
 
 import android.net.Uri
-import com.apollographql.apollo.coroutines.await
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.apolloClient
@@ -22,7 +21,7 @@ data class NeevaUser (
             shared.isLoading = true
             val response = apolloClient(NeevaBrowser.context)
                 .query(UserInfoQuery())
-                .await()
+                .execute()
 
             response.data?.user?.let { userQuery ->
                 shared = NeevaUser(

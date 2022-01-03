@@ -6,7 +6,7 @@ task clean(type: Delete) {
 
 buildscript {
     ext {
-        apollo_version = '2.5.5'
+        apollo_version = '3.0.0'
         compose_version = '1.0.5'
         kotlin_version = '1.5.31'
         lifecycle_version = '2.4.0'
