@@ -8,10 +8,24 @@ buildscript {
     ext {
         apollo_version = '3.0.0'
         compose_version = '1.0.5'
+        dagger_version = '2.40.5'
+        gradle_version = '7.1.0-rc01'
         kotlin_version = '1.5.31'
         lifecycle_version = '2.4.0'
         play_services_version = '17.0.0'
         room_version = '2.4.0'
         strikt_version = '0.33.0'
+    }
+
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:$gradle_version"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.google.dagger:hilt-android-gradle-plugin:$dagger_version"
     }
 }

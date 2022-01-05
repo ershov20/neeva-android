@@ -9,6 +9,7 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.history.HistoryViewModel
 import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.Site
+import com.neeva.app.storage.SpaceStore
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.zeroQuery.ZeroQuery
 import kotlinx.coroutines.flow.map
@@ -18,7 +19,8 @@ fun SuggestionPane(
     suggestionsModel: SuggestionsModel,
     urlBarModel: URLBarModel,
     activeTabModel: ActiveTabModel,
-    historyViewModel: HistoryViewModel
+    historyViewModel: HistoryViewModel,
+    spaceStore: SpaceStore
 ) {
     val isUrlBarBlank: Boolean by urlBarModel.textFieldValue.map { it.text.isBlank() }.collectAsState(true)
     val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
@@ -60,7 +62,8 @@ fun SuggestionPane(
     } else {
         ZeroQuery(
             urlBarModel = urlBarModel,
-            historyViewModel = historyViewModel
+            historyViewModel = historyViewModel,
+            spaceStore = spaceStore
         ) {
             if (!isLazyTab) {
                 val favicon: Favicon? by historyViewModel.getFaviconFlow(currentURL).collectAsState(null)

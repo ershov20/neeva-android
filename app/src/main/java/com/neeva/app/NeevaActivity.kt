@@ -20,14 +20,18 @@ import com.neeva.app.browsing.BrowserCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.publicsuffixlist.SuffixListManager
 import com.neeva.app.storage.*
 import com.neeva.app.ui.theme.NeevaTheme
+import dagger.hilt.android.AndroidEntryPoint
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
 import java.lang.ref.WeakReference
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     companion object {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
@@ -36,23 +40,27 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         private const val WEBLAYER_FRAGMENT_TAG = "WebLayer Fragment"
     }
 
+    @Inject lateinit var spaceStore: SpaceStore
+    @Inject lateinit var suffixListManager: SuffixListManager
+    @Inject lateinit var historyDatabase: HistoryDatabase
+
     private val historyViewModel by viewModels<HistoryViewModel> {
         HistoryViewModel.HistoryViewModelFactory(
-            SitesRepository(History.db.fromSites()),
-            DomainRepository(History.db.fromDomains())
+            SitesRepository(historyDatabase.fromSites()),
+            DomainRepository(historyDatabase.fromDomains())
         )
     }
 
     private val webModel by viewModels<WebLayerModel> {
         WebLayerModel.WebLayerModelFactory(
-            application,
+            suffixListManager,
             historyViewModel,
             apolloClient(application)
         )
     }
 
     private val appNavModel by viewModels<AppNavModel> {
-        AppNavModel.AppNavModelFactory(webModel.activeTabModel::loadUrl)
+        AppNavModel.AppNavModelFactory(webModel.activeTabModel::loadUrl, spaceStore)
     }
 
     /**
@@ -69,6 +77,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         webModel.browserCallbacks = WeakReference(this)
 
         setContentView(R.layout.main)
@@ -77,8 +86,11 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 NeevaTheme {
                     Surface(color = MaterialTheme.colors.background) {
                         BrowserUI(
-                            webModel.urlBarModel, webModel.suggestionsModel,
-                            webModel.activeTabModel, historyViewModel
+                            webModel.urlBarModel,
+                            webModel.suggestionsModel,
+                            webModel.activeTabModel,
+                            historyViewModel,
+                            spaceStore
                         )
                     }
                 }
@@ -90,8 +102,11 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             NeevaTheme {
                 Surface(color = Color.Transparent) {
                     AppNav(
-                        appNavModel, historyViewModel,
-                        webModel, webModel.urlBarModel
+                        appNavModel,
+                        historyViewModel,
+                        webModel,
+                        webModel.urlBarModel,
+                        spaceStore
                     )
                 }
             }
@@ -134,16 +149,13 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             throw RuntimeException("Failed to initialize WebLayer", e)
         }
 
-        // Warm up the database.
-        History.db
-
         lifecycleScope.launchWhenCreated {
             NeevaUser.fetch()
         }
 
         lifecycleScope.launchWhenCreated {
             webModel.urlBarModel.isEditing.collect { isEditing ->
-                if (isEditing) SpaceStore.shared.refresh()
+                if (isEditing) spaceStore.refresh()
             }
         }
     }

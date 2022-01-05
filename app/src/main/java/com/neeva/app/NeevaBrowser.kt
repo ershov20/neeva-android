@@ -1,9 +1,10 @@
 package com.neeva.app
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class NeevaBrowser: Application() {
     companion object {
         // TODO(dan.alcantara): Context shouldn't be stored like this.

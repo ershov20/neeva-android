@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.SuggestionPane
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBar
@@ -25,7 +26,8 @@ fun BrowserUI(
     urlBarModel: URLBarModel,
     suggestionsModel: SuggestionsModel,
     activeTabModel: ActiveTabModel,
-    historyViewModel: HistoryViewModel
+    historyViewModel: HistoryViewModel,
+    spaceStore: SpaceStore
 ) {
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
     val progress: Int by activeTabModel.progressFlow.collectAsState()
@@ -52,7 +54,7 @@ fun BrowserUI(
 
         if (isEditing) {
             Box(modifier = Modifier.weight(1.0f)) {
-                SuggestionPane(suggestionsModel, urlBarModel, activeTabModel, historyViewModel)
+                SuggestionPane(suggestionsModel, urlBarModel, activeTabModel, historyViewModel, spaceStore)
             }
         }
     }

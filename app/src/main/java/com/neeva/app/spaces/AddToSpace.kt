@@ -34,10 +34,15 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun AddToSpaceSheet(appNavModel: AppNavModel, activeTabModel: ActiveTabModel) {
+fun AddToSpaceSheet(
+    appNavModel: AppNavModel,
+    activeTabModel: ActiveTabModel,
+    spaceStore: SpaceStore
+) {
     OverlaySheet(appNavModel = appNavModel, visibleState = AppNavState.ADD_TO_SPACE) {
         AddToSpaceUI(
             activeTabModel,
+            spaceStore,
             onDismiss = { appNavModel.showBrowser() }
         )
     }
@@ -47,10 +52,11 @@ fun AddToSpaceSheet(appNavModel: AppNavModel, activeTabModel: ActiveTabModel) {
 @Composable
 fun AddToSpaceUI(
     activeTabModel: ActiveTabModel,
+    spaceStore: SpaceStore,
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.collectAsState()
+    val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
     LazyColumn {
         stickyHeader {

@@ -1,13 +1,14 @@
 plugins {
     id 'com.android.application'
-    id('org.jetbrains.kotlin.android').version("$kotlin_version")
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'org.jetbrains.kotlin.android'
     id("com.apollographql.apollo3").version("$apollo_version")
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
     compileSdk 31
-
-    apply plugin: 'kotlin-kapt'
 
     defaultConfig {
         applicationId "com.neeva.app"
@@ -103,12 +104,28 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
 
+    // Hilt
+    implementation "com.google.dagger:hilt-android:$dagger_version"
+    kapt "com.google.dagger:hilt-compiler:$dagger_version"
+    androidTestImplementation "com.google.dagger:hilt-android-testing:$dagger_version"
+    kaptAndroidTest "com.google.dagger:hilt-compiler:$dagger_version"
+    testImplementation "com.google.dagger:hilt-android-testing:$dagger_version"
+    kaptTest "com.google.dagger:hilt-compiler:$dagger_version"
+
     // Room
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
     testImplementation "androidx.room:room-testing:$room_version"
+}
+
+hilt {
+    enableAggregatingTask = true
+}
+
+kapt {
+    correctErrorTypes true
 }
 
 tasks.withType(Test) {

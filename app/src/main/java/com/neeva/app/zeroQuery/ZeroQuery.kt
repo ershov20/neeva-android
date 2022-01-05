@@ -44,9 +44,10 @@ import java.util.*
 fun ZeroQuery(
     urlBarModel: URLBarModel,
     historyViewModel: HistoryViewModel,
+    spaceStore: SpaceStore,
     topContent: @Composable() (LazyItemScope.() -> Unit) = {},
 ) {
-    val spaces: List<Space> by SpaceStore.shared.allSpacesFlow.collectAsState()
+    val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
     /** Takes the top 3 suggestions for display to the user. */
     val suggestedQueries: List<QueryRowSuggestion> by historyViewModel.frequentSites

@@ -1,4 +1,4 @@
-package com.neeva.app.browsing
+package com.neeva.app.publicsuffixlist
 
 import android.content.Context
 import android.net.Uri
@@ -13,12 +13,14 @@ import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.IDN
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Derives the registerable domain name from the provided domain.
  * See https://publicsuffix.org/list/ for information about how this should work.
  */
-class SuffixListManager {
+class SuffixListManager(val context: Context) {
     companion object {
         val TAG = SuffixListManager::class.simpleName
         const val SUFFIX_FILENAME = "public_suffix_list.dat"
@@ -34,13 +36,13 @@ class SuffixListManager {
     private val _loadingState = MutableStateFlow(LoadingState.UNINITIALIZED)
     val loadingState: StateFlow<LoadingState> = _loadingState
 
-    fun initialize(context: Context, coroutineScope: CoroutineScope) {
+    fun initialize(coroutineScope: CoroutineScope) {
         coroutineScope.launch(Dispatchers.IO) {
-            initialize(context)
+            initialize()
         }
     }
 
-    internal suspend fun initialize(context: Context) {
+    internal suspend fun initialize() {
         if (!_loadingState.compareAndSet(LoadingState.UNINITIALIZED, LoadingState.LOADING)) return
         loadList(context)
     }

@@ -1,4 +1,4 @@
-package com.neeva.app.browsing
+package com.neeva.app.publicsuffixlist
 
 import android.net.Uri
 import com.neeva.app.BaseTest
@@ -23,13 +23,13 @@ class SuffixListManagerTest: BaseTest() {
 
     override fun setUp() {
         super.setUp()
-        suffixListManager = SuffixListManager()
+        suffixListManager = SuffixListManager(RuntimeEnvironment.getApplication())
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun baseTest() = runTest {
-        suffixListManager.initialize(RuntimeEnvironment.getApplication())
+        suffixListManager.initialize()
         advanceUntilIdle()
         expectThat(suffixListManager.loadingState.value).isEqualTo(SuffixListManager.LoadingState.READY)
 

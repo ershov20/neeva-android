@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
+import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.*
 import com.neeva.app.NeevaConstants.appSpacesURL
@@ -11,6 +12,8 @@ import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 data class SpaceEntityData(
     val url: Uri,
@@ -84,11 +87,8 @@ data class Space(
     }
 }
 
-class SpaceStore {
-    companion object {
-        val shared = SpaceStore()
-    }
-
+@Singleton
+class SpaceStore @Inject constructor(val apolloClient: ApolloClient) {
     enum class State {
         READY,
         REFRESHING,
@@ -101,7 +101,7 @@ class SpaceStore {
     @OptIn(ExperimentalStdlibApi::class)
     suspend fun refresh() {
         stateFlow.emit(State.REFRESHING)
-        val response = apolloClient(NeevaBrowser.context)
+        val response = apolloClient
             .query(ListSpacesQuery())
             .execute()
 
@@ -151,7 +151,7 @@ class SpaceStore {
 
             allSpacesFlow.emit(spaceList)
 
-            val spacesDataResponse = apolloClient(NeevaBrowser.context)
+            val spacesDataResponse = apolloClient
                 .query(GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id })))
                 .execute()
 

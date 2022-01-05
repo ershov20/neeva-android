@@ -1,7 +1,5 @@
 package com.neeva.app.browsing
 
-import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -16,14 +14,13 @@ import com.neeva.app.NeevaBrowser
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
 import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.publicsuffixlist.SuffixListManager
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.storage.DateConverter
 import com.neeva.app.storage.Visit
 import com.neeva.app.storage.toFavicon
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import org.chromium.weblayer.*
 import java.io.File
@@ -39,7 +36,7 @@ import kotlin.collections.set
  * whenever the current tab changes (e.g.).
  */
 class WebLayerModel(
-    appContext: Application,
+    suffixListManager: SuffixListManager,
     private val historyViewModel: HistoryViewModel,
     apolloClient: ApolloClient
 ): ViewModel() {
@@ -158,11 +155,8 @@ class WebLayerModel(
         apolloClient
     )
 
-    val suffixListManager: SuffixListManager
-
     init {
-        suffixListManager = SuffixListManager()
-        suffixListManager.initialize(appContext, viewModelScope)
+        suffixListManager.initialize(viewModelScope)
     }
 
     fun onSaveInstanceState(outState: Bundle) {
@@ -479,12 +473,12 @@ class WebLayerModel(
 
     @Suppress("UNCHECKED_CAST")
     class WebLayerModelFactory(
-        private val appContext: Application,
+        private val suffixListManager: SuffixListManager,
         private val historyViewModel: HistoryViewModel,
         private val apolloClient: ApolloClient
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return WebLayerModel(appContext, historyViewModel, apolloClient) as T
+            return WebLayerModel(suffixListManager, historyViewModel, apolloClient) as T
         }
     }
 }
