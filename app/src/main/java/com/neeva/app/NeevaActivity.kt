@@ -45,6 +45,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
     private val webModel by viewModels<WebLayerModel> {
         WebLayerModel.WebLayerModelFactory(
+            application,
             historyViewModel,
             apolloClient(application)
         )
