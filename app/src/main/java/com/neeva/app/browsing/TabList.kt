@@ -21,15 +21,16 @@ class TabList {
     fun getTab(index: Int) = currentTabs[index]
     fun getTabInfo(id: String) = currentPrimitives[id]
 
-    fun add(tab: Tab) {
+    fun add(tab: Tab, thumbnailUri: Uri) {
         if (currentTabs.contains(tab)) return
         currentTabs.add(tab)
 
         currentPrimitives[tab.guid] = TabInfo(
             id = tab.guid,
+            thumbnailUri = thumbnailUri,
             url = tab.currentDisplayUrl,
             title = tab.currentDisplayTitle,
-            isSelected =  tab.isSelected
+            isSelected = tab.isSelected
         )
 
         updateFlow()

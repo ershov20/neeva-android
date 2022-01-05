@@ -12,7 +12,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,12 +21,10 @@ import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.Favicon
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.Button
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import org.chromium.weblayer.Tab
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -35,7 +32,7 @@ import org.chromium.weblayer.Tab
 fun CardsContainer(
     appNavModel: AppNavModel,
     webLayerModel: WebLayerModel,
-    historyViewModel: HistoryViewModel,
+    historyManager: HistoryManager,
     urlBarModel: URLBarModel
 ) {
     val state: AppNavState by appNavModel.state.collectAsState()
@@ -55,7 +52,7 @@ fun CardsContainer(
             ?: 0
         val listState = LazyListState(activeTabIndex)
 
-        CardGrid(webLayerModel, historyViewModel, appNavModel, urlBarModel, listState)
+        CardGrid(webLayerModel, historyManager, appNavModel, urlBarModel, listState)
     }
 }
 
@@ -63,7 +60,7 @@ fun CardsContainer(
 @Composable
 fun CardGrid(
     webLayerModel: WebLayerModel,
-    historyViewModel: HistoryViewModel,
+    historyManager: HistoryManager,
     appNavModel: AppNavModel,
     urlBarModel: URLBarModel,
     listState: LazyListState
@@ -83,7 +80,7 @@ fun CardGrid(
                 .weight(1f)
         ) {
             items(tabs) { tab ->
-                val favicon: Favicon? by historyViewModel.getFaviconFlow(tab.url).collectAsState(null)
+                val favicon: Favicon? by historyManager.getFaviconFlow(tab.url).collectAsState(null)
                 val bitmap = favicon?.toBitmap()
 
                 TabCard(

@@ -16,14 +16,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.BrowserCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.SuffixListManager
-import com.neeva.app.storage.*
+import com.neeva.app.storage.HistoryDatabase
+import com.neeva.app.storage.NeevaUser
+import com.neeva.app.storage.SpaceStore
 import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
@@ -40,24 +44,13 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         private const val WEBLAYER_FRAGMENT_TAG = "WebLayer Fragment"
     }
 
+    @Inject lateinit var apolloClient: ApolloClient
     @Inject lateinit var spaceStore: SpaceStore
     @Inject lateinit var suffixListManager: SuffixListManager
     @Inject lateinit var historyDatabase: HistoryDatabase
+    @Inject lateinit var historyManager: HistoryManager
 
-    private val historyViewModel by viewModels<HistoryViewModel> {
-        HistoryViewModel.HistoryViewModelFactory(
-            SitesRepository(historyDatabase.fromSites()),
-            DomainRepository(historyDatabase.fromDomains())
-        )
-    }
-
-    private val webModel by viewModels<WebLayerModel> {
-        WebLayerModel.WebLayerModelFactory(
-            suffixListManager,
-            historyViewModel,
-            apolloClient(application)
-        )
-    }
+    private val webModel by viewModels<WebLayerModel>()
 
     private val appNavModel by viewModels<AppNavModel> {
         AppNavModel.AppNavModelFactory(webModel.activeTabModel::loadUrl, spaceStore)
@@ -89,7 +82,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                             webModel.urlBarModel,
                             webModel.suggestionsModel,
                             webModel.activeTabModel,
-                            historyViewModel,
+                            historyManager,
                             spaceStore
                         )
                     }
@@ -103,11 +96,16 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 Surface(color = Color.Transparent) {
                     AppNav(
                         appNavModel,
-                        historyViewModel,
+                        historyManager,
                         webModel,
                         webModel.urlBarModel,
                         spaceStore
-                    )
+                    ) { space ->
+                        lifecycleScope.launch {
+                            webModel.activeTabModel.modifySpace(space, apolloClient)
+                            appNavModel.showBrowser()
+                        }
+                    }
                 }
             }
         }
@@ -150,7 +148,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         }
 
         lifecycleScope.launchWhenCreated {
-            NeevaUser.fetch()
+            NeevaUser.fetch(apolloClient)
         }
 
         lifecycleScope.launchWhenCreated {
@@ -223,7 +221,6 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-
         webModel.onSaveInstanceState(outState)
     }
 

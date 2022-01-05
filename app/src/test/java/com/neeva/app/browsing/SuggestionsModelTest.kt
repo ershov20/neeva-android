@@ -6,7 +6,7 @@ import com.apollographql.apollo3.network.okHttpClient
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.SuggestionsQuery
-import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.Site
 import com.neeva.app.suggestions.Suggestions
 import com.neeva.app.suggestions.SuggestionsModel
@@ -55,7 +55,7 @@ class SuggestionsModelTest: BaseTest() {
     private lateinit var urlBarIsEditing: MutableStateFlow<Boolean>
     private lateinit var responseData: String
 
-    private lateinit var historyViewModel: HistoryViewModel
+    private lateinit var historyManager: HistoryManager
     private lateinit var urlBarModel: URLBarModel
     private lateinit var apolloClient: ApolloClient
 
@@ -67,8 +67,8 @@ class SuggestionsModelTest: BaseTest() {
         urlBarText = MutableStateFlow(TextFieldValue())
         urlBarIsEditing = MutableStateFlow(false)
 
-        historyViewModel = mock()
-        Mockito.`when`(historyViewModel.siteSuggestions).thenReturn(siteSuggestions)
+        historyManager = mock()
+        Mockito.`when`(historyManager.siteSuggestions).thenReturn(siteSuggestions)
 
         urlBarModel = mock()
         Mockito.`when`(urlBarModel.textFieldValue).thenReturn(urlBarText)
@@ -85,7 +85,7 @@ class SuggestionsModelTest: BaseTest() {
 
         model = SuggestionsModel(
             coroutineScopeRule.scope,
-            historyViewModel,
+            historyManager,
             urlBarModel,
             apolloClient
         )
@@ -153,7 +153,7 @@ class SuggestionsModelTest: BaseTest() {
         val collectionJob = CoroutineScope(this.coroutineContext + Job())
         val model = SuggestionsModel(
             collectionJob,
-            historyViewModel,
+            historyManager,
             urlBarModel,
             apolloClient
         )
@@ -174,7 +174,7 @@ class SuggestionsModelTest: BaseTest() {
         val collectionJob = CoroutineScope(this.coroutineContext + Job())
         val model = SuggestionsModel(
             collectionJob,
-            historyViewModel,
+            historyManager,
             urlBarModel,
             apolloClient
         )

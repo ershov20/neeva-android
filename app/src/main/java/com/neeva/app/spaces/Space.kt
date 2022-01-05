@@ -6,7 +6,10 @@ import android.net.Uri
 import android.util.Base64
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Optional
-import com.neeva.app.*
+import com.neeva.app.AddToSpaceMutation
+import com.neeva.app.DeleteSpaceResultByURLMutation
+import com.neeva.app.GetSpacesDataQuery
+import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants.appSpacesURL
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
@@ -34,8 +37,8 @@ data class Space(
     val userACL : SpaceACLLevel,
 ) {
     companion object {
-        val defaultThumbnail: Bitmap by lazy {
-            BitmapFactory.decodeResource(NeevaBrowser.context.resources, R.drawable.spaces)
+        fun interface SpaceModifier {
+            fun addOrRemoveCurrentTabToSpace(space: Space)
         }
     }
     val url: Uri = Uri.parse("$appSpacesURL/$id")
@@ -43,41 +46,48 @@ data class Space(
     var contentURLs: Set<Uri>? = null
     var contentData: List<SpaceEntityData>? = null
 
-    fun thumbnailAsBitmap() : Bitmap {
-        val encoded = thumbnail ?: return defaultThumbnail
-        if (!thumbnail.startsWith("data:image/jpeg;base64,")) return defaultThumbnail
+    fun thumbnailAsBitmap() : Bitmap? {
+        val encoded = thumbnail ?: return null
+        if (!thumbnail.startsWith("data:image/jpeg;base64,")) return null
         val byteArray = Base64.decode(encoded.substring("data:image/jpeg;base64,".length), Base64.DEFAULT)
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
-    suspend fun addOrRemove(url: Uri, title: String, description: String? = null) {
+    suspend fun addOrRemove(
+        apolloClient: ApolloClient,
+        url: Uri,
+        title: String,
+        description: String? = null
+    ) {
         if (contentURLs?.contains(url) == true) {
-            val response = apolloClient(NeevaBrowser.context).mutation(
-                DeleteSpaceResultByURLMutation(
-                    input = DeleteSpaceResultByURLInput(
-                        spaceID = id,
-                        url = url.toString(),
+            val response = apolloClient
+                .mutation(
+                    DeleteSpaceResultByURLMutation(
+                        input = DeleteSpaceResultByURLInput(
+                            spaceID = id,
+                            url = url.toString(),
+                        )
                     )
-                )
-            ).execute()
+                ).execute()
 
             response.data?.deleteSpaceResultByURL.let {
                 // TODO Add a toast here
                 android.util.Log.i("Spaces","Deleted item from space")
             }
         } else {
-            val response = apolloClient(NeevaBrowser.context).mutation(
-                AddToSpaceMutation(
-                    input = AddSpaceResultByURLInput(
-                        spaceID = id,
-                        url = url.toString(),
-                        title = title,
-                        data = description?.let { Optional.presentIfNotNull(it) }
-                            ?: Optional.Absent,
-                        mediaType = Optional.presentIfNotNull("text/plain")
+            val response = apolloClient
+                .mutation(
+                    AddToSpaceMutation(
+                        input = AddSpaceResultByURLInput(
+                            spaceID = id,
+                            url = url.toString(),
+                            title = title,
+                            data = description?.let { Optional.presentIfNotNull(it) }
+                                ?: Optional.Absent,
+                            mediaType = Optional.presentIfNotNull("text/plain")
+                        )
                     )
-                )
-            ).execute()
+                ).execute()
 
             response.data?.entityId.let {
                 // TODO Add a toast here

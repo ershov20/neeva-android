@@ -1,6 +1,8 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.storage.Space
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.chromium.weblayer.*
@@ -107,6 +109,15 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
             activeTabFlow.value?.navigationController?.goForward()
             updateNavigationInfo()
         }
+    }
+
+    /** Adds or removes the active tab from the given [space]. */
+    suspend fun modifySpace(space: Space, apolloClient: ApolloClient) {
+        space.addOrRemove(
+            apolloClient = apolloClient,
+            url = urlFlow.value,
+            title = titleFlow.value
+        )
     }
 
     private fun updateNavigationInfo() {

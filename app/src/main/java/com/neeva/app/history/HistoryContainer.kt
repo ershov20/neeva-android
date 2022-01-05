@@ -21,10 +21,10 @@ import com.neeva.app.storage.Site
 @Composable
 fun HistoryContainer(
     appNavModel: AppNavModel,
-    historyViewModel: HistoryViewModel
+    historyManager: HistoryManager
 ) {
     val state: AppNavState by appNavModel.state.collectAsState()
-    val history: List<Site> by historyViewModel.historyWithinRange.collectAsState(emptyList())
+    val history: List<Site> by historyManager.historyWithinRange.collectAsState(emptyList())
 
     val density = LocalDensity.current
     AnimatedVisibility(
@@ -40,7 +40,7 @@ fun HistoryContainer(
             history = history,
             onClose = appNavModel::showBrowser,
             onOpenUrl = appNavModel::openUrl,
-            faviconProvider = historyViewModel::getFaviconFlow
+            faviconProvider = historyManager::getFaviconFlow
         )
     }
 }

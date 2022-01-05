@@ -23,7 +23,7 @@ object NeevaAppModule {
     @Provides
     @Singleton
     fun providesApolloClient(@ApplicationContext context: Context): ApolloClient {
-        return apolloClient(context)
+        return createApolloClient(context)
     }
 
     @Provides

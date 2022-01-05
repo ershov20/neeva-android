@@ -4,9 +4,8 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.text.TextRange
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.SpaceStore
@@ -19,13 +18,13 @@ fun SuggestionPane(
     suggestionsModel: SuggestionsModel,
     urlBarModel: URLBarModel,
     activeTabModel: ActiveTabModel,
-    historyViewModel: HistoryViewModel,
+    historyManager: HistoryManager,
     spaceStore: SpaceStore
 ) {
     val isUrlBarBlank: Boolean by urlBarModel.textFieldValue.map { it.text.isBlank() }.collectAsState(true)
     val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
-    val domainSuggestions by historyViewModel.domainSuggestions.collectAsState()
-    val siteSuggestions by historyViewModel.siteSuggestions.collectAsState()
+    val domainSuggestions by historyManager.domainSuggestions.collectAsState()
+    val siteSuggestions by historyManager.siteSuggestions.collectAsState()
     val currentURL: Uri by activeTabModel.urlFlow.collectAsState()
     val suggestions by suggestionsModel.suggestionFlow.collectAsState()
 
@@ -54,7 +53,7 @@ fun SuggestionPane(
             queryRowSuggestions = queryRowSuggestions,
             queryNavSuggestions = queryNavSuggestions,
             historySuggestions = historySuggestions,
-            faviconProvider = historyViewModel::getFaviconFlow,
+            faviconProvider = historyManager::getFaviconFlow,
             onOpenUrl = urlBarModel::loadUrl
         ) {
             updateUrlBarContents(urlBarModel, it)
@@ -62,11 +61,11 @@ fun SuggestionPane(
     } else {
         ZeroQuery(
             urlBarModel = urlBarModel,
-            historyViewModel = historyViewModel,
+            historyManager = historyManager,
             spaceStore = spaceStore
         ) {
             if (!isLazyTab) {
-                val favicon: Favicon? by historyViewModel.getFaviconFlow(currentURL).collectAsState(null)
+                val favicon: Favicon? by historyManager.getFaviconFlow(currentURL).collectAsState(null)
                 CurrentPageRow(favicon = favicon?.toBitmap(), url = currentURL) {
                     updateUrlBarContents(urlBarModel, currentURL.toString())
                 }

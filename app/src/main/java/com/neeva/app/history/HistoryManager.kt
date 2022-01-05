@@ -1,23 +1,24 @@
 package com.neeva.app.history
 
 import android.net.Uri
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.NavSuggestion
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Provides access to the user's navigation history. */
-class HistoryViewModel(
-    private val sitesRepository: SitesRepository,
-    private val domainRepository: DomainRepository
-) : ViewModel() {
+@Singleton
+class HistoryManager @Inject constructor(historyDatabase: HistoryDatabase) {
+    private val sitesRepository = SitesRepository(historyDatabase.fromSites())
+    private val domainRepository = DomainRepository(historyDatabase.fromDomains())
+
     companion object {
         private const val MAX_FREQUENT_SITES = 40
 
@@ -43,8 +44,8 @@ class HistoryViewModel(
     val domainSuggestions: StateFlow<List<NavSuggestion>> = _domainSuggestions
 
     /** Updates the query that is being used to fetch history and domain name suggestions. */
-    fun updateSuggestionQuery(currentInput: String) {
-        viewModelScope.launch(Dispatchers.IO) {
+    fun updateSuggestionQuery(coroutineScope: CoroutineScope, currentInput: String) {
+        coroutineScope.launch(Dispatchers.IO) {
             _siteSuggestions.value = sitesRepository.getQuerySuggestions(currentInput)
             _domainSuggestions.value = domainRepository.queryNavSuggestions(currentInput)
         }
@@ -61,12 +62,13 @@ class HistoryViewModel(
 
     /** Inserts or updates an item into the history. */
     fun insert(
+        coroutineScope: CoroutineScope,
         url: Uri,
         title: String? = null,
         favicon: Favicon? = null,
         visit: Visit? = null
     ) {
-        viewModelScope.launch {
+        coroutineScope.launch {
             sitesRepository.insert(url, title, favicon, visit)
 
             url.baseDomain()?.let { domainName ->
@@ -82,19 +84,9 @@ class HistoryViewModel(
     }
 
     /** Updates the [Favicon] for the given [url]. */
-    fun updateFaviconFor(url: String, favicon: Favicon) {
-        viewModelScope.launch {
+    fun updateFaviconFor(coroutineScope: CoroutineScope, url: String, favicon: Favicon) {
+        coroutineScope.launch {
             domainRepository.updateFaviconFor(url, favicon)
-        }
-    }
-
-    class HistoryViewModelFactory(
-        private val sitesRepository: SitesRepository,
-        private val domainRepository: DomainRepository
-    ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            @Suppress("UNCHECKED_CAST")
-            return HistoryViewModel(sitesRepository, domainRepository) as T
         }
     }
 }

@@ -1,9 +1,8 @@
 package com.neeva.app.storage
 
 import android.net.Uri
-import com.neeva.app.NeevaBrowser
+import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.UserInfoQuery
-import com.neeva.app.apolloClient
 
 data class NeevaUser (
     val id: String? = null,
@@ -17,9 +16,9 @@ data class NeevaUser (
     companion object {
         var shared = NeevaUser()
 
-        suspend fun fetch() {
+        suspend fun fetch(apolloClient: ApolloClient) {
             shared.isLoading = true
-            val response = apolloClient(NeevaBrowser.context)
+            val response = apolloClient
                 .query(UserInfoQuery())
                 .execute()
 

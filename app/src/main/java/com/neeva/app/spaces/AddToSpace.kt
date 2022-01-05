@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
@@ -30,19 +31,20 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.widgets.OverlaySheet
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AddToSpaceSheet(
     appNavModel: AppNavModel,
     activeTabModel: ActiveTabModel,
+    spaceModifier: Space.Companion.SpaceModifier,
     spaceStore: SpaceStore
 ) {
     OverlaySheet(appNavModel = appNavModel, visibleState = AppNavState.ADD_TO_SPACE) {
         AddToSpaceUI(
             activeTabModel,
             spaceStore,
+            spaceModifier,
             onDismiss = { appNavModel.showBrowser() }
         )
     }
@@ -53,6 +55,7 @@ fun AddToSpaceSheet(
 fun AddToSpaceUI(
     activeTabModel: ActiveTabModel,
     spaceStore: SpaceStore,
+    spaceModifier: Space.Companion.SpaceModifier,
     onDismiss: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -87,16 +90,8 @@ fun AddToSpaceUI(
         }
 
         items(spaces) {
-            val title = activeTabModel.titleFlow.collectAsState()
-
             SpaceRow(space = it, activeTabModel) {
-                scope.launch {
-                    it.addOrRemove(
-                        activeTabModel.urlFlow.value,
-                        title = title.value
-                    )
-                    onDismiss()
-                }
+                spaceModifier.addOrRemoveCurrentTabToSpace(it)
             }
         }
     }
@@ -104,7 +99,10 @@ fun AddToSpaceUI(
 
 @Composable
 fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -> Unit) {
-    val thumbnail: ImageBitmap = space.thumbnailAsBitmap().asImageBitmap()
+    val thumbnail: ImageBitmap =
+        space.thumbnailAsBitmap()?.asImageBitmap()
+        ?: ImageBitmap.imageResource(R.drawable.spaces)
+
     Row(modifier = Modifier
         .clickable {
             onClick()
@@ -116,7 +114,7 @@ fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -
     ) {
         Image(
             bitmap = thumbnail,
-            contentDescription = "Space Thumbnail",
+            contentDescription = null,
             modifier = Modifier
                 .size(48.dp)
                 .clip(RoundedCornerShape(6.dp)),

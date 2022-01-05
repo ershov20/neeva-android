@@ -1,26 +1,16 @@
 package com.neeva.app
 
 import android.content.Context
-import android.os.Looper
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.okHttpClient
 import com.neeva.app.NeevaConstants.appHost
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
+import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.*
 
-private var instance: ApolloClient? = null
-
-fun apolloClient(context: Context): ApolloClient {
-    check(Looper.myLooper() == Looper.getMainLooper()) {
-        "Only the main thread can get the apolloClient instance"
-    }
-
-    if (instance != null) {
-        return instance!!
-    }
-
-    instance = ApolloClient.Builder()
+fun createApolloClient(@ApplicationContext context: Context): ApolloClient {
+    return ApolloClient.Builder()
         .serverUrl("${appURL}graphql")
         .okHttpClient(
             OkHttpClient.Builder()
@@ -29,8 +19,6 @@ fun apolloClient(context: Context): ApolloClient {
                 .build()
         )
         .build()
-
-    return instance!!
 }
 
 private class AuthCookieJar(val context: Context): CookieJar {
@@ -40,7 +28,7 @@ private class AuthCookieJar(val context: Context): CookieJar {
         val browserVersionCookie = Cookie.Builder().name("BrowserVersion").secure()
             .domain(appHost).expiresAt(Long.MAX_VALUE).value("0.0.1").build()
         val cookies = mutableListOf(browserTypeCookie, browserVersionCookie)
-        val token = User.getToken()
+        val token = User.getToken(context)
         if (token != null) {
             val authCookie = Cookie.Builder().name(loginCookie).secure()
                 .domain(appHost).expiresAt(Long.MAX_VALUE).value(token).build()
@@ -63,8 +51,8 @@ private class AuthorizationInterceptor(val context: Context): Interceptor {
     }
 }
 
-fun saveLoginCookieFrom(cookie: String) {
+fun saveLoginCookieFrom(context: Context, cookie: String) {
     if (cookie.split("=").first() == loginCookie) {
-        User.setToken(cookie.split("=").last())
+        User.setToken(context, cookie.split("=").last())
     }
 }

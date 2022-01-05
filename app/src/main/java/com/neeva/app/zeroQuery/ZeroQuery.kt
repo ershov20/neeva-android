@@ -26,7 +26,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.R
 import com.neeva.app.browsing.baseDomain
-import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.Space
@@ -43,20 +43,20 @@ import java.util.*
 @Composable
 fun ZeroQuery(
     urlBarModel: URLBarModel,
-    historyViewModel: HistoryViewModel,
+    historyManager: HistoryManager,
     spaceStore: SpaceStore,
     topContent: @Composable() (LazyItemScope.() -> Unit) = {},
 ) {
     val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
     /** Takes the top 3 suggestions for display to the user. */
-    val suggestedQueries: List<QueryRowSuggestion> by historyViewModel.frequentSites
+    val suggestedQueries: List<QueryRowSuggestion> by historyManager.frequentSites
         .map { siteList ->
             siteList.mapNotNull { it.toSearchSuggest() }.take(3)
         }
         .collectAsState(emptyList())
 
-    val suggestedSites: List<Site> by historyViewModel.frequentSites
+    val suggestedSites: List<Site> by historyManager.frequentSites
         .map { sites ->
             // Assume that anything pointing at https://www.neeva.com should not be recommended to
             // the user.  This includes search suggestions and Spaces, e.g.

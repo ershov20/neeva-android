@@ -7,7 +7,7 @@ import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.browsing.baseDomain
 import com.neeva.app.browsing.toSearchUri
-import com.neeva.app.history.HistoryViewModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.Site
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.urlbar.URLBarModel
@@ -44,7 +44,7 @@ data class Suggestions(
 /** Maintains a list of suggestions from the backend that correspond to the current query. */
 class SuggestionsModel(
     coroutineScope: CoroutineScope,
-    historyViewModel: HistoryViewModel,
+    historyManager: HistoryManager,
     private val urlBarModel: URLBarModel,
     private val apolloClient: ApolloClient
 ) {
@@ -60,7 +60,7 @@ class SuggestionsModel(
 
     init {
         coroutineScope.launch {
-            historyViewModel.siteSuggestions.collect { suggestions ->
+            historyManager.siteSuggestions.collect { suggestions ->
                 _autocompleteSuggestion.value = suggestions.firstOrNull()?.toNavSuggestion()
 
                 _suggestionFlow.value = _suggestionFlow.value.copy(
