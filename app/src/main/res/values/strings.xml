@@ -28,4 +28,7 @@
     <string name="history_today">Today</string>
     <string name="history_yesterday">Yesterday</string>
     <string name="history_this_week">This week</string>
+
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_with_okta">Sign in using email</string>
 </resources>

@@ -12,6 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
+import com.neeva.app.User
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.SuffixListManager
 import com.neeva.app.saveLoginCookieFrom
@@ -236,6 +237,10 @@ class WebLayerModel @Inject constructor(
                         }
                     }
                 )
+
+                if (!User.getToken(appContext).isNullOrEmpty()) {
+                    setCookie(Uri.parse(appURL), User.loginCookieString(appContext)){}
+                }
             }
         }
     }
@@ -249,6 +254,17 @@ class WebLayerModel @Inject constructor(
     fun createTabWithUri(uri: Uri, parentTabId: String?) {
         newTabInfo = CreateNewTabInfo(uri, parentTabId)
         browser.createTab()
+    }
+
+    fun onAuthTokenUpdated() {
+        browser.profile.cookieManager.setCookie(
+            Uri.parse(appURL),
+            User.loginCookieString(appContext)
+        ) { success ->
+            if (success && activeTabModel.urlFlow.value.toString() == appURL) {
+                activeTabModel.reload()
+            }
+        }
     }
 
     private fun onNewTabAdded(tab: Tab) {

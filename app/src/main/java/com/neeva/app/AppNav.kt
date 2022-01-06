@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
+import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.neeva_menu.NeevaMenuItemId
@@ -49,6 +50,7 @@ class AppNavModel(
     fun showNeevaMenu() = setContentState(AppNavState.NEEVA_MENU)
     fun showSettings() = setContentState(AppNavState.SETTINGS)
     fun showHistory() = setContentState(AppNavState.HISTORY)
+    fun showFirstRun() = setContentState(AppNavState.FIRST_RUN)
 
     fun onMenuItem(id: NeevaMenuItemId) {
         when (id) {
@@ -119,6 +121,8 @@ fun AppNav(
             historyManager = historyManager,
             urlBarModel = urlBarModel
         )
+
+        FirstRunContainer(appNavModel = model)
     }
 }
 
@@ -128,5 +132,6 @@ enum class AppNavState {
     ADD_TO_SPACE,
     NEEVA_MENU,
     HISTORY,
-    CARD_GRID
+    CARD_GRID,
+    FIRST_RUN
 }

@@ -20,6 +20,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.BrowserCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.SuffixListManager
 import com.neeva.app.storage.HistoryDatabase
@@ -155,6 +156,20 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             webModel.urlBarModel.isEditing.collect { isEditing ->
                 if (isEditing) spaceStore.refresh()
             }
+        }
+
+        if (FirstRun.shouldShowFirstRun(this)) {
+            appNavModel.showFirstRun()
+            FirstRun.firstRunDone(this)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        User.extractAuthTokenFromIntent(intent)?.let {
+            User.setToken(this, it)
+            webModel.onAuthTokenUpdated()
+            appNavModel.showBrowser()
         }
     }
 
