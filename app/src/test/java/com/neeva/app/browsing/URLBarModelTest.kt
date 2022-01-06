@@ -21,6 +21,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
+import strikt.assertions.isTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
@@ -29,15 +31,12 @@ class URLBarModelTest: BaseTest() {
     @Rule @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    @Mock
-    lateinit var onTextChanged: (String) -> Unit
-
     private lateinit var urlFlow: MutableStateFlow<Uri>
     private lateinit var activeTabModel: ActiveTabModel
     private lateinit var model: URLBarModel
 
     private val urlBarModelText: String
-        get() = model.textFieldValue.value.text
+        get() = model.userInputText.value.text
 
     override fun setUp() {
         super.setUp()
@@ -46,24 +45,7 @@ class URLBarModelTest: BaseTest() {
         activeTabModel = mock()
         Mockito.`when`(activeTabModel.urlFlow).thenReturn(urlFlow)
 
-        model = URLBarModel(coroutineScopeRule.scope, activeTabModel, onTextChanged)
-    }
-
-    @Test
-    fun init_collectsUrlFlow() {
-        urlFlow.value = Uri.parse("https://www.reddit.com/r/android")
-        coroutineScopeRule.scope.advanceUntilIdle()
-        expectThat(urlBarModelText).isEqualTo("reddit.com")
-        expectThat(model.showLock.value).isEqualTo(true)
-        verify(onTextChanged, times(1)).invoke(eq("reddit.com"))
-
-        urlFlow.value = Uri.parse("http://news.google.com/")
-        coroutineScopeRule.scope.advanceUntilIdle()
-        expectThat(urlBarModelText).isEqualTo("google.com")
-        expectThat(model.showLock.value).isEqualTo(false)
-        verify(onTextChanged, times(1)).invoke(eq("google.com"))
-
-        TestResult
+        model = URLBarModel(activeTabModel)
     }
 
     @Test
@@ -75,11 +57,6 @@ class URLBarModelTest: BaseTest() {
 
     @Test
     fun loadUrl_withLazyTab() {
-        // Load the bar with a non-empty string.
-        urlFlow.value = Uri.parse("https://news.google.com")
-        coroutineScopeRule.scope.advanceUntilIdle()
-        expectThat(urlBarModelText).isEqualTo("google.com")
-
         // Open a lazy tab.
         model.openLazyTab()
         expectThat(urlBarModelText).isEqualTo("")
@@ -118,20 +95,16 @@ class URLBarModelTest: BaseTest() {
 
     @Test
     fun onFocusChanged() {
-        // Load the bar with a non-empty string.
-        urlFlow.value = Uri.parse("https://news.google.com")
-        coroutineScopeRule.scope.advanceUntilIdle()
-        expectThat(urlBarModelText).isEqualTo("google.com")
-
         // When the bar is focused, remove whatever text was being displayed.
         model.onFocusChanged(true)
         expectThat(urlBarModelText).isEqualTo("")
+        expectThat(model.isEditing.value).isTrue()
 
         model.replaceLocationBarText("reddit.com/r/android")
         expectThat(urlBarModelText).isEqualTo("reddit.com/r/android")
 
         // When the bar is unfocused, it should return to showing the webpage domain.
         model.onFocusChanged(false)
-        expectThat(urlBarModelText).isEqualTo("google.com")
+        expectThat(model.isEditing.value).isFalse()
     }
 }

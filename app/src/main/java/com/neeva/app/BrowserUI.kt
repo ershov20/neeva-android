@@ -33,7 +33,7 @@ fun BrowserUI(
     val progress: Int by activeTabModel.progressFlow.collectAsState()
 
     Column {
-        URLBar(suggestionsModel, urlBarModel, historyManager)
+        URLBar(suggestionsModel, activeTabModel, urlBarModel, historyManager)
         Box {
             Box(
                 Modifier

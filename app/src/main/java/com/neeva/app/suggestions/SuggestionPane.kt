@@ -21,7 +21,7 @@ fun SuggestionPane(
     historyManager: HistoryManager,
     spaceStore: SpaceStore
 ) {
-    val isUrlBarBlank: Boolean by urlBarModel.textFieldValue.map { it.text.isBlank() }.collectAsState(true)
+    val isUrlBarBlank: Boolean by urlBarModel.userInputText.map { it.text.isBlank() }.collectAsState(true)
     val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
     val domainSuggestions by historyManager.domainSuggestions.collectAsState()
     val siteSuggestions by historyManager.siteSuggestions.collectAsState()

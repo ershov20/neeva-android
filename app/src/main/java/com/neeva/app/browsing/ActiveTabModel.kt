@@ -35,6 +35,12 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
     private var _activeTabFlow = MutableStateFlow<Tab?>(null)
     val activeTabFlow: StateFlow<Tab?> = _activeTabFlow
 
+    private val _showLock = MutableStateFlow(false)
+    val showLock: StateFlow<Boolean> = _showLock
+
+    private val _displayedDomain = MutableStateFlow("")
+    val displayedDomain: StateFlow<String> = _displayedDomain
+
     internal fun onActiveTabChanged(newActiveTab: Tab?) {
         val previousTab = _activeTabFlow.value
         previousTab?.apply {
@@ -54,7 +60,7 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
 
         // Update all the state to account for the currently selected tab's information.
         updateNavigationInfo()
-        _urlFlow.value = newActiveTab?.currentDisplayUrl ?: Uri.EMPTY
+        updateUrl(newActiveTab?.currentDisplayUrl ?: Uri.EMPTY)
         _titleFlow.value = newActiveTab?.currentDisplayTitle ?: ""
     }
 
@@ -73,9 +79,19 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
         activeTabFlow.value?.navigationController?.navigate(uri, navigateParamsBuilder.build())
     }
 
+    private fun updateUrl(uri: Uri) {
+        _urlFlow.value = uri
+        _displayedDomain.value = uri.baseDomain() ?: ""
+
+        // TODO(dan.alcantara); Pull this from WebLayer.  This is actually not correct since this
+        //                      should depend on browser security signals rather than only the
+        //                      scheme.
+        _showLock.value = uri.scheme.equals("https")
+    }
+
     private val selectedTabCallback: TabCallback = object : TabCallback() {
         override fun onVisibleUriChanged(uri: Uri) {
-            _urlFlow.value = uri
+            updateUrl(uri)
         }
 
         override fun onTitleUpdated(title: String) {

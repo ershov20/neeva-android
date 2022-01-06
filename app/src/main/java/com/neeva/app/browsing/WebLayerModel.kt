@@ -22,6 +22,7 @@ import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.chromium.weblayer.*
 import java.io.File
 import java.io.FileOutputStream
@@ -139,10 +140,7 @@ class WebLayerModel @Inject constructor(
 
     val activeTabModel = ActiveTabModel(this::createTabWithUri)
 
-    val urlBarModel = URLBarModel(viewModelScope, activeTabModel) {
-        // Pull new suggestions from the database according to what's currently in the URL bar.
-        historyManager.updateSuggestionQuery(viewModelScope, it)
-    }
+    val urlBarModel = URLBarModel(activeTabModel)
 
     val suggestionsModel = SuggestionsModel(
         viewModelScope,
@@ -153,6 +151,13 @@ class WebLayerModel @Inject constructor(
 
     init {
         suffixListManager.initialize(viewModelScope)
+
+        // Pull new suggestions from the database according to what's currently in the URL bar.
+        viewModelScope.launch {
+            urlBarModel.userInputText.collect {
+                historyManager.updateSuggestionQuery(viewModelScope, it.text)
+            }
+        }
     }
 
     fun onSaveInstanceState(outState: Bundle) {

@@ -71,12 +71,12 @@ class SuggestionsModel(
 
         coroutineScope.launch {
             // Every time the contents of the URL bar changes, try to fire a query to the backend.
-            urlBarModel.textFieldValue
+            urlBarModel.userInputText
                 .combine(urlBarModel.isEditing) { textFieldValue, isEditing ->
-                    Pair(textFieldValue.text, isEditing)
+                    Pair(textFieldValue, isEditing)
                 }
                 .collect { (urlBarValue, isEditing) ->
-                    onUrlBarChanged(urlBarValue, isEditing)
+                    onUrlBarChanged(urlBarValue.text, isEditing)
                 }
         }
     }

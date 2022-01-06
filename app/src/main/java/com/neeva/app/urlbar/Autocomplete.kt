@@ -49,19 +49,15 @@ import kotlinx.coroutines.flow.Flow
 fun AutocompleteTextField(
     suggestionsModel: SuggestionsModel,
     urlBarModel: URLBarModel,
-    getFaviconFlow: (Uri) -> Flow<Favicon?>
+    getFaviconFlow: (Uri) -> Flow<Favicon?>,
+    urlBarIsBeingEdited: Boolean
 ) {
     val autocompletedSuggestion by suggestionsModel.autocompleteSuggestion.collectAsState()
-    val urlBarText: TextFieldValue by urlBarModel.textFieldValue.collectAsState()
-    val urlBarIsBeingEdited: Boolean by urlBarModel.isEditing.collectAsState()
+    val urlBarText: TextFieldValue by urlBarModel.userInputText.collectAsState()
 
     var lastEditWasDeletion by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
     urlBarModel.focusRequester = focusRequester
-
-    val url = autocompletedSuggestion?.url ?: Uri.parse(urlBarText.text) ?: Uri.parse(appURL)
-    val favicon: Favicon? by getFaviconFlow(url).collectAsState(null)
-    val bitmap = favicon?.toBitmap()
 
     // Don't bother calculating what the suggestion should be if the bar isn't visible.
     val autocompleteText = if (urlBarIsBeingEdited) {
@@ -74,6 +70,12 @@ fun AutocompleteTextField(
                 && !autocompleteText.isNullOrBlank()
                 && !lastEditWasDeletion
                 && autocompleteText.length > urlBarText.text.length
+
+    val url = autocompletedSuggestion?.takeIf { autocompleteIsValid }?.url
+        ?: Uri.parse(urlBarText.text)
+        ?: Uri.parse(appURL)
+    val favicon: Favicon? by getFaviconFlow(url).collectAsState(null)
+    val bitmap = favicon?.toBitmap()
 
     AutocompleteTextField(
         autocompletedSuggestion = autocompleteText.takeIf { autocompleteIsValid },

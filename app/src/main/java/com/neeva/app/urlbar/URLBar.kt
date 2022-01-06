@@ -8,25 +8,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.suggestions.SuggestionsModel
 
 @Composable
 fun URLBar(
     suggestionsModel: SuggestionsModel,
+    activeTabModel: ActiveTabModel,
     urlBarModel: URLBarModel,
     historyManager: HistoryManager
 ) {
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
-    val showLock: Boolean by urlBarModel.showLock.collectAsState()
-    val value: TextFieldValue by urlBarModel.textFieldValue.collectAsState()
 
     Box(
         modifier = Modifier
@@ -43,15 +41,19 @@ fun URLBar(
                 .height(40.dp)
                 .padding(horizontal = 8.dp)
         ) {
-            AutocompleteTextField(suggestionsModel, urlBarModel, historyManager::getFaviconFlow)
+            AutocompleteTextField(
+                suggestionsModel = suggestionsModel,
+                urlBarModel = urlBarModel,
+                getFaviconFlow = historyManager::getFaviconFlow,
+                urlBarIsBeingEdited = isEditing
+            )
 
             // We need to have both the AutocompleteTextField and the LocationLabel in the URLBar
             // at the same time because the AutocompleteTextField is the thing that must be focused
             // when the LocationLabel is clicked.
             if (!isEditing) {
                 LocationLabel(
-                    urlBarValue = value.text,
-                    showLock = showLock,
+                    activeTabModel = activeTabModel,
                     onReload = urlBarModel::reload,
                     modifier = Modifier.clickable { urlBarModel.onRequestFocus() }
                 )

@@ -64,14 +64,14 @@ class SuggestionsModelTest: BaseTest() {
     override fun setUp() {
         super.setUp()
         siteSuggestions = MutableStateFlow(emptyList())
-        urlBarText = MutableStateFlow(TextFieldValue())
+        urlBarText = MutableStateFlow(TextFieldValue(""))
         urlBarIsEditing = MutableStateFlow(false)
 
         historyManager = mock()
         Mockito.`when`(historyManager.siteSuggestions).thenReturn(siteSuggestions)
 
         urlBarModel = mock()
-        Mockito.`when`(urlBarModel.textFieldValue).thenReturn(urlBarText)
+        Mockito.`when`(urlBarModel.userInputText).thenReturn(urlBarText)
         Mockito.`when`(urlBarModel.isEditing).thenReturn(urlBarIsEditing)
 
         apolloClient = ApolloClient.Builder()
