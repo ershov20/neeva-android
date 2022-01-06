@@ -2,6 +2,7 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Space
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -9,7 +10,10 @@ import org.chromium.weblayer.*
 import kotlin.math.roundToInt
 
 /** Monitors changes to the [Browser]'s active tab and emits values related to it. */
-class ActiveTabModel(private val tabCreator: TabCreator) {
+class ActiveTabModel(
+    private val tabCreator: TabCreator,
+    private val domainProvider: DomainProvider
+) {
     data class NavigationInfo(
         val canGoBackward: Boolean = false,
         val canGoForward: Boolean = false
@@ -81,7 +85,7 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
 
     private fun updateUrl(uri: Uri) {
         _urlFlow.value = uri
-        _displayedDomain.value = uri.baseDomain() ?: ""
+        _displayedDomain.value = domainProvider.getRegisteredDomain(uri) ?: ""
 
         // TODO(dan.alcantara); Pull this from WebLayer.  This is actually not correct since this
         //                      should depend on browser security signals rather than only the

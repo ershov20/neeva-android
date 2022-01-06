@@ -2,6 +2,7 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.neeva.app.BaseTest
+import com.neeva.app.publicsuffixlist.DomainProvider
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
@@ -22,8 +23,9 @@ import strikt.assertions.isTrue
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class ActiveTabModelTest: BaseTest() {
-    @Mock
-    lateinit var tabCreator: TabCreator
+    @Mock lateinit var tabCreator: TabCreator
+
+    private lateinit var domainProvider: DomainProvider
 
     private lateinit var model: ActiveTabModel
 
@@ -32,7 +34,13 @@ class ActiveTabModelTest: BaseTest() {
     @Before
     override fun setUp() {
         super.setUp()
-        model = ActiveTabModel(tabCreator)
+
+        domainProvider = mock {
+            on { getRegisteredDomain(eq(Uri.parse("https://www.site.com/1"))) } doReturn "site.com"
+            on { getRegisteredDomain(eq(Uri.parse("http://www.othersite.com/2"))) } doReturn "othersite.com"
+        }
+
+        model = ActiveTabModel(tabCreator, domainProvider)
 
         mainTab = MockTabHarness(
             currentTitle = "Title #1",

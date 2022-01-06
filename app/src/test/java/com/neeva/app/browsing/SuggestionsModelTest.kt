@@ -7,6 +7,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Site
 import com.neeva.app.suggestions.Suggestions
 import com.neeva.app.suggestions.SuggestionsModel
@@ -27,6 +28,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -49,6 +51,8 @@ class SuggestionsModelTest: BaseTest() {
     @Rule
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
+
+    @Mock lateinit var domainProvider: DomainProvider
 
     private lateinit var siteSuggestions: MutableStateFlow<List<Site>>
     private lateinit var urlBarText: MutableStateFlow<TextFieldValue>
@@ -87,7 +91,8 @@ class SuggestionsModelTest: BaseTest() {
             coroutineScopeRule.scope,
             historyManager,
             urlBarModel,
-            apolloClient
+            apolloClient,
+            domainProvider
         )
 
         coroutineScopeRule.scope.advanceUntilIdle()
@@ -137,7 +142,7 @@ class SuggestionsModelTest: BaseTest() {
         )
 
         coroutineScopeRule.scope.advanceUntilIdle()
-        val navSuggestions = siteSuggestions.value.map { it.toNavSuggestion() }
+        val navSuggestions = siteSuggestions.value.map { it.toNavSuggestion(domainProvider) }
         expectThat(model.autocompleteSuggestion.value).isEqualTo(navSuggestions.first())
         expectThat(model.suggestionFlow.value).isEqualTo(
             Suggestions(autocompleteSuggestion = navSuggestions.first())
@@ -155,7 +160,8 @@ class SuggestionsModelTest: BaseTest() {
             collectionJob,
             historyManager,
             urlBarModel,
-            apolloClient
+            apolloClient,
+            domainProvider
         )
         advanceUntilIdle()
 
@@ -176,7 +182,8 @@ class SuggestionsModelTest: BaseTest() {
             collectionJob,
             historyManager,
             urlBarModel,
-            apolloClient
+            apolloClient,
+            domainProvider
         )
         advanceUntilIdle()
 
@@ -192,7 +199,7 @@ class SuggestionsModelTest: BaseTest() {
         advanceUntilIdle()
 
         // Make sure the autocomplete suggestion has been set and nothing else has.
-        val expectedSuggestion = siteSuggestions.value.first().toNavSuggestion()
+        val expectedSuggestion = siteSuggestions.value.first().toNavSuggestion(domainProvider)
         expectThat(model.autocompleteSuggestion.value).isEqualTo(expectedSuggestion)
         expectThat(model.suggestionFlow.value).isEqualTo(
             Suggestions(autocompleteSuggestion = expectedSuggestion)
@@ -254,7 +261,7 @@ class SuggestionsModelTest: BaseTest() {
                     subtitle = "reddit: the front page of the internet",
                     sourceQueryIndex = 0,
                     boldSpan = listOf(SuggestionsQuery.BoldSpan1(12, 17))
-                ).toNavSuggestion(),
+                ).toNavSuggestion(domainProvider),
                 SuggestionsQuery.UrlSuggestion(
                     icon = SuggestionsQuery.Icon(null),
                     suggestedURL = "https://nflthursday.com/reddit-nfl-streams/",
@@ -264,7 +271,7 @@ class SuggestionsModelTest: BaseTest() {
                     subtitle = "Reddit NFL streams is banned - How to watch this weeks ...",
                     sourceQueryIndex = 1,
                     boldSpan = listOf(SuggestionsQuery.BoldSpan1(24, 29))
-                ).toNavSuggestion(),
+                ).toNavSuggestion(domainProvider),
                 SuggestionsQuery.UrlSuggestion(
                     icon = SuggestionsQuery.Icon(null),
                     suggestedURL = "https://www.reddit.com/r/news/",
@@ -274,7 +281,7 @@ class SuggestionsModelTest: BaseTest() {
                     subtitle = "News - reddit",
                     sourceQueryIndex = 2,
                     boldSpan = listOf(SuggestionsQuery.BoldSpan1(12, 17))
-                ).toNavSuggestion(),
+                ).toNavSuggestion(domainProvider),
                 SuggestionsQuery.UrlSuggestion(
                     icon = SuggestionsQuery.Icon(null),
                     suggestedURL = "https://www.reddit.com/r/cfb",
@@ -284,7 +291,7 @@ class SuggestionsModelTest: BaseTest() {
                     subtitle = "r/CFB - Reddit",
                     sourceQueryIndex = 4,
                     boldSpan = listOf(SuggestionsQuery.BoldSpan1(12, 17))
-                ).toNavSuggestion(),
+                ).toNavSuggestion(domainProvider),
             )
         )
 

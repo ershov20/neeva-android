@@ -14,7 +14,7 @@ import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
 import com.neeva.app.User
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.publicsuffixlist.SuffixListManager
+import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.storage.DateConverter
 import com.neeva.app.storage.Visit
@@ -42,7 +42,7 @@ import kotlin.collections.set
 @HiltViewModel
 class WebLayerModel @Inject constructor(
     private val appContext: Application,
-    suffixListManager: SuffixListManager,
+    domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
     apolloClient: ApolloClient
 ): ViewModel() {
@@ -139,7 +139,7 @@ class WebLayerModel @Inject constructor(
 
     private val tabCallbackMap: HashMap<Tab, TabCallbacks> = HashMap()
 
-    val activeTabModel = ActiveTabModel(this::createTabWithUri)
+    val activeTabModel = ActiveTabModel(this::createTabWithUri, domainProviderImpl)
 
     val urlBarModel = URLBarModel(activeTabModel)
 
@@ -147,11 +147,13 @@ class WebLayerModel @Inject constructor(
         viewModelScope,
         historyManager,
         urlBarModel,
-        apolloClient
+        apolloClient,
+        domainProviderImpl
     )
 
     init {
-        suffixListManager.initialize(viewModelScope)
+        // TODO(dan.alcantara): Add initialization logic so we know it's ready before we use it.
+        domainProviderImpl.initialize(viewModelScope)
 
         // Pull new suggestions from the database according to what's currently in the URL bar.
         viewModelScope.launch {

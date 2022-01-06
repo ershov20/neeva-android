@@ -7,7 +7,10 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
@@ -25,6 +29,8 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.Favicon
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.Button
+import com.neeva.app.widgets.ComposableSingletonEntryPoint
+import dagger.hilt.EntryPoints
 import org.chromium.weblayer.Tab
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -32,9 +38,12 @@ import org.chromium.weblayer.Tab
 fun CardsContainer(
     appNavModel: AppNavModel,
     webLayerModel: WebLayerModel,
-    historyManager: HistoryManager,
     urlBarModel: URLBarModel
 ) {
+    val historyManager = EntryPoints
+        .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
+        .historyManager()
+
     val state: AppNavState by appNavModel.state.collectAsState()
 
     AnimatedVisibility(

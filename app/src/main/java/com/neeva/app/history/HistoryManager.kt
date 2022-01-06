@@ -1,7 +1,7 @@
 package com.neeva.app.history
 
 import android.net.Uri
-import com.neeva.app.browsing.baseDomain
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.*
 import com.neeva.app.suggestions.NavSuggestion
 import kotlinx.coroutines.CoroutineScope
@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /** Provides access to the user's navigation history. */
-@Singleton
-class HistoryManager @Inject constructor(historyDatabase: HistoryDatabase) {
+class HistoryManager(
+    historyDatabase: HistoryDatabase,
+    private val domainProvider: DomainProvider
+) {
     private val sitesRepository = SitesRepository(historyDatabase.fromSites())
     private val domainRepository = DomainRepository(historyDatabase.fromDomains())
 
@@ -51,9 +51,14 @@ class HistoryManager @Inject constructor(historyDatabase: HistoryDatabase) {
         }
     }
 
-    /** Returns a Flow that emits the best Favicon for the given Uri. */
+    /**
+     * Returns a Flow that emits the best Favicon for the given Uri.
+     *
+     * TODO(dan.alcantara): Given that sites can have different favicons than the registered domain,
+     *                      we shouldn't be using the DomainRepository to provide it.
+     */
     fun getFaviconFlow(uri: Uri?): Flow<Favicon?> {
-        val domainName = uri?.baseDomain() ?: return flowOf(null)
+        val domainName = domainProvider.getRegisteredDomain(uri) ?: return flowOf(null)
         return domainRepository
             .listen(domainName)
             .map { it.largestFavicon }
@@ -68,10 +73,10 @@ class HistoryManager @Inject constructor(historyDatabase: HistoryDatabase) {
         favicon: Favicon? = null,
         visit: Visit? = null
     ) {
-        coroutineScope.launch {
+        coroutineScope.launch(Dispatchers.IO) {
             sitesRepository.insert(url, title, favicon, visit)
 
-            url.baseDomain()?.let { domainName ->
+            domainProvider.getRegisteredDomain(url)?.let { domainName ->
                 domainRepository.insert(
                     Domain(
                         domainName = domainName,
@@ -85,8 +90,11 @@ class HistoryManager @Inject constructor(historyDatabase: HistoryDatabase) {
 
     /** Updates the [Favicon] for the given [url]. */
     fun updateFaviconFor(coroutineScope: CoroutineScope, url: String, favicon: Favicon) {
-        coroutineScope.launch {
-            domainRepository.updateFaviconFor(url, favicon)
+        coroutineScope.launch(Dispatchers.IO) {
+            domainRepository.updateFaviconFor(
+                domainProvider.getRegisteredDomain(Uri.parse(url)) ?: return@launch,
+                favicon
+            )
         }
     }
 }

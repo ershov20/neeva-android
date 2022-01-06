@@ -25,15 +25,13 @@ import com.neeva.app.urlbar.URLBarModel
 fun BrowserUI(
     urlBarModel: URLBarModel,
     suggestionsModel: SuggestionsModel,
-    activeTabModel: ActiveTabModel,
-    historyManager: HistoryManager,
-    spaceStore: SpaceStore
+    activeTabModel: ActiveTabModel
 ) {
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
     val progress: Int by activeTabModel.progressFlow.collectAsState()
 
     Column {
-        URLBar(suggestionsModel, activeTabModel, urlBarModel, historyManager)
+        URLBar(suggestionsModel, activeTabModel, urlBarModel)
         Box {
             Box(
                 Modifier
@@ -54,7 +52,7 @@ fun BrowserUI(
 
         if (isEditing) {
             Box(modifier = Modifier.weight(1.0f)) {
-                SuggestionPane(suggestionsModel, urlBarModel, activeTabModel, historyManager, spaceStore)
+                SuggestionPane(suggestionsModel, urlBarModel, activeTabModel)
             }
         }
     }

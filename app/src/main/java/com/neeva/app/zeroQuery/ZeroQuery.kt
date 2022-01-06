@@ -19,34 +19,40 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.R
-import com.neeva.app.browsing.baseDomain
-import com.neeva.app.history.HistoryManager
+import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.Space
-import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
+import dagger.hilt.EntryPoints
 import kotlinx.coroutines.flow.map
 import java.util.*
 
 @Composable
 fun ZeroQuery(
     urlBarModel: URLBarModel,
-    historyManager: HistoryManager,
-    spaceStore: SpaceStore,
-    topContent: @Composable() (LazyItemScope.() -> Unit) = {},
+    topContent: @Composable (LazyItemScope.() -> Unit) = {},
 ) {
+    val entryPoint = EntryPoints.get(
+        LocalContext.current.applicationContext,
+        ComposableSingletonEntryPoint::class.java
+    )
+    val historyManager = entryPoint.historyManager()
+    val spaceStore = entryPoint.spaceStore()
+    val domainProvider = entryPoint.domainProvider()
+
     val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
     /** Takes the top 3 suggestions for display to the user. */
@@ -82,9 +88,16 @@ fun ZeroQuery(
                 LazyRow(modifier = Modifier.padding(16.dp)) {
                     items(suggestedSites.subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
                         val bitmap = site.largestFavicon?.toBitmap()
-                        val siteName = Uri.parse(site.siteURL).baseDomain().toString()
-                            .split(".").first()
-                            .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+                        val siteName = domainProvider.getRegisteredDomain(Uri.parse(site.siteURL))
+                            ?.split(".")
+                            ?.firstOrNull()
+                            ?.replaceFirstChar {
+                                if (it.isLowerCase()) {
+                                    it.titlecase(Locale.ENGLISH)
+                                } else {
+                                    it.toString()
+                                }
+                            }
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
@@ -110,7 +123,7 @@ fun ZeroQuery(
                                 )
                             }
                             Text(
-                                text = siteName,
+                                text = siteName ?: "",
                                 modifier = Modifier
                                     .padding(top = 8.dp)
                                     .padding(horizontal = 8.dp),

@@ -22,7 +22,7 @@ import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.publicsuffixlist.SuffixListManager
+import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.SpaceStore
@@ -47,7 +47,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
     @Inject lateinit var apolloClient: ApolloClient
     @Inject lateinit var spaceStore: SpaceStore
-    @Inject lateinit var suffixListManager: SuffixListManager
+    @Inject lateinit var domainProviderImpl: DomainProviderImpl
     @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var historyManager: HistoryManager
 
@@ -82,9 +82,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                         BrowserUI(
                             webModel.urlBarModel,
                             webModel.suggestionsModel,
-                            webModel.activeTabModel,
-                            historyManager,
-                            spaceStore
+                            webModel.activeTabModel
                         )
                     }
                 }
@@ -95,13 +93,7 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         findViewById<ComposeView>(R.id.app_nav).setContent {
             NeevaTheme {
                 Surface(color = Color.Transparent) {
-                    AppNav(
-                        appNavModel,
-                        historyManager,
-                        webModel,
-                        webModel.urlBarModel,
-                        spaceStore
-                    ) { space ->
+                    AppNav(appNavModel, webModel, webModel.urlBarModel) { space ->
                         lifecycleScope.launch {
                             webModel.activeTabModel.modifySpace(space, apolloClient)
                             appNavModel.showBrowser()

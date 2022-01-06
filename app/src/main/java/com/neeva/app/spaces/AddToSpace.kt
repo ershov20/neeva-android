@@ -1,6 +1,5 @@
 package com.neeva.app.spaces
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,6 +19,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
@@ -30,16 +30,20 @@ import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
+import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.OverlaySheet
+import dagger.hilt.EntryPoints
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AddToSpaceSheet(
     appNavModel: AppNavModel,
     activeTabModel: ActiveTabModel,
-    spaceModifier: Space.Companion.SpaceModifier,
-    spaceStore: SpaceStore
+    spaceModifier: Space.Companion.SpaceModifier
 ) {
+    val spaceStore = EntryPoints
+        .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
+        .spaceStore()
+
     OverlaySheet(appNavModel = appNavModel, visibleState = AppNavState.ADD_TO_SPACE) {
         AddToSpaceUI(
             activeTabModel,
@@ -58,7 +62,6 @@ fun AddToSpaceUI(
     spaceModifier: Space.Companion.SpaceModifier,
     onDismiss: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
     LazyColumn {

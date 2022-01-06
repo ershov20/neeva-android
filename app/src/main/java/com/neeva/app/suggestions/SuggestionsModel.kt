@@ -5,9 +5,9 @@ import android.util.Log
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
-import com.neeva.app.browsing.baseDomain
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Site
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.urlbar.URLBarModel
@@ -46,7 +46,8 @@ class SuggestionsModel(
     coroutineScope: CoroutineScope,
     historyManager: HistoryManager,
     private val urlBarModel: URLBarModel,
-    private val apolloClient: ApolloClient
+    private val apolloClient: ApolloClient,
+    private val domainProvider: DomainProvider
 ) {
     companion object {
         val TAG = SuggestionsModel::class.simpleName
@@ -61,7 +62,7 @@ class SuggestionsModel(
     init {
         coroutineScope.launch {
             historyManager.siteSuggestions.collect { suggestions ->
-                _autocompleteSuggestion.value = suggestions.firstOrNull()?.toNavSuggestion()
+                _autocompleteSuggestion.value = suggestions.firstOrNull()?.toNavSuggestion(domainProvider)
 
                 _suggestionFlow.value = _suggestionFlow.value.copy(
                     autocompleteSuggestion = _autocompleteSuggestion.value
@@ -124,15 +125,15 @@ class SuggestionsModel(
         _suggestionFlow.value = Suggestions(
             autocompleteSuggestion = autocompleteSuggestion.value,
             queryRowSuggestions = suggestionResults.querySuggestion.map { it.toQueryRowSuggestion() },
-            navSuggestions = viewableSuggestions.map { it.toNavSuggestion() }
+            navSuggestions = viewableSuggestions.map { it.toNavSuggestion(domainProvider) }
         )
     }
 }
 
-fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() = NavSuggestion(
+fun SuggestionsQuery.UrlSuggestion.toNavSuggestion(domainProvider: DomainProvider) = NavSuggestion(
     url = Uri.parse(suggestedURL),
     label = subtitle ?: "",
-    secondaryLabel = title?.let { Uri.parse(it).baseDomain() } ?: "",
+    secondaryLabel = title?.let { domainProvider.getRegisteredDomain(Uri.parse(it)) } ?: "",
     queryIndex = sourceQueryIndex
 )
 
@@ -152,12 +153,12 @@ fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() = QueryRowSuggestion
     dictionaryInfo = this.annotation?.dictionaryInfo
 )
 
-fun Site.toNavSuggestion() : NavSuggestion {
+fun Site.toNavSuggestion(domainProvider: DomainProvider) : NavSuggestion {
     val uri = Uri.parse(this.siteURL)
 
     return NavSuggestion(
         url = uri,
-        label = this.metadata?.title ?: uri.baseDomain() ?: this.siteURL,
+        label = this.metadata?.title ?: domainProvider.getRegisteredDomain(uri) ?: this.siteURL,
         secondaryLabel = uri.toString()
     )
 }

@@ -3,7 +3,6 @@ package com.neeva.app.storage
 import android.net.Uri
 import androidx.annotation.WorkerThread
 import androidx.room.*
-import com.neeva.app.browsing.baseDomain
 import com.neeva.app.suggestions.NavSuggestion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -43,8 +42,7 @@ interface DomainAccessor {
     suspend fun delete(domain: Domain)
 
     @Transaction
-    suspend fun updateFavicon(url: String, favicon: Favicon) {
-        val domainName = Uri.parse(url).baseDomain() ?: return
+    suspend fun updateFavicon(domainName: String, favicon: Favicon) {
         val domain = find(domainName)
         if (domain == null) {
             add(
@@ -93,7 +91,9 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
 
     suspend fun insert(domain: Domain) = domainAccessor.upsert(domain)
 
-    suspend fun updateFaviconFor(url: String, favicon: Favicon) = domainAccessor.updateFavicon(url, favicon)
+    suspend fun updateFaviconFor(domainName: String, favicon: Favicon) {
+        domainAccessor.updateFavicon(domainName, favicon)
+    }
 }
 
 // TODO: Find a more elegant way to handle this through Uri

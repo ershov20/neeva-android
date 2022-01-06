@@ -4,25 +4,25 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.storage.Site
+import com.neeva.app.widgets.ComposableSingletonEntryPoint
+import dagger.hilt.EntryPoints
 
-@OptIn(
-    ExperimentalAnimationApi::class,
-    ExperimentalFoundationApi::class
-)
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun HistoryContainer(
-    appNavModel: AppNavModel,
-    historyManager: HistoryManager
-) {
+fun HistoryContainer(appNavModel: AppNavModel) {
+    val historyManager = EntryPoints
+        .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
+        .historyManager()
+
     val state: AppNavState by appNavModel.state.collectAsState()
     val history: List<Site> by historyManager.historyWithinRange.collectAsState(emptyList())
 

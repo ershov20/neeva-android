@@ -10,7 +10,6 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
-import com.neeva.app.history.HistoryManager
 import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.NeevaMenuSheet
 import com.neeva.app.settings.SettingsContainer
@@ -91,38 +90,31 @@ class AppNavModel(
 
 @Composable
 fun AppNav(
-    model: AppNavModel,
-    historyManager: HistoryManager,
+    appNavModel: AppNavModel,
     webLayerModel: WebLayerModel,
     urlBarModel: URLBarModel,
-    spaceStore: SpaceStore,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
     Box {
         AddToSpaceSheet(
-            appNavModel = model,
-            spaceStore = spaceStore,
+            appNavModel = appNavModel,
             activeTabModel = webLayerModel.activeTabModel,
             spaceModifier = spaceModifier
         )
 
-        NeevaMenuSheet(appNavModel = model)
+        NeevaMenuSheet(appNavModel = appNavModel)
 
-        SettingsContainer(appNavModel = model)
+        SettingsContainer(appNavModel = appNavModel)
 
-        HistoryContainer(
-            appNavModel = model,
-            historyManager = historyManager
-        )
+        HistoryContainer(appNavModel = appNavModel)
 
         CardsContainer(
-            appNavModel = model,
+            appNavModel = appNavModel,
             webLayerModel = webLayerModel,
-            historyManager = historyManager,
             urlBarModel = urlBarModel
         )
 
-        FirstRunContainer(appNavModel = model)
+        FirstRunContainer(appNavModel = appNavModel)
     }
 }
 

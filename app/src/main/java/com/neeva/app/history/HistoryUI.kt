@@ -15,19 +15,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.toFavicon
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.Site
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.CollapsingState
+import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.collapsibleHeaderItems
+import dagger.hilt.EntryPoints
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
@@ -42,6 +46,22 @@ fun HistoryUI(
     faviconProvider: (Uri?) -> Flow<Favicon?>,
     now: LocalDate = LocalDate.now()
 ) {
+    val domainProvider = EntryPoints
+        .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
+        .domainProvider()
+
+    HistoryUI(history, onClose, onOpenUrl, faviconProvider, domainProvider, now)
+}
+
+@Composable
+fun HistoryUI(
+    history: List<Site>,
+    onClose: () -> Unit,
+    onOpenUrl: (Uri) -> Unit,
+    faviconProvider: (Uri?) -> Flow<Favicon?>,
+    domainProvider: DomainProvider,
+    now: LocalDate = LocalDate.now()
+) {
     // Bucket the history by their timestamps.
     // TODO(dan.alcantara): This Composable will only fire when the history database is updated, so
     //                      if the user visits the history UI multiple times over several days
@@ -53,15 +73,15 @@ fun HistoryUI(
 
     val historyToday = history
         .filter { it.lastVisitTimestamp >= startOfToday && it.lastVisitTimestamp < startOfTomorrow }
-        .map { it.toNavSuggestion() }
+        .map { it.toNavSuggestion(domainProvider) }
 
     val historyYesterday = history
         .filter { it.lastVisitTimestamp >= startOfYesterday && it.lastVisitTimestamp < startOfToday }
-        .map { it.toNavSuggestion() }
+        .map { it.toNavSuggestion(domainProvider) }
 
     val historyThisWeek = history
         .filter { it.lastVisitTimestamp >= startOf7DaysAgo && it.lastVisitTimestamp < startOfYesterday }
-        .map { it.toNavSuggestion() }
+        .map { it.toNavSuggestion(domainProvider) }
 
     // Compose doesn't count `LazyListScope` as a @Composable, so pull the header strings here.
     val headerToday = stringResource(id = R.string.history_today)
@@ -198,6 +218,9 @@ fun HistoryUI_Preview() {
             onClose = {},
             onOpenUrl = {},
             faviconProvider = { MutableStateFlow(it.toFavicon()) },
+            domainProvider = { uri ->
+                uri?.authority?.split(".")?.takeLast(2)?.joinToString(".")
+            },
             now = now
         )
     }

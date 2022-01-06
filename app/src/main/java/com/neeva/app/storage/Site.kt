@@ -16,6 +16,8 @@ enum class VisitType {
     SEARCH, LINK, TOP_SITES
 }
 
+// TODO(dan.alcantara): We should be limiting how large these strings can get -- especially if they
+//                      are provided by the website itself.
 data class SiteMetadata(
     val imageURL: String? = null,
     val title: String? = null,

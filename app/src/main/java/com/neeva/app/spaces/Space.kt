@@ -15,8 +15,6 @@ import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import kotlinx.coroutines.flow.MutableStateFlow
-import javax.inject.Inject
-import javax.inject.Singleton
 
 data class SpaceEntityData(
     val url: Uri,
@@ -97,8 +95,7 @@ data class Space(
     }
 }
 
-@Singleton
-class SpaceStore @Inject constructor(val apolloClient: ApolloClient) {
+class SpaceStore(val apolloClient: ApolloClient) {
     enum class State {
         READY,
         REFRESHING,

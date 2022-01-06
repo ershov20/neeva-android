@@ -4,23 +4,30 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.history.HistoryManager
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.Site
-import com.neeva.app.storage.SpaceStore
 import com.neeva.app.urlbar.URLBarModel
+import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.zeroQuery.ZeroQuery
+import dagger.hilt.EntryPoints
 import kotlinx.coroutines.flow.map
 
 @Composable
 fun SuggestionPane(
     suggestionsModel: SuggestionsModel,
     urlBarModel: URLBarModel,
-    activeTabModel: ActiveTabModel,
-    historyManager: HistoryManager,
-    spaceStore: SpaceStore
+    activeTabModel: ActiveTabModel
 ) {
+    val entryPoint = EntryPoints.get(
+        LocalContext.current.applicationContext,
+        ComposableSingletonEntryPoint::class.java
+    )
+    val domainProvider = entryPoint.domainProvider()
+    val historyManager = entryPoint.historyManager()
+
     val isUrlBarBlank: Boolean by urlBarModel.userInputText.map { it.text.isBlank() }.collectAsState(true)
     val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
     val domainSuggestions by historyManager.domainSuggestions.collectAsState()
@@ -31,7 +38,7 @@ fun SuggestionPane(
     val topSuggestion = suggestions.autocompleteSuggestion
     val queryRowSuggestions = suggestions.queryRowSuggestions
     val queryNavSuggestions = suggestions.navSuggestions
-    val historySuggestions = determineHistorySuggestions(domainSuggestions, siteSuggestions)
+    val historySuggestions = determineHistorySuggestions(domainSuggestions, siteSuggestions, domainProvider)
 
     val showSuggestionList = when {
         // Don't show suggestions if the user hasn't typed anything.
@@ -59,11 +66,7 @@ fun SuggestionPane(
             updateUrlBarContents(urlBarModel, it)
         }
     } else {
-        ZeroQuery(
-            urlBarModel = urlBarModel,
-            historyManager = historyManager,
-            spaceStore = spaceStore
-        ) {
+        ZeroQuery(urlBarModel = urlBarModel) {
             if (!isLazyTab) {
                 val favicon: Favicon? by historyManager.getFaviconFlow(currentURL).collectAsState(null)
                 CurrentPageRow(favicon = favicon?.toBitmap(), url = currentURL) {
@@ -77,10 +80,11 @@ fun SuggestionPane(
 /** Create a combined list of places that the user has visited. */
 internal fun determineHistorySuggestions(
     domainSuggestions: List<NavSuggestion>,
-    historySuggestions: List<Site>
+    historySuggestions: List<Site>,
+    domainProvider: DomainProvider
 ) : List<NavSuggestion> {
     // Prioritize the history suggestions first because they were directly visited by the user.
-    val combinedSuggestions = historySuggestions.map { it.toNavSuggestion() } + domainSuggestions
+    val combinedSuggestions = historySuggestions.map { it.toNavSuggestion(domainProvider) } + domainSuggestions
 
     // Keep only the unique history items with unique URLs.
     return combinedSuggestions.distinctBy { it.url }

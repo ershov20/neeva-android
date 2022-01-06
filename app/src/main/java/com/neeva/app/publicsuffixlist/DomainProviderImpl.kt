@@ -13,16 +13,14 @@ import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.IDN
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Derives the registerable domain name from the provided domain.
  * See https://publicsuffix.org/list/ for information about how this should work.
  */
-class SuffixListManager(val context: Context) {
+class DomainProviderImpl(val context: Context): DomainProvider {
     companion object {
-        val TAG = SuffixListManager::class.simpleName
+        val TAG = DomainProviderImpl::class.simpleName
         const val SUFFIX_FILENAME = "public_suffix_list.dat"
     }
 
@@ -84,10 +82,18 @@ class SuffixListManager(val context: Context) {
     }
 
     /** Returns the registerable domain for the given [uri], or null if it is invalid. */
-    fun getRegisteredDomain(uri: Uri): String? = getRegisteredDomain(uri.host)
+    override fun getRegisteredDomain(uri: Uri?): String? {
+        uri ?: return null
+        return if (uri.scheme == null) {
+            // The user might be typing something in manually.
+            getRegisteredDomainForHost(uri.toString().split("/").firstOrNull())
+        } else {
+            getRegisteredDomainForHost(uri.host)
+        }
+    }
 
     /** Returns the registerable domain for the given [hostname], or null if it is invalid. */
-    fun getRegisteredDomain(hostname: String?): String? {
+    fun getRegisteredDomainForHost(hostname: String?): String? {
         val sanitizedHostname = hostname?.lowercase() ?: return null
         if (sanitizedHostname.isEmpty()) return null
 
