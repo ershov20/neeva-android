@@ -27,9 +27,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.browsing.toFavicon
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.Favicon.Companion.toFavicon
 import com.neeva.app.storage.Site
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.toNavSuggestion
@@ -139,8 +139,7 @@ fun HistoryUI(
                 items = historyToday
             ) {
                 val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
-                val bitmap = favicon?.toBitmap()
-                NavSuggestion(bitmap, onOpenUrl, it)
+                NavSuggestion(favicon, onOpenUrl, it)
             }
 
             collapsibleHeaderItems(
@@ -149,8 +148,7 @@ fun HistoryUI(
                 items = historyYesterday
             ) {
                 val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
-                val bitmap = favicon?.toBitmap()
-                NavSuggestion(bitmap, onOpenUrl, it)
+                NavSuggestion(favicon, onOpenUrl, it)
             }
 
             collapsibleHeaderItems(
@@ -159,8 +157,7 @@ fun HistoryUI(
                 items = historyThisWeek
             ) {
                 val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
-                val bitmap = favicon?.toBitmap()
-                NavSuggestion(bitmap, onOpenUrl, it)
+                NavSuggestion(favicon, onOpenUrl, it)
             }
         }
     }

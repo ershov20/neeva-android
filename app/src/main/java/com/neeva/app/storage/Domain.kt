@@ -63,10 +63,17 @@ interface DomainAccessor {
                 )
             )
         } else {
+            // Take the largest available favicon, which doesn't necessarily make sense for sites
+            // with pages that have different favicons on them (e.g. google.com vs news.google.com).
+            val bestFavicon = when {
+                domain.largestFavicon == null -> favicon
+                favicon.width >= domain.largestFavicon.width -> favicon
+                else -> domain.largestFavicon
+            }
             update(
                 domain.copy(
                     domainName = domainName,
-                    largestFavicon = Favicon.bestFavicon(favicon, domain.largestFavicon)
+                    largestFavicon = bestFavicon
                 )
             )
         }

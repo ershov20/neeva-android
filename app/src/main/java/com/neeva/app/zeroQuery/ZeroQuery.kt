@@ -17,16 +17,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.R
 import com.neeva.app.spaces.SpaceRow
+import com.neeva.app.storage.Favicon.Companion.toPainter
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.Space
 import com.neeva.app.suggestions.QueryRowSuggestion
@@ -87,7 +86,7 @@ fun ZeroQuery(
             ) {
                 LazyRow(modifier = Modifier.padding(16.dp)) {
                     items(suggestedSites.subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
-                        val bitmap = site.largestFavicon?.toBitmap()
+                        val favicon = site.largestFavicon
                         val siteName = domainProvider.getRegisteredDomain(Uri.parse(site.siteURL))
                             ?.split(".")
                             ?.firstOrNull()
@@ -104,24 +103,14 @@ fun ZeroQuery(
                                 .padding(horizontal = 8.dp)
                                 .clickable { urlBarModel.loadUrl(Uri.parse(site.siteURL)) }
                         ) {
-                            val imageModifier = Modifier
-                                .size(36.dp)
-                                .padding(2.dp)
-                            if (bitmap == null) {
-                                Image(
-                                    painter = painterResource(id = R.drawable.globe),
-                                    contentDescription = null,
-                                    modifier = imageModifier,
-                                    contentScale = ContentScale.FillBounds,
-                                )
-                            } else {
-                                Image(
-                                    bitmap = bitmap.asImageBitmap(),
-                                    contentDescription = null,
-                                    modifier = imageModifier,
-                                    contentScale = ContentScale.FillBounds,
-                                )
-                            }
+                            Image(
+                                painter = favicon.toPainter(),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .padding(2.dp),
+                                contentScale = ContentScale.FillBounds,
+                            )
                             Text(
                                 text = siteName ?: "",
                                 modifier = Modifier

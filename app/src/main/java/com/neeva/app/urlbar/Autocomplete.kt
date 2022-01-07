@@ -1,6 +1,5 @@
 package com.neeva.app.urlbar
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Patterns
 import androidx.compose.foundation.Image
@@ -93,12 +92,11 @@ fun AutocompleteTextField(
         ?: Uri.parse(urlBarText.text)
         ?: Uri.parse(appURL)
     val favicon: Favicon? by getFaviconFlow(url).collectAsState(null)
-    val bitmap = favicon?.toBitmap()
 
     AutocompleteTextField(
         autocompletedSuggestion = autocompleteText.takeIf { autocompleteIsValid },
         value = urlBarText,
-        bitmap = bitmap,
+        favicon = favicon,
         onLocationEdited = { textFieldValue ->
             lastEditWasDeletion = textFieldValue.text.length < urlBarText.text.length
             urlBarModel.onLocationBarTextChanged(textFieldValue)
@@ -121,7 +119,7 @@ fun AutocompleteTextField(
 fun AutocompleteTextField(
     autocompletedSuggestion: String?,
     value: TextFieldValue,
-    bitmap: Bitmap?,
+    favicon: Favicon?,
     focusRequester: FocusRequester,
     onLocationEdited: (TextFieldValue) -> Unit,
     onLocationReplaced: (String) -> Unit,
@@ -141,7 +139,7 @@ fun AutocompleteTextField(
                 } ?: Modifier
             )
     ) {
-        FaviconView(bitmap = bitmap, bordered = false)
+        FaviconView(favicon = favicon, bordered = false)
 
         // TODO(dan.alcantara): If you have a really long autocomplete suggestion, this layout
         //                      breaks because it isn't scrollable.
@@ -232,7 +230,7 @@ fun AutocompleteTextField_Preview() {
         AutocompleteTextField(
             autocompletedSuggestion = "something else comes after this",
             value = TextFieldValue(text = "something else"),
-            bitmap = null,
+            favicon = null,
             focusRequester = FocusRequester(),
             onLocationEdited = {},
             onLocationReplaced = {},
@@ -250,7 +248,7 @@ fun AutocompleteTextField_PreviewHebrew() {
         AutocompleteTextField(
             autocompletedSuggestion = "עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרה",
             value = TextFieldValue(text = "חמש עשרה"),
-            bitmap = null,
+            favicon = null,
             focusRequester = FocusRequester(),
             onLocationEdited = {},
             onLocationReplaced = {},
@@ -268,7 +266,7 @@ fun AutocompleteTextField_PreviewNoSuggestion() {
         AutocompleteTextField(
             autocompletedSuggestion = null,
             value = TextFieldValue(text = "something else"),
-            bitmap = null,
+            favicon = null,
             focusRequester = FocusRequester(),
             onLocationEdited = {},
             onLocationReplaced = {},

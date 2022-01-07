@@ -17,10 +17,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(
@@ -63,16 +64,19 @@ class HistoryManager(
     }
 
     /**
-     * Returns a Flow that emits the best Favicon for the given Uri.
-     *
-     * TODO(dan.alcantara): Given that sites can have different favicons than the registered domain,
-     *                      we shouldn't be using the DomainRepository to provide it.
+     * Returns a Flow that emits the best Favicon for the given Uri.  It prefers favicons that come
+     * from a direct match in the user's history before falling back to the registered domain.
      */
     fun getFaviconFlow(uri: Uri?): Flow<Favicon?> {
-        val domainName = domainProvider.getRegisteredDomain(uri) ?: return flowOf(null)
-        return domainRepository
-            .listen(domainName)
-            .map { it.largestFavicon }
+        if (uri == null || uri.toString().isBlank()) return flowOf(null)
+
+        val siteFlow = sitesRepository.getFlow(uri)
+        val domainFlow = domainProvider.getRegisteredDomain(uri)?.let {
+            domainRepository.listen(it)
+        } ?: flowOf(null)
+
+        return siteFlow
+            .combine(domainFlow) { site, domain -> site?.largestFavicon ?: domain?.largestFavicon }
             .distinctUntilChanged()
     }
 
@@ -100,10 +104,12 @@ class HistoryManager(
     }
 
     /** Updates the [Favicon] for the given [url]. */
-    fun updateFaviconFor(coroutineScope: CoroutineScope, url: String, favicon: Favicon) {
-        coroutineScope.launch(Dispatchers.IO) {
+    suspend fun updateFaviconFor(url: String, favicon: Favicon?) {
+        favicon ?: return
+
+        withContext(Dispatchers.IO) {
             domainRepository.updateFaviconFor(
-                domainProvider.getRegisteredDomain(Uri.parse(url)) ?: return@launch,
+                domainProvider.getRegisteredDomain(Uri.parse(url)) ?: return@withContext,
                 favicon
             )
         }

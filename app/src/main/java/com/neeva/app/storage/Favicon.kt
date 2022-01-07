@@ -2,11 +2,23 @@ package com.neeva.app.storage
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.net.Uri
 import android.util.Base64
-import androidx.core.graphics.scale
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import coil.compose.rememberImagePainter
+import com.neeva.app.R
 import java.io.ByteArrayOutputStream
 
-/** Stores information about a website's favicon.  The image is stored as an encoded Data URI. */
+/**
+ * Stores information about a website's favicon.
+ *
+ * TODO(dan.alcantara): Delete [encodedImage] when we move to the next version of the database.
+ */
 data class Favicon(
     val faviconURL: String?,
     val encodedImage: String?,
@@ -14,45 +26,52 @@ data class Favicon(
     val height: Int,
 ) {
     companion object {
-        /** Returns the biggest favicon among the ones given, or null if both were null. */
-        fun bestFavicon(first: Favicon?, second: Favicon?): Favicon? {
+        private const val DATA_URI_PREFIX = "data:image/png;base64,"
+
+        /** Returns a [Painter] that can be used to render the favicon. */
+        @Composable
+        fun Favicon?.toPainter(): Painter {
             return when {
-                first == null -> second
-                second == null -> first
-                first.width >= second.width -> first
-                else -> second
+                this?.faviconURL?.startsWith(DATA_URI_PREFIX) == true -> {
+                    val byteArray =
+                        Base64.decode(faviconURL.drop(DATA_URI_PREFIX.length), Base64.DEFAULT)
+                    BitmapPainter(
+                        BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                            .asImageBitmap()
+                    )
+                }
+
+                this?.faviconURL != null -> {
+                    rememberImagePainter(faviconURL) {
+                        placeholder(R.drawable.globe)
+                        error(R.drawable.globe)
+                    }
+                }
+
+                else -> {
+                    painterResource(R.drawable.globe)
+                }
             }
         }
-    }
 
-    fun toBitmap(): Bitmap? {
-        val encoded = this.encodedImage
-        return if (encoded.isNullOrEmpty()) {
-            null
-        } else {
-            val byteArray = Base64.decode(encoded, Base64.DEFAULT)
-            BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        /** Generates a single-colored Bitmap from the given Uri for debugging. */
+        fun Uri?.toFavicon(): Favicon {
+            val color = hashCode().or(0xff000000.toInt())
+            val bitmap = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(bitmap)
+            canvas.drawColor(color)
+
+            val stream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val byteArray: ByteArray = stream.toByteArray()
+            val encoded = DATA_URI_PREFIX + Base64.encodeToString(byteArray, Base64.DEFAULT)
+
+            return Favicon(
+                faviconURL = encoded,
+                encodedImage = null,
+                width = bitmap.width,
+                height = bitmap.height
+            )
         }
     }
-}
-
-fun Bitmap.toFavicon(): Favicon {
-    // Ensure that the Bitmap is a reasonable size to avoid storing a ridiculously large string.
-    val maxSize = 48
-    val scaledBitmap = if (width > maxSize || height > maxSize) {
-        val aspectRatio = width / height.toFloat()
-        if (width > height) {
-            scale(maxSize, (maxSize / aspectRatio).toInt())
-        } else {
-            scale((maxSize * aspectRatio).toInt(), maxSize)
-        }
-    } else {
-        this
-    }
-
-    val stream = ByteArrayOutputStream()
-    scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-    val byteArray: ByteArray = stream.toByteArray()
-    val encoded: String = Base64.encodeToString(byteArray, Base64.DEFAULT)
-    return Favicon(null, encoded, scaledBitmap.width, scaledBitmap.height)
 }

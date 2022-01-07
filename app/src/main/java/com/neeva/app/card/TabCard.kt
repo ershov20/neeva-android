@@ -1,6 +1,5 @@
 package com.neeva.app.card
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,6 +33,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
+import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
@@ -41,7 +41,7 @@ import com.neeva.app.widgets.FaviconView
 @Composable
 fun TabCard(
     tab: TabInfo,
-    faviconData: Bitmap?,
+    faviconData: Favicon?,
     onSelect: () -> Unit,
     onClose: () -> Unit
 ) {

@@ -1,6 +1,5 @@
 package com.neeva.app.suggestions
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
@@ -11,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
+import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -20,7 +20,7 @@ fun NavSuggestionRow(
     onTapRowContentDescription: String? = null,
     secondaryLabel: String? = null,
     onTapEdit: (() -> Unit)? = null,
-    faviconData: Bitmap? = null,
+    faviconData: Favicon? = null,
     imageURL: String? = null,
     drawableID: Int? = null,
     drawableTint: Color? = null

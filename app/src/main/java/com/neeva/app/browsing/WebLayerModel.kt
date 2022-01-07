@@ -17,8 +17,8 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.storage.DateConverter
+import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.Visit
-import com.neeva.app.storage.toFavicon
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,8 +28,10 @@ import java.lang.ref.WeakReference
 import java.util.Date
 import javax.inject.Inject
 import kotlin.collections.set
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.ContextMenuParams
@@ -56,7 +58,8 @@ class WebLayerModel @Inject constructor(
     private val appContext: Application,
     domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
-    apolloClient: ApolloClient
+    apolloClient: ApolloClient,
+    private val faviconCache: FaviconCache
 ) : ViewModel() {
     companion object {
         private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
@@ -417,19 +420,25 @@ class WebLayerModel @Inject constructor(
         private val faviconFetcher = tab.createFaviconFetcher(object : FaviconCallback() {
             override fun onFaviconChanged(favicon: Bitmap?) {
                 val icon = favicon ?: return
+                val url = tab.currentDisplayUrl
 
-                historyManager.updateFaviconFor(
-                    viewModelScope,
-                    tab.currentDisplayUrl.toString(),
-                    icon.toFavicon()
-                )
+                viewModelScope.launch {
+                    val faviconData = withContext(Dispatchers.IO) {
+                        faviconCache.saveFavicon(icon)
+                    }
 
-                tab.currentDisplayUrl?.let { currentUrl ->
-                    historyManager.insert(
-                        coroutineScope = viewModelScope,
-                        url = currentUrl,
-                        title = tab.currentDisplayTitle,
-                        favicon = icon.toFavicon()
+                    url?.let {
+                        historyManager.insert(
+                            coroutineScope = viewModelScope,
+                            url = it,
+                            title = tab.currentDisplayTitle,
+                            favicon = faviconData
+                        )
+                    }
+
+                    historyManager.updateFaviconFor(
+                        tab.currentDisplayUrl.toString(),
+                        favicon = faviconData
                     )
                 }
             }

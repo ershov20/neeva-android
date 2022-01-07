@@ -97,11 +97,10 @@ fun CardGrid(
         ) {
             items(tabs) { tab ->
                 val favicon: Favicon? by historyManager.getFaviconFlow(tab.url).collectAsState(null)
-                val bitmap = favicon?.toBitmap()
 
                 TabCard(
                     tab = tab,
-                    faviconData = bitmap,
+                    faviconData = favicon,
                     onSelect = {
                         webLayerModel.selectTab(tab)
                         appNavModel.showBrowser()

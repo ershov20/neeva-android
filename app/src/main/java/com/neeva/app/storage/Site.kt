@@ -1,7 +1,6 @@
 package com.neeva.app.storage
 
 import android.net.Uri
-import androidx.annotation.WorkerThread
 import androidx.room.Dao
 import androidx.room.Embedded
 import androidx.room.Entity
@@ -119,7 +118,7 @@ interface SitesWithVisitsAccessor {
         LIMIT :limit
     """
     )
-    fun getQuerySuggestions(query: String, limit: Int = 1): List<Site>
+    suspend fun getQuerySuggestions(query: String, limit: Int = 1): List<Site>
 
     @Transaction
     @Query("SELECT * FROM site")
@@ -136,6 +135,9 @@ interface SitesWithVisitsAccessor {
 
     @Query("SELECT * FROM site WHERE siteURL LIKE :url")
     suspend fun find(url: String): Site?
+
+    @Query("SELECT * FROM site WHERE siteURL LIKE :url")
+    fun getFromUrl(url: String): Flow<Site?>
 
     @Query("SELECT * FROM site WHERE siteUID LIKE :uid")
     suspend fun get(uid: Int): Site?
@@ -160,12 +162,9 @@ interface SitesWithVisitsAccessor {
                 }
             } ?: SiteMetadata(title = title)
 
-            // Keep the biggest favicon we find.
-            val largest = Favicon.bestFavicon(site.largestFavicon, favicon)
-
             site = site.copy(
                 metadata = metadata,
-                largestFavicon = largest,
+                largestFavicon = favicon ?: site.largestFavicon,
                 visitCount = if (visit != null) site.visitCount + 1 else site.visitCount,
                 lastVisitTimestamp = visit?.timestamp ?: site.lastVisitTimestamp
             )
@@ -192,7 +191,6 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
     val allSites: Flow<List<Site>> = sitesAccessor.getAllSites().distinctUntilChanged()
     val allVisits: Flow<List<Visit>> = sitesAccessor.getAllVisits().distinctUntilChanged()
 
-    @WorkerThread
     fun getHistoryAfter(thresholdTime: Date): Flow<List<Site>> =
         sitesAccessor.getVisitsAfter(thresholdTime)
             .map { list ->
@@ -202,14 +200,14 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
             }
             .distinctUntilChanged()
 
-    @WorkerThread
     fun getFrequentSitesAfter(thresholdTime: Date, limit: Int): Flow<List<Site>> =
         sitesAccessor.getFrequentSitesAfter(thresholdTime, limit).distinctUntilChanged()
 
-    @WorkerThread
-    fun getQuerySuggestions(query: String): List<Site> {
-        return sitesAccessor.getQuerySuggestions(query)
-    }
+    suspend fun getQuerySuggestions(query: String): List<Site> =
+        sitesAccessor.getQuerySuggestions(query)
+
+    fun getFlow(url: Uri): Flow<Site?> =
+        sitesAccessor.getFromUrl(url.toString()).distinctUntilChanged()
 
     suspend fun insert(
         url: Uri,

@@ -72,7 +72,7 @@ fun SuggestionPane(
         ZeroQuery(urlBarModel = urlBarModel) {
             if (!isLazyTab) {
                 val favicon by historyManager.getFaviconFlow(currentURL).collectAsState(null)
-                CurrentPageRow(favicon = favicon?.toBitmap(), url = currentURL) {
+                CurrentPageRow(favicon = favicon, url = currentURL) {
                     updateUrlBarContents(urlBarModel, currentURL.toString())
                 }
             }

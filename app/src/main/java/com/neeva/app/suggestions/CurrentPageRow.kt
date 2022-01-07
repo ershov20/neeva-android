@@ -1,16 +1,16 @@
 package com.neeva.app.suggestions
 
-import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
+import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun CurrentPageRow(
-    favicon: Bitmap?,
+    favicon: Favicon?,
     url: Uri,
     onEditPressed: () -> Unit
 ) {

@@ -1,6 +1,6 @@
 package com.neeva.app.widgets
 
-import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -11,18 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.neeva.app.R
+import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.Favicon.Companion.toFavicon
+import com.neeva.app.storage.Favicon.Companion.toPainter
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun FaviconView(
-    bitmap: Bitmap?,
+    favicon: Favicon?,
     modifier: Modifier = Modifier,
     bordered: Boolean = true
 ) {
@@ -39,7 +38,7 @@ fun FaviconView(
         Alignment.Center
     ) {
         Image(
-            bitmap = bitmap?.asImageBitmap() ?: ImageBitmap.imageResource(id = R.drawable.globe),
+            painter = favicon.toPainter(),
             contentDescription = "favicon",
             modifier = Modifier
                 .size(16.dp)
@@ -49,38 +48,34 @@ fun FaviconView(
     }
 }
 
-@Preview(group = "Globe favicon")
+@Preview(name = "Globe favicon, bordered")
 @Composable
 fun FaviconView_Globe_Bordered() {
     NeevaTheme {
-        FaviconView(bitmap = null, bordered = true)
+        FaviconView(favicon = null, bordered = true)
     }
 }
 
-@Preview(group = "Globe favicon")
+@Preview(name = "Globe favicon, no border")
 @Composable
 fun FaviconView_Globe_NoBorder() {
     NeevaTheme {
-        FaviconView(bitmap = null, bordered = false)
+        FaviconView(favicon = null, bordered = false)
     }
 }
 
-@Preview(group = "Blank favicon")
+@Preview(group = "Solid favicon, bordered")
 @Composable
 fun FaviconView_Blank_Bordered() {
     NeevaTheme {
-        val bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888)
-        bitmap.eraseColor(android.graphics.Color.MAGENTA)
-        FaviconView(bitmap, bordered = true)
+        FaviconView(Uri.parse("https://www.neeva.com").toFavicon(), bordered = true)
     }
 }
 
-@Preview(group = "Blank favicon")
+@Preview(group = "Solid favicon, no border")
 @Composable
 fun FaviconView_Blank_NoBorder() {
     NeevaTheme {
-        val bitmap = Bitmap.createBitmap(16, 16, Bitmap.Config.ARGB_8888)
-        bitmap.eraseColor(android.graphics.Color.MAGENTA)
-        FaviconView(bitmap, bordered = false)
+        FaviconView(Uri.parse("https://www.neeva.com").toFavicon(), bordered = false)
     }
 }
