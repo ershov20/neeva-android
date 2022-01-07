@@ -3,7 +3,8 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-kapt'
     id 'org.jetbrains.kotlin.android'
-    id("com.apollographql.apollo3").version("$apollo_version")
+    id 'com.apollographql.apollo3' version "$apollo_version"
+    id 'org.jlleitschuh.gradle.ktlint' version "$ktlint_version"
     id 'dagger.hilt.android.plugin'
 }
 
@@ -64,6 +65,10 @@ android {
     // Chromium expects to be able to mmap these assets.
     aaptOptions {
         noCompress "dat", "bin", "pak"
+    }
+
+    sourceSets {
+        findByName("main")?.java?.srcDirs(project.file("src/main/kotlin"))
     }
 }
 
@@ -129,10 +134,17 @@ kapt {
     correctErrorTypes true
 }
 
+// Output the status of test runners to the log.
 tasks.withType(Test) {
     testLogging {
         exceptionFormat "full"
         events "started", "skipped", "passed", "failed"
         showStandardStreams true
     }
+}
+
+// Set up ktlint.
+ktlint {
+    android.set(true)
+    outputColorName.set("RED")
 }

@@ -40,9 +40,9 @@ class BrowserRestoreCallbackImpl(
         super.onRestoreCompleted()
         restorePreviousTabList()
 
-        if (browser.tabs.count() == 1
-            && browser.activeTab == browser.tabs.first()
-            && browser.activeTab?.navigationController?.navigationListCurrentIndex == -1
+        if (browser.tabs.count() == 1 &&
+            browser.activeTab == browser.tabs.first() &&
+            browser.activeTab?.navigationController?.navigationListCurrentIndex == -1
         ) {
             browser.activeTab?.navigationController?.navigate(Uri.parse(NeevaConstants.appURL))
         } else if (browser.tabs.isEmpty()) {
@@ -51,7 +51,8 @@ class BrowserRestoreCallbackImpl(
     }
 
     private fun restorePreviousTabList() {
-        val previousTabGuids = lastSavedInstanceState?.getStringArray(KEY_PREVIOUS_TAB_GUIDS) ?: return
+        val previousTabGuids =
+            lastSavedInstanceState?.getStringArray(KEY_PREVIOUS_TAB_GUIDS) ?: return
         browser.tabs
             .filter { previousTabGuids.contains(it.guid) }
             .forEach { onNewTabAdded(it) }

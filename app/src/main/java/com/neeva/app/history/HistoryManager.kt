@@ -2,14 +2,25 @@ package com.neeva.app.history
 
 import android.net.Uri
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.*
+import com.neeva.app.storage.Domain
+import com.neeva.app.storage.DomainRepository
+import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.HistoryDatabase
+import com.neeva.app.storage.Site
+import com.neeva.app.storage.SitesRepository
+import com.neeva.app.storage.Visit
 import com.neeva.app.suggestions.NavSuggestion
+import java.util.Date
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import java.util.*
-import java.util.concurrent.TimeUnit
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(

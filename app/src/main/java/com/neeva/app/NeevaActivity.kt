@@ -28,13 +28,13 @@ import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.ref.WeakReference
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
-import java.lang.ref.WeakReference
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
@@ -240,13 +240,15 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
 
         // Caching the system ui visibility is ok for shell, but likely not ok for real code.
         val systemVisibilityToRestore = decorView.systemUiVisibility
-        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+        decorView.systemUiVisibility = (
+            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION      // hide nav bar
-                or View.SYSTEM_UI_FLAG_FULLSCREEN           // hide status bar
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                 or View.SYSTEM_UI_FLAG_LOW_PROFILE
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY)
+                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            )
 
         return systemVisibilityToRestore
     }

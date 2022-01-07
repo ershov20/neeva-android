@@ -129,7 +129,8 @@ fun DictionarySuggestionRow_PreviewLongWord() {
         DictionarySuggestionRow(
             onTapRow = {},
             word = "antidisestablishmentarianism",
-            shortDefinition = "opposition to the withdrawal of state support or recognition from an established church",
+            shortDefinition = "opposition to the withdrawal of state support or recognition from " +
+                "an established church",
             phoneticSpelling = "ˌæn tiˌdɪs əˌstæb lɪʃ mənˈtɛər i əˌnɪz əm",
             lexicalCategory = "noun"
         )

@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.R
-import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.Space
@@ -34,11 +33,12 @@ import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.CollapsingState
+import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
 import dagger.hilt.EntryPoints
+import java.util.Locale
 import kotlinx.coroutines.flow.map
-import java.util.*
 
 @Composable
 fun ZeroQuery(
@@ -162,17 +162,16 @@ fun ZeroQuery(
                 }
             }
         }
-
     }
 }
 
-fun Site.toSearchSuggest() : QueryRowSuggestion? {
+fun Site.toSearchSuggest(): QueryRowSuggestion? {
     if (!siteURL.startsWith(NeevaConstants.appSearchURL)) return null
     val query = Uri.parse(this.siteURL).getQueryParameter("q") ?: return null
 
     return QueryRowSuggestion(
         url = Uri.parse(this.siteURL),
-        query =  query,
+        query = query,
         drawableID = R.drawable.ic_baseline_history_24
     )
 }

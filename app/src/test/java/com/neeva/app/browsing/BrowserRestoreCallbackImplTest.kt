@@ -8,7 +8,13 @@ import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -42,7 +48,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: No tabs were specified in the bundle so nothing should be restored.
-        expectThat(testSetup.addedTabs.map { it.guid } ).isEmpty()
+        expectThat(testSetup.addedTabs.map { it.guid }).isEmpty()
     }
 
     @Test
@@ -58,7 +64,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: We should only have restored the tabs we specified.
-        expectThat(testSetup.addedTabs.map { it.guid } ).containsExactlyInAnyOrder(restoredTabIds)
+        expectThat(testSetup.addedTabs.map { it.guid }).containsExactlyInAnyOrder(restoredTabIds)
         verify(testSetup.onEmptyTabList, times(0)).invoke()
     }
 
@@ -75,9 +81,10 @@ class BrowserRestoreCallbackImplTest {
 
         // Assert: All tabs should have been restored and it should have navigated the active tab.
         val uriCaptor = argumentCaptor<Uri>()
-        expectThat(testSetup.addedTabs.map { it.guid } ).containsExactlyInAnyOrder(activeTabId)
+        expectThat(testSetup.addedTabs.map { it.guid }).containsExactlyInAnyOrder(activeTabId)
         verify(testSetup.onEmptyTabList, times(0)).invoke()
-        verify(testSetup.browser.activeTab!!.navigationController, times(1)).navigate(uriCaptor.capture())
+        verify(testSetup.browser.activeTab!!.navigationController, times(1))
+            .navigate(uriCaptor.capture())
         expectThat(uriCaptor.lastValue).isEqualTo(Uri.parse(NeevaConstants.appURL))
     }
 
@@ -93,7 +100,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: All tabs should have been restored and it should have not navigated anywhere.
-        expectThat(testSetup.addedTabs.map { it.guid } ).containsExactlyInAnyOrder(activeTabId)
+        expectThat(testSetup.addedTabs.map { it.guid }).containsExactlyInAnyOrder(activeTabId)
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.browser.activeTab!!.navigationController, never()).navigate(any())
     }
@@ -112,7 +119,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: Because there were multiple tabs restored, navigation logic shouldn't kick in.
-        expectThat(testSetup.addedTabs.map { it.guid } ).containsExactlyInAnyOrder(tabIds)
+        expectThat(testSetup.addedTabs.map { it.guid }).containsExactlyInAnyOrder(tabIds)
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.browser.activeTab!!.navigationController, never()).navigate(any())
     }

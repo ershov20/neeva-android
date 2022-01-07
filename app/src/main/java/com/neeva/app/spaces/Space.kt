@@ -19,20 +19,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 data class SpaceEntityData(
     val url: Uri,
     val title: String?,
-    val snippet : String?,
+    val snippet: String?,
     val thumbnail: String?,
 )
 
 data class Space(
     val id: String,
     val name: String,
-    val lastModifiedTs : String,
-    val thumbnail : String?,
-    val resultCount : Int,
-    val isDefaultSpace : Boolean,
-    val isShared : Boolean,
-    val isPublic : Boolean,
-    val userACL : SpaceACLLevel,
+    val lastModifiedTs: String,
+    val thumbnail: String?,
+    val resultCount: Int,
+    val isDefaultSpace: Boolean,
+    val isShared: Boolean,
+    val isPublic: Boolean,
+    val userACL: SpaceACLLevel,
 ) {
     companion object {
         fun interface SpaceModifier {
@@ -44,10 +44,13 @@ data class Space(
     var contentURLs: Set<Uri>? = null
     var contentData: List<SpaceEntityData>? = null
 
-    fun thumbnailAsBitmap() : Bitmap? {
+    fun thumbnailAsBitmap(): Bitmap? {
         val encoded = thumbnail ?: return null
         if (!thumbnail.startsWith("data:image/jpeg;base64,")) return null
-        val byteArray = Base64.decode(encoded.substring("data:image/jpeg;base64,".length), Base64.DEFAULT)
+        val byteArray = Base64.decode(
+            encoded.substring("data:image/jpeg;base64,".length),
+            Base64.DEFAULT
+        )
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
 
@@ -70,7 +73,7 @@ data class Space(
 
             response.data?.deleteSpaceResultByURL.let {
                 // TODO Add a toast here
-                android.util.Log.i("Spaces","Deleted item from space")
+                android.util.Log.i("Spaces", "Deleted item from space")
             }
         } else {
             val response = apolloClient
@@ -89,7 +92,7 @@ data class Space(
 
             response.data?.entityId.let {
                 // TODO Add a toast here
-                android.util.Log.i("Spaces","Added item to space with id=$it")
+                android.util.Log.i("Spaces", "Added item to space with id=$it")
             }
         }
     }
@@ -144,10 +147,10 @@ class SpaceStore(val apolloClient: ApolloClient) {
 
                 val oldSpace = oldSpaceMap[id]
 
-                if (oldSpace != null && oldSpace.lastModifiedTs == newSpace.lastModifiedTs
-                    && oldSpace.contentData != null
-                    && oldSpace.contentURLs != null)
-                {
+                if (oldSpace != null && oldSpace.lastModifiedTs == newSpace.lastModifiedTs &&
+                    oldSpace.contentData != null &&
+                    oldSpace.contentURLs != null
+                ) {
                     onUpdateSpaceURLs(newSpace, oldSpace.contentURLs!!, oldSpace.contentData!!)
                 } else {
                     spacesToFetch.add(newSpace)
@@ -167,13 +170,15 @@ class SpaceStore(val apolloClient: ApolloClient) {
                     val entityQueries = spaceQuery.space?.entities ?: return@let
                     val entities = entityQueries.map { entityQuery ->
                         val url = Uri.parse(entityQuery.spaceEntity?.url) ?: return@map null
-                        SpaceEntityData(url, title = entityQuery.spaceEntity?.title,
+                        SpaceEntityData(
+                            url, title = entityQuery.spaceEntity?.title,
                             snippet = entityQuery.spaceEntity?.snippet,
-                            thumbnail = entityQuery.spaceEntity?.thumbnail)
+                            thumbnail = entityQuery.spaceEntity?.thumbnail
+                        )
                     }.filterNotNull()
                     val contentUrls = mutableSetOf<Uri>()
                     entities.forEach { contentUrls.add(it.url) }
-                    val space = spacesToFetch.first {   space ->
+                    val space = spacesToFetch.first { space ->
                         space.id == spaceQuery.pageMetadata?.pageID
                     }
                     onUpdateSpaceURLs(space, contentUrls, entities)
@@ -194,4 +199,3 @@ class SpaceStore(val apolloClient: ApolloClient) {
         }
     }
 }
-

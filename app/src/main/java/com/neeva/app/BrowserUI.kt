@@ -14,8 +14,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.history.HistoryManager
-import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.SuggestionPane
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBar
@@ -37,7 +35,8 @@ fun BrowserUI(
                 Modifier
                     .height(1.dp)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colors.background))
+                    .background(MaterialTheme.colors.background)
+            )
             if (progress != 100) {
                 LinearProgressIndicator(
                     progress = progress / 100.0f,

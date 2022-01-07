@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class AppNavModel(
     private val onOpenUrl: (Uri, Boolean) -> Unit,
     private val spaceStore: SpaceStore
-): ViewModel() {
+) : ViewModel() {
     private val _state = MutableStateFlow(AppNavState.BROWSER)
     val state: StateFlow<AppNavState> = _state
 

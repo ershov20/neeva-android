@@ -45,10 +45,12 @@ class AutocompleteTest {
             secondaryLabel = "https://www.reddit.com/r/android"
         )
 
-        expectThat(getAutocompleteText(autocompleteSuggestion,"http")).isEqualTo("https://www.reddit.com/r/android")
-        expectThat(getAutocompleteText(autocompleteSuggestion,"redd")).isEqualTo("reddit.com/r/android")
-        expectThat(getAutocompleteText(autocompleteSuggestion,"mismatch")).isNull()
-        expectThat(getAutocompleteText(autocompleteSuggestion,"com")).isNull()
+        expectThat(getAutocompleteText(autocompleteSuggestion, "http"))
+            .isEqualTo("https://www.reddit.com/r/android")
+        expectThat(getAutocompleteText(autocompleteSuggestion, "redd"))
+            .isEqualTo("reddit.com/r/android")
+        expectThat(getAutocompleteText(autocompleteSuggestion, "mismatch")).isNull()
+        expectThat(getAutocompleteText(autocompleteSuggestion, "com")).isNull()
     }
 
     @Test
@@ -59,10 +61,12 @@ class AutocompleteTest {
             secondaryLabel = "https://news.google.com"
         )
 
-        expectThat(getAutocompleteText(autocompleteSuggestion,"http")).isEqualTo("https://news.google.com")
-        expectThat(getAutocompleteText(autocompleteSuggestion,"news")).isEqualTo("news.google.com")
-        expectThat(getAutocompleteText(autocompleteSuggestion,"google")).isNull()
-        expectThat(getAutocompleteText(autocompleteSuggestion,"mismatch")).isNull()
-        expectThat(getAutocompleteText(autocompleteSuggestion,"com")).isNull()
+        expectThat(getAutocompleteText(autocompleteSuggestion, "http"))
+            .isEqualTo("https://news.google.com")
+        expectThat(getAutocompleteText(autocompleteSuggestion, "news"))
+            .isEqualTo("news.google.com")
+        expectThat(getAutocompleteText(autocompleteSuggestion, "google")).isNull()
+        expectThat(getAutocompleteText(autocompleteSuggestion, "mismatch")).isNull()
+        expectThat(getAutocompleteText(autocompleteSuggestion, "com")).isNull()
     }
 }

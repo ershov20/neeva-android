@@ -4,7 +4,7 @@ import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class NeevaBrowser: Application() {
+class NeevaBrowser : Application() {
     companion object {
         var versionString: String? = null
     }

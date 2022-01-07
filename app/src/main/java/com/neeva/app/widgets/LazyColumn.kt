@@ -3,7 +3,11 @@ package com.neeva.app.widgets
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
@@ -86,11 +90,13 @@ fun CollapsibleHeader(
         )
         Spacer(modifier = Modifier.weight(1f))
         Image(
-            imageVector = ImageVector.vectorResource(id = when(headerState.next()) {
-                CollapsingState.HIDDEN -> R.drawable.ic_baseline_keyboard_arrow_up_24
-                CollapsingState.SHOW_COMPACT -> R.drawable.ic_baseline_keyboard_arrow_down_24
-                CollapsingState.SHOW_ALL -> R.drawable.ic_baseline_keyboard_double_arrow_down_24
-            }),
+            imageVector = ImageVector.vectorResource(
+                id = when (headerState.next()) {
+                    CollapsingState.HIDDEN -> R.drawable.ic_baseline_keyboard_arrow_up_24
+                    CollapsingState.SHOW_COMPACT -> R.drawable.ic_baseline_keyboard_arrow_down_24
+                    CollapsingState.SHOW_ALL -> R.drawable.ic_baseline_keyboard_double_arrow_down_24
+                }
+            ),
             contentDescription = "$label section",
             contentScale = ContentScale.Inside,
             modifier = Modifier

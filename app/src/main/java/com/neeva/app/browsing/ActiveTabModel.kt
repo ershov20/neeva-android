@@ -4,10 +4,15 @@ import android.net.Uri
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Space
+import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import org.chromium.weblayer.*
-import kotlin.math.roundToInt
+import org.chromium.weblayer.Browser
+import org.chromium.weblayer.NavigateParams
+import org.chromium.weblayer.Navigation
+import org.chromium.weblayer.NavigationCallback
+import org.chromium.weblayer.Tab
+import org.chromium.weblayer.TabCallback
 
 /** Monitors changes to the [Browser]'s active tab and emits values related to it. */
 class ActiveTabModel(

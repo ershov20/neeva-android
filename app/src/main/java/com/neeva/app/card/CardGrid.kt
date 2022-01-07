@@ -6,7 +6,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -103,25 +110,36 @@ fun CardGrid(
                 )
             }
         }
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .height(1.dp)
-            .background(Color.LightGray))
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(1.dp)
+                .background(Color.LightGray)
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Button(enabled = true, resID = R.drawable.ic_baseline_add_24, contentDescription = "New Tab") {
+            Button(
+                enabled = true,
+                resID = R.drawable.ic_baseline_add_24,
+                contentDescription = "New Tab"
+            ) {
                 urlBarModel.openLazyTab()
                 appNavModel.showBrowser()
             }
+
             Spacer(modifier = Modifier.weight(1f))
-            Button(enabled = true, resID = R.drawable.ic_baseline_close_24, contentDescription = "Done") {
+
+            Button(
+                enabled = true,
+                resID = R.drawable.ic_baseline_close_24,
+                contentDescription = "Done"
+            ) {
                 appNavModel.showBrowser()
             }
         }
     }
 }
-

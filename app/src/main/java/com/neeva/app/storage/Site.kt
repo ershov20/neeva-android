@@ -2,11 +2,22 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import androidx.annotation.WorkerThread
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.PrimaryKey
+import androidx.room.Query
+import androidx.room.Relation
+import androidx.room.Transaction
+import androidx.room.TypeConverter
+import androidx.room.Update
+import java.util.Date
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import java.util.*
 
 enum class EntityType {
     UNKNOWN, ARTICLE, PRODUCT
@@ -27,7 +38,7 @@ data class SiteMetadata(
 
 @Entity(indices = [Index(value = ["siteURL"], unique = true)])
 data class Site(
-    @PrimaryKey (autoGenerate = true) val siteUID: Int = 0,
+    @PrimaryKey(autoGenerate = true) val siteUID: Int = 0,
     val siteURL: String,
     val visitCount: Int = 1,
     val lastVisitTimestamp: Date,
@@ -37,11 +48,13 @@ data class Site(
 
 @Entity
 data class Visit(
-    @PrimaryKey (autoGenerate = true) val visitUID: Int = 0,
+    @PrimaryKey(autoGenerate = true) val visitUID: Int = 0,
     val visitRootID: Long,
     val visitType: Int,
     val timestamp: Date,
-    val visitedSiteUID: Int = 0, // For passing a Visit down the stack and setting the siteUID in repository
+
+    /** For passing a Visit down the stack and setting the siteUID in repository */
+    val visitedSiteUID: Int = 0
 )
 
 data class SiteWithVisits(
@@ -77,13 +90,35 @@ interface SitesWithVisitsAccessor {
     @Query("SELECT * FROM visit WHERE timestamp > :thresholdTime ORDER BY timestamp DESC")
     fun getVisitsAfter(thresholdTime: Date): Flow<List<Visit>>
 
-    @Query("SELECT * FROM visit WHERE timestamp > :from AND timestamp < :to ORDER BY timestamp DESC")
+    @Query(
+        """
+        SELECT *
+        FROM visit
+        WHERE timestamp > :from AND timestamp < :to ORDER BY timestamp DESC
+    """
+    )
     fun getVisitsWithin(from: Date, to: Date): Flow<List<Visit>>
 
-    @Query("SELECT * FROM site WHERE lastVisitTimestamp > :thresholdTime ORDER BY visitCount DESC LIMIT :limit")
+    @Query(
+        """
+        SELECT *
+        FROM site
+        WHERE lastVisitTimestamp > :thresholdTime
+        ORDER BY visitCount DESC
+        LIMIT :limit
+    """
+    )
     fun getFrequentSitesAfter(thresholdTime: Date, limit: Int): Flow<List<Site>>
 
-    @Query("SELECT * FROM site WHERE siteURL LIKE '%'||:query||'%' ORDER BY visitCount DESC LIMIT :limit")
+    @Query(
+        """
+        SELECT * 
+        FROM site
+        WHERE siteURL LIKE '%'||:query||'%'
+        ORDER BY visitCount DESC
+        LIMIT :limit
+    """
+    )
     fun getQuerySuggestions(query: String, limit: Int = 1): List<Site>
 
     @Transaction

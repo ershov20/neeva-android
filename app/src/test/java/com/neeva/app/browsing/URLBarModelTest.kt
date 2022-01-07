@@ -6,12 +6,9 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.TestResult
-import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -27,7 +24,7 @@ import strikt.assertions.isTrue
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
-class URLBarModelTest: BaseTest() {
+class URLBarModelTest : BaseTest() {
     @Rule @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 

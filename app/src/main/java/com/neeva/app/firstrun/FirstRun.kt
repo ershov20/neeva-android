@@ -9,7 +9,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +21,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.neeva.app.*
+import com.neeva.app.AppNavModel
+import com.neeva.app.AppNavState
+import com.neeva.app.R
+import com.neeva.app.User
 import com.neeva.app.widgets.BrandedTextButton
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -48,7 +50,7 @@ fun FirstRunContainer(
                     CustomTabsIntent.Builder()
                         .setShowTitle(true)
                         .build()
-                        .launchUrl(activityContext, Uri.parse(FirstRun.authURL))
+                        .launchUrl(activityContext, FirstRun.authUri)
                 }
             }
         }
@@ -58,7 +60,17 @@ fun FirstRunContainer(
 object FirstRun {
     private const val FIRST_RUN_PREFS_FOLDER_NAME = "FIRST_RUN_PREFERENCES"
     private const val FIRST_RUN_DONE_KEY = "HAS_FINISHED_FIRST_RUN"
-    const val authURL = "https://neeva.com/login?provider=neeva.co/auth/oauth2/authenticators/google&finalPath=%2F&signup=true&ignoreCountryCode=true&loginCallbackType=ios"
+
+    val authUri: Uri = Uri.Builder()
+        .scheme("https")
+        .authority("neeva.com")
+        .path("login")
+        .appendQueryParameter("provider", "neeva.co/auth/oauth2/authenticators/google")
+        .appendQueryParameter("finalPath", "/")
+        .appendQueryParameter("signup", "true")
+        .appendQueryParameter("ignoreCountryCode", "true")
+        .appendQueryParameter("loginCallbackType", "ios")
+        .build()
 
     private fun getSharedPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(FIRST_RUN_PREFS_FOLDER_NAME, MODE_PRIVATE)
@@ -66,7 +78,7 @@ object FirstRun {
 
     fun shouldShowFirstRun(context: Context): Boolean {
         return User.getToken(context).isNullOrEmpty() &&
-                !getSharedPreferences(context).getBoolean(FIRST_RUN_DONE_KEY, false)
+            !getSharedPreferences(context).getBoolean(FIRST_RUN_DONE_KEY, false)
     }
 
     fun firstRunDone(context: Context) {
@@ -76,4 +88,3 @@ object FirstRun {
             .apply()
     }
 }
-

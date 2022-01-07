@@ -22,15 +22,27 @@ import com.neeva.app.storage.toFavicon
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import org.chromium.weblayer.*
 import java.io.File
 import java.io.FileOutputStream
 import java.lang.ref.WeakReference
-import java.util.*
+import java.util.Date
 import javax.inject.Inject
 import kotlin.collections.set
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import org.chromium.weblayer.Browser
+import org.chromium.weblayer.BrowserControlsOffsetCallback
+import org.chromium.weblayer.ContextMenuParams
+import org.chromium.weblayer.CookieChangedCallback
+import org.chromium.weblayer.FaviconCallback
+import org.chromium.weblayer.Navigation
+import org.chromium.weblayer.NavigationCallback
+import org.chromium.weblayer.NewTabCallback
+import org.chromium.weblayer.NewTabType
+import org.chromium.weblayer.OpenUrlCallback
+import org.chromium.weblayer.Tab
+import org.chromium.weblayer.TabCallback
+import org.chromium.weblayer.TabListCallback
 
 /**
  * Manages and maintains the interface between the Neeva browser and WebLayer.
@@ -45,7 +57,7 @@ class WebLayerModel @Inject constructor(
     domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
     apolloClient: ApolloClient
-): ViewModel() {
+) : ViewModel() {
     companion object {
         private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
     }
@@ -191,13 +203,14 @@ class WebLayerModel @Inject constructor(
         // and listen for the scrolling offsets, which we then apply to the real bottom toolbar.
         // This is a valid use case according to the BrowserControlsOffsetCallback.
         browser.setBottomView(bottomControlsPlaceholder)
+        val resources = fragment.context?.resources
         bottomControlsPlaceholder.layoutParams.height =
-            fragment.context?.resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
+            resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
         bottomControlsPlaceholder.requestLayout()
 
         browser.setTopView(topControlsPlaceholder)
         topControlsPlaceholder.layoutParams.height =
-            fragment.context?.resources?.getDimensionPixelSize(com.neeva.app.R.dimen.top_toolbar_height) ?: 0
+            resources?.getDimensionPixelSize(com.neeva.app.R.dimen.top_toolbar_height) ?: 0
         topControlsPlaceholder.requestLayout()
 
         if (!isBrowserCallbacksInitialized) {
@@ -241,7 +254,7 @@ class WebLayerModel @Inject constructor(
                 )
 
                 if (!User.getToken(appContext).isNullOrEmpty()) {
-                    setCookie(Uri.parse(appURL), User.loginCookieString(appContext)){}
+                    setCookie(Uri.parse(appURL), User.loginCookieString(appContext)) {}
                 }
             }
         }
@@ -391,7 +404,6 @@ class WebLayerModel @Inject constructor(
         }
     }
 
-
     /**
      * Encapsulates all callbacks related to a particular Tab's operation.
      *
@@ -527,4 +539,3 @@ class WebLayerModel @Inject constructor(
         }
     }
 }
-

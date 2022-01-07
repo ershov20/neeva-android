@@ -4,21 +4,21 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.WorkerThread
+import java.io.BufferedReader
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.net.IDN
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.net.IDN
 
 /**
  * Derives the registerable domain name from the provided domain.
  * See https://publicsuffix.org/list/ for information about how this should work.
  */
-class DomainProviderImpl(val context: Context): DomainProvider {
+class DomainProviderImpl(val context: Context) : DomainProvider {
     companion object {
         val TAG = DomainProviderImpl::class.simpleName
         const val SUFFIX_FILENAME = "public_suffix_list.dat"

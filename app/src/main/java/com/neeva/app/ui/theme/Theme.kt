@@ -8,21 +8,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
-        primary = BackgroundDark,
-        primaryVariant = FillDark,
-        background = TrayDark,
-        onPrimary = Color.White,
-        onBackground = Color.White,
-        onSecondary = LabelSecondaryDark
+    primary = BackgroundDark,
+    primaryVariant = FillDark,
+    background = TrayDark,
+    onPrimary = Color.White,
+    onBackground = Color.White,
+    onSecondary = LabelSecondaryDark
 )
 
 private val LightColorPalette = lightColors(
-        primary = BackgroundLight,
-        primaryVariant = FillLight,
-        background = TrayLight,
-        onPrimary = Color.Black,
-        onBackground = Color.Black,
-        onSecondary = LabelSecondaryLight
+    primary = BackgroundLight,
+    primaryVariant = FillLight,
+    background = TrayLight,
+    onPrimary = Color.Black,
+    onBackground = Color.Black,
+    onSecondary = LabelSecondaryLight
         /* Other default colors to override
     surface = Color.White,
     onSecondary = Color.Black,
@@ -39,9 +39,9 @@ fun NeevaTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable(
     }
 
     MaterialTheme(
-            colors = colors,
-            typography = Typography,
-            shapes = Shapes,
-            content = content
+        colors = colors,
+        typography = Typography,
+        shapes = Shapes,
+        content = content
     )
 }

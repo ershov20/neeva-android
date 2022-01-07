@@ -1,11 +1,7 @@
 package com.neeva.app.browsing
 
-import android.graphics.Bitmap
 import android.net.Uri
-import androidx.core.net.toUri
 import org.chromium.weblayer.Tab
-import java.io.File
-import java.io.FileOutputStream
 
 val Tab.currentDisplayUrl: Uri?
     get() {

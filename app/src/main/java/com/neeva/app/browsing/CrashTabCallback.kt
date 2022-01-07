@@ -15,7 +15,10 @@ class CrashTabCallback(val tab: Tab, val appContext: Application) : TabCallback(
     override fun onRenderProcessGone() {
         consecutiveCrashes++
 
-        if (consecutiveCrashes < 3 && !tab.willAutomaticallyReloadAfterCrash() && !tab.isDestroyed) {
+        if (consecutiveCrashes < 3 &&
+            !tab.willAutomaticallyReloadAfterCrash() &&
+            !tab.isDestroyed
+        ) {
             showDebugToast("Renderer crashed.  Automatically reloading")
 
             // We have to delay the reload because onRenderProcessGone() is called synchronously.

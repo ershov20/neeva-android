@@ -4,7 +4,13 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -32,11 +38,11 @@ import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.collapsibleHeaderItems
 import dagger.hilt.EntryPoints
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
 import java.time.ZoneOffset
-import java.util.*
+import java.util.Date
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun HistoryUI(
@@ -76,11 +82,15 @@ fun HistoryUI(
         .map { it.toNavSuggestion(domainProvider) }
 
     val historyYesterday = history
-        .filter { it.lastVisitTimestamp >= startOfYesterday && it.lastVisitTimestamp < startOfToday }
+        .filter {
+            it.lastVisitTimestamp >= startOfYesterday && it.lastVisitTimestamp < startOfToday
+        }
         .map { it.toNavSuggestion(domainProvider) }
 
     val historyThisWeek = history
-        .filter { it.lastVisitTimestamp >= startOf7DaysAgo && it.lastVisitTimestamp < startOfYesterday }
+        .filter {
+            it.lastVisitTimestamp >= startOf7DaysAgo && it.lastVisitTimestamp < startOfYesterday
+        }
         .map { it.toNavSuggestion(domainProvider) }
 
     // Compose doesn't count `LazyListScope` as a @Composable, so pull the header strings here.

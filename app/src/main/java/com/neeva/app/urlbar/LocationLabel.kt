@@ -2,7 +2,13 @@ package com.neeva.app.urlbar
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -74,7 +80,8 @@ fun LocationLabel(
 
         Spacer(modifier = Modifier.weight(1.0f))
 
-        Button(enabled = true,
+        Button(
+            enabled = true,
             resID = R.drawable.ic_baseline_refresh_24,
             contentDescription = "refresh button",
             onClick = onReload

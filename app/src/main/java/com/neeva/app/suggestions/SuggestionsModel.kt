@@ -62,7 +62,8 @@ class SuggestionsModel(
     init {
         coroutineScope.launch {
             historyManager.siteSuggestions.collect { suggestions ->
-                _autocompleteSuggestion.value = suggestions.firstOrNull()?.toNavSuggestion(domainProvider)
+                _autocompleteSuggestion.value =
+                    suggestions.firstOrNull()?.toNavSuggestion(domainProvider)
 
                 _suggestionFlow.value = _suggestionFlow.value.copy(
                     autocompleteSuggestion = _autocompleteSuggestion.value
@@ -99,10 +100,8 @@ class SuggestionsModel(
                 if (result == null || response.hasErrors()) {
                     Log.e(TAG, "Failed to parse response.  Has errors: ${response.hasErrors()}")
                 }
-            } catch (e: RuntimeException) {
-                Log.e(TAG, "Caught runtime exception while performing query.  Removing suggestions", e)
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to perform query.  Removing suggestions", e)
+                Log.e(TAG, "Caught exception while performing query.  Removing suggestions", e)
             }
         }
 
@@ -124,7 +123,8 @@ class SuggestionsModel(
         val viewableSuggestions = urlSuggestionsSplit.first
         _suggestionFlow.value = Suggestions(
             autocompleteSuggestion = autocompleteSuggestion.value,
-            queryRowSuggestions = suggestionResults.querySuggestion.map { it.toQueryRowSuggestion() },
+            queryRowSuggestions =
+            suggestionResults.querySuggestion.map { it.toQueryRowSuggestion() },
             navSuggestions = viewableSuggestions.map { it.toNavSuggestion(domainProvider) }
         )
     }
@@ -153,7 +153,7 @@ fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() = QueryRowSuggestion
     dictionaryInfo = this.annotation?.dictionaryInfo
 )
 
-fun Site.toNavSuggestion(domainProvider: DomainProvider) : NavSuggestion {
+fun Site.toNavSuggestion(domainProvider: DomainProvider): NavSuggestion {
     val uri = Uri.parse(this.siteURL)
 
     return NavSuggestion(

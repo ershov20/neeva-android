@@ -13,27 +13,54 @@ import com.neeva.app.NeevaConstants.appWelcomeToursURL
 object SettingsMainData {
     // TODO(dan.alcantara): These strings should be in strings.xml, not hard-coded here.
     val groups = listOf(
-        SettingsGroupData("Neeva",
+        SettingsGroupData(
+            "Neeva",
             listOf(
-                SettingsRowData("Account Settings", SettingsRowType.LINK, Uri.parse(appSettingsURL)),
-                SettingsRowData("Connected Apps", SettingsRowType.LINK, Uri.parse(appConnectionsURL)),
-                SettingsRowData("Invite your friends!", SettingsRowType.LINK, Uri.parse(appReferralURL)),
+                SettingsRowData(
+                    "Account Settings",
+                    SettingsRowType.LINK,
+                    Uri.parse(appSettingsURL)
+                ),
+                SettingsRowData(
+                    "Connected Apps",
+                    SettingsRowType.LINK,
+                    Uri.parse(appConnectionsURL)
+                ),
+                SettingsRowData(
+                    "Invite your friends!",
+                    SettingsRowType.LINK,
+                    Uri.parse(appReferralURL)
+                ),
             )
         ),
-        SettingsGroupData("Privacy",
+        SettingsGroupData(
+            "Privacy",
             listOf(
-                SettingsRowData("Privacy Policy", SettingsRowType.LINK, Uri.parse(appPrivacyURL)),
+                SettingsRowData(
+                    "Privacy Policy",
+                    SettingsRowType.LINK,
+                    Uri.parse(appPrivacyURL)
+                ),
             )
         ),
-        SettingsGroupData("Support",
+        SettingsGroupData(
+            "Support",
             listOf(
-                SettingsRowData("Welcome Tours", SettingsRowType.LINK, Uri.parse(appWelcomeToursURL)),
+                SettingsRowData(
+                    "Welcome Tours",
+                    SettingsRowType.LINK,
+                    Uri.parse(appWelcomeToursURL)
+                ),
                 SettingsRowData("Help Center", SettingsRowType.LINK, Uri.parse(appHelpCenterURL)),
             )
         ),
-        SettingsGroupData("About",
+        SettingsGroupData(
+            "About",
             listOf(
-                SettingsRowData("Neeva Browser ${NeevaBrowser.versionString}", SettingsRowType.LABEL),
+                SettingsRowData(
+                    "Neeva Browser ${NeevaBrowser.versionString}",
+                    SettingsRowType.LABEL
+                ),
                 SettingsRowData("Terms", SettingsRowType.LINK, Uri.parse(appTermsURL)),
             )
         )

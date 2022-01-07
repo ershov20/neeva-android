@@ -22,7 +22,7 @@ import org.junit.runners.model.Statement
  * for RuntimeExceptions in case your tests this happens.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-class CoroutineScopeRule: TestRule {
+class CoroutineScopeRule : TestRule {
     val scope: TestScope = TestScope()
 
     override fun apply(base: Statement?, description: Description?): Statement {

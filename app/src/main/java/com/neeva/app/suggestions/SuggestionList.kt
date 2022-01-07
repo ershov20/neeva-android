@@ -39,7 +39,8 @@ fun SuggestionList(
                 Modifier
                     .height(2.dp)
                     .fillMaxWidth()
-                    .background(MaterialTheme.colors.background))
+                    .background(MaterialTheme.colors.background)
+            )
         }
 
         topSuggestion?.let {

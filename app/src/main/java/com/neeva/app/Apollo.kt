@@ -7,7 +7,12 @@ import com.neeva.app.NeevaConstants.appHost
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
 import dagger.hilt.android.qualifiers.ApplicationContext
-import okhttp3.*
+import okhttp3.Cookie
+import okhttp3.CookieJar
+import okhttp3.HttpUrl
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Response
 
 fun createApolloClient(@ApplicationContext context: Context): ApolloClient {
     return ApolloClient.Builder()
@@ -21,7 +26,7 @@ fun createApolloClient(@ApplicationContext context: Context): ApolloClient {
         .build()
 }
 
-private class AuthCookieJar(val context: Context): CookieJar {
+private class AuthCookieJar(val context: Context) : CookieJar {
     override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
         val browserTypeCookie = Cookie.Builder().name("BrowserType").secure()
             .domain(appHost).expiresAt(Long.MAX_VALUE).value("neeva-android").build()
@@ -40,12 +45,12 @@ private class AuthCookieJar(val context: Context): CookieJar {
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
 }
 
-private class AuthorizationInterceptor(val context: Context): Interceptor {
+private class AuthorizationInterceptor(val context: Context) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
             .addHeader("User-Agent", "NeevaBrowserAndroid")
             .addHeader("X-Neeva-Client-ID", "co.neeva.app.android.browser")
-            .addHeader("X-Neeva-Client-Version",  "0.0.1")
+            .addHeader("X-Neeva-Client-Version", "0.0.1")
             .build()
         return chain.proceed(request)
     }

@@ -2,7 +2,7 @@ package com.neeva.app
 
 object NeevaConstants {
     var appHost: String = "neeva.com"
-    var appURL: String = "https://${appHost}/"
+    var appURL: String = "https://$appHost/"
     var appMarketingURL: String = appURL
     var appSearchURL: String = "${appURL}search"
     var appSpacesURL: String = "${appURL}spaces"

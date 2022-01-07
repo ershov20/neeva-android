@@ -11,7 +11,14 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.kotlin.*
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doAnswer
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -22,7 +29,7 @@ import strikt.assertions.isTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
-class ActiveTabModelTest: BaseTest() {
+class ActiveTabModelTest : BaseTest() {
     @Mock lateinit var tabCreator: TabCreator
 
     private lateinit var domainProvider: DomainProvider
@@ -36,8 +43,13 @@ class ActiveTabModelTest: BaseTest() {
         super.setUp()
 
         domainProvider = mock {
-            on { getRegisteredDomain(eq(Uri.parse("https://www.site.com/1"))) } doReturn "site.com"
-            on { getRegisteredDomain(eq(Uri.parse("http://www.othersite.com/2"))) } doReturn "othersite.com"
+            on {
+                getRegisteredDomain(eq(Uri.parse("https://www.site.com/1")))
+            } doReturn "site.com"
+
+            on {
+                getRegisteredDomain(eq(Uri.parse("http://www.othersite.com/2")))
+            } doReturn "othersite.com"
         }
 
         model = ActiveTabModel(tabCreator, domainProvider)

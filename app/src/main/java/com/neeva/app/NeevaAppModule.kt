@@ -45,7 +45,7 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesSpaceStore(apolloClient: ApolloClient) : SpaceStore {
+    fun providesSpaceStore(apolloClient: ApolloClient): SpaceStore {
         return SpaceStore(apolloClient)
     }
 }

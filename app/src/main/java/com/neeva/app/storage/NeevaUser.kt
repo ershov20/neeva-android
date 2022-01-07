@@ -4,7 +4,7 @@ import android.net.Uri
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.UserInfoQuery
 
-data class NeevaUser (
+data class NeevaUser(
     val id: String? = null,
     val displayName: String? = null,
     val email: String? = null,

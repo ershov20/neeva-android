@@ -9,10 +9,8 @@ version: 2.1
 orbs:
   android: circleci/android@2.0.0
 
-jobs:
-  run-unit-tests:
-    docker:
-      - image: circleci/android:api-30
+commands:
+  bootstrap-checkout:
     steps:
       - checkout
 
@@ -23,7 +21,7 @@ jobs:
             sudo apt-get install git-lfs
 
       - run:
-          name: Bootstrap
+          name: Bootstrap Chromium projects
           command: ./bootstrap.sh
 
       - android/restore-build-cache
@@ -36,12 +34,29 @@ jobs:
       - android/save-gradle-cache
       - android/save-build-cache
 
-      - android/run-tests:
-          test-command: ./gradlew lint test
+      - run:
+            name: Creating directory for artifacts
+            command: mkdir -p artifacts
+
+jobs:
+  run-ktlint:
+    docker:
+      - image: circleci/android:api-30
+    steps:
+      - bootstrap-checkout
 
       - run:
-          name: Creating directory for artifacts
-          command: mkdir -p artifacts
+          name: Running ktlint check.  If this fails, try running `./gradlew ktlintFormat` locally
+          command: ./gradlew ktlintCheck
+
+  run-unit-tests:
+    docker:
+      - image: circleci/android:api-30
+    steps:
+      - bootstrap-checkout
+
+      - android/run-tests:
+          test-command: ./gradlew lint test
       
       - run:
           name: Saving lint results
@@ -53,6 +68,8 @@ jobs:
 workflows:
   test-workflow:
     jobs:
+      - run-ktlint
+
       - run-unit-tests
 
 #      - android/build:

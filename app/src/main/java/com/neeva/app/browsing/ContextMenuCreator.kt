@@ -3,7 +3,12 @@ package com.neeva.app.browsing
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.view.*
+import android.view.ContextMenu
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import com.neeva.app.R
 import org.chromium.weblayer.ContextMenuParams
@@ -15,7 +20,7 @@ class ContextMenuCreator(
     private val params: ContextMenuParams,
     private val tab: Tab,
     private val context: Context
-): View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
+) : View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
     companion object {
         private const val MENU_ID_COPY_LINK_URI = 1
         private const val MENU_ID_COPY_LINK_TEXT = 2

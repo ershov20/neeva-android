@@ -25,16 +25,37 @@ $ brew install git-lfs
 
 # Repository setup
 
-When you first checkout the repository, or when a new version of Chromium has been checked in, you must run this command before opening Android Studio:
-Before opening Android Studio, run:
+When you first checkout the repository, or when a new version of Chromium has been checked in,
+you must run this command before opening Android Studio:
+
+`$ ./bootstrap.sh`
+
+ Or do "File > Sync Project with Gradle Files" within Android Studio after running the above command.
+
+# Code style
+
+We're trying to adhere to Google’s [Kotlin style guide](https://developer.android.com/kotlin/style-guide)
+
+To enforce this, we run both `lint` and `ktlint` checks as part of our continuous integration tests
+on CircleCI.  If you run afoul of `ktlint`, you may be able to auto-correct the problems by running:
+`
+$ ./gradlew ktlintFormat
+`
+
+If you want to run the `ktlint` check before you push to the origin, you can add this to your local
+`.git/hooks/pre-commit` script:
+
 ```
-$ ./bootstrap.sh
+echo "Running git pre-commit-hook"
+./gradlew ktlintCheck
+
+# Exit with an error if the checks fail.
+RESULT=$?
+[ $RESULT -ne 0 ] && exit 1
+exit 0
 ```
-Or do "File > Sync Project with Gradle Files" within Android Studio after running the above command.
 
 # Repository structure
-
-## General info
 
 ### Jetpack
 We rely heavily on Compose and `@Preview`s to see that our UI behaves under different conditions.
@@ -81,6 +102,11 @@ The directory structure is still in flux as we untangle and update how our brows
     * `urlbar` contains logic for implementing the URL bar at the top of the screen, including the autocomplete logic.
 
 * `chromium/` and `weblayer/` are directories with source and pre-compiled libs we include so that we can use WebLayer (until they release it publicly).
+
+## Code style
+We run both lint and ktlint checks.  If ktlint is failing for you, see 
+
+https://github.com/neevaco/neeva-android/#code-style
 
 # Updating GraphQL files and `schema.json`
 

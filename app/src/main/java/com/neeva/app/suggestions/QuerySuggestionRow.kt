@@ -13,9 +13,9 @@ fun QuerySuggestionRow(
     val onTapRow = { onLoadUrl(suggestion.url) }
 
     when {
-        suggestion.annotationType == AnnotationType.Dictionary
-                && suggestion.dictionaryInfo?.word != null
-                && suggestion.dictionaryInfo.shortDefinition != null -> {
+        suggestion.annotationType == AnnotationType.Dictionary &&
+            suggestion.dictionaryInfo?.word != null &&
+            suggestion.dictionaryInfo.shortDefinition != null -> {
             DictionarySuggestionRow(
                 onTapRow = onTapRow,
                 word = suggestion.dictionaryInfo.word,
@@ -26,15 +26,17 @@ fun QuerySuggestionRow(
         }
 
         suggestion.annotationType == AnnotationType.Stock -> {
-            StockSuggestionRow(
-                onTapRow = onTapRow,
-                companyName = suggestion.stockInfo?.companyName,
-                ticker = suggestion.stockInfo?.ticker,
-                currentPrice = suggestion.stockInfo?.currentPrice,
-                changeFromPreviousClose = suggestion.stockInfo?.changeFromPreviousClose,
-                percentChangeFromPreviousClose = suggestion.stockInfo?.percentChangeFromPreviousClose,
-                fetchedAtTime = suggestion.stockInfo?.fetchedAtTime
-            )
+            suggestion.stockInfo?.let {
+                StockSuggestionRow(
+                    onTapRow = onTapRow,
+                    companyName = it.companyName,
+                    ticker = it.ticker,
+                    currentPrice = it.currentPrice,
+                    changeFromPreviousClose = it.changeFromPreviousClose,
+                    percentChangeFromPreviousClose = it.percentChangeFromPreviousClose,
+                    fetchedAtTime = it.fetchedAtTime
+                )
+            }
         }
 
         suggestion.annotationType == AnnotationType.Calculator -> {

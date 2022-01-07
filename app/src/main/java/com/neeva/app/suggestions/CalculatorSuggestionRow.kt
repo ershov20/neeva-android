@@ -15,7 +15,7 @@ fun CalculatorSuggestionRow(
         query = suggestion.query,
         description = suggestion.description,
         drawableID = R.drawable.ic_calculator,
-        drawableTint = null,  // The calculator is already colored.
+        drawableTint = null, // The calculator is already colored.
         onTapRow = onTapRow
     )
 }

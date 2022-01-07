@@ -26,7 +26,7 @@ object User {
         preferences(context).edit().remove(KEY_TOKEN).apply()
     }
 
-    fun extractAuthTokenFromIntent(intent: Intent?) : String? {
+    fun extractAuthTokenFromIntent(intent: Intent?): String? {
         val dataUri = Uri.parse(intent?.dataString) ?: return null
         if (dataUri.scheme != "neeva" && dataUri.host != "login") return null
         // The URI is not hierarchical so none of the nicer getQueryForKey calls work.

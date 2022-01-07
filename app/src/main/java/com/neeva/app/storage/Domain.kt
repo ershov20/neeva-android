@@ -2,7 +2,17 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import androidx.annotation.WorkerThread
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.Index
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.PrimaryKey
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Update
 import com.neeva.app.suggestions.NavSuggestion
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -11,7 +21,7 @@ import kotlinx.coroutines.flow.map
 
 @Entity(indices = [Index(value = ["domainName"], unique = true)])
 data class Domain(
-    @PrimaryKey (autoGenerate = true) val domainUID: Int = 0,
+    @PrimaryKey(autoGenerate = true) val domainUID: Int = 0,
     val domainName: String,
     val providerName: String?,
     @Embedded val largestFavicon: Favicon?,
@@ -97,9 +107,9 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
 }
 
 // TODO: Find a more elegant way to handle this through Uri
-fun Domain.url() : Uri = Uri.parse("https://www.${this.domainName}")
+fun Domain.url(): Uri = Uri.parse("https://www.${this.domainName}")
 
-fun Domain.toNavSuggestion() : NavSuggestion  = NavSuggestion(
+fun Domain.toNavSuggestion(): NavSuggestion = NavSuggestion(
     url = this.url(),
     label = this.providerName ?: this.domainName,
     secondaryLabel = domainName

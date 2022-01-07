@@ -6,13 +6,26 @@ import android.util.Patterns
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -23,7 +36,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.layout.*
+import androidx.compose.ui.layout.IntrinsicMeasurable
+import androidx.compose.ui.layout.IntrinsicMeasureScope
+import androidx.compose.ui.layout.LayoutModifier
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureResult
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -66,10 +84,10 @@ fun AutocompleteTextField(
         null
     }
     val autocompleteIsValid: Boolean =
-        urlBarText.text.isNotBlank()
-                && !autocompleteText.isNullOrBlank()
-                && !lastEditWasDeletion
-                && autocompleteText.length > urlBarText.text.length
+        urlBarText.text.isNotBlank() &&
+            !autocompleteText.isNullOrBlank() &&
+            !lastEditWasDeletion &&
+            autocompleteText.length > urlBarText.text.length
 
     val url = autocompletedSuggestion?.takeIf { autocompleteIsValid }?.url
         ?: Uri.parse(urlBarText.text)
@@ -273,7 +291,8 @@ internal fun getAutocompleteText(
     if (urlBarContents.isBlank()) return null
 
     // Check if we have a direct match.
-    val autocompleteText = autocompletedSuggestion?.secondaryLabel?.takeIf { it.isNotBlank() } ?: return null
+    val autocompleteText =
+        autocompletedSuggestion?.secondaryLabel?.takeIf { it.isNotBlank() } ?: return null
     if (autocompleteText.startsWith(urlBarContents)) {
         return autocompleteText
     }
