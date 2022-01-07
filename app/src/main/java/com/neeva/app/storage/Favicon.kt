@@ -3,6 +3,8 @@ package com.neeva.app.storage
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.net.Uri
 import android.util.Base64
 import androidx.compose.runtime.Composable
@@ -54,23 +56,31 @@ data class Favicon(
             }
         }
 
-        /** Generates a single-colored Bitmap from the given Uri for debugging. */
+        /** Generates a single-colored Bitmap from the given Uri. */
         fun Uri?.toFavicon(): Favicon {
             val color = hashCode().or(0xff000000.toInt())
             val bitmap = Bitmap.createBitmap(32, 32, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
             canvas.drawColor(color)
 
+            val textPaint = Paint()
+            textPaint.textAlign = Paint.Align.CENTER
+            textPaint.color = Color.WHITE
+            textPaint.textSize = 32.0f
+
+            val xPos = canvas.width / 2.0f
+            val yPos = (canvas.height - textPaint.descent() - textPaint.ascent()) / 2.0f
+            val text: String = this?.authority?.takeIf { it.length > 1 }?.take(1) ?: ""
+            canvas.drawText(text.uppercase(), xPos, yPos, textPaint)
+
             val stream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
             val byteArray: ByteArray = stream.toByteArray()
-            val encoded = DATA_URI_PREFIX + Base64.encodeToString(byteArray, Base64.DEFAULT)
-
             return Favicon(
-                faviconURL = encoded,
+                faviconURL = DATA_URI_PREFIX + Base64.encodeToString(byteArray, Base64.DEFAULT),
                 encodedImage = null,
-                width = bitmap.width,
-                height = bitmap.height
+                width = canvas.width,
+                height = canvas.height
             )
         }
     }

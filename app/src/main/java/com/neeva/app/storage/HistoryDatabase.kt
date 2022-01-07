@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(entities = [Domain::class, Site::class, Visit::class], version = 6)
-@TypeConverters(DateConverter::class)
+@TypeConverters(com.neeva.app.storage.TypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
     abstract fun fromDomains(): DomainAccessor
     abstract fun fromSites(): SitesWithVisitsAccessor

@@ -16,8 +16,8 @@ import com.neeva.app.User
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.saveLoginCookieFrom
-import com.neeva.app.storage.DateConverter
 import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.TypeConverters
 import com.neeva.app.storage.Visit
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
@@ -436,8 +436,8 @@ class WebLayerModel @Inject constructor(
                         )
                     }
 
-                    historyManager.updateFaviconFor(
-                        tab.currentDisplayUrl.toString(),
+                    historyManager.updateDomainFavicon(
+                        url = tab.currentDisplayUrl.toString(),
                         favicon = faviconData
                     )
                 }
@@ -463,7 +463,7 @@ class WebLayerModel @Inject constructor(
                 val timestamp = Date()
                 visitToCommit = Visit(
                     timestamp = timestamp,
-                    visitRootID = DateConverter.fromDate(timestamp)!!,
+                    visitRootID = TypeConverters.fromDate(timestamp)!!,
                     visitType = 0
                 )
             }

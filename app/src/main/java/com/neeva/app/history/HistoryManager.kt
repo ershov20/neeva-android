@@ -5,6 +5,7 @@ import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Domain
 import com.neeva.app.storage.DomainRepository
 import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.Favicon.Companion.toFavicon
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.SitesRepository
@@ -65,18 +66,33 @@ class HistoryManager(
 
     /**
      * Returns a Flow that emits the best Favicon for the given Uri.  It prefers favicons that come
-     * from a direct match in the user's history before falling back to the registered domain.
+     * from a direct match in the user's history before falling back to the registered domain.  If
+     * both of those fail and [allowFallbackIcon] is true, then a fallback favicon is provided.
      */
-    fun getFaviconFlow(uri: Uri?): Flow<Favicon?> {
-        if (uri == null || uri.toString().isBlank()) return flowOf(null)
+    fun getFaviconFlow(uri: Uri?, allowFallbackIcon: Boolean = true): Flow<Favicon?> {
+        val fallbackIcon: Favicon? by lazy {
+            if (!allowFallbackIcon) return@lazy null
+
+            // Create a favicon based off the URL and the first letter of the registered domain.
+            uri
+                ?.let {
+                    val registeredDomain = domainProvider.getRegisteredDomain(it)
+                    Uri.Builder().scheme(it.scheme).authority(registeredDomain).build()
+                }
+                .toFavicon()
+        }
+
+        if (uri == null || uri.toString().isBlank()) return flowOf(fallbackIcon)
 
         val siteFlow = sitesRepository.getFlow(uri)
-        val domainFlow = domainProvider.getRegisteredDomain(uri)?.let {
-            domainRepository.listen(it)
-        } ?: flowOf(null)
+        val domainFlow = domainProvider.getRegisteredDomain(uri)
+            ?.let { domainRepository.getFlow(it) }
+            ?: flowOf(null)
 
         return siteFlow
-            .combine(domainFlow) { site, domain -> site?.largestFavicon ?: domain?.largestFavicon }
+            .combine(domainFlow) { site, domain ->
+                site?.largestFavicon ?: domain?.largestFavicon ?: fallbackIcon
+            }
             .distinctUntilChanged()
     }
 
@@ -103,8 +119,8 @@ class HistoryManager(
         }
     }
 
-    /** Updates the [Favicon] for the given [url]. */
-    suspend fun updateFaviconFor(url: String, favicon: Favicon?) {
+    /** Updates the [Favicon] for the domain associated with the given [url]. */
+    suspend fun updateDomainFavicon(url: String, favicon: Favicon?) {
         favicon ?: return
 
         withContext(Dispatchers.IO) {

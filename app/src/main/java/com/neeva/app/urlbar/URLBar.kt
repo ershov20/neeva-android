@@ -50,7 +50,9 @@ fun URLBar(
             AutocompleteTextField(
                 suggestionsModel = suggestionsModel,
                 urlBarModel = urlBarModel,
-                getFaviconFlow = historyManager::getFaviconFlow,
+                getFaviconFlow = {
+                    historyManager.getFaviconFlow(uri = it, allowFallbackIcon = false)
+                },
                 urlBarIsBeingEdited = isEditing
             )
 
