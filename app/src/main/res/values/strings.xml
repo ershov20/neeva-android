@@ -31,4 +31,5 @@
 
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_in_with_okta">Sign in using email</string>
+    <string name="first_run_intro">Welcome to Neeva, the only ad-free, private search engine</string>
 </resources>

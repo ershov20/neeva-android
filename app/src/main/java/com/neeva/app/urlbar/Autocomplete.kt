@@ -59,6 +59,7 @@ import com.neeva.app.storage.Favicon
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.theme.SelectionHighlight
 import com.neeva.app.widgets.FaviconView
 import kotlinx.coroutines.flow.Flow
 
@@ -194,7 +195,7 @@ fun AutocompleteTextField(
             autocompletedSuggestion?.substring(value.text.length)?.let { suggestion ->
                 Text(
                     text = suggestion,
-                    modifier = Modifier.background(Color(R.color.selection_highlight)),
+                    modifier = Modifier.background(SelectionHighlight),
                     style = MaterialTheme.typography.body1,
                     softWrap = false,
                     maxLines = 1,

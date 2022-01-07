@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.suggestions.SuggestionPane
 import com.neeva.app.suggestions.SuggestionsModel
+import com.neeva.app.ui.theme.SelectionHighlight
 import com.neeva.app.urlbar.URLBar
 import com.neeva.app.urlbar.URLBarModel
 
@@ -43,7 +44,7 @@ fun BrowserUI(
                     Modifier
                         .height(2.dp)
                         .fillMaxWidth(),
-                    color = Color(R.color.selection_highlight),
+                    color = SelectionHighlight,
                     backgroundColor = Color.LightGray
                 )
             }

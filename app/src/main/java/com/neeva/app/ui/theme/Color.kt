@@ -13,3 +13,6 @@ val LabelSecondaryDark = Color(0xFFF3F3F9)
 
 // TODO(dan.alcantara): Need to shove this into the material theme so we can specify a dark mode.
 val SuggestionDrawableTint = Color.LightGray
+val SelectionHighlight = Color(0xFFBBCFF3)
+val BrandBlue = Color(0xFF415AFF)
+val Gray20 = Color(0xFF2C2E33)
