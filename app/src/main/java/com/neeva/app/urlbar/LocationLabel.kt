@@ -5,14 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,20 +21,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.Button
-
-@Composable
-fun LocationLabel(
-    activeTabModel: ActiveTabModel,
-    onReload: () -> Unit,
-    modifier: Modifier
-) {
-    val displayedDomain by activeTabModel.displayedDomain.collectAsState()
-    val showLock: Boolean by activeTabModel.showLock.collectAsState()
-    LocationLabel(displayedDomain, showLock, onReload, modifier)
-}
 
 @Composable
 fun LocationLabel(
@@ -51,7 +37,6 @@ fun LocationLabel(
             .background(MaterialTheme.colors.primaryVariant)
             .wrapContentSize(Alignment.Center)
             .defaultMinSize(minHeight = 40.dp)
-            .fillMaxWidth()
     ) {
         Spacer(modifier = Modifier.weight(1.0f))
 

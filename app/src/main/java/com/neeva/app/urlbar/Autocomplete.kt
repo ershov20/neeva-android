@@ -140,7 +140,7 @@ fun AutocompleteTextField(
                 } ?: Modifier
             )
     ) {
-        FaviconView(favicon = favicon, bordered = false)
+        FaviconView(favicon = favicon, bordered = false, modifier = Modifier.padding(start = 8.dp))
 
         // TODO(dan.alcantara): If you have a really long autocomplete suggestion, this layout
         //                      breaks because it isn't scrollable.
@@ -159,7 +159,8 @@ fun AutocompleteTextField(
                     .onFocusChanged(onFocusChanged)
                     .onPreviewKeyEvent {
                         if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
-                            // If we're seeing a hardware enter key, intercept it to prevent adding a newline to the URL.
+                            // If we're seeing a hardware enter key, intercept it to prevent adding
+                            // a newline to the URL.
                             onLoadUrl.invoke()
                             true
                         } else {

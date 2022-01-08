@@ -16,3 +16,6 @@ val SuggestionDrawableTint = Color.LightGray
 val SelectionHighlight = Color(0xFFBBCFF3)
 val BrandBlue = Color(0xFF415AFF)
 val Gray20 = Color(0xFF2C2E33)
+
+val LightModeBlue = Color(0xff4078fb)
+val DarkModeBlue = Color(0xff4a8aff)
