@@ -40,9 +40,8 @@ import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.User
-import com.neeva.app.ui.theme.Gray20
+import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Roobert
-import com.neeva.app.ui.theme.TrayLight
 import com.neeva.app.widgets.BrandedTextButton
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -61,7 +60,7 @@ fun FirstRunContainer(
         Box(
             Modifier
                 .fillMaxSize()
-                .background(TrayLight)
+                .background(ColorPalette.Ui.DefaultBackground)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_baseline_close_24),
@@ -103,7 +102,7 @@ fun FirstRunContainer(
                         fontSize = 40.sp,
                         lineHeight = 48.sp
                     ),
-                    color = Gray20,
+                    color = ColorPalette.Ui.Gray20,
                     textAlign = TextAlign.Start
                 )
                 BrandedTextButton(enabled = true, stringResID = R.string.sign_in_with_google) {

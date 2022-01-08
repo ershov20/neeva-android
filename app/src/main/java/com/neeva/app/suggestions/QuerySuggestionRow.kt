@@ -1,8 +1,8 @@
 package com.neeva.app.suggestions
 
 import android.net.Uri
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import com.neeva.app.ui.theme.SuggestionDrawableTint
 
 @Composable
 fun QuerySuggestionRow(
@@ -52,7 +52,7 @@ fun QuerySuggestionRow(
                 description = suggestion.description,
                 imageURL = suggestion.imageURL,
                 drawableID = suggestion.drawableID,
-                drawableTint = SuggestionDrawableTint,
+                drawableTint = MaterialTheme.colors.onSecondary,
                 onTapRow = onTapRow,
                 onEditUrl = onEditUrl
             )

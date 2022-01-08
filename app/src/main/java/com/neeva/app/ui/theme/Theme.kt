@@ -9,25 +9,24 @@ import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
     primary = BackgroundDark,
-    primaryVariant = FillDark,
-    background = TrayDark,
-    onPrimary = Color.White,
-    onBackground = Color.White,
-    onSecondary = LabelSecondaryDark
+    primaryVariant = ColorPalette.Ui.Gray20,
+    secondary = ColorPalette.Ui.DarkModeBlue,
+    background = Color.Black,
+
+    onPrimary = ColorPalette.Ui.Gray99,
+    onSecondary = ColorPalette.Ui.Gray97,
+    onBackground = ColorPalette.Ui.Gray99
 )
 
 private val LightColorPalette = lightColors(
     primary = BackgroundLight,
-    primaryVariant = FillLight,
-    background = TrayLight,
+    primaryVariant = ColorPalette.Ui.Gray94,
+    secondary = ColorPalette.Ui.DefaultBlue,
+    background = ColorPalette.Ui.DefaultBackground,
+
     onPrimary = Color.Black,
-    onBackground = Color.Black,
-    onSecondary = LabelSecondaryLight
-        /* Other default colors to override
-    surface = Color.White,
-    onSecondary = Color.Black,
-    onBackground = Color.Black,
-    */
+    onSecondary = ColorPalette.Ui.Gray50,
+    onBackground = Color.Black
 )
 
 @Composable

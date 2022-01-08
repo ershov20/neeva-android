@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.suggestions.SuggestionsModel
-import com.neeva.app.ui.theme.LightModeBlue
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import dagger.hilt.EntryPoints
 
@@ -108,7 +107,7 @@ fun URLBar(
                     text = stringResource(id = R.string.cancel),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
-                    color = LightModeBlue
+                    color = MaterialTheme.colors.secondary
                 )
             }
         }

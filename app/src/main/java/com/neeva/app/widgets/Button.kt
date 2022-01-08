@@ -26,7 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neeva.app.R
-import com.neeva.app.ui.theme.BrandBlue
+import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.Roobert
 
@@ -66,7 +66,7 @@ fun BrandedTextButton(
             .wrapContentHeight(align = Alignment.CenterVertically)
             .padding(16.dp)
             .clip(RoundedCornerShape(24.dp))
-            .background(BrandBlue)
+            .background(ColorPalette.Brand.Blue)
             .padding(vertical = 12.dp, horizontal = 48.dp)
             .fillMaxWidth()
             .clickable(enabled) { onClick() },
