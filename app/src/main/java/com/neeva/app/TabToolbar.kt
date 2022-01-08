@@ -72,7 +72,7 @@ fun TabToolbar(model: TabToolbarModel, activeTabModel: ActiveTabModel) {
 @Composable
 fun NeevaMenuButton(onClick: () -> Unit) {
     Image(
-        painter = painterResource(R.drawable.ic_neeva_logo),
+        painter = painterResource(R.drawable.ic_neeva_logo_vector),
         contentDescription = stringResource(id = R.string.toolbar_neeva_menu),
         contentScale = ContentScale.Inside,
         modifier = Modifier
