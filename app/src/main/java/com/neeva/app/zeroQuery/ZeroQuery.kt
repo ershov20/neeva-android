@@ -1,11 +1,13 @@
 package com.neeva.app.zeroQuery
 
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,15 +19,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaConstants
-import com.neeva.app.NeevaConstants.appURL
+import com.neeva.app.NeevaConstants.appHost
 import com.neeva.app.R
 import com.neeva.app.spaces.SpaceRow
-import com.neeva.app.storage.Favicon.Companion.toPainter
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.Space
 import com.neeva.app.suggestions.QueryRowSuggestion
@@ -33,10 +34,10 @@ import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
+import com.neeva.app.widgets.FaviconView
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
 import dagger.hilt.EntryPoints
-import java.util.Locale
 import kotlinx.coroutines.flow.map
 
 @Composable
@@ -63,10 +64,10 @@ fun ZeroQuery(
 
     val suggestedSites: List<Site> by historyManager.frequentSites
         .map { sites ->
-            // Assume that anything pointing at https://www.neeva.com should not be recommended to
-            // the user.  This includes search suggestions and Spaces, e.g.
+            // Assume that anything pointing at neeva.com should not be recommended to the user.
+            // This includes search suggestions and Spaces, e.g.
             sites.filterNot {
-                it.siteURL.contains(appURL)
+                domainProvider.getRegisteredDomain(Uri.parse(it.siteURL)) == appHost
             }
         }.collectAsState(emptyList())
 
@@ -84,41 +85,30 @@ fun ZeroQuery(
                 label = suggestedSitesLabel,
                 startingState = CollapsingState.SHOW_COMPACT,
             ) {
-                LazyRow(modifier = Modifier.padding(16.dp)) {
+                LazyRow(modifier = Modifier.padding(vertical = 16.dp)) {
                     items(suggestedSites.subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
                         val favicon = site.largestFavicon
-                        val siteName = domainProvider.getRegisteredDomain(Uri.parse(site.siteURL))
-                            ?.split(".")
-                            ?.firstOrNull()
-                            ?.replaceFirstChar {
-                                if (it.isLowerCase()) {
-                                    it.titlecase(Locale.ENGLISH)
-                                } else {
-                                    it.toString()
-                                }
-                            }
+                        val title = site.metadata?.title
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
-                                .padding(horizontal = 8.dp)
-                                .clickable { urlBarModel.loadUrl(Uri.parse(site.siteURL)) }
+                                .clickable(onClickLabel = title) {
+                                    urlBarModel.loadUrl(Uri.parse(site.siteURL))
+                                }
+                                .padding(horizontal = 16.dp)
+                                .width(64.dp)
                         ) {
-                            Image(
-                                painter = favicon.toPainter(),
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .size(36.dp)
-                                    .padding(2.dp),
-                                contentScale = ContentScale.FillBounds,
-                            )
+                            FaviconView(favicon = favicon, bordered = false, size = 48.dp)
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
                             Text(
-                                text = siteName ?: "",
-                                modifier = Modifier
-                                    .padding(top = 8.dp)
-                                    .padding(horizontal = 8.dp),
+                                text = title ?: "",
+                                modifier = Modifier.fillMaxWidth(),
                                 style = MaterialTheme.typography.body2,
                                 color = MaterialTheme.colors.onSecondary,
                                 maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
@@ -135,7 +125,7 @@ fun ZeroQuery(
                 QuerySuggestionRow(
                     suggestion = search,
                     onLoadUrl = urlBarModel::loadUrl,
-                    onEditUrl = null
+                    onEditUrl = { urlBarModel.replaceLocationBarText(search.query) }
                 )
             }
         }

@@ -3,6 +3,7 @@ package com.neeva.app
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.HistoryDatabase
@@ -19,7 +20,13 @@ import javax.inject.Singleton
 object NeevaAppModule {
     @Provides
     @Singleton
-    fun provideSuffixListManager(@ApplicationContext context: Context): DomainProviderImpl {
+    fun provideDomainProvider(domainProviderImpl: DomainProviderImpl): DomainProvider {
+        return domainProviderImpl
+    }
+
+    @Provides
+    @Singleton
+    fun provideDomainProviderImpl(@ApplicationContext context: Context): DomainProviderImpl {
         return DomainProviderImpl(context)
     }
 

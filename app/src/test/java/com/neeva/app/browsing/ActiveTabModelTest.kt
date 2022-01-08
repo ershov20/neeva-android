@@ -79,7 +79,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedDomain.value).isEqualTo("site.com")
+        expectThat(model.displayedDomain.value).isEqualTo("www.site.com")
         expectThat(model.showLock.value).isTrue()
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
@@ -87,7 +87,7 @@ class ActiveTabModelTest : BaseTest() {
         // Set the second tab as active and confirm the flows were updated.
         val secondTab = MockTabHarness(
             currentTitle = "Title #2",
-            currentUri = Uri.parse("http://www.othersite.com/2"),
+            currentUri = Uri.parse("http://news.othersite.com/2"),
             canGoBack = false,
             canGoForward = true
         )
@@ -98,7 +98,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo(secondTab.currentTitle)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(secondTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(secondTab.canGoForward)
-        expectThat(model.displayedDomain.value).isEqualTo("othersite.com")
+        expectThat(model.displayedDomain.value).isEqualTo("news.othersite.com")
         expectThat(model.showLock.value).isFalse()
         expectThat(secondTab.tabCallbacks.size).isEqualTo(1)
         expectThat(secondTab.navigationCallbacks.size).isEqualTo(1)
@@ -125,7 +125,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedDomain.value).isEqualTo("site.com")
+        expectThat(model.displayedDomain.value).isEqualTo("www.site.com")
         expectThat(model.showLock.value).isTrue()
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
@@ -163,7 +163,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedDomain.value).isEqualTo("site.com")
+        expectThat(model.displayedDomain.value).isEqualTo("www.site.com")
         expectThat(model.showLock.value).isTrue()
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
@@ -174,10 +174,10 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo("New title")
 
         // Check that the Uri gets updated.
-        mainTab.currentUri = Uri.parse("http://www.othersite.com/2")
+        mainTab.currentUri = Uri.parse("http://news.othersite.com/2")
         mainTab.tabCallbacks.first().onVisibleUriChanged(mainTab.currentUri ?: Uri.EMPTY)
         expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
-        expectThat(model.displayedDomain.value).isEqualTo("othersite.com")
+        expectThat(model.displayedDomain.value).isEqualTo("news.othersite.com")
         expectThat(model.showLock.value).isFalse()
 
         // Check that navigations are kept in sync.

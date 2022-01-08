@@ -90,7 +90,7 @@ class ActiveTabModel(
 
     private fun updateUrl(uri: Uri) {
         _urlFlow.value = uri
-        _displayedDomain.value = domainProvider.getRegisteredDomain(uri) ?: ""
+        _displayedDomain.value = uri.host ?: ""
 
         // TODO(dan.alcantara); Pull this from WebLayer.  This is actually not correct since this
         //                      should depend on browser security signals rather than only the
