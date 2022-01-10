@@ -4,15 +4,13 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.WorkerThread
+import com.neeva.app.LoadingState
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
 import java.net.IDN
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 /**
  * Derives the registerable domain name from the provided domain.
@@ -24,29 +22,20 @@ class DomainProviderImpl(val context: Context) : DomainProvider {
         const val SUFFIX_FILENAME = "public_suffix_list.dat"
     }
 
-    enum class LoadingState {
-        UNINITIALIZED, LOADING, READY
-    }
-
     private val trieRoot = HostTrieNode()
     private val exceptionRules = mutableListOf<String>()
 
     private val _loadingState = MutableStateFlow(LoadingState.UNINITIALIZED)
     val loadingState: StateFlow<LoadingState> = _loadingState
 
-    fun initialize(coroutineScope: CoroutineScope) {
-        coroutineScope.launch(Dispatchers.IO) {
-            initialize()
-        }
-    }
-
+    @WorkerThread
     internal suspend fun initialize() {
         if (!_loadingState.compareAndSet(LoadingState.UNINITIALIZED, LoadingState.LOADING)) return
         loadList(context)
     }
 
     @WorkerThread
-    private fun loadList(context: Context) {
+    private suspend fun loadList(context: Context) {
         var inputStream: InputStream? = null
         var streamReader: InputStreamReader? = null
         var bufferedReader: BufferedReader? = null

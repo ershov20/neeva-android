@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.LoadingState
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.loginCookie
 import com.neeva.app.User
@@ -29,7 +30,10 @@ import java.util.Date
 import javax.inject.Inject
 import kotlin.collections.set
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
@@ -45,6 +49,8 @@ import org.chromium.weblayer.OpenUrlCallback
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
 import org.chromium.weblayer.TabListCallback
+import org.chromium.weblayer.UnsupportedVersionException
+import org.chromium.weblayer.WebLayer
 
 /**
  * Manages and maintains the interface between the Neeva browser and WebLayer.
@@ -166,9 +172,34 @@ class WebLayerModel @Inject constructor(
         domainProviderImpl
     )
 
+    private val _webLayerInitializationState = MutableStateFlow(LoadingState.UNINITIALIZED)
+    private var webLayer: WebLayer? = null
+
+    lateinit var initializationState: StateFlow<LoadingState>
+
     init {
-        // TODO(dan.alcantara): Add initialization logic so we know it's ready before we use it.
-        domainProviderImpl.initialize(viewModelScope)
+        viewModelScope.launch {
+            initializationState =
+                domainProviderImpl.loadingState
+                    .combine(_webLayerInitializationState) { domainState, webLayerState ->
+                        LoadingState.from(domainState, webLayerState)
+                    }
+                    .stateIn(viewModelScope)
+        }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            domainProviderImpl.initialize()
+        }
+
+        try {
+            WebLayer.loadAsync(appContext) { webLayer ->
+                webLayer.isRemoteDebuggingEnabled = true
+                this.webLayer = webLayer
+                _webLayerInitializationState.value = LoadingState.READY
+            }
+        } catch (e: UnsupportedVersionException) {
+            throw RuntimeException("Failed to initialize WebLayer, e")
+        }
 
         // Pull new suggestions from the database according to what's currently in the URL bar.
         viewModelScope.launch {

@@ -27,8 +27,11 @@ object User {
     }
 
     fun extractAuthTokenFromIntent(intent: Intent?): String? {
-        val dataUri = Uri.parse(intent?.dataString) ?: return null
+        val dataString = intent?.dataString ?: return null
+
+        val dataUri = Uri.parse(dataString)
         if (dataUri.scheme != "neeva" && dataUri.host != "login") return null
+
         // The URI is not hierarchical so none of the nicer getQueryForKey calls work.
         val token = dataUri.query?.substringAfter("sessionKey=")
         return if (token.isNullOrEmpty()) null else token

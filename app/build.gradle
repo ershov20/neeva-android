@@ -15,8 +15,8 @@ android {
         applicationId "com.neeva.app"
         minSdk 28
         targetSdk 30
-        versionCode 17
-        versionName "0.0.17"
+        versionCode 20
+        versionName "0.0.20"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary true

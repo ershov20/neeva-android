@@ -2,6 +2,7 @@ package com.neeva.app.publicsuffixlist
 
 import android.net.Uri
 import com.neeva.app.BaseTest
+import com.neeva.app.LoadingState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -31,8 +32,7 @@ class DomainProviderImplTest : BaseTest() {
     fun baseTest() = runTest {
         domainProviderImpl.initialize()
         advanceUntilIdle()
-        expectThat(domainProviderImpl.loadingState.value)
-            .isEqualTo(DomainProviderImpl.LoadingState.READY)
+        expectThat(domainProviderImpl.loadingState.value).isEqualTo(LoadingState.READY)
 
         fun domainForHost(host: String?) = domainProviderImpl.getRegisteredDomainForHost(host)
 

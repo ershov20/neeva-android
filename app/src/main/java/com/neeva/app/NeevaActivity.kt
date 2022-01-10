@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.whenStarted
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.BrowserCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
@@ -33,7 +34,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
-import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
 
 @AndroidEntryPoint
@@ -128,16 +128,14 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             }
         }
 
-        try {
-            // This ensures asynchronous initialization of WebLayer on first start of activity.
-            // If activity is re-created during process restart, FragmentManager attaches
-            // BrowserFragment immediately, resulting in synchronous init. By the time this line
-            // executes, the synchronous init has already happened.
-            WebLayer.loadAsync(application) { webLayer: WebLayer ->
-                onWebLayerReady(webLayer, savedInstanceState)
+        lifecycleScope.launch {
+            lifecycle.whenStarted {
+                webModel.initializationState.collect {
+                    if (it == LoadingState.READY) {
+                        onWebLayerReady(savedInstanceState)
+                    }
+                }
             }
-        } catch (e: UnsupportedVersionException) {
-            throw RuntimeException("Failed to initialize WebLayer", e)
         }
 
         lifecycleScope.launchWhenCreated {
@@ -182,9 +180,8 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         return fragment
     }
 
-    private fun onWebLayerReady(webLayer: WebLayer, savedInstanceState: Bundle?) {
+    private fun onWebLayerReady(savedInstanceState: Bundle?) {
         if (isFinishing || isDestroyed) return
-        webLayer.isRemoteDebuggingEnabled = true
 
         val fragment: Fragment = getOrCreateBrowserFragment()
 
