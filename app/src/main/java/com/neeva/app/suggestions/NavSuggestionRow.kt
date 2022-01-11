@@ -1,5 +1,7 @@
 package com.neeva.app.suggestions
 
+import android.net.Uri
+import android.webkit.URLUtil
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
@@ -8,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.storage.Favicon
@@ -43,13 +46,17 @@ fun NavSuggestionRow(
                 modifier = Modifier.fillMaxWidth()
             )
             secondaryLabel?.let {
-                Text(
-                    text = secondaryLabel,
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSecondary,
-                    maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if (URLUtil.isValidUrl(secondaryLabel)) {
+                    UriDisplayView(Uri.parse(secondaryLabel))
+                } else {
+                    Text(
+                        text = secondaryLabel,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.onSecondary,
+                        maxLines = 1
+                    )
+                }
             }
         }
     }

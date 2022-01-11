@@ -269,7 +269,7 @@ class SuggestionsModelTest : BaseTest() {
                     subtitle = "reddit: the front page of the internet",
                     sourceQueryIndex = 0,
                     boldSpan = listOf(SuggestionsQuery.BoldSpan1(12, 17))
-                ).toNavSuggestion(domainProvider),
+                ).toNavSuggestion(),
                 SuggestionsQuery.UrlSuggestion(
                     icon = SuggestionsQuery.Icon(null),
                     suggestedURL = "https://nflthursday.com/reddit-nfl-streams/",
@@ -279,7 +279,7 @@ class SuggestionsModelTest : BaseTest() {
                     subtitle = "Reddit NFL streams is banned - How to watch this weeks ...",
                     sourceQueryIndex = 1,
                     boldSpan = listOf(SuggestionsQuery.BoldSpan1(24, 29))
-                ).toNavSuggestion(domainProvider),
+                ).toNavSuggestion(),
                 SuggestionsQuery.UrlSuggestion(
                     icon = SuggestionsQuery.Icon(null),
                     suggestedURL = "https://www.reddit.com/r/news/",
@@ -289,7 +289,7 @@ class SuggestionsModelTest : BaseTest() {
                     subtitle = "News - reddit",
                     sourceQueryIndex = 2,
                     boldSpan = listOf(SuggestionsQuery.BoldSpan1(12, 17))
-                ).toNavSuggestion(domainProvider),
+                ).toNavSuggestion(),
                 SuggestionsQuery.UrlSuggestion(
                     icon = SuggestionsQuery.Icon(null),
                     suggestedURL = "https://www.reddit.com/r/cfb",
@@ -299,7 +299,7 @@ class SuggestionsModelTest : BaseTest() {
                     subtitle = "r/CFB - Reddit",
                     sourceQueryIndex = 4,
                     boldSpan = listOf(SuggestionsQuery.BoldSpan1(12, 17))
-                ).toNavSuggestion(domainProvider),
+                ).toNavSuggestion(),
             )
         )
 

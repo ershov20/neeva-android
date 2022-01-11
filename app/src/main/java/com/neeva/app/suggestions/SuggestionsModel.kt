@@ -125,15 +125,15 @@ class SuggestionsModel(
             autocompleteSuggestion = autocompleteSuggestion.value,
             queryRowSuggestions =
             suggestionResults.querySuggestion.map { it.toQueryRowSuggestion() },
-            navSuggestions = viewableSuggestions.map { it.toNavSuggestion(domainProvider) }
+            navSuggestions = viewableSuggestions.map { it.toNavSuggestion() }
         )
     }
 }
 
-fun SuggestionsQuery.UrlSuggestion.toNavSuggestion(domainProvider: DomainProvider) = NavSuggestion(
+fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() = NavSuggestion(
     url = Uri.parse(suggestedURL),
     label = subtitle ?: "",
-    secondaryLabel = title?.let { domainProvider.getRegisteredDomain(Uri.parse(it)) } ?: "",
+    secondaryLabel = title ?: "",
     queryIndex = sourceQueryIndex
 )
 
@@ -153,6 +153,7 @@ fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() = QueryRowSuggestion
     dictionaryInfo = this.annotation?.dictionaryInfo
 )
 
+/** Generates Nav Suggestion for Sites in History. */
 fun Site.toNavSuggestion(domainProvider: DomainProvider): NavSuggestion {
     val uri = Uri.parse(this.siteURL)
 
