@@ -33,6 +33,8 @@
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <data android:scheme="neeva"/>
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
             </intent-filter>
         </activity>
 

@@ -164,6 +164,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             webModel.onAuthTokenUpdated()
             appNavModel.showBrowser()
         }
+        if (intent != null && intent.action == Intent.ACTION_VIEW) {
+            intent.data?.let { webModel.currentBrowser.activeTabModel.loadUrl(it, newTab = true) }
+        }
     }
 
     private fun onWebLayerReady() {

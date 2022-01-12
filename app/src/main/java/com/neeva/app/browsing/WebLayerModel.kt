@@ -65,7 +65,7 @@ class WebLayerModel @Inject constructor(
 
     private val _browserWrapperFlow = MutableStateFlow<BrowserWrapper>(regularBrowser)
     val browserWrapperFlow: StateFlow<BrowserWrapper> = _browserWrapperFlow
-    private val currentBrowser
+    val currentBrowser
         get() = _browserWrapperFlow.value
 
     init {
