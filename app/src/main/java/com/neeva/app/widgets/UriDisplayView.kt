@@ -93,7 +93,7 @@ fun UriDisplayView_shortAuthorityAndLongPath() {
 @Composable
 fun UriDisplayView_invalidURI() {
     val urlString = stringResource(R.string.debug_long_string_secondary) +
-            "/this/is/a/long/path/to/the/website/and/result/you/want/yours/truly/neeva"
+        "/this/is/a/long/path/to/the/website/and/result/you/want/yours/truly/neeva"
     NeevaTheme {
         UriDisplayView(
             Uri.parse(urlString)
