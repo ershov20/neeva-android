@@ -16,7 +16,7 @@ import org.chromium.weblayer.Tab
 
 /** Creates a context menu for a link that has been long-pressed. */
 class ContextMenuCreator(
-    private val webLayerModel: WebLayerModel,
+    private val browserWrapper: BrowserWrapper,
     private val params: ContextMenuParams,
     private val tab: Tab,
     private val context: Context
@@ -106,7 +106,7 @@ class ContextMenuCreator(
         when (item.itemId) {
             MENU_ID_OPEN_IN_NEW_TAB -> {
                 params.linkUri?.let {
-                    webLayerModel.createTabWithUri(it, parentTabId = tab.guid)
+                    browserWrapper.createTabWithUri(it, parentTabId = tab.guid)
                 }
             }
 

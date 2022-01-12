@@ -1,7 +1,6 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
-import android.os.Bundle
 import com.neeva.app.NeevaConstants
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.NavigationController
@@ -18,8 +17,6 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
-import strikt.assertions.containsExactlyInAnyOrder
-import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 
 @RunWith(RobolectricTestRunner::class)
@@ -28,60 +25,26 @@ class BrowserRestoreCallbackImplTest {
     @Test
     fun onRestoreCompleted_withoutTabs_firesEmptyTabList() {
         // Arrange: Say that the browser had no tabs.
-        val testSetup = TestSetup(null, emptyList(), null)
+        val testSetup = TestSetup(emptyList(), null)
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
 
         // Assert: We should have received a callback about there being no tabs to restore.
-        expectThat(testSetup.addedTabs).isEmpty()
         verify(testSetup.onEmptyTabList, times(1)).invoke()
-    }
-
-    @Test
-    fun onRestoreCompleted_withoutSavedInstanceState_restoresNoTabs() {
-        // Arrange: Say that the browser had three tabs but we didn't persist any to the Bundle.
-        val tabIds = listOf("tab a", "tab b", "tab c")
-        val testSetup = TestSetup(null, tabIds, null)
-
-        // Act: Restore the tabs.
-        testSetup.callback.onRestoreCompleted()
-
-        // Assert: No tabs were specified in the bundle so nothing should be restored.
-        expectThat(testSetup.addedTabs.map { it.guid }).isEmpty()
-    }
-
-    @Test
-    fun onRestoreCompleted_withSavedInstanceState_restoresNamedTabs() {
-        // Arrange: Say that the browser had three tabs but we only knew about two of them.
-        val tabIds = listOf("tab a", "tab b", "tab c")
-        val restoredTabIds = listOf("tab b", "tab c")
-        val lastSavedInstanceState = Bundle()
-        BrowserRestoreCallbackImpl.onSaveInstanceState(lastSavedInstanceState, restoredTabIds)
-        val testSetup = TestSetup(lastSavedInstanceState, tabIds, null)
-
-        // Act: Restore the tabs.
-        testSetup.callback.onRestoreCompleted()
-
-        // Assert: We should only have restored the tabs we specified.
-        expectThat(testSetup.addedTabs.map { it.guid }).containsExactlyInAnyOrder(restoredTabIds)
-        verify(testSetup.onEmptyTabList, times(0)).invoke()
     }
 
     @Test
     fun onRestoreCompleted_withSingleActiveTabAndInvalidNavigation_goesHome() {
         // Arrange: Say that the browser had only one tab, it was active, and in a bad state.
         val activeTabId = "tab b"
-        val lastSavedInstanceState = Bundle()
-        BrowserRestoreCallbackImpl.onSaveInstanceState(lastSavedInstanceState, listOf(activeTabId))
-        val testSetup = TestSetup(lastSavedInstanceState, emptyList(), activeTabId, -1)
+        val testSetup = TestSetup(emptyList(), activeTabId, -1)
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
 
-        // Assert: All tabs should have been restored and it should have navigated the active tab.
+        // Assert: It should have navigated the active tab.
         val uriCaptor = argumentCaptor<Uri>()
-        expectThat(testSetup.addedTabs.map { it.guid }).containsExactlyInAnyOrder(activeTabId)
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.browser.activeTab!!.navigationController, times(1))
             .navigate(uriCaptor.capture())
@@ -92,15 +55,12 @@ class BrowserRestoreCallbackImplTest {
     fun onRestoreCompleted_withSingleActiveTabAndValidNavigation_staysPut() {
         // Arrange: Say that the browser had only one tab, it was active, and in a good state.
         val activeTabId = "tab b"
-        val lastSavedInstanceState = Bundle()
-        BrowserRestoreCallbackImpl.onSaveInstanceState(lastSavedInstanceState, listOf(activeTabId))
-        val testSetup = TestSetup(lastSavedInstanceState, emptyList(), activeTabId, 13)
+        val testSetup = TestSetup(emptyList(), activeTabId, 13)
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
 
-        // Assert: All tabs should have been restored and it should have not navigated anywhere.
-        expectThat(testSetup.addedTabs.map { it.guid }).containsExactlyInAnyOrder(activeTabId)
+        // Assert: It should have not navigated anywhere.
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.browser.activeTab!!.navigationController, never()).navigate(any())
     }
@@ -109,38 +69,28 @@ class BrowserRestoreCallbackImplTest {
     fun onRestoreCompleted_withActiveTabAndInvalidNavigation_doesNothing() {
         // Arrange: Say that the browser had three tabs and that the active tab was in a bad state.
         val tabIds = listOf("tab a", "tab b", "tab c")
-
-        // Allow all the tabs to be restored.
-        val lastSavedInstanceState = Bundle()
-        BrowserRestoreCallbackImpl.onSaveInstanceState(lastSavedInstanceState, tabIds)
-        val testSetup = TestSetup(lastSavedInstanceState, listOf("tab a", "tab c"), "tab b")
+        val testSetup = TestSetup(listOf("tab a", "tab c"), "tab b")
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
 
         // Assert: Because there were multiple tabs restored, navigation logic shouldn't kick in.
-        expectThat(testSetup.addedTabs.map { it.guid }).containsExactlyInAnyOrder(tabIds)
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.browser.activeTab!!.navigationController, never()).navigate(any())
     }
 
     class TestSetup(
-        lastSavedInstanceState: Bundle?,
         inactiveTabIds: List<String>,
         activeTabId: String?,
         activeTabNavigationIndex: Int = -1
     ) {
         val onEmptyTabList: () -> Unit = mock()
 
-        val addedTabs = mutableSetOf<Tab>()
-
         val browser = createMockBrowser(inactiveTabIds, activeTabId, activeTabNavigationIndex)
 
         val callback = BrowserRestoreCallbackImpl(
-            lastSavedInstanceState = lastSavedInstanceState,
             browser = browser,
-            onEmptyTabList = onEmptyTabList,
-            onNewTabAdded = { addedTabs.add(it) }
+            onEmptyTabList = onEmptyTabList
         )
 
         private fun createMockBrowser(

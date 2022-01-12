@@ -23,7 +23,7 @@ import com.neeva.app.urlbar.URLBarModel
 @Composable
 fun BrowserUI(
     urlBarModel: URLBarModel,
-    suggestionsModel: SuggestionsModel,
+    suggestionsModel: SuggestionsModel?,
     activeTabModel: ActiveTabModel
 ) {
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState()

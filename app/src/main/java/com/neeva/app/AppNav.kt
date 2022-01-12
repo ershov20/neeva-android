@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.card.CardsContainer
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
@@ -16,7 +16,6 @@ import com.neeva.app.settings.SettingsContainer
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
-import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -79,8 +78,8 @@ class AppNavModel(
 
     @Suppress("UNCHECKED_CAST")
     class AppNavModelFactory(
-        private val onOpenUrl: (Uri, Boolean) -> Unit,
-        private val spaceStore: SpaceStore
+        private val spaceStore: SpaceStore,
+        private val onOpenUrl: (Uri, Boolean) -> Unit
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return AppNavModel(onOpenUrl, spaceStore) as T
@@ -91,14 +90,13 @@ class AppNavModel(
 @Composable
 fun AppNav(
     appNavModel: AppNavModel,
-    webLayerModel: WebLayerModel,
-    urlBarModel: URLBarModel,
+    browserWrapper: BrowserWrapper,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
     Box {
         AddToSpaceSheet(
             appNavModel = appNavModel,
-            activeTabModel = webLayerModel.activeTabModel,
+            activeTabModel = browserWrapper.activeTabModel,
             spaceModifier = spaceModifier
         )
 
@@ -110,8 +108,7 @@ fun AppNav(
 
         CardsContainer(
             appNavModel = appNavModel,
-            webLayerModel = webLayerModel,
-            urlBarModel = urlBarModel
+            browserWrapper = browserWrapper
         )
 
         FirstRunContainer(appNavModel = appNavModel)

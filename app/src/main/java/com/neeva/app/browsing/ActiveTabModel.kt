@@ -2,7 +2,6 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.apollographql.apollo3.ApolloClient
-import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Space
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,10 +14,7 @@ import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
 
 /** Monitors changes to the [Browser]'s active tab and emits values related to it. */
-class ActiveTabModel(
-    private val tabCreator: TabCreator,
-    private val domainProvider: DomainProvider
-) {
+class ActiveTabModel(private val tabCreator: TabCreator) {
     data class NavigationInfo(
         val canGoBackward: Boolean = false,
         val canGoForward: Boolean = false

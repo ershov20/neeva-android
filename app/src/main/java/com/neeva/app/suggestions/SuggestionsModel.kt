@@ -78,12 +78,12 @@ class SuggestionsModel(
                     Pair(textFieldValue, isEditing)
                 }
                 .collect { (urlBarValue, isEditing) ->
-                    onUrlBarChanged(urlBarValue.text, isEditing)
+                    getSuggestionsFromBackend(urlBarValue.text, isEditing)
                 }
         }
     }
 
-    internal suspend fun onUrlBarChanged(newValue: String, isEditing: Boolean) {
+    internal suspend fun getSuggestionsFromBackend(newValue: String, isEditing: Boolean) {
         // Because the URL bar text changes whenever the user navigates somewhere, we will end up
         // firing a wasted query.  Make sure the user is actively typing something in.
         if (!isEditing) return

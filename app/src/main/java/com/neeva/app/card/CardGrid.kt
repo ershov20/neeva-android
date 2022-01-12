@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
+import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
-import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.Favicon
 import com.neeva.app.urlbar.URLBarModel
@@ -44,9 +44,10 @@ import org.chromium.weblayer.Tab
 @Composable
 fun CardsContainer(
     appNavModel: AppNavModel,
-    webLayerModel: WebLayerModel,
-    urlBarModel: URLBarModel
+    browserWrapper: BrowserWrapper
 ) {
+    val urlBarModel = browserWrapper.urlBarModel
+
     val historyManager = EntryPoints
         .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
         .historyManager()
@@ -61,27 +62,27 @@ fun CardsContainer(
         // Reset the scroll state of the LazyVerticalGrid every time the active tab changes.
         // TODO(dan.alcantara): We'll need to investigate how this should work with tab groups
         //                      and child tabs.
-        val activeTab: Tab? by webLayerModel.activeTabModel.activeTabFlow.collectAsState()
+        val activeTab: Tab? by browserWrapper.activeTabModel.activeTabFlow.collectAsState()
         val activeTabIndex = activeTab?.guid
-            ?.let { guid -> webLayerModel.orderedTabList.value.indexOfFirst { it.id == guid } }
+            ?.let { guid -> browserWrapper.orderedTabList.value.indexOfFirst { it.id == guid } }
             ?.coerceAtLeast(0)
             ?: 0
         val listState = LazyListState(activeTabIndex)
 
-        CardGrid(webLayerModel, historyManager, appNavModel, urlBarModel, listState)
+        CardGrid(browserWrapper, historyManager, appNavModel, urlBarModel, listState)
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardGrid(
-    webLayerModel: WebLayerModel,
+    browserWrapper: BrowserWrapper,
     historyManager: HistoryManager,
     appNavModel: AppNavModel,
     urlBarModel: URLBarModel,
     listState: LazyListState
 ) {
-    val tabs: List<TabInfo> by webLayerModel.orderedTabList.collectAsState()
+    val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
 
     Column(
         modifier = Modifier
@@ -102,10 +103,10 @@ fun CardGrid(
                     tab = tab,
                     faviconData = favicon,
                     onSelect = {
-                        webLayerModel.selectTab(tab)
+                        browserWrapper.selectTab(tab)
                         appNavModel.showBrowser()
                     },
-                    onClose = { webLayerModel.closeTab(tab) }
+                    onClose = { browserWrapper.closeTab(tab) }
                 )
             }
         }

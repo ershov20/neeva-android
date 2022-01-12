@@ -12,11 +12,12 @@ import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.zeroQuery.ZeroQuery
 import dagger.hilt.EntryPoints
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
 @Composable
 fun SuggestionPane(
-    suggestionsModel: SuggestionsModel,
+    suggestionsModel: SuggestionsModel?,
     urlBarModel: URLBarModel,
     activeTabModel: ActiveTabModel
 ) {
@@ -32,7 +33,9 @@ fun SuggestionPane(
     val domainSuggestions by historyManager.domainSuggestions.collectAsState()
     val siteSuggestions by historyManager.siteSuggestions.collectAsState()
     val currentURL: Uri by activeTabModel.urlFlow.collectAsState()
-    val suggestions by suggestionsModel.suggestionFlow.collectAsState()
+
+    val suggestionFlow = suggestionsModel?.suggestionFlow ?: MutableStateFlow(Suggestions())
+    val suggestions by suggestionFlow.collectAsState()
 
     val topSuggestion = suggestions.autocompleteSuggestion
     val queryRowSuggestions = suggestions.queryRowSuggestions

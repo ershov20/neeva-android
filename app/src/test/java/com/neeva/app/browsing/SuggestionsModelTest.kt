@@ -173,7 +173,7 @@ class SuggestionsModelTest : BaseTest() {
         )
         advanceUntilIdle()
 
-        model.onUrlBarChanged("query text", false)
+        model.getSuggestionsFromBackend("query text", false)
 
         expectThat(model.suggestionFlow.value.queryRowSuggestions).isEmpty()
         expectThat(model.suggestionFlow.value.navSuggestions).isEmpty()
@@ -214,7 +214,7 @@ class SuggestionsModelTest : BaseTest() {
         )
 
         // Trigger the Apollo query and check the results.
-        model.onUrlBarChanged("query text", true)
+        model.getSuggestionsFromBackend("query text", true)
         advanceUntilIdle()
 
         val emptyAnnotation = SuggestionsQuery.Annotation(null, null, null, null, null)

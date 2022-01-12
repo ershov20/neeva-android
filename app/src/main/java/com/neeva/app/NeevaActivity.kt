@@ -14,11 +14,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
 import com.apollographql.apollo3.ApolloClient
-import com.neeva.app.browsing.BrowserCallbacks
+import com.neeva.app.browsing.ActivityCallbacks
+import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRun
@@ -34,13 +34,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
-import org.chromium.weblayer.WebLayer
 
 @AndroidEntryPoint
-class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
+class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     companion object {
-        private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
-        private const val PERSISTENCE_ID = "Neeva_Browser"
         private const val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
         private const val WEBLAYER_FRAGMENT_TAG = "WebLayer Fragment"
     }
@@ -54,7 +51,9 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     private val webModel by viewModels<WebLayerModel>()
 
     private val appNavModel by viewModels<AppNavModel> {
-        AppNavModel.AppNavModelFactory(webModel.activeTabModel::loadUrl, spaceStore)
+        AppNavModel.AppNavModelFactory(spaceStore) { uri, newTab ->
+            webModel.browserWrapperFlow.value.activeTabModel.loadUrl(uri, newTab)
+        }
     }
 
     /**
@@ -72,17 +71,20 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        webModel.browserCallbacks = WeakReference(this)
+        webModel.setBrowserCallbacks(WeakReference(this))
 
         setContentView(R.layout.main)
         browserUI = findViewById<ComposeView>(R.id.browser_ui).apply {
             setContent {
                 NeevaTheme {
                     Surface(color = MaterialTheme.colors.background) {
+                        val browserWrapper: BrowserWrapper
+                            by webModel.browserWrapperFlow.collectAsState()
+
                         BrowserUI(
-                            webModel.urlBarModel,
-                            webModel.suggestionsModel,
-                            webModel.activeTabModel
+                            browserWrapper.urlBarModel,
+                            browserWrapper.suggestionsModel,
+                            browserWrapper.activeTabModel
                         )
                     }
                 }
@@ -93,9 +95,12 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         findViewById<ComposeView>(R.id.app_nav).setContent {
             NeevaTheme {
                 Surface(color = Color.Transparent) {
-                    AppNav(appNavModel, webModel, webModel.urlBarModel) { space ->
+                    val browserWrapper: BrowserWrapper
+                        by webModel.browserWrapperFlow.collectAsState()
+
+                    AppNav(appNavModel, browserWrapper) { space ->
                         lifecycleScope.launch {
-                            webModel.activeTabModel.modifySpace(space, apolloClient)
+                            browserWrapper.activeTabModel.modifySpace(space, apolloClient)
                             appNavModel.showBrowser()
                         }
                     }
@@ -108,19 +113,23 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         bottomControls = findViewById<ComposeView>(R.id.tab_toolbar).apply {
             setContent {
                 NeevaTheme {
+                    val browserWrapper: BrowserWrapper
+                        by webModel.browserWrapperFlow.collectAsState()
+                    val isEditing: Boolean by
+                    browserWrapper.urlBarModel.isEditing.collectAsState()
+
                     Surface(color = MaterialTheme.colors.background) {
-                        val isEditing: Boolean by webModel.urlBarModel.isEditing.collectAsState()
                         if (!isEditing) {
                             TabToolbar(
                                 TabToolbarModel(
                                     appNavModel::showNeevaMenu,
                                     appNavModel::showAddToSpace,
                                     {
-                                        webModel.onGridShown()
+                                        browserWrapper.takeScreenshotOfActiveTab()
                                         appNavModel.showCardGrid()
                                     }
                                 ),
-                                webModel.activeTabModel
+                                browserWrapper.activeTabModel
                             )
                         }
                     }
@@ -131,21 +140,15 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         lifecycleScope.launch {
             lifecycle.whenStarted {
                 webModel.initializationState.collect {
-                    if (it == LoadingState.READY) {
-                        onWebLayerReady(savedInstanceState)
-                    }
+                    if (it != LoadingState.READY) return@collect
+
+                    onWebLayerReady()
                 }
             }
         }
 
         lifecycleScope.launchWhenCreated {
             NeevaUser.fetch(apolloClient)
-        }
-
-        lifecycleScope.launchWhenCreated {
-            webModel.urlBarModel.isEditing.collect { isEditing ->
-                if (isEditing) spaceStore.refresh()
-            }
         }
 
         if (FirstRun.shouldShowFirstRun(this)) {
@@ -163,57 +166,39 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
         }
     }
 
-    private fun getOrCreateBrowserFragment(): Fragment {
-        // Check if the Fragment was already created by a previous instance of the NeevaActivity.
-        supportFragmentManager.findFragmentByTag(WEBLAYER_FRAGMENT_TAG)?.apply {
-            return this
-        }
-
-        val fragment = WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.add(R.id.weblayer, fragment, WEBLAYER_FRAGMENT_TAG)
-
-        // Note the commitNow() instead of commit(). We want the fragment to get attached to
-        // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
-        // have to wait until the commit is executed.
-        transaction.commitNow()
-        return fragment
-    }
-
-    private fun onWebLayerReady(savedInstanceState: Bundle?) {
+    private fun onWebLayerReady() {
         if (isFinishing || isDestroyed) return
 
-        val fragment: Fragment = getOrCreateBrowserFragment()
-
-        // Have WebLayer Shell retain the fragment instance to simulate the behavior of
-        // external embedders (note that if this is changed, then WebLayer Shell should handle
-        // rotations and resizes itself via its manifest, as otherwise the user loses all state
-        // when the shell is rotated in the foreground).
-        fragment.retainInstance = true
-
         webModel.onWebLayerReady(
-            fragment,
             topControlPlaceholder,
-            bottomControlPlaceholder,
-            savedInstanceState
-        )
+            bottomControlPlaceholder
+        ) {
+            // Note the commitNow() instead of commit(). We want the fragment to get attached to
+            // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
+            // have to wait until the commit is executed.
+            val transaction = supportFragmentManager.beginTransaction()
+            transaction.add(R.id.weblayer, it, WEBLAYER_FRAGMENT_TAG)
+            transaction.commitNow()
+        }
     }
 
     override fun onBackPressed() {
+        val browserWrapper = webModel.browserWrapperFlow.value
+
         when {
-            webModel.canExitFullscreen() -> {
-                webModel.exitFullscreen()
+            browserWrapper.canExitFullscreen() -> {
+                browserWrapper.exitFullscreen()
             }
 
             appNavModel.state.value != AppNavState.BROWSER -> {
                 appNavModel.showBrowser()
             }
 
-            webModel.activeTabModel.navigationInfoFlow.value.canGoBackward -> {
-                webModel.activeTabModel.goBack()
+            browserWrapper.activeTabModel.navigationInfoFlow.value.canGoBackward -> {
+                browserWrapper.activeTabModel.goBack()
             }
 
-            webModel.closeActiveChildTab() -> {
+            browserWrapper.closeActiveChildTab() -> {
                 return
             }
 
@@ -221,11 +206,6 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
                 super.onBackPressed()
             }
         }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        webModel.onSaveInstanceState(outState)
     }
 
     override fun onEnterFullscreen(): Int {
@@ -273,7 +253,12 @@ class NeevaActivity : AppCompatActivity(), BrowserCallbacks {
             // Need to use the NeevaActivity as the context because the WebLayer View doesn't have
             // access to the correct resources.
             setOnCreateContextMenuListener(
-                ContextMenuCreator(webModel, contextMenuParams, tab, this@NeevaActivity)
+                ContextMenuCreator(
+                    webModel.browserWrapperFlow.value,
+                    contextMenuParams,
+                    tab,
+                    this@NeevaActivity
+                )
             )
 
             showContextMenu()

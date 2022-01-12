@@ -62,15 +62,17 @@ import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.SelectionHighlight
 import com.neeva.app.widgets.FaviconView
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun AutocompleteTextField(
-    suggestionsModel: SuggestionsModel,
+    suggestionsModel: SuggestionsModel?,
     urlBarModel: URLBarModel,
     getFaviconFlow: (Uri) -> Flow<Favicon?>,
     urlBarIsBeingEdited: Boolean
 ) {
-    val autocompletedSuggestion by suggestionsModel.autocompleteSuggestion.collectAsState()
+    val suggestionFlow = suggestionsModel?.autocompleteSuggestion ?: MutableStateFlow(null)
+    val autocompletedSuggestion by suggestionFlow.collectAsState()
     val urlBarText: TextFieldValue by urlBarModel.userInputText.collectAsState()
 
     var lastEditWasDeletion by remember { mutableStateOf(false) }

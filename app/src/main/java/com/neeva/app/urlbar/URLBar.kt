@@ -37,7 +37,7 @@ import dagger.hilt.EntryPoints
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun URLBar(
-    suggestionsModel: SuggestionsModel,
+    suggestionsModel: SuggestionsModel?,
     activeTabModel: ActiveTabModel,
     urlBarModel: URLBarModel
 ) {

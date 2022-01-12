@@ -5,7 +5,7 @@ import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 
 /** Callbacks that are necessary when interacting with web content. */
-interface BrowserCallbacks {
+interface ActivityCallbacks {
     /**
      * Called when a browser tab asks the app to enter fullscreen mode.
      * @return The window flags that were set before the user was sent into fullscreen mode.
