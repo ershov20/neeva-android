@@ -11,11 +11,12 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
-import java.lang.ref.WeakReference
+import java.lang.IllegalStateException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
+import org.chromium.weblayer.BrowserRestoreCallback
 import org.chromium.weblayer.NewTabType
 import org.chromium.weblayer.OpenUrlCallback
 import org.chromium.weblayer.Tab
@@ -32,12 +33,9 @@ import org.chromium.weblayer.TabListCallback
 abstract class BrowserWrapper(
     val isIncognito: Boolean,
     val appContext: Application,
+    val activityCallbackProvider: () -> ActivityCallbacks?,
     val coroutineScope: CoroutineScope
 ) {
-    companion object {
-        val TAG = BrowserWrapper::class.simpleName
-    }
-
     data class CreateNewTabInfo(
         val uri: Uri,
         val parentTabId: String? = null
@@ -50,7 +48,7 @@ abstract class BrowserWrapper(
         get() = tabList.orderedTabList
 
     private lateinit var fragment: Fragment
-    protected lateinit var browser: Browser
+    protected var browser: Browser? = null
 
     val activeTabModel: ActiveTabModel
     val urlBarModel: URLBarModel
@@ -63,23 +61,26 @@ abstract class BrowserWrapper(
      */
     private var newTabInfo: CreateNewTabInfo? = null
 
-    var activityCallbacks: WeakReference<ActivityCallbacks> = WeakReference(null)
+    private val tabScreenshotter: TabScreenshotter by lazy {
+        createTabScreenshotter { guid, fileUri ->
+            tabList.updateThumbnailUri(guid, fileUri)
+        }
+    }
 
-    abstract val tabScreenshotter: TabScreenshotter
     abstract val suggestionsModel: SuggestionsModel?
     abstract val historyManager: HistoryManager?
     abstract val faviconCache: FaviconCache?
 
-    private lateinit var tabListRestorer: BrowserRestoreCallbackImpl
+    private var tabListRestorer: BrowserRestoreCallback? = null
 
     init {
         activeTabModel = ActiveTabModel { uri, parentTabId -> createTabWithUri(uri, parentTabId) }
-        urlBarModel = URLBarModel(activeTabModel)
+        urlBarModel = URLBarModel(isIncognito, activeTabModel)
     }
 
     private var fullscreenCallback = FullscreenCallbackImpl(
-        { activityCallbacks.get()?.onEnterFullscreen() },
-        { flags -> activityCallbacks.get()?.onExitFullscreen(flags) }
+        { activityCallbackProvider()?.onEnterFullscreen() },
+        { flags -> activityCallbackProvider()?.onExitFullscreen(flags) }
     )
 
     private val tabListCallback = object : TabListCallback() {
@@ -95,22 +96,14 @@ abstract class BrowserWrapper(
 
             unregisterTabCallbacks(tab)
 
-            // If the tab that was removed wasn't the active tab, don't switch tabs.
-            if (tab.browser.activeTab != null) return
+            // If a tab is still active, don't switch tabs.
+            browser?.let {
+                if (it.activeTab != null) return
 
-            when {
-                parentTab != null -> {
-                    tab.browser.setActiveTab(parentTab)
-                }
-
-                orderedTabList.value.isNotEmpty() -> {
-                    tab.browser.setActiveTab(tabList.getTab(newIndex))
-                }
-
-                else -> {
-                    createTabWithUri(Uri.parse(NeevaConstants.appURL), parentTabId = null)
-                    tab.browser.setActiveTab(tabList.getTab(newIndex))
-                    activityCallbacks.get()?.bringToForeground()
+                when {
+                    parentTab != null -> it.setActiveTab(parentTab)
+                    orderedTabList.value.isNotEmpty() -> it.setActiveTab(tabList.getTab(newIndex))
+                    else -> onEmptyTabList(it)
                 }
             }
         }
@@ -133,17 +126,15 @@ abstract class BrowserWrapper(
 
     private val browserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
         override fun onBottomViewOffsetChanged(offset: Int) {
-            activityCallbacks.get()?.onBottomBarOffsetChanged(offset)
+            activityCallbackProvider()?.onBottomBarOffsetChanged(offset)
         }
 
         override fun onTopViewOffsetChanged(offset: Int) {
-            activityCallbacks.get()?.onTopBarOffsetChanged(offset)
+            activityCallbackProvider()?.onTopBarOffsetChanged(offset)
         }
     }
 
-    fun initialize(activityCallbacks: WeakReference<ActivityCallbacks>) {
-        this.activityCallbacks = activityCallbacks
-
+    fun initialize() {
         fragment = createBrowserFragment()
 
         // Have WebLayer Shell retain the fragment instance to simulate the behavior of
@@ -161,27 +152,32 @@ abstract class BrowserWrapper(
      */
     abstract fun createBrowserFragment(): Fragment
 
-    @Synchronized
-    fun createAndAttachBrowser(fragmentAttacher: (Fragment) -> Unit): Boolean {
-        if (::browser.isInitialized) return false
+    /** Creates a [TabScreenshotter] that can be used to persist preview images of tabs. */
+    abstract fun createTabScreenshotter(
+        tabListUpdater: (guid: String, fileUri: Uri) -> Unit
+    ): TabScreenshotter
 
-        fragmentAttacher.invoke(fragment)
-        browser = Browser.fromFragment(fragment)!!
-        return true
+    @Synchronized
+    fun createAndAttachBrowser(fragmentAttacher: (Fragment, Boolean) -> Unit) {
+        fragmentAttacher.invoke(fragment, isIncognito)
+        if (browser == null) {
+            browser = Browser.fromFragment(fragment)
+        }
     }
 
     @CallSuper
     @Synchronized
     open fun registerBrowserCallbacks(): Boolean {
-        if (::tabListRestorer.isInitialized) return false
+        val browser = this.browser ?: return false
+        if (tabListRestorer != null) return false
 
-        tabListRestorer = BrowserRestoreCallbackImpl(browser) {
+        val restorer = BrowserRestoreCallbackImpl(browser) {
             createTabWithUri(Uri.parse(NeevaConstants.appURL), parentTabId = null)
         }
 
         browser.registerTabListCallback(tabListCallback)
         browser.registerBrowserControlsOffsetCallback(browserControlsOffsetCallback)
-        browser.registerBrowserRestoreCallback(tabListRestorer)
+        browser.registerBrowserRestoreCallback(restorer)
 
         browser.profile.setTablessOpenUrlCallback(
             object : OpenUrlCallback() {
@@ -190,19 +186,19 @@ abstract class BrowserWrapper(
             }
         )
 
+        tabListRestorer = restorer
         return true
     }
 
     /** Prepares a Browser to be displayed and used within the current environment. */
     fun prepareBrowser(
-        activityCallbacks: WeakReference<ActivityCallbacks>,
         topControlsPlaceholder: View,
         bottomControlsPlaceholder: View
     ): Fragment {
+        val browser = this.browser ?: throw IllegalStateException()
         registerBrowserCallbacks()
 
-        this.activityCallbacks = activityCallbacks
-        activityCallbacks.get()?.getDisplaySize()?.let { windowSize ->
+        activityCallbackProvider()?.getDisplaySize()?.let { windowSize ->
             browser.setMinimumSurfaceSize(windowSize.x, windowSize.y)
         }
 
@@ -211,9 +207,8 @@ abstract class BrowserWrapper(
         // around this, we pass in a fake view that is the same height as the real bottom toolbar
         // and listen for the scrolling offsets, which we then apply to the real bottom toolbar.
         // This is a valid use case according to the BrowserControlsOffsetCallback.
-        browser.setBottomView(bottomControlsPlaceholder)
-
         val resources = appContext.resources
+        browser.setBottomView(bottomControlsPlaceholder)
         bottomControlsPlaceholder.layoutParams.height =
             resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
         bottomControlsPlaceholder.requestLayout()
@@ -264,9 +259,10 @@ abstract class BrowserWrapper(
             historyManager = historyManager,
             faviconCache = faviconCache,
             tabList = tabList,
-            activityCallbacks = activityCallbacks,
+            activityCallbackProvider = activityCallbackProvider,
             registerNewTab = this::registerNewTab,
-            fullscreenCallback = fullscreenCallback
+            fullscreenCallback = fullscreenCallback,
+            tabScreenshotter = tabScreenshotter
         )
     }
 
@@ -280,14 +276,24 @@ abstract class BrowserWrapper(
     /** Removes all the callbacks that are set up to interact with WebLayer. */
     @CallSuper
     open fun unregisterBrowserAndTabCallbacks() {
-        browser.unregisterTabListCallback(tabListCallback)
-        browser.unregisterBrowserControlsOffsetCallback(browserControlsOffsetCallback)
-        browser.unregisterBrowserRestoreCallback(tabListRestorer)
+        browser?.apply {
+            unregisterTabListCallback(tabListCallback)
+            unregisterBrowserControlsOffsetCallback(browserControlsOffsetCallback)
+            tabListRestorer?.let { unregisterBrowserRestoreCallback(it) }
+        }
 
         // Avoid a ConcurrentModificationException by iterating on a copy of the keys rather than
         // the map itself.
-        tabCallbackMap.keys.toList().forEach { unregisterTabCallbacks(it) }
+        tabCallbackMap.keys.toList().forEach {
+            unregisterTabCallbacks(it)
+            tabList.remove(it)
+        }
         tabCallbackMap.clear()
+        tabList.clear()
+        activeTabModel.onActiveTabChanged(null)
+
+        browser = null
+        tabListRestorer = null
     }
 
     /**
@@ -297,8 +303,10 @@ abstract class BrowserWrapper(
      * the [TabListCallback] tells us the new tab has been added.
      */
     fun createTabWithUri(uri: Uri, parentTabId: String?) {
-        newTabInfo = CreateNewTabInfo(uri, parentTabId)
-        browser.createTab()
+        browser?.let {
+            newTabInfo = CreateNewTabInfo(uri, parentTabId)
+            it.createTab()
+        }
     }
 
     fun canExitFullscreen() = fullscreenCallback.canExitFullscreen()
@@ -321,7 +329,8 @@ abstract class BrowserWrapper(
     }
 
     fun takeScreenshotOfActiveTab() {
-        tabScreenshotter.captureAndSaveScreenshot(browser.activeTab, tabList)
+        val tab = browser?.activeTab?.takeUnless { it.isDestroyed } ?: return
+        tabScreenshotter.captureAndSaveScreenshot(tab)
     }
 
     /**
@@ -331,7 +340,7 @@ abstract class BrowserWrapper(
      * @return True if the tab was the child of an existing Tab.
      */
     fun closeActiveChildTab(): Boolean {
-        return browser.activeTab
+        return browser?.activeTab
             ?.let { activeTab ->
                 val tabInfo = tabList.getTabInfo(activeTab.guid)
                 tabInfo?.parentTabId?.let {
@@ -340,4 +349,9 @@ abstract class BrowserWrapper(
                 }
             } ?: false
     }
+
+    fun hasNoTabs(): Boolean = tabList.hasNoTabs()
+
+    /** Called when there are no tabs remaining in the browser. */
+    abstract fun onEmptyTabList(browser: Browser)
 }

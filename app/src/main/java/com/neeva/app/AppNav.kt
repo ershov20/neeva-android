@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.neeva.app.browsing.BrowserWrapper
+import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
@@ -21,14 +22,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AppNavModel(
-    private val onOpenUrl: (Uri, Boolean) -> Unit,
+    private val webLayerModel: WebLayerModel,
     private val spaceStore: SpaceStore
 ) : ViewModel() {
     private val _state = MutableStateFlow(AppNavState.BROWSER)
     val state: StateFlow<AppNavState> = _state
 
     fun openUrl(uri: Uri) {
-        onOpenUrl(uri, true)
+        webLayerModel.browserWrapperFlow.value.activeTabModel.loadUrl(uri, true)
         showBrowser()
     }
 
@@ -40,6 +41,11 @@ class AppNavModel(
                 spaceStore.refresh()
             }
         }
+    }
+
+    fun showTabSwitcher(useIncognito: Boolean) {
+        setContentState(AppNavState.CARD_GRID)
+        webLayerModel.switchToProfile(useIncognito = useIncognito)
     }
 
     fun showBrowser() = setContentState(AppNavState.BROWSER)
@@ -78,11 +84,11 @@ class AppNavModel(
 
     @Suppress("UNCHECKED_CAST")
     class AppNavModelFactory(
-        private val spaceStore: SpaceStore,
-        private val onOpenUrl: (Uri, Boolean) -> Unit
+        private val webLayerModel: WebLayerModel,
+        private val spaceStore: SpaceStore
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return AppNavModel(onOpenUrl, spaceStore) as T
+            return AppNavModel(webLayerModel, spaceStore) as T
         }
     }
 }

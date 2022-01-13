@@ -3,6 +3,7 @@ package com.neeva.app.widgets
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -38,6 +39,24 @@ fun Button(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val colorTint = if (enabled) {
+        MaterialTheme.colors.onPrimary
+    } else {
+        Color.LightGray
+    }
+
+    Button(enabled, resID, contentDescription, colorTint, modifier, onClick)
+}
+
+@Composable
+fun Button(
+    enabled: Boolean,
+    resID: Int,
+    contentDescription: String,
+    colorTint: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
     Image(
         painter = painterResource(id = resID),
         contentDescription = contentDescription,
@@ -45,13 +64,7 @@ fun Button(
         modifier = modifier
             .size(48.dp, 48.dp)
             .clickable(enabled) { onClick() },
-        colorFilter = ColorFilter.tint(
-            if (enabled) {
-                MaterialTheme.colors.onPrimary
-            } else {
-                Color.LightGray
-            }
-        )
+        colorFilter = ColorFilter.tint(colorTint)
     )
 }
 
@@ -82,11 +95,35 @@ fun BrandedTextButton(
     )
 }
 
-@Preview("1x scale")
+@Preview(showBackground = true, backgroundColor = 0xff000000)
 @Composable
-fun Button_Preview() {
+fun Button_PreviewDarkEnabled() {
+    NeevaTheme(darkTheme = true) {
+        Button(enabled = true, R.drawable.btn_close, "Close Button") {}
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xff000000)
+@Composable
+fun Button_PreviewDarkDisabled() {
+    NeevaTheme(darkTheme = true) {
+        Button(enabled = false, R.drawable.btn_close, "Close Button") {}
+    }
+}
+
+@Preview
+@Composable
+fun Button_PreviewEnabled() {
     NeevaTheme {
         Button(enabled = true, R.drawable.btn_close, "Close Button") {}
+    }
+}
+
+@Preview
+@Composable
+fun Button_PreviewDisabled() {
+    NeevaTheme {
+        Button(enabled = false, R.drawable.btn_close, "Close Button") {}
     }
 }
 
@@ -98,5 +135,18 @@ fun Button_Preview() {
 fun BrandedTextButton_Preview() {
     NeevaTheme {
         BrandedTextButton(enabled = true, stringResID = R.string.sign_in_with_google) {}
+    }
+}
+
+@Preview("Dark, 1x scale")
+@Preview("Dark, 2x scale", fontScale = 2.0f)
+@Preview("Dark, RTL, 1x scale", locale = "he")
+@Preview("Dark, RTL, 2x scale", locale = "he", fontScale = 2.0f)
+@Composable
+fun BrandedTextButton_PreviewDark() {
+    NeevaTheme(darkTheme = true) {
+        Box(modifier = Modifier.background(Color.Black)) {
+            BrandedTextButton(enabled = true, stringResID = R.string.sign_in_with_google) {}
+        }
     }
 }

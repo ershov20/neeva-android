@@ -16,6 +16,7 @@ class TabList {
     private val _orderedTabList = MutableStateFlow<List<TabInfo>>(emptyList())
     val orderedTabList: StateFlow<List<TabInfo>> = _orderedTabList
 
+    fun hasNoTabs(): Boolean = currentTabs.isEmpty()
     fun indexOf(tab: Tab) = currentTabs.indexOf(tab)
     fun findTab(id: String) = currentTabs.firstOrNull { it.guid == id }
     fun getTab(index: Int) = currentTabs[index]
@@ -84,6 +85,12 @@ class TabList {
         val existingTab = currentPrimitives[tabId] ?: return
         if (existingTab.parentTabId == parentTabId) return
         currentPrimitives[tabId] = existingTab.copy(parentTabId = parentTabId)
+        updateFlow()
+    }
+
+    internal fun clear() {
+        currentTabs.clear()
+        currentPrimitives.clear()
         updateFlow()
     }
 

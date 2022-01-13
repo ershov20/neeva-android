@@ -2,6 +2,7 @@ package com.neeva.app.urlbar
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -10,23 +11,28 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.Button
 
 @Composable
 fun LocationLabel(
     urlBarValue: String,
+    backgroundColor: Color,
+    foregroundColor: Color,
+    showIncognitoBadge: Boolean,
     showLock: Boolean,
     onReload: () -> Unit,
     modifier: Modifier = Modifier
@@ -34,22 +40,31 @@ fun LocationLabel(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .background(MaterialTheme.colors.primaryVariant)
+            .background(backgroundColor)
             .wrapContentSize(Alignment.Center)
             .defaultMinSize(minHeight = 40.dp)
     ) {
+        val iconSize = 24.dp
+        val iconModifier = Modifier.padding(8.dp).size(iconSize)
+        if (showIncognitoBadge) {
+            Image(
+                painter = painterResource(R.drawable.ic_incognito),
+                contentDescription = stringResource(R.string.incognito),
+                modifier = iconModifier,
+                colorFilter = ColorFilter.tint(foregroundColor)
+            )
+        } else {
+            Box(modifier = iconModifier)
+        }
+
         Spacer(modifier = Modifier.weight(1.0f))
 
         if (showLock) {
             Image(
                 painter = painterResource(R.drawable.ic_baseline_lock_18),
                 contentDescription = "secure site",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(14.dp),
-                colorFilter = ColorFilter.tint(
-                    MaterialTheme.colors.contentColorFor(MaterialTheme.colors.primaryVariant)
-                ),
+                modifier = Modifier.padding(8.dp).size(16.dp),
+                colorFilter = ColorFilter.tint(foregroundColor),
                 contentScale = ContentScale.Fit
             )
         }
@@ -58,7 +73,7 @@ fun LocationLabel(
             text = urlBarValue.ifEmpty { "Search or enter address" },
             style = MaterialTheme.typography.body1,
             maxLines = 1,
-            color = MaterialTheme.colors.contentColorFor(MaterialTheme.colors.primaryVariant)
+            color = foregroundColor
         )
 
         Spacer(modifier = Modifier.weight(1.0f))
@@ -67,46 +82,40 @@ fun LocationLabel(
             enabled = true,
             resID = R.drawable.ic_baseline_refresh_24,
             contentDescription = stringResource(R.string.reload),
-            onClick = onReload
+            onClick = onReload,
+            colorTint = foregroundColor
         )
     }
 }
 
-@Preview("With lock, dark mode, 1x font scale")
-@Preview("With lock, dark mode, 2x font scale", fontScale = 2.0f)
-@Composable
-fun LocationBar_PreviewWithLock_Dark() {
-    NeevaTheme(darkTheme = true) {
-        LocationLabel(
-            urlBarValue = "www.reddit.com",
-            showLock = true,
-            onReload = {}
-        )
-    }
-}
+class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPreviews.Params>(3) {
+    data class Params(
+        val darkTheme: Boolean,
+        val isIncognito: Boolean,
+        val showLock: Boolean
+    )
 
-@Preview("With lock, 1x font scale")
-@Preview("With lock, 2x font scale", fontScale = 2.0f)
-@Composable
-fun LocationBar_PreviewWithLock() {
-    NeevaTheme {
-        LocationLabel(
-            urlBarValue = "www.reddit.com",
-            showLock = true,
-            onReload = {}
-        )
-    }
-}
+    override fun createParams(booleanArray: BooleanArray) = Params(
+        darkTheme = booleanArray[0],
+        isIncognito = booleanArray[1],
+        showLock = booleanArray[2]
+    )
 
-@Preview("No lock, 1x font scale")
-@Preview("No lock, 2x font scale", fontScale = 2.0f)
-@Composable
-fun LocationBar_PreviewNoLock() {
-    NeevaTheme {
-        LocationLabel(
-            urlBarValue = "www.reddit.com",
-            showLock = false,
-            onReload = {}
-        )
+    @Preview("1x font scale")
+    @Preview("2x font scale", fontScale = 2.0f)
+    @Composable
+    fun LocationLabelPreview(
+        @PreviewParameter(LocationLabelPreviews::class) params: Params
+    ) {
+        NeevaTheme(darkTheme = params.darkTheme) {
+            LocationLabel(
+                urlBarValue = "www.reddit.com",
+                backgroundColor = MaterialTheme.colors.primaryVariant,
+                foregroundColor = MaterialTheme.colors.onPrimary,
+                showIncognitoBadge = params.isIncognito,
+                showLock = params.showLock,
+                onReload = {}
+            )
+        }
     }
 }

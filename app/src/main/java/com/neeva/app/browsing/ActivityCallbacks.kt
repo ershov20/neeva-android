@@ -32,4 +32,10 @@ interface ActivityCallbacks {
 
     /** Called when the top bar needs to be translated from its current location as the user scrolls. */
     fun onTopBarOffsetChanged(offset: Int)
+
+    /**
+     * Called when the Fragment containing the Incognito profile should be removed from the
+     * hierarchy, allowing it to be culled and deleted by WebLayer.
+     */
+    fun onDeleteIncognitoProfile()
 }

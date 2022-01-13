@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import androidx.fragment.app.Fragment
 import com.neeva.app.history.HistoryManager
@@ -9,28 +10,30 @@ import com.neeva.app.suggestions.SuggestionsModel
 import java.nio.file.Files
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.chromium.weblayer.Browser
 import org.chromium.weblayer.WebLayer
 
-/** Maintains the logic for an Incognito browser profile. */
+/**
+ * Maintains the logic for an Incognito browser profile.
+ *
+ * TODO(dan.alcantara): Encrypt the screenshots that are taken using a per-session ID that
+ *                      guarantees that we can't decrypt the screenshots once the app is restarted.
+ */
 class IncognitoBrowserWrapper(
     appContext: Application,
+    activityCallbackProvider: () -> ActivityCallbacks?,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 ) : BrowserWrapper(
     isIncognito = true,
     appContext = appContext,
+    activityCallbackProvider = activityCallbackProvider,
     coroutineScope = coroutineScope
 ) {
     companion object {
         val TAG = IncognitoBrowserWrapper::class.simpleName
-        const val FOLDER_NAME = "incognito"
+        const val FOLDER_PREFIX = "incognito"
     }
-
-    override val tabScreenshotter: TabScreenshotter = TabScreenshotter(
-        Files.createTempDirectory(FOLDER_NAME).toFile().also {
-            Log.d(TAG, "Created temporary folder: ${it.absolutePath}")
-            it.deleteOnExit()
-        }
-    )
 
     override val suggestionsModel: SuggestionsModel? = null
     override val historyManager: HistoryManager? = null
@@ -40,13 +43,25 @@ class IncognitoBrowserWrapper(
         return WebLayer.createBrowserFragmentWithIncognitoProfile(null, null)
     }
 
+    override fun createTabScreenshotter(tabListUpdater: (guid: String, fileUri: Uri) -> Unit) =
+        TabScreenshotter(Files.createTempDirectory(FOLDER_PREFIX).toFile(), tabListUpdater)
+
+    override fun onEmptyTabList(browser: Browser) {
+        // Do nothing so that we can detect when the user is no longer needs Incognito active.
+    }
+
     override fun unregisterBrowserAndTabCallbacks() {
+        // Tell WebLayer that it should destroy the incognito profile when it can.  This deletes any
+        // temporary files or cookies that were created while the user was in the incognito session.
         Log.d(TAG, "Marking incognito profile for deletion")
-        browser.profile.destroyAndDeleteDataFromDiskSoon {
+        browser?.profile?.destroyAndDeleteDataFromDiskSoon {
             Log.d(TAG, "Destroyed incognito profile")
         }
 
-        // TODO(dan.alcantara): Make sure to delete any screenshots or favicons we saved.
+        // Delete the local state that we keep track of separately from WebLayer.
+        coroutineScope.launch(Dispatchers.IO) {
+            CacheCleaner(appContext.filesDir).run()
+        }
 
         super.unregisterBrowserAndTabCallbacks()
     }

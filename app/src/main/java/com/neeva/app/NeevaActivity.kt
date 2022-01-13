@@ -31,6 +31,8 @@ import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
@@ -39,7 +41,8 @@ import org.chromium.weblayer.Tab
 class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     companion object {
         private const val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
-        private const val WEBLAYER_FRAGMENT_TAG = "WebLayer Fragment"
+        private const val TAG_REGULAR_PROFILE = "FRAGMENT_TAG_REGULAR_PROFILE"
+        private const val TAG_INCOGNITO_PROFILE = "FRAGMENT_TAG_INCOGNITO_PROFILE"
     }
 
     @Inject lateinit var apolloClient: ApolloClient
@@ -51,9 +54,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     private val webModel by viewModels<WebLayerModel>()
 
     private val appNavModel by viewModels<AppNavModel> {
-        AppNavModel.AppNavModelFactory(spaceStore) { uri, newTab ->
-            webModel.browserWrapperFlow.value.activeTabModel.loadUrl(uri, newTab)
-        }
+        AppNavModel.AppNavModelFactory(webModel, spaceStore)
     }
 
     /**
@@ -62,16 +63,17 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
      * appears to have a bug that prevents the bottom view from rendering correctly.
      * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v96.
      */
-    private lateinit var bottomControlPlaceholder: View
-    private lateinit var topControlPlaceholder: View
     private lateinit var bottomControls: View
     private lateinit var browserUI: View
+
+    private lateinit var containerRegularProfile: View
+    private lateinit var containerIncognitoProfile: View
 
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        webModel.setBrowserCallbacks(WeakReference(this))
+        webModel.activityCallbacks = WeakReference(this)
 
         setContentView(R.layout.main)
         browserUI = findViewById<ComposeView>(R.id.browser_ui).apply {
@@ -107,8 +109,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
             }
         }
-        topControlPlaceholder = layoutInflater.inflate(R.layout.fake_top_controls, null)
-        bottomControlPlaceholder = layoutInflater.inflate(R.layout.fake_bottom_controls, null)
 
         bottomControls = findViewById<ComposeView>(R.id.tab_toolbar).apply {
             setContent {
@@ -137,13 +137,20 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             }
         }
 
+        containerRegularProfile = findViewById(R.id.weblayer_regular)
+        containerIncognitoProfile = findViewById(R.id.weblayer_incognito)
+
         lifecycleScope.launch {
             lifecycle.whenStarted {
-                webModel.initializationState.collect {
-                    if (it != LoadingState.READY) return@collect
-
-                    onWebLayerReady()
-                }
+                webModel.initializationState
+                    .combine(webModel.browserWrapperFlow) { loadingState, browserDelegate ->
+                        Pair(loadingState, browserDelegate)
+                    }
+                    .stateIn(lifecycleScope)
+                    .collect { (loadingState, browserDelegate) ->
+                        if (loadingState != LoadingState.READY) return@collect
+                        prepareWebLayer()
+                    }
             }
         }
 
@@ -169,18 +176,30 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
-    private fun onWebLayerReady() {
+    private fun prepareWebLayer() {
         if (isFinishing || isDestroyed) return
 
+        val topControlPlaceholder = layoutInflater.inflate(R.layout.fake_top_controls, null)
+        val bottomControlPlaceholder = layoutInflater.inflate(R.layout.fake_bottom_controls, null)
         webModel.onWebLayerReady(
             topControlPlaceholder,
             bottomControlPlaceholder
-        ) {
+        ) { fragment, isIncognito ->
             // Note the commitNow() instead of commit(). We want the fragment to get attached to
             // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
             // have to wait until the commit is executed.
             val transaction = supportFragmentManager.beginTransaction()
-            transaction.add(R.id.weblayer, it, WEBLAYER_FRAGMENT_TAG)
+
+            if (isIncognito) {
+                containerRegularProfile.visibility = View.GONE
+                containerIncognitoProfile.visibility = View.VISIBLE
+                transaction.replace(R.id.weblayer_incognito, fragment, TAG_INCOGNITO_PROFILE)
+            } else {
+                containerIncognitoProfile.visibility = View.GONE
+                containerRegularProfile.visibility = View.VISIBLE
+                transaction.replace(R.id.weblayer_regular, fragment, TAG_REGULAR_PROFILE)
+            }
+
             transaction.commitNow()
         }
     }
@@ -252,7 +271,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
-        supportFragmentManager.findFragmentByTag(WEBLAYER_FRAGMENT_TAG)?.view?.apply {
+        tab.takeUnless { it.isDestroyed }?.browser?.fragment?.view?.apply {
             // Need to use the NeevaActivity as the context because the WebLayer View doesn't have
             // access to the correct resources.
             setOnCreateContextMenuListener(
@@ -284,5 +303,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     override fun onTopBarOffsetChanged(offset: Int) {
         // Move the real bar when WebLayer says that the fake one is moving.
         browserUI.translationY = offset.toFloat()
+    }
+
+    override fun onDeleteIncognitoProfile() {
+        val fragment = supportFragmentManager.findFragmentByTag(TAG_INCOGNITO_PROFILE) ?: return
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.remove(fragment)
+        transaction.commitNow()
+
+        containerRegularProfile.visibility = View.VISIBLE
+        containerIncognitoProfile.visibility = View.GONE
     }
 }

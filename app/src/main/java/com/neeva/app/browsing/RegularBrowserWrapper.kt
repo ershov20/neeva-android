@@ -15,6 +15,7 @@ import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.chromium.weblayer.Browser
 import org.chromium.weblayer.CookieChangedCallback
 import org.chromium.weblayer.WebLayer
 
@@ -24,6 +25,7 @@ import org.chromium.weblayer.WebLayer
  */
 class RegularBrowserWrapper(
     appContext: Application,
+    activityCallbackProvider: () -> ActivityCallbacks?,
     domainProviderImpl: DomainProviderImpl,
     apolloClient: ApolloClient,
     override val historyManager: HistoryManager,
@@ -33,14 +35,13 @@ class RegularBrowserWrapper(
 ) : BrowserWrapper(
     isIncognito = false,
     appContext,
+    activityCallbackProvider,
     coroutineScope
 ) {
     companion object {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
         private const val PERSISTENCE_ID = "Neeva_Browser"
     }
-
-    override val tabScreenshotter = TabScreenshotter(appContext.filesDir)
 
     override val suggestionsModel = SuggestionsModel(
         coroutineScope,
@@ -69,11 +70,14 @@ class RegularBrowserWrapper(
         return WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
     }
 
+    override fun createTabScreenshotter(tabListUpdater: (guid: String, fileUri: Uri) -> Unit) =
+        TabScreenshotter(appContext.filesDir, tabListUpdater)
+
     override fun registerBrowserCallbacks(): Boolean {
         val wasRegistered = super.registerBrowserCallbacks()
         if (!wasRegistered) return false
 
-        browser.profile.cookieManager.apply {
+        browser?.profile?.cookieManager?.apply {
             getCookie(Uri.parse(NeevaConstants.appURL)) {
                 it?.split("; ")?.forEach { cookie ->
                     saveLoginCookieFrom(appContext, cookie)
@@ -101,8 +105,13 @@ class RegularBrowserWrapper(
         return true
     }
 
+    override fun onEmptyTabList(browser: Browser) {
+        createTabWithUri(Uri.parse(NeevaConstants.appURL), parentTabId = null)
+        activityCallbackProvider()?.bringToForeground()
+    }
+
     override fun onAuthTokenUpdated() {
-        browser.profile.cookieManager.setCookie(
+        browser?.profile?.cookieManager?.setCookie(
             Uri.parse(NeevaConstants.appURL),
             User.loginCookieString(appContext)
         ) { success ->

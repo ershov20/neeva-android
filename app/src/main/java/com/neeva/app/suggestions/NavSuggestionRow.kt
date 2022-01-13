@@ -2,6 +2,8 @@ package com.neeva.app.suggestions
 
 import android.net.Uri
 import android.webkit.URLUtil
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
@@ -12,8 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.R
 import com.neeva.app.storage.Favicon
+import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -62,53 +66,49 @@ fun NavSuggestionRow(
     }
 }
 
-@Preview("No edit, 1x")
-@Preview("No edit, 2x", fontScale = 2.0f)
-@Preview("No edit, RTL, 1x", locale = "he")
-@Preview("No edit, RTL, 2x", locale = "he", fontScale = 2.0f)
-@Composable
-fun NavSuggestionRow_Preview() {
-    NeevaTheme {
-        NavSuggestionRow(
-            primaryLabel = "Primary label",
-            onTapRow = {},
-            secondaryLabel = "Secondary label",
-            onTapEdit = null,
-            faviconData = null
-        )
-    }
-}
+class NavSuggestionRowPreviews :
+    BooleanPreviewParameterProvider<NavSuggestionRowPreviews.Params>(3) {
+    data class Params(
+        val darkTheme: Boolean,
+        val useLongLabels: Boolean,
+        val allowEditing: Boolean
+    )
 
-@Preview("With edit, 1x")
-@Preview("With edit, 2x", fontScale = 2.0f)
-@Preview("With edit, RTL, 1x", locale = "he")
-@Preview("With edit, RTL, 2x", locale = "he", fontScale = 2.0f)
-@Composable
-fun NavSuggestionRow_PreviewEditable() {
-    NeevaTheme {
-        NavSuggestionRow(
-            primaryLabel = "Primary label",
-            onTapRow = {},
-            secondaryLabel = "Secondary label",
-            onTapEdit = {},
-            faviconData = null
-        )
-    }
-}
+    override fun createParams(booleanArray: BooleanArray) = Params(
+        darkTheme = booleanArray[0],
+        useLongLabels = booleanArray[1],
+        allowEditing = booleanArray[2]
+    )
 
-@Preview("Long text with edit, 1x")
-@Preview("Long text with edit, 2x", fontScale = 2.0f)
-@Preview("Long text with edit, RTL, 1x", locale = "he")
-@Preview("Long text with edit, RTL, 2x", locale = "he", fontScale = 2.0f)
-@Composable
-fun NavSuggestionRow_PreviewLongTextEditable() {
-    NeevaTheme {
-        NavSuggestionRow(
-            primaryLabel = stringResource(R.string.debug_long_string_primary),
-            onTapRow = {},
-            secondaryLabel = stringResource(R.string.debug_long_string_secondary),
-            onTapEdit = {},
-            faviconData = null
-        )
+    @Preview("1x", locale = "en")
+    @Preview("2x", locale = "en", fontScale = 2.0f)
+    @Preview("RTL, 1x", locale = "he")
+    @Preview("RTL, 2x", locale = "he", fontScale = 2.0f)
+    @Composable
+    fun DefaultPreview(
+        @PreviewParameter(NavSuggestionRowPreviews::class) params: Params
+    ) {
+        val primaryLabel: String
+        val secondaryLabel: String
+        if (params.useLongLabels) {
+            primaryLabel = stringResource(R.string.debug_long_string_primary)
+            secondaryLabel = stringResource(R.string.debug_long_string_primary)
+        } else {
+            primaryLabel = "Primary label"
+            secondaryLabel = "Secondary label"
+        }
+        val onTapEdit = {}.takeIf { params.allowEditing }
+
+        NeevaTheme(darkTheme = params.darkTheme) {
+            Box(modifier = Modifier.background(MaterialTheme.colors.primary)) {
+                NavSuggestionRow(
+                    primaryLabel = primaryLabel,
+                    onTapRow = {},
+                    secondaryLabel = secondaryLabel,
+                    onTapEdit = onTapEdit,
+                    faviconData = null
+                )
+            }
+        }
     }
 }

@@ -7,7 +7,6 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.TypeConverters
 import com.neeva.app.storage.Visit
-import java.lang.ref.WeakReference
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -37,9 +36,10 @@ class TabCallbacks(
     private val historyManager: HistoryManager?,
     private val faviconCache: FaviconCache?,
     private val tabList: TabList,
-    private val activityCallbacks: WeakReference<ActivityCallbacks>,
+    private val activityCallbackProvider: () -> ActivityCallbacks?,
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
-    fullscreenCallback: FullscreenCallback
+    fullscreenCallback: FullscreenCallback,
+    private val tabScreenshotter: TabScreenshotter
 ) {
     private val browser: Browser get() = tab.browser
 
@@ -53,6 +53,7 @@ class TabCallbacks(
                 return
             }
 
+            val title = tab.currentDisplayTitle
             val url = tab.currentDisplayUrl
 
             coroutineScope.launch {
@@ -64,13 +65,13 @@ class TabCallbacks(
                     historyManager.insert(
                         coroutineScope = coroutineScope,
                         url = it,
-                        title = tab.currentDisplayTitle,
+                        title = title,
                         favicon = faviconData
                     )
                 }
 
                 historyManager.updateDomainFavicon(
-                    url = tab.currentDisplayUrl.toString(),
+                    url = url.toString(),
                     favicon = faviconData
                 )
             }
@@ -105,6 +106,8 @@ class TabCallbacks(
         override fun onNavigationFailed(navigation: Navigation) = commitVisit(navigation)
 
         private fun commitVisit(navigation: Navigation) {
+            tabScreenshotter.captureAndSaveScreenshot(tab)
+
             // Try to avoid recording visits to history when we are revisiting the same page.
             val shouldRecordVisit = when {
                 isIncognito -> false
@@ -134,7 +137,7 @@ class TabCallbacks(
     private val tabCallback = object : TabCallback() {
         override fun bringTabToFront() {
             browser.setActiveTab(tab)
-            activityCallbacks.get()?.bringToForeground()
+            activityCallbackProvider()?.bringToForeground()
         }
 
         override fun onTitleUpdated(title: String) {
@@ -151,7 +154,7 @@ class TabCallbacks(
 
         override fun showContextMenu(params: ContextMenuParams) {
             if (tab != browser.activeTab) return
-            activityCallbacks.get()?.showContextMenuForTab(params, tab)
+            activityCallbackProvider()?.showContextMenuForTab(params, tab)
         }
     }
 

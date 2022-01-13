@@ -69,7 +69,9 @@ fun AutocompleteTextField(
     suggestionsModel: SuggestionsModel?,
     urlBarModel: URLBarModel,
     getFaviconFlow: (Uri) -> Flow<Favicon?>,
-    urlBarIsBeingEdited: Boolean
+    urlBarIsBeingEdited: Boolean,
+    backgroundColor: Color,
+    foregroundColor: Color
 ) {
     val suggestionFlow = suggestionsModel?.autocompleteSuggestion ?: MutableStateFlow(null)
     val autocompletedSuggestion by suggestionFlow.collectAsState()
@@ -114,7 +116,9 @@ fun AutocompleteTextField(
                     urlBarText.text
                 )
             )
-        }
+        },
+        backgroundColor = backgroundColor,
+        foregroundColor = foregroundColor
     )
 }
 
@@ -128,12 +132,15 @@ fun AutocompleteTextField(
     onLocationReplaced: (String) -> Unit,
     onFocusChanged: (FocusState) -> Unit,
     onLoadUrl: () -> Unit,
+    backgroundColor: Color,
+    foregroundColor: Color
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .defaultMinSize(minHeight = 40.dp)
             .fillMaxWidth()
+            .background(backgroundColor)
             .then(
                 // If the user clicks on the URL bar while a suggestion is displayed, make it the
                 // new current query.
@@ -171,11 +178,7 @@ fun AutocompleteTextField(
                     },
                 singleLine = true,
                 textStyle = TextStyle(
-                    color = if (value.text.isEmpty()) {
-                        MaterialTheme.colors.onSecondary
-                    } else {
-                        MaterialTheme.colors.onPrimary
-                    },
+                    color = foregroundColor,
                     fontSize = MaterialTheme.typography.body1.fontSize
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -219,8 +222,8 @@ fun AutocompleteTextField(
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_baseline_cancel_24),
-                contentDescription = stringResource(id = R.string.cancel),
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
+                contentDescription = stringResource(id = R.string.clear),
+                colorFilter = ColorFilter.tint(foregroundColor)
             )
         }
     }
@@ -239,7 +242,9 @@ fun AutocompleteTextField_Preview() {
             onLocationEdited = {},
             onLocationReplaced = {},
             onFocusChanged = {},
-            onLoadUrl = {}
+            onLoadUrl = {},
+            backgroundColor = MaterialTheme.colors.primaryVariant,
+            foregroundColor = MaterialTheme.colors.onPrimary
         )
     }
 }
@@ -257,7 +262,9 @@ fun AutocompleteTextField_PreviewHebrew() {
             onLocationEdited = {},
             onLocationReplaced = {},
             onFocusChanged = {},
-            onLoadUrl = {}
+            onLoadUrl = {},
+            backgroundColor = MaterialTheme.colors.primaryVariant,
+            foregroundColor = MaterialTheme.colors.onPrimary
         )
     }
 }
@@ -275,7 +282,9 @@ fun AutocompleteTextField_PreviewNoSuggestion() {
             onLocationEdited = {},
             onLocationReplaced = {},
             onFocusChanged = {},
-            onLoadUrl = {}
+            onLoadUrl = {},
+            backgroundColor = MaterialTheme.colors.primaryVariant,
+            foregroundColor = MaterialTheme.colors.onPrimary
         )
     }
 }

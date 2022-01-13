@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,12 +29,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.storage.Favicon
+import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
@@ -48,7 +51,8 @@ fun TabCard(
     Column(
         modifier = Modifier
             .padding(10.dp)
-            .clickable { onSelect() }
+            .clickable { onSelect() },
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             modifier = Modifier.then(
@@ -91,15 +95,13 @@ fun TabCard(
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.padding(vertical = 8.dp)
         ) {
-            Box(modifier = Modifier.padding(8.dp)) {
+            Box(modifier = Modifier.padding(end = 8.dp)) {
                 FaviconView(faviconData)
             }
             Text(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .weight(1.0f),
                 text = tab.title ?: tab.url.toString(),
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onPrimary,
@@ -110,44 +112,46 @@ fun TabCard(
     }
 }
 
-@Preview("Not selected, 1x scale", locale = "en")
-@Preview("Not selected, 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("RTL, Not selected, 1x scale", locale = "he")
-@Preview("RTL, Not selected, 2x scale", locale = "he", fontScale = 2.0f)
-@Composable
-fun TabCard_PreviewIsNotSelected() {
-    NeevaTheme {
-        TabCard(
-            tab = TabInfo(
-                id = "unimportant",
-                thumbnailUri = null,
-                url = Uri.parse("https://www.reddit.com"),
-                title = stringResource(id = R.string.debug_long_string_primary),
-                isSelected = false
-            ),
-            faviconData = null,
-            onSelect = {},
-            onClose = {}
-        )
-    }
-}
+class TabCardPreviews : BooleanPreviewParameterProvider<TabCardPreviews.Params>(3) {
+    data class Params(
+        val darkTheme: Boolean,
+        val isSelected: Boolean,
+        val useLongString: Boolean
+    )
 
-@Preview("Selected, 1x scale", locale = "en")
-@Preview("Selected, 2x scale", locale = "en", fontScale = 2.0f)
-@Composable
-fun TabCard_PreviewIsSelected() {
-    NeevaTheme {
-        TabCard(
-            tab = TabInfo(
-                id = "unimportant",
-                thumbnailUri = null,
-                url = Uri.parse("https://www.reddit.com"),
-                title = stringResource(id = R.string.debug_long_string_primary),
-                isSelected = true
-            ),
-            faviconData = null,
-            onSelect = {},
-            onClose = {}
-        )
+    override fun createParams(booleanArray: BooleanArray) = Params(
+        darkTheme = booleanArray[0],
+        isSelected = booleanArray[1],
+        useLongString = booleanArray[2]
+    )
+
+    @Preview("1x scale", locale = "en")
+    @Preview("2x scale", locale = "en", fontScale = 2.0f)
+    @Preview("RTL, 1x scale", locale = "he")
+    @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
+    @Composable
+    fun TabCard_Preview(@PreviewParameter(TabCardPreviews::class) params: Params) {
+        val title = if (params.useLongString) {
+            stringResource(id = R.string.debug_long_string_primary)
+        } else {
+            "short"
+        }
+
+        NeevaTheme(darkTheme = params.darkTheme) {
+            Box(modifier = Modifier.background(MaterialTheme.colors.primary)) {
+                TabCard(
+                    tab = TabInfo(
+                        id = "unimportant",
+                        thumbnailUri = null,
+                        url = Uri.parse("https://www.reddit.com"),
+                        title = title,
+                        isSelected = params.isSelected
+                    ),
+                    faviconData = null,
+                    onSelect = {},
+                    onClose = {}
+                )
+            }
+        }
     }
 }

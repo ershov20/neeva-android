@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.app.Application
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
@@ -16,6 +17,7 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -34,25 +36,24 @@ import org.chromium.weblayer.WebLayer
  */
 @HiltViewModel
 class WebLayerModel @Inject constructor(
-    appContext: Application,
+    private val appContext: Application,
     private val domainProviderImpl: DomainProviderImpl,
     historyManager: HistoryManager,
     apolloClient: ApolloClient,
     faviconCache: FaviconCache,
     spaceStore: SpaceStore
 ) : ViewModel() {
-
-    private var _activityCallbacks: WeakReference<ActivityCallbacks> = WeakReference(null)
-
-    fun setBrowserCallbacks(activityCallbacks: WeakReference<ActivityCallbacks>) {
-        _activityCallbacks = activityCallbacks
-        regularBrowser.activityCallbacks = activityCallbacks
+    companion object {
+        val TAG = WebLayerModel::class.simpleName
     }
+
+    var activityCallbacks: WeakReference<ActivityCallbacks> = WeakReference(null)
 
     private val _webLayer = MutableStateFlow<WebLayer?>(null)
 
     private val regularBrowser = RegularBrowserWrapper(
         appContext = appContext,
+        activityCallbackProvider = { activityCallbacks.get() },
         domainProviderImpl = domainProviderImpl,
         apolloClient = apolloClient,
         historyManager = historyManager,
@@ -60,37 +61,39 @@ class WebLayerModel @Inject constructor(
         spaceStore = spaceStore,
         coroutineScope = viewModelScope
     )
+    private var incognitoBrowser: IncognitoBrowserWrapper? = null
 
-    lateinit var initializationState: StateFlow<LoadingState>
+    /** Keeps track of the initialization pipeline. */
+    private val internalInitializationState = MutableStateFlow(LoadingState.UNINITIALIZED)
+    val initializationState: StateFlow<LoadingState> =
+        internalInitializationState.combine(_webLayer) { internalState, webLayer ->
+            LoadingState.from(
+                internalState,
+                when (webLayer) {
+                    null -> LoadingState.LOADING
+                    else -> LoadingState.READY
+                }
+            )
+        }
+            .stateIn(viewModelScope, SharingStarted.Lazily, LoadingState.LOADING)
 
     private val _browserWrapperFlow = MutableStateFlow<BrowserWrapper>(regularBrowser)
     val browserWrapperFlow: StateFlow<BrowserWrapper> = _browserWrapperFlow
     val currentBrowser
-        get() = _browserWrapperFlow.value
+        get() = browserWrapperFlow.value
 
     init {
-        viewModelScope.launch {
-            initializationState =
-                domainProviderImpl.loadingState
-                    .combine(_webLayer) { domainState, webLayer ->
-                        val webLayerState = if (webLayer == null) {
-                            LoadingState.LOADING
-                        } else {
-                            LoadingState.READY
-                        }
-                        LoadingState.from(domainState, webLayerState)
-                    }
-                    .stateIn(viewModelScope)
-        }
-
         viewModelScope.launch(Dispatchers.IO) {
             domainProviderImpl.initialize()
+            CacheCleaner(appContext.cacheDir).run()
+            internalInitializationState.value = LoadingState.READY
         }
 
         try {
             WebLayer.loadAsync(appContext) { webLayer ->
                 webLayer.isRemoteDebuggingEnabled = true
-                regularBrowser.initialize(_activityCallbacks)
+                regularBrowser.initialize()
+                incognitoBrowser?.initialize()
                 _webLayer.value = webLayer
             }
         } catch (e: UnsupportedVersionException) {
@@ -107,16 +110,39 @@ class WebLayerModel @Inject constructor(
     fun onWebLayerReady(
         topControlsPlaceholder: View,
         bottomControlsPlaceholder: View,
-        fragmentAttacher: (Fragment) -> Unit
+        fragmentAttacher: (Fragment, Boolean) -> Unit
     ) {
-        regularBrowser.createAndAttachBrowser(fragmentAttacher)
+        currentBrowser.createAndAttachBrowser(fragmentAttacher)
 
-        regularBrowser.prepareBrowser(
-            _activityCallbacks,
+        currentBrowser.prepareBrowser(
             topControlsPlaceholder,
             bottomControlsPlaceholder
         )
     }
 
     fun onAuthTokenUpdated() = currentBrowser.onAuthTokenUpdated()
+
+    fun switchToProfile(useIncognito: Boolean) {
+        if (useIncognito) {
+            val delegate = incognitoBrowser ?: run {
+                IncognitoBrowserWrapper(
+                    appContext = appContext,
+                    activityCallbackProvider = { activityCallbacks.get() },
+                    coroutineScope = viewModelScope
+                ).also { it.initialize() }
+            }
+
+            incognitoBrowser = delegate
+            _browserWrapperFlow.value = delegate
+        } else {
+            if (incognitoBrowser?.hasNoTabs() == true) {
+                Log.d(TAG, "Culling unnecessary incognito profile")
+                activityCallbacks.get()?.onDeleteIncognitoProfile()
+                incognitoBrowser = null
+            }
+
+            // Delete incognito if necessary.
+            _browserWrapperFlow.value = regularBrowser
+        }
+    }
 }

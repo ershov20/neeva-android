@@ -19,7 +19,10 @@ import kotlinx.coroutines.flow.StateFlow
  *
  * TODO(dan.alcantara): Audit how lazy tab opening works.
  */
-class URLBarModel(private val activeTabModel: ActiveTabModel) {
+class URLBarModel(
+    val isIncognito: Boolean,
+    private val activeTabModel: ActiveTabModel
+) {
     private val _userInputText = MutableStateFlow(TextFieldValue(""))
     val userInputText: StateFlow<TextFieldValue> = _userInputText
 

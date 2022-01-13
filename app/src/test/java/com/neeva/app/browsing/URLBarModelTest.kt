@@ -42,7 +42,7 @@ class URLBarModelTest : BaseTest() {
         activeTabModel = mock()
         Mockito.`when`(activeTabModel.urlFlow).thenReturn(urlFlow)
 
-        model = URLBarModel(activeTabModel)
+        model = URLBarModel(isIncognito = false, activeTabModel)
     }
 
     @Test

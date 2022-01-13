@@ -37,8 +37,7 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
     val progressFlow: StateFlow<Int> = _progressFlow
 
     /** Tracks which tab is currently active. */
-    private var _activeTabFlow = MutableStateFlow<Tab?>(null)
-    val activeTabFlow: StateFlow<Tab?> = _activeTabFlow
+    internal val activeTabFlow = MutableStateFlow<Tab?>(null)
 
     private val _showLock = MutableStateFlow(false)
     val showLock: StateFlow<Boolean> = _showLock
@@ -47,7 +46,7 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
     val displayedDomain: StateFlow<String> = _displayedDomain
 
     internal fun onActiveTabChanged(newActiveTab: Tab?) {
-        val previousTab = _activeTabFlow.value
+        val previousTab = activeTabFlow.value
         previousTab?.apply {
             unregisterTabCallback(selectedTabCallback)
             navigationController.unregisterNavigationCallback(selectedTabNavigationCallback)
@@ -57,7 +56,7 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
         // bar until the NavigationCallback fires.
         _progressFlow.value = 100
 
-        _activeTabFlow.value = newActiveTab
+        activeTabFlow.value = newActiveTab
         newActiveTab?.apply {
             registerTabCallback(selectedTabCallback)
             navigationController.registerNavigationCallback(selectedTabNavigationCallback)

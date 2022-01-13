@@ -22,6 +22,8 @@ import okhttp3.internal.closeQuietly
  * allow us to cache these and share them amongst multiple sites, we store them in the cache
  * directory with filenames determined by their MD5 hash.  Consumers may get the favicon Bitmap back
  * by loading File URIs that point at the cached file.
+ *
+ * TODO(dan.alcantara): Investigate using Profile.getCachedFaviconForPageUri instead.
  */
 class FaviconCache(context: Context) {
     companion object {
