@@ -1,5 +1,6 @@
 package com.neeva.app.card
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -112,7 +113,8 @@ fun CardsContainer(
             },
             listState = listState,
             cardGridListener = cardGridListener,
-            tabs = tabs
+            tabs = tabs,
+            screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot
         )
     }
 }
@@ -137,7 +139,8 @@ fun CardGrid(
     selectedScreen: SelectedScreen,
     listState: LazyListState,
     cardGridListener: CardGridListener,
-    tabs: List<TabInfo>
+    tabs: List<TabInfo>,
+    screenshotProvider: (tabId: String) -> Bitmap?
 ) {
     Column(
         modifier = Modifier
@@ -168,7 +171,8 @@ fun CardGrid(
                     tab = tab,
                     faviconData = favicon,
                     onSelect = { cardGridListener.onSelectTab(tab) },
-                    onClose = { cardGridListener.onCloseTab(tab) }
+                    onClose = { cardGridListener.onCloseTab(tab) },
+                    screenshotProvider = screenshotProvider
                 )
             }
         }
@@ -257,7 +261,6 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
                     TabInfo(
                         id = "tab $i",
                         parentTabId = null,
-                        thumbnailUri = null,
                         url = Uri.parse("https://www.neeva.com/$i"),
                         title = title,
                         isSelected = i == selectedTabIndex
@@ -265,7 +268,7 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
                 )
             }
 
-            CardGrid(selectedScreen, listState, cardGridListener, tabs)
+            CardGrid(selectedScreen, listState, cardGridListener, tabs) { null }
         }
     }
 }

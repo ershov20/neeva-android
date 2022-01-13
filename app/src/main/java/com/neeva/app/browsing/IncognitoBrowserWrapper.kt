@@ -1,7 +1,6 @@
 package com.neeva.app.browsing
 
 import android.app.Application
-import android.net.Uri
 import android.util.Log
 import androidx.fragment.app.Fragment
 import com.neeva.app.history.HistoryManager
@@ -43,8 +42,10 @@ class IncognitoBrowserWrapper(
         return WebLayer.createBrowserFragmentWithIncognitoProfile(null, null)
     }
 
-    override fun createTabScreenshotter(tabListUpdater: (guid: String, fileUri: Uri) -> Unit) =
-        TabScreenshotter(Files.createTempDirectory(FOLDER_PREFIX).toFile(), tabListUpdater)
+    override fun createTabScreenshotManager() = IncognitoTabScreenshotManager(
+        appContext,
+        Files.createTempDirectory(FOLDER_PREFIX).toFile()
+    )
 
     override fun onEmptyTabList(browser: Browser) {
         // Do nothing so that we can detect when the user is no longer needs Incognito active.
@@ -60,7 +61,7 @@ class IncognitoBrowserWrapper(
 
         // Delete the local state that we keep track of separately from WebLayer.
         coroutineScope.launch(Dispatchers.IO) {
-            CacheCleaner(appContext.filesDir).run()
+            CacheCleaner(appContext.cacheDir).run()
         }
 
         super.unregisterBrowserAndTabCallbacks()

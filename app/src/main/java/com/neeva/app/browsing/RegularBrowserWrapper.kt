@@ -70,8 +70,7 @@ class RegularBrowserWrapper(
         return WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
     }
 
-    override fun createTabScreenshotter(tabListUpdater: (guid: String, fileUri: Uri) -> Unit) =
-        TabScreenshotter(appContext.filesDir, tabListUpdater)
+    override fun createTabScreenshotManager() = TabScreenshotManager(appContext.cacheDir)
 
     override fun registerBrowserCallbacks(): Boolean {
         val wasRegistered = super.registerBrowserCallbacks()

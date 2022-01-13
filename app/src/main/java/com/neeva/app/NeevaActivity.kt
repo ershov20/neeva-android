@@ -123,12 +123,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                             TabToolbar(
                                 TabToolbarModel(
                                     appNavModel::showNeevaMenu,
-                                    appNavModel::showAddToSpace,
-                                    {
-                                        browserWrapper.takeScreenshotOfActiveTab()
+                                    appNavModel::showAddToSpace
+                                ) {
+                                    browserWrapper.takeScreenshotOfActiveTab {
                                         appNavModel.showCardGrid()
                                     }
-                                ),
+                                },
                                 browserWrapper.activeTabModel
                             )
                         }

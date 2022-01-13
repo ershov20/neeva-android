@@ -13,7 +13,9 @@ import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import java.lang.IllegalStateException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserRestoreCallback
@@ -61,11 +63,7 @@ abstract class BrowserWrapper(
      */
     private var newTabInfo: CreateNewTabInfo? = null
 
-    private val tabScreenshotter: TabScreenshotter by lazy {
-        createTabScreenshotter { guid, fileUri ->
-            tabList.updateThumbnailUri(guid, fileUri)
-        }
-    }
+    val tabScreenshotManager: TabScreenshotManager by lazy { createTabScreenshotManager() }
 
     abstract val suggestionsModel: SuggestionsModel?
     abstract val historyManager: HistoryManager?
@@ -90,16 +88,25 @@ abstract class BrowserWrapper(
         }
 
         override fun onTabRemoved(tab: Tab) {
+            // Delete any screenshot that was taken for the tab.
+            val tabId = tab.guid
+            coroutineScope.launch(Dispatchers.IO) {
+                tabScreenshotManager.deleteScreenshot(tabId)
+            }
+
+            // Remove the tab from our local state.
             val newIndex = (tabList.indexOf(tab) - 1).coerceAtLeast(0)
             val tabInfo = tabList.remove(tab)
-            val parentTab = tabInfo?.parentTabId?.let { tabList.findTab(it) }
 
+            // Remove all the callbacks associated with the tab to avoid any callbacks after the tab
+            // gets destroyed.
             unregisterTabCallbacks(tab)
 
-            // If a tab is still active, don't switch tabs.
+            // If a tab is still active, this tab was closed in the background.
             browser?.let {
                 if (it.activeTab != null) return
 
+                val parentTab = tabInfo?.parentTabId?.let { parentId -> tabList.findTab(parentId) }
                 when {
                     parentTab != null -> it.setActiveTab(parentTab)
                     orderedTabList.value.isNotEmpty() -> it.setActiveTab(tabList.getTab(newIndex))
@@ -152,10 +159,8 @@ abstract class BrowserWrapper(
      */
     abstract fun createBrowserFragment(): Fragment
 
-    /** Creates a [TabScreenshotter] that can be used to persist preview images of tabs. */
-    abstract fun createTabScreenshotter(
-        tabListUpdater: (guid: String, fileUri: Uri) -> Unit
-    ): TabScreenshotter
+    /** Creates a [TabScreenshotManager] that can be used to persist preview images of tabs. */
+    abstract fun createTabScreenshotManager(): TabScreenshotManager
 
     @Synchronized
     fun createAndAttachBrowser(fragmentAttacher: (Fragment, Boolean) -> Unit) {
@@ -262,7 +267,7 @@ abstract class BrowserWrapper(
             activityCallbackProvider = activityCallbackProvider,
             registerNewTab = this::registerNewTab,
             fullscreenCallback = fullscreenCallback,
-            tabScreenshotter = tabScreenshotter
+            tabScreenshotManager = tabScreenshotManager
         )
     }
 
@@ -313,7 +318,7 @@ abstract class BrowserWrapper(
     fun exitFullscreen() = fullscreenCallback.exitFullscreen()
 
     private fun onNewTabAdded(tab: Tab) {
-        tabList.add(tab, tabScreenshotter.getTabScreenshotFile(tab).toUri())
+        tabList.add(tab, tabScreenshotManager.getTabScreenshotFile(tab).toUri())
         registerTabCallbacks(tab)
     }
 
@@ -328,9 +333,9 @@ abstract class BrowserWrapper(
         tab.browser.setActiveTab(tab)
     }
 
-    fun takeScreenshotOfActiveTab() {
+    fun takeScreenshotOfActiveTab(onCompleted: () -> Unit = {}) {
         val tab = browser?.activeTab?.takeUnless { it.isDestroyed } ?: return
-        tabScreenshotter.captureAndSaveScreenshot(tab)
+        tabScreenshotManager.captureAndSaveScreenshot(tab, onCompleted)
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.neeva.app.card
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,11 +19,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
@@ -31,23 +37,54 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import coil.annotation.ExperimentalCoilApi
-import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun TabCard(
     tab: TabInfo,
     faviconData: Favicon?,
     onSelect: () -> Unit,
+    onClose: () -> Unit,
+    screenshotProvider: (id: String) -> Bitmap?
+) {
+    TabCard(
+        tab.title,
+        tab.url,
+        tab.id,
+        screenshotProvider,
+        tab.isSelected,
+        faviconData,
+        onSelect,
+        onClose
+    )
+}
+
+@Composable
+fun TabCard(
+    title: String?,
+    url: Uri?,
+    id: String,
+    screenshotProvider: (id: String) -> Bitmap?,
+    isSelected: Boolean,
+    faviconData: Favicon?,
+    onSelect: () -> Unit,
     onClose: () -> Unit
 ) {
+    val (thumbnail, setThumbnail) = remember { mutableStateOf<Bitmap?>(null) }
+
+    LaunchedEffect(key1 = id) {
+        withContext(Dispatchers.IO) {
+            setThumbnail(screenshotProvider(id))
+        }
+    }
+
     Column(
         modifier = Modifier
             .padding(10.dp)
@@ -56,7 +93,7 @@ fun TabCard(
     ) {
         Box(
             modifier = Modifier.then(
-                if (tab.isSelected) {
+                if (isSelected) {
                     Modifier.border(3.dp, Color.Blue, RoundedCornerShape(12.dp))
                 } else {
                     Modifier
@@ -64,10 +101,7 @@ fun TabCard(
             )
         ) {
             Image(
-                painter = rememberImagePainter(
-                    data = tab.thumbnailUri,
-                    builder = { crossfade(true) }
-                ),
+                bitmap = thumbnail?.asImageBitmap() ?: ImageBitmap(1, 1),
                 contentDescription = null,
                 contentScale = ContentScale.FillWidth,
                 modifier = Modifier
@@ -102,7 +136,7 @@ fun TabCard(
                 FaviconView(faviconData)
             }
             Text(
-                text = tab.title ?: tab.url.toString(),
+                text = title ?: url?.toString() ?: "",
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onPrimary,
                 maxLines = 1,
@@ -142,14 +176,14 @@ class TabCardPreviews : BooleanPreviewParameterProvider<TabCardPreviews.Params>(
                 TabCard(
                     tab = TabInfo(
                         id = "unimportant",
-                        thumbnailUri = null,
                         url = Uri.parse("https://www.reddit.com"),
                         title = title,
                         isSelected = params.isSelected
                     ),
                     faviconData = null,
                     onSelect = {},
-                    onClose = {}
+                    onClose = {},
+                    screenshotProvider = { null }
                 )
             }
         }

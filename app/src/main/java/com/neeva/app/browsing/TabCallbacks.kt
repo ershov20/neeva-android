@@ -39,7 +39,7 @@ class TabCallbacks(
     private val activityCallbackProvider: () -> ActivityCallbacks?,
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
-    private val tabScreenshotter: TabScreenshotter
+    private val tabScreenshotManager: TabScreenshotManager
 ) {
     private val browser: Browser get() = tab.browser
 
@@ -106,7 +106,7 @@ class TabCallbacks(
         override fun onNavigationFailed(navigation: Navigation) = commitVisit(navigation)
 
         private fun commitVisit(navigation: Navigation) {
-            tabScreenshotter.captureAndSaveScreenshot(tab)
+            tabScreenshotManager.captureAndSaveScreenshot(tab)
 
             // Try to avoid recording visits to history when we are revisiting the same page.
             val shouldRecordVisit = when {

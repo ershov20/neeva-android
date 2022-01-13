@@ -6,7 +6,6 @@ import android.net.Uri
 data class TabInfo(
     val id: String,
     val parentTabId: String? = null,
-    val thumbnailUri: Uri?,
     val url: Uri?,
     val title: String?,
     val isSelected: Boolean

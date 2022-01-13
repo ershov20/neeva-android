@@ -28,7 +28,6 @@ class TabList {
 
         currentPrimitives[tab.guid] = TabInfo(
             id = tab.guid,
-            thumbnailUri = thumbnailUri,
             url = tab.currentDisplayUrl,
             title = tab.currentDisplayTitle,
             isSelected = tab.isSelected
@@ -71,13 +70,6 @@ class TabList {
         val existingTab = currentPrimitives[tabId] ?: return
         if (existingTab.url == newUrl) return
         currentPrimitives[tabId] = existingTab.copy(url = newUrl)
-        updateFlow()
-    }
-
-    fun updateThumbnailUri(tabId: String, newThumbnailUri: Uri?) {
-        val existingTab = currentPrimitives[tabId] ?: return
-        if (existingTab.thumbnailUri == newThumbnailUri) return
-        currentPrimitives[tabId] = existingTab.copy(thumbnailUri = newThumbnailUri)
         updateFlow()
     }
 
