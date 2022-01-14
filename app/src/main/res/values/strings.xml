@@ -17,6 +17,10 @@
     <string name="spaces">Spaces</string>
     <string name="tabs">Tabs</string>
 
+    <string name="empty_regular_tabs_title">Create and manage tabs</string>
+    <string name="empty_incognito_tabs_title">Create and manage Incognito tabs</string>
+    <string name="empty_tab_hint">Tap + below to create a new tab</string>
+
     <string name="download_image">Download image</string>
     <string name="download_video">Download video</string>
     <string name="download_link">Download link</string>

@@ -15,7 +15,6 @@ import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.chromium.weblayer.Browser
 import org.chromium.weblayer.CookieChangedCallback
 import org.chromium.weblayer.WebLayer
 
@@ -102,11 +101,6 @@ class RegularBrowserWrapper(
         }
 
         return true
-    }
-
-    override fun onEmptyTabList(browser: Browser) {
-        createTabWithUri(Uri.parse(NeevaConstants.appURL), parentTabId = null)
-        activityCallbackProvider()?.bringToForeground()
     }
 
     override fun onAuthTokenUpdated() {

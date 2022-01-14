@@ -110,7 +110,6 @@ abstract class BrowserWrapper(
                 when {
                     parentTab != null -> it.setActiveTab(parentTab)
                     orderedTabList.value.isNotEmpty() -> it.setActiveTab(tabList.getTab(newIndex))
-                    else -> onEmptyTabList(it)
                 }
             }
         }
@@ -334,7 +333,7 @@ abstract class BrowserWrapper(
     }
 
     fun takeScreenshotOfActiveTab(onCompleted: () -> Unit = {}) {
-        val tab = browser?.activeTab?.takeUnless { it.isDestroyed } ?: return
+        val tab = browser?.activeTab
         tabScreenshotManager.captureAndSaveScreenshot(tab, onCompleted)
     }
 
@@ -356,7 +355,4 @@ abstract class BrowserWrapper(
     }
 
     fun hasNoTabs(): Boolean = tabList.hasNoTabs()
-
-    /** Called when there are no tabs remaining in the browser. */
-    abstract fun onEmptyTabList(browser: Browser)
 }

@@ -36,7 +36,10 @@ open class TabScreenshotManager(private val filesDir: File) {
 
     /** Takes a screenshot of the given [tab]. */
     fun captureAndSaveScreenshot(tab: Tab?, onCompleted: () -> Unit = {}) {
-        if (tab == null || tab.isDestroyed) return
+        if (tab == null || tab.isDestroyed) {
+            onCompleted()
+            return
+        }
 
         val tabGuid = tab.guid
 

@@ -10,7 +10,6 @@ import java.nio.file.Files
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.chromium.weblayer.Browser
 import org.chromium.weblayer.WebLayer
 
 /**
@@ -46,10 +45,6 @@ class IncognitoBrowserWrapper(
         appContext,
         Files.createTempDirectory(FOLDER_PREFIX).toFile()
     )
-
-    override fun onEmptyTabList(browser: Browser) {
-        // Do nothing so that we can detect when the user is no longer needs Incognito active.
-    }
 
     override fun unregisterBrowserAndTabCallbacks() {
         // Tell WebLayer that it should destroy the incognito profile when it can.  This deletes any
