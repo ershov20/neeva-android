@@ -8,8 +8,8 @@ import android.view.View
 import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
@@ -79,7 +79,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         browserUI = findViewById<ComposeView>(R.id.browser_ui).apply {
             setContent {
                 NeevaTheme {
-                    Surface(color = MaterialTheme.colors.background) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
                         val browserWrapper: BrowserWrapper
                             by webModel.browserWrapperFlow.collectAsState()
 
@@ -118,7 +118,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     val isEditing: Boolean by
                     browserWrapper.urlBarModel.isEditing.collectAsState()
 
-                    Surface(color = MaterialTheme.colors.background) {
+                    Surface(color = MaterialTheme.colorScheme.background) {
                         if (!isEditing) {
                             TabToolbar(
                                 TabToolbarModel(

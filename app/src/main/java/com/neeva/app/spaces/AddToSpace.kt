@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -76,15 +76,16 @@ fun AddToSpaceUI(
         stickyHeader {
             Row(
                 modifier = Modifier
-                    .background(MaterialTheme.colors.background)
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(16.dp)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // TODO(kobec): might be wrong font style
                 Text(
                     "Save to Spaces",
-                    style = MaterialTheme.typography.h4,
-                    color = MaterialTheme.colors.onPrimary,
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                 )
                 Spacer(modifier = Modifier.weight(1f))
@@ -95,7 +96,7 @@ fun AddToSpaceUI(
                     modifier = Modifier
                         .size(48.dp, 48.dp)
                         .clickable { onDismiss() },
-                    colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
                 )
             }
         }
@@ -135,8 +136,8 @@ fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -
         Text(
             text = space.name,
             modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.h4,
-            color = MaterialTheme.colors.onPrimary,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
         )
         if (space.isPublic) {
@@ -145,7 +146,7 @@ fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -
                 contentDescription = "Url in space indicator",
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.size(48.dp, 48.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
         }
         if (space.isShared) {
@@ -154,7 +155,7 @@ fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -
                 contentDescription = "Url in space indicator",
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.size(48.dp, 48.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
         }
         Spacer(modifier = Modifier.weight(1f))
@@ -174,7 +175,7 @@ fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -
                 contentDescription = "Url in space indicator",
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.size(48.dp, 48.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
         }
     }

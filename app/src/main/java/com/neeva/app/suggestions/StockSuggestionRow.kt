@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,7 +54,7 @@ fun StockSuggestionRow(
                 currentPrice?.let {
                     Text(
                         text = formatCurrency(it),
-                        style = MaterialTheme.typography.body1,
+                        style = MaterialTheme.typography.bodyLarge,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         softWrap = false
@@ -68,7 +68,7 @@ fun StockSuggestionRow(
                         } else {
                             " +${formatCurrency(it.absoluteValue)}"
                         },
-                        style = MaterialTheme.typography.body2,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = stockColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -84,7 +84,7 @@ fun StockSuggestionRow(
                         } else {
                             " +(${it.absoluteValue}%)"
                         },
-                        style = MaterialTheme.typography.body2,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = stockColor,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -96,8 +96,8 @@ fun StockSuggestionRow(
                 fetchedAtTime?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSecondary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1.0f).padding(start = elementSpacing),
@@ -113,7 +113,7 @@ fun StockSuggestionRow(
                 companyName?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.body2,
+                        style = MaterialTheme.typography.bodyMedium,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -122,8 +122,8 @@ fun StockSuggestionRow(
                 ticker?.let {
                     Text(
                         text = it,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSecondary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.fillMaxWidth().padding(start = elementSpacing)

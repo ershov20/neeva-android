@@ -17,8 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -179,7 +179,7 @@ fun AutocompleteTextField(
                 singleLine = true,
                 textStyle = TextStyle(
                     color = foregroundColor,
-                    fontSize = MaterialTheme.typography.body1.fontSize
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
                 ),
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Go
@@ -202,10 +202,10 @@ fun AutocompleteTextField(
                 Text(
                     text = suggestion,
                     modifier = Modifier.background(SelectionHighlight),
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.bodyLarge,
                     softWrap = false,
                     maxLines = 1,
-                    color = MaterialTheme.colors.onPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Start
                 )
             }
@@ -243,8 +243,8 @@ fun AutocompleteTextField_Preview() {
             onLocationReplaced = {},
             onFocusChanged = {},
             onLoadUrl = {},
-            backgroundColor = MaterialTheme.colors.primaryVariant,
-            foregroundColor = MaterialTheme.colors.onPrimary
+            backgroundColor = MaterialTheme.colorScheme.background,
+            foregroundColor = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -263,8 +263,8 @@ fun AutocompleteTextField_PreviewHebrew() {
             onLocationReplaced = {},
             onFocusChanged = {},
             onLoadUrl = {},
-            backgroundColor = MaterialTheme.colors.primaryVariant,
-            foregroundColor = MaterialTheme.colors.onPrimary
+            backgroundColor = MaterialTheme.colorScheme.background,
+            foregroundColor = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -283,8 +283,8 @@ fun AutocompleteTextField_PreviewNoSuggestion() {
             onLocationReplaced = {},
             onFocusChanged = {},
             onLoadUrl = {},
-            backgroundColor = MaterialTheme.colors.primaryVariant,
-            foregroundColor = MaterialTheme.colors.onPrimary
+            backgroundColor = MaterialTheme.colorScheme.background,
+            foregroundColor = MaterialTheme.colorScheme.onSurface
         )
     }
 }

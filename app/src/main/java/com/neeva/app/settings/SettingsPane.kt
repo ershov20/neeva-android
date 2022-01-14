@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,14 +36,14 @@ fun SettingsPane(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
             .fillMaxSize(),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
-                .background(MaterialTheme.colors.primary),
+                .background(MaterialTheme.colorScheme.primary),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
@@ -53,13 +53,14 @@ fun SettingsPane(
                 modifier = Modifier
                     .size(48.dp)
                     .clickable { onShowBrowser() },
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
             )
+            // TODO(kobec): might be wrong font style
             Text(
                 text = stringResource(R.string.settings),
                 modifier = Modifier.padding(8.dp),
-                style = MaterialTheme.typography.h3,
-                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
             )
         }
@@ -76,13 +77,14 @@ fun SettingsPane(
                             .fillMaxWidth()
                             .defaultMinSize(minHeight = 56.dp)
                             .padding(16.dp)
-                            .background(MaterialTheme.colors.background)
+                            .background(MaterialTheme.colorScheme.primary)
                             .wrapContentHeight(align = Alignment.Bottom),
                     ) {
+                        // TODO(kobec): might be wrong font style
                         Text(
                             text = it.label,
-                            style = MaterialTheme.typography.h4,
-                            color = MaterialTheme.colors.onPrimary,
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                         )
                     }

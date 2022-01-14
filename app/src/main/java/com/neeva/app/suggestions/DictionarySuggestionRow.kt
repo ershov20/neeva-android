@@ -2,8 +2,8 @@ package com.neeva.app.suggestions
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.buildAnnotatedString
@@ -31,13 +31,13 @@ fun DictionarySuggestionRow(
         Column(modifier = baseModifier) {
             Text(
                 text = buildAnnotatedString {
-                    withStyle(MaterialTheme.typography.body1.toSpanStyle()) {
+                    withStyle(MaterialTheme.typography.bodyLarge.toSpanStyle()) {
                         append(word)
                     }
 
                     withStyle(
-                        MaterialTheme.typography.body2
-                            .copy(color = MaterialTheme.colors.onSecondary)
+                        MaterialTheme.typography.bodyMedium
+                            .copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                             .toSpanStyle()
                     ) {
                         phoneticSpelling?.let {
@@ -61,8 +61,8 @@ fun DictionarySuggestionRow(
             Text(
                 text = buildAnnotatedString {
                     withStyle(
-                        MaterialTheme.typography.body2
-                            .copy(color = MaterialTheme.colors.onSecondary)
+                        MaterialTheme.typography.bodyMedium
+                            .copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
                             .toSpanStyle()
                     ) {
                         append(shortDefinition)

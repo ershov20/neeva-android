@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +40,7 @@ fun LocationLabel(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .background(backgroundColor)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .wrapContentSize(Alignment.Center)
             .defaultMinSize(minHeight = 40.dp)
     ) {
@@ -68,10 +68,9 @@ fun LocationLabel(
                 contentScale = ContentScale.Fit
             )
         }
-
         Text(
             text = urlBarValue.ifEmpty { "Search or enter address" },
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyLarge,
             maxLines = 1,
             color = foregroundColor
         )
@@ -107,11 +106,11 @@ class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPrevi
     fun LocationLabelPreview(
         @PreviewParameter(LocationLabelPreviews::class) params: Params
     ) {
-        NeevaTheme(darkTheme = params.darkTheme) {
+        NeevaTheme(useDarkTheme = params.darkTheme) {
             LocationLabel(
                 urlBarValue = "www.reddit.com",
-                backgroundColor = MaterialTheme.colors.primaryVariant,
-                foregroundColor = MaterialTheme.colors.onPrimary,
+                backgroundColor = MaterialTheme.colorScheme.background,
+                foregroundColor = MaterialTheme.colorScheme.onSurface,
                 showIncognitoBadge = params.isIncognito,
                 showLock = params.showLock,
                 onReload = {}

@@ -16,8 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
@@ -94,7 +94,11 @@ fun TabCard(
         Box(
             modifier = Modifier.then(
                 if (isSelected) {
-                    Modifier.border(3.dp, Color.Blue, RoundedCornerShape(12.dp))
+                    Modifier.border(
+                        3.dp,
+                        MaterialTheme.colorScheme.primary,
+                        RoundedCornerShape(12.dp)
+                    )
                 } else {
                     Modifier
                 }
@@ -135,10 +139,14 @@ fun TabCard(
             Box(modifier = Modifier.padding(end = 8.dp)) {
                 FaviconView(faviconData)
             }
+            // TODO(kobec): figure out if we really need that modifier padding here...
             Text(
                 text = title ?: url?.toString() ?: "",
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .weight(1.0f),
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -171,8 +179,8 @@ class TabCardPreviews : BooleanPreviewParameterProvider<TabCardPreviews.Params>(
             "short"
         }
 
-        NeevaTheme(darkTheme = params.darkTheme) {
-            Box(modifier = Modifier.background(MaterialTheme.colors.primary)) {
+        NeevaTheme(useDarkTheme = params.darkTheme) {
+            Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                 TabCard(
                     tab = TabInfo(
                         id = "unimportant",

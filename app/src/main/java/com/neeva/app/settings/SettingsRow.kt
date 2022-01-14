@@ -10,8 +10,8 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +31,7 @@ fun SettingsRow(data: SettingsRowData, openUrl: (Uri) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 56.dp)
-            .background(MaterialTheme.colors.primary)
+            .background(MaterialTheme.colorScheme.primary)
             .then(
                 if (data.type == SettingsRowType.LINK && data.url != null) {
                     Modifier.clickable { openUrl(data.url) }
@@ -45,8 +45,8 @@ fun SettingsRow(data: SettingsRowData, openUrl: (Uri) -> Unit) {
 
         Text(
             text = data.title,
-            style = MaterialTheme.typography.h3,
-            color = MaterialTheme.colors.onPrimary,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1.0f)
@@ -58,7 +58,7 @@ fun SettingsRow(data: SettingsRowData, openUrl: (Uri) -> Unit) {
                 contentDescription = data.title,
                 contentScale = ContentScale.Inside,
                 modifier = Modifier.size(48.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colors.onSecondary)
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
             )
         }
     }

@@ -15,9 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.suggestions.SuggestionsModel
+import com.neeva.app.ui.theme.md_theme_dark_shadow
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import dagger.hilt.EntryPoints
 
@@ -49,23 +49,24 @@ fun URLBar(
 
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
 
+    // TODO(kobec): figure out how to map incognito to color scheme?
     val isIncognito: Boolean = urlBarModel.isIncognito
     val backgroundColor = if (isIncognito) {
-        Color.Black
+        md_theme_dark_shadow
     } else {
-        MaterialTheme.colors.primaryVariant
+        MaterialTheme.colorScheme.background
     }
 
     val foregroundColor = if (isIncognito) {
         Color.White
     } else {
-        MaterialTheme.colors.contentColorFor(backgroundColor)
+        MaterialTheme.colorScheme.onSurface
     }
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colors.primary)
+            .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 8.dp)
             .padding(vertical = 8.dp)
             .height(40.dp),
@@ -75,6 +76,7 @@ fun URLBar(
             modifier = Modifier
                 .weight(1.0f)
                 .clip(RoundedCornerShape(24.dp))
+                .background(MaterialTheme.colorScheme.primary)
         ) {
             AutocompleteTextField(
                 suggestionsModel = suggestionsModel,
@@ -83,7 +85,7 @@ fun URLBar(
                     historyManager.getFaviconFlow(uri = it, allowFallbackIcon = false)
                 },
                 urlBarIsBeingEdited = isEditing,
-                backgroundColor = backgroundColor,
+                backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                 foregroundColor = foregroundColor
             )
 
@@ -97,7 +99,7 @@ fun URLBar(
                 LocationLabel(
                     urlBarValue = displayedDomain,
                     showIncognitoBadge = isIncognito,
-                    backgroundColor = backgroundColor,
+                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                     foregroundColor = foregroundColor,
                     showLock = showLock,
                     onReload = urlBarModel::reload,
@@ -127,7 +129,7 @@ fun URLBar(
                     text = stringResource(id = R.string.cancel),
                     textAlign = TextAlign.Center,
                     maxLines = 1,
-                    color = MaterialTheme.colors.secondary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }

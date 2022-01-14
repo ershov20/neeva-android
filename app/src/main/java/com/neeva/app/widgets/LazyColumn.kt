@@ -12,8 +12,8 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -83,8 +83,8 @@ fun CollapsibleHeader(
         Text(
             text = label,
             modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.h4,
-            color = MaterialTheme.colors.onPrimary,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -106,7 +106,7 @@ fun CollapsibleHeader(
                 .clickable {
                     state.value = headerState.next()
                 },
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceVariant)
         )
     }
 }

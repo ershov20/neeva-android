@@ -1,5 +1,6 @@
 package com.neeva.app.zeroQuery
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -12,8 +13,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +41,8 @@ import com.neeva.app.widgets.collapsibleHeaderItems
 import dagger.hilt.EntryPoints
 import kotlinx.coroutines.flow.map
 
+// TODO(kobec): ask how to fix this
+@SuppressLint("FlowOperatorInvokedInComposition")
 @Composable
 fun ZeroQuery(
     urlBarModel: URLBarModel,
@@ -105,8 +108,8 @@ fun ZeroQuery(
                             Text(
                                 text = title ?: "",
                                 modifier = Modifier.fillMaxWidth(),
-                                style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSecondary,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )

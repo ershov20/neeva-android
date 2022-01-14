@@ -2,8 +2,8 @@ package com.neeva.app.suggestions
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -30,8 +30,8 @@ fun UriDisplayView(
             Text(
                 text = authority.replace("www.", ""),
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.body2,
-                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1
             )
             var pathText = ""
@@ -40,8 +40,8 @@ fun UriDisplayView(
                 Text(
                     text = pathText,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSecondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1
                 )
             }

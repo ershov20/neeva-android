@@ -29,7 +29,7 @@ fun CurrentPageRow(
 @Preview("Light, RTL, 2x font scale", locale = "he", fontScale = 2.0f)
 @Composable
 fun CurrentPageRow_PreviewLight() {
-    NeevaTheme(darkTheme = false) {
+    NeevaTheme(useDarkTheme = false) {
         CurrentPageRow(
             favicon = null,
             url = Uri.parse("https://www.reddit.com")
@@ -41,7 +41,7 @@ fun CurrentPageRow_PreviewLight() {
 @Preview("Dark, 2x font scale", locale = "en", fontScale = 2.0f)
 @Composable
 fun CurrentPageRow_PreviewDark() {
-    NeevaTheme(darkTheme = true) {
+    NeevaTheme(useDarkTheme = true) {
         CurrentPageRow(
             favicon = null,
             url = Uri.parse("https://www.reddit.com")

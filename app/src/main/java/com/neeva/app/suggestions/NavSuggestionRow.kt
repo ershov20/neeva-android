@@ -6,8 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,8 +44,8 @@ fun NavSuggestionRow(
         Column(modifier = it) {
             Text(
                 text = primaryLabel,
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 1,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -56,8 +56,8 @@ fun NavSuggestionRow(
                     Text(
                         text = secondaryLabel,
                         overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.body2,
-                        color = MaterialTheme.colors.onSecondary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )
                 }
@@ -99,8 +99,8 @@ class NavSuggestionRowPreviews :
         }
         val onTapEdit = {}.takeIf { params.allowEditing }
 
-        NeevaTheme(darkTheme = params.darkTheme) {
-            Box(modifier = Modifier.background(MaterialTheme.colors.primary)) {
+        NeevaTheme(useDarkTheme = params.darkTheme) {
+            Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                 NavSuggestionRow(
                     primaryLabel = primaryLabel,
                     onTapRow = {},

@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +39,7 @@ fun NeevaMenuContent(onMenuItem: (NeevaMenuItemId) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         LazyVerticalGrid(
             cells = GridCells.Fixed(2),
@@ -60,7 +60,7 @@ fun NeevaMenuContent(onMenuItem: (NeevaMenuItemId) -> Unit) {
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 16.dp)
                 .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colors.primary)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             items(NeevaMenuData.rows) { itemData ->
                 NeevaMenuRow(

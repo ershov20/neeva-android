@@ -1,5 +1,6 @@
 package com.neeva.app.suggestions
 
+import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,6 +16,8 @@ import dagger.hilt.EntryPoints
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 
+// TODO(kobec): ask how to fix this
+@SuppressLint("FlowOperatorInvokedInComposition")
 @Composable
 fun SuggestionPane(
     suggestionsModel: SuggestionsModel?,

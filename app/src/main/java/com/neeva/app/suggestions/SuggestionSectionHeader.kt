@@ -3,8 +3,8 @@ package com.neeva.app.suggestions
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -18,7 +18,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SuggestionSectionHeader(stringRes: Int) {
     Text(
         modifier = Modifier
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxWidth()
             .padding(
                 start = 18.dp,

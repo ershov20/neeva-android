@@ -21,13 +21,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -145,7 +144,7 @@ fun CardGrid(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         ModeSwitcher(selectedScreen = selectedScreen) {
             when (it) {
@@ -180,7 +179,7 @@ fun CardGrid(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(1.dp)
-                .background(Color.LightGray)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
         )
         Row(
             modifier = Modifier
@@ -233,7 +232,7 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
             SelectedScreen.REGULAR_TABS
         }
 
-        NeevaTheme(darkTheme = darkTheme) {
+        NeevaTheme(useDarkTheme = darkTheme) {
             val listState = rememberLazyListState()
             val cardGridListener = object : CardGridListener {
                 override fun onSelectTab(tab: TabInfo) {}

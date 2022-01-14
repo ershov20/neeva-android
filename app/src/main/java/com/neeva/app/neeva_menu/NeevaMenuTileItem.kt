@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +32,7 @@ fun NeevaMenuTileItem(
         modifier = Modifier
             .padding(8.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colors.primary)
+            .background(MaterialTheme.colorScheme.background)
             .clickable(onClickLabel = stringResource(itemData.labelId)) {
                 onMenuItem(itemData.id)
             }
@@ -41,8 +41,8 @@ fun NeevaMenuTileItem(
     ) {
         Text(
             text = stringResource(itemData.labelId),
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onPrimary,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -51,7 +51,7 @@ fun NeevaMenuTileItem(
             contentDescription = null,
             contentScale = ContentScale.Inside,
             modifier = Modifier.size(48.dp, 48.dp),
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.onPrimary)
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
         )
     }
 }

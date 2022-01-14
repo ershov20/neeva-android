@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +40,7 @@ fun Button(
     onClick: () -> Unit
 ) {
     val colorTint = if (enabled) {
-        MaterialTheme.colors.onPrimary
+        MaterialTheme.colorScheme.onSurface
     } else {
         Color.LightGray
     }
@@ -98,7 +98,7 @@ fun BrandedTextButton(
 @Preview(showBackground = true, backgroundColor = 0xff000000)
 @Composable
 fun Button_PreviewDarkEnabled() {
-    NeevaTheme(darkTheme = true) {
+    NeevaTheme(useDarkTheme = true) {
         Button(enabled = true, R.drawable.btn_close, "Close Button") {}
     }
 }
@@ -106,7 +106,7 @@ fun Button_PreviewDarkEnabled() {
 @Preview(showBackground = true, backgroundColor = 0xff000000)
 @Composable
 fun Button_PreviewDarkDisabled() {
-    NeevaTheme(darkTheme = true) {
+    NeevaTheme(useDarkTheme = true) {
         Button(enabled = false, R.drawable.btn_close, "Close Button") {}
     }
 }
@@ -144,7 +144,7 @@ fun BrandedTextButton_Preview() {
 @Preview("Dark, RTL, 2x scale", locale = "he", fontScale = 2.0f)
 @Composable
 fun BrandedTextButton_PreviewDark() {
-    NeevaTheme(darkTheme = true) {
+    NeevaTheme(useDarkTheme = true) {
         Box(modifier = Modifier.background(Color.Black)) {
             BrandedTextButton(enabled = true, stringResID = R.string.sign_in_with_google) {}
         }

@@ -1,7 +1,7 @@
 package com.neeva.app.suggestions
 
 import android.net.Uri
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 
 @Composable
@@ -52,7 +52,7 @@ fun QuerySuggestionRow(
                 description = suggestion.description,
                 imageURL = suggestion.imageURL,
                 drawableID = suggestion.drawableID,
-                drawableTint = MaterialTheme.colors.onSecondary,
+                drawableTint = MaterialTheme.colorScheme.onSurfaceVariant,
                 onTapRow = onTapRow,
                 onEditUrl = onEditUrl
             )

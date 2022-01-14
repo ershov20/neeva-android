@@ -19,7 +19,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,8 +41,8 @@ import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.User
-import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Roobert
+import com.neeva.app.ui.theme.Ui.Gray20
 import com.neeva.app.widgets.BrandedTextButton
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -60,7 +61,7 @@ fun FirstRunContainer(
         Box(
             Modifier
                 .fillMaxSize()
-                .background(ColorPalette.Ui.DefaultBackground)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.ic_baseline_close_24),
@@ -102,7 +103,7 @@ fun FirstRunContainer(
                         fontSize = 40.sp,
                         lineHeight = 48.sp
                     ),
-                    color = ColorPalette.Ui.Gray20,
+                    color = Gray20,
                     textAlign = TextAlign.Start
                 )
                 BrandedTextButton(enabled = true, stringResID = R.string.sign_in_with_google) {
