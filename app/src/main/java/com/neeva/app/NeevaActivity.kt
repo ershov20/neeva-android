@@ -3,6 +3,7 @@ package com.neeva.app
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Point
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
@@ -166,13 +167,18 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        User.extractAuthTokenFromIntent(intent)?.let {
-            User.setToken(this, it)
-            webModel.onAuthTokenUpdated()
-            appNavModel.showBrowser()
-        }
         if (intent != null && intent.action == Intent.ACTION_VIEW) {
-            intent.data?.let { webModel.currentBrowser.activeTabModel.loadUrl(it, newTab = true) }
+            if (Uri.parse(intent.dataString).scheme == "neeva") {
+                User.extractAuthTokenFromIntent(intent)?.let {
+                    User.setToken(this, it)
+                    webModel.onAuthTokenUpdated()
+                    appNavModel.showBrowser()
+                }
+            } else {
+                intent.data?.let {
+                    webModel.currentBrowser.activeTabModel.loadUrl(it, newTab = true)
+                }
+            }
         }
     }
 

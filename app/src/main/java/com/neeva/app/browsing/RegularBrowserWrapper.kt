@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.fragment.app.Fragment
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.NeevaConstants
+import com.neeva.app.NeevaConstants.browserTypeCookie
+import com.neeva.app.NeevaConstants.browserVersionCookie
 import com.neeva.app.User
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
@@ -91,6 +93,10 @@ class RegularBrowserWrapper(
                     }
                 }
             )
+            setCookie(
+                Uri.parse(NeevaConstants.appURL),
+                browserTypeCookie.toString() + browserVersionCookie.toString()
+            ) {}
 
             if (!User.getToken(appContext).isNullOrEmpty()) {
                 setCookie(

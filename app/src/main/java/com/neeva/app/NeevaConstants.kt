@@ -1,5 +1,7 @@
 package com.neeva.app
 
+import okhttp3.Cookie
+
 object NeevaConstants {
     var appHost: String = "neeva.com"
     var appURL: String = "https://$appHost/"
@@ -15,4 +17,18 @@ object NeevaConstants {
     var appHelpCenterURL: String = "https://help.neeva.com/"
 
     val loginCookie: String = "httpd~login"
+    val browserTypeCookie = Cookie.Builder()
+        .name("BrowserType")
+        .secure()
+        .domain(appHost)
+        .expiresAt(Long.MAX_VALUE)
+        .value("neeva-android")
+        .build()
+    val browserVersionCookie = Cookie.Builder()
+        .name("BrowserVersion")
+        .secure()
+        .domain(appHost)
+        .expiresAt(Long.MAX_VALUE)
+        .value(NeevaBrowser.versionString ?: "0.0.1")
+        .build()
 }

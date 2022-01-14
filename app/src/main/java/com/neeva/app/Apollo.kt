@@ -5,6 +5,8 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.okHttpClient
 import com.neeva.app.NeevaConstants.appHost
 import com.neeva.app.NeevaConstants.appURL
+import com.neeva.app.NeevaConstants.browserTypeCookie
+import com.neeva.app.NeevaConstants.browserVersionCookie
 import com.neeva.app.NeevaConstants.loginCookie
 import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.Cookie
@@ -28,10 +30,6 @@ fun createApolloClient(@ApplicationContext context: Context): ApolloClient {
 
 private class AuthCookieJar(val context: Context) : CookieJar {
     override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
-        val browserTypeCookie = Cookie.Builder().name("BrowserType").secure()
-            .domain(appHost).expiresAt(Long.MAX_VALUE).value("neeva-android").build()
-        val browserVersionCookie = Cookie.Builder().name("BrowserVersion").secure()
-            .domain(appHost).expiresAt(Long.MAX_VALUE).value("0.0.1").build()
         val cookies = mutableListOf(browserTypeCookie, browserVersionCookie)
         val token = User.getToken(context)
         if (token != null) {

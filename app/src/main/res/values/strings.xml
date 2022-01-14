@@ -35,7 +35,15 @@
     <string name="history_yesterday">Yesterday</string>
     <string name="history_this_week">This week</string>
 
+    <string name="email_label">EMAIL</string>
+    <string name="dont_have_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign up</string>
+    <string name="already_have_account">Already have an account?</string>
+    <string name="sign_in">Sign In</string>
+    <string name="sign_up_with_google">Sign up with Google</string>
+    <string name="sign_up_with_microsoft">Sign up with Microsoft</string>
     <string name="sign_in_with_google">Sign in with Google</string>
-    <string name="sign_in_with_okta">Sign in using email</string>
+    <string name="sign_in_with_microsoft">Sign in with Microsoft</string>
+    <string name="sign_in_with_okta">Continue</string>
     <string name="first_run_intro">Welcome to Neeva, the only ad-free, private search engine</string>
 </resources>

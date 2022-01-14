@@ -37,11 +37,11 @@ data class NeevaUser(
         }
     }
 
-    enum class SSOProvider(val url: String) {
-        UNKNOWN(""),
-        GOOGLE("neeva.co/auth/oauth2/authenticators/google"),
-        APPLE("neeva.co/auth/oauth2/authenticators/apple"),
-        MICROSOFT("neeva.co/auth/oauth2/authenticators/microsoft"),
-        OKTA("neeva.co/auth/oauth2/authenticators/okta")
+    enum class SSOProvider(val url: String, val finalPath: String) {
+        UNKNOWN("", ""),
+        GOOGLE("neeva.co/auth/oauth2/authenticators/google", "/"),
+        APPLE("neeva.co/auth/oauth2/authenticators/apple", "/"),
+        MICROSOFT("neeva.co/auth/oauth2/authenticators/microsoft", "/"),
+        OKTA("neeva.co/auth/oauth2/authenticators/okta", "/?nva")
     }
 }
