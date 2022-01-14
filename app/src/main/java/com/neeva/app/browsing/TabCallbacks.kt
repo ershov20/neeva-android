@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.TypeConverters
 import com.neeva.app.storage.Visit
 import java.util.Date
@@ -49,7 +50,7 @@ class TabCallbacks(
      */
     private val faviconFetcher = tab.createFaviconFetcher(object : FaviconCallback() {
         override fun onFaviconChanged(favicon: Bitmap?) {
-            if (isIncognito || historyManager == null || faviconCache == null || favicon == null) {
+            if (faviconCache == null || favicon == null) {
                 return
             }
 
@@ -58,22 +59,24 @@ class TabCallbacks(
 
             coroutineScope.launch {
                 val faviconData = withContext(Dispatchers.IO) {
-                    faviconCache.saveFavicon(favicon)
+                    faviconCache.saveFavicon(url, favicon)
                 }
 
-                url?.let {
-                    historyManager.insert(
-                        coroutineScope = coroutineScope,
-                        url = it,
-                        title = title,
+                if (!isIncognito) {
+                    url?.let {
+                        historyManager?.insert(
+                            coroutineScope = coroutineScope,
+                            url = it,
+                            title = title,
+                            favicon = faviconData
+                        )
+                    }
+
+                    historyManager?.updateDomainFavicon(
+                        url = url.toString(),
                         favicon = faviconData
                     )
                 }
-
-                historyManager.updateDomainFavicon(
-                    url = url.toString(),
-                    favicon = faviconData
-                )
             }
         }
     })

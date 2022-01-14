@@ -15,8 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -28,9 +26,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.Favicon
-import com.neeva.app.storage.Favicon.Companion.toFavicon
+import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.Site
+import com.neeva.app.storage.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme
@@ -41,22 +39,20 @@ import dagger.hilt.EntryPoints
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Date
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun HistoryUI(
     history: List<Site>,
     onClose: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
-    faviconProvider: (Uri?) -> Flow<Favicon?>,
+    faviconCache: FaviconCache,
     now: LocalDate = LocalDate.now()
 ) {
     val domainProvider = EntryPoints
         .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
         .domainProvider()
 
-    HistoryUI(history, onClose, onOpenUrl, faviconProvider, domainProvider, now)
+    HistoryUI(history, onClose, onOpenUrl, faviconCache, domainProvider, now)
 }
 
 @Composable
@@ -64,7 +60,7 @@ fun HistoryUI(
     history: List<Site>,
     onClose: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
-    faviconProvider: (Uri?) -> Flow<Favicon?>,
+    faviconCache: FaviconCache,
     domainProvider: DomainProvider,
     now: LocalDate = LocalDate.now()
 ) {
@@ -139,8 +135,7 @@ fun HistoryUI(
                 CollapsingState.SHOW_COMPACT,
                 items = historyToday
             ) {
-                val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
-                NavSuggestion(favicon, onOpenUrl, it)
+                NavSuggestion(faviconCache, onOpenUrl, it)
             }
 
             collapsibleHeaderItems(
@@ -148,8 +143,7 @@ fun HistoryUI(
                 CollapsingState.SHOW_COMPACT,
                 items = historyYesterday
             ) {
-                val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
-                NavSuggestion(favicon, onOpenUrl, it)
+                NavSuggestion(faviconCache, onOpenUrl, it)
             }
 
             collapsibleHeaderItems(
@@ -157,8 +151,7 @@ fun HistoryUI(
                 CollapsingState.SHOW_COMPACT,
                 items = historyThisWeek
             ) {
-                val favicon: Favicon? by faviconProvider(it.url).collectAsState(null)
-                NavSuggestion(favicon, onOpenUrl, it)
+                NavSuggestion(faviconCache, onOpenUrl, it)
             }
         }
     }
@@ -225,10 +218,8 @@ fun HistoryUI_Preview() {
             history = history,
             onClose = {},
             onOpenUrl = {},
-            faviconProvider = { MutableStateFlow(it.toFavicon()) },
-            domainProvider = { uri ->
-                uri?.authority?.split(".")?.takeLast(2)?.joinToString(".")
-            },
+            faviconCache = mockFaviconCache,
+            domainProvider = mockFaviconCache.domainProvider,
             now = now
         )
     }

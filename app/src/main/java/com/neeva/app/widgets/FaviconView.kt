@@ -1,5 +1,6 @@
 package com.neeva.app.widgets
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
@@ -12,18 +13,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.neeva.app.storage.Favicon
-import com.neeva.app.storage.Favicon.Companion.toFavicon
-import com.neeva.app.storage.Favicon.Companion.toPainter
+import com.neeva.app.R
+import com.neeva.app.storage.Favicon.Companion.toBitmap
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun FaviconView(
-    favicon: Favicon?,
+    bitmap: Bitmap?,
     modifier: Modifier = Modifier,
     bordered: Boolean = true,
     size: Dp = 20.dp
@@ -37,15 +39,25 @@ fun FaviconView(
                 } else {
                     Modifier
                 }
-            ).padding(2.dp),
+            )
+            .padding(2.dp),
         Alignment.Center
     ) {
-        Image(
-            painter = favicon.toPainter(),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.FillBounds,
-        )
+        bitmap?.asImageBitmap()?.let {
+            Image(
+                bitmap = it,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds,
+            )
+        } ?: run {
+            Image(
+                painter = painterResource(R.drawable.globe),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds,
+            )
+        }
     }
 }
 
@@ -53,7 +65,7 @@ fun FaviconView(
 @Composable
 fun FaviconView_Globe_Bordered() {
     NeevaTheme {
-        FaviconView(favicon = null, bordered = true)
+        FaviconView(bitmap = null, bordered = true)
     }
 }
 
@@ -61,7 +73,7 @@ fun FaviconView_Globe_Bordered() {
 @Composable
 fun FaviconView_Globe_NoBorder() {
     NeevaTheme {
-        FaviconView(favicon = null, bordered = false)
+        FaviconView(bitmap = null, bordered = false)
     }
 }
 
@@ -69,7 +81,7 @@ fun FaviconView_Globe_NoBorder() {
 @Composable
 fun FaviconView_Blank_Bordered() {
     NeevaTheme {
-        FaviconView(Uri.parse("https://www.neeva.com").toFavicon(), bordered = true)
+        FaviconView(Uri.parse("https://www.neeva.com").toBitmap(), bordered = true)
     }
 }
 
@@ -77,6 +89,6 @@ fun FaviconView_Blank_Bordered() {
 @Composable
 fun FaviconView_Blank_NoBorder() {
     NeevaTheme {
-        FaviconView(Uri.parse("https://www.neeva.com").toFavicon(), bordered = false)
+        FaviconView(Uri.parse("https://www.neeva.com").toBitmap(), bordered = false)
     }
 }

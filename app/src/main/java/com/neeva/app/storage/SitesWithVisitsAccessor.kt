@@ -70,7 +70,7 @@ interface SitesWithVisitsAccessor {
     suspend fun find(url: String): Site?
 
     @Query("SELECT * FROM site WHERE siteURL LIKE :url")
-    fun getFromUrl(url: String): Flow<Site?>
+    fun getFromUrl(url: String): Site?
 
     @Query("SELECT * FROM site WHERE siteUID LIKE :uid")
     suspend fun get(uid: Int): Site?

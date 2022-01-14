@@ -1,5 +1,6 @@
 package com.neeva.app.suggestions
 
+import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
-import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
@@ -42,7 +42,7 @@ fun BaseSuggestionRow(
     onTapRow: () -> Unit,
     onTapRowContentDescription: String? = null,
     onTapEdit: (() -> Unit)? = null,
-    faviconData: Favicon? = null,
+    faviconBitmap: Bitmap? = null,
     imageURL: String? = null,
     drawableID: Int? = null,
     drawableTint: Color? = null,
@@ -88,7 +88,7 @@ fun BaseSuggestionRow(
 
             else -> {
                 FaviconView(
-                    faviconData,
+                    bitmap = faviconBitmap,
                     modifier = iconModifier
                 )
             }
@@ -126,7 +126,7 @@ fun BaseSuggestionRow_Preview() {
         BaseSuggestionRow(
             onTapRow = {},
             onTapEdit = null,
-            faviconData = null
+            faviconBitmap = null
         ) {
             Box(modifier = it.background(Color.Magenta).height(56.dp))
         }
@@ -143,7 +143,7 @@ fun BaseSuggestionRow_PreviewEditable() {
         BaseSuggestionRow(
             onTapRow = {},
             onTapEdit = {},
-            faviconData = null
+            faviconBitmap = null
         ) {
             Box(modifier = it.background(Color.Magenta).height(56.dp))
         }

@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -39,7 +40,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
-import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.mockFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
@@ -48,40 +50,18 @@ import kotlinx.coroutines.withContext
 
 @Composable
 fun TabCard(
-    tab: TabInfo,
-    faviconData: Favicon?,
+    tabInfo: TabInfo,
     onSelect: () -> Unit,
     onClose: () -> Unit,
+    faviconCache: FaviconCache,
     screenshotProvider: (id: String) -> Bitmap?
 ) {
-    TabCard(
-        tab.title,
-        tab.url,
-        tab.id,
-        screenshotProvider,
-        tab.isSelected,
-        faviconData,
-        onSelect,
-        onClose
-    )
-}
-
-@Composable
-fun TabCard(
-    title: String?,
-    url: Uri?,
-    id: String,
-    screenshotProvider: (id: String) -> Bitmap?,
-    isSelected: Boolean,
-    faviconData: Favicon?,
-    onSelect: () -> Unit,
-    onClose: () -> Unit
-) {
     val (thumbnail, setThumbnail) = remember { mutableStateOf<Bitmap?>(null) }
+    val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(tabInfo.url)
 
-    LaunchedEffect(key1 = id) {
+    LaunchedEffect(key1 = tabInfo) {
         withContext(Dispatchers.IO) {
-            setThumbnail(screenshotProvider(id))
+            setThumbnail(screenshotProvider(tabInfo.id))
         }
     }
 
@@ -93,7 +73,7 @@ fun TabCard(
     ) {
         Box(
             modifier = Modifier.then(
-                if (isSelected) {
+                if (tabInfo.isSelected) {
                     Modifier.border(
                         3.dp,
                         MaterialTheme.colorScheme.primary,
@@ -137,11 +117,11 @@ fun TabCard(
             modifier = Modifier.padding(vertical = 8.dp)
         ) {
             Box(modifier = Modifier.padding(end = 8.dp)) {
-                FaviconView(faviconData)
+                FaviconView(faviconBitmap)
             }
             // TODO(kobec): figure out if we really need that modifier padding here...
             Text(
-                text = title ?: url?.toString() ?: "",
+                text = tabInfo.title ?: tabInfo.url?.toString() ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier
@@ -182,15 +162,15 @@ class TabCardPreviews : BooleanPreviewParameterProvider<TabCardPreviews.Params>(
         NeevaTheme(useDarkTheme = params.darkTheme) {
             Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                 TabCard(
-                    tab = TabInfo(
+                    tabInfo = TabInfo(
                         id = "unimportant",
                         url = Uri.parse("https://www.reddit.com"),
                         title = title,
                         isSelected = params.isSelected
                     ),
-                    faviconData = null,
                     onSelect = {},
                     onClose = {},
+                    faviconCache = mockFaviconCache,
                     screenshotProvider = { null }
                 )
             }

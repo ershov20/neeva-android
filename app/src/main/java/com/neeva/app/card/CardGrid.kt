@@ -24,14 +24,13 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -43,14 +42,11 @@ import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
-import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.mockFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.Button
-import com.neeva.app.widgets.ComposableSingletonEntryPoint
-import dagger.hilt.EntryPoints
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -58,12 +54,6 @@ fun CardsContainer(
     appNavModel: AppNavModel,
     browserWrapper: BrowserWrapper
 ) {
-    val urlBarModel = browserWrapper.urlBarModel
-
-    val historyManager = EntryPoints
-        .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
-        .historyManager()
-
     val state: AppNavState by appNavModel.state.collectAsState()
 
     val cardGridListener = object : CardGridListener {
@@ -77,16 +67,12 @@ fun CardsContainer(
         }
 
         override fun onOpenLazyTab() {
-            urlBarModel.openLazyTab()
+            browserWrapper.openLazyTab()
             appNavModel.showBrowser()
         }
 
         override fun onDone() {
             appNavModel.showBrowser()
-        }
-
-        override fun getFaviconFlow(uri: Uri?): Flow<Favicon?> {
-            return historyManager.getFaviconFlow(uri)
         }
 
         override fun onSwitchToIncognitoProfile() {
@@ -119,6 +105,7 @@ fun CardsContainer(
             listState = listState,
             cardGridListener = cardGridListener,
             tabs = tabs,
+            faviconCache = browserWrapper.faviconCache,
             screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot
         )
     }
@@ -129,7 +116,6 @@ interface CardGridListener {
     fun onCloseTab(tab: TabInfo)
     fun onOpenLazyTab()
     fun onDone()
-    fun getFaviconFlow(uri: Uri?): Flow<Favicon?>
     fun onSwitchToIncognitoProfile()
     fun onSwitchToRegularProfile()
 }
@@ -145,6 +131,7 @@ fun CardGrid(
     listState: LazyListState,
     cardGridListener: CardGridListener,
     tabs: List<TabInfo>,
+    faviconCache: FaviconCache,
     screenshotProvider: (tabId: String) -> Bitmap?
 ) {
     // TODO(dan.alcantara): Material3 doesn't seem to have a MaterialTheme.colors.isLight function.
@@ -223,15 +210,11 @@ fun CardGrid(
                 modifier = contentModifier
             ) {
                 items(tabs) { tab ->
-                    val favicon: Favicon? by cardGridListener
-                        .getFaviconFlow(tab.url)
-                        .collectAsState(null)
-
                     TabCard(
-                        tab = tab,
-                        faviconData = favicon,
+                        tabInfo = tab,
                         onSelect = { cardGridListener.onSelectTab(tab) },
                         onClose = { cardGridListener.onCloseTab(tab) },
+                        faviconCache = faviconCache,
                         screenshotProvider = screenshotProvider
                     )
                 }
@@ -305,7 +288,6 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
                 override fun onCloseTab(tab: TabInfo) {}
                 override fun onOpenLazyTab() {}
                 override fun onDone() {}
-                override fun getFaviconFlow(uri: Uri?): Flow<Favicon?> = flowOf(null)
                 override fun onSwitchToIncognitoProfile() {}
                 override fun onSwitchToRegularProfile() {}
             }
@@ -335,7 +317,13 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
                 }
             }
 
-            CardGrid(selectedScreen, listState, cardGridListener, tabs) { null }
+            CardGrid(
+                selectedScreen = selectedScreen,
+                listState = listState,
+                cardGridListener = cardGridListener,
+                tabs = tabs,
+                faviconCache = mockFaviconCache
+            ) { null }
         }
     }
 }

@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.ActiveTabModel
+import com.neeva.app.storage.FaviconCache
 import com.neeva.app.suggestions.SuggestionPane
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.theme.SelectionHighlight
@@ -24,13 +25,14 @@ import com.neeva.app.urlbar.URLBarModel
 fun BrowserUI(
     urlBarModel: URLBarModel,
     suggestionsModel: SuggestionsModel?,
-    activeTabModel: ActiveTabModel
+    activeTabModel: ActiveTabModel,
+    faviconCache: FaviconCache
 ) {
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
     val progress: Int by activeTabModel.progressFlow.collectAsState()
 
     Column {
-        URLBar(suggestionsModel, activeTabModel, urlBarModel)
+        URLBar(suggestionsModel, activeTabModel, urlBarModel, faviconCache)
         Box {
             Box(
                 Modifier
@@ -52,7 +54,7 @@ fun BrowserUI(
 
         if (isEditing) {
             Box(modifier = Modifier.weight(1.0f)) {
-                SuggestionPane(suggestionsModel, urlBarModel, activeTabModel)
+                SuggestionPane(suggestionsModel, urlBarModel, activeTabModel, faviconCache)
             }
         }
     }

@@ -24,29 +24,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
+import com.neeva.app.storage.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.theme.md_theme_dark_shadow
-import com.neeva.app.widgets.ComposableSingletonEntryPoint
-import dagger.hilt.EntryPoints
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun URLBar(
     suggestionsModel: SuggestionsModel?,
     activeTabModel: ActiveTabModel,
-    urlBarModel: URLBarModel
+    urlBarModel: URLBarModel,
+    faviconCache: FaviconCache
 ) {
-    val historyManager = EntryPoints
-        .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
-        .historyManager()
-
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
 
     // TODO(kobec): figure out how to map incognito to color scheme?
@@ -81,9 +76,7 @@ fun URLBar(
             AutocompleteTextField(
                 suggestionsModel = suggestionsModel,
                 urlBarModel = urlBarModel,
-                getFaviconFlow = {
-                    historyManager.getFaviconFlow(uri = it, allowFallbackIcon = false)
-                },
+                faviconCache = faviconCache,
                 urlBarIsBeingEdited = isEditing,
                 backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                 foregroundColor = foregroundColor

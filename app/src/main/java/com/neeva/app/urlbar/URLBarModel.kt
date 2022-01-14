@@ -5,8 +5,10 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import com.neeva.app.browsing.ActiveTabModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 
 /**
  * Maintains logic required to provide a URL bar to the user.  There is a single URL bar that is
@@ -25,6 +27,7 @@ class URLBarModel(
 ) {
     private val _userInputText = MutableStateFlow(TextFieldValue(""))
     val userInputText: StateFlow<TextFieldValue> = _userInputText
+    val userInputTextIsBlank: Flow<Boolean> = _userInputText.map { it.text.isBlank() }
 
     private val _isEditing = MutableStateFlow(false)
     val isEditing: StateFlow<Boolean> = _isEditing

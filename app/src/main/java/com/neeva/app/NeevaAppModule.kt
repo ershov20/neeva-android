@@ -5,7 +5,6 @@ import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
-import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.SpaceStore
 import dagger.Module
@@ -55,11 +54,5 @@ object NeevaAppModule {
     @Singleton
     fun providesSpaceStore(apolloClient: ApolloClient): SpaceStore {
         return SpaceStore(apolloClient)
-    }
-
-    @Provides
-    @Singleton
-    fun providesFaviconCache(@ApplicationContext context: Context): FaviconCache {
-        return FaviconCache(context)
     }
 }

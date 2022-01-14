@@ -12,13 +12,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.neeva.app.AppNavModel
 import com.neeva.app.AppNavState
+import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.Site
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import dagger.hilt.EntryPoints
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun HistoryContainer(appNavModel: AppNavModel) {
+fun HistoryContainer(appNavModel: AppNavModel, faviconCache: FaviconCache) {
     val historyManager = EntryPoints
         .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
         .historyManager()
@@ -40,7 +41,7 @@ fun HistoryContainer(appNavModel: AppNavModel) {
             history = history,
             onClose = appNavModel::showBrowser,
             onOpenUrl = appNavModel::openUrl,
-            faviconProvider = historyManager::getFaviconFlow
+            faviconCache = faviconCache
         )
     }
 }

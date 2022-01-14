@@ -1,16 +1,19 @@
 package com.neeva.app.history
 
 import android.net.Uri
+import com.neeva.app.NeevaConstants
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Domain
 import com.neeva.app.storage.DomainRepository
 import com.neeva.app.storage.Favicon
-import com.neeva.app.storage.Favicon.Companion.toFavicon
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.SitesRepository
 import com.neeva.app.storage.Visit
 import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.suggestions.QueryRowSuggestion
+import com.neeva.app.suggestions.toNavSuggestion
+import com.neeva.app.zeroQuery.toSearchSuggest
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -18,9 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -47,53 +48,62 @@ class HistoryManager(
     val historyWithinRange: Flow<List<Site>> =
         sitesRepository.getHistoryAfter(HISTORY_START_DATE)
 
-    val frequentSites: Flow<List<Site>> =
+    private val frequentSites: Flow<List<Site>> =
         sitesRepository.getFrequentSitesAfter(HISTORY_START_DATE, MAX_FREQUENT_SITES)
 
     private val _siteSuggestions = MutableStateFlow<List<Site>>(emptyList())
     val siteSuggestions: StateFlow<List<Site>> = _siteSuggestions
 
-    private val _domainSuggestions = MutableStateFlow<List<NavSuggestion>>(emptyList())
-    val domainSuggestions: StateFlow<List<NavSuggestion>> = _domainSuggestions
+    private val _historySuggestions = MutableStateFlow<List<NavSuggestion>>(emptyList())
+    val historySuggestions: StateFlow<List<NavSuggestion>> = _historySuggestions
+
+    /** Provides the top 3 suggestions based on how often a user visited a site. */
+    val suggestedQueries: Flow<List<QueryRowSuggestion>> =
+        frequentSites.map { siteList -> siteList.mapNotNull { it.toSearchSuggest() }.take(3) }
+
+    /** Provides non-Neeva sites from history as suggestions. */
+    val suggestedSites: Flow<List<Site>> =
+        frequentSites
+            .map { sites ->
+                // Assume that anything pointing at neeva.com should not be recommended to the user.
+                // This includes search suggestions and Spaces, e.g.
+                sites.filterNot {
+                    val registeredDomain = domainProvider.getRegisteredDomain(Uri.parse(it.siteURL))
+                    registeredDomain == NeevaConstants.appHost
+                }
+            }
 
     /** Updates the query that is being used to fetch history and domain name suggestions. */
     fun updateSuggestionQuery(coroutineScope: CoroutineScope, currentInput: String) {
         coroutineScope.launch(Dispatchers.IO) {
-            _siteSuggestions.value = sitesRepository.getQuerySuggestions(currentInput)
-            _domainSuggestions.value = domainRepository.queryNavSuggestions(currentInput)
+            val siteSuggestions = sitesRepository.getQuerySuggestions(currentInput)
+            val domainSuggestions = domainRepository.queryNavSuggestions(currentInput)
+
+            _siteSuggestions.value = siteSuggestions
+
+            // Determine what history should be suggested as the user types out a query.
+            // Prioritize the site visits first because they were directly visited by the user.
+            val combinedSuggestions =
+                _siteSuggestions.value.map { it.toNavSuggestion(domainProvider) } +
+                    domainSuggestions
+
+            // Keep only the unique history items with unique URLs.
+            _historySuggestions.value = combinedSuggestions.distinctBy { it.url }
         }
     }
 
     /**
-     * Returns a Flow that emits the best Favicon for the given Uri.  It prefers favicons that come
-     * from a direct match in the user's history before falling back to the registered domain.  If
-     * both of those fail and [allowFallbackIcon] is true, then a fallback favicon is provided.
+     * Returns the best Favicon for the given Uri.  It prefers favicons that come from a direct
+     * match in the user's history before falling back to the registered domain.
      */
-    fun getFaviconFlow(uri: Uri?, allowFallbackIcon: Boolean = true): Flow<Favicon?> {
-        val fallbackIcon: Favicon? by lazy {
-            if (!allowFallbackIcon) return@lazy null
+    suspend fun getFaviconFromHistory(uri: Uri): Favicon? {
+        val siteFavicon = sitesRepository.find(uri)?.largestFavicon
+        if (siteFavicon != null) return siteFavicon
 
-            // Create a favicon based off the URL and the first letter of the registered domain.
-            uri
-                ?.let {
-                    val registeredDomain = domainProvider.getRegisteredDomain(it)
-                    Uri.Builder().scheme(it.scheme).authority(registeredDomain).build()
-                }
-                .toFavicon()
-        }
-
-        if (uri == null || uri.toString().isBlank()) return flowOf(fallbackIcon)
-
-        val siteFlow = sitesRepository.getFlow(uri)
-        val domainFlow = domainProvider.getRegisteredDomain(uri)
-            ?.let { domainRepository.getFlow(it) }
-            ?: flowOf(null)
-
-        return siteFlow
-            .combine(domainFlow) { site, domain ->
-                site?.largestFavicon ?: domain?.largestFavicon ?: fallbackIcon
-            }
-            .distinctUntilChanged()
+        return domainProvider
+            .getRegisteredDomain(uri)
+            ?.let { domainRepository.get(it) }
+            ?.largestFavicon
     }
 
     /** Inserts or updates an item into the history. */

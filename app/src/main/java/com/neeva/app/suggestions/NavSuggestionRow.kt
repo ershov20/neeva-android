@@ -1,5 +1,6 @@
 package com.neeva.app.suggestions
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.webkit.URLUtil
 import androidx.compose.foundation.background
@@ -16,7 +17,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.R
-import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -27,7 +27,7 @@ fun NavSuggestionRow(
     onTapRowContentDescription: String? = null,
     secondaryLabel: String? = null,
     onTapEdit: (() -> Unit)? = null,
-    faviconData: Favicon? = null,
+    faviconBitmap: Bitmap? = null,
     imageURL: String? = null,
     drawableID: Int? = null,
     drawableTint: Color? = null
@@ -36,7 +36,7 @@ fun NavSuggestionRow(
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
         onTapEdit = onTapEdit,
-        faviconData = faviconData,
+        faviconBitmap = faviconBitmap,
         imageURL = imageURL,
         drawableID = drawableID,
         drawableTint = drawableTint
@@ -106,7 +106,7 @@ class NavSuggestionRowPreviews :
                     onTapRow = {},
                     secondaryLabel = secondaryLabel,
                     onTapEdit = onTapEdit,
-                    faviconData = null
+                    faviconBitmap = null
                 )
             }
         }

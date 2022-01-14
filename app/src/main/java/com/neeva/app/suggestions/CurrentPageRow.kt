@@ -1,16 +1,16 @@
 package com.neeva.app.suggestions
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.storage.Favicon
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun CurrentPageRow(
-    favicon: Favicon?,
+    faviconBitmap: Bitmap?,
     url: Uri,
     onEditPressed: () -> Unit
 ) {
@@ -19,7 +19,7 @@ fun CurrentPageRow(
         onTapRow = { onEditPressed.invoke() },
         secondaryLabel = stringResource(id = R.string.edit_current_url),
         onTapEdit = onEditPressed,
-        faviconData = favicon
+        faviconBitmap = faviconBitmap
     )
 }
 
@@ -31,7 +31,7 @@ fun CurrentPageRow(
 fun CurrentPageRow_PreviewLight() {
     NeevaTheme(useDarkTheme = false) {
         CurrentPageRow(
-            favicon = null,
+            faviconBitmap = null,
             url = Uri.parse("https://www.reddit.com")
         ) {}
     }
@@ -43,7 +43,7 @@ fun CurrentPageRow_PreviewLight() {
 fun CurrentPageRow_PreviewDark() {
     NeevaTheme(useDarkTheme = true) {
         CurrentPageRow(
-            favicon = null,
+            faviconBitmap = null,
             url = Uri.parse("https://www.reddit.com")
         ) {}
     }

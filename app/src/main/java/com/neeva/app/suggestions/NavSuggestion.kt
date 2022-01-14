@@ -1,26 +1,25 @@
 package com.neeva.app.suggestions
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.storage.Favicon
-import com.neeva.app.storage.Favicon.Companion.toFavicon
+import com.neeva.app.storage.Favicon.Companion.toBitmap
+import com.neeva.app.storage.FaviconCache
 import com.neeva.app.ui.theme.NeevaTheme
-import kotlinx.coroutines.flow.Flow
 
 @Composable
 fun NavSuggestion(
-    faviconProvider: (Uri) -> Flow<Favicon?>,
+    faviconCache: FaviconCache,
     onOpenUrl: (Uri) -> Unit,
     navSuggestion: NavSuggestion
 ) {
-    val favicon: Favicon? by faviconProvider(navSuggestion.url).collectAsState(null)
+    val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
     NavSuggestion(
-        faviconData = favicon,
+        faviconBitmap = faviconBitmap,
         onOpenUrl = onOpenUrl,
         navSuggestion = navSuggestion
     )
@@ -28,7 +27,7 @@ fun NavSuggestion(
 
 @Composable
 fun NavSuggestion(
-    faviconData: Favicon?,
+    faviconBitmap: Bitmap?,
     onOpenUrl: (Uri) -> Unit,
     navSuggestion: NavSuggestion
 ) {
@@ -36,7 +35,7 @@ fun NavSuggestion(
         primaryLabel = navSuggestion.label,
         onTapRow = { onOpenUrl.invoke(navSuggestion.url) },
         secondaryLabel = navSuggestion.secondaryLabel,
-        faviconData = faviconData
+        faviconBitmap = faviconBitmap
     )
 }
 
@@ -48,7 +47,7 @@ fun NavSuggestion(
 fun NavSuggestion_Preview() {
     NeevaTheme {
         NavSuggestion(
-            faviconData = null,
+            faviconBitmap = null,
             onOpenUrl = {},
             navSuggestion = NavSuggestion(
                 url = Uri.parse("https://www.neeva.com"),
@@ -66,7 +65,7 @@ fun NavSuggestion_PreviewWithSolidFavicon() {
     val uri = Uri.parse("https://www.neeva.com")
     NeevaTheme {
         NavSuggestion(
-            faviconData = uri.toFavicon(),
+            faviconBitmap = uri.toBitmap(),
             onOpenUrl = {},
             navSuggestion = NavSuggestion(
                 url = uri,

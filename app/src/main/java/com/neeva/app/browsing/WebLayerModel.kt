@@ -10,7 +10,6 @@ import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.LoadingState
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
-import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.SpaceStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.lang.ref.WeakReference
@@ -40,7 +39,6 @@ class WebLayerModel @Inject constructor(
     private val domainProviderImpl: DomainProviderImpl,
     historyManager: HistoryManager,
     apolloClient: ApolloClient,
-    faviconCache: FaviconCache,
     spaceStore: SpaceStore
 ) : ViewModel() {
     companion object {
@@ -54,10 +52,9 @@ class WebLayerModel @Inject constructor(
     private val regularBrowser = RegularBrowserWrapper(
         appContext = appContext,
         activityCallbackProvider = { activityCallbacks.get() },
-        domainProviderImpl = domainProviderImpl,
+        domainProvider = domainProviderImpl,
         apolloClient = apolloClient,
         historyManager = historyManager,
-        faviconCache = faviconCache,
         spaceStore = spaceStore,
         coroutineScope = viewModelScope
     )
@@ -128,7 +125,8 @@ class WebLayerModel @Inject constructor(
                 IncognitoBrowserWrapper(
                     appContext = appContext,
                     activityCallbackProvider = { activityCallbacks.get() },
-                    coroutineScope = viewModelScope
+                    coroutineScope = viewModelScope,
+                    domainProvider = domainProviderImpl
                 ).also { it.initialize() }
             }
 

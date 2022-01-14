@@ -9,9 +9,9 @@ import androidx.fragment.app.Fragment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
-import java.lang.IllegalStateException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -67,7 +67,7 @@ abstract class BrowserWrapper(
 
     abstract val suggestionsModel: SuggestionsModel?
     abstract val historyManager: HistoryManager?
-    abstract val faviconCache: FaviconCache?
+    abstract val faviconCache: FaviconCache
 
     private var tabListRestorer: BrowserRestoreCallback? = null
 
@@ -354,5 +354,12 @@ abstract class BrowserWrapper(
             } ?: false
     }
 
+    /**
+     * Allows the user to use the URL bar and see suggestions without opening a tab until they
+     * trigger a navigation.
+     */
+    fun openLazyTab() = urlBarModel.openLazyTab()
+
+    /** Returns true if the [Browser] is maintaining no tabs. */
     fun hasNoTabs(): Boolean = tabList.hasNoTabs()
 }

@@ -12,9 +12,7 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
             domainList.map { it.toNavSuggestion() }
         }
 
-    fun getFlow(domainName: String): Flow<Domain?> {
-        return domainAccessor.getFlow(domainName).distinctUntilChanged()
-    }
+    suspend fun get(domainName: String): Domain? = domainAccessor.get(domainName)
 
     suspend fun queryNavSuggestions(query: String): List<NavSuggestion> {
         return domainAccessor.matchesTo(query).map { domain -> domain.toNavSuggestion() }

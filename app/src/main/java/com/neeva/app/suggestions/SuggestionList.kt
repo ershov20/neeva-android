@@ -14,10 +14,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.mockFaviconCache
 import com.neeva.app.ui.theme.NeevaTheme
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun SuggestionList(
@@ -25,7 +24,7 @@ fun SuggestionList(
     queryRowSuggestions: List<QueryRowSuggestion>,
     queryNavSuggestions: List<NavSuggestion>,
     historySuggestions: List<NavSuggestion>,
-    faviconProvider: (Uri?) -> Flow<Favicon?>,
+    faviconCache: FaviconCache,
     onOpenUrl: (Uri) -> Unit,
     onEditUrl: (String) -> Unit
 ) {
@@ -45,7 +44,7 @@ fun SuggestionList(
 
         topSuggestion?.let {
             item {
-                NavSuggestion(faviconProvider, onOpenUrl, it)
+                NavSuggestion(faviconCache, onOpenUrl, it)
             }
         }
 
@@ -71,7 +70,7 @@ fun SuggestionList(
                     queryNavSuggestions.filter { it.queryIndex == index },
                     { "${it.url} ${it.queryIndex}" }
                 ) {
-                    NavSuggestion(faviconProvider, onOpenUrl, it)
+                    NavSuggestion(faviconCache, onOpenUrl, it)
                 }
 
                 if (index != queryRowSuggestions.size - 1) {
@@ -91,7 +90,7 @@ fun SuggestionList(
                     unassociatedSuggestions,
                     { "${it.url} ${it.queryIndex}" }
                 ) {
-                    NavSuggestion(faviconProvider, onOpenUrl, it)
+                    NavSuggestion(faviconCache, onOpenUrl, it)
                 }
             }
         }
@@ -109,7 +108,7 @@ fun SuggestionList(
                 historySuggestions,
                 { "${it.url} ${it.queryIndex}" }
             ) {
-                NavSuggestion(faviconProvider, onOpenUrl, it)
+                NavSuggestion(faviconCache, onOpenUrl, it)
             }
         }
     }
@@ -202,7 +201,7 @@ fun SuggestionList_PreviewFullyLoaded() {
                     secondaryLabel = stringResource(R.string.debug_long_string_secondary)
                 ),
             ),
-            faviconProvider = { flowOf(null) },
+            faviconCache = mockFaviconCache,
             onOpenUrl = {}
         ) {}
     }

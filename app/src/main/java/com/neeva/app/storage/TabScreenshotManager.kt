@@ -1,14 +1,12 @@
-package com.neeva.app.browsing
+package com.neeva.app.storage
 
-import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.util.Log
 import androidx.annotation.WorkerThread
-import androidx.security.crypto.EncryptedFile
-import androidx.security.crypto.MasterKey
+import com.neeva.app.browsing.FileEncrypter
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -21,17 +19,15 @@ import org.chromium.weblayer.Tab
  * Manages thumbnails for each tab to display in the tab switcher.  These thumbnails are created by
  * WebLayer and persisted into our cache directory.
  */
-open class TabScreenshotManager(private val filesDir: File) {
+abstract class TabScreenshotManager(filesDir: File) {
     companion object {
         private val TAG = TabScreenshotManager::class.simpleName
         private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
     }
 
-    private fun getTabScreenshotDirectory(): File {
-        return File(filesDir, DIRECTORY_TAB_SCREENSHOTS)
-    }
+    private val tabScreenshotDirectory = File(filesDir, DIRECTORY_TAB_SCREENSHOTS)
 
-    fun getTabScreenshotFile(guid: String) = File(getTabScreenshotDirectory(), "tab_$guid.jpg")
+    fun getTabScreenshotFile(guid: String) = File(tabScreenshotDirectory, "tab_$guid.jpg")
     fun getTabScreenshotFile(tab: Tab) = getTabScreenshotFile(tab.guid)
 
     /** Takes a screenshot of the given [tab]. */
@@ -44,22 +40,24 @@ open class TabScreenshotManager(private val filesDir: File) {
         val tabGuid = tab.guid
 
         tab.captureScreenShot(0.5f) { thumbnail, _ ->
-            val dir = File(filesDir, DIRECTORY_TAB_SCREENSHOTS)
+            val dir = tabScreenshotDirectory
             dir.mkdirs()
 
             val file = getTabScreenshotFile(tabGuid)
             if (file.exists()) file.delete()
 
             var fileStream: OutputStream? = null
-
+            var bufferedStream: BufferedOutputStream? = null
             try {
                 fileStream = getOutputStream(file)
-                thumbnail?.compress(Bitmap.CompressFormat.JPEG, 100, fileStream)
-                fileStream.flush()
-                fileStream.close()
+                bufferedStream = BufferedOutputStream(fileStream)
+                thumbnail?.compress(Bitmap.CompressFormat.JPEG, 100, bufferedStream)
+                bufferedStream.flush()
+                bufferedStream.close()
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to store bitmap", e)
             } finally {
+                bufferedStream?.closeQuietly()
                 fileStream?.closeQuietly()
                 onCompleted()
             }
@@ -80,57 +78,36 @@ open class TabScreenshotManager(private val filesDir: File) {
     fun restoreScreenshot(tabId: String): Bitmap? {
         val file = getTabScreenshotFile(tabId)
         var fileStream: InputStream? = null
+        var bufferedStream: BufferedInputStream? = null
 
         return try {
             fileStream = getInputStream(file)
-            BitmapFactory.decodeStream(fileStream)
+            bufferedStream = BufferedInputStream(fileStream)
+            BitmapFactory.decodeStream(bufferedStream)
         } catch (e: Exception) {
             Log.e(TAG, "Failed to restore bitmap", e)
             null
         } finally {
+            bufferedStream?.closeQuietly()
             fileStream?.closeQuietly()
         }
     }
 
-    open fun getInputStream(file: File): InputStream {
-        return FileInputStream(file)
-    }
-
-    open fun getOutputStream(file: File): OutputStream {
-        return FileOutputStream(file)
-    }
+    abstract fun getInputStream(file: File): InputStream
+    abstract fun getOutputStream(file: File): OutputStream
 }
 
-/**
- * Manages a set of thumbnails for tabs created while in incognito mode.  These files are encrypted
- * and stored in the cache directory, then deleted when either the Incognito profile is deleted or
- * when the app is next restarted.
- */
+/** Caches unencrypted screenshots of tabs. */
+class RegularTabScreenshotManager(filesDir: File) : TabScreenshotManager(filesDir) {
+    override fun getInputStream(file: File) = FileInputStream(file)
+    override fun getOutputStream(file: File) = FileOutputStream(file)
+}
+
+/** Caches screenshots of tabs and encrypts them so that they can't be accessed by outside apps. */
 class IncognitoTabScreenshotManager(
-    private val appContext: Application,
-    filesDir: File
+    filesDir: File,
+    private val encrypter: FileEncrypter
 ) : TabScreenshotManager(filesDir) {
-    private val masterKey: MasterKey
-
-    init {
-        val spec = KeyGenParameterSpec
-            .Builder(
-                MasterKey.DEFAULT_MASTER_KEY_ALIAS,
-                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            )
-            .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-            .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-            .setKeySize(MasterKey.DEFAULT_AES_GCM_MASTER_KEY_SIZE)
-            .build()
-
-        masterKey = MasterKey.Builder(appContext).setKeyGenParameterSpec(spec).build()
-    }
-
-    override fun getInputStream(file: File): InputStream {
-        return EncryptedFile(appContext, file, masterKey).openFileInput()
-    }
-
-    override fun getOutputStream(file: File): OutputStream {
-        return EncryptedFile(appContext, file, masterKey).openFileOutput()
-    }
+    override fun getInputStream(file: File): InputStream = encrypter.getInputStream(file)
+    override fun getOutputStream(file: File): OutputStream = encrypter.getOutputStream(file)
 }

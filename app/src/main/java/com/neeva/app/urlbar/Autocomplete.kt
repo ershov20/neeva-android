@@ -1,5 +1,6 @@
 package com.neeva.app.urlbar
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Patterns
 import androidx.compose.foundation.Image
@@ -55,20 +56,19 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.R
 import com.neeva.app.browsing.toSearchUri
-import com.neeva.app.storage.Favicon
+import com.neeva.app.storage.FaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.SelectionHighlight
 import com.neeva.app.widgets.FaviconView
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun AutocompleteTextField(
     suggestionsModel: SuggestionsModel?,
     urlBarModel: URLBarModel,
-    getFaviconFlow: (Uri) -> Flow<Favicon?>,
+    faviconCache: FaviconCache,
     urlBarIsBeingEdited: Boolean,
     backgroundColor: Color,
     foregroundColor: Color
@@ -96,12 +96,12 @@ fun AutocompleteTextField(
     val url = autocompletedSuggestion?.takeIf { autocompleteIsValid }?.url
         ?: Uri.parse(urlBarText.text)
         ?: Uri.parse(appURL)
-    val favicon: Favicon? by getFaviconFlow(url).collectAsState(null)
+    val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(url, generateFavicon = false)
 
     AutocompleteTextField(
         autocompletedSuggestion = autocompleteText.takeIf { autocompleteIsValid },
         value = urlBarText,
-        favicon = favicon,
+        faviconBitmap = faviconBitmap,
         onLocationEdited = { textFieldValue ->
             lastEditWasDeletion = textFieldValue.text.length < urlBarText.text.length
             urlBarModel.onLocationBarTextChanged(textFieldValue)
@@ -126,7 +126,7 @@ fun AutocompleteTextField(
 fun AutocompleteTextField(
     autocompletedSuggestion: String?,
     value: TextFieldValue,
-    favicon: Favicon?,
+    faviconBitmap: Bitmap?,
     focusRequester: FocusRequester,
     onLocationEdited: (TextFieldValue) -> Unit,
     onLocationReplaced: (String) -> Unit,
@@ -149,7 +149,11 @@ fun AutocompleteTextField(
                 } ?: Modifier
             )
     ) {
-        FaviconView(favicon = favicon, bordered = false, modifier = Modifier.padding(start = 8.dp))
+        FaviconView(
+            bitmap = faviconBitmap,
+            bordered = false,
+            modifier = Modifier.padding(start = 8.dp)
+        )
 
         // TODO(dan.alcantara): If you have a really long autocomplete suggestion, this layout
         //                      breaks because it isn't scrollable.
@@ -237,7 +241,7 @@ fun AutocompleteTextField_Preview() {
         AutocompleteTextField(
             autocompletedSuggestion = "something else comes after this",
             value = TextFieldValue(text = "something else"),
-            favicon = null,
+            faviconBitmap = null,
             focusRequester = FocusRequester(),
             onLocationEdited = {},
             onLocationReplaced = {},
@@ -257,7 +261,7 @@ fun AutocompleteTextField_PreviewHebrew() {
         AutocompleteTextField(
             autocompletedSuggestion = "עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרה",
             value = TextFieldValue(text = "חמש עשרה"),
-            favicon = null,
+            faviconBitmap = null,
             focusRequester = FocusRequester(),
             onLocationEdited = {},
             onLocationReplaced = {},
@@ -277,7 +281,7 @@ fun AutocompleteTextField_PreviewNoSuggestion() {
         AutocompleteTextField(
             autocompletedSuggestion = null,
             value = TextFieldValue(text = "something else"),
-            favicon = null,
+            faviconBitmap = null,
             focusRequester = FocusRequester(),
             onLocationEdited = {},
             onLocationReplaced = {},

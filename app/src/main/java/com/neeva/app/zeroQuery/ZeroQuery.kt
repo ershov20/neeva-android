@@ -1,6 +1,5 @@
 package com.neeva.app.zeroQuery
 
-import android.annotation.SuppressLint
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -25,9 +24,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaConstants
-import com.neeva.app.NeevaConstants.appHost
 import com.neeva.app.R
 import com.neeva.app.spaces.SpaceRow
+import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.Site
 import com.neeva.app.storage.Space
 import com.neeva.app.suggestions.QueryRowSuggestion
@@ -39,13 +38,11 @@ import com.neeva.app.widgets.FaviconView
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
 import dagger.hilt.EntryPoints
-import kotlinx.coroutines.flow.map
 
-// TODO(kobec): ask how to fix this
-@SuppressLint("FlowOperatorInvokedInComposition")
 @Composable
 fun ZeroQuery(
     urlBarModel: URLBarModel,
+    faviconCache: FaviconCache,
     topContent: @Composable (LazyItemScope.() -> Unit) = {},
 ) {
     val entryPoint = EntryPoints.get(
@@ -54,25 +51,11 @@ fun ZeroQuery(
     )
     val historyManager = entryPoint.historyManager()
     val spaceStore = entryPoint.spaceStore()
-    val domainProvider = entryPoint.domainProvider()
 
     val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
-    /** Takes the top 3 suggestions for display to the user. */
-    val suggestedQueries: List<QueryRowSuggestion> by historyManager.frequentSites
-        .map { siteList ->
-            siteList.mapNotNull { it.toSearchSuggest() }.take(3)
-        }
-        .collectAsState(emptyList())
-
-    val suggestedSites: List<Site> by historyManager.frequentSites
-        .map { sites ->
-            // Assume that anything pointing at neeva.com should not be recommended to the user.
-            // This includes search suggestions and Spaces, e.g.
-            sites.filterNot {
-                domainProvider.getRegisteredDomain(Uri.parse(it.siteURL)) == appHost
-            }
-        }.collectAsState(emptyList())
+    val suggestedQueries by historyManager.suggestedQueries.collectAsState(emptyList())
+    val suggestedSites by historyManager.suggestedSites.collectAsState(emptyList())
 
     val searchesLabel = stringResource(id = R.string.searches)
     val spacesLabel = stringResource(id = R.string.spaces)
@@ -90,7 +73,7 @@ fun ZeroQuery(
             ) {
                 LazyRow(modifier = Modifier.padding(vertical = 16.dp)) {
                     items(suggestedSites.subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
-                        val favicon = site.largestFavicon
+                        val faviconBitmap by faviconCache.getFaviconAsync(Uri.parse(site.siteURL))
                         val title = site.metadata?.title
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -101,7 +84,7 @@ fun ZeroQuery(
                                 .padding(horizontal = 16.dp)
                                 .width(64.dp)
                         ) {
-                            FaviconView(favicon = favicon, bordered = false, size = 48.dp)
+                            FaviconView(bitmap = faviconBitmap, bordered = false, size = 48.dp)
 
                             Spacer(modifier = Modifier.height(8.dp))
 

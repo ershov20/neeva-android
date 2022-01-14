@@ -87,7 +87,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         BrowserUI(
                             browserWrapper.urlBarModel,
                             browserWrapper.suggestionsModel,
-                            browserWrapper.activeTabModel
+                            browserWrapper.activeTabModel,
+                            browserWrapper.faviconCache
                         )
                     }
                 }

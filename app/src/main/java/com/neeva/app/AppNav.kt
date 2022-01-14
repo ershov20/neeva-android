@@ -110,7 +110,12 @@ fun AppNav(
 
         SettingsContainer(appNavModel = appNavModel)
 
-        HistoryContainer(appNavModel = appNavModel)
+        // TODO(dan.alcantara): Should we be using the regular profile's favicon cache here?
+        //                      The history UI always shows the regular profile's history.
+        HistoryContainer(
+            appNavModel = appNavModel,
+            faviconCache = browserWrapper.faviconCache
+        )
 
         CardsContainer(
             appNavModel = appNavModel,

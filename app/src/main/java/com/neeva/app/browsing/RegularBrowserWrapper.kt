@@ -9,9 +9,10 @@ import com.neeva.app.NeevaConstants.browserTypeCookie
 import com.neeva.app.NeevaConstants.browserVersionCookie
 import com.neeva.app.User
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.publicsuffixlist.DomainProviderImpl
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.saveLoginCookieFrom
-import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.RegularFaviconCache
+import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
@@ -27,10 +28,9 @@ import org.chromium.weblayer.WebLayer
 class RegularBrowserWrapper(
     appContext: Application,
     activityCallbackProvider: () -> ActivityCallbacks?,
-    domainProviderImpl: DomainProviderImpl,
+    domainProvider: DomainProvider,
     apolloClient: ApolloClient,
     override val historyManager: HistoryManager,
-    override val faviconCache: FaviconCache,
     spaceStore: SpaceStore,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 ) : BrowserWrapper(
@@ -49,7 +49,14 @@ class RegularBrowserWrapper(
         historyManager,
         urlBarModel,
         apolloClient,
-        domainProviderImpl
+        domainProvider
+    )
+
+    override val faviconCache = RegularFaviconCache(
+        filesDir = appContext.cacheDir,
+        domainProvider = domainProvider,
+        profileProvider = { browser?.profile },
+        historyManager = historyManager
     )
 
     init {
@@ -71,7 +78,7 @@ class RegularBrowserWrapper(
         return WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
     }
 
-    override fun createTabScreenshotManager() = TabScreenshotManager(appContext.cacheDir)
+    override fun createTabScreenshotManager() = RegularTabScreenshotManager(appContext.cacheDir)
 
     override fun registerBrowserCallbacks(): Boolean {
         val wasRegistered = super.registerBrowserCallbacks()

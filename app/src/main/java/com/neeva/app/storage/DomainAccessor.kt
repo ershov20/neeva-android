@@ -17,9 +17,6 @@ interface DomainAccessor {
     @Query("SELECT * FROM domain WHERE domainName LIKE :domainName")
     suspend fun get(domainName: String): Domain?
 
-    @Query("SELECT * FROM domain WHERE domainName LIKE :domainName")
-    fun getFlow(domainName: String): Flow<Domain?>
-
     // Returns list of all domains that has a domainName containing the query
     @Query("SELECT * FROM domain WHERE domainName LIKE :query||'%'")
     suspend fun matchesTo(query: String): List<Domain>

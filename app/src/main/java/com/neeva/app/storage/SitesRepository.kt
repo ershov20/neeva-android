@@ -25,8 +25,7 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
     suspend fun getQuerySuggestions(query: String): List<Site> =
         sitesAccessor.getQuerySuggestions(query)
 
-    fun getFlow(url: Uri): Flow<Site?> =
-        sitesAccessor.getFromUrl(url.toString()).distinctUntilChanged()
+    suspend fun find(url: Uri): Site? = sitesAccessor.find(url.toString())
 
     suspend fun insert(
         url: Uri,

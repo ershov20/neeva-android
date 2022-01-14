@@ -21,7 +21,7 @@ fun QueryNavSuggestionRow(
         onTapRow = { onTapRow.invoke() },
         secondaryLabel = description,
         onTapEdit = onEditUrl,
-        faviconData = null,
+        faviconBitmap = null,
         imageURL = imageURL,
         drawableID = drawableID,
         drawableTint = drawableTint
