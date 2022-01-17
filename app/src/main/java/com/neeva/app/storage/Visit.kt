@@ -11,7 +11,7 @@ data class Visit(
     val visitType: Int,
     val timestamp: Date,
 
-    /** For passing a Visit down the stack and setting the siteUID in repository */
+    /** Tracks the ID of the [Site] that was visited. */
     val visitedSiteUID: Int = 0
 ) {
     enum class VisitType {

@@ -1,6 +1,9 @@
 package com.neeva.app.history
 
 import android.net.Uri
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.neeva.app.NeevaConstants
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Domain
@@ -35,18 +38,23 @@ class HistoryManager(
 
     companion object {
         private const val MAX_FREQUENT_SITES = 40
+        private const val PAGE_SIZE = 10
 
         private val HISTORY_WINDOW = TimeUnit.DAYS.toMillis(7)
         private val HISTORY_START_DATE = Date(System.currentTimeMillis() - HISTORY_WINDOW)
     }
 
-    /**
-     * Tracks all history from |HISTORY_START_DATE| going forward.  While HISTORY_START_DATE is a
-     * constant value that won't be updated until the app is reopened, we can manually filter the
-     * list later with the actual timeframes we're interested in.
-     */
-    val historyWithinRange: Flow<List<Site>> =
-        sitesRepository.getHistoryAfter(HISTORY_START_DATE)
+    fun getHistoryBetween(startTime: Date, endTime: Date): Flow<PagingData<Site>> {
+        return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
+            sitesRepository.getHistoryBetween(startTime, endTime)
+        }.flow
+    }
+
+    fun getHistoryAfter(startTime: Date): Flow<PagingData<Site>> {
+        return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
+            sitesRepository.getHistoryAfter(startTime)
+        }.flow
+    }
 
     private val frequentSites: Flow<List<Site>> =
         sitesRepository.getFrequentSitesAfter(HISTORY_START_DATE, MAX_FREQUENT_SITES)
@@ -76,8 +84,8 @@ class HistoryManager(
     /** Updates the query that is being used to fetch history and domain name suggestions. */
     fun updateSuggestionQuery(coroutineScope: CoroutineScope, currentInput: String) {
         coroutineScope.launch(Dispatchers.IO) {
-            val siteSuggestions = sitesRepository.getQuerySuggestions(currentInput)
-            val domainSuggestions = domainRepository.queryNavSuggestions(currentInput)
+            val siteSuggestions = sitesRepository.getQuerySuggestions(currentInput, limit = 10)
+            val domainSuggestions = domainRepository.queryNavSuggestions(currentInput, limit = 10)
 
             _siteSuggestions.value = siteSuggestions
 

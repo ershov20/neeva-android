@@ -1,6 +1,7 @@
 package com.neeva.app.storage
 
 import android.net.Uri
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -12,21 +13,32 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface SitesWithVisitsAccessor {
-    @Query("SELECT * FROM site")
-    fun getAllSites(): Flow<List<Site>>
+    @Query(
+        """
+        SELECT *
+        FROM site INNER JOIN visit ON site.siteUID = visit.visitedSiteUID
+        WHERE visit.timestamp >= :startTime AND visit.timestamp < :endTime 
+        ORDER BY visit.timestamp DESC
+        """
+    )
+    fun getPagedSitesVisitedBetween(startTime: Date, endTime: Date): PagingSource<Int, Site>
 
-    @Query("SELECT * FROM visit")
-    fun getAllVisits(): Flow<List<Visit>>
-
-    // TODO: Use DataSource.Factory and the Pagination library for this instead after the UI is done
-    @Query("SELECT * FROM visit WHERE timestamp > :thresholdTime ORDER BY timestamp DESC")
-    fun getVisitsAfter(thresholdTime: Date): Flow<List<Visit>>
+    @Query(
+        """
+        SELECT *
+        FROM site INNER JOIN visit ON site.siteUID = visit.visitedSiteUID
+        WHERE visit.timestamp >= :thresholdTime
+        ORDER BY visit.timestamp DESC
+        """
+    )
+    fun getPagedSitesVisitedAfter(thresholdTime: Date): PagingSource<Int, Site>
 
     @Query(
         """
         SELECT *
         FROM visit
-        WHERE timestamp > :from AND timestamp < :to ORDER BY timestamp DESC
+        WHERE timestamp > :from AND timestamp < :to
+        ORDER BY timestamp DESC
     """
     )
     fun getVisitsWithin(from: Date, to: Date): Flow<List<Visit>>
@@ -51,23 +63,19 @@ interface SitesWithVisitsAccessor {
         LIMIT :limit
     """
     )
-    suspend fun getQuerySuggestions(query: String, limit: Int = 1): List<Site>
-
-    @Transaction
-    @Query("SELECT * FROM site")
-    fun getSitesWithVisits(): List<SiteWithVisits>
+    suspend fun getQuerySuggestions(query: String, limit: Int): List<Site>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun add(vararg sites: Site)
+    suspend fun addSite(vararg sites: Site)
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun add(visit: Visit)
+    suspend fun addVisit(visit: Visit)
 
     @Update
-    suspend fun update(vararg sites: Site)
+    suspend fun updateSite(vararg sites: Site)
 
     @Query("SELECT * FROM site WHERE siteURL LIKE :url")
-    suspend fun find(url: String): Site?
+    suspend fun findSite(url: String): Site?
 
     @Query("SELECT * FROM site WHERE siteURL LIKE :url")
     fun getFromUrl(url: String): Site?
@@ -82,7 +90,7 @@ interface SitesWithVisitsAccessor {
         favicon: Favicon? = null,
         visit: Visit? = null
     ) {
-        var site = find(url.toString())
+        var site = findSite(url.toString())
 
         if (site != null) {
             val metadata: Site.SiteMetadata = site.metadata?.let {
@@ -101,7 +109,7 @@ interface SitesWithVisitsAccessor {
                 visitCount = if (visit != null) site.visitCount + 1 else site.visitCount,
                 lastVisitTimestamp = visit?.timestamp ?: site.lastVisitTimestamp
             )
-            update(site)
+            updateSite(site)
         } else {
             site = Site(
                 siteURL = url.toString(),
@@ -109,12 +117,12 @@ interface SitesWithVisitsAccessor {
                 largestFavicon = favicon,
                 lastVisitTimestamp = visit?.timestamp ?: Date()
             )
-            add(site)
+            addSite(site)
         }
 
         visit?.let {
-            add(
-                it.copy(visitedSiteUID = find(site.siteURL)?.siteUID ?: 0)
+            addVisit(
+                it.copy(visitedSiteUID = findSite(site.siteURL)?.siteUID ?: 0)
             )
         }
     }

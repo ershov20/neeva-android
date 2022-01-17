@@ -18,8 +18,8 @@ interface DomainAccessor {
     suspend fun get(domainName: String): Domain?
 
     // Returns list of all domains that has a domainName containing the query
-    @Query("SELECT * FROM domain WHERE domainName LIKE :query||'%'")
-    suspend fun matchesTo(query: String): List<Domain>
+    @Query("SELECT * FROM domain WHERE domainName LIKE :query||'%' LIMIT :limit")
+    suspend fun matchesTo(query: String, limit: Int): List<Domain>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun add(vararg domains: Domain)

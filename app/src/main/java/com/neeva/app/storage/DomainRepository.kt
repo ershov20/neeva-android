@@ -14,8 +14,8 @@ class DomainRepository(private val domainAccessor: DomainAccessor) {
 
     suspend fun get(domainName: String): Domain? = domainAccessor.get(domainName)
 
-    suspend fun queryNavSuggestions(query: String): List<NavSuggestion> {
-        return domainAccessor.matchesTo(query).map { domain -> domain.toNavSuggestion() }
+    suspend fun queryNavSuggestions(query: String, limit: Int): List<NavSuggestion> {
+        return domainAccessor.matchesTo(query, limit).map { domain -> domain.toNavSuggestion() }
     }
 
     suspend fun insert(domain: Domain) = domainAccessor.upsert(domain)
