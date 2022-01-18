@@ -16,20 +16,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.neeva.app.AppNavModel
-import com.neeva.app.AppNavState
+import androidx.navigation.NavController
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.OverlaySheet
 import com.neeva.app.widgets.OverlaySheetHeightConfig
 
 @Composable
-fun NeevaMenuSheet(appNavModel: AppNavModel) {
+fun NeevaMenuSheet(navController: NavController, onMenuItem: (NeevaMenuItemId) -> Unit) {
     OverlaySheet(
-        appNavModel = appNavModel,
-        visibleState = AppNavState.NEEVA_MENU,
+        navController = navController,
         config = OverlaySheetHeightConfig.WRAP_CONTENT
     ) {
-        NeevaMenuContent(onMenuItem = appNavModel::onMenuItem)
+        NeevaMenuContent(onMenuItem = onMenuItem)
     }
 }
 

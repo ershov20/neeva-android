@@ -55,7 +55,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     private val webModel by viewModels<WebLayerModel>()
 
     private val appNavModel by viewModels<AppNavModel> {
-        AppNavModel.AppNavModelFactory(webModel, spaceStore)
+        AppNavModel.AppNavModelFactory(spaceStore)
     }
 
     /**
@@ -102,7 +102,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     val browserWrapper: BrowserWrapper
                         by webModel.browserWrapperFlow.collectAsState()
 
-                    AppNav(appNavModel, browserWrapper) { space ->
+                    AppNav(appNavModel, webModel) { space ->
                         lifecycleScope.launch {
                             browserWrapper.activeTabModel.modifySpace(space, apolloClient)
                             appNavModel.showBrowser()
@@ -219,7 +219,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 browserWrapper.exitFullscreen()
             }
 
-            appNavModel.state.value != AppNavState.BROWSER -> {
+            !appNavModel.isCurrentState(AppNavState.BROWSER) -> {
                 appNavModel.showBrowser()
             }
 

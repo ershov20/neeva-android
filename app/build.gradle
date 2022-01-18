@@ -81,7 +81,6 @@ dependencies {
     // in our Android Manifest.  We use the GMS version that matches the value we used when building
     // the WebLayerSupport APK, which was version 17.0.0.
     implementation "com.google.android.gms:play-services-base:$play_services_version"
-
     implementation 'androidx.activity:activity-compose:1.4.0'
     implementation 'androidx.appcompat:appcompat:1.4.0'
     implementation 'androidx.browser:browser:1.4.0'
@@ -94,6 +93,7 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
+    implementation("androidx.navigation:navigation-compose:2.4.0-rc01")
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
     implementation 'com.google.android.material:material:1.5.0'

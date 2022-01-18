@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.app.Application
+import android.net.Uri
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -118,6 +119,9 @@ class WebLayerModel @Inject constructor(
     }
 
     fun onAuthTokenUpdated() = currentBrowser.onAuthTokenUpdated()
+
+    /** Loads the given [url] in a new tab. */
+    fun loadUrl(url: Uri) = currentBrowser.activeTabModel.loadUrl(url, true)
 
     fun switchToProfile(useIncognito: Boolean) {
         if (useIncognito) {

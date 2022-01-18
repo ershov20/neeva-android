@@ -2,10 +2,7 @@ package com.neeva.app.card
 
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -37,11 +34,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.neeva.app.AppNavModel
+import androidx.navigation.NavController
 import com.neeva.app.AppNavState
 import com.neeva.app.R
-import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
+import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.mockFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
@@ -51,64 +48,57 @@ import com.neeva.app.widgets.Button
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun CardsContainer(
-    appNavModel: AppNavModel,
-    browserWrapper: BrowserWrapper
+    navController: NavController,
+    webLayerModel: WebLayerModel
 ) {
-    val state: AppNavState by appNavModel.state.collectAsState()
-
     val cardGridListener = object : CardGridListener {
         override fun onSelectTab(tab: TabInfo) {
-            browserWrapper.selectTab(tab)
-            appNavModel.showBrowser()
+            webLayerModel.currentBrowser.selectTab(tab)
+            navController.navigate(AppNavState.BROWSER.name)
         }
 
         override fun onCloseTab(tab: TabInfo) {
-            browserWrapper.closeTab(tab)
+            webLayerModel.currentBrowser.closeTab(tab)
         }
 
         override fun onOpenLazyTab() {
-            browserWrapper.openLazyTab()
-            appNavModel.showBrowser()
+            webLayerModel.currentBrowser.openLazyTab()
+            navController.navigate(AppNavState.BROWSER.name)
         }
 
         override fun onDone() {
-            appNavModel.showBrowser()
+            navController.navigate(AppNavState.BROWSER.name)
         }
 
         override fun onSwitchToIncognitoProfile() {
-            appNavModel.showTabSwitcher(useIncognito = true)
+            navController.navigate(AppNavState.CARD_GRID.name)
+            webLayerModel.switchToProfile(true)
         }
 
         override fun onSwitchToRegularProfile() {
-            appNavModel.showTabSwitcher(useIncognito = false)
+            navController.navigate(AppNavState.CARD_GRID.name)
+            webLayerModel.switchToProfile(false)
         }
     }
+    // Reset the scroll state of the LazyVerticalGrid every time the active tab changes.
+    // TODO(dan.alcantara): We'll need to investigate how this should work with tab groups
+    //                      and child tabs.
+    val tabs: List<TabInfo> by webLayerModel.currentBrowser.orderedTabList.collectAsState()
+    val activeTabIndex: Int = tabs.indexOfFirst { it.isSelected }.coerceAtLeast(0)
+    val listState = LazyListState(activeTabIndex)
 
-    AnimatedVisibility(
-        visible = state == AppNavState.CARD_GRID,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        // Reset the scroll state of the LazyVerticalGrid every time the active tab changes.
-        // TODO(dan.alcantara): We'll need to investigate how this should work with tab groups
-        //                      and child tabs.
-        val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
-        val activeTabIndex: Int = tabs.indexOfFirst { it.isSelected }.coerceAtLeast(0)
-        val listState = LazyListState(activeTabIndex)
-
-        CardGrid(
-            selectedScreen = if (browserWrapper.isIncognito) {
-                SelectedScreen.INCOGNITO_TABS
-            } else {
-                SelectedScreen.REGULAR_TABS
-            },
-            listState = listState,
-            cardGridListener = cardGridListener,
-            tabs = tabs,
-            faviconCache = browserWrapper.faviconCache,
-            screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot
-        )
-    }
+    CardGrid(
+        selectedScreen = if (webLayerModel.currentBrowser.isIncognito) {
+            SelectedScreen.INCOGNITO_TABS
+        } else {
+            SelectedScreen.REGULAR_TABS
+        },
+        listState = listState,
+        cardGridListener = cardGridListener,
+        tabs = tabs,
+        faviconCache = webLayerModel.currentBrowser.faviconCache,
+        screenshotProvider = webLayerModel.currentBrowser.tabScreenshotManager::restoreScreenshot
+    )
 }
 
 interface CardGridListener {
