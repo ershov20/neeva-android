@@ -31,18 +31,16 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.FaviconCache
-import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.theme.md_theme_dark_shadow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun URLBar(
-    suggestionsModel: SuggestionsModel?,
     activeTabModel: ActiveTabModel,
     urlBarModel: URLBarModel,
     faviconCache: FaviconCache
 ) {
-    val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
+    val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
     // TODO(kobec): figure out how to map incognito to color scheme?
     val isIncognito: Boolean = urlBarModel.isIncognito
@@ -73,11 +71,13 @@ fun URLBar(
                 .clip(RoundedCornerShape(24.dp))
                 .background(MaterialTheme.colorScheme.primary)
         ) {
+            val textFieldValue = urlBarModel.textFieldValue.collectAsState()
+
             AutocompleteTextField(
-                suggestionsModel = suggestionsModel,
                 urlBarModel = urlBarModel,
+                textFieldValue = textFieldValue.value,
+                textFieldValueMutator = urlBarModel::setTextFieldValue,
                 faviconCache = faviconCache,
-                urlBarIsBeingEdited = isEditing,
                 backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                 foregroundColor = foregroundColor
             )

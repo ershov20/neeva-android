@@ -6,7 +6,6 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.IncognitoFaviconCache
 import com.neeva.app.storage.IncognitoTabScreenshotManager
-import com.neeva.app.suggestions.SuggestionsModel
 import java.nio.file.Files
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +22,7 @@ class IncognitoBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
     activityCallbackProvider = activityCallbackProvider,
+    suggestionsModel = null,
     coroutineScope = coroutineScope
 ) {
     companion object {
@@ -33,7 +33,6 @@ class IncognitoBrowserWrapper(
     private val tempDirectory = Files.createTempDirectory(FOLDER_PREFIX).toFile()
     private val encrypter = FileEncrypter(appContext)
 
-    override val suggestionsModel: SuggestionsModel? = null
     override val historyManager: HistoryManager? = null
 
     override val faviconCache =

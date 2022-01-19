@@ -17,6 +17,8 @@ import com.neeva.app.storage.SpaceStore
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.CookieChangedCallback
 import org.chromium.weblayer.WebLayer
@@ -35,22 +37,20 @@ class RegularBrowserWrapper(
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
 ) : BrowserWrapper(
     isIncognito = false,
-    appContext,
-    activityCallbackProvider,
-    coroutineScope
+    appContext = appContext,
+    activityCallbackProvider = activityCallbackProvider,
+    suggestionsModel = SuggestionsModel(
+        coroutineScope,
+        historyManager,
+        apolloClient,
+        domainProvider
+    ),
+    coroutineScope = coroutineScope
 ) {
     companion object {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
         private const val PERSISTENCE_ID = "Neeva_Browser"
     }
-
-    override val suggestionsModel = SuggestionsModel(
-        coroutineScope,
-        historyManager,
-        urlBarModel,
-        apolloClient,
-        domainProvider
-    )
 
     override val faviconCache = RegularFaviconCache(
         filesDir = appContext.cacheDir,
@@ -60,18 +60,25 @@ class RegularBrowserWrapper(
     )
 
     init {
-        // Pull new suggestions from the database according to what's currently in the URL bar.
-        coroutineScope.launch {
-            urlBarModel.userInputText.collect {
-                historyManager.updateSuggestionQuery(coroutineScope, it.text)
-            }
-        }
+        urlBarModel.userInputState
+            .onEach { state ->
+                val queryText = state.queryText
 
-        coroutineScope.launch {
-            urlBarModel.isEditing.collect { isEditing ->
-                if (isEditing) spaceStore.refresh()
+                // Pull new suggestions from the database.
+                coroutineScope.launch(Dispatchers.IO) {
+                    historyManager.updateSuggestionQuery(queryText)
+                }
+
+                // Ask the backend for suggestions appropriate for the currently typed in text.
+                coroutineScope.launch(Dispatchers.IO) {
+                    suggestionsModel?.getSuggestionsFromBackend(queryText)
+                }
             }
-        }
+            .launchIn(coroutineScope)
+
+        urlBarModel.isEditing
+            .onEach { isEditing -> if (isEditing) spaceStore.refresh() }
+            .launchIn(coroutineScope)
     }
 
     override fun createBrowserFragment(): Fragment {

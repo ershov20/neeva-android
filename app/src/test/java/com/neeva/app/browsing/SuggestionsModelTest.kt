@@ -15,7 +15,6 @@ import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.suggestions.toQueryRowSuggestion
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
-import com.neeva.app.urlbar.URLBarModel
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -68,7 +67,6 @@ class SuggestionsModelTest : BaseTest() {
     private lateinit var responseData: String
 
     private lateinit var historyManager: HistoryManager
-    private lateinit var urlBarModel: URLBarModel
     private lateinit var apolloClient: ApolloClient
 
     private lateinit var model: SuggestionsModel
@@ -82,10 +80,6 @@ class SuggestionsModelTest : BaseTest() {
         historyManager = mock()
         Mockito.`when`(historyManager.siteSuggestions).thenReturn(siteSuggestions)
 
-        urlBarModel = mock()
-        Mockito.`when`(urlBarModel.userInputText).thenReturn(urlBarText)
-        Mockito.`when`(urlBarModel.isEditing).thenReturn(urlBarIsEditing)
-
         apolloClient = ApolloClient.Builder()
             .serverUrl("https://fake.url")
             .okHttpClient(
@@ -98,7 +92,6 @@ class SuggestionsModelTest : BaseTest() {
         model = SuggestionsModel(
             coroutineScopeRule.scope,
             historyManager,
-            urlBarModel,
             apolloClient,
             domainProvider
         )
@@ -158,7 +151,7 @@ class SuggestionsModelTest : BaseTest() {
     }
 
     @Test
-    fun onUrlBarChanged_whileNotEditing_dropsIt() = runTest {
+    fun onUrlBarChanged_withEmptyString_doesNoQuery() = runTest {
         responseData = FULL_RESPONSE
 
         // Pass in a different CoroutineScope so that the subscriptions in the constructor don't
@@ -167,20 +160,18 @@ class SuggestionsModelTest : BaseTest() {
         val model = SuggestionsModel(
             collectionJob,
             historyManager,
-            urlBarModel,
             apolloClient,
             domainProvider
         )
         advanceUntilIdle()
 
-        model.getSuggestionsFromBackend("query text", false)
-
+        model.getSuggestionsFromBackend("")
         expectThat(model.suggestionFlow.value.queryRowSuggestions).isEmpty()
         expectThat(model.suggestionFlow.value.navSuggestions).isEmpty()
     }
 
     @Test
-    fun onUrlBarChanged_whileEditing_firesRequestAndProcessesResult() = runTest {
+    fun onUrlBarChanged_withNonEmptyString_firesRequestAndProcessesResult() = runTest {
         responseData = FULL_RESPONSE
 
         // Pass in a different CoroutineScope so that the subscriptions in the constructor don't
@@ -189,7 +180,6 @@ class SuggestionsModelTest : BaseTest() {
         val model = SuggestionsModel(
             collectionJob,
             historyManager,
-            urlBarModel,
             apolloClient,
             domainProvider
         )
@@ -214,7 +204,7 @@ class SuggestionsModelTest : BaseTest() {
         )
 
         // Trigger the Apollo query and check the results.
-        model.getSuggestionsFromBackend("query text", true)
+        model.getSuggestionsFromBackend("query text")
         advanceUntilIdle()
 
         val emptyAnnotation = SuggestionsQuery.Annotation(null, null, null, null, null)

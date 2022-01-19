@@ -118,7 +118,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     val browserWrapper: BrowserWrapper
                         by webModel.browserWrapperFlow.collectAsState()
                     val isEditing: Boolean by
-                    browserWrapper.urlBarModel.isEditing.collectAsState()
+                    browserWrapper.urlBarModel.isEditing.collectAsState(false)
 
                     Surface(color = MaterialTheme.colorScheme.background) {
                         if (!isEditing) {

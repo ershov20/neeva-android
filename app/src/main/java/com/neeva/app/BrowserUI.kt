@@ -28,11 +28,11 @@ fun BrowserUI(
     activeTabModel: ActiveTabModel,
     faviconCache: FaviconCache
 ) {
-    val isEditing: Boolean by urlBarModel.isEditing.collectAsState()
+    val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
     val progress: Int by activeTabModel.progressFlow.collectAsState()
 
     Column {
-        URLBar(suggestionsModel, activeTabModel, urlBarModel, faviconCache)
+        URLBar(activeTabModel, urlBarModel, faviconCache)
         Box {
             Box(
                 Modifier

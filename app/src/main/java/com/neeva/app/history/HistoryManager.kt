@@ -82,22 +82,27 @@ class HistoryManager(
             }
 
     /** Updates the query that is being used to fetch history and domain name suggestions. */
-    fun updateSuggestionQuery(coroutineScope: CoroutineScope, currentInput: String) {
-        coroutineScope.launch(Dispatchers.IO) {
-            val siteSuggestions = sitesRepository.getQuerySuggestions(currentInput, limit = 10)
-            val domainSuggestions = domainRepository.queryNavSuggestions(currentInput, limit = 10)
-
-            _siteSuggestions.value = siteSuggestions
-
-            // Determine what history should be suggested as the user types out a query.
-            // Prioritize the site visits first because they were directly visited by the user.
-            val combinedSuggestions =
-                _siteSuggestions.value.map { it.toNavSuggestion(domainProvider) } +
-                    domainSuggestions
-
-            // Keep only the unique history items with unique URLs.
-            _historySuggestions.value = combinedSuggestions.distinctBy { it.url }
+    suspend fun updateSuggestionQuery(currentInput: String?) {
+        val siteSuggestions: List<Site>
+        val domainSuggestions: List<NavSuggestion>
+        if (currentInput != null) {
+            siteSuggestions = sitesRepository.getQuerySuggestions(currentInput, limit = 10)
+            domainSuggestions = domainRepository.queryNavSuggestions(currentInput, limit = 10)
+        } else {
+            siteSuggestions = emptyList()
+            domainSuggestions = emptyList()
         }
+
+        _siteSuggestions.value = siteSuggestions
+
+        // Determine what history should be suggested as the user types out a query.
+        // Prioritize the site visits first because they were directly visited by the user.
+        val combinedSuggestions =
+            _siteSuggestions.value.map { it.toNavSuggestion(domainProvider) } +
+                domainSuggestions
+
+        // Keep only the unique history items with unique URLs.
+        _historySuggestions.value = combinedSuggestions.distinctBy { it.url }
     }
 
     /**

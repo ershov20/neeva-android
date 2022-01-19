@@ -22,7 +22,7 @@ class TabList {
     fun getTab(index: Int) = currentTabs[index]
     fun getTabInfo(id: String) = currentPrimitives[id]
 
-    fun add(tab: Tab, thumbnailUri: Uri) {
+    fun add(tab: Tab) {
         if (currentTabs.contains(tab)) return
         currentTabs.add(tab)
 

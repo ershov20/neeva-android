@@ -10,12 +10,11 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.Site
 import com.neeva.app.type.QuerySuggestionType
-import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 data class NavSuggestion(
     val url: Uri,
@@ -45,7 +44,6 @@ data class Suggestions(
 class SuggestionsModel(
     coroutineScope: CoroutineScope,
     historyManager: HistoryManager,
-    private val urlBarModel: URLBarModel,
     private val apolloClient: ApolloClient,
     private val domainProvider: DomainProvider
 ) {
@@ -60,8 +58,8 @@ class SuggestionsModel(
     val autocompleteSuggestion: StateFlow<NavSuggestion?> = _autocompleteSuggestion
 
     init {
-        coroutineScope.launch {
-            historyManager.siteSuggestions.collect { suggestions ->
+        historyManager.siteSuggestions
+            .onEach { suggestions ->
                 _autocompleteSuggestion.value =
                     suggestions.firstOrNull()?.toNavSuggestion(domainProvider)
 
@@ -69,24 +67,14 @@ class SuggestionsModel(
                     autocompleteSuggestion = _autocompleteSuggestion.value
                 )
             }
-        }
-
-        coroutineScope.launch {
-            // Every time the contents of the URL bar changes, try to fire a query to the backend.
-            urlBarModel.userInputText
-                .combine(urlBarModel.isEditing) { textFieldValue, isEditing ->
-                    Pair(textFieldValue, isEditing)
-                }
-                .collect { (urlBarValue, isEditing) ->
-                    getSuggestionsFromBackend(urlBarValue.text, isEditing)
-                }
-        }
+            .launchIn(coroutineScope)
     }
 
-    internal suspend fun getSuggestionsFromBackend(newValue: String, isEditing: Boolean) {
-        // Because the URL bar text changes whenever the user navigates somewhere, we will end up
-        // firing a wasted query.  Make sure the user is actively typing something in.
-        if (!isEditing) return
+    internal suspend fun getSuggestionsFromBackend(newValue: String?) {
+        if (newValue.isNullOrBlank()) {
+            updateWith(null)
+            return
+        }
 
         // If the query is blank, don't bother firing the query.
         var result: SuggestionsQuery.Data? = null

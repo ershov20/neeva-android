@@ -4,7 +4,6 @@ import android.app.Application
 import android.net.Uri
 import android.view.View
 import androidx.annotation.CallSuper
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
@@ -14,6 +13,7 @@ import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
@@ -36,6 +36,7 @@ abstract class BrowserWrapper(
     val isIncognito: Boolean,
     val appContext: Application,
     val activityCallbackProvider: () -> ActivityCallbacks?,
+    val suggestionsModel: SuggestionsModel?,
     val coroutineScope: CoroutineScope
 ) {
     data class CreateNewTabInfo(
@@ -65,7 +66,6 @@ abstract class BrowserWrapper(
 
     val tabScreenshotManager: TabScreenshotManager by lazy { createTabScreenshotManager() }
 
-    abstract val suggestionsModel: SuggestionsModel?
     abstract val historyManager: HistoryManager?
     abstract val faviconCache: FaviconCache
 
@@ -73,7 +73,13 @@ abstract class BrowserWrapper(
 
     init {
         activeTabModel = ActiveTabModel { uri, parentTabId -> createTabWithUri(uri, parentTabId) }
-        urlBarModel = URLBarModel(isIncognito, activeTabModel)
+
+        urlBarModel = URLBarModel(
+            isIncognito = isIncognito,
+            activeTabModel = activeTabModel,
+            suggestionFlow = suggestionsModel?.autocompleteSuggestion ?: MutableStateFlow(null),
+            coroutineScope = coroutineScope
+        )
     }
 
     private var fullscreenCallback = FullscreenCallbackImpl(
@@ -317,7 +323,7 @@ abstract class BrowserWrapper(
     fun exitFullscreen() = fullscreenCallback.exitFullscreen()
 
     private fun onNewTabAdded(tab: Tab) {
-        tabList.add(tab, tabScreenshotManager.getTabScreenshotFile(tab).toUri())
+        tabList.add(tab)
         registerTabCallbacks(tab)
     }
 
