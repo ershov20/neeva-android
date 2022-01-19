@@ -9,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
 import com.neeva.app.firstrun.FirstRunContainer
@@ -63,7 +62,9 @@ fun AppNav(
     settingsModel: SettingsModel,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
-    val navController = rememberNavController()
+    val browserWrapper = LocalEnvironment.current.browserWrapper
+    val navController = LocalEnvironment.current.navController
+
     appNavModel.navController = navController
     val onMenuItem = { id: NeevaMenuItemId ->
         when (id) {
@@ -99,7 +100,7 @@ fun AppNav(
         composable(AppNavState.ADD_TO_SPACE.name) {
             AddToSpaceSheet(
                 navController = navController,
-                activeTabModel = webLayerModel.currentBrowser.activeTabModel,
+                activeTabModel = browserWrapper.activeTabModel,
                 spaceModifier = spaceModifier
             )
         }
@@ -119,7 +120,7 @@ fun AppNav(
         composable(AppNavState.HISTORY.name) {
             HistoryContainer(
                 navController = navController,
-                faviconCache = webLayerModel.currentBrowser.faviconCache
+                faviconCache = browserWrapper.faviconCache
             ) {
                 webLayerModel.loadUrl(it)
                 navController.navigate(AppNavState.BROWSER.name)

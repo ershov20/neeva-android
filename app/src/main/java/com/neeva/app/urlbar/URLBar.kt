@@ -28,18 +28,18 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
-import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.storage.FaviconCache
 import com.neeva.app.ui.theme.md_theme_dark_shadow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun URLBar(
-    activeTabModel: ActiveTabModel,
-    urlBarModel: URLBarModel,
-    faviconCache: FaviconCache
-) {
+fun URLBar() {
+    val browserWrapper = LocalEnvironment.current.browserWrapper
+    val urlBarModel = browserWrapper.urlBarModel
+    val activeTabModel = browserWrapper.activeTabModel
+    val faviconCache = browserWrapper.faviconCache
+
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
     // TODO(kobec): figure out how to map incognito to color scheme?

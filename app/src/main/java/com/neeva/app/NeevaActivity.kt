@@ -9,17 +9,13 @@ import android.view.View
 import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.ActivityCallbacks
-import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRun
@@ -29,10 +25,10 @@ import com.neeva.app.settings.SettingsModel
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.SpaceStore
-import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -61,17 +57,17 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         AppNavModel.AppNavModelFactory(spaceStore)
     }
 
-    /**
-     * View provided to WebLayer that allows us to receive information about when the bottom toolbar
-     * needs to be scrolled off.  We provide a placeholder instead of the real view because WebLayer
-     * appears to have a bug that prevents the bottom view from rendering correctly.
-     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v96.
-     */
-    private lateinit var bottomControls: View
-    private lateinit var browserUI: View
-
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View
+
+    /**
+     * WebLayer provides information about when the bottom and top toolbars need to be scrolled off.
+     * We provide a placeholder instead of the real view because WebLayer has a bug that prevents it
+     * from rendering Composables properly.
+     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v96.
+     */
+    private val topControlOffset = MutableStateFlow(0.0f)
+    private val bottomControlOffset = MutableStateFlow(0.0f)
 
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,64 +76,19 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         webModel.activityCallbacks = WeakReference(this)
 
         setContentView(R.layout.main)
-        browserUI = findViewById<ComposeView>(R.id.browser_ui).apply {
+
+        findViewById<ComposeView>(R.id.browser_ui).apply {
             setContent {
-                NeevaTheme {
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        val browserWrapper: BrowserWrapper
-                            by webModel.browserWrapperFlow.collectAsState()
-
-                        BrowserUI(
-                            browserWrapper.urlBarModel,
-                            browserWrapper.suggestionsModel,
-                            browserWrapper.activeTabModel,
-                            browserWrapper.faviconCache
-                        )
-                    }
-                }
-            }
-        }
-        browserUI.background = null
-
-        findViewById<ComposeView>(R.id.app_nav).setContent {
-            NeevaTheme {
-                Surface(color = Color.Transparent) {
-                    val browserWrapper: BrowserWrapper
-                        by webModel.browserWrapperFlow.collectAsState()
-                    AppNav(appNavModel, webModel, settingsModel) { space ->
-                        lifecycleScope.launch {
-                            browserWrapper.activeTabModel.modifySpace(space, apolloClient)
-                            appNavModel.showBrowser()
-                        }
-                    }
-                }
-            }
-        }
-
-        bottomControls = findViewById<ComposeView>(R.id.tab_toolbar).apply {
-            setContent {
-                NeevaTheme {
-                    val browserWrapper: BrowserWrapper
-                        by webModel.browserWrapperFlow.collectAsState()
-                    val isEditing: Boolean by
-                    browserWrapper.urlBarModel.isEditing.collectAsState(false)
-
-                    Surface(color = MaterialTheme.colorScheme.background) {
-                        if (!isEditing) {
-                            TabToolbar(
-                                TabToolbarModel(
-                                    appNavModel::showNeevaMenu,
-                                    appNavModel::showAddToSpace
-                                ) {
-                                    browserWrapper.takeScreenshotOfActiveTab {
-                                        appNavModel.showCardGrid()
-                                    }
-                                },
-                                browserWrapper.activeTabModel
-                            )
-                        }
-                    }
-                }
+                val browserWrapper by webModel.browserWrapperFlow.collectAsState()
+                ActivityUI(
+                    browserWrapper = browserWrapper,
+                    bottomControlOffset = bottomControlOffset,
+                    topControlOffset = topControlOffset,
+                    appNavModel = appNavModel,
+                    webLayerModel = webModel,
+                    settingsModel = settingsModel,
+                    apolloClient = apolloClient
+                )
             }
         }
 
@@ -151,7 +102,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         Pair(loadingState, browserDelegate)
                     }
                     .stateIn(lifecycleScope)
-                    .collect { (loadingState, browserDelegate) ->
+                    .collect { (loadingState, _) ->
                         if (loadingState != LoadingState.READY) return@collect
                         prepareWebLayer()
                     }
@@ -306,12 +257,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     override fun onBottomBarOffsetChanged(offset: Int) {
         // Move the real bar when WebLayer says that the fake one is moving.
-        bottomControls.translationY = offset.toFloat()
+        bottomControlOffset.value = offset.toFloat()
     }
 
     override fun onTopBarOffsetChanged(offset: Int) {
         // Move the real bar when WebLayer says that the fake one is moving.
-        browserUI.translationY = offset.toFloat()
+        topControlOffset.value = offset.toFloat()
     }
 
     override fun onDeleteIncognitoProfile() {

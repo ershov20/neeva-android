@@ -30,7 +30,10 @@ class TabToolbarModel(
 )
 
 @Composable
-fun TabToolbar(model: TabToolbarModel, activeTabModel: ActiveTabModel) {
+fun TabToolbar(
+    model: TabToolbarModel,
+    activeTabModel: ActiveTabModel
+) {
     val navigationInfo by activeTabModel.navigationInfoFlow.collectAsState()
 
     Row(

@@ -18,15 +18,4 @@
         android:id="@+id/browser_ui"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-
-    <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/tab_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom" />
-
-    <androidx.compose.ui.platform.ComposeView
-        android:id="@+id/app_nav"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
 </FrameLayout>

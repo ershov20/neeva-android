@@ -5,8 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.storage.FaviconCache
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.zeroQuery.ZeroQuery
@@ -14,15 +13,16 @@ import dagger.hilt.EntryPoints
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun SuggestionPane(
-    suggestionsModel: SuggestionsModel?,
-    urlBarModel: URLBarModel,
-    activeTabModel: ActiveTabModel,
-    faviconCache: FaviconCache
-) {
+fun SuggestionPane() {
     val historyManager = EntryPoints
         .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
         .historyManager()
+
+    val browserWrapper = LocalEnvironment.current.browserWrapper
+    val urlBarModel = browserWrapper.urlBarModel
+    val activeTabModel = browserWrapper.activeTabModel
+    val faviconCache = browserWrapper.faviconCache
+    val suggestionsModel = browserWrapper.suggestionsModel
 
     val isUrlBarBlank by urlBarModel.userInputTextIsBlank.collectAsState(true)
     val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
