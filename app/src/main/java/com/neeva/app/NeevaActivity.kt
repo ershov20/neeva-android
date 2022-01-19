@@ -25,6 +25,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
+import com.neeva.app.settings.SettingsModel
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.SpaceStore
@@ -53,6 +54,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var historyManager: HistoryManager
 
     private val webModel by viewModels<WebLayerModel>()
+
+    private val settingsModel by viewModels<SettingsModel>()
 
     private val appNavModel by viewModels<AppNavModel> {
         AppNavModel.AppNavModelFactory(spaceStore)
@@ -101,8 +104,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 Surface(color = Color.Transparent) {
                     val browserWrapper: BrowserWrapper
                         by webModel.browserWrapperFlow.collectAsState()
-
-                    AppNav(appNavModel, webModel) { space ->
+                    AppNav(appNavModel, webModel, settingsModel) { space ->
                         lifecycleScope.launch {
                             browserWrapper.activeTabModel.modifySpace(space, apolloClient)
                             appNavModel.showBrowser()

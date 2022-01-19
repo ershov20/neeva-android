@@ -17,6 +17,7 @@ import com.neeva.app.history.HistoryContainer
 import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.NeevaMenuSheet
 import com.neeva.app.settings.SettingsContainer
+import com.neeva.app.settings.SettingsModel
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.storage.Space
 import com.neeva.app.storage.SpaceStore
@@ -59,6 +60,7 @@ class AppNavModel(
 fun AppNav(
     appNavModel: AppNavModel,
     webLayerModel: WebLayerModel,
+    settingsModel: SettingsModel,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
     val navController = rememberNavController()
@@ -101,13 +103,12 @@ fun AppNav(
                 spaceModifier = spaceModifier
             )
         }
-
         composable(AppNavState.NEEVA_MENU.name) {
             NeevaMenuSheet(navController = navController, onMenuItem = onMenuItem)
         }
 
         composable(AppNavState.SETTINGS.name) {
-            SettingsContainer(navController = navController) {
+            SettingsContainer(navController = navController, settingsModel) {
                 webLayerModel.loadUrl(it)
                 navController.navigate(AppNavState.BROWSER.name)
             }

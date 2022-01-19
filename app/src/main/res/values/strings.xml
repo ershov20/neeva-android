@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Neeva Search &amp; Browser</string>
     <string name="neeva_search">Neeva Search</string>
+    <string name="company_name">Neeva</string>
     <string name="edit_current_url">Edit current URL</string>
     <string name="edit_content_description">Edit</string>
     <string name="cancel">Cancel</string>
@@ -46,4 +47,28 @@
     <string name="sign_in_with_microsoft">Sign in with Microsoft</string>
     <string name="sign_in_with_okta">Continue</string>
     <string name="first_run_intro">Welcome to Neeva, the only ad-free, private search engine</string>
+
+    <string name="settings_account_settings">Account Settings</string>
+    <string name="settings_connected_apps">Connected Apps</string>
+    <string name="settings_invite_friends">Invite your friends!</string>
+    <string name="settings_general">General</string>
+    <string name="settings_default_browser">Default Browser</string>
+    <string name="settings_show_search_search_suggestions">Show Search Suggestions</string>
+    <string name="settings_block_pop_up_windows">Block Pop-up Windows</string>
+    <string name="settings_open_copied_links">Offer to Open Copied Links</string>
+    <string name="settings_show_link_previews">Show Link Previews</string>
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_clear_browsing_data">Clear Browsing Data</string>
+    <string name="settings_close_incognito_tabs">Close Incognito Tabs</string>
+    <string name="settings_tracking_protection">Tracking Protection</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_support">Support</string>
+    <string name="settings_welcome_tours">Welcome Tours</string>
+    <string name="settings_help_center">Help Center</string>
+    <string name="settings_about">About</string>
+    <string name="settings_neeva_browser_version">Neeva Browser %s</string>
+    <string name="settings_licenses">Licenses</string>
+    <string name="settings_terms">Terms</string>
+    <string name="settings_account_email_placeholder">Account-email (placeholder for now)</string>
+
 </resources>
