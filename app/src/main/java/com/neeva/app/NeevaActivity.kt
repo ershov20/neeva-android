@@ -50,9 +50,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var domainProviderImpl: DomainProviderImpl
     @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var historyManager: HistoryManager
+    @Inject lateinit var settingsModel: SettingsModel
 
     private val webModel by viewModels<WebLayerModel>()
-    private val settingsModel by viewModels<SettingsModel>()
 
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View

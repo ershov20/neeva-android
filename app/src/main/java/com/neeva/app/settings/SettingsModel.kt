@@ -5,14 +5,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
-@HiltViewModel
-class SettingsModel @Inject constructor(
-    application: Application
-) : ViewModel() {
+class SettingsModel(application: Application) {
     private val SETTINGS_PREFS_FOLDER_NAME = "SETTINGS_PREFERENCES"
 
     val sharedPreferences: SharedPreferences = application

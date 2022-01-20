@@ -1,10 +1,12 @@
 package com.neeva.app
 
+import android.app.Application
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
+import com.neeva.app.settings.SettingsModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
 import dagger.Module
@@ -54,6 +56,12 @@ object NeevaAppModule {
     @Singleton
     fun providesSpaceStore(apolloClient: ApolloClient): SpaceStore {
         return SpaceStore(apolloClient)
+    }
+
+    @Provides
+    @Singleton
+    fun providesSettings(application: Application): SettingsModel {
+        return SettingsModel(application)
     }
 
     @Provides
