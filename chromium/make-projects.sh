@@ -112,7 +112,9 @@ get_list_of_jars() {
     list=$(find $unpacked_dir/jars/obj -name \*.jar | egrep -v $exclude_pattern)
 
     # Include these back
-    list="$list $unpacked_dir/jars/obj/third_party/android_deps/chromium_play_services_availability_java.processed.jar"
+    list="$list \
+        $unpacked_dir/jars/obj/third_party/android_deps/chromium_play_services_availability_java.processed.jar \
+        $unpacked_dir/jars/obj/third_party/android_provider/android_provider_java.processed.jar"
 
     echo $list
 }
