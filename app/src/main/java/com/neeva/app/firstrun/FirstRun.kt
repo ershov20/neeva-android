@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -53,6 +54,7 @@ import com.neeva.app.AppNavState
 import com.neeva.app.R
 import com.neeva.app.User
 import com.neeva.app.storage.NeevaUser
+import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.Roobert
 import com.neeva.app.widgets.BrandedTextButton
 
@@ -61,10 +63,6 @@ import com.neeva.app.widgets.BrandedTextButton
 fun FirstRunContainer(
     navController: NavController
 ) {
-    val activityContext = LocalContext.current
-    var emailProvided by remember { mutableStateOf("") }
-    var signup by remember { mutableStateOf(true) }
-
     Box(
         Modifier
             .fillMaxSize()
@@ -84,175 +82,183 @@ fun FirstRunContainer(
                 },
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
         )
-        Column(
-            Modifier
-                .padding(top = 72.dp, bottom = 28.dp)
-                .wrapContentSize()
-                .align(Alignment.Center)
-        ) {
-            if (signup) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_wordmark),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(horizontal = 32.dp)
-                        .padding(bottom = 20.dp),
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
-                )
-                Text(
-                    modifier = Modifier
-                        .wrapContentHeight(align = Alignment.CenterVertically)
-                        .padding(horizontal = 32.dp)
-                        .padding(bottom = 50.dp),
-                    text = stringResource(id = R.string.first_run_intro),
-                    style = TextStyle(
-                        fontFamily = Roobert,
-                        fontWeight = FontWeight.Light,
-                        fontSize = 40.sp,
-                        lineHeight = 48.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    textAlign = TextAlign.Start
-                )
-            } else {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentSize(align = Alignment.Center),
-                    text = stringResource(id = R.string.sign_in),
-                    style = TextStyle(
-                        fontFamily = Roobert,
-                        fontWeight = FontWeight.W400,
-                        fontSize = 20.sp,
-                        lineHeight = 28.sp
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    textAlign = TextAlign.Start
-                )
-                ToggleSignUpText(false) {
-                    signup = true
-                }
-                TextField(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
-                        .fillMaxWidth(),
-                    value = emailProvided,
-                    onValueChange = { emailProvided = it },
-                    label = {
-                        Text(
-                            text = stringResource(id = R.string.email_label),
-                            style = TextStyle(
-                                fontFamily = Roobert,
-                                fontWeight = FontWeight.W500,
-                                fontSize = 10.sp,
-                                lineHeight = 15.sp
-                            ),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    },
-                    singleLine = true,
-                    textStyle = TextStyle(
-                        fontFamily = Roobert,
-                        fontWeight = FontWeight.W400,
-                        fontSize = 16.sp,
-                        lineHeight = 22.sp
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Go
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onGo = { }
-                    ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        textColor = MaterialTheme.colorScheme.onPrimary,
-                        backgroundColor = MaterialTheme.colorScheme.primary,
-                        cursorColor = MaterialTheme.colorScheme.onPrimary,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent
-                    ),
-                    shape = RoundedCornerShape(size = 12.dp),
-                    leadingIcon = {
-                        Image(
-                            painter = painterResource(id = R.drawable.ic_mail),
-                            contentDescription = null,
-                            modifier = Modifier
-                                .wrapContentSize(),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
-                        )
-                    }
-                )
-                BrandedTextButton(
-                    enabled = emailProvided.contains("@"),
-                    stringResID = R.string.sign_in_with_okta
-                ) {
-                    CustomTabsIntent.Builder()
-                        .setShowTitle(true)
-                        .build()
-                        .launchUrl(
-                            activityContext,
-                            FirstRun.authUri(
-                                signup,
-                                NeevaUser.SSOProvider.OKTA,
-                                emailProvided
-                            )
-                        )
-                }
-                if (!emailProvided.contains("@")) {
+        FirstRunScreen()
+    }
+}
+
+@Composable
+fun FirstRunScreen() {
+    val activityContext = LocalContext.current
+    var emailProvided by remember { mutableStateOf("") }
+    var signup by remember { mutableStateOf(true) }
+
+    Column(
+        Modifier
+            .padding(top = 72.dp, bottom = 28.dp)
+            .wrapContentSize()
+    ) {
+        if (signup) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_wordmark),
+                contentDescription = null,
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(horizontal = 32.dp)
+                    .padding(bottom = 20.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
+            )
+            Text(
+                modifier = Modifier
+                    .wrapContentHeight(align = Alignment.CenterVertically)
+                    .padding(horizontal = 32.dp)
+                    .padding(bottom = 50.dp),
+                text = stringResource(id = R.string.first_run_intro),
+                style = TextStyle(
+                    fontFamily = Roobert,
+                    fontWeight = FontWeight.Light,
+                    fontSize = 40.sp,
+                    lineHeight = 48.sp
+                ),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                textAlign = TextAlign.Start
+            )
+        } else {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(align = Alignment.Center),
+                text = stringResource(id = R.string.sign_in),
+                style = TextStyle(
+                    fontFamily = Roobert,
+                    fontWeight = FontWeight.W400,
+                    fontSize = 20.sp,
+                    lineHeight = 28.sp
+                ),
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                textAlign = TextAlign.Start
+            )
+            ToggleSignUpText(false) {
+                signup = true
+            }
+            TextField(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth(),
+                value = emailProvided,
+                onValueChange = { emailProvided = it },
+                label = {
                     Text(
-                        "OR",
-                        modifier = Modifier
-                            .padding(vertical = 20.dp)
-                            .fillMaxWidth()
-                            .wrapContentSize(align = Alignment.Center),
+                        text = stringResource(id = R.string.email_label),
                         style = TextStyle(
-                            fontFamily = FontFamily.Default,
-                            fontWeight = FontWeight.W600,
-                            fontSize = 12.sp,
-                            lineHeight = 20.sp
+                            fontFamily = Roobert,
+                            fontWeight = FontWeight.W500,
+                            fontSize = 10.sp,
+                            lineHeight = 15.sp
                         ),
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                },
+                singleLine = true,
+                textStyle = TextStyle(
+                    fontFamily = Roobert,
+                    fontWeight = FontWeight.W400,
+                    fontSize = 16.sp,
+                    lineHeight = 22.sp
+                ),
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Go
+                ),
+                keyboardActions = KeyboardActions(
+                    onGo = { }
+                ),
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = MaterialTheme.colorScheme.onPrimary,
+                    backgroundColor = MaterialTheme.colorScheme.primary,
+                    cursorColor = MaterialTheme.colorScheme.onPrimary,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent
+                ),
+                shape = RoundedCornerShape(size = 12.dp),
+                leadingIcon = {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_mail),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .wrapContentSize(),
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimary)
                     )
                 }
+            )
+            BrandedTextButton(
+                enabled = emailProvided.contains("@"),
+                stringResID = R.string.sign_in_with_okta
+            ) {
+                CustomTabsIntent.Builder()
+                    .setShowTitle(true)
+                    .build()
+                    .launchUrl(
+                        activityContext,
+                        FirstRun.authUri(
+                            signup,
+                            NeevaUser.SSOProvider.OKTA,
+                            emailProvided
+                        )
+                    )
             }
             if (!emailProvided.contains("@")) {
-                BrandedTextButton(
-                    enabled = true,
-                    stringResID = if (signup) {
-                        R.string.already_have_account
-                    } else {
-                        R.string.dont_have_account
-                    }
-                ) {
-                    CustomTabsIntent.Builder()
-                        .setShowTitle(true)
-                        .build()
-                        .launchUrl(
-                            activityContext,
-                            FirstRun.authUri(signup, NeevaUser.SSOProvider.GOOGLE)
-                        )
+                Text(
+                    "OR",
+                    modifier = Modifier
+                        .padding(vertical = 20.dp)
+                        .fillMaxWidth()
+                        .wrapContentSize(align = Alignment.Center),
+                    style = TextStyle(
+                        fontFamily = FontFamily.Default,
+                        fontWeight = FontWeight.W600,
+                        fontSize = 12.sp,
+                        lineHeight = 20.sp
+                    ),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+        if (!emailProvided.contains("@")) {
+            BrandedTextButton(
+                enabled = true,
+                stringResID = if (signup) {
+                    R.string.sign_up_with_google
+                } else {
+                    R.string.sign_up_with_google
                 }
-                BrandedTextButton(
-                    enabled = true,
-                    stringResID = if (signup) {
-                        R.string.sign_in
-                    } else {
-                        R.string.sign_up
-                    }
-                ) {
-                    CustomTabsIntent.Builder()
-                        .setShowTitle(true)
-                        .build()
-                        .launchUrl(
-                            activityContext,
-                            FirstRun.authUri(signup, NeevaUser.SSOProvider.MICROSOFT)
-                        )
+            ) {
+                CustomTabsIntent.Builder()
+                    .setShowTitle(true)
+                    .build()
+                    .launchUrl(
+                        activityContext,
+                        FirstRun.authUri(signup, NeevaUser.SSOProvider.GOOGLE)
+                    )
+            }
+            BrandedTextButton(
+                enabled = true,
+                stringResID = if (signup) {
+                    R.string.sign_up_with_microsoft
+                } else {
+                    R.string.sign_in_with_microsoft
                 }
-                if (signup) {
-                    Spacer(modifier = Modifier.weight(1.0f))
-                    ToggleSignUpText(true) {
-                        signup = false
-                    }
+            ) {
+                CustomTabsIntent.Builder()
+                    .setShowTitle(true)
+                    .build()
+                    .launchUrl(
+                        activityContext,
+                        FirstRun.authUri(signup, NeevaUser.SSOProvider.MICROSOFT)
+                    )
+            }
+            if (signup) {
+                Spacer(modifier = Modifier.weight(1.0f))
+                ToggleSignUpText(true) {
+                    signup = false
                 }
             }
         }
@@ -278,8 +284,11 @@ fun ToggleSignUpText(signup: Boolean, onClick: () -> Unit) {
                 ) {
                     append(
                         stringResource(
-                            id = if (signup)
-                                R.string.already_have_account else R.string.dont_have_account
+                            id = if (signup) {
+                                R.string.already_have_account
+                            } else {
+                                R.string.dont_have_account
+                            }
                         )
                     )
                 }
@@ -292,7 +301,15 @@ fun ToggleSignUpText(signup: Boolean, onClick: () -> Unit) {
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 ) {
-                    append(stringResource(id = if (signup) R.string.sign_in else R.string.sign_up))
+                    append(
+                        stringResource(
+                            id = if (signup) {
+                                R.string.sign_in
+                            } else {
+                                R.string.sign_up
+                            }
+                        )
+                    )
                 }
             }
         },
@@ -302,6 +319,24 @@ fun ToggleSignUpText(signup: Boolean, onClick: () -> Unit) {
             .fillMaxWidth()
             .wrapContentSize(align = Alignment.Center)
     )
+}
+
+@Preview("1x scale")
+@Preview("RTL, 1x scale", locale = "he")
+@Composable
+fun FirstRun_Preview() {
+    NeevaTheme {
+        FirstRunScreen()
+    }
+}
+
+@Preview("Dark, 1x scale")
+@Preview("Dark, RTL, 1x scale", locale = "he")
+@Composable
+fun FirstRun_PreviewDark() {
+    NeevaTheme(useDarkTheme = true) {
+        FirstRunScreen()
+    }
 }
 
 object FirstRun {
