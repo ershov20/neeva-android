@@ -18,7 +18,6 @@ import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsModel
@@ -80,6 +79,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         findViewById<ComposeView>(R.id.browser_ui).apply {
             setContent {
                 val browserWrapper by webModel.browserWrapperFlow.collectAsState()
+
                 ActivityUI(
                     browserWrapper = browserWrapper,
                     bottomControlOffset = bottomControlOffset,
@@ -111,11 +111,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         lifecycleScope.launchWhenCreated {
             NeevaUser.fetch(apolloClient)
-        }
-
-        if (FirstRun.shouldShowFirstRun(this)) {
-            appNavModel.showFirstRun()
-            FirstRun.firstRunDone(this)
         }
     }
 

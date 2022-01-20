@@ -3,6 +3,8 @@ package com.neeva.app
 import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,6 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
+import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.neeva_menu.NeevaMenuItemId
@@ -36,7 +39,9 @@ class AppNavModel(
         }
     }
 
-    fun isCurrentState(state: AppNavState) = navController?.currentBackStackEntry?.id == state.name
+    fun isCurrentState(state: AppNavState): Boolean {
+        return navController?.currentBackStackEntry?.destination?.route == state.name
+    }
 
     fun showBrowser() = setContentState(AppNavState.BROWSER)
     fun showCardGrid() = setContentState(AppNavState.CARD_GRID)
@@ -136,6 +141,17 @@ fun AppNav(
 
         composable(AppNavState.FIRST_RUN.name) {
             FirstRunContainer(navController = navController)
+        }
+    }
+
+    // TODO(dan.alcantara): Not the best place to do this, but because of the way AppNav and
+    //                      AppNavModel are currently intertwined, it's the best option we've
+    //                      got until that's fixed.
+    val context = LocalContext.current
+    LaunchedEffect(true) {
+        if (FirstRun.shouldShowFirstRun(context)) {
+            appNavModel.showFirstRun()
+            FirstRun.firstRunDone(context)
         }
     }
 }
