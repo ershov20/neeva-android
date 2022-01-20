@@ -34,8 +34,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.neeva.app.AppNavState
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
@@ -47,14 +46,13 @@ import com.neeva.app.widgets.Button
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun CardsContainer(
-    navController: NavController,
-    webLayerModel: WebLayerModel
-) {
+fun CardsContainer(webLayerModel: WebLayerModel) {
+    val appNavModel = LocalEnvironment.current.appNavModel
+
     val cardGridListener = object : CardGridListener {
         override fun onSelectTab(tab: TabInfo) {
             webLayerModel.currentBrowser.selectTab(tab)
-            navController.navigate(AppNavState.BROWSER.name)
+            appNavModel.showBrowser()
         }
 
         override fun onCloseTab(tab: TabInfo) {
@@ -63,20 +61,20 @@ fun CardsContainer(
 
         override fun onOpenLazyTab() {
             webLayerModel.currentBrowser.openLazyTab()
-            navController.navigate(AppNavState.BROWSER.name)
+            appNavModel.showBrowser()
         }
 
         override fun onDone() {
-            navController.navigate(AppNavState.BROWSER.name)
+            appNavModel.showBrowser()
         }
 
         override fun onSwitchToIncognitoProfile() {
-            navController.navigate(AppNavState.CARD_GRID.name)
+            appNavModel.showCardGrid()
             webLayerModel.switchToProfile(true)
         }
 
         override fun onSwitchToRegularProfile() {
-            navController.navigate(AppNavState.CARD_GRID.name)
+            appNavModel.showCardGrid()
             webLayerModel.switchToProfile(false)
         }
     }

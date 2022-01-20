@@ -2,7 +2,7 @@ package com.neeva.app.widgets
 
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.SpaceStore
+import com.neeva.app.spaces.SpaceStore
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent

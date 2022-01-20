@@ -3,18 +3,18 @@ package com.neeva.app.settings
 import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
-import com.neeva.app.AppNavState
+import com.neeva.app.LocalEnvironment
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun SettingsContainer(
-    navController: NavController,
     settingsModel: SettingsModel,
     onOpenUrl: (Uri) -> Unit
 ) {
+    val appNavModel = LocalEnvironment.current.appNavModel
+
     SettingsPane(
-        onShowBrowser = { navController.navigate(AppNavState.BROWSER.name) },
+        onShowBrowser = appNavModel::showBrowser,
         onOpenUrl = onOpenUrl,
         getTogglePreferenceSetter = settingsModel::getTogglePreferenceSetter,
         getToggleState = settingsModel::getToggleState

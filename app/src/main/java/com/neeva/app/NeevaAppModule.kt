@@ -5,8 +5,8 @@ import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
+import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
-import com.neeva.app.storage.SpaceStore
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -54,5 +54,11 @@ object NeevaAppModule {
     @Singleton
     fun providesSpaceStore(apolloClient: ApolloClient): SpaceStore {
         return SpaceStore(apolloClient)
+    }
+
+    @Provides
+    @Singleton
+    fun providesAppNavModel(@ApplicationContext context: Context): AppNavModel {
+        return AppNavModel(context)
     }
 }

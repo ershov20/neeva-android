@@ -32,19 +32,15 @@ import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.neeva.app.AppNavState
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.storage.Space
-import com.neeva.app.storage.SpaceStore
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.OverlaySheet
 import dagger.hilt.EntryPoints
 
 @Composable
 fun AddToSpaceSheet(
-    navController: NavController,
     activeTabModel: ActiveTabModel,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
@@ -52,12 +48,14 @@ fun AddToSpaceSheet(
         .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
         .spaceStore()
 
-    OverlaySheet(navController = navController) {
+    val appNavModel = LocalEnvironment.current.appNavModel
+
+    OverlaySheet {
         AddToSpaceUI(
             activeTabModel,
             spaceStore,
             spaceModifier,
-            onDismiss = { navController.navigate(AppNavState.BROWSER.name) }
+            onDismiss = appNavModel::showBrowser
         )
     }
 }

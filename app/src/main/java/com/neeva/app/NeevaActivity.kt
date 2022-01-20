@@ -12,7 +12,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.ComposeView
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.whenStarted
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.ActivityCallbacks
@@ -21,9 +23,9 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsModel
+import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.NeevaUser
-import com.neeva.app.storage.SpaceStore
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -43,18 +45,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     @Inject lateinit var apolloClient: ApolloClient
+    @Inject lateinit var appNavModel: AppNavModel
     @Inject lateinit var spaceStore: SpaceStore
     @Inject lateinit var domainProviderImpl: DomainProviderImpl
     @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var historyManager: HistoryManager
 
     private val webModel by viewModels<WebLayerModel>()
-
     private val settingsModel by viewModels<SettingsModel>()
-
-    private val appNavModel by viewModels<AppNavModel> {
-        AppNavModel.AppNavModelFactory(spaceStore)
-    }
 
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View
@@ -112,6 +110,17 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         lifecycleScope.launchWhenCreated {
             NeevaUser.fetch(apolloClient)
         }
+
+        lifecycleScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                // Refresh the user's Spaces whenever they try to add something to one.
+                appNavModel.currentDestination.collect {
+                    if (it?.route == AppNavDestination.ADD_TO_SPACE.name) {
+                        spaceStore.refresh()
+                    }
+                }
+            }
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -167,7 +176,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 browserWrapper.exitFullscreen()
             }
 
-            !appNavModel.isCurrentState(AppNavState.BROWSER) -> {
+            !appNavModel.isCurrentState(AppNavDestination.BROWSER) -> {
                 appNavModel.showBrowser()
             }
 

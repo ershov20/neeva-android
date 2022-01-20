@@ -49,8 +49,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
-import com.neeva.app.AppNavState
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.User
 import com.neeva.app.storage.NeevaUser
@@ -60,9 +59,9 @@ import com.neeva.app.widgets.BrandedTextButton
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun FirstRunContainer(
-    navController: NavController
-) {
+fun FirstRunContainer() {
+    val appNavModel = LocalEnvironment.current.appNavModel
+
     Box(
         Modifier
             .fillMaxSize()
@@ -76,10 +75,7 @@ fun FirstRunContainer(
                 .align(Alignment.TopEnd)
                 .padding(10.dp)
                 .size(48.dp, 48.dp)
-                .clickable
-                {
-                    navController.navigate(AppNavState.BROWSER.name)
-                },
+                .clickable { appNavModel.showBrowser() },
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
         )
         FirstRunScreen()

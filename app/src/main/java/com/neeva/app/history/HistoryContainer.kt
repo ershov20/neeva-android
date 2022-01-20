@@ -3,19 +3,16 @@ package com.neeva.app.history
 import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
-import com.neeva.app.AppNavState
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.storage.FaviconCache
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun HistoryContainer(
-    navController: NavController,
-    faviconCache: FaviconCache,
-    onOpenUrl: (Uri) -> Unit
-) {
+fun HistoryContainer(faviconCache: FaviconCache, onOpenUrl: (Uri) -> Unit) {
+    val appNavModel = LocalEnvironment.current.appNavModel
+
     HistoryUI(
-        onClose = { navController.navigate(AppNavState.BROWSER.name) },
+        onClose = appNavModel::showBrowser,
         onOpenUrl = onOpenUrl,
         faviconCache = faviconCache
     )

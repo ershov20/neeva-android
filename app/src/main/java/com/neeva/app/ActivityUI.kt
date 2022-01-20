@@ -15,8 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
@@ -26,8 +24,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 data class LocalEnvironmentState(
-    val navController: NavHostController,
-    val browserWrapper: BrowserWrapper
+    val browserWrapper: BrowserWrapper,
+    val appNavModel: AppNavModel
 )
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 
@@ -42,11 +40,10 @@ fun ActivityUI(
     apolloClient: ApolloClient
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val navController = rememberNavController()
 
     val environment = LocalEnvironmentState(
-        navController = navController,
-        browserWrapper = browserWrapper
+        browserWrapper = browserWrapper,
+        appNavModel = appNavModel
     )
     CompositionLocalProvider(LocalEnvironment provides environment) {
         NeevaTheme {
@@ -91,7 +88,6 @@ fun ActivityUI(
             Box(modifier = Modifier.fillMaxSize()) {
                 Surface(color = Color.Transparent) {
                     AppNav(
-                        appNavModel = appNavModel,
                         webLayerModel = webLayerModel,
                         settingsModel = settingsModel
                     ) { space ->

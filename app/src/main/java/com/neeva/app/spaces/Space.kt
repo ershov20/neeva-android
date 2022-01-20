@@ -1,4 +1,4 @@
-package com.neeva.app.storage
+package com.neeva.app.spaces
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -11,6 +11,7 @@ import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants.appSpacesURL
+import com.neeva.app.storage.NeevaUser
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel

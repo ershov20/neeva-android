@@ -2,7 +2,7 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.apollographql.apollo3.ApolloClient
-import com.neeva.app.storage.Space
+import com.neeva.app.spaces.Space
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

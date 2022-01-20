@@ -11,7 +11,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.LoadingState
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
-import com.neeva.app.storage.SpaceStore
+import com.neeva.app.spaces.SpaceStore
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.lang.ref.WeakReference
 import javax.inject.Inject

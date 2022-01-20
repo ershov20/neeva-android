@@ -14,21 +14,20 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.neeva.app.AppNavState
+import com.neeva.app.LocalEnvironment
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun OverlaySheet(
-    navController: NavController,
     config: OverlaySheetHeightConfig = OverlaySheetHeightConfig.HALF_SCREEN,
     content: @Composable () -> Unit,
 ) {
+    val appNavModel = LocalEnvironment.current.appNavModel
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,7 +35,7 @@ fun OverlaySheet(
     ) {
         Spacer(
             modifier = Modifier
-                .clickable { navController.navigate(AppNavState.BROWSER.name) }
+                .clickable { appNavModel.showBrowser() }
                 .fillMaxWidth()
                 .then(
                     when (config) {
