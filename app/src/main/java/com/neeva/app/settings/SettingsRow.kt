@@ -44,6 +44,11 @@ fun SettingsRow(
             .then(
                 if (data.type == SettingsRowType.LINK && data.url != null) {
                     Modifier.clickable { openUrl(data.url) }
+                } else if (
+                    data.type == SettingsRowType.NAVIGATION &&
+                    data.title_id == R.string.settings_clear_browsing_data
+                ) {
+                    Modifier.clickable { /* @Dan this is your nuke button for now */ }
                 } else {
                     Modifier
                 }
@@ -52,36 +57,37 @@ fun SettingsRow(
     ) {
         Spacer(modifier = Modifier.width(16.dp))
 
-        var title = stringResource(data.title_id)
+        var title = data.title_id?.let { stringResource(it) }
         val versionString = NeevaBrowser.versionString
         if (data.title_id == R.string.settings_neeva_browser_version && versionString != null) {
             title = stringResource(data.title_id, versionString)
         }
-
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1.0f)
-        )
-        val toggleState = getToggleState(data.togglePreferenceKey)
-
-        if (data.type == SettingsRowType.LINK) {
-            Image(
-                painter = painterResource(R.drawable.ic_baseline_open_in_new_24),
-                contentDescription = stringResource(data.title_id),
-                contentScale = ContentScale.Inside,
-                modifier = Modifier.size(48.dp),
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+        if (title != null) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1.0f)
             )
-        } else if (data.type == SettingsRowType.TOGGLE && toggleState != null) {
-            Switch(
-                checked = toggleState.value,
-                modifier = Modifier.size(48.dp),
-                onCheckedChange = getTogglePreferenceSetter(data.togglePreferenceKey)
-            )
+            val toggleState = getToggleState(data.togglePreferenceKey)
+
+            if (data.type == SettingsRowType.LINK) {
+                Image(
+                    painter = painterResource(R.drawable.ic_baseline_open_in_new_24),
+                    contentDescription = title,
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier.size(48.dp),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+                )
+            } else if (data.type == SettingsRowType.TOGGLE && toggleState != null) {
+                Switch(
+                    checked = toggleState.value,
+                    modifier = Modifier.size(48.dp),
+                    onCheckedChange = getTogglePreferenceSetter(data.togglePreferenceKey)
+                )
+            }
         }
     }
 }
@@ -93,8 +99,8 @@ fun SettingsRow_PreviewToggle() {
     NeevaTheme {
         SettingsRow(
             data = SettingsRowData(
-                R.string.debug_long_string_primary,
-                SettingsRowType.TOGGLE
+                SettingsRowType.TOGGLE,
+                R.string.debug_long_string_primary
             ),
             openUrl = {},
             getTogglePreferenceSetter = { {} },
@@ -112,8 +118,8 @@ fun SettingsRow_PreviewLink() {
     NeevaTheme {
         SettingsRow(
             data = SettingsRowData(
-                R.string.debug_long_string_primary,
                 SettingsRowType.LINK,
+                R.string.debug_long_string_primary,
                 Uri.parse("")
             ),
             openUrl = {},
@@ -130,8 +136,8 @@ fun SettingsRow_PreviewLabel() {
     NeevaTheme {
         SettingsRow(
             data = SettingsRowData(
-                R.string.debug_long_string_primary,
-                SettingsRowType.LABEL
+                SettingsRowType.LABEL,
+                R.string.debug_long_string_primary
             ),
             openUrl = {},
             getTogglePreferenceSetter = { {} },

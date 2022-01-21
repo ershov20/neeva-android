@@ -16,14 +16,12 @@ import com.neeva.app.history.HistoryContainer
 import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.NeevaMenuSheet
 import com.neeva.app.settings.SettingsContainer
-import com.neeva.app.settings.SettingsModel
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.Space
 
 @Composable
 fun AppNav(
     webLayerModel: WebLayerModel,
-    settingsModel: SettingsModel,
     modifier: Modifier,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
@@ -76,7 +74,7 @@ fun AppNav(
         }
 
         composable(AppNavDestination.SETTINGS.route) {
-            SettingsContainer(settingsModel) {
+            SettingsContainer {
                 webLayerModel.loadUrl(it)
                 appNavModel.showBrowser()
             }

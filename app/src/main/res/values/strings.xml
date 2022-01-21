@@ -70,5 +70,6 @@
     <string name="settings_licenses">Licenses</string>
     <string name="settings_terms">Terms</string>
     <string name="settings_account_email_placeholder">Account-email (placeholder for now)</string>
+    <string name="settings_sign_in_to_join_neeva">Sign In or Join Neeva</string>
 
 </resources>

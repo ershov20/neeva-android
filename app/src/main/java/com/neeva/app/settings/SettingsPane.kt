@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -91,13 +92,17 @@ fun SettingsPane(
                     }
                 }
 
-                items(it.rows) { row ->
-                    SettingsRow(
-                        data = row,
-                        openUrl = onOpenUrl,
-                        getTogglePreferenceSetter = getTogglePreferenceSetter,
-                        getToggleState = getToggleState
-                    )
+                items(it.rows) { rowData ->
+                    if (rowData.type == SettingsRowType.PROFILE) {
+                        ProfileUI(id = NeevaUser.shared.id)
+                    } else {
+                        SettingsRow(
+                            data = rowData,
+                            openUrl = onOpenUrl,
+                            getTogglePreferenceSetter = getTogglePreferenceSetter,
+                            getToggleState = getToggleState
+                        )
+                    }
                 }
             }
         }

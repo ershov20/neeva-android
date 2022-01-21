@@ -8,10 +8,10 @@ import com.neeva.app.LocalEnvironment
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun SettingsContainer(
-    settingsModel: SettingsModel,
     onOpenUrl: (Uri) -> Unit
 ) {
     val appNavModel = LocalEnvironment.current.appNavModel
+    val settingsModel = LocalEnvironment.current.settingsModel
 
     SettingsPane(
         onShowBrowser = appNavModel::showBrowser,

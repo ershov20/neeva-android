@@ -24,7 +24,8 @@ import kotlinx.coroutines.launch
 
 data class LocalEnvironmentState(
     val browserWrapper: BrowserWrapper,
-    val appNavModel: AppNavModel
+    val appNavModel: AppNavModel,
+    val settingsModel: SettingsModel
 )
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 
@@ -42,7 +43,8 @@ fun ActivityUI(
 
     val environment = LocalEnvironmentState(
         browserWrapper = browserWrapper,
-        appNavModel = appNavModel
+        appNavModel = appNavModel,
+        settingsModel = settingsModel
     )
     CompositionLocalProvider(LocalEnvironment provides environment) {
         NeevaTheme {
@@ -82,7 +84,6 @@ fun ActivityUI(
             // All the other screens in the app.
             AppNav(
                 webLayerModel = webLayerModel,
-                settingsModel = settingsModel,
                 modifier = Modifier.fillMaxSize()
             ) { space ->
                 coroutineScope.launch {
