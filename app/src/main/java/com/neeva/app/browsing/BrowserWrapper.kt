@@ -1,6 +1,6 @@
 package com.neeva.app.browsing
 
-import android.app.Application
+import android.content.Context
 import android.net.Uri
 import android.view.View
 import androidx.annotation.CallSuper
@@ -14,7 +14,10 @@ import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
@@ -34,10 +37,10 @@ import org.chromium.weblayer.TabListCallback
  */
 abstract class BrowserWrapper(
     val isIncognito: Boolean,
-    val appContext: Application,
+    val appContext: Context,
+    val coroutineScope: CoroutineScope,
     val activityCallbackProvider: () -> ActivityCallbacks?,
-    val suggestionsModel: SuggestionsModel?,
-    val coroutineScope: CoroutineScope
+    val suggestionsModel: SuggestionsModel?
 ) {
     data class CreateNewTabInfo(
         val uri: Uri,
@@ -55,6 +58,9 @@ abstract class BrowserWrapper(
 
     val activeTabModel: ActiveTabModel
     val urlBarModel: URLBarModel
+
+    /** Tracks whether the user needs to be kept in the CardGrid if they're on that screen. */
+    val userMustStayInCardGridFlow: StateFlow<Boolean>
 
     /**
      * Keeps track of data that must be applied to the next tab that is created.  This is necessary
@@ -80,11 +86,19 @@ abstract class BrowserWrapper(
             suggestionFlow = suggestionsModel?.autocompleteSuggestion ?: MutableStateFlow(null),
             coroutineScope = coroutineScope
         )
+
+        userMustStayInCardGridFlow = orderedTabList
+            .combine(urlBarModel.isLazyTab) { tabs, isLazyTab -> tabs.isEmpty() && !isLazyTab }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, false)
     }
 
     private var fullscreenCallback = FullscreenCallbackImpl(
-        { activityCallbackProvider()?.onEnterFullscreen() },
-        { flags -> activityCallbackProvider()?.onExitFullscreen(flags) }
+        onEnterFullscreen = { callback ->
+            activityCallbackProvider()?.onEnterFullscreen(callback)
+        },
+        onExitFullscreen = { flags ->
+            activityCallbackProvider()?.onExitFullscreen(flags)
+        }
     )
 
     private val tabListCallback = object : TabListCallback() {
@@ -319,9 +333,6 @@ abstract class BrowserWrapper(
         }
     }
 
-    fun canExitFullscreen() = fullscreenCallback.canExitFullscreen()
-    fun exitFullscreen() = fullscreenCallback.exitFullscreen()
-
     private fun onNewTabAdded(tab: Tab) {
         tabList.add(tab)
         registerTabCallbacks(tab)
@@ -368,4 +379,7 @@ abstract class BrowserWrapper(
 
     /** Returns true if the [Browser] is maintaining no tabs. */
     fun hasNoTabs(): Boolean = tabList.hasNoTabs()
+
+    /** Returns true if the user should be forced to go to the card grid. */
+    fun userMustBeShownCardGrid(): Boolean = hasNoTabs() && !urlBarModel.isLazyTab.value
 }

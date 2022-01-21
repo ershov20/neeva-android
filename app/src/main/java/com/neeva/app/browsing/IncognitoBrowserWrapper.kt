@@ -1,6 +1,6 @@
 package com.neeva.app.browsing
 
-import android.app.Application
+import android.content.Context
 import android.util.Log
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -14,16 +14,17 @@ import org.chromium.weblayer.WebLayer
 
 /** Maintains the logic for an Incognito browser profile. */
 class IncognitoBrowserWrapper(
-    appContext: Application,
-    activityCallbackProvider: () -> ActivityCallbacks?,
+    appContext: Context,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
-    domainProvider: DomainProvider
+    activityCallbackProvider: () -> ActivityCallbacks?,
+    domainProvider: DomainProvider,
+    private val onDestroyed: () -> Unit
 ) : BrowserWrapper(
     isIncognito = true,
     appContext = appContext,
+    coroutineScope = coroutineScope,
     activityCallbackProvider = activityCallbackProvider,
-    suggestionsModel = null,
-    coroutineScope = coroutineScope
+    suggestionsModel = null
 ) {
     companion object {
         val TAG = IncognitoBrowserWrapper::class.simpleName
@@ -59,5 +60,7 @@ class IncognitoBrowserWrapper(
         }
 
         super.unregisterBrowserAndTabCallbacks()
+
+        onDestroyed()
     }
 }

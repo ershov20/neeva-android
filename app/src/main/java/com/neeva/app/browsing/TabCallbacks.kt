@@ -1,6 +1,6 @@
 package com.neeva.app.browsing
 
-import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.history.HistoryManager
@@ -32,7 +32,7 @@ import org.chromium.weblayer.TabCallback
 class TabCallbacks(
     private val isIncognito: Boolean,
     private val tab: Tab,
-    appContext: Application,
+    appContext: Context,
     private val coroutineScope: CoroutineScope,
     private val historyManager: HistoryManager?,
     private val faviconCache: FaviconCache?,

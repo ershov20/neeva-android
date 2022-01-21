@@ -1,5 +1,6 @@
 package com.neeva.app.urlbar
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.expandHorizontally
@@ -103,11 +104,18 @@ fun URLBar() {
             exit = shrinkHorizontally().plus(fadeOut())
         ) {
             val localFocusManager = LocalFocusManager.current
+            val appNavModel = LocalEnvironment.current.appNavModel
+            val cancelLambda = {
+                localFocusManager.clearFocus()
+                appNavModel.showBrowser()
+            }
+
             Box(
                 Modifier
-                    .clickable(onClickLabel = stringResource(id = R.string.cancel)) {
-                        localFocusManager.clearFocus()
-                    }
+                    .clickable(
+                        onClickLabel = stringResource(id = R.string.cancel),
+                        onClick = cancelLambda
+                    )
                     .defaultMinSize(minHeight = 40.dp)
                     .padding(horizontal = 8.dp),
                 contentAlignment = Alignment.Center
@@ -119,6 +127,8 @@ fun URLBar() {
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
+
+            BackHandler(onBack = cancelLambda)
         }
     }
 }

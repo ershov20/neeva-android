@@ -3,6 +3,7 @@ package com.neeva.app
 import android.app.Application
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
@@ -15,10 +16,19 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 
 @Module
 @InstallIn(SingletonComponent::class)
 object NeevaAppModule {
+    @Provides
+    @Singleton
+    fun provideCoroutineScope(): CoroutineScope {
+        return CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    }
+
     @Provides
     @Singleton
     fun provideDomainProvider(domainProviderImpl: DomainProviderImpl): DomainProvider {
@@ -66,7 +76,21 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesAppNavModel(@ApplicationContext context: Context): AppNavModel {
-        return AppNavModel(context)
+    fun providesWebLayerModel(
+        @ApplicationContext context: Context,
+        domainProviderImpl: DomainProviderImpl,
+        historyManager: HistoryManager,
+        apolloClient: ApolloClient,
+        spaceStore: SpaceStore,
+        coroutineScope: CoroutineScope
+    ): WebLayerModel {
+        return WebLayerModel(
+            appContext = context,
+            domainProviderImpl = domainProviderImpl,
+            historyManager = historyManager,
+            apolloClient = apolloClient,
+            spaceStore = spaceStore,
+            coroutineScope = coroutineScope
+        )
     }
 }

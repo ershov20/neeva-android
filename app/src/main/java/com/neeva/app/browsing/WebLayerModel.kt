@@ -1,20 +1,17 @@
 package com.neeva.app.browsing
 
-import android.app.Application
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.LoadingState
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.spaces.SpaceStore
-import dagger.hilt.android.lifecycle.HiltViewModel
 import java.lang.ref.WeakReference
-import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -34,14 +31,14 @@ import org.chromium.weblayer.WebLayer
  * classes must be monitored using various callbacks that fire whenever a new tab is opened, or
  * whenever the current tab changes (e.g.).
  */
-@HiltViewModel
-class WebLayerModel @Inject constructor(
-    private val appContext: Application,
+class WebLayerModel(
+    private val appContext: Context,
     private val domainProviderImpl: DomainProviderImpl,
     historyManager: HistoryManager,
     apolloClient: ApolloClient,
-    spaceStore: SpaceStore
-) : ViewModel() {
+    spaceStore: SpaceStore,
+    private val coroutineScope: CoroutineScope
+) {
     companion object {
         val TAG = WebLayerModel::class.simpleName
     }
@@ -52,28 +49,26 @@ class WebLayerModel @Inject constructor(
 
     private val regularBrowser = RegularBrowserWrapper(
         appContext = appContext,
+        coroutineScope = coroutineScope,
         activityCallbackProvider = { activityCallbacks.get() },
         domainProvider = domainProviderImpl,
         apolloClient = apolloClient,
         historyManager = historyManager,
-        spaceStore = spaceStore,
-        coroutineScope = viewModelScope
+        spaceStore = spaceStore
     )
     private var incognitoBrowser: IncognitoBrowserWrapper? = null
 
     /** Keeps track of the initialization pipeline. */
     private val internalInitializationState = MutableStateFlow(LoadingState.UNINITIALIZED)
     val initializationState: StateFlow<LoadingState> =
-        internalInitializationState.combine(_webLayer) { internalState, webLayer ->
-            LoadingState.from(
-                internalState,
-                when (webLayer) {
-                    null -> LoadingState.LOADING
-                    else -> LoadingState.READY
-                }
-            )
-        }
-            .stateIn(viewModelScope, SharingStarted.Lazily, LoadingState.LOADING)
+        internalInitializationState
+            .combine(_webLayer) { internalState, webLayer ->
+                LoadingState.from(
+                    internalState,
+                    if (webLayer == null) LoadingState.LOADING else LoadingState.READY
+                )
+            }
+            .stateIn(coroutineScope, SharingStarted.Lazily, LoadingState.LOADING)
 
     private val _browserWrapperFlow = MutableStateFlow<BrowserWrapper>(regularBrowser)
     val browserWrapperFlow: StateFlow<BrowserWrapper> = _browserWrapperFlow
@@ -81,7 +76,7 @@ class WebLayerModel @Inject constructor(
         get() = browserWrapperFlow.value
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(Dispatchers.IO) {
             domainProviderImpl.initialize()
             CacheCleaner(appContext.cacheDir).run()
             internalInitializationState.value = LoadingState.READY
@@ -124,27 +119,33 @@ class WebLayerModel @Inject constructor(
     fun loadUrl(url: Uri) = currentBrowser.activeTabModel.loadUrl(url, true)
 
     fun switchToProfile(useIncognito: Boolean) {
+        if (currentBrowser.isIncognito == useIncognito) return
+
         if (useIncognito) {
             val delegate = incognitoBrowser ?: run {
                 IncognitoBrowserWrapper(
                     appContext = appContext,
-                    activityCallbackProvider = { activityCallbacks.get() },
-                    coroutineScope = viewModelScope,
+                    coroutineScope = coroutineScope,
+                    activityCallbackProvider = activityCallbacks::get,
                     domainProvider = domainProviderImpl
-                ).also { it.initialize() }
+                ) {
+                    incognitoBrowser = null
+                    switchToProfile(useIncognito = false)
+                }
+                    .also { it.initialize() }
             }
 
             incognitoBrowser = delegate
             _browserWrapperFlow.value = delegate
         } else {
+            _browserWrapperFlow.value = regularBrowser
+
+            // Delete incognito if there's no reason to keep it around.
             if (incognitoBrowser?.hasNoTabs() == true) {
                 Log.d(TAG, "Culling unnecessary incognito profile")
-                activityCallbacks.get()?.onDeleteIncognitoProfile()
+                activityCallbacks.get()?.detachIncognitoFragment()
                 incognitoBrowser = null
             }
-
-            // Delete incognito if necessary.
-            _browserWrapperFlow.value = regularBrowser
         }
     }
 }

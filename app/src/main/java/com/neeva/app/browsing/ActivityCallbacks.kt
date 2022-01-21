@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.graphics.Point
+import androidx.activity.OnBackPressedCallback
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 
@@ -10,7 +11,7 @@ interface ActivityCallbacks {
      * Called when a browser tab asks the app to enter fullscreen mode.
      * @return The window flags that were set before the user was sent into fullscreen mode.
      */
-    fun onEnterFullscreen(): Int
+    fun onEnterFullscreen(onBackPressedCallback: OnBackPressedCallback): Int
 
     /**
      * Called when a browser tab asks the app to exit fullscreen mode.
@@ -37,5 +38,5 @@ interface ActivityCallbacks {
      * Called when the Fragment containing the Incognito profile should be removed from the
      * hierarchy, allowing it to be culled and deleted by WebLayer.
      */
-    fun onDeleteIncognitoProfile()
+    fun detachIncognitoFragment()
 }

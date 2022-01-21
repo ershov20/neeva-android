@@ -69,6 +69,7 @@ fun AppNav(
                 spaceModifier = spaceModifier
             )
         }
+
         composable(AppNavDestination.NEEVA_MENU.route) {
             NeevaMenuSheet(onMenuItem = onMenuItem)
         }

@@ -1,6 +1,6 @@
 package com.neeva.app.browsing
 
-import android.app.Application
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
@@ -9,7 +9,8 @@ import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
 
 /** Automatically reloads a tab when the renderer crashes. */
-class CrashTabCallback(val tab: Tab, val appContext: Application) : TabCallback() {
+class CrashTabCallback(val tab: Tab, val context: Context) : TabCallback() {
+    val appContext: Context = context.applicationContext
     var consecutiveCrashes = 0
 
     override fun onRenderProcessGone() {

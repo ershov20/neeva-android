@@ -6,6 +6,8 @@
     <string name="edit_content_description">Edit</string>
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
+    <string name="done">Done</string>
+    <string name="new_tab_content_description">Create new tab</string>
 
     <string name="downloads">Downloads</string>
     <string name="feedback">Feedback</string>

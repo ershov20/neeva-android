@@ -31,7 +31,7 @@ val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No val
 
 @Composable
 fun ActivityUI(
-    browserWrapper: BrowserWrapper,
+    browserWrapperFlow: StateFlow<BrowserWrapper>,
     bottomControlOffset: StateFlow<Float>,
     topControlOffset: StateFlow<Float>,
     appNavModel: AppNavModel,
@@ -40,6 +40,7 @@ fun ActivityUI(
     apolloClient: ApolloClient
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val browserWrapper by browserWrapperFlow.collectAsState()
 
     val environment = LocalEnvironmentState(
         browserWrapper = browserWrapper,
@@ -65,7 +66,9 @@ fun ActivityUI(
                         goForward = browserWrapper.activeTabModel::goForward,
                     ),
                     activeTabModel = browserWrapper.activeTabModel,
-                    modifier = Modifier.align(Alignment.BottomCenter).offset(y = bottomOffsetDp)
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .offset(y = bottomOffsetDp)
                 )
 
                 // Top controls: URL bar, Suggestions, Zero Query, ...

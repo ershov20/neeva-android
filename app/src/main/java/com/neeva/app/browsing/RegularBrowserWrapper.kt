@@ -1,6 +1,6 @@
 package com.neeva.app.browsing
 
-import android.app.Application
+import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.Fragment
 import com.apollographql.apollo3.ApolloClient
@@ -28,24 +28,24 @@ import org.chromium.weblayer.WebLayer
  * suggestions from the backend as the user types out a query.
  */
 class RegularBrowserWrapper(
-    appContext: Application,
+    appContext: Context,
+    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
     activityCallbackProvider: () -> ActivityCallbacks?,
     domainProvider: DomainProvider,
     apolloClient: ApolloClient,
     override val historyManager: HistoryManager,
-    spaceStore: SpaceStore,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main)
+    spaceStore: SpaceStore
 ) : BrowserWrapper(
     isIncognito = false,
     appContext = appContext,
+    coroutineScope = coroutineScope,
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = SuggestionsModel(
         coroutineScope,
         historyManager,
         apolloClient,
         domainProvider
-    ),
-    coroutineScope = coroutineScope
+    )
 ) {
     companion object {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"

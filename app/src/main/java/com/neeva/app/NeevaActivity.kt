@@ -7,24 +7,21 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
-import androidx.activity.viewModels
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.whenStarted
+import androidx.navigation.compose.rememberNavController
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.history.HistoryManager
-import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsModel
 import com.neeva.app.spaces.SpaceStore
-import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.NeevaUser
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
@@ -45,14 +42,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     @Inject lateinit var apolloClient: ApolloClient
-    @Inject lateinit var appNavModel: AppNavModel
     @Inject lateinit var spaceStore: SpaceStore
-    @Inject lateinit var domainProviderImpl: DomainProviderImpl
-    @Inject lateinit var historyDatabase: HistoryDatabase
-    @Inject lateinit var historyManager: HistoryManager
     @Inject lateinit var settingsModel: SettingsModel
-
-    private val webModel by viewModels<WebLayerModel>()
+    @Inject lateinit var webModel: WebLayerModel
 
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View
@@ -66,6 +58,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     private val topControlOffset = MutableStateFlow(0.0f)
     private val bottomControlOffset = MutableStateFlow(0.0f)
 
+    private var appNavModel: AppNavModel? = null
+
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,13 +70,30 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         findViewById<ComposeView>(R.id.browser_ui).apply {
             setContent {
-                val browserWrapper by webModel.browserWrapperFlow.collectAsState()
+                val navController = rememberNavController()
+
+                appNavModel = remember(navController) {
+                    AppNavModel(
+                        navController = navController,
+                        webLayerModel = webModel,
+                        coroutineScope = lifecycleScope
+                    )
+                }
+
+                LaunchedEffect(appNavModel) {
+                    // Refresh the user's Spaces whenever they try to add something to one.
+                    appNavModel?.currentDestination?.collect {
+                        if (it?.route == AppNavDestination.ADD_TO_SPACE.name) {
+                            spaceStore.refresh()
+                        }
+                    }
+                }
 
                 ActivityUI(
-                    browserWrapper = browserWrapper,
+                    browserWrapperFlow = webModel.browserWrapperFlow,
                     bottomControlOffset = bottomControlOffset,
                     topControlOffset = topControlOffset,
-                    appNavModel = appNavModel,
+                    appNavModel = appNavModel!!,
                     webLayerModel = webModel,
                     settingsModel = settingsModel,
                     apolloClient = apolloClient
@@ -111,12 +122,16 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             NeevaUser.fetch(apolloClient)
         }
 
+        // Display the correct Fragment when the user switches profiles.
         lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Refresh the user's Spaces whenever they try to add something to one.
-                appNavModel.currentDestination.collect {
-                    if (it?.route == AppNavDestination.ADD_TO_SPACE.name) {
-                        spaceStore.refresh()
+            lifecycle.whenStarted {
+                webModel.browserWrapperFlow.collect {
+                    if (it.isIncognito) {
+                        containerRegularProfile.visibility = View.GONE
+                        containerIncognitoProfile.visibility = View.VISIBLE
+                    } else {
+                        containerRegularProfile.visibility = View.VISIBLE
+                        containerIncognitoProfile.visibility = View.GONE
                     }
                 }
             }
@@ -130,7 +145,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 User.extractAuthTokenFromIntent(intent)?.let {
                     User.setToken(this, it)
                     webModel.onAuthTokenUpdated()
-                    appNavModel.showBrowser()
+                    appNavModel?.showBrowser()
                 }
             } else {
                 intent.data?.let {
@@ -155,12 +170,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             val transaction = supportFragmentManager.beginTransaction()
 
             if (isIncognito) {
-                containerRegularProfile.visibility = View.GONE
-                containerIncognitoProfile.visibility = View.VISIBLE
                 transaction.replace(R.id.weblayer_incognito, fragment, TAG_INCOGNITO_PROFILE)
             } else {
-                containerIncognitoProfile.visibility = View.GONE
-                containerRegularProfile.visibility = View.VISIBLE
                 transaction.replace(R.id.weblayer_regular, fragment, TAG_REGULAR_PROFILE)
             }
 
@@ -169,15 +180,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun onBackPressed() {
-        val browserWrapper = webModel.browserWrapperFlow.value
+        val browserWrapper = webModel.currentBrowser
 
         when {
-            browserWrapper.canExitFullscreen() -> {
-                browserWrapper.exitFullscreen()
-            }
-
-            !appNavModel.isCurrentState(AppNavDestination.BROWSER) -> {
-                appNavModel.showBrowser()
+            onBackPressedDispatcher.hasEnabledCallbacks() -> {
+                onBackPressedDispatcher.onBackPressed()
             }
 
             browserWrapper.activeTabModel.navigationInfoFlow.value.canGoBackward -> {
@@ -194,7 +201,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
-    override fun onEnterFullscreen(): Int {
+    override fun onEnterFullscreen(onBackPressedCallback: OnBackPressedCallback): Int {
+        onBackPressedDispatcher.addCallback(onBackPressedCallback)
+
         // This avoids an extra resize.
         val attrs: WindowManager.LayoutParams = window.attributes
         attrs.flags = attrs.flags or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
@@ -227,7 +236,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun bringToForeground() {
-        appNavModel.showBrowser()
+        appNavModel?.showBrowser()
 
         val intent = Intent(this, NeevaActivity::class.java)
         intent.action = Intent.ACTION_MAIN
@@ -269,13 +278,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         topControlOffset.value = offset.toFloat()
     }
 
-    override fun onDeleteIncognitoProfile() {
+    override fun detachIncognitoFragment() {
         val fragment = supportFragmentManager.findFragmentByTag(TAG_INCOGNITO_PROFILE) ?: return
         val transaction = supportFragmentManager.beginTransaction()
         transaction.remove(fragment)
         transaction.commitNow()
-
-        containerRegularProfile.visibility = View.VISIBLE
-        containerIncognitoProfile.visibility = View.GONE
     }
 }
