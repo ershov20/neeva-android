@@ -1,10 +1,10 @@
 package com.neeva.app
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -13,7 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.BrowserWrapper
@@ -48,54 +47,47 @@ fun ActivityUI(
     CompositionLocalProvider(LocalEnvironment provides environment) {
         NeevaTheme {
             Box(modifier = Modifier.fillMaxSize()) {
-                // Top controls: URL bar, Suggestions, Zero Query, ...
-                val topOffset by topControlOffset.collectAsState()
-                val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
-                Surface(
-                    color = MaterialTheme.colorScheme.background,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(y = topOffsetDp)
-                ) {
-                    BrowserUI()
-                }
-
                 // Bottom controls: Back, forward, app menu, ...
                 val bottomOffset by bottomControlOffset.collectAsState()
                 val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
-                Surface(
-                    color = MaterialTheme.colorScheme.background,
+                TabToolbar(
+                    model = TabToolbarModel(
+                        onNeevaMenu = appNavModel::showNeevaMenu,
+                        onAddToSpace = appNavModel::showAddToSpace,
+                        onTabSwitcher = {
+                            browserWrapper.takeScreenshotOfActiveTab {
+                                appNavModel.showCardGrid()
+                            }
+                        },
+                        goBack = browserWrapper.activeTabModel::goBack,
+                        goForward = browserWrapper.activeTabModel::goForward,
+                    ),
+                    activeTabModel = browserWrapper.activeTabModel,
                     modifier = Modifier.align(Alignment.BottomCenter).offset(y = bottomOffsetDp)
-                ) {
-                    val isEditing by browserWrapper.urlBarModel.isEditing.collectAsState(false)
-                    if (!isEditing) {
-                        TabToolbar(
-                            model = TabToolbarModel(
-                                appNavModel::showNeevaMenu,
-                                appNavModel::showAddToSpace
-                            ) {
-                                browserWrapper.takeScreenshotOfActiveTab {
-                                    appNavModel.showCardGrid()
-                                }
-                            },
-                            activeTabModel = browserWrapper.activeTabModel
-                        )
-                    }
-                }
+                )
+
+                // Top controls: URL bar, Suggestions, Zero Query, ...
+                // Placed after the bottom controls so that it is drawn over the bottom controls
+                // when necessary.
+                val topOffset by topControlOffset.collectAsState()
+                val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
+                BrowserUI(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .offset(y = topOffsetDp)
+                        .background(MaterialTheme.colorScheme.background)
+                )
             }
 
             // All the other screens in the app.
-            Box(modifier = Modifier.fillMaxSize()) {
-                Surface(color = Color.Transparent) {
-                    AppNav(
-                        webLayerModel = webLayerModel,
-                        settingsModel = settingsModel
-                    ) { space ->
-                        coroutineScope.launch {
-                            browserWrapper.activeTabModel.modifySpace(space, apolloClient)
-                            appNavModel.showBrowser()
-                        }
-                    }
+            AppNav(
+                webLayerModel = webLayerModel,
+                settingsModel = settingsModel,
+                modifier = Modifier.fillMaxSize()
+            ) { space ->
+                coroutineScope.launch {
+                    browserWrapper.activeTabModel.modifySpace(space, apolloClient)
+                    appNavModel.showBrowser()
                 }
             }
         }

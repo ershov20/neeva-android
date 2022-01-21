@@ -32,9 +32,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.storage.FaviconCache
+import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
@@ -106,7 +108,6 @@ fun AutocompleteTextField(
             value = textFieldValue,
             onValueChange = onLocationEdited,
             modifier = Modifier
-                .weight(1.0f)
                 .padding(start = 8.dp)
                 .focusRequester(focusRequester)
                 .onFocusChanged(onFocusChanged)
@@ -119,7 +120,8 @@ fun AutocompleteTextField(
                     } else {
                         false
                     }
-                },
+                }
+                .weight(1.0f),
             singleLine = true,
             textStyle = TextStyle(
                 color = foregroundColor,
@@ -148,50 +150,52 @@ fun AutocompleteTextField(
     }
 }
 
-@Preview("Default, 1x scale", locale = "en")
-@Preview("Default, 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("Default, RTL, 1x scale", locale = "he")
-@Preview("Default, RTL, 2x scale", locale = "he", fontScale = 2.0f)
-@Composable
-fun AutocompleteTextField_Preview() {
-    NeevaTheme {
-        val text = stringResource(id = R.string.debug_long_string_primary)
-        AutocompleteTextField(
-            textFieldValue = TextFieldValue(
-                text = text,
-                selection = TextRange(7, text.length)
-            ),
-            faviconBitmap = null,
-            focusRequester = FocusRequester(),
-            onLocationEdited = {},
-            onLocationReplaced = {},
-            onFocusChanged = {},
-            onLoadUrl = {},
-            backgroundColor = MaterialTheme.colorScheme.background,
-            foregroundColor = MaterialTheme.colorScheme.onSurface
+class AutocompleteTextFieldPreviews :
+    BooleanPreviewParameterProvider<AutocompleteTextFieldPreviews.Params>(2) {
+    data class Params(
+        val darkTheme: Boolean,
+        val useLongText: Boolean
+    )
+
+    override fun createParams(booleanArray: BooleanArray): Params {
+        return Params(
+            darkTheme = booleanArray[0],
+            useLongText = booleanArray[1]
         )
     }
-}
 
-@Preview("Not editing, 1x scale", locale = "en")
-@Preview("Not editing, 2x scale", locale = "en", fontScale = 2.0f)
-@Composable
-fun AutocompleteTextField_PreviewNoSuggestion() {
-    NeevaTheme {
-        val text = "something else"
-        AutocompleteTextField(
-            textFieldValue = TextFieldValue(
+    @Preview("1x scale", locale = "en")
+    @Preview("2x scale", locale = "en", fontScale = 2.0f)
+    @Preview("RTL, 1x scale", locale = "he")
+    @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
+    @Composable
+    fun Default(@PreviewParameter(AutocompleteTextFieldPreviews::class) params: Params) {
+        val textFieldValue = if (params.useLongText) {
+            val text = stringResource(id = R.string.debug_long_string_primary)
+            TextFieldValue(
+                text = text,
+                selection = TextRange(7, text.length)
+            )
+        } else {
+            val text = "something else"
+            TextFieldValue(
                 text = text,
                 selection = TextRange(text.length)
-            ),
-            faviconBitmap = null,
-            focusRequester = FocusRequester(),
-            onLocationEdited = {},
-            onLocationReplaced = {},
-            onFocusChanged = {},
-            onLoadUrl = {},
-            backgroundColor = MaterialTheme.colorScheme.background,
-            foregroundColor = MaterialTheme.colorScheme.onSurface
-        )
+            )
+        }
+
+        NeevaTheme(useDarkTheme = params.darkTheme) {
+            AutocompleteTextField(
+                textFieldValue = textFieldValue,
+                faviconBitmap = null,
+                focusRequester = FocusRequester(),
+                onLocationEdited = {},
+                onLocationReplaced = {},
+                onFocusChanged = {},
+                onLoadUrl = {},
+                backgroundColor = MaterialTheme.colorScheme.background,
+                foregroundColor = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }

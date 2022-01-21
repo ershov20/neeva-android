@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -23,6 +24,7 @@ import com.neeva.app.spaces.Space
 fun AppNav(
     webLayerModel: WebLayerModel,
     settingsModel: SettingsModel,
+    modifier: Modifier,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
     val browserWrapper = LocalEnvironment.current.browserWrapper
@@ -56,7 +58,8 @@ fun AppNav(
 
     NavHost(
         navController = appNavModel.navController,
-        startDestination = AppNavDestination.BROWSER.route
+        startDestination = AppNavDestination.BROWSER.route,
+        modifier = modifier
     ) {
         composable(AppNavDestination.BROWSER.route) {
             Box {}

@@ -1,6 +1,7 @@
 package com.neeva.app.zeroQuery
 
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -61,7 +62,7 @@ fun ZeroQuery(
     val spacesLabel = stringResource(id = R.string.spaces)
     val suggestedSitesLabel = stringResource(id = R.string.suggested_sites)
 
-    LazyColumn {
+    LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         item {
             topContent()
         }
