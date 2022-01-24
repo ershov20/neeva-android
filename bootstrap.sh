@@ -11,4 +11,4 @@ fi
 git lfs install
 git lfs pull
 
-(cd chromium && ./make-projects.sh)
+(cd chromium && ./make-projects.sh $1)

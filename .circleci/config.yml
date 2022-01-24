@@ -22,7 +22,7 @@ commands:
 
       - run:
           name: Bootstrap Chromium projects
-          command: ./bootstrap.sh
+          command: ./bootstrap.sh release-96-x64
 
       - android/restore-build-cache
       - android/restore-gradle-cache
@@ -41,7 +41,7 @@ commands:
 jobs:
   run-ktlint:
     docker:
-      - image: circleci/android:api-30
+      - image: cimg/android:2021.12.2
     steps:
       - bootstrap-checkout
 
@@ -51,7 +51,7 @@ jobs:
 
   run-unit-tests:
     docker:
-      - image: circleci/android:api-30
+      - image: cimg/android:2021.12.2
     steps:
       - bootstrap-checkout
 
@@ -65,6 +65,35 @@ jobs:
       - store_artifacts:
           path: artifacts
 
+  run-instrumented-tests:
+    machine:
+      image: android:202102-01
+
+    resource_class: large
+
+    steps:
+      - bootstrap-checkout
+
+      - run:
+          name: Accept all licenses
+          command: yes | sdkmanager --licenses || exit 0
+
+      - run:
+          name: Update SDK manager
+          command: yes | sdkmanager --update || exit 0
+
+      - android/start-emulator-and-run-tests:
+          post-emulator-launch-assemble-command: ''
+          system-image: system-images;android-28;default;x86_64
+          test-command: ./gradlew :app:connectedDebugAndroidTest
+
+      - run:
+          name: Saving instrumentation test results
+          command: cp -R app/build/outputs/androidTest-results artifacts
+
+      - store_artifacts:
+          path: artifacts
+
 workflows:
   test-workflow:
     jobs:
@@ -72,15 +101,4 @@ workflows:
 
       - run-unit-tests
 
-#      - android/build:
-#          executor:
-#            name: android/android-machine 
-#            # Tag selected from: https://circleci.com/developer/images/image/cimg/android#image-tags
-#            tag: 2021.10.1
-
-#      - android/run-ui-tests:
-#          system-image: system-images;android-28;default;x86 
-#          executor:
-#              name: android/android-machine 
-#              # Tag selected from: https://circleci.com/developer/images/image/cimg/android#image-tags
-#              tag: 2021.10.1
+      - run-instrumented-tests
