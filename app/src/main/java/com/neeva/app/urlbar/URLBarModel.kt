@@ -9,6 +9,7 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.suggestions.NavSuggestion
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.withContext
 
 data class URLBarModelState(
     val isEditing: Boolean = false,
@@ -60,8 +62,19 @@ class URLBarModel(
     init {
         // Update what is displayed in the URL bar as the user types.
         suggestionFlow
-            .combine(userInputState) { suggestion, state -> determineUrlBarText(suggestion, state) }
-            .onEach { _textFieldValue.value = it }
+            .combine(userInputState) { suggestion, state ->
+                Pair(
+                    determineUrlBarText(suggestion, state),
+                    state.userTypedInput
+                )
+            }
+            .onEach { (textFieldValue, expectedInput) ->
+                textFieldValue?.let {
+                    withContext(Dispatchers.Main) {
+                        setTextFieldValue(textFieldValue, expectedInput)
+                    }
+                }
+            }
             .launchIn(coroutineScope)
     }
 
@@ -69,21 +82,17 @@ class URLBarModel(
     internal fun determineUrlBarText(
         suggestionValue: NavSuggestion?,
         userInputStateValue: URLBarModelState
-    ): TextFieldValue {
+    ): TextFieldValue? {
         val suggestion = suggestionValue.takeIf { userInputStateValue.allowAutocomplete }
         val userInput = userInputStateValue.userTypedInput
 
         return getAutocompleteText(suggestion, userInput)?.let { autocompletedText ->
-            // Display the user's text with the autocomplete suggestion tacked on.
+            // Display the user's text with the autocomplete suggestion tacked on.  This currently
+            // nullifies whatever composition is currently alive, which accepts whatever suggestion
+            // the IME is showing.
             TextFieldValue(
                 text = autocompletedText,
                 selection = TextRange(userInput.length, autocompletedText.length)
-            )
-        } ?: run {
-            // Display exactly what the user has typed in.
-            TextFieldValue(
-                text = userInput,
-                selection = TextRange(userInput.length)
             )
         }
     }
@@ -131,7 +140,7 @@ class URLBarModel(
 
         // Clear out the URL bar contents whenever the user stops typing.
         if (!isFocused) {
-            _textFieldValue.value = TextFieldValue()
+            setTextFieldValue(TextFieldValue())
         }
 
         _isLazyTab.value = _isLazyTab.value && userInputState.value.isEditing
@@ -141,7 +150,10 @@ class URLBarModel(
         focusRequester?.requestFocus()
     }
 
-    fun setTextFieldValue(textFieldValue: TextFieldValue) {
+    fun setTextFieldValue(textFieldValue: TextFieldValue, expectedInput: String? = null) {
+        if (expectedInput != null && _userInputState.value.userTypedInput != expectedInput) {
+            return
+        }
         _textFieldValue.value = textFieldValue
     }
 

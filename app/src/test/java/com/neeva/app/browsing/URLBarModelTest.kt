@@ -131,12 +131,12 @@ class URLBarModelTest : BaseTest() {
         )
 
         val actualValue = model.determineUrlBarText(autocompleteSuggestion, inputState)
-        expectThat(actualValue.text).isEqualTo("reddit.com/r/android")
-        expectThat(actualValue.selection).isEqualTo(TextRange(4, "reddit.com/r/android".length))
+        expectThat(actualValue?.text).isEqualTo("reddit.com/r/android")
+        expectThat(actualValue?.selection).isEqualTo(TextRange(4, "reddit.com/r/android".length))
     }
 
     @Test
-    fun determineUrlBarText_withoutMatch_showsUserInput() {
+    fun determineUrlBarText_withoutMatch_returnsNull() {
         val autocompleteSuggestion = NavSuggestion(
             url = Uri.parse("https://www.reddit.com/r/android"),
             label = "Primary label",
@@ -150,8 +150,7 @@ class URLBarModelTest : BaseTest() {
         )
 
         val actualValue = model.determineUrlBarText(autocompleteSuggestion, inputState)
-        expectThat(actualValue.text).isEqualTo("not a match")
-        expectThat(actualValue.selection).isEqualTo(TextRange("not a match".length))
+        expectThat(actualValue).isNull()
     }
 
     @Test
