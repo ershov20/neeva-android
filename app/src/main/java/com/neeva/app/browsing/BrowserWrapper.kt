@@ -7,8 +7,8 @@ import androidx.annotation.CallSuper
 import androidx.fragment.app.Fragment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.TabScreenshotManager
+import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.CoroutineScope

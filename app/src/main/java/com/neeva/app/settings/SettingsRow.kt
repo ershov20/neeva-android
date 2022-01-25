@@ -33,6 +33,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SettingsRow(
     data: SettingsRowData,
     openUrl: (Uri) -> Unit,
+    onClearHistory: () -> Unit,
     getTogglePreferenceSetter: (String?) -> ((Boolean) -> Unit)?,
     getToggleState: (String?) -> MutableState<Boolean>?
 ) {
@@ -48,7 +49,7 @@ fun SettingsRow(
                     data.type == SettingsRowType.NAVIGATION &&
                     data.title_id == R.string.settings_clear_browsing_data
                 ) {
-                    Modifier.clickable { /* @Dan this is your nuke button for now */ }
+                    Modifier.clickable { onClearHistory() }
                 } else {
                     Modifier
                 }
@@ -103,6 +104,7 @@ fun SettingsRow_PreviewToggle() {
                 R.string.debug_long_string_primary
             ),
             openUrl = {},
+            onClearHistory = {},
             getTogglePreferenceSetter = { {} },
             getToggleState = { mutableStateOf(true) }
         )
@@ -123,6 +125,7 @@ fun SettingsRow_PreviewLink() {
                 Uri.parse("")
             ),
             openUrl = {},
+            onClearHistory = {},
             getTogglePreferenceSetter = { {} },
             getToggleState = { mutableStateOf(true) }
         )
@@ -140,6 +143,7 @@ fun SettingsRow_PreviewLabel() {
                 R.string.debug_long_string_primary
             ),
             openUrl = {},
+            onClearHistory = {},
             getTogglePreferenceSetter = { {} },
             getToggleState = { mutableStateOf(true) }
         )

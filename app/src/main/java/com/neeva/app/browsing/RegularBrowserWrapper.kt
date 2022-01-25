@@ -12,8 +12,8 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.spaces.SpaceStore
-import com.neeva.app.storage.RegularFaviconCache
 import com.neeva.app.storage.RegularTabScreenshotManager
+import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

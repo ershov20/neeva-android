@@ -35,6 +35,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SettingsPane(
     onShowBrowser: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
+    onClearHistory: () -> Unit,
     getTogglePreferenceSetter: (String?) -> ((Boolean) -> Unit)?,
     getToggleState: (String?) -> MutableState<Boolean>?
 ) {
@@ -99,6 +100,7 @@ fun SettingsPane(
                         SettingsRow(
                             data = rowData,
                             openUrl = onOpenUrl,
+                            onClearHistory = onClearHistory,
                             getTogglePreferenceSetter = getTogglePreferenceSetter,
                             getToggleState = getToggleState
                         )
@@ -119,6 +121,7 @@ fun SettingsMain_Preview() {
         SettingsPane(
             onShowBrowser = {},
             onOpenUrl = {},
+            onClearHistory = {},
             getTogglePreferenceSetter = { {} },
             getToggleState = { mutableStateOf(true) }
         )

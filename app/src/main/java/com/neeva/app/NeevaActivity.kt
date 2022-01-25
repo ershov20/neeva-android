@@ -20,6 +20,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.settings.SettingsModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
@@ -45,6 +46,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var spaceStore: SpaceStore
     @Inject lateinit var settingsModel: SettingsModel
     @Inject lateinit var webModel: WebLayerModel
+    @Inject lateinit var historyManager: HistoryManager
 
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View
@@ -96,7 +98,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     appNavModel = appNavModel!!,
                     webLayerModel = webModel,
                     settingsModel = settingsModel,
-                    apolloClient = apolloClient
+                    apolloClient = apolloClient,
+                    historyManager = historyManager
                 )
             }
         }

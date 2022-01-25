@@ -1,4 +1,4 @@
-package com.neeva.app.storage
+package com.neeva.app.storage.favicons
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -12,7 +12,8 @@ import androidx.compose.runtime.produceState
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.Favicon.Companion.toBitmap
+import com.neeva.app.storage.entities.Favicon
+import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream

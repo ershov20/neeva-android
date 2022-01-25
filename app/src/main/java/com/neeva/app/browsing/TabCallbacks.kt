@@ -4,10 +4,10 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.storage.FaviconCache
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.TypeConverters
-import com.neeva.app.storage.Visit
+import com.neeva.app.storage.entities.Visit
+import com.neeva.app.storage.favicons.FaviconCache
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +65,6 @@ class TabCallbacks(
                 if (!isIncognito) {
                     url?.let {
                         historyManager?.insert(
-                            coroutineScope = coroutineScope,
                             url = it,
                             title = title,
                             favicon = faviconData
@@ -124,7 +123,6 @@ class TabCallbacks(
             if (shouldRecordVisit) {
                 visitToCommit?.let { visit ->
                     historyManager?.insert(
-                        coroutineScope = coroutineScope,
                         url = navigation.uri,
                         title = tab.currentDisplayTitle,
                         visit = visit
@@ -145,7 +143,7 @@ class TabCallbacks(
 
         override fun onTitleUpdated(title: String) {
             tab.currentDisplayUrl?.let {
-                historyManager?.insert(coroutineScope = coroutineScope, url = it, title = title)
+                historyManager?.insert(url = it, title = title)
             }
 
             tabList.updateTabTitle(tab.guid, title)

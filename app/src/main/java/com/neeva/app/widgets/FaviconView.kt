@@ -20,7 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.storage.Favicon.Companion.toBitmap
+import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable

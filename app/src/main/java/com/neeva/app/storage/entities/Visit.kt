@@ -1,13 +1,18 @@
-package com.neeva.app.storage
+package com.neeva.app.storage.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.Date
 
-@Entity
+@Entity(
+    tableName = "Visit"
+)
 data class Visit(
     @PrimaryKey(autoGenerate = true) val visitUID: Int = 0,
+
+    /** Deprecated. */
     val visitRootID: Long,
+
     val visitType: Int,
     val timestamp: Date,
 

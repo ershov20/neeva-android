@@ -7,8 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.storage.Favicon.Companion.toBitmap
-import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
+import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable

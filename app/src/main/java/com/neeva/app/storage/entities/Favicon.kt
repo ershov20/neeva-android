@@ -1,4 +1,4 @@
-package com.neeva.app.storage
+package com.neeva.app.storage.entities
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

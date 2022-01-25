@@ -44,8 +44,8 @@ import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.storage.FaviconCache
-import com.neeva.app.storage.mockFaviconCache
+import com.neeva.app.storage.favicons.FaviconCache
+import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 

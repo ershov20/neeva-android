@@ -26,9 +26,9 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.FaviconCache
-import com.neeva.app.storage.Site
-import com.neeva.app.storage.mockFaviconCache
+import com.neeva.app.storage.entities.Site
+import com.neeva.app.storage.favicons.FaviconCache
+import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme

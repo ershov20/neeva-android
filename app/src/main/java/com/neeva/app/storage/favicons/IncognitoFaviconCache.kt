@@ -1,9 +1,10 @@
-package com.neeva.app.storage
+package com.neeva.app.storage.favicons
 
 import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.browsing.FileEncrypter
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.storage.entities.Favicon
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream

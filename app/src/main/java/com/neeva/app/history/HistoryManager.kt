@@ -6,13 +6,13 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.neeva.app.NeevaConstants
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.Domain
 import com.neeva.app.storage.DomainRepository
-import com.neeva.app.storage.Favicon
 import com.neeva.app.storage.HistoryDatabase
-import com.neeva.app.storage.Site
 import com.neeva.app.storage.SitesRepository
-import com.neeva.app.storage.Visit
+import com.neeva.app.storage.entities.Domain
+import com.neeva.app.storage.entities.Favicon
+import com.neeva.app.storage.entities.Site
+import com.neeva.app.storage.entities.Visit
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.toNavSuggestion
@@ -30,8 +30,9 @@ import kotlinx.coroutines.withContext
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(
-    historyDatabase: HistoryDatabase,
-    private val domainProvider: DomainProvider
+    private val historyDatabase: HistoryDatabase,
+    private val domainProvider: DomainProvider,
+    private val coroutineScope: CoroutineScope
 ) {
     private val sitesRepository = SitesRepository(historyDatabase.fromSites())
     private val domainRepository = DomainRepository(historyDatabase.fromDomains())
@@ -121,7 +122,6 @@ class HistoryManager(
 
     /** Inserts or updates an item into the history. */
     fun insert(
-        coroutineScope: CoroutineScope,
         url: Uri,
         title: String? = null,
         favicon: Favicon? = null,
@@ -151,6 +151,12 @@ class HistoryManager(
                 domainProvider.getRegisteredDomain(Uri.parse(url)) ?: return@withContext,
                 favicon
             )
+        }
+    }
+
+    fun clearAllHistory() {
+        coroutineScope.launch(Dispatchers.IO) {
+            historyDatabase.clearAllTables()
         }
     }
 }

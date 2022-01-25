@@ -8,7 +8,7 @@ import com.neeva.app.SuggestionsQuery
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.Site
+import com.neeva.app.storage.entities.Site
 import com.neeva.app.type.QuerySuggestionType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow

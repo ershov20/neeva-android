@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalDensity
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.settings.SettingsModel
 import com.neeva.app.ui.theme.NeevaTheme
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,8 @@ import kotlinx.coroutines.launch
 data class LocalEnvironmentState(
     val browserWrapper: BrowserWrapper,
     val appNavModel: AppNavModel,
-    val settingsModel: SettingsModel
+    val settingsModel: SettingsModel,
+    val historyManager: HistoryManager
 )
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 
@@ -37,7 +39,8 @@ fun ActivityUI(
     appNavModel: AppNavModel,
     webLayerModel: WebLayerModel,
     settingsModel: SettingsModel,
-    apolloClient: ApolloClient
+    apolloClient: ApolloClient,
+    historyManager: HistoryManager
 ) {
     val coroutineScope = rememberCoroutineScope()
     val browserWrapper by browserWrapperFlow.collectAsState()
@@ -45,7 +48,8 @@ fun ActivityUI(
     val environment = LocalEnvironmentState(
         browserWrapper = browserWrapper,
         appNavModel = appNavModel,
-        settingsModel = settingsModel
+        settingsModel = settingsModel,
+        historyManager = historyManager
     )
     CompositionLocalProvider(LocalEnvironment provides environment) {
         NeevaTheme {

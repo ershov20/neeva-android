@@ -1,4 +1,4 @@
-package com.neeva.app.storage
+package com.neeva.app.storage.entities
 
 import android.net.Uri
 import androidx.room.Embedded
@@ -7,7 +7,10 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.neeva.app.suggestions.NavSuggestion
 
-@Entity(indices = [Index(value = ["domainName"], unique = true)])
+@Entity(
+    tableName = "Domain",
+    indices = [Index(value = ["domainName"], unique = true)]
+)
 data class Domain(
     @PrimaryKey(autoGenerate = true) val domainUID: Int = 0,
     val domainName: String,

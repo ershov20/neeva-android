@@ -28,8 +28,8 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.spaces.Space
 import com.neeva.app.spaces.SpaceRow
-import com.neeva.app.storage.FaviconCache
-import com.neeva.app.storage.Site
+import com.neeva.app.storage.entities.Site
+import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.urlbar.URLBarModel

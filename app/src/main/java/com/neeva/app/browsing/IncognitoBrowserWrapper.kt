@@ -4,8 +4,8 @@ import android.content.Context
 import android.util.Log
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.IncognitoFaviconCache
 import com.neeva.app.storage.IncognitoTabScreenshotManager
+import com.neeva.app.storage.favicons.IncognitoFaviconCache
 import java.nio.file.Files
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -1,20 +1,20 @@
-package com.neeva.app.storage
+package com.neeva.app.storage.daos
 
 import android.net.Uri
 import androidx.paging.PagingSource
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
-import androidx.room.Update
+import com.neeva.app.storage.entities.Favicon
+import com.neeva.app.storage.entities.Site
+import com.neeva.app.storage.entities.Visit
 import java.util.Date
 import kotlinx.coroutines.flow.Flow
 
+@RewriteQueriesToDropUnusedColumns
 @Dao
-interface SitesWithVisitsAccessor {
-    @RewriteQueriesToDropUnusedColumns
+interface SitesWithVisitsAccessor : SiteDao, VisitDao {
     @Query(
         """
         SELECT *
@@ -25,7 +25,6 @@ interface SitesWithVisitsAccessor {
     )
     fun getPagedSitesVisitedBetween(startTime: Date, endTime: Date): PagingSource<Int, Site>
 
-    @RewriteQueriesToDropUnusedColumns
     @Query(
         """
         SELECT *
@@ -36,55 +35,56 @@ interface SitesWithVisitsAccessor {
     )
     fun getPagedSitesVisitedAfter(thresholdTime: Date): PagingSource<Int, Site>
 
+    /** Deletes any entries in the [Site] table that have no corresponding [Visit] information. */
     @Query(
         """
-        SELECT *
-        FROM visit
-        WHERE timestamp > :from AND timestamp < :to
-        ORDER BY timestamp DESC
-    """
+            DELETE
+            FROM site
+            WHERE site.siteUID IN (
+                SELECT site.siteUID
+                FROM site LEFT JOIN visit ON site.siteUID = visit.visitedSiteUID
+                WHERE visit.visitUID IS NULL
+                GROUP BY site.siteUID
+            )
+        """
     )
-    fun getVisitsWithin(from: Date, to: Date): Flow<List<Visit>>
+    fun deleteOrphanedSiteEntities(): Int
 
     @Query(
         """
         SELECT *
-        FROM site
-        WHERE lastVisitTimestamp > :thresholdTime
-        ORDER BY visitCount DESC
+        FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
+        WHERE visit.timestamp >= :thresholdTime
+        GROUP BY site.siteUID
+        ORDER BY COUNT(*) DESC
         LIMIT :limit
-    """
+        """
     )
-    fun getFrequentSitesAfter(thresholdTime: Date, limit: Int): Flow<List<Site>>
+    fun getFrequentSitesAfter(thresholdTime: Date, limit: Int = 10): List<Site>
 
     @Query(
         """
-        SELECT * 
-        FROM site
-        WHERE siteURL LIKE '%'||:query||'%'
-        ORDER BY visitCount DESC
+        SELECT *
+        FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
+        WHERE visit.timestamp >= :thresholdTime
+        GROUP BY site.siteUID
+        ORDER BY COUNT(*) DESC
+        LIMIT :limit
+        """
+    )
+    fun getFrequentSitesAfterFlow(thresholdTime: Date, limit: Int = 10): Flow<List<Site>>
+
+    @Query(
+        """
+        SELECT *
+        FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
+        WHERE Site.siteURL LIKE '%'||:query||'%'
+        GROUP BY Site.siteUID
+        ORDER BY COUNT(*) DESC
         LIMIT :limit
     """
     )
     suspend fun getQuerySuggestions(query: String, limit: Int): List<Site>
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addSite(vararg sites: Site)
-
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun addVisit(visit: Visit)
-
-    @Update
-    suspend fun updateSite(vararg sites: Site)
-
-    @Query("SELECT * FROM site WHERE siteURL LIKE :url")
-    suspend fun findSite(url: String): Site?
-
-    @Query("SELECT * FROM site WHERE siteURL LIKE :url")
-    fun getFromUrl(url: String): Site?
-
-    @Query("SELECT * FROM site WHERE siteUID LIKE :uid")
-    suspend fun get(uid: Int): Site?
 
     @Transaction
     suspend fun upsert(
@@ -93,13 +93,13 @@ interface SitesWithVisitsAccessor {
         favicon: Favicon? = null,
         visit: Visit? = null
     ) {
-        var site = findSite(url.toString())
+        var site = getSiteByUrl(url.toString())
 
         if (site != null) {
             val metadata: Site.SiteMetadata = site.metadata?.let {
                 // Don't delete a title if we are trying to update an existing entry.  We may be
                 // trying to update an entry from a place where it's not available.
-                if (title != null) {
+                if (!title.isNullOrBlank()) {
                     it.copy(title = title)
                 } else {
                     it
@@ -125,8 +125,14 @@ interface SitesWithVisitsAccessor {
 
         visit?.let {
             addVisit(
-                it.copy(visitedSiteUID = findSite(site.siteURL)?.siteUID ?: 0)
+                it.copy(visitedSiteUID = getSiteByUrl(site.siteURL)?.siteUID ?: 0)
             )
         }
+    }
+
+    @Transaction
+    suspend fun deleteHistoryWithinTimeframe(startTime: Date, endTime: Date) {
+        deleteVisitsWithinTimeframe(startTime, endTime)
+        deleteOrphanedSiteEntities()
     }
 }

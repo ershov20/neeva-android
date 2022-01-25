@@ -4,7 +4,7 @@ import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import com.neeva.app.LocalEnvironment
-import com.neeva.app.storage.FaviconCache
+import com.neeva.app.storage.favicons.FaviconCache
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable

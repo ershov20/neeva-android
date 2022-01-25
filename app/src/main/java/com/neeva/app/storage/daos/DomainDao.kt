@@ -1,4 +1,4 @@
-package com.neeva.app.storage
+package com.neeva.app.storage.daos
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -7,10 +7,12 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.neeva.app.storage.entities.Domain
+import com.neeva.app.storage.entities.Favicon
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface DomainAccessor {
+interface DomainDao {
     @Query("SELECT * FROM domain")
     fun getAll(): Flow<List<Domain>>
 

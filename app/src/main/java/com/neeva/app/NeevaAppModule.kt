@@ -57,9 +57,10 @@ object NeevaAppModule {
     @Singleton
     fun providesHistoryManager(
         historyDatabase: HistoryDatabase,
-        domainProviderImpl: DomainProviderImpl
+        domainProviderImpl: DomainProviderImpl,
+        coroutineScope: CoroutineScope
     ): HistoryManager {
-        return HistoryManager(historyDatabase, domainProviderImpl)
+        return HistoryManager(historyDatabase, domainProviderImpl, coroutineScope)
     }
 
     @Provides
