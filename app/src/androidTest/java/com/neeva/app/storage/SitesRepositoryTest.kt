@@ -69,11 +69,11 @@ class SitesRepositoryTest : HistoryDatabaseBaseTest() {
 
             expectThat(sites).hasSize(3)
             expectThat(sites[0].siteURL).isEqualTo("https://www.a.com")
-            expectThat(sites[0].metadata?.title).isEqualTo("Title A")
+            expectThat(sites[0].title).isEqualTo("Title A")
             expectThat(sites[1].siteURL).isEqualTo("https://www.b.com")
-            expectThat(sites[1].metadata?.title).isEqualTo("Title B")
+            expectThat(sites[1].title).isEqualTo("Title B")
             expectThat(sites[2].siteURL).isEqualTo("https://www.c.com")
-            expectThat(sites[2].metadata?.title).isEqualTo("Title C")
+            expectThat(sites[2].title).isEqualTo("Title C")
 
             val visits = database.fromSites().getVisitsWithinTimeframe(Date(0L), Date(50000L))
             expectThat(visits).hasSize(6)

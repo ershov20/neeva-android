@@ -168,7 +168,6 @@ fun HistoryUI(
 @Preview
 @Composable
 fun HistoryUI_Preview() {
-    val now = LocalDate.now()
     var ids = 0
 
     // Add items for today.
@@ -178,10 +177,7 @@ fun HistoryUI_Preview() {
             Site(
                 siteUID = ids++,
                 siteURL = "https://www.site$ids.com/$i",
-                lastVisitTimestamp = Date.from(
-                    now.atStartOfDay().plusHours(i.toLong()).toInstant(ZoneOffset.UTC)
-                ),
-                metadata = null,
+                title = null,
                 largestFavicon = null
             )
         )
@@ -194,10 +190,7 @@ fun HistoryUI_Preview() {
             Site(
                 siteUID = ids++,
                 siteURL = "https://www.site$ids.com/$i",
-                lastVisitTimestamp = Date.from(
-                    now.minusDays(1).atStartOfDay().plusHours(i.toLong()).toInstant(ZoneOffset.UTC)
-                ),
-                metadata = null,
+                title = null,
                 largestFavicon = null
             )
         )
@@ -210,10 +203,7 @@ fun HistoryUI_Preview() {
             Site(
                 siteUID = ids++,
                 siteURL = "https://www.site$ids.com/${daysAgo}_days_ago",
-                lastVisitTimestamp = Date.from(
-                    now.minusDays(daysAgo.toLong()).atStartOfDay().toInstant(ZoneOffset.UTC)
-                ),
-                metadata = null,
+                title = null,
                 largestFavicon = null
             )
         )

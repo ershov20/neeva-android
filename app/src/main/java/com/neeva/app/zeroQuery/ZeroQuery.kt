@@ -32,6 +32,7 @@ import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
+import com.neeva.app.suggestions.toUserVisibleString
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.CollapsingState
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
@@ -50,6 +51,7 @@ fun ZeroQuery(
         LocalContext.current.applicationContext,
         ComposableSingletonEntryPoint::class.java
     )
+    val domainProvider = entryPoint.domainProvider()
     val historyManager = entryPoint.historyManager()
     val spaceStore = entryPoint.spaceStore()
 
@@ -75,7 +77,7 @@ fun ZeroQuery(
                 LazyRow(modifier = Modifier.padding(vertical = 16.dp)) {
                     items(suggestedSites.subList(0, minOf(suggestedSites.size - 1, 8))) { site ->
                         val faviconBitmap by faviconCache.getFaviconAsync(Uri.parse(site.siteURL))
-                        val title = site.metadata?.title
+                        val title = site.title
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
@@ -90,7 +92,7 @@ fun ZeroQuery(
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text(
-                                text = title ?: "",
+                                text = site.toUserVisibleString(domainProvider),
                                 modifier = Modifier.fillMaxWidth(),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,

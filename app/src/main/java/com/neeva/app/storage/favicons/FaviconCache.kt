@@ -67,7 +67,6 @@ abstract class FaviconCache(
         val md5File = File(faviconDirectory, md5Hash)
         val favicon = Favicon(
             faviconURL = md5File.toUri().toString(),
-            encodedImage = null,
             width = bitmap.width,
             height = bitmap.height
         )

@@ -15,7 +15,6 @@ import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.suggestions.toQueryRowSuggestion
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
-import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -130,14 +129,12 @@ class SuggestionsModelTest : BaseTest() {
         siteSuggestions.value = listOf(
             Site(
                 siteURL = "https://www.reddit.com/r/android",
-                lastVisitTimestamp = Date(),
-                metadata = null,
+                title = null,
                 largestFavicon = null
             ),
             Site(
                 siteURL = "https://www.ignored.url",
-                lastVisitTimestamp = Date(),
-                metadata = null,
+                title = null,
                 largestFavicon = null
             )
         )
@@ -189,8 +186,7 @@ class SuggestionsModelTest : BaseTest() {
         siteSuggestions.value = listOf(
             Site(
                 siteURL = "https://www.reddit.com/r/android",
-                lastVisitTimestamp = Date(),
-                metadata = null,
+                title = null,
                 largestFavicon = null
             )
         )

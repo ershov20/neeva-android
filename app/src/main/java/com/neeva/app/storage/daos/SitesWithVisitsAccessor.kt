@@ -96,30 +96,21 @@ interface SitesWithVisitsAccessor : SiteDao, VisitDao {
         var site = getSiteByUrl(url.toString())
 
         if (site != null) {
-            val metadata: Site.SiteMetadata = site.metadata?.let {
-                // Don't delete a title if we are trying to update an existing entry.  We may be
-                // trying to update an entry from a place where it's not available.
-                if (!title.isNullOrBlank()) {
-                    it.copy(title = title)
-                } else {
-                    it
-                }
-            } ?: Site.SiteMetadata(title = title)
-
+            // Don't replace the title if we are trying to update an existing entry because we may
+            // be trying to update an entry from a place where it's not available.
             site = site.copy(
-                metadata = metadata,
-                largestFavicon = favicon ?: site.largestFavicon,
-                visitCount = if (visit != null) site.visitCount + 1 else site.visitCount,
-                lastVisitTimestamp = visit?.timestamp ?: site.lastVisitTimestamp
+                title = title.takeUnless { title.isNullOrBlank() } ?: site.title,
+                largestFavicon = favicon ?: site.largestFavicon
             )
+
             updateSite(site)
         } else {
             site = Site(
                 siteURL = url.toString(),
-                metadata = Site.SiteMetadata(title = title),
-                largestFavicon = favicon,
-                lastVisitTimestamp = visit?.timestamp ?: Date()
+                title = title,
+                largestFavicon = favicon
             )
+
             addSite(site)
         }
 

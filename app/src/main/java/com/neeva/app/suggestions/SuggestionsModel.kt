@@ -147,7 +147,15 @@ fun Site.toNavSuggestion(domainProvider: DomainProvider): NavSuggestion {
 
     return NavSuggestion(
         url = uri,
-        label = this.metadata?.title ?: domainProvider.getRegisteredDomain(uri) ?: this.siteURL,
+        label = toUserVisibleString(domainProvider),
         secondaryLabel = uri.toString()
     )
+}
+
+/** Returns a string that can be displayed to the user that represents a [Site] in the UI. */
+fun Site.toUserVisibleString(domainProvider: DomainProvider): String {
+    val uri = Uri.parse(this.siteURL)
+    return this.title.takeUnless { it.isNullOrBlank() }
+        ?: domainProvider.getRegisteredDomain(uri)
+        ?: this.siteURL
 }

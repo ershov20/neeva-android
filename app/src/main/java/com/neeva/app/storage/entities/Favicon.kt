@@ -6,14 +6,9 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 
-/**
- * Stores information about a website's favicon.
- *
- * TODO(dan.alcantara): Delete [encodedImage] when we move to the next version of the database.
- */
+/** Stores information about a website's favicon. */
 data class Favicon(
     val faviconURL: String?,
-    val encodedImage: String?,
     val width: Int,
     val height: Int,
 ) {
