@@ -2,7 +2,7 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import androidx.paging.PagingSource
-import com.neeva.app.storage.daos.SitesWithVisitsAccessor
+import com.neeva.app.storage.daos.HistoryDao
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
@@ -10,7 +10,7 @@ import java.util.Date
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
+class SitesRepository(private val sitesAccessor: HistoryDao) {
     fun getHistoryBetween(startTime: Date, endTime: Date): PagingSource<Int, Site> =
         sitesAccessor.getPagedSitesVisitedBetween(startTime, endTime)
 
@@ -23,7 +23,7 @@ class SitesRepository(private val sitesAccessor: SitesWithVisitsAccessor) {
     suspend fun getQuerySuggestions(query: String, limit: Int): List<Site> =
         sitesAccessor.getQuerySuggestions(query, limit)
 
-    suspend fun find(url: Uri): Site? = sitesAccessor.getSiteByUrl(url.toString())
+    suspend fun find(uri: Uri): Site? = sitesAccessor.getSiteByUrl(uri.toString())
 
     suspend fun insert(
         url: Uri,

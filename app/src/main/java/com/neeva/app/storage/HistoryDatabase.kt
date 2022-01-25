@@ -4,27 +4,26 @@ import android.content.Context
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.DeleteColumn
+import androidx.room.DeleteTable
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
-import com.neeva.app.storage.daos.DomainDao
-import com.neeva.app.storage.daos.SitesWithVisitsAccessor
-import com.neeva.app.storage.entities.Domain
+import com.neeva.app.storage.daos.HistoryDao
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
 
 @Database(
-    entities = [Domain::class, Site::class, Visit::class],
-    version = 7,
+    entities = [Site::class, Visit::class],
+    version = 8,
     autoMigrations = [
-        AutoMigration(from = 6, to = 7, spec = HistoryDatabase.MigrationFrom6To7::class)
+        AutoMigration(from = 6, to = 7, spec = HistoryDatabase.MigrationFrom6To7::class),
+        AutoMigration(from = 7, to = 8, spec = HistoryDatabase.MigrationFrom7To8::class)
     ]
 )
 @TypeConverters(com.neeva.app.storage.TypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
-    abstract fun fromDomains(): DomainDao
-    abstract fun fromSites(): SitesWithVisitsAccessor
+    abstract fun fromSites(): HistoryDao
 
     companion object {
         fun create(context: Context): HistoryDatabase {
@@ -52,4 +51,9 @@ abstract class HistoryDatabase : RoomDatabase() {
         DeleteColumn(tableName = "Site", columnName = "imageURL"),
     )
     class MigrationFrom6To7 : AutoMigrationSpec
+
+    @DeleteTable.Entries(
+        DeleteTable(tableName = "Domain")
+    )
+    class MigrationFrom7To8 : AutoMigrationSpec
 }

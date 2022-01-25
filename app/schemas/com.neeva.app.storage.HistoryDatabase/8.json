@@ -1,0 +1,118 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 8,
+    "identityHash": "1fd7fdb1b833e58a950a6dea657e4c2e",
+    "entities": [
+      {
+        "tableName": "Site",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUID` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `siteURL` TEXT NOT NULL, `title` TEXT, `faviconURL` TEXT, `width` INTEGER, `height` INTEGER)",
+        "fields": [
+          {
+            "fieldPath": "siteUID",
+            "columnName": "siteUID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "siteURL",
+            "columnName": "siteURL",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "largestFavicon.faviconURL",
+            "columnName": "faviconURL",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "largestFavicon.width",
+            "columnName": "width",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "largestFavicon.height",
+            "columnName": "height",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "siteUID"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Site_siteURL",
+            "unique": true,
+            "columnNames": [
+              "siteURL"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Site_siteURL` ON `${TABLE_NAME}` (`siteURL`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "Visit",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`visitUID` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `visitRootID` INTEGER NOT NULL, `visitType` INTEGER NOT NULL, `timestamp` INTEGER NOT NULL, `visitedSiteUID` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "visitUID",
+            "columnName": "visitUID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visitRootID",
+            "columnName": "visitRootID",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visitType",
+            "columnName": "visitType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timestamp",
+            "columnName": "timestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "visitedSiteUID",
+            "columnName": "visitedSiteUID",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "visitUID"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1fd7fdb1b833e58a950a6dea657e4c2e')"
+    ]
+  }
+}

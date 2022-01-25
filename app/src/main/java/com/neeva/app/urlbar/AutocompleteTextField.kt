@@ -52,6 +52,8 @@ fun AutocompleteTextField(
     val focusRequester = remember { FocusRequester() }
     urlBarModel.focusRequester = focusRequester
 
+    // TODO(dan.alcantara): Make the URLBarModel give us the favicon to load, instead.  It has info
+    //                      about the autocomplete entry.
     val url = URLBarModel.getUrlToLoad(textFieldValue.text)
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(url, generateFavicon = false)
 
@@ -63,12 +65,6 @@ fun AutocompleteTextField(
             urlBarModel.onLocationBarTextChanged(newValue.text)
         },
         onLocationReplaced = {
-            textFieldValueMutator(
-                TextFieldValue(
-                    text = it,
-                    selection = TextRange(it.length)
-                )
-            )
             urlBarModel.replaceLocationBarText(it)
         },
         focusRequester = focusRequester,
@@ -128,7 +124,8 @@ fun AutocompleteTextField(
                 fontSize = MaterialTheme.typography.bodyLarge.fontSize
             ),
             keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Go
+                imeAction = ImeAction.Go,
+                autoCorrect = false
             ),
             keyboardActions = KeyboardActions(
                 onGo = { onLoadUrl.invoke() }

@@ -70,11 +70,6 @@ class TabCallbacks(
                             favicon = faviconData
                         )
                     }
-
-                    historyManager?.updateDomainFavicon(
-                        url = url.toString(),
-                        favicon = faviconData
-                    )
                 }
             }
         }

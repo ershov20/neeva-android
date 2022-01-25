@@ -6,10 +6,8 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.neeva.app.NeevaConstants
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.DomainRepository
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.SitesRepository
-import com.neeva.app.storage.entities.Domain
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
@@ -26,7 +24,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(
@@ -35,7 +32,6 @@ class HistoryManager(
     private val coroutineScope: CoroutineScope
 ) {
     private val sitesRepository = SitesRepository(historyDatabase.fromSites())
-    private val domainRepository = DomainRepository(historyDatabase.fromDomains())
 
     companion object {
         private const val MAX_FREQUENT_SITES = 40
@@ -82,16 +78,12 @@ class HistoryManager(
                 }
             }
 
-    /** Updates the query that is being used to fetch history and domain name suggestions. */
+    /** Updates the query that is being used to fetch history suggestions. */
     suspend fun updateSuggestionQuery(currentInput: String?) {
-        val siteSuggestions: List<Site>
-        val domainSuggestions: List<NavSuggestion>
-        if (currentInput != null) {
-            siteSuggestions = sitesRepository.getQuerySuggestions(currentInput, limit = 10)
-            domainSuggestions = domainRepository.queryNavSuggestions(currentInput, limit = 10)
+        val siteSuggestions = if (currentInput != null) {
+            sitesRepository.getQuerySuggestions(currentInput, limit = 10)
         } else {
-            siteSuggestions = emptyList()
-            domainSuggestions = emptyList()
+            emptyList()
         }
 
         _siteSuggestions.value = siteSuggestions
@@ -99,25 +91,17 @@ class HistoryManager(
         // Determine what history should be suggested as the user types out a query.
         // Prioritize the site visits first because they were directly visited by the user.
         val combinedSuggestions =
-            _siteSuggestions.value.map { it.toNavSuggestion(domainProvider) } +
-                domainSuggestions
+            _siteSuggestions.value.map { it.toNavSuggestion(domainProvider) }
 
         // Keep only the unique history items with unique URLs.
         _historySuggestions.value = combinedSuggestions.distinctBy { it.url }
     }
 
-    /**
-     * Returns the best Favicon for the given Uri.  It prefers favicons that come from a direct
-     * match in the user's history before falling back to the registered domain.
-     */
+    /** Returns the favicon that corresponds to an exact visit in the user's history. */
     suspend fun getFaviconFromHistory(uri: Uri): Favicon? {
         val siteFavicon = sitesRepository.find(uri)?.largestFavicon
         if (siteFavicon != null) return siteFavicon
-
-        return domainProvider
-            .getRegisteredDomain(uri)
-            ?.let { domainRepository.get(it) }
-            ?.largestFavicon
+        return null
     }
 
     /** Inserts or updates an item into the history. */
@@ -129,34 +113,16 @@ class HistoryManager(
     ) {
         coroutineScope.launch(Dispatchers.IO) {
             sitesRepository.insert(url, title, favicon, visit)
-
-            domainProvider.getRegisteredDomain(url)?.let { domainName ->
-                domainRepository.insert(
-                    Domain(
-                        domainName = domainName,
-                        providerName = title,
-                        largestFavicon = null
-                    )
-                )
-            }
-        }
-    }
-
-    /** Updates the [Favicon] for the domain associated with the given [url]. */
-    suspend fun updateDomainFavicon(url: String, favicon: Favicon?) {
-        favicon ?: return
-
-        withContext(Dispatchers.IO) {
-            domainRepository.updateFaviconFor(
-                domainProvider.getRegisteredDomain(Uri.parse(url)) ?: return@withContext,
-                favicon
-            )
         }
     }
 
     fun clearAllHistory() {
         coroutineScope.launch(Dispatchers.IO) {
-            historyDatabase.clearAllTables()
+            sitesRepository.deleteHistoryWithinTimeframe(Date(0L), Date())
+
+            // TODO(dan.alcantara): Delete favicons.
+            // TODO(dan.alcantara): Delete tab thumbnails
+            // TDOO(dan.alcantara): Should we close all tabs when the user clears history?
         }
     }
 }
