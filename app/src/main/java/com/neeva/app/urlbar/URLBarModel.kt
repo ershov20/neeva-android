@@ -111,6 +111,12 @@ class URLBarModel(
 
     /** Completely replaces what is displayed in the URL bar for user editing. */
     fun replaceLocationBarText(newValue: String) {
+        setTextFieldValue(
+            TextFieldValue(
+                text = newValue,
+                selection = TextRange(newValue.length)
+            )
+        )
         onRequestFocus()
         onLocationBarTextChanged(newValue)
     }

@@ -2,6 +2,8 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.NeevaConstants
+import com.neeva.app.R
 import com.neeva.app.spaces.Space
 import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,11 +41,14 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
     /** Tracks which tab is currently active. */
     internal val activeTabFlow = MutableStateFlow<Tab?>(null)
 
-    private val _showLock = MutableStateFlow(false)
-    val showLock: StateFlow<Boolean> = _showLock
+    private val _locationInfoResource: MutableStateFlow<Int?> = MutableStateFlow(null)
+    val locationInfoResource: StateFlow<Int?> = _locationInfoResource
 
-    private val _displayedDomain = MutableStateFlow("")
-    val displayedDomain: StateFlow<String> = _displayedDomain
+    private val _displayedText = MutableStateFlow("")
+    val displayedText: StateFlow<String> = _displayedText
+
+    private val _isShowingQuery = MutableStateFlow(false)
+    val isShowingQuery: StateFlow<Boolean> = _isShowingQuery
 
     internal fun onActiveTabChanged(newActiveTab: Tab?) {
         val previousTab = activeTabFlow.value
@@ -85,12 +90,20 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
 
     private fun updateUrl(uri: Uri) {
         _urlFlow.value = uri
-        _displayedDomain.value = uri.host ?: ""
+        val isNeevaSearch = uri.toString().startsWith(NeevaConstants.appSearchURL)
+        val query = if (isNeevaSearch) uri.getQueryParameter("q") else null
+        _displayedText.value = query ?: uri.host ?: ""
 
         // TODO(dan.alcantara); Pull this from WebLayer.  This is actually not correct since this
         //                      should depend on browser security signals rather than only the
         //                      scheme.
-        _showLock.value = uri.scheme.equals("https")
+        _locationInfoResource.value = when {
+            query != null -> R.drawable.ic_baseline_search_24
+            uri.scheme == "https" -> R.drawable.ic_baseline_lock_18
+            else -> null
+        }
+
+        _isShowingQuery.value = query != null
     }
 
     private val selectedTabCallback: TabCallback = object : TabCallback() {

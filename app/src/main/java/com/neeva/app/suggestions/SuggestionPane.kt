@@ -28,6 +28,8 @@ fun SuggestionPane() {
     val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
     val historySuggestions by historyManager.historySuggestions.collectAsState()
     val currentURL: Uri by activeTabModel.urlFlow.collectAsState()
+    val displayedText: String by activeTabModel.displayedText.collectAsState()
+    val isShowingQuery: Boolean by activeTabModel.isShowingQuery.collectAsState()
 
     val faviconBitmap by faviconCache.getFaviconAsync(currentURL)
 
@@ -67,8 +69,19 @@ fun SuggestionPane() {
         ZeroQuery(urlBarModel = urlBarModel, faviconCache = faviconCache) {
             if (!isLazyTab) {
                 if (currentURL.toString().isNotBlank()) {
-                    CurrentPageRow(faviconBitmap = faviconBitmap, url = currentURL) {
-                        updateUrlBarContents(urlBarModel, currentURL.toString())
+                    CurrentPageRow(
+                        faviconBitmap = faviconBitmap,
+                        label = if (isShowingQuery) {
+                            displayedText
+                        } else {
+                            currentURL.toString()
+                        },
+                        isShowingQuery = isShowingQuery
+                    ) {
+                        updateUrlBarContents(
+                            urlBarModel,
+                            if (isShowingQuery) displayedText else currentURL.toString()
+                        )
                     }
                 }
             }

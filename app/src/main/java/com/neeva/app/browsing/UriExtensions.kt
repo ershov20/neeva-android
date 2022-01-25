@@ -10,3 +10,8 @@ fun String.toSearchUri(): Uri {
         .appendQueryParameter("src", "nvobar")
         .build()
 }
+
+fun Uri.neevaSearchQuery(): String? {
+    val isNeevaSearch = this.toString().startsWith(appSearchURL)
+    return if (isNeevaSearch) this.getQueryParameter("q") else null
+}

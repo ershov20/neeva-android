@@ -1,7 +1,6 @@
 package com.neeva.app.suggestions
 
 import android.graphics.Bitmap
-import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -11,13 +10,20 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun CurrentPageRow(
     faviconBitmap: Bitmap?,
-    url: Uri,
+    label: String,
+    isShowingQuery: Boolean,
     onEditPressed: () -> Unit
 ) {
     NavSuggestionRow(
-        primaryLabel = url.toString(),
+        primaryLabel = label,
         onTapRow = { onEditPressed.invoke() },
-        secondaryLabel = stringResource(id = R.string.edit_current_url),
+        secondaryLabel = stringResource(
+            id = if (isShowingQuery) {
+                R.string.edit_current_search
+            } else {
+                R.string.edit_current_url
+            }
+        ),
         onTapEdit = onEditPressed,
         faviconBitmap = faviconBitmap
     )
@@ -32,7 +38,8 @@ fun CurrentPageRow_PreviewLight() {
     NeevaTheme(useDarkTheme = false) {
         CurrentPageRow(
             faviconBitmap = null,
-            url = Uri.parse("https://www.reddit.com")
+            label = "https://www.reddit.com",
+            isShowingQuery = false
         ) {}
     }
 }
@@ -44,7 +51,8 @@ fun CurrentPageRow_PreviewDark() {
     NeevaTheme(useDarkTheme = true) {
         CurrentPageRow(
             faviconBitmap = null,
-            url = Uri.parse("https://www.reddit.com")
+            label = "https://www.reddit.com",
+            isShowingQuery = false
         ) {}
     }
 }

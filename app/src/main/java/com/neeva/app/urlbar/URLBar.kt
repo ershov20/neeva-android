@@ -81,15 +81,16 @@ fun URLBar() {
             // at the same time because the AutocompleteTextField is the thing that must be focused
             // when the LocationLabel is clicked.
             if (!isEditing) {
-                val displayedDomain by activeTabModel.displayedDomain.collectAsState()
-                val showLock: Boolean by activeTabModel.showLock.collectAsState()
+                val displayedLocation by activeTabModel.displayedText.collectAsState()
+                val locationInfoResource: Int? by
+                activeTabModel.locationInfoResource.collectAsState()
 
                 LocationLabel(
-                    urlBarValue = displayedDomain,
+                    urlBarValue = displayedLocation,
                     showIncognitoBadge = isIncognito,
                     backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                     foregroundColor = foregroundColor,
-                    showLock = showLock,
+                    locationInfoResource = locationInfoResource,
                     onReload = urlBarModel::reload,
                     modifier = Modifier
                         .fillMaxWidth()

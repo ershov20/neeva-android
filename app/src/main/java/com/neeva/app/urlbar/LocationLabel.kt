@@ -33,7 +33,7 @@ fun LocationLabel(
     backgroundColor: Color,
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
-    showLock: Boolean,
+    locationInfoResource: Int?,
     onReload: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -59,9 +59,9 @@ fun LocationLabel(
 
         Spacer(modifier = Modifier.weight(1.0f))
 
-        if (showLock) {
+        if (locationInfoResource != null) {
             Image(
-                painter = painterResource(R.drawable.ic_baseline_lock_18),
+                painter = painterResource(locationInfoResource),
                 contentDescription = "secure site",
                 modifier = Modifier.padding(8.dp).size(16.dp),
                 colorFilter = ColorFilter.tint(foregroundColor),
@@ -87,17 +87,19 @@ fun LocationLabel(
     }
 }
 
-class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPreviews.Params>(3) {
+class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPreviews.Params>(4) {
     data class Params(
         val darkTheme: Boolean,
         val isIncognito: Boolean,
-        val showLock: Boolean
+        val showLock: Boolean,
+        val showMagnifier: Boolean
     )
 
     override fun createParams(booleanArray: BooleanArray) = Params(
         darkTheme = booleanArray[0],
         isIncognito = booleanArray[1],
-        showLock = booleanArray[2]
+        showLock = booleanArray[2],
+        showMagnifier = booleanArray[3]
     )
 
     @Preview("1x font scale")
@@ -112,7 +114,11 @@ class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPrevi
                 backgroundColor = MaterialTheme.colorScheme.background,
                 foregroundColor = MaterialTheme.colorScheme.onSurface,
                 showIncognitoBadge = params.isIncognito,
-                showLock = params.showLock,
+                locationInfoResource = when {
+                    params.showMagnifier -> R.drawable.ic_baseline_search_24
+                    params.showLock -> R.drawable.ic_baseline_lock_18
+                    else -> null
+                },
                 onReload = {}
             )
         }
