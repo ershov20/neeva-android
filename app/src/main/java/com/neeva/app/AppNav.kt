@@ -15,7 +15,9 @@ import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.NeevaMenuSheet
-import com.neeva.app.settings.SettingsContainer
+import com.neeva.app.settings.ClearBrowsingSettingsContainer
+import com.neeva.app.settings.MainSettingsContainer
+import com.neeva.app.settings.ProfileSettingsContainer
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.Space
 
@@ -75,10 +77,15 @@ fun AppNav(
         }
 
         composable(AppNavDestination.SETTINGS.route) {
-            SettingsContainer {
-                webLayerModel.loadUrl(it)
-                appNavModel.showBrowser()
-            }
+            MainSettingsContainer()
+        }
+
+        composable(AppNavDestination.PROFILE_SETTINGS.route) {
+            ProfileSettingsContainer()
+        }
+
+        composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {
+            ClearBrowsingSettingsContainer()
         }
 
         // TODO(dan.alcantara): Should we be using the regular profile's favicon cache here?

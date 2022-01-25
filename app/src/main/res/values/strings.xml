@@ -17,7 +17,7 @@
     <string name="incognito">Incognito</string>
     <string name="suggested_sites">Suggested sites</string>
     <string name="searches">Searches</string>
-    <string name="settings">Settings</string>
+    <string name="settings_main_title">Settings</string>
     <string name="spaces">Spaces</string>
     <string name="tabs">Tabs</string>
 
@@ -74,5 +74,16 @@
     <string name="settings_terms">Terms</string>
     <string name="settings_account_email_placeholder">Account-email (placeholder for now)</string>
     <string name="settings_sign_in_to_join_neeva">Sign In or Join Neeva</string>
+    <string name="settings_signed_into_neeva_with">Signed In To Neeva With</string>
+    <string name="settings_sign_out">Sign Out</string>
+    <string name="settings_data_on_this_device">Data On This Device</string>
+    <string name="settings_clear_selected_data_on_device">Clear Selected Data on This Device</string>
+    <string name="settings_browsing_history">Browsing History</string>
+    <string name="settings_cache">Cache</string>
+    <string name="settings_cookies_primary">Cookies</string>
+    <string name="settings_downloaded_files">Downloaded Files</string>
+    <string name="settings_data_in_neeva_memory">Data In Neeva Memory</string>
+    <string name="settings_manage_neeva_memory">Manage Neeva Memory</string>
+    <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
 
 </resources>

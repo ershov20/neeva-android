@@ -4,6 +4,8 @@ package com.neeva.app
 enum class AppNavDestination {
     BROWSER,
     SETTINGS,
+    PROFILE_SETTINGS,
+    CLEAR_BROWSING_SETTINGS,
     ADD_TO_SPACE,
     NEEVA_MENU,
     HISTORY,

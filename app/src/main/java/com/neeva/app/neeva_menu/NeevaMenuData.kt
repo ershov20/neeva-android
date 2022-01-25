@@ -33,7 +33,7 @@ object NeevaMenuData {
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SETTINGS,
-            labelId = R.string.settings,
+            labelId = R.string.settings_main_title,
             imageResourceID = R.drawable.ic_baseline_settings_24
         ),
         NeevaMenuItemData(

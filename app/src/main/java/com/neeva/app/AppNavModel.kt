@@ -1,5 +1,6 @@
 package com.neeva.app
 
+import android.net.Uri
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import com.neeva.app.browsing.BrowserWrapper
@@ -70,10 +71,17 @@ class AppNavModel(
         }
     }
 
+    fun openUrl(url: Uri) {
+        webLayerModel.loadUrl(url)
+        showBrowser()
+    }
+
     fun showCardGrid() = showSecondaryScreen(AppNavDestination.CARD_GRID)
     fun showAddToSpace() = showSecondaryScreen(AppNavDestination.ADD_TO_SPACE)
     fun showNeevaMenu() = showSecondaryScreen(AppNavDestination.NEEVA_MENU)
     fun showSettings() = showSecondaryScreen(AppNavDestination.SETTINGS)
+    fun showProfileSettings() = showSecondaryScreen(AppNavDestination.PROFILE_SETTINGS)
+    fun showClearBrowsingSettings() = showSecondaryScreen(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     fun showFirstRun() = showSecondaryScreen(AppNavDestination.FIRST_RUN)
     fun showHistory() = showSecondaryScreen(AppNavDestination.HISTORY)
 }
