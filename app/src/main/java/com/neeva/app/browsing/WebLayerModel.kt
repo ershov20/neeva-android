@@ -127,12 +127,12 @@ class WebLayerModel(
                     appContext = appContext,
                     coroutineScope = coroutineScope,
                     activityCallbackProvider = activityCallbacks::get,
-                    domainProvider = domainProviderImpl
-                ) {
-                    incognitoBrowser = null
-                    switchToProfile(useIncognito = false)
-                }
-                    .also { it.initialize() }
+                    domainProvider = domainProviderImpl,
+                    onDestroyed = {
+                        incognitoBrowser = null
+                        switchToProfile(useIncognito = false)
+                    }
+                ).also { it.initialize() }
             }
 
             incognitoBrowser = delegate

@@ -24,6 +24,7 @@ import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserRestoreCallback
 import org.chromium.weblayer.NewTabType
 import org.chromium.weblayer.OpenUrlCallback
+import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabListCallback
 
@@ -40,8 +41,9 @@ abstract class BrowserWrapper(
     val appContext: Context,
     val coroutineScope: CoroutineScope,
     val activityCallbackProvider: () -> ActivityCallbacks?,
-    val suggestionsModel: SuggestionsModel?
-) {
+    val suggestionsModel: SuggestionsModel?,
+    val faviconCache: FaviconCache
+) : FaviconCache.ProfileProvider {
     data class CreateNewTabInfo(
         val uri: Uri,
         val parentTabId: String? = null
@@ -73,18 +75,20 @@ abstract class BrowserWrapper(
     val tabScreenshotManager: TabScreenshotManager by lazy { createTabScreenshotManager() }
 
     abstract val historyManager: HistoryManager?
-    abstract val faviconCache: FaviconCache
 
     private var tabListRestorer: BrowserRestoreCallback? = null
 
     init {
+        faviconCache.profileProvider = this
+
         activeTabModel = ActiveTabModel { uri, parentTabId -> createTabWithUri(uri, parentTabId) }
 
         urlBarModel = URLBarModel(
             isIncognito = isIncognito,
             activeTabModel = activeTabModel,
             suggestionFlow = suggestionsModel?.autocompleteSuggestion ?: MutableStateFlow(null),
-            coroutineScope = coroutineScope
+            coroutineScope = coroutineScope,
+            faviconCache = faviconCache
         )
 
         userMustStayInCardGridFlow = orderedTabList
@@ -382,4 +386,7 @@ abstract class BrowserWrapper(
 
     /** Returns true if the user should be forced to go to the card grid. */
     fun userMustBeShownCardGrid(): Boolean = hasNoTabs() && !urlBarModel.isLazyTab.value
+
+    /** Provides access to the WebLayer profile. */
+    override fun getProfile(): Profile? = browser?.profile
 }

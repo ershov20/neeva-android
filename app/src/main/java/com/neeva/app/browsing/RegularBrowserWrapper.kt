@@ -45,6 +45,11 @@ class RegularBrowserWrapper(
         historyManager,
         apolloClient,
         domainProvider
+    ),
+    faviconCache = RegularFaviconCache(
+        filesDir = appContext.cacheDir,
+        domainProvider = domainProvider,
+        historyManager = historyManager
     )
 ) {
     companion object {
@@ -52,18 +57,9 @@ class RegularBrowserWrapper(
         private const val PERSISTENCE_ID = "Neeva_Browser"
     }
 
-    override val faviconCache = RegularFaviconCache(
-        filesDir = appContext.cacheDir,
-        domainProvider = domainProvider,
-        profileProvider = { browser?.profile },
-        historyManager = historyManager
-    )
-
     init {
-        urlBarModel.userInputState
-            .onEach { state ->
-                val queryText = state.queryText
-
+        urlBarModel.queryTextFlow
+            .onEach { queryText ->
                 // Pull new suggestions from the database.
                 coroutineScope.launch(Dispatchers.IO) {
                     historyManager.updateSuggestionQuery(queryText)

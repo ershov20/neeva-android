@@ -38,7 +38,6 @@ fun URLBar() {
     val browserWrapper = LocalEnvironment.current.browserWrapper
     val urlBarModel = browserWrapper.urlBarModel
     val activeTabModel = browserWrapper.activeTabModel
-    val faviconCache = browserWrapper.faviconCache
 
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
@@ -66,13 +65,11 @@ fun URLBar() {
                 .clip(RoundedCornerShape(24.dp))
                 .background(MaterialTheme.colorScheme.primary)
         ) {
-            val textFieldValue = urlBarModel.textFieldValue.collectAsState()
+            val urlBarModelState = urlBarModel.state.collectAsState()
 
             AutocompleteTextField(
                 urlBarModel = urlBarModel,
-                textFieldValue = textFieldValue.value,
-                textFieldValueMutator = urlBarModel::setTextFieldValue,
-                faviconCache = faviconCache,
+                urlBarModelState = urlBarModelState.value,
                 backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
                 foregroundColor = foregroundColor
             )

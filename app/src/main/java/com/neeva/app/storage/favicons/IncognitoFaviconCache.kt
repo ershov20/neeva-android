@@ -1,5 +1,6 @@
 package com.neeva.app.storage.favicons
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.browsing.FileEncrypter
@@ -8,7 +9,6 @@ import com.neeva.app.storage.entities.Favicon
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
-import org.chromium.weblayer.Profile
 
 /**
  * Manages a set of favicons for sites visited while in incognito mode.
@@ -20,11 +20,11 @@ import org.chromium.weblayer.Profile
  * the app restarts (in case the app died in the background before incognito cleanup could occur).
  */
 class IncognitoFaviconCache(
+    appContext: Context,
     filesDir: File,
-    domainProvider: DomainProvider,
-    profileProvider: () -> Profile?,
-    private val encrypter: FileEncrypter
-) : FaviconCache(filesDir, profileProvider, domainProvider) {
+    domainProvider: DomainProvider
+) : FaviconCache(filesDir, domainProvider) {
+    private val encrypter: FileEncrypter = FileEncrypter(appContext)
     private val faviconMap = mutableMapOf<Int, Uri>()
 
     override suspend fun saveFavicon(siteUri: Uri?, bitmap: Bitmap?): Favicon? {

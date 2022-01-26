@@ -2,16 +2,20 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
+import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.URLBarModelState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -32,13 +36,14 @@ class URLBarModelTest : BaseTest() {
     @Rule @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
+    @Mock private lateinit var faviconCache: FaviconCache
     private lateinit var suggestionFlow: MutableStateFlow<NavSuggestion?>
     private lateinit var urlFlow: MutableStateFlow<Uri>
     private lateinit var activeTabModel: ActiveTabModel
     private lateinit var model: URLBarModel
 
     private val urlBarModelText: String
-        get() = model.userInputState.value.userTypedInput
+        get() = model.state.value.userTypedInput
 
     override fun setUp() {
         super.setUp()
@@ -52,7 +57,8 @@ class URLBarModelTest : BaseTest() {
             isIncognito = false,
             activeTabModel = activeTabModel,
             suggestionFlow = suggestionFlow,
-            coroutineScope = coroutineScopeRule.scope
+            coroutineScope = coroutineScopeRule.scope,
+            faviconCache = faviconCache
         )
     }
 
@@ -106,14 +112,14 @@ class URLBarModelTest : BaseTest() {
         // When the bar is focused, remove whatever text was being displayed.
         model.onFocusChanged(true)
         expectThat(urlBarModelText).isEqualTo("")
-        expectThat(model.userInputState.value.isEditing).isTrue()
+        expectThat(model.state.value.isEditing).isTrue()
 
         model.replaceLocationBarText("reddit.com/r/android")
         expectThat(urlBarModelText).isEqualTo("reddit.com/r/android")
 
         // When the bar is unfocused, it should return to showing the webpage domain.
         model.onFocusChanged(false)
-        expectThat(model.userInputState.value.isEditing).isFalse()
+        expectThat(model.state.value.isEditing).isFalse()
     }
 
     @Test
@@ -130,9 +136,12 @@ class URLBarModelTest : BaseTest() {
             userTypedInput = "redd"
         )
 
-        val actualValue = model.determineUrlBarText(autocompleteSuggestion, inputState)
-        expectThat(actualValue?.text).isEqualTo("reddit.com/r/android")
-        expectThat(actualValue?.selection).isEqualTo(TextRange(4, "reddit.com/r/android".length))
+        val actualValue = runBlocking {
+            model.determineDisplayState(autocompleteSuggestion, inputState)
+        }
+        expectThat(actualValue.textFieldValue.text).isEqualTo("reddit.com/r/android")
+        expectThat(actualValue.textFieldValue.selection)
+            .isEqualTo(TextRange(4, "reddit.com/r/android".length))
     }
 
     @Test
@@ -146,11 +155,14 @@ class URLBarModelTest : BaseTest() {
         val inputState = URLBarModelState(
             isEditing = true,
             allowAutocomplete = true,
-            userTypedInput = "not a match"
+            userTypedInput = "not a match",
+            textFieldValue = TextFieldValue("not a match")
         )
 
-        val actualValue = model.determineUrlBarText(autocompleteSuggestion, inputState)
-        expectThat(actualValue).isNull()
+        val actualValue = runBlocking {
+            model.determineDisplayState(autocompleteSuggestion, inputState)
+        }
+        expectThat(actualValue.textFieldValue.text).isEqualTo("not a match")
     }
 
     @Test
@@ -175,12 +187,12 @@ class URLBarModelTest : BaseTest() {
             secondaryLabel = "https://www.reddit.com/r/android"
         )
 
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "http"))
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "http"))
             .isEqualTo("https://www.reddit.com/r/android")
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "redd"))
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "redd"))
             .isEqualTo("reddit.com/r/android")
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "mismatch")).isNull()
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "com")).isNull()
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "mismatch")).isNull()
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "com")).isNull()
     }
 
     @Test
@@ -191,12 +203,12 @@ class URLBarModelTest : BaseTest() {
             secondaryLabel = "https://news.google.com"
         )
 
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "http"))
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "http"))
             .isEqualTo("https://news.google.com")
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "news"))
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "news"))
             .isEqualTo("news.google.com")
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "google")).isNull()
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "mismatch")).isNull()
-        expectThat(URLBarModel.getAutocompleteText(autocompleteSuggestion, "com")).isNull()
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "google")).isNull()
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "mismatch")).isNull()
+        expectThat(URLBarModel.computeAutocompleteText(autocompleteSuggestion, "com")).isNull()
     }
 }

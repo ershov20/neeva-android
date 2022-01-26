@@ -43,7 +43,6 @@ import org.chromium.weblayer.Profile
  */
 abstract class FaviconCache(
     filesDir: File,
-    private val profileProvider: () -> Profile?,
     val domainProvider: DomainProvider
 ) {
     companion object {
@@ -51,7 +50,13 @@ abstract class FaviconCache(
         private const val FAVICON_SUBDIRECTORY = "favicons"
     }
 
+    fun interface ProfileProvider {
+        fun getProfile(): Profile?
+    }
+
     private val faviconDirectory = File(filesDir, FAVICON_SUBDIRECTORY)
+
+    var profileProvider: ProfileProvider? = null
 
     @WorkerThread
     @CallSuper
@@ -125,22 +130,23 @@ abstract class FaviconCache(
      *                 the [uri] contents.
      * @return Favicon that corresponds to the given [siteUri], or null if none could be found.
      */
-    private suspend fun getFavicon(siteUri: Uri?, generate: Boolean): Bitmap? {
+    suspend fun getFavicon(siteUri: Uri?, generate: Boolean): Bitmap? {
         // Check if the bitmap is stored inside of WebLayer's cache.  The callback mechanism used by
         // WebLayer is normally asynchronous, but we force it to be a suspending function so
         // that the code flows logically.
-        val weblayerBitmap = suspendCoroutine<Bitmap?> { continuation ->
-            if (siteUri == null) {
-                continuation.resume(null)
-            } else {
-                profileProvider()?.getCachedFaviconForPageUri(siteUri) {
-                    continuation.resume(it)
-                } ?: run {
-                    continuation.resume(null)
+        if (siteUri != null) {
+            val weblayerBitmap = withContext(Dispatchers.Main) {
+                suspendCoroutine<Bitmap?> { continuation ->
+                    profileProvider?.getProfile()?.getCachedFaviconForPageUri(siteUri) {
+                        continuation.resume(it)
+                    } ?: run {
+                        continuation.resume(null)
+                    }
                 }
             }
+
+            if (weblayerBitmap != null) return weblayerBitmap
         }
-        if (weblayerBitmap != null) return weblayerBitmap
 
         // If WebLayer doesn't know about it, check if we stored a suitable favicon ourselves.
         return withContext(Dispatchers.IO) {
@@ -181,7 +187,6 @@ val mockFaviconCache: FaviconCache by lazy {
 
     object : FaviconCache(
         filesDir = Files.createTempDirectory(null).toFile(),
-        profileProvider = { null },
         domainProvider = domainProvider
     ) {
         override suspend fun getFaviconFromHistory(siteUri: Uri?): Bitmap? = null

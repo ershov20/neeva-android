@@ -24,7 +24,7 @@ fun SuggestionPane() {
     val faviconCache = browserWrapper.faviconCache
     val suggestionsModel = browserWrapper.suggestionsModel
 
-    val isUrlBarBlank by urlBarModel.userInputTextIsBlank.collectAsState(true)
+    val isUrlBarBlank by urlBarModel.isUserQueryBlank.collectAsState(true)
     val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
     val historySuggestions by historyManager.historySuggestions.collectAsState()
     val currentURL: Uri by activeTabModel.urlFlow.collectAsState()

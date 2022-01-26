@@ -1,5 +1,6 @@
 package com.neeva.app.storage
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -105,9 +106,11 @@ class RegularTabScreenshotManager(filesDir: File) : TabScreenshotManager(filesDi
 
 /** Caches screenshots of tabs and encrypts them so that they can't be accessed by outside apps. */
 class IncognitoTabScreenshotManager(
-    filesDir: File,
-    private val encrypter: FileEncrypter
+    appContext: Context,
+    filesDir: File
 ) : TabScreenshotManager(filesDir) {
+    private val encrypter: FileEncrypter = FileEncrypter(appContext)
+
     override fun getInputStream(file: File): InputStream = encrypter.getInputStream(file)
     override fun getOutputStream(file: File): OutputStream = encrypter.getOutputStream(file)
 }

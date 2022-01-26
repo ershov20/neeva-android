@@ -14,7 +14,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,7 +34,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
@@ -43,33 +41,21 @@ import com.neeva.app.widgets.FaviconView
 @Composable
 fun AutocompleteTextField(
     urlBarModel: URLBarModel,
-    textFieldValue: TextFieldValue,
-    textFieldValueMutator: (TextFieldValue) -> Unit,
-    faviconCache: FaviconCache,
+    urlBarModelState: URLBarModelState,
     backgroundColor: Color,
     foregroundColor: Color
 ) {
     val focusRequester = remember { FocusRequester() }
     urlBarModel.focusRequester = focusRequester
 
-    // TODO(dan.alcantara): Make the URLBarModel give us the favicon to load, instead.  It has info
-    //                      about the autocomplete entry.
-    val url = URLBarModel.getUrlToLoad(textFieldValue.text)
-    val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(url, generateFavicon = false)
-
     AutocompleteTextField(
-        textFieldValue = textFieldValue,
-        faviconBitmap = faviconBitmap,
-        onLocationEdited = { newValue ->
-            textFieldValueMutator(newValue)
-            urlBarModel.onLocationBarTextChanged(newValue.text)
-        },
-        onLocationReplaced = {
-            urlBarModel.replaceLocationBarText(it)
-        },
+        textFieldValue = urlBarModelState.textFieldValue,
+        faviconBitmap = urlBarModelState.faviconBitmap,
+        onLocationEdited = { urlBarModel.onLocationBarTextChanged(it) },
+        onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
         focusRequester = focusRequester,
         onFocusChanged = { urlBarModel.onFocusChanged(it.isFocused) },
-        onLoadUrl = { urlBarModel.loadUrl(url) },
+        onLoadUrl = { urlBarModel.loadUrl(urlBarModelState.uriToLoad) },
         backgroundColor = backgroundColor,
         foregroundColor = foregroundColor
     )

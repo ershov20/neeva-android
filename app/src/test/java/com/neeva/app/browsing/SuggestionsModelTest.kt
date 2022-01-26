@@ -15,13 +15,13 @@ import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.suggestions.toQueryRowSuggestion
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -46,9 +46,6 @@ import strikt.assertions.isTrue
 /**
  * Tests that the [SuggestionsModel] triggers network queries for suggestions via Apollo and that
  * it processes them correctly.
- *
- * TODO(dan.alcantara): Figure out how to get the collections in the SuggestionsModel.init to work
- *                      correctly in a testing environment without hanging the main thread.
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
@@ -57,6 +54,8 @@ class SuggestionsModelTest : BaseTest() {
     @Rule
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
+
+    private lateinit var testDispatcher: TestDispatcher
 
     @Mock lateinit var domainProvider: DomainProvider
 
@@ -72,6 +71,7 @@ class SuggestionsModelTest : BaseTest() {
 
     override fun setUp() {
         super.setUp()
+        testDispatcher = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler)
         siteSuggestions = MutableStateFlow(emptyList())
         urlBarText = MutableStateFlow(TextFieldValue(""))
         urlBarIsEditing = MutableStateFlow(false)
@@ -92,7 +92,8 @@ class SuggestionsModelTest : BaseTest() {
             coroutineScopeRule.scope,
             historyManager,
             apolloClient,
-            domainProvider
+            domainProvider,
+            testDispatcher
         )
 
         coroutineScopeRule.scope.advanceUntilIdle()
@@ -148,39 +149,20 @@ class SuggestionsModelTest : BaseTest() {
     }
 
     @Test
-    fun onUrlBarChanged_withEmptyString_doesNoQuery() = runTest {
+    fun onUrlBarChanged_withEmptyString_doesNoQuery() {
         responseData = FULL_RESPONSE
 
-        // Pass in a different CoroutineScope so that the subscriptions in the constructor don't
-        // cause the thread to hang.
-        val collectionJob = CoroutineScope(this.coroutineContext + Job())
-        val model = SuggestionsModel(
-            collectionJob,
-            historyManager,
-            apolloClient,
-            domainProvider
-        )
-        advanceUntilIdle()
-
-        model.getSuggestionsFromBackend("")
+        coroutineScopeRule.scope.advanceUntilIdle()
+        runBlocking {
+            model.getSuggestionsFromBackend("")
+        }
         expectThat(model.suggestionFlow.value.queryRowSuggestions).isEmpty()
         expectThat(model.suggestionFlow.value.navSuggestions).isEmpty()
     }
 
     @Test
-    fun onUrlBarChanged_withNonEmptyString_firesRequestAndProcessesResult() = runTest {
+    fun onUrlBarChanged_withNonEmptyString_firesRequestAndProcessesResult() {
         responseData = FULL_RESPONSE
-
-        // Pass in a different CoroutineScope so that the subscriptions in the constructor don't
-        // cause the thread to hang.
-        val collectionJob = CoroutineScope(this.coroutineContext + Job())
-        val model = SuggestionsModel(
-            collectionJob,
-            historyManager,
-            apolloClient,
-            domainProvider
-        )
-        advanceUntilIdle()
 
         // Set the autocomplete suggestion.
         siteSuggestions.value = listOf(
@@ -190,7 +172,7 @@ class SuggestionsModelTest : BaseTest() {
                 largestFavicon = null
             )
         )
-        advanceUntilIdle()
+        coroutineScopeRule.scope.advanceUntilIdle()
 
         // Make sure the autocomplete suggestion has been set and nothing else has.
         val expectedSuggestion = siteSuggestions.value.first().toNavSuggestion(domainProvider)
@@ -200,8 +182,10 @@ class SuggestionsModelTest : BaseTest() {
         )
 
         // Trigger the Apollo query and check the results.
-        model.getSuggestionsFromBackend("query text")
-        advanceUntilIdle()
+        runBlocking {
+            model.getSuggestionsFromBackend("query text")
+        }
+        coroutineScopeRule.scope.advanceUntilIdle()
 
         val emptyAnnotation = SuggestionsQuery.Annotation(null, null, null, null, null)
         expectThat(model.suggestionFlow.value.queryRowSuggestions).containsExactly(

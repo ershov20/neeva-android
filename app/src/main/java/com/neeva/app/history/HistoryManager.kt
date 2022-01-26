@@ -89,9 +89,7 @@ class HistoryManager(
         _siteSuggestions.value = siteSuggestions
 
         // Determine what history should be suggested as the user types out a query.
-        // Prioritize the site visits first because they were directly visited by the user.
-        val combinedSuggestions =
-            _siteSuggestions.value.map { it.toNavSuggestion(domainProvider) }
+        val combinedSuggestions = _siteSuggestions.value.map { it.toNavSuggestion(domainProvider) }
 
         // Keep only the unique history items with unique URLs.
         _historySuggestions.value = combinedSuggestions.distinctBy { it.url }
