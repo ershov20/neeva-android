@@ -22,7 +22,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -32,6 +31,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import com.neeva.app.R
+import com.neeva.app.ui.theme.ColorPalette
 
 fun <T : Any> LazyListScope.collapsibleSection(
     @StringRes label: Int,
@@ -148,8 +148,8 @@ fun CollapsibleHeader(
         Text(
             text = label,
             modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onSurface,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.outline,
             maxLines = 1,
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -167,11 +167,11 @@ fun CollapsibleHeader(
                 .padding(8.dp)
                 .size(32.dp, 32.dp)
                 .clip(CircleShape)
-                .background(Color.LightGray)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
                 .clickable {
                     state.value = headerState.next()
                 },
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.surfaceVariant)
+            colorFilter = ColorFilter.tint(ColorPalette.Brand.BlueUICandidate)
         )
     }
 }

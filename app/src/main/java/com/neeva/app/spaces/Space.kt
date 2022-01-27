@@ -16,6 +16,7 @@ import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
 
 data class SpaceEntityData(
     val url: Uri,
@@ -106,6 +107,7 @@ class SpaceStore(val apolloClient: ApolloClient) {
         FAILED
     }
     val allSpacesFlow = MutableStateFlow<List<Space>>(emptyList())
+    val editableSpacesFlow = MutableStateFlow<List<Space>>(emptyList())
     private var urlToSpacesMap = HashMap<Uri, ArrayList<Space>>()
     val stateFlow = MutableStateFlow(State.READY)
 
@@ -160,7 +162,11 @@ class SpaceStore(val apolloClient: ApolloClient) {
                 newSpace
             }.filterNotNull()
 
-            allSpacesFlow.emit(spaceList)
+            allSpacesFlow.value = spaceList
+            editableSpacesFlow.value =
+                spaceList.filter {
+                    it.userACL == SpaceACLLevel.Owner || it.userACL == SpaceACLLevel.Edit
+                }
 
             val spacesDataResponse = apolloClient
                 .query(GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id })))

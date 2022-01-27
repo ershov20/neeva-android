@@ -25,7 +25,7 @@ data class Favicon(
             val textPaint = Paint()
             textPaint.textAlign = Paint.Align.CENTER
             textPaint.color = Color.WHITE
-            textPaint.textSize = DEFAULT_SIZE.toFloat()
+            textPaint.textSize = DEFAULT_SIZE * 0.75f
 
             val xPos = canvas.width / 2.0f
             val yPos = (canvas.height - textPaint.descent() - textPaint.ascent()) / 2.0f

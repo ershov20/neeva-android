@@ -38,7 +38,7 @@ fun URLBar() {
     val browserWrapper = LocalEnvironment.current.browserWrapper
     val urlBarModel = browserWrapper.urlBarModel
     val activeTabModel = browserWrapper.activeTabModel
-
+    val urlBarModelState = urlBarModel.state.collectAsState()
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
     // TODO(kobec): figure out how to map incognito to color scheme?
@@ -65,8 +65,6 @@ fun URLBar() {
                 .clip(RoundedCornerShape(24.dp))
                 .background(MaterialTheme.colorScheme.primary)
         ) {
-            val urlBarModelState = urlBarModel.state.collectAsState()
-
             AutocompleteTextField(
                 urlBarModel = urlBarModel,
                 urlBarModelState = urlBarModelState.value,

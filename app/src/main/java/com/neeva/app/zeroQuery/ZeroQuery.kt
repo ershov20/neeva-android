@@ -87,7 +87,11 @@ fun ZeroQuery(
                                 .padding(horizontal = 16.dp)
                                 .width(64.dp)
                         ) {
-                            FaviconView(bitmap = faviconBitmap, bordered = false, size = 48.dp)
+                            FaviconView(
+                                bitmap = faviconBitmap,
+                                bordered = false,
+                                size = 48.dp
+                            )
 
                             Spacer(modifier = Modifier.height(8.dp))
 

@@ -86,4 +86,6 @@
     <string name="settings_manage_neeva_memory">Manage Neeva Memory</string>
     <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
 
+    <string name="space_contains_page">Space contains the current page</string>
+    <string name="space_not_contain_page">Space doesn\'t contain the current page</string>
 </resources>
