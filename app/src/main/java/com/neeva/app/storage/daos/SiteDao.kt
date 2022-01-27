@@ -28,4 +28,7 @@ interface SiteDao {
 
     @Query("SELECT * FROM site")
     suspend fun getAllSites(): List<Site>
+
+    @Query("SELECT DISTINCT(faviconURL) FROM site")
+    suspend fun getAllFavicons(): List<String>
 }

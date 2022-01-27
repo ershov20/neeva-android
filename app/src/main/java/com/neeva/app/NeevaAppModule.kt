@@ -17,18 +17,14 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 
-@Module
+@Module(
+    includes = [
+        CoroutineModule::class
+    ]
+)
 @InstallIn(SingletonComponent::class)
 object NeevaAppModule {
-    @Provides
-    @Singleton
-    fun provideCoroutineScope(): CoroutineScope {
-        return CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
-    }
-
     @Provides
     @Singleton
     fun provideDomainProvider(domainProviderImpl: DomainProviderImpl): DomainProvider {

@@ -178,8 +178,22 @@ abstract class FaviconCache(
             value = getFavicon(uri, generateFavicon)
         }
     }
+
+    @WorkerThread
+    suspend fun pruneCacheDirectory(usedFavicons: List<String>) {
+        try {
+            if (!faviconDirectory.exists()) return
+
+            faviconDirectory.listFiles()
+                ?.filterNot { usedFavicons.contains(it.toUri().toString()) }
+                ?.forEach { it.delete() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to cleanup favicon directory", e)
+        }
+    }
 }
 
+/** Favicon cache used for Composable previews.  Doesn't actually provide favicons. */
 val mockFaviconCache: FaviconCache by lazy {
     val domainProvider = { uri: Uri? ->
         uri?.authority?.split(".")?.takeLast(2)?.joinToString(".")

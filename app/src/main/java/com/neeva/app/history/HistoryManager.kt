@@ -16,6 +16,7 @@ import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.zeroQuery.toSearchSuggest
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -28,7 +29,8 @@ import kotlinx.coroutines.launch
 class HistoryManager(
     historyDatabase: HistoryDatabase,
     private val domainProvider: DomainProvider,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
     companion object {
         private const val MAX_FREQUENT_SITES = 40
@@ -108,7 +110,7 @@ class HistoryManager(
         favicon: Favicon? = null,
         visit: Visit? = null
     ) {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(ioDispatcher) {
             dao.upsert(url, title, favicon, visit)
         }
     }
@@ -116,10 +118,8 @@ class HistoryManager(
     fun clearAllHistory() {
         coroutineScope.launch(Dispatchers.IO) {
             dao.deleteHistoryWithinTimeframe(Date(0L), Date())
-
-            // TODO(dan.alcantara): Delete favicons.
-            // TODO(dan.alcantara): Delete tab thumbnails
-            // TDOO(dan.alcantara): Should we close all tabs when the user clears history?
         }
     }
+
+    suspend fun getAllFaviconUris(): List<String> = dao.getAllFavicons()
 }

@@ -162,6 +162,9 @@ abstract class BrowserWrapper(
             // Clean up any unused tab thumbnails.
             val liveTabGuids = tabList.orderedTabList.value.map { it.id }
             tabScreenshotManager.cleanCacheDirectory(liveTabGuids)
+
+            // Clean up any unused favicons.
+            historyManager?.getAllFaviconUris()?.let { faviconCache.pruneCacheDirectory(it) }
         }
     }
 
