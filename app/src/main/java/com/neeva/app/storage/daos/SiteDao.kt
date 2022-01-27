@@ -1,5 +1,6 @@
 package com.neeva.app.storage.daos
 
+import android.net.Uri
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
@@ -19,6 +20,8 @@ interface SiteDao {
 
     @Query("SELECT * FROM site WHERE siteURL = :url")
     suspend fun getSiteByUrl(url: String): Site?
+
+    suspend fun getSiteByUrl(uri: Uri) = getSiteByUrl(uri.toString())
 
     @Query("SELECT * FROM site WHERE siteUID = :uid")
     suspend fun getSiteByUid(uid: Int): Site?

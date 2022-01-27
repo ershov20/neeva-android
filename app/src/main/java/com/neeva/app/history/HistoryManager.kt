@@ -7,7 +7,6 @@ import androidx.paging.PagingData
 import com.neeva.app.NeevaConstants
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.HistoryDatabase
-import com.neeva.app.storage.SitesRepository
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
@@ -27,12 +26,10 @@ import kotlinx.coroutines.launch
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(
-    private val historyDatabase: HistoryDatabase,
+    historyDatabase: HistoryDatabase,
     private val domainProvider: DomainProvider,
     private val coroutineScope: CoroutineScope
 ) {
-    private val sitesRepository = SitesRepository(historyDatabase.fromSites())
-
     companion object {
         private const val MAX_FREQUENT_SITES = 40
         private const val PAGE_SIZE = 10
@@ -41,20 +38,22 @@ class HistoryManager(
         private val HISTORY_START_DATE = Date(System.currentTimeMillis() - HISTORY_WINDOW)
     }
 
+    private val dao = historyDatabase.dao()
+
     fun getHistoryBetween(startTime: Date, endTime: Date): Flow<PagingData<Site>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
-            sitesRepository.getHistoryBetween(startTime, endTime)
+            dao.getPagedSitesVisitedBetween(startTime, endTime)
         }.flow
     }
 
     fun getHistoryAfter(startTime: Date): Flow<PagingData<Site>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
-            sitesRepository.getHistoryAfter(startTime)
+            dao.getPagedSitesVisitedAfter(startTime)
         }.flow
     }
 
     private val frequentSites: Flow<List<Site>> =
-        sitesRepository.getFrequentSitesAfter(HISTORY_START_DATE, MAX_FREQUENT_SITES)
+        dao.getFrequentSitesAfterFlow(HISTORY_START_DATE, MAX_FREQUENT_SITES)
 
     private val _siteSuggestions = MutableStateFlow<List<Site>>(emptyList())
     val siteSuggestions: StateFlow<List<Site>> = _siteSuggestions
@@ -81,7 +80,7 @@ class HistoryManager(
     /** Updates the query that is being used to fetch history suggestions. */
     suspend fun updateSuggestionQuery(currentInput: String?) {
         val siteSuggestions = if (currentInput != null) {
-            sitesRepository.getQuerySuggestions(currentInput, limit = 10)
+            dao.getQuerySuggestions(currentInput, limit = 10)
         } else {
             emptyList()
         }
@@ -97,26 +96,26 @@ class HistoryManager(
 
     /** Returns the favicon that corresponds to an exact visit in the user's history. */
     suspend fun getFaviconFromHistory(uri: Uri): Favicon? {
-        val siteFavicon = sitesRepository.find(uri)?.largestFavicon
+        val siteFavicon = dao.getSiteByUrl(uri)?.largestFavicon
         if (siteFavicon != null) return siteFavicon
         return null
     }
 
     /** Inserts or updates an item into the history. */
-    fun insert(
+    fun upsert(
         url: Uri,
         title: String? = null,
         favicon: Favicon? = null,
         visit: Visit? = null
     ) {
         coroutineScope.launch(Dispatchers.IO) {
-            sitesRepository.insert(url, title, favicon, visit)
+            dao.upsert(url, title, favicon, visit)
         }
     }
 
     fun clearAllHistory() {
         coroutineScope.launch(Dispatchers.IO) {
-            sitesRepository.deleteHistoryWithinTimeframe(Date(0L), Date())
+            dao.deleteHistoryWithinTimeframe(Date(0L), Date())
 
             // TODO(dan.alcantara): Delete favicons.
             // TODO(dan.alcantara): Delete tab thumbnails

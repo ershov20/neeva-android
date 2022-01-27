@@ -23,7 +23,7 @@ import com.neeva.app.storage.entities.Visit
 )
 @TypeConverters(com.neeva.app.storage.TypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
-    abstract fun fromSites(): HistoryDao
+    abstract fun dao(): HistoryDao
 
     companion object {
         fun create(context: Context): HistoryDatabase {

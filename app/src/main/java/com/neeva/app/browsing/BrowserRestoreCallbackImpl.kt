@@ -8,6 +8,7 @@ import org.chromium.weblayer.BrowserRestoreCallback
 /** Handles anything that needs to be done after a Browser finishes restoration. */
 class BrowserRestoreCallbackImpl(
     private val browser: Browser,
+    private val cleanCache: () -> Unit,
     private val onEmptyTabList: () -> Unit
 ) : BrowserRestoreCallback() {
     override fun onRestoreCompleted() {
@@ -21,5 +22,7 @@ class BrowserRestoreCallbackImpl(
         } else if (browser.tabs.isEmpty()) {
             onEmptyTabList()
         }
+
+        cleanCache()
     }
 }

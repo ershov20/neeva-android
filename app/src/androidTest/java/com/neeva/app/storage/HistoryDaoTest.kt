@@ -2,6 +2,7 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.neeva.app.storage.daos.HistoryDao
 import com.neeva.app.storage.entities.Visit
 import java.util.Date
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,18 +16,18 @@ import strikt.assertions.isEqualTo
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class SitesRepositoryTest : HistoryDatabaseBaseTest() {
-    private lateinit var sitesRepository: SitesRepository
+class HistoryDaoTest : HistoryDatabaseBaseTest() {
+    private lateinit var sitesRepository: HistoryDao
 
     override fun setUp() {
         super.setUp()
-        sitesRepository = SitesRepository(database.fromSites())
+        sitesRepository = database.dao()
     }
 
     private suspend fun addSitesIntoDatabase() {
         // Setup: Add entries into the database.  A was visited 3 times, B twice, and C once.
         for (i in 0 until 3) {
-            sitesRepository.insert(
+            sitesRepository.upsert(
                 url = Uri.parse("https://www.a.com"),
                 title = "Title A",
                 favicon = null,
@@ -38,7 +39,7 @@ class SitesRepositoryTest : HistoryDatabaseBaseTest() {
             )
         }
         for (i in 0 until 2) {
-            sitesRepository.insert(
+            sitesRepository.upsert(
                 url = Uri.parse("https://www.b.com"),
                 title = "Title B",
                 favicon = null,
@@ -49,7 +50,7 @@ class SitesRepositoryTest : HistoryDatabaseBaseTest() {
                 )
             )
         }
-        sitesRepository.insert(
+        sitesRepository.upsert(
             url = Uri.parse("https://www.c.com"),
             title = "Title C",
             favicon = null,
@@ -65,7 +66,7 @@ class SitesRepositoryTest : HistoryDatabaseBaseTest() {
     fun insert() {
         runBlocking {
             addSitesIntoDatabase()
-            val sites = database.fromSites().getFrequentSitesAfter(Date(0L))
+            val sites = database.dao().getFrequentSitesAfter(Date(0L))
 
             expectThat(sites).hasSize(3)
             expectThat(sites[0].siteURL).isEqualTo("https://www.a.com")
@@ -75,7 +76,7 @@ class SitesRepositoryTest : HistoryDatabaseBaseTest() {
             expectThat(sites[2].siteURL).isEqualTo("https://www.c.com")
             expectThat(sites[2].title).isEqualTo("Title C")
 
-            val visits = database.fromSites().getVisitsWithinTimeframe(Date(0L), Date(50000L))
+            val visits = database.dao().getVisitsWithinTimeframe(Date(0L), Date(50000L))
             expectThat(visits).hasSize(6)
         }
     }
@@ -84,7 +85,7 @@ class SitesRepositoryTest : HistoryDatabaseBaseTest() {
     fun deleteOrphanedSiteEntities() {
         runBlocking {
             addSitesIntoDatabase()
-            val sitesBefore = database.fromSites().getAllSites()
+            val sitesBefore = database.dao().getAllSites()
             expectThat(sitesBefore).hasSize(3)
             expectThat(sitesBefore.map { it.siteURL })
                 .containsExactly("https://www.a.com", "https://www.b.com", "https://www.c.com")
@@ -92,7 +93,7 @@ class SitesRepositoryTest : HistoryDatabaseBaseTest() {
             // Delete some of the recorded Visits.
             // There should still be 3 visits for www.a.com and 1 for www.b.com.
             sitesRepository.deleteHistoryWithinTimeframe(Date(20001L), Date(50000L))
-            val sitesAfter = database.fromSites().getAllSites()
+            val sitesAfter = database.dao().getAllSites()
             expectThat(sitesAfter).hasSize(2)
             expectThat(sitesAfter.map { it.siteURL })
                 .containsExactly("https://www.a.com", "https://www.b.com")

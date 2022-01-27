@@ -11,6 +11,7 @@ import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +43,8 @@ abstract class BrowserWrapper(
     val coroutineScope: CoroutineScope,
     val activityCallbackProvider: () -> ActivityCallbacks?,
     val suggestionsModel: SuggestionsModel?,
-    val faviconCache: FaviconCache
+    val faviconCache: FaviconCache,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : FaviconCache.ProfileProvider {
     data class CreateNewTabInfo(
         val uri: Uri,
@@ -154,6 +156,14 @@ abstract class BrowserWrapper(
         }
     }
 
+    private fun cleanCacheDirectory() {
+        coroutineScope.launch(ioDispatcher) {
+            // Clean up any unused tab thumbnails.
+            val liveTabGuids = tabList.orderedTabList.value.map { it.id }
+            tabScreenshotManager.cleanCacheDirectory(liveTabGuids)
+        }
+    }
+
     private val browserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
         override fun onBottomViewOffsetChanged(offset: Int) {
             activityCallbackProvider()?.onBottomBarOffsetChanged(offset)
@@ -199,9 +209,13 @@ abstract class BrowserWrapper(
         val browser = this.browser ?: return false
         if (tabListRestorer != null) return false
 
-        val restorer = BrowserRestoreCallbackImpl(browser) {
-            createTabWithUri(Uri.parse(NeevaConstants.appURL), parentTabId = null)
-        }
+        val restorer = BrowserRestoreCallbackImpl(
+            browser = browser,
+            cleanCache = this::cleanCacheDirectory,
+            onEmptyTabList = {
+                createTabWithUri(Uri.parse(NeevaConstants.appURL), parentTabId = null)
+            }
+        )
 
         browser.registerTabListCallback(tabListCallback)
         browser.registerBrowserControlsOffsetCallback(browserControlsOffsetCallback)
@@ -282,7 +296,6 @@ abstract class BrowserWrapper(
         tabCallbackMap[tab] = TabCallbacks(
             isIncognito = isIncognito,
             tab = tab,
-            appContext = appContext,
             coroutineScope = coroutineScope,
             historyManager = historyManager,
             faviconCache = faviconCache,

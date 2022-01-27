@@ -1,6 +1,5 @@
 package com.neeva.app.browsing
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.history.HistoryManager
@@ -32,7 +31,6 @@ import org.chromium.weblayer.TabCallback
 class TabCallbacks(
     private val isIncognito: Boolean,
     private val tab: Tab,
-    appContext: Context,
     private val coroutineScope: CoroutineScope,
     private val historyManager: HistoryManager?,
     private val faviconCache: FaviconCache?,
@@ -64,7 +62,7 @@ class TabCallbacks(
 
                 if (!isIncognito) {
                     url?.let {
-                        historyManager?.insert(
+                        historyManager?.upsert(
                             url = it,
                             title = title,
                             favicon = faviconData
@@ -103,7 +101,9 @@ class TabCallbacks(
         override fun onNavigationFailed(navigation: Navigation) = commitVisit(navigation)
 
         private fun commitVisit(navigation: Navigation) {
-            tabScreenshotManager.captureAndSaveScreenshot(tab)
+            if (tab.browser.takeUnless { it.isDestroyed }?.activeTab == tab) {
+                tabScreenshotManager.captureAndSaveScreenshot(tab)
+            }
 
             // Try to avoid recording visits to history when we are revisiting the same page.
             val shouldRecordVisit = when {
@@ -117,7 +117,7 @@ class TabCallbacks(
 
             if (shouldRecordVisit) {
                 visitToCommit?.let { visit ->
-                    historyManager?.insert(
+                    historyManager?.upsert(
                         url = navigation.uri,
                         title = tab.currentDisplayTitle,
                         visit = visit
@@ -138,7 +138,7 @@ class TabCallbacks(
 
         override fun onTitleUpdated(title: String) {
             tab.currentDisplayUrl?.let {
-                historyManager?.insert(url = it, title = title)
+                historyManager?.upsert(url = it, title = title)
             }
 
             tabList.updateTabTitle(tab.guid, title)
@@ -155,7 +155,7 @@ class TabCallbacks(
     }
 
     /** Handles when the Tab crashes. */
-    private val crashTabCallback = CrashTabCallback(tab, appContext)
+    private val crashTabCallback = CrashTabCallback(tab)
 
     init {
         tab.fullscreenCallback = fullscreenCallback

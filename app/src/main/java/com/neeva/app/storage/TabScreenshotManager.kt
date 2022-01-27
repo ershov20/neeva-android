@@ -40,7 +40,13 @@ abstract class TabScreenshotManager(filesDir: File) {
 
         val tabGuid = tab.guid
 
-        tab.captureScreenShot(0.5f) { thumbnail, _ ->
+        tab.captureScreenShot(0.5f) { thumbnail, errorCode ->
+            if (errorCode != 0) {
+                Log.e(TAG, "Failed to create tab thumbnail: Error=$errorCode")
+                onCompleted()
+                return@captureScreenShot
+            }
+
             val dir = tabScreenshotDirectory
             dir.mkdirs()
 
@@ -62,6 +68,22 @@ abstract class TabScreenshotManager(filesDir: File) {
                 fileStream?.closeQuietly()
                 onCompleted()
             }
+        }
+    }
+
+    @WorkerThread
+    fun cleanCacheDirectory(liveTabGuids: List<String>) {
+        val liveTabFiles = liveTabGuids.map { guid -> getTabScreenshotFile(guid) }
+
+        try {
+            val dir = tabScreenshotDirectory
+            if (!dir.exists()) return
+
+            dir.listFiles()
+                ?.filterNot { liveTabFiles.contains(it) }
+                ?.forEach { it.delete() }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to cleanup tab screenshot directory", e)
         }
     }
 
