@@ -1,12 +1,17 @@
 package com.neeva.app.urlbar
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Patterns
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.graphics.drawable.toBitmap
+import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
+import com.neeva.app.browsing.isNeevaSearchUri
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.NavSuggestion
@@ -57,9 +62,13 @@ class URLBarModel(
     val isIncognito: Boolean,
     private val activeTabModel: ActiveTabModel,
     suggestionFlow: StateFlow<NavSuggestion?>,
+    appContext: Context,
     coroutineScope: CoroutineScope,
     private val faviconCache: FaviconCache
 ) {
+    private val neevaFavicon =
+        AppCompatResources.getDrawable(appContext, R.mipmap.ic_neeva_logo)?.toBitmap()
+
     private var _isLazyTab = MutableStateFlow(false)
     val isLazyTab: StateFlow<Boolean> = _isLazyTab
 
@@ -103,10 +112,14 @@ class URLBarModel(
             userInputStateValue.allowAutocomplete || isExactMatch(suggestionValue, userInput)
         }
 
-        // Check for an autocomplete match.  If there isn't one, nullify the favicon to avoid
-        // showing the wrong one.
+        // Check for an autocomplete match.
         val autocompletedText = computeAutocompleteText(suggestion, userInput)
-            ?: return newState.copy(faviconBitmap = null)
+            ?: run {
+                // If there isn't a match, show the search provider's icon if the URI will perform
+                // a search.
+                val isSearchUri = userInputStateValue.uriToLoad.isNeevaSearchUri()
+                return newState.copy(faviconBitmap = if (isSearchUri) neevaFavicon else null)
+            }
 
         // Display the user's text with the autocomplete suggestion tacked on.  This nullifies
         // whatever composition is currently alive, which effectively accepts the suggestion being

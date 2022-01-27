@@ -3,6 +3,7 @@ package com.neeva.app.browsing
 import android.net.Uri
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.storage.favicons.FaviconCache
@@ -22,7 +23,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
@@ -30,7 +30,6 @@ import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
 @RunWith(RobolectricTestRunner::class)
-@Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
 class URLBarModelTest : BaseTest() {
     @Rule @JvmField
@@ -57,6 +56,7 @@ class URLBarModelTest : BaseTest() {
             isIncognito = false,
             activeTabModel = activeTabModel,
             suggestionFlow = suggestionFlow,
+            appContext = ApplicationProvider.getApplicationContext(),
             coroutineScope = coroutineScopeRule.scope,
             faviconCache = faviconCache
         )

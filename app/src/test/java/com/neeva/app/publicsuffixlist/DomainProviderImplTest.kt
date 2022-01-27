@@ -10,15 +10,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
-import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
 @RunWith(RobolectricTestRunner::class)
-@Config(
-    // TODO(dan.alcantara): Figure out why this has to point at src/main even when I change the asset parameter
-    manifest = "src/main/EmptyManifest.xml"
-)
 class DomainProviderImplTest : BaseTest() {
     private lateinit var domainProviderImpl: DomainProviderImpl
 

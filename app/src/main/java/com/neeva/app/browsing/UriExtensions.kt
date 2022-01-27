@@ -11,6 +11,10 @@ fun String.toSearchUri(): Uri {
         .build()
 }
 
+fun Uri.isNeevaSearchUri(): Boolean {
+    return toString().startsWith(appSearchURL)
+}
+
 fun Uri.neevaSearchQuery(): String? {
     val isNeevaSearch = this.toString().startsWith(appSearchURL)
     return if (isNeevaSearch) this.getQueryParameter("q") else null
