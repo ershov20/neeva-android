@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 
@@ -47,6 +48,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var settingsModel: SettingsModel
     @Inject lateinit var webModel: WebLayerModel
     @Inject lateinit var historyManager: HistoryManager
+    @Inject lateinit var dispatchers: Dispatchers
 
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View
@@ -78,7 +80,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     AppNavModel(
                         navController = navController,
                         webLayerModel = webModel,
-                        coroutineScope = lifecycleScope
+                        coroutineScope = lifecycleScope,
+                        dispatchers = dispatchers
                     )
                 }
 
@@ -99,7 +102,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     webLayerModel = webModel,
                     settingsModel = settingsModel,
                     apolloClient = apolloClient,
-                    historyManager = historyManager
+                    historyManager = historyManager,
+                    dispatchers = dispatchers
                 )
             }
         }
@@ -122,7 +126,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
 
         lifecycleScope.launchWhenCreated {
-            NeevaUser.fetch(apolloClient)
+            withContext(dispatchers.io) {
+                NeevaUser.fetch(apolloClient)
+            }
         }
 
         // Display the correct Fragment when the user switches profiles.

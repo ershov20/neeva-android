@@ -5,6 +5,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.network.okHttpClient
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
+import com.neeva.app.Dispatchers
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -55,7 +55,7 @@ class SuggestionsModelTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    private lateinit var testDispatcher: TestDispatcher
+    private lateinit var testDispatcher: Dispatchers
 
     @Mock lateinit var domainProvider: DomainProvider
 
@@ -71,7 +71,10 @@ class SuggestionsModelTest : BaseTest() {
 
     override fun setUp() {
         super.setUp()
-        testDispatcher = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler)
+        testDispatcher = Dispatchers(
+            main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
+            io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
+        )
         siteSuggestions = MutableStateFlow(emptyList())
         urlBarText = MutableStateFlow(TextFieldValue(""))
         urlBarIsEditing = MutableStateFlow(false)

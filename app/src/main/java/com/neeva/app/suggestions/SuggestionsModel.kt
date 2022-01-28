@@ -3,6 +3,7 @@ package com.neeva.app.suggestions
 import android.net.Uri
 import android.util.Log
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.Dispatchers
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.browsing.toSearchUri
@@ -10,9 +11,7 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.type.QuerySuggestionType
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOn
@@ -49,7 +48,7 @@ class SuggestionsModel(
     historyManager: HistoryManager,
     private val apolloClient: ApolloClient,
     private val domainProvider: DomainProvider,
-    ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    dispatchers: Dispatchers
 ) {
     companion object {
         val TAG = SuggestionsModel::class.simpleName
@@ -71,7 +70,7 @@ class SuggestionsModel(
                     autocompleteSuggestion = _autocompleteSuggestion.value
                 )
             }
-            .flowOn(ioDispatcher)
+            .flowOn(dispatchers.io)
             .launchIn(coroutineScope)
     }
 

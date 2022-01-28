@@ -11,6 +11,8 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import com.neeva.app.Dispatchers
+import com.neeva.app.previewDispatchers
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
@@ -28,7 +30,6 @@ import java.nio.file.Files
 import java.security.MessageDigest
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.internal.closeQuietly
 import org.chromium.weblayer.Profile
@@ -43,7 +44,8 @@ import org.chromium.weblayer.Profile
  */
 abstract class FaviconCache(
     filesDir: File,
-    val domainProvider: DomainProvider
+    val domainProvider: DomainProvider,
+    private val dispatchers: Dispatchers
 ) {
     companion object {
         private val TAG = FaviconCache::class.simpleName
@@ -135,7 +137,7 @@ abstract class FaviconCache(
         // WebLayer is normally asynchronous, but we force it to be a suspending function so
         // that the code flows logically.
         if (siteUri != null) {
-            val weblayerBitmap = withContext(Dispatchers.Main) {
+            val weblayerBitmap = withContext(dispatchers.main) {
                 suspendCoroutine<Bitmap?> { continuation ->
                     profileProvider?.getProfile()?.getCachedFaviconForPageUri(siteUri) {
                         continuation.resume(it)
@@ -149,7 +151,7 @@ abstract class FaviconCache(
         }
 
         // If WebLayer doesn't know about it, check if we stored a suitable favicon ourselves.
-        return withContext(Dispatchers.IO) {
+        return withContext(dispatchers.io) {
             val historyBitmap = getFaviconFromHistory(siteUri)
             if (historyBitmap != null) return@withContext historyBitmap
 
@@ -201,7 +203,8 @@ val mockFaviconCache: FaviconCache by lazy {
 
     object : FaviconCache(
         filesDir = Files.createTempDirectory(null).toFile(),
-        domainProvider = domainProvider
+        domainProvider = domainProvider,
+        dispatchers = previewDispatchers
     ) {
         override suspend fun getFaviconFromHistory(siteUri: Uri?): Bitmap? = null
     }

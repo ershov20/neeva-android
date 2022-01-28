@@ -9,6 +9,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.graphics.drawable.toBitmap
+import com.neeva.app.Dispatchers
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.isNeevaSearchUri
@@ -16,7 +17,6 @@ import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -64,6 +64,7 @@ class URLBarModel(
     suggestionFlow: StateFlow<NavSuggestion?>,
     appContext: Context,
     coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers,
     private val faviconCache: FaviconCache
 ) {
     private val neevaFavicon =
@@ -97,7 +98,7 @@ class URLBarModel(
                 // something in the URL bar.
                 _state.compareAndSet(currentState, newState)
             }
-            .flowOn(Dispatchers.IO)
+            .flowOn(dispatchers.io)
             .launchIn(coroutineScope)
     }
 
@@ -107,6 +108,13 @@ class URLBarModel(
         userInputStateValue: URLBarModelState
     ): URLBarModelState {
         var newState = userInputStateValue.copy()
+
+        // If IME is doing any compositing, abort autocompleting.  This avoids *most* issues where
+        // IME's state gets corrupted by the text we tack on afterwards, but the standard LatinIME
+        // can still abort composition if you type too fast, resulting in the IME dropping those
+        // characters entirely.
+        if (userInputStateValue.textFieldValue.composition != null) return newState
+
         val userInput = userInputStateValue.userTypedInput
         val suggestion = suggestionValue.takeIf {
             userInputStateValue.allowAutocomplete || isExactMatch(suggestionValue, userInput)
@@ -121,9 +129,7 @@ class URLBarModel(
                 return newState.copy(faviconBitmap = if (isSearchUri) neevaFavicon else null)
             }
 
-        // Display the user's text with the autocomplete suggestion tacked on.  This nullifies
-        // whatever composition is currently alive, which effectively accepts the suggestion being
-        // shown by IME and may not be the correct behavior.
+        // Display the user's text with the autocomplete suggestion tacked on.
         val newTextFieldValue = TextFieldValue(
             text = autocompletedText,
             selection = TextRange(userInput.length, autocompletedText.length)
@@ -131,7 +137,7 @@ class URLBarModel(
         if (newTextFieldValue.text != userInputStateValue.textFieldValue.text) {
             // We explicitly check only for text equality because:
             // * The selection can change if the user long presses on the text field
-            // * The composition can change whenever IME decides the user is typing out something.
+            // * The composition can change whenever IME decides the user is typing out something
             newState = newState.copy(textFieldValue = newTextFieldValue)
         }
 

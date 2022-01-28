@@ -2,6 +2,7 @@ package com.neeva.app.browsing
 
 import android.content.Context
 import android.util.Log
+import com.neeva.app.Dispatchers
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.IncognitoTabScreenshotManager
@@ -9,14 +10,14 @@ import com.neeva.app.storage.favicons.IncognitoFaviconCache
 import java.io.File
 import java.nio.file.Files
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.WebLayer
 
 /** Maintains the logic for an Incognito browser profile. */
 class IncognitoBrowserWrapper private constructor(
     appContext: Context,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers,
     activityCallbackProvider: () -> ActivityCallbacks?,
     private val onDestroyed: () -> Unit,
     private val tempDirectory: File,
@@ -25,13 +26,15 @@ class IncognitoBrowserWrapper private constructor(
     isIncognito = true,
     appContext = appContext,
     coroutineScope = coroutineScope,
+    dispatchers = dispatchers,
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = null,
     faviconCache = incognitoFaviconCache
 ) {
     constructor(
         appContext: Context,
-        coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
         activityCallbackProvider: () -> ActivityCallbacks?,
         domainProvider: DomainProvider,
         onDestroyed: () -> Unit,
@@ -39,10 +42,16 @@ class IncognitoBrowserWrapper private constructor(
     ) : this(
         appContext = appContext,
         coroutineScope = coroutineScope,
+        dispatchers = dispatchers,
         activityCallbackProvider = activityCallbackProvider,
         onDestroyed = onDestroyed,
         tempDirectory = tempDirectory,
-        incognitoFaviconCache = IncognitoFaviconCache(appContext, tempDirectory, domainProvider)
+        incognitoFaviconCache = IncognitoFaviconCache(
+            appContext,
+            tempDirectory,
+            domainProvider,
+            dispatchers
+        )
     )
 
     companion object {
@@ -67,7 +76,7 @@ class IncognitoBrowserWrapper private constructor(
         }
 
         // Delete the local state that we keep track of separately from WebLayer.
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(dispatchers.io) {
             incognitoFaviconCache.clearMapping()
             CacheCleaner(appContext.cacheDir).run()
         }

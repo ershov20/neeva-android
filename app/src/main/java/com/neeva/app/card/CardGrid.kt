@@ -40,10 +40,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.neeva.app.Dispatchers
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.previewDispatchers
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
@@ -54,6 +56,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun CardsContainer(webLayerModel: WebLayerModel) {
     val appNavModel = LocalEnvironment.current.appNavModel
     val browserWrapper = LocalEnvironment.current.browserWrapper
+    val dispatchers = LocalEnvironment.current.dispatchers
 
     val cardGridListener = object : CardGridListener {
         override fun onSelectTab(tab: TabInfo) {
@@ -103,7 +106,8 @@ fun CardsContainer(webLayerModel: WebLayerModel) {
             cardGridListener = cardGridListener,
             tabs = tabs,
             faviconCache = browserWrapper.faviconCache,
-            screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot
+            screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot,
+            dispatchers = dispatchers
         )
     }
 }
@@ -130,7 +134,8 @@ fun CardGrid(
     cardGridListener: CardGridListener,
     tabs: List<TabInfo>,
     faviconCache: FaviconCache,
-    screenshotProvider: (tabId: String) -> Bitmap?
+    screenshotProvider: (tabId: String) -> Bitmap?,
+    dispatchers: Dispatchers
 ) {
     // TODO(dan.alcantara): Material3 doesn't seem to have a MaterialTheme.colors.isLight function.
     val emptyLogoId = if (isSystemInDarkTheme()) {
@@ -213,7 +218,8 @@ fun CardGrid(
                         onSelect = { cardGridListener.onSelectTab(tab) },
                         onClose = { cardGridListener.onCloseTab(tab) },
                         faviconCache = faviconCache,
-                        screenshotProvider = screenshotProvider
+                        screenshotProvider = screenshotProvider,
+                        dispatchers = dispatchers
                     )
                 }
             }
@@ -326,8 +332,10 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
                 closeButtonEnabled = !params.emptyTabList,
                 cardGridListener = cardGridListener,
                 tabs = tabs,
-                faviconCache = mockFaviconCache
-            ) { null }
+                faviconCache = mockFaviconCache,
+                screenshotProvider = { null },
+                dispatchers = previewDispatchers
+            )
         }
     }
 }

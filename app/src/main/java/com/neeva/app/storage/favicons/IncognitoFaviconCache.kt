@@ -3,6 +3,7 @@ package com.neeva.app.storage.favicons
 import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
+import com.neeva.app.Dispatchers
 import com.neeva.app.browsing.FileEncrypter
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Favicon
@@ -22,8 +23,9 @@ import java.io.OutputStream
 class IncognitoFaviconCache(
     appContext: Context,
     filesDir: File,
-    domainProvider: DomainProvider
-) : FaviconCache(filesDir, domainProvider) {
+    domainProvider: DomainProvider,
+    dispatchers: Dispatchers
+) : FaviconCache(filesDir, domainProvider, dispatchers) {
     private val encrypter: FileEncrypter = FileEncrypter(appContext)
     private val faviconMap = mutableMapOf<Int, Uri>()
 

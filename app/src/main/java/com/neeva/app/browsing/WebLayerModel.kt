@@ -6,13 +6,13 @@ import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.spaces.SpaceStore
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,7 +37,8 @@ class WebLayerModel(
     historyManager: HistoryManager,
     apolloClient: ApolloClient,
     spaceStore: SpaceStore,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers
 ) {
     companion object {
         val TAG = WebLayerModel::class.simpleName
@@ -50,6 +51,7 @@ class WebLayerModel(
     private val regularBrowser = RegularBrowserWrapper(
         appContext = appContext,
         coroutineScope = coroutineScope,
+        dispatchers = dispatchers,
         activityCallbackProvider = { activityCallbacks.get() },
         domainProvider = domainProviderImpl,
         apolloClient = apolloClient,
@@ -76,7 +78,7 @@ class WebLayerModel(
         get() = browserWrapperFlow.value
 
     init {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch(dispatchers.io) {
             domainProviderImpl.initialize()
             CacheCleaner(appContext.cacheDir).run()
             internalInitializationState.value = LoadingState.READY
@@ -126,6 +128,7 @@ class WebLayerModel(
                 IncognitoBrowserWrapper(
                     appContext = appContext,
                     coroutineScope = coroutineScope,
+                    dispatchers = dispatchers,
                     activityCallbackProvider = activityCallbacks::get,
                     domainProvider = domainProviderImpl,
                     onDestroyed = {

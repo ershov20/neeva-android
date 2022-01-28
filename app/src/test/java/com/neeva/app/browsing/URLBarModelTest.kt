@@ -6,6 +6,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
+import com.neeva.app.Dispatchers
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.urlbar.URLBarModel
@@ -13,6 +14,7 @@ import com.neeva.app.urlbar.URLBarModelState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,6 +38,8 @@ class URLBarModelTest : BaseTest() {
     val coroutineScopeRule = CoroutineScopeRule()
 
     @Mock private lateinit var faviconCache: FaviconCache
+
+    private lateinit var dispatchers: Dispatchers
     private lateinit var suggestionFlow: MutableStateFlow<NavSuggestion?>
     private lateinit var urlFlow: MutableStateFlow<Uri>
     private lateinit var activeTabModel: ActiveTabModel
@@ -46,6 +50,11 @@ class URLBarModelTest : BaseTest() {
 
     override fun setUp() {
         super.setUp()
+
+        dispatchers = Dispatchers(
+            main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
+            io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
+        )
         suggestionFlow = MutableStateFlow(null)
         urlFlow = MutableStateFlow(Uri.EMPTY)
 
@@ -58,7 +67,8 @@ class URLBarModelTest : BaseTest() {
             suggestionFlow = suggestionFlow,
             appContext = ApplicationProvider.getApplicationContext(),
             coroutineScope = coroutineScopeRule.scope,
-            faviconCache = faviconCache
+            faviconCache = faviconCache,
+            dispatchers = dispatchers
         )
     }
 

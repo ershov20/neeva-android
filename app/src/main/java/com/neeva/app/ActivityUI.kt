@@ -27,7 +27,8 @@ data class LocalEnvironmentState(
     val browserWrapper: BrowserWrapper,
     val appNavModel: AppNavModel,
     val settingsModel: SettingsModel,
-    val historyManager: HistoryManager
+    val historyManager: HistoryManager,
+    val dispatchers: Dispatchers
 )
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 
@@ -40,7 +41,8 @@ fun ActivityUI(
     webLayerModel: WebLayerModel,
     settingsModel: SettingsModel,
     apolloClient: ApolloClient,
-    historyManager: HistoryManager
+    historyManager: HistoryManager,
+    dispatchers: Dispatchers
 ) {
     val coroutineScope = rememberCoroutineScope()
     val browserWrapper by browserWrapperFlow.collectAsState()
@@ -49,7 +51,8 @@ fun ActivityUI(
         browserWrapper = browserWrapper,
         appNavModel = appNavModel,
         settingsModel = settingsModel,
-        historyManager = historyManager
+        historyManager = historyManager,
+        dispatchers = dispatchers
     )
     CompositionLocalProvider(LocalEnvironment provides environment) {
         NeevaTheme {
@@ -93,7 +96,7 @@ fun ActivityUI(
                 webLayerModel = webLayerModel,
                 modifier = Modifier.fillMaxSize()
             ) { space ->
-                coroutineScope.launch {
+                coroutineScope.launch(dispatchers.io) {
                     browserWrapper.activeTabModel.modifySpace(space, apolloClient)
                     appNavModel.showBrowser()
                 }

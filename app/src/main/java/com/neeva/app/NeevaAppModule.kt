@@ -54,9 +54,10 @@ object NeevaAppModule {
     fun providesHistoryManager(
         historyDatabase: HistoryDatabase,
         domainProviderImpl: DomainProviderImpl,
-        coroutineScope: CoroutineScope
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers
     ): HistoryManager {
-        return HistoryManager(historyDatabase, domainProviderImpl, coroutineScope)
+        return HistoryManager(historyDatabase, domainProviderImpl, coroutineScope, dispatchers)
     }
 
     @Provides
@@ -79,7 +80,8 @@ object NeevaAppModule {
         historyManager: HistoryManager,
         apolloClient: ApolloClient,
         spaceStore: SpaceStore,
-        coroutineScope: CoroutineScope
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers
     ): WebLayerModel {
         return WebLayerModel(
             appContext = context,
@@ -87,7 +89,8 @@ object NeevaAppModule {
             historyManager = historyManager,
             apolloClient = apolloClient,
             spaceStore = spaceStore,
-            coroutineScope = coroutineScope
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers
         )
     }
 }

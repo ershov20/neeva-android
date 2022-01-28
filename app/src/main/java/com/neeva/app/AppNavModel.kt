@@ -10,6 +10,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -17,7 +18,8 @@ import kotlinx.coroutines.flow.onEach
 class AppNavModel(
     val navController: NavHostController,
     private val webLayerModel: WebLayerModel,
-    private val coroutineScope: CoroutineScope
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers
 ) {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     val currentDestination: StateFlow<NavDestination?> = _currentDestination
@@ -32,6 +34,7 @@ class AppNavModel(
 
         webLayerModel.browserWrapperFlow
             .onEach { updateBackEnablingJob(it) }
+            .flowOn(dispatchers.main)
             .launchIn(coroutineScope)
     }
 
@@ -49,6 +52,7 @@ class AppNavModel(
                 mustStay && currentDestination?.route == AppNavDestination.CARD_GRID.route
             }
             .onEach { userMustStay -> navController.enableOnBackPressed(!userMustStay) }
+            .flowOn(dispatchers.main)
             .launchIn(coroutineScope)
     }
 

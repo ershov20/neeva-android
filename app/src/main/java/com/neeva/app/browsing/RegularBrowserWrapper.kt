@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.fragment.app.Fragment
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.browserTypeCookie
 import com.neeva.app.NeevaConstants.browserVersionCookie
@@ -16,7 +17,7 @@ import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -29,7 +30,8 @@ import org.chromium.weblayer.WebLayer
  */
 class RegularBrowserWrapper(
     appContext: Context,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Main),
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers,
     activityCallbackProvider: () -> ActivityCallbacks?,
     domainProvider: DomainProvider,
     apolloClient: ApolloClient,
@@ -39,17 +41,20 @@ class RegularBrowserWrapper(
     isIncognito = false,
     appContext = appContext,
     coroutineScope = coroutineScope,
+    dispatchers = dispatchers,
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = SuggestionsModel(
         coroutineScope,
         historyManager,
         apolloClient,
-        domainProvider
+        domainProvider,
+        dispatchers
     ),
     faviconCache = RegularFaviconCache(
         filesDir = appContext.cacheDir,
         domainProvider = domainProvider,
-        historyManager = historyManager
+        historyManager = historyManager,
+        dispatchers = dispatchers
     )
 ) {
     companion object {
@@ -61,12 +66,12 @@ class RegularBrowserWrapper(
         urlBarModel.queryTextFlow
             .onEach { queryText ->
                 // Pull new suggestions from the database.
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(dispatchers.io) {
                     historyManager.updateSuggestionQuery(queryText)
                 }
 
                 // Ask the backend for suggestions appropriate for the currently typed in text.
-                coroutineScope.launch(Dispatchers.IO) {
+                coroutineScope.launch(dispatchers.io) {
                     suggestionsModel?.getSuggestionsFromBackend(queryText)
                 }
             }
@@ -74,6 +79,7 @@ class RegularBrowserWrapper(
 
         urlBarModel.isEditing
             .onEach { isEditing -> if (isEditing) spaceStore.refresh() }
+            .flowOn(dispatchers.io)
             .launchIn(coroutineScope)
     }
 

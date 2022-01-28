@@ -2,6 +2,7 @@ package com.neeva.app.browsing
 
 import android.graphics.Bitmap
 import android.net.Uri
+import com.neeva.app.Dispatchers
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.TypeConverters
@@ -9,7 +10,6 @@ import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
@@ -32,6 +32,7 @@ class TabCallbacks(
     private val isIncognito: Boolean,
     private val tab: Tab,
     private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers,
     private val historyManager: HistoryManager?,
     private val faviconCache: FaviconCache?,
     private val tabList: TabList,
@@ -56,7 +57,7 @@ class TabCallbacks(
             val url = tab.currentDisplayUrl
 
             coroutineScope.launch {
-                val faviconData = withContext(Dispatchers.IO) {
+                val faviconData = withContext(dispatchers.io) {
                     faviconCache.saveFavicon(url, favicon)
                 }
 

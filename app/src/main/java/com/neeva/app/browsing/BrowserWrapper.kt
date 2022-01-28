@@ -5,15 +5,14 @@ import android.net.Uri
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.fragment.app.Fragment
+import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -41,10 +40,10 @@ abstract class BrowserWrapper(
     val isIncognito: Boolean,
     val appContext: Context,
     val coroutineScope: CoroutineScope,
+    val dispatchers: Dispatchers,
     val activityCallbackProvider: () -> ActivityCallbacks?,
     val suggestionsModel: SuggestionsModel?,
-    val faviconCache: FaviconCache,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    val faviconCache: FaviconCache
 ) : FaviconCache.ProfileProvider {
     data class CreateNewTabInfo(
         val uri: Uri,
@@ -91,7 +90,8 @@ abstract class BrowserWrapper(
             suggestionFlow = suggestionsModel?.autocompleteSuggestion ?: MutableStateFlow(null),
             appContext = appContext,
             coroutineScope = coroutineScope,
-            faviconCache = faviconCache
+            faviconCache = faviconCache,
+            dispatchers = dispatchers
         )
 
         userMustStayInCardGridFlow = orderedTabList
@@ -117,7 +117,7 @@ abstract class BrowserWrapper(
         override fun onTabRemoved(tab: Tab) {
             // Delete any screenshot that was taken for the tab.
             val tabId = tab.guid
-            coroutineScope.launch(Dispatchers.IO) {
+            coroutineScope.launch(dispatchers.io) {
                 tabScreenshotManager.deleteScreenshot(tabId)
             }
 
@@ -158,7 +158,7 @@ abstract class BrowserWrapper(
     }
 
     private fun cleanCacheDirectory() {
-        coroutineScope.launch(ioDispatcher) {
+        coroutineScope.launch(dispatchers.io) {
             // Clean up any unused tab thumbnails.
             val liveTabGuids = tabList.orderedTabList.value.map { it.id }
             tabScreenshotManager.cleanCacheDirectory(liveTabGuids)
@@ -301,6 +301,7 @@ abstract class BrowserWrapper(
             isIncognito = isIncognito,
             tab = tab,
             coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
             historyManager = historyManager,
             faviconCache = faviconCache,
             tabList = tabList,
