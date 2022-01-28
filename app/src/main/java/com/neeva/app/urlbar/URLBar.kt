@@ -23,14 +23,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
-import com.neeva.app.ui.theme.md_theme_dark_shadow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -41,18 +39,17 @@ fun URLBar() {
     val urlBarModelState = urlBarModel.state.collectAsState()
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
-    // TODO(kobec): figure out how to map incognito to color scheme?
     val isIncognito: Boolean = urlBarModel.isIncognito
     val backgroundColor = if (isIncognito) {
-        md_theme_dark_shadow
+        MaterialTheme.colorScheme.inverseSurface
     } else {
-        MaterialTheme.colorScheme.background
+        MaterialTheme.colorScheme.surfaceVariant
     }
 
     val foregroundColor = if (isIncognito) {
-        Color.White
+        MaterialTheme.colorScheme.inverseOnSurface
     } else {
-        MaterialTheme.colorScheme.onSurface
+        MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     TopAppBar(
@@ -68,7 +65,7 @@ fun URLBar() {
             AutocompleteTextField(
                 urlBarModel = urlBarModel,
                 urlBarModelState = urlBarModelState.value,
-                backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                backgroundColor = backgroundColor,
                 foregroundColor = foregroundColor
             )
 
@@ -83,7 +80,7 @@ fun URLBar() {
                 LocationLabel(
                     urlBarValue = displayedLocation,
                     showIncognitoBadge = isIncognito,
-                    backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                    backgroundColor = backgroundColor,
                     foregroundColor = foregroundColor,
                     locationInfoResource = locationInfoResource,
                     onReload = urlBarModel::reload,

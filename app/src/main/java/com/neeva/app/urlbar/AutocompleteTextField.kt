@@ -12,8 +12,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,6 +25,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -81,56 +84,59 @@ fun AutocompleteTextField(
             .fillMaxWidth()
             .background(backgroundColor)
     ) {
-        FaviconView(
-            bitmap = faviconBitmap,
-            bordered = false,
-            modifier = Modifier.padding(start = 8.dp)
-        )
+        CompositionLocalProvider(LocalContentColor provides foregroundColor) {
+            FaviconView(
+                bitmap = faviconBitmap,
+                bordered = false,
+                modifier = Modifier.padding(start = 8.dp)
+            )
 
-        BasicTextField(
-            value = textFieldValue,
-            onValueChange = onLocationEdited,
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .focusRequester(focusRequester)
-                .onFocusChanged(onFocusChanged)
-                .onPreviewKeyEvent {
-                    if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
-                        // If we're seeing a hardware enter key, intercept it to prevent adding
-                        // a newline to the URL.
-                        onLoadUrl.invoke()
-                        true
-                    } else {
-                        false
+            BasicTextField(
+                value = textFieldValue,
+                onValueChange = onLocationEdited,
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .focusRequester(focusRequester)
+                    .onFocusChanged(onFocusChanged)
+                    .onPreviewKeyEvent {
+                        if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
+                            // If we're seeing a hardware enter key, intercept it to prevent adding
+                            // a newline to the URL.
+                            onLoadUrl.invoke()
+                            true
+                        } else {
+                            false
+                        }
                     }
-                }
-                .weight(1.0f),
-            singleLine = true,
-            textStyle = TextStyle(
-                color = foregroundColor,
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Uri,
-                imeAction = ImeAction.Go,
-                autoCorrect = false
-            ),
-            keyboardActions = KeyboardActions(
-                onGo = { onLoadUrl.invoke() }
+                    .weight(1.0f),
+                singleLine = true,
+                textStyle = TextStyle(
+                    color = LocalContentColor.current,
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                ),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Go,
+                    autoCorrect = false
+                ),
+                keyboardActions = KeyboardActions(
+                    onGo = { onLoadUrl.invoke() }
+                ),
+                cursorBrush = SolidColor(LocalContentColor.current)
             )
-        )
 
-        IconButton(
-            onClick = { onLocationReplaced("") },
-            modifier = Modifier
-                .size(40.dp)
-                .padding(8.dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_baseline_cancel_24),
-                contentDescription = stringResource(id = R.string.clear),
-                colorFilter = ColorFilter.tint(foregroundColor)
-            )
+            IconButton(
+                onClick = { onLocationReplaced("") },
+                modifier = Modifier
+                    .size(40.dp)
+                    .padding(8.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_baseline_cancel_24),
+                    contentDescription = stringResource(id = R.string.clear),
+                    colorFilter = ColorFilter.tint(LocalContentColor.current)
+                )
+            }
         }
     }
 }

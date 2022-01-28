@@ -9,19 +9,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
+import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -37,15 +44,14 @@ fun FaviconView(
             .then(
                 if (bordered) {
                     Modifier
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(RoundedCornerShape(Dimensions.RADIUS_SMALL))
                         .border(
                             1.dp, MaterialTheme.colorScheme.surfaceVariant,
-                            RoundedCornerShape(4.dp)
+                            RoundedCornerShape(Dimensions.RADIUS_SMALL)
                         )
                         .padding(1.dp)
                 } else {
-                    Modifier
-                        .clip(RoundedCornerShape(8.dp))
+                    Modifier.clip(RoundedCornerShape(Dimensions.RADIUS_LARGE))
                 }
             ),
         Alignment.Center
@@ -63,39 +69,47 @@ fun FaviconView(
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.FillBounds,
+                colorFilter = ColorFilter.tint(LocalContentColor.current)
             )
         }
     }
 }
 
-@Preview(name = "Globe favicon, bordered")
-@Composable
-fun FaviconView_Globe_Bordered() {
-    NeevaTheme {
-        FaviconView(bitmap = null, bordered = true)
-    }
-}
+class FaviconViewPreviews : BooleanPreviewParameterProvider<FaviconViewPreviews.Params>(3) {
+    data class Params(
+        val darkTheme: Boolean,
+        val bordered: Boolean,
+        val bitmap: Bitmap?
+    )
 
-@Preview(name = "Globe favicon, no border")
-@Composable
-fun FaviconView_Globe_NoBorder() {
-    NeevaTheme {
-        FaviconView(bitmap = null, bordered = false)
+    override fun createParams(booleanArray: BooleanArray): Params {
+        return Params(
+            darkTheme = booleanArray[0],
+            bordered = booleanArray[1],
+            bitmap = if (booleanArray[2]) {
+                Uri.parse("https://www.neeva.com").toBitmap()
+            } else {
+                null
+            }
+        )
     }
-}
 
-@Preview(group = "Solid favicon, bordered")
-@Composable
-fun FaviconView_Blank_Bordered() {
-    NeevaTheme {
-        FaviconView(Uri.parse("https://www.neeva.com").toBitmap(), bordered = true)
-    }
-}
-
-@Preview(group = "Solid favicon, no border")
-@Composable
-fun FaviconView_Blank_NoBorder() {
-    NeevaTheme {
-        FaviconView(Uri.parse("https://www.neeva.com").toBitmap(), bordered = false)
+    @Preview
+    @Composable
+    fun DefaultPreview(
+        @PreviewParameter(provider = FaviconViewPreviews::class) params: Params
+    ) {
+        NeevaTheme(useDarkTheme = params.darkTheme) {
+            Surface(color = MaterialTheme.colorScheme.background) {
+                CompositionLocalProvider(
+                    LocalContentColor provides MaterialTheme.colorScheme.onBackground
+                ) {
+                    FaviconView(
+                        bitmap = params.bitmap,
+                        bordered = params.bordered
+                    )
+                }
+            }
+        }
     }
 }

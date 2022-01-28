@@ -8,6 +8,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
+import com.neeva.app.zeroQuery.IncognitoZeroQuery
 import com.neeva.app.zeroQuery.ZeroQuery
 import dagger.hilt.EntryPoints
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,24 +66,24 @@ fun SuggestionPane() {
         ) {
             updateUrlBarContents(urlBarModel, it)
         }
+    } else if (browserWrapper.isIncognito) {
+        IncognitoZeroQuery()
     } else {
         ZeroQuery(urlBarModel = urlBarModel, faviconCache = faviconCache) {
-            if (!isLazyTab) {
-                if (currentURL.toString().isNotBlank()) {
-                    CurrentPageRow(
-                        faviconBitmap = faviconBitmap,
-                        label = if (isShowingQuery) {
-                            displayedText
-                        } else {
-                            currentURL.toString()
-                        },
-                        isShowingQuery = isShowingQuery
-                    ) {
-                        updateUrlBarContents(
-                            urlBarModel,
-                            if (isShowingQuery) displayedText else currentURL.toString()
-                        )
-                    }
+            if (!isLazyTab && currentURL.toString().isNotBlank()) {
+                CurrentPageRow(
+                    faviconBitmap = faviconBitmap,
+                    label = if (isShowingQuery) {
+                        displayedText
+                    } else {
+                        currentURL.toString()
+                    },
+                    isShowingQuery = isShowingQuery
+                ) {
+                    updateUrlBarContents(
+                        urlBarModel,
+                        if (isShowingQuery) displayedText else currentURL.toString()
+                    )
                 }
             }
         }

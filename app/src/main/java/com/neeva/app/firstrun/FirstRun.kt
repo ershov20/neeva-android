@@ -11,13 +11,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material3.MaterialTheme
@@ -89,9 +92,11 @@ fun FirstRunScreen() {
 
     Column(
         Modifier
-            .padding(top = 72.dp, bottom = 28.dp)
             .wrapContentSize()
+            .verticalScroll(rememberScrollState())
     ) {
+        Spacer(modifier = Modifier.height(72.dp).fillMaxWidth())
+
         if (signup) {
             Image(
                 painter = painterResource(id = R.drawable.ic_wordmark),
@@ -257,6 +262,8 @@ fun FirstRunScreen() {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(28.dp))
     }
 }
 
@@ -320,6 +327,15 @@ fun ToggleSignUpText(signup: Boolean, onClick: () -> Unit) {
 @Preview("RTL, 1x scale", locale = "he")
 @Composable
 fun FirstRun_Preview() {
+    NeevaTheme {
+        FirstRunScreen()
+    }
+}
+
+@Preview("Landscape, 1x scale", widthDp = 512, heightDp = 384, locale = "he")
+@Preview("Landscape, RTL, 1x scale", locale = "he")
+@Composable
+fun FirstRun_Preview_Landscape() {
     NeevaTheme {
         FirstRunScreen()
     }

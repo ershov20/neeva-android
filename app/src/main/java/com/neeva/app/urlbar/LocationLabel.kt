@@ -40,7 +40,7 @@ fun LocationLabel(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(backgroundColor)
             .wrapContentSize(Alignment.Center)
             .defaultMinSize(minHeight = 40.dp)
     ) {

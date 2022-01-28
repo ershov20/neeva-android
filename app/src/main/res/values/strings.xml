@@ -88,4 +88,8 @@
 
     <string name="space_contains_page">Space contains the current page</string>
     <string name="space_not_contain_page">Space doesn\'t contain the current page</string>
+
+    <string name="incognito_zero_query_title">You are incognito</string>
+    <string name="incognito_zero_query_body">Neeva <b>won\'t save</b> any of your personal activity like searches, clicks, or browsing.\n\nSearch privately, knowing that other people who use this device won\'t see your activity if you close your incognito tabs.</string>
+    <string name="incognito_zero_query_footer">Your activity <b>might still be visible</b> to your internet service provider, school, or employer.</string>
 </resources>
