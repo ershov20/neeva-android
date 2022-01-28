@@ -86,10 +86,8 @@ fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
 
                     SettingsRow(
                         rowData = rowData,
-                        openUrl = settingsPaneListener.openUrl,
+                        settingsPaneListener = settingsPaneListener,
                         onClick = onClickMap[rowData.titleId] ?: {},
-                        getTogglePreferenceSetter = settingsPaneListener.getTogglePreferenceSetter,
-                        getToggleState = settingsPaneListener.getToggleState,
                         modifier = rowModifier
                     )
                 }
@@ -116,6 +114,8 @@ fun getFakeSettingsPaneListener(): SettingsPaneListener {
             get() = { }
         override val onClearHistory: () -> Unit
             get() = {}
+        override val isSignedIn: () -> Boolean
+            get() = { true }
     }
 }
 

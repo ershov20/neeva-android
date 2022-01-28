@@ -64,6 +64,17 @@ class AppNavModel(
         }
     }
 
+    /** Shows a screen and adds the previous screen to the back stack. */
+    private fun showSubscreen(destination: AppNavDestination) {
+        navController.navigate(destination.route) {
+            launchSingleTop = true
+        }
+    }
+
+    fun popBackStack() {
+        navController.popBackStack()
+    }
+
     fun showBrowser() {
         navController.popBackStack(
             route = AppNavDestination.BROWSER.route,
@@ -83,9 +94,9 @@ class AppNavModel(
     fun showCardGrid() = showSecondaryScreen(AppNavDestination.CARD_GRID)
     fun showAddToSpace() = showSecondaryScreen(AppNavDestination.ADD_TO_SPACE)
     fun showNeevaMenu() = showSecondaryScreen(AppNavDestination.NEEVA_MENU)
-    fun showSettings() = showSecondaryScreen(AppNavDestination.SETTINGS)
-    fun showProfileSettings() = showSecondaryScreen(AppNavDestination.PROFILE_SETTINGS)
-    fun showClearBrowsingSettings() = showSecondaryScreen(AppNavDestination.CLEAR_BROWSING_SETTINGS)
+    fun showSettings() = showSubscreen(AppNavDestination.SETTINGS)
+    fun showProfileSettings() = showSubscreen(AppNavDestination.PROFILE_SETTINGS)
+    fun showClearBrowsingSettings() = showSubscreen(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     fun showFirstRun() = showSecondaryScreen(AppNavDestination.FIRST_RUN)
     fun showHistory() = showSecondaryScreen(AppNavDestination.HISTORY)
 }

@@ -1,8 +1,9 @@
 package com.neeva.app.widgets
 
+import com.neeva.app.NeevaUserToken
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.settings.SettingsModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
@@ -15,5 +16,6 @@ interface ComposableSingletonEntryPoint {
     fun historyManager(): HistoryManager
     fun spaceStore(): SpaceStore
     fun domainProvider(): DomainProvider
-    fun settingsModel(): SettingsModel
+    fun sharedPreferences(): SharedPreferencesModel
+    fun userProvider(): NeevaUserToken
 }

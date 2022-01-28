@@ -10,7 +10,6 @@ import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.lifecycleScope
@@ -22,6 +21,7 @@ import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.settings.SettingsModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,6 +46,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var apolloClient: ApolloClient
     @Inject lateinit var spaceStore: SpaceStore
     @Inject lateinit var settingsModel: SettingsModel
+    @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
+    @Inject lateinit var neevaUserToken: NeevaUserToken
     @Inject lateinit var webModel: WebLayerModel
     @Inject lateinit var historyManager: HistoryManager
     @Inject lateinit var dispatchers: Dispatchers
@@ -103,7 +105,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     settingsModel = settingsModel,
                     apolloClient = apolloClient,
                     historyManager = historyManager,
-                    dispatchers = dispatchers
+                    dispatchers = dispatchers,
+                    sharedPreferencesModel = sharedPreferencesModel,
+                    neevaUserToken = neevaUserToken
                 )
             }
         }
@@ -151,8 +155,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         super.onNewIntent(intent)
         if (intent != null && intent.action == Intent.ACTION_VIEW) {
             if (Uri.parse(intent.dataString).scheme == "neeva") {
-                User.extractAuthTokenFromIntent(intent)?.let {
-                    User.setToken(this, it)
+                neevaUserToken.extractAuthTokenFromIntent(intent)?.let {
+                    neevaUserToken.setToken(it)
                     webModel.onAuthTokenUpdated()
                     appNavModel?.showBrowser()
                 }

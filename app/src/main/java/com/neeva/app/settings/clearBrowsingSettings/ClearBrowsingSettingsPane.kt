@@ -81,10 +81,7 @@ fun ClearBrowsingSettingsPane(settingsPaneListener: SettingsPaneListener) {
                     } else {
                         SettingsRow(
                             rowData = rowData,
-                            openUrl = settingsPaneListener.openUrl,
-                            getTogglePreferenceSetter = settingsPaneListener
-                                .getTogglePreferenceSetter,
-                            getToggleState = settingsPaneListener.getToggleState,
+                            settingsPaneListener = settingsPaneListener,
                             modifier = rowModifier
                         )
                     }

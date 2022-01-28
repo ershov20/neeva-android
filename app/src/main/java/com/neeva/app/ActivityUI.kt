@@ -19,6 +19,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.settings.SettingsModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.theme.NeevaTheme
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -28,7 +29,9 @@ data class LocalEnvironmentState(
     val appNavModel: AppNavModel,
     val settingsModel: SettingsModel,
     val historyManager: HistoryManager,
-    val dispatchers: Dispatchers
+    val dispatchers: Dispatchers,
+    val sharedPreferencesModel: SharedPreferencesModel,
+    val neevaUserToken: NeevaUserToken
 )
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 
@@ -42,17 +45,23 @@ fun ActivityUI(
     settingsModel: SettingsModel,
     apolloClient: ApolloClient,
     historyManager: HistoryManager,
-    dispatchers: Dispatchers
+    dispatchers: Dispatchers,
+    sharedPreferencesModel: SharedPreferencesModel,
+    neevaUserToken: NeevaUserToken
 ) {
     val coroutineScope = rememberCoroutineScope()
     val browserWrapper by browserWrapperFlow.collectAsState()
+
+    // TODO(kobec): SETTINGSMODEL can be created right here with all the lambdas
 
     val environment = LocalEnvironmentState(
         browserWrapper = browserWrapper,
         appNavModel = appNavModel,
         settingsModel = settingsModel,
         historyManager = historyManager,
-        dispatchers = dispatchers
+        dispatchers = dispatchers,
+        sharedPreferencesModel = sharedPreferencesModel,
+        neevaUserToken = neevaUserToken
     )
     CompositionLocalProvider(LocalEnvironment provides environment) {
         NeevaTheme {

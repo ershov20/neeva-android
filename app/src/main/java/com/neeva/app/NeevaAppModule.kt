@@ -1,6 +1,5 @@
 package com.neeva.app
 
-import android.app.Application
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.WebLayerModel
@@ -8,6 +7,7 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
 import dagger.Module
@@ -39,8 +39,11 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesApolloClient(@ApplicationContext context: Context): ApolloClient {
-        return createApolloClient(context)
+    fun providesApolloClient(
+        @ApplicationContext context: Context,
+        neevaUserToken: NeevaUserToken
+    ): ApolloClient {
+        return createApolloClient(context, neevaUserToken)
     }
 
     @Provides
@@ -67,9 +70,21 @@ object NeevaAppModule {
     }
 
     @Provides
-    @Singleton
-    fun providesSettings(application: Application): SettingsModel {
-        return SettingsModel(application)
+    fun providesSettings(
+        sharedPreferencesModel: SharedPreferencesModel,
+        neevaUserToken: NeevaUserToken
+    ): SettingsModel {
+        return SettingsModel(sharedPreferencesModel, neevaUserToken)
+    }
+
+    @Provides
+    fun providesSharedPreferences(@ApplicationContext context: Context): SharedPreferencesModel {
+        return SharedPreferencesModel(context)
+    }
+
+    @Provides
+    fun providesNeevaUserToken(sharedPreferencesModel: SharedPreferencesModel): NeevaUserToken {
+        return NeevaUserToken(sharedPreferencesModel)
     }
 
     @Provides
@@ -81,7 +96,8 @@ object NeevaAppModule {
         apolloClient: ApolloClient,
         spaceStore: SpaceStore,
         coroutineScope: CoroutineScope,
-        dispatchers: Dispatchers
+        dispatchers: Dispatchers,
+        neevaUserToken: NeevaUserToken
     ): WebLayerModel {
         return WebLayerModel(
             appContext = context,
@@ -90,7 +106,8 @@ object NeevaAppModule {
             apolloClient = apolloClient,
             spaceStore = spaceStore,
             coroutineScope = coroutineScope,
-            dispatchers = dispatchers
+            dispatchers = dispatchers,
+            neevaUserToken = neevaUserToken
         )
     }
 }

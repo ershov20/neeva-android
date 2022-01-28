@@ -1,8 +1,5 @@
 package com.neeva.app.firstrun
 
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
-import android.content.SharedPreferences
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -50,8 +47,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.NeevaUserToken
 import com.neeva.app.R
-import com.neeva.app.User
+import com.neeva.app.sharedprefs.SharedPrefFolder
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.Roobert
@@ -358,19 +357,16 @@ object FirstRun {
         }
     }
 
-    private fun getSharedPreferences(context: Context): SharedPreferences {
-        return context.getSharedPreferences(FIRST_RUN_PREFS_FOLDER_NAME, MODE_PRIVATE)
+    fun shouldShowFirstRun(
+        sharedPreferencesModel: SharedPreferencesModel,
+        neevaUserToken: NeevaUserToken
+    ): Boolean {
+        return neevaUserToken.getToken().isNullOrEmpty() &&
+            !sharedPreferencesModel
+                .getBoolean(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, false)
     }
 
-    fun shouldShowFirstRun(context: Context): Boolean {
-        return User.getToken(context).isNullOrEmpty() &&
-            !getSharedPreferences(context).getBoolean(FIRST_RUN_DONE_KEY, false)
-    }
-
-    fun firstRunDone(context: Context) {
-        getSharedPreferences(context)
-            .edit()
-            .putBoolean(FIRST_RUN_DONE_KEY, true)
-            .apply()
+    fun firstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
+        sharedPreferencesModel.setValue(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, true)
     }
 }

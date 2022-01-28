@@ -16,22 +16,25 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 
-fun createApolloClient(@ApplicationContext context: Context): ApolloClient {
+fun createApolloClient(
+    @ApplicationContext context: Context,
+    neevaUserToken: NeevaUserToken
+): ApolloClient {
     return ApolloClient.Builder()
         .serverUrl("${appURL}graphql")
         .okHttpClient(
             OkHttpClient.Builder()
                 .addInterceptor(AuthorizationInterceptor(context))
-                .cookieJar(AuthCookieJar(context))
+                .cookieJar(AuthCookieJar(neevaUserToken))
                 .build()
         )
         .build()
 }
 
-private class AuthCookieJar(val context: Context) : CookieJar {
+private class AuthCookieJar(val neevaUserToken: NeevaUserToken) : CookieJar {
     override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
         val cookies = mutableListOf(browserTypeCookie, browserVersionCookie)
-        val token = User.getToken(context)
+        val token = neevaUserToken.getToken()
         if (token != null) {
             val authCookie = Cookie.Builder().name(loginCookie).secure()
                 .domain(appHost).expiresAt(Long.MAX_VALUE).value(token).build()
@@ -54,8 +57,8 @@ private class AuthorizationInterceptor(val context: Context) : Interceptor {
     }
 }
 
-fun saveLoginCookieFrom(context: Context, cookie: String) {
+fun saveLoginCookieFrom(neevaUserToken: NeevaUserToken, cookie: String) {
     if (cookie.split("=").first() == loginCookie) {
-        User.setToken(context, cookie.split("=").last())
+        neevaUserToken.setToken(cookie.split("=").last())
     }
 }

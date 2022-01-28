@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
+import com.neeva.app.NeevaUserToken
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.spaces.SpaceStore
@@ -38,7 +39,8 @@ class WebLayerModel(
     apolloClient: ApolloClient,
     spaceStore: SpaceStore,
     private val coroutineScope: CoroutineScope,
-    private val dispatchers: Dispatchers
+    private val dispatchers: Dispatchers,
+    neevaUserToken: NeevaUserToken
 ) {
     companion object {
         val TAG = WebLayerModel::class.simpleName
@@ -56,7 +58,8 @@ class WebLayerModel(
         domainProvider = domainProviderImpl,
         apolloClient = apolloClient,
         historyManager = historyManager,
-        spaceStore = spaceStore
+        spaceStore = spaceStore,
+        neevaUserToken = neevaUserToken
     )
     private var incognitoBrowser: IncognitoBrowserWrapper? = null
 

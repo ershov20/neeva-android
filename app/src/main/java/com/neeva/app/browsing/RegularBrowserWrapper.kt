@@ -8,7 +8,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.browserTypeCookie
 import com.neeva.app.NeevaConstants.browserVersionCookie
-import com.neeva.app.User
+import com.neeva.app.NeevaUserToken
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.saveLoginCookieFrom
@@ -36,7 +36,8 @@ class RegularBrowserWrapper(
     domainProvider: DomainProvider,
     apolloClient: ApolloClient,
     override val historyManager: HistoryManager,
-    spaceStore: SpaceStore
+    spaceStore: SpaceStore,
+    val neevaUserToken: NeevaUserToken
 ) : BrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -96,7 +97,7 @@ class RegularBrowserWrapper(
         browser?.profile?.cookieManager?.apply {
             getCookie(Uri.parse(NeevaConstants.appURL)) {
                 it?.split("; ")?.forEach { cookie ->
-                    saveLoginCookieFrom(appContext, cookie)
+                    saveLoginCookieFrom(neevaUserToken, cookie)
                 }
             }
 
@@ -105,7 +106,7 @@ class RegularBrowserWrapper(
                 NeevaConstants.loginCookie,
                 object : CookieChangedCallback() {
                     override fun onCookieChanged(cookie: String, cause: Int) {
-                        saveLoginCookieFrom(appContext, cookie)
+                        saveLoginCookieFrom(neevaUserToken, cookie)
                     }
                 }
             )
@@ -114,10 +115,10 @@ class RegularBrowserWrapper(
                 browserTypeCookie.toString() + browserVersionCookie.toString()
             ) {}
 
-            if (!User.getToken(appContext).isNullOrEmpty()) {
+            if (!neevaUserToken.getToken().isNullOrEmpty()) {
                 setCookie(
                     Uri.parse(NeevaConstants.appURL),
-                    User.loginCookieString(appContext)
+                    neevaUserToken.loginCookieString()
                 ) {}
             }
         }
@@ -128,7 +129,7 @@ class RegularBrowserWrapper(
     override fun onAuthTokenUpdated() {
         browser?.profile?.cookieManager?.setCookie(
             Uri.parse(NeevaConstants.appURL),
-            User.loginCookieString(appContext)
+            neevaUserToken.loginCookieString()
         ) { success ->
             if (success && activeTabModel.urlFlow.value.toString() == NeevaConstants.appURL) {
                 activeTabModel.reload()

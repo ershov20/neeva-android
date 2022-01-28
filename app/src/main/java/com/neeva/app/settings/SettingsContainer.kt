@@ -20,6 +20,7 @@ interface SettingsPaneListener {
     val showClearBrowsingSettings: () -> Unit
     val showProfileSettings: () -> Unit
     val onClearHistory: () -> Unit
+    val isSignedIn: () -> Boolean
 }
 
 fun getSettingsPaneListener(
@@ -28,7 +29,7 @@ fun getSettingsPaneListener(
     historyManager: HistoryManager
 ): SettingsPaneListener {
     return object : SettingsPaneListener {
-        override val onBackPressed = appNavModel::showBrowser
+        override val onBackPressed = appNavModel::popBackStack
         override val getTogglePreferenceSetter = settingsModel::getTogglePreferenceSetter
         override val getToggleState = settingsModel::getToggleState
         override val openUrl = appNavModel::openUrl
@@ -36,6 +37,7 @@ fun getSettingsPaneListener(
         override val showClearBrowsingSettings = appNavModel::showClearBrowsingSettings
         override val showProfileSettings = appNavModel::showProfileSettings
         override val onClearHistory = historyManager::clearAllHistory
+        override val isSignedIn: () -> Boolean = settingsModel::isSignedIn
     }
 }
 
@@ -52,7 +54,11 @@ fun MainSettingsContainer() {
 @Composable
 fun ProfileSettingsContainer() {
     val appNavModel = LocalEnvironment.current.appNavModel
-    ProfileSettingsPane(onBackPressed = appNavModel::showSettings)
+    val settingsModel = LocalEnvironment.current.settingsModel
+    ProfileSettingsPane(onBackPressed = appNavModel::popBackStack) {
+        settingsModel.signOut()
+        appNavModel.showSettings()
+    }
 }
 
 @OptIn(ExperimentalAnimationApi::class)

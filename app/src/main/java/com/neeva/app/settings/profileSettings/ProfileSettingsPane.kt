@@ -26,6 +26,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun ProfileSettingsPane(
     onBackPressed: () -> Unit,
+    signUserOut: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -74,8 +75,7 @@ fun ProfileSettingsPane(
             SettingsButtonRow(
                 title = stringResource(R.string.settings_sign_out),
                 onClick = {
-                    NeevaUser.shared = NeevaUser()
-                    onBackPressed()
+                    signUserOut()
                 },
                 modifier = rowModifier
             )
@@ -91,7 +91,8 @@ fun ProfileSettingsPane(
 fun SettingsProfile_Preview() {
     NeevaTheme {
         ProfileSettingsPane(
-            onBackPressed = {}
+            onBackPressed = {},
+            signUserOut = {}
         )
     }
 }
@@ -104,7 +105,8 @@ fun SettingsProfile_Preview() {
 fun SettingsProfile_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         ProfileSettingsPane(
-            onBackPressed = {}
+            onBackPressed = {},
+            signUserOut = {}
         )
     }
 }

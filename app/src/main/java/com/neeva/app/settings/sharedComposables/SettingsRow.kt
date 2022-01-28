@@ -7,29 +7,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.R
+import com.neeva.app.settings.mainSettings.getFakeSettingsPaneListener
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabel
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsNavigationRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsToggleRow
-import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun SettingsRow(
     rowData: SettingsRowData,
-    openUrl: (Uri) -> Unit = {},
+    settingsPaneListener: SettingsPaneListener,
     onClick: () -> Unit = {},
-    getTogglePreferenceSetter: (String?) -> ((Boolean) -> Unit)? = { {} },
-    getToggleState: (String?) -> MutableState<Boolean>? = { mutableStateOf(true) },
     modifier: Modifier
 ) {
     var title = stringResource(rowData.titleId)
@@ -38,7 +34,7 @@ fun SettingsRow(
         title = stringResource(rowData.titleId, versionString)
     }
 
-    val toggleState = getToggleState(rowData.togglePreferenceKey)
+    val toggleState = settingsPaneListener.getToggleState(rowData.togglePreferenceKey)
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
             SettingsButtonRow(title, onClick, modifier)
@@ -48,7 +44,7 @@ fun SettingsRow(
         }
         SettingsRowType.LINK -> {
             if (rowData.url != null) {
-                SettingsLinkRow(title, openUrl, rowData.url, modifier)
+                SettingsLinkRow(title, settingsPaneListener.openUrl, rowData.url, modifier)
             }
         }
         SettingsRowType.TOGGLE -> {
@@ -57,7 +53,7 @@ fun SettingsRow(
                     title = title,
                     toggleState = toggleState,
                     togglePrefKey = rowData.togglePreferenceKey,
-                    getTogglePreferenceSetter = getTogglePreferenceSetter,
+                    getTogglePreferenceSetter = settingsPaneListener.getTogglePreferenceSetter,
                     modifier = modifier
                 )
             }
@@ -66,7 +62,7 @@ fun SettingsRow(
             SettingsNavigationRow(title = title, onClick = onClick, modifier = modifier)
         }
         SettingsRowType.PROFILE -> {
-            if (NeevaUser.shared.id != null) {
+            if (settingsPaneListener.isSignedIn()) {
                 ProfileRow(onClick = onClick, modifier = modifier)
             } else {
                 SettingsButtonRow(
@@ -89,8 +85,7 @@ fun SettingsRow_PreviewToggle() {
                 SettingsRowType.TOGGLE,
                 R.string.debug_long_string_primary
             ),
-            getTogglePreferenceSetter = { {} },
-            getToggleState = { mutableStateOf(true) },
+            settingsPaneListener = getFakeSettingsPaneListener(),
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
@@ -114,8 +109,7 @@ fun SettingsRow_PreviewLink() {
                 Uri.parse(""),
                 togglePreferenceKey = ""
             ),
-            getTogglePreferenceSetter = { {} },
-            getToggleState = { mutableStateOf(true) },
+            settingsPaneListener = getFakeSettingsPaneListener(),
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
@@ -135,8 +129,7 @@ fun SettingsRow_PreviewLabel() {
                 SettingsRowType.LABEL,
                 R.string.debug_long_string_primary
             ),
-            getTogglePreferenceSetter = { {} },
-            getToggleState = { mutableStateOf(true) },
+            settingsPaneListener = getFakeSettingsPaneListener(),
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)

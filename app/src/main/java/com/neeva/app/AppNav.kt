@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.neeva.app.browsing.WebLayerModel
@@ -113,11 +112,12 @@ fun AppNav(
     // TODO(dan.alcantara): Not the best place to do this, but because of the way AppNav and
     //                      AppNavModel are currently intertwined, it's the best option we've
     //                      got until that's fixed.
-    val context = LocalContext.current
+    val sharedPreferencesModel = LocalEnvironment.current.sharedPreferencesModel
+    val user = LocalEnvironment.current.neevaUserToken
     LaunchedEffect(true) {
-        if (FirstRun.shouldShowFirstRun(context)) {
+        if (FirstRun.shouldShowFirstRun(sharedPreferencesModel, user)) {
             appNavModel.showFirstRun()
-            FirstRun.firstRunDone(context)
+            FirstRun.firstRunDone(sharedPreferencesModel)
         }
     }
 }
