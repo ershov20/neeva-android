@@ -21,8 +21,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Icon
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -69,18 +70,20 @@ fun FirstRunContainer() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.primaryContainer)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_baseline_close_24),
-            contentDescription = "Close",
-            contentScale = ContentScale.Inside,
+        FirstRunScreen()
+
+        IconButton(
+            onClick = { appNavModel.showBrowser() },
             modifier = Modifier
                 .align(Alignment.TopEnd)
-                .padding(10.dp)
-                .size(48.dp, 48.dp)
-                .clickable { appNavModel.showBrowser() },
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onPrimaryContainer)
-        )
-        FirstRunScreen()
+                .background(MaterialTheme.colorScheme.primaryContainer)
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_baseline_close_24),
+                contentDescription = stringResource(R.string.close),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+        }
     }
 }
 
@@ -95,7 +98,11 @@ fun FirstRunScreen() {
             .wrapContentSize()
             .verticalScroll(rememberScrollState())
     ) {
-        Spacer(modifier = Modifier.height(72.dp).fillMaxWidth())
+        Spacer(
+            modifier = Modifier
+                .height(72.dp)
+                .fillMaxWidth()
+        )
 
         if (signup) {
             Image(
