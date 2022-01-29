@@ -9,13 +9,14 @@ import android.view.View
 import android.view.WindowManager
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
-import androidx.navigation.compose.rememberNavController
 import com.apollographql.apollo3.ApolloClient
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
@@ -66,6 +67,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     private var appNavModel: AppNavModel? = null
 
+    @OptIn(ExperimentalAnimationApi::class)
     @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,7 +78,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         findViewById<ComposeView>(R.id.browser_ui).apply {
             setContent {
-                val navController = rememberNavController()
+                val navController = rememberAnimatedNavController()
 
                 appNavModel = remember(navController) {
                     AppNavModel(

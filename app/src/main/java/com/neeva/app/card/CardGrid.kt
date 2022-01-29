@@ -17,10 +17,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
@@ -51,7 +51,10 @@ import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 
-@OptIn(ExperimentalAnimationApi::class)
+@OptIn(
+    ExperimentalAnimationApi::class,
+    androidx.compose.foundation.ExperimentalFoundationApi::class
+)
 @Composable
 fun CardsContainer(webLayerModel: WebLayerModel) {
     val appNavModel = LocalEnvironment.current.appNavModel
@@ -92,7 +95,7 @@ fun CardsContainer(webLayerModel: WebLayerModel) {
     //                      and child tabs.
     val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
     val activeTabIndex: Int = tabs.indexOfFirst { it.isSelected }.coerceAtLeast(0)
-    val listState = LazyListState(activeTabIndex)
+    val gridState = LazyGridState(activeTabIndex)
 
     Surface {
         CardGrid(
@@ -101,7 +104,7 @@ fun CardsContainer(webLayerModel: WebLayerModel) {
             } else {
                 SelectedScreen.REGULAR_TABS
             },
-            listState = listState,
+            gridState = gridState,
             closeButtonEnabled = !browserWrapper.hasNoTabs(),
             cardGridListener = cardGridListener,
             tabs = tabs,
@@ -129,7 +132,7 @@ enum class SelectedScreen {
 @Composable
 fun CardGrid(
     selectedScreen: SelectedScreen,
-    listState: LazyListState,
+    gridState: LazyGridState,
     closeButtonEnabled: Boolean,
     cardGridListener: CardGridListener,
     tabs: List<TabInfo>,
@@ -209,7 +212,7 @@ fun CardGrid(
         } else {
             LazyVerticalGrid(
                 cells = GridCells.Fixed(2),
-                state = listState,
+                state = gridState,
                 modifier = contentModifier
             ) {
                 items(tabs) { tab ->
@@ -248,7 +251,9 @@ fun CardGrid(
                 Surface(
                     onClick = cardGridListener::onDone,
                     enabled = closeButtonEnabled,
-                    modifier = Modifier.fillMaxHeight().defaultMinSize(minWidth = 48.dp)
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .defaultMinSize(minWidth = 48.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Text(
@@ -277,6 +282,7 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
         emptyTabList = booleanArray[2]
     )
 
+    @OptIn(ExperimentalFoundationApi::class)
     @Preview("1x", locale = "en")
     @Preview("2x", locale = "en", fontScale = 2.0f)
     @Preview("RTL, 1x", locale = "he")
@@ -291,7 +297,7 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
         }
 
         NeevaTheme(useDarkTheme = darkTheme) {
-            val listState = rememberLazyListState()
+            val gridState = rememberLazyGridState()
             val cardGridListener = object : CardGridListener {
                 override fun onSelectTab(tab: TabInfo) {}
                 override fun onCloseTab(tab: TabInfo) {}
@@ -328,7 +334,7 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
 
             CardGrid(
                 selectedScreen = selectedScreen,
-                listState = listState,
+                gridState = gridState,
                 closeButtonEnabled = !params.emptyTabList,
                 cardGridListener = cardGridListener,
                 tabs = tabs,

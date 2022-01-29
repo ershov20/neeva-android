@@ -1,12 +1,14 @@
 package com.neeva.app
 
 import android.net.Uri
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
 import com.neeva.app.firstrun.FirstRun
@@ -20,6 +22,7 @@ import com.neeva.app.settings.ProfileSettingsContainer
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.Space
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNav(
     webLayerModel: WebLayerModel,
@@ -55,7 +58,7 @@ fun AppNav(
         }
     }
 
-    NavHost(
+    AnimatedNavHost(
         navController = appNavModel.navController,
         startDestination = AppNavDestination.BROWSER.route,
         modifier = modifier
@@ -64,32 +67,92 @@ fun AppNav(
             Box {}
         }
 
-        composable(AppNavDestination.ADD_TO_SPACE.route) {
+        composable(
+            AppNavDestination.ADD_TO_SPACE.route,
+            enterTransition = enterSlideTransition(
+                initialRoute = AppNavDestination.BROWSER.route,
+                AnimatedContentScope.SlideDirection.Up
+            ),
+            exitTransition = exitSlideTransition(
+                targetRoute = AppNavDestination.BROWSER.route,
+                AnimatedContentScope.SlideDirection.Down
+            )
+        ) {
             AddToSpaceSheet(
                 activeTabModel = browserWrapper.activeTabModel,
                 spaceModifier = spaceModifier
             )
         }
 
-        composable(AppNavDestination.NEEVA_MENU.route) {
+        composable(
+            AppNavDestination.NEEVA_MENU.route,
+            enterTransition = enterSlideTransition(
+                initialRoute = AppNavDestination.BROWSER.route,
+                AnimatedContentScope.SlideDirection.Up
+            ),
+            exitTransition = exitSlideTransition(
+                targetRoute = AppNavDestination.BROWSER.route,
+                AnimatedContentScope.SlideDirection.Down
+            )
+        ) {
             NeevaMenuSheet(onMenuItem = onMenuItem)
         }
 
-        composable(AppNavDestination.SETTINGS.route) {
+        composable(
+            AppNavDestination.SETTINGS.route,
+            enterTransition = enterSlideTransition(
+                initialRoute = AppNavDestination.NEEVA_MENU.route,
+                AnimatedContentScope.SlideDirection.Start
+            ),
+            exitTransition = exitSlideTransition(
+                targetRoute = AppNavDestination.BROWSER.route,
+                AnimatedContentScope.SlideDirection.End
+            )
+        ) {
             MainSettingsContainer()
         }
 
-        composable(AppNavDestination.PROFILE_SETTINGS.route) {
+        composable(
+            AppNavDestination.PROFILE_SETTINGS.route,
+            enterTransition = enterSlideTransition(
+                initialRoute = AppNavDestination.SETTINGS.route,
+                AnimatedContentScope.SlideDirection.Start
+            ),
+            exitTransition = exitSlideTransition(
+                targetRoute = AppNavDestination.BROWSER.route,
+                AnimatedContentScope.SlideDirection.End
+            )
+        ) {
             ProfileSettingsContainer()
         }
 
-        composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {
+        composable(
+            AppNavDestination.CLEAR_BROWSING_SETTINGS.route,
+            enterTransition = enterSlideTransition(
+                initialRoute = AppNavDestination.SETTINGS.route,
+                AnimatedContentScope.SlideDirection.Start
+            ),
+            exitTransition = exitSlideTransition(
+                targetRoute = AppNavDestination.SETTINGS.route,
+                AnimatedContentScope.SlideDirection.End
+            )
+        ) {
             ClearBrowsingSettingsContainer()
         }
 
         // TODO(dan.alcantara): Should we be using the regular profile's favicon cache here?
         //                      The history UI always shows the regular profile's history.
-        composable(AppNavDestination.HISTORY.route) {
+        composable(
+            AppNavDestination.HISTORY.route,
+            enterTransition = enterSlideTransition(
+                initialRoute = AppNavDestination.NEEVA_MENU.route,
+                AnimatedContentScope.SlideDirection.Start
+            ),
+            exitTransition = exitSlideTransition(
+                targetRoute = AppNavDestination.BROWSER.route,
+                AnimatedContentScope.SlideDirection.End
+            )
+        ) {
             HistoryContainer(
                 faviconCache = browserWrapper.faviconCache
             ) {

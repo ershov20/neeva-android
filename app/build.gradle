@@ -105,6 +105,7 @@ dependencies {
     // Pulling this dependency in allows us to define the constant @integer/google_play_services_version
     // in our Android Manifest.  We use the GMS version that matches the value we used when building
     // the WebLayerSupport APK, which was version 17.0.0.
+    implementation "com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha"
     implementation "com.google.android.gms:play-services-base:$play_services_version"
     implementation 'androidx.activity:activity-compose:1.4.0'
     implementation 'androidx.appcompat:appcompat:1.4.0'
