@@ -6,6 +6,9 @@
 
     <queries>
         <package android:name="org.chromium.weblayer.support" />
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
     </queries>
 
     <application
@@ -32,9 +35,9 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="neeva"/>
                 <data android:scheme="http"/>
                 <data android:scheme="https"/>
+                <data android:scheme="neeva"/>
             </intent-filter>
         </activity>
 

@@ -1,6 +1,8 @@
 package com.neeva.app.firstrun
 
+import android.content.Context
 import android.net.Uri
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
@@ -200,17 +202,12 @@ fun FirstRunScreen() {
                 enabled = emailProvided.contains("@"),
                 stringResID = R.string.sign_in_with_okta
             ) {
-                CustomTabsIntent.Builder()
-                    .setShowTitle(true)
-                    .build()
-                    .launchUrl(
-                        activityContext,
-                        FirstRun.authUri(
-                            signup,
-                            NeevaUser.SSOProvider.OKTA,
-                            emailProvided
-                        )
-                    )
+                FirstRun.launchLoginIntent(
+                    activityContext = activityContext,
+                    provider = NeevaUser.SSOProvider.OKTA,
+                    signup = signup,
+                    emailProvided = emailProvided
+                )
             }
             if (!emailProvided.contains("@")) {
                 Text(
@@ -238,13 +235,12 @@ fun FirstRunScreen() {
                     R.string.sign_up_with_google
                 }
             ) {
-                CustomTabsIntent.Builder()
-                    .setShowTitle(true)
-                    .build()
-                    .launchUrl(
-                        activityContext,
-                        FirstRun.authUri(signup, NeevaUser.SSOProvider.GOOGLE)
-                    )
+                FirstRun.launchLoginIntent(
+                    activityContext = activityContext,
+                    provider = NeevaUser.SSOProvider.GOOGLE,
+                    signup = signup,
+                    emailProvided = emailProvided
+                )
             }
             BrandedTextButton(
                 enabled = true,
@@ -254,13 +250,12 @@ fun FirstRunScreen() {
                     R.string.sign_in_with_microsoft
                 }
             ) {
-                CustomTabsIntent.Builder()
-                    .setShowTitle(true)
-                    .build()
-                    .launchUrl(
-                        activityContext,
-                        FirstRun.authUri(signup, NeevaUser.SSOProvider.MICROSOFT)
-                    )
+                FirstRun.launchLoginIntent(
+                    activityContext = activityContext,
+                    provider = NeevaUser.SSOProvider.MICROSOFT,
+                    signup = signup,
+                    emailProvided = emailProvided
+                )
             }
             if (signup) {
                 Spacer(modifier = Modifier.weight(1.0f))
@@ -391,5 +386,28 @@ object FirstRun {
 
     fun firstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
         sharedPreferencesModel.setValue(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, true)
+    }
+
+    fun launchLoginIntent(
+        activityContext: Context,
+        provider: NeevaUser.SSOProvider,
+        signup: Boolean,
+        emailProvided: String
+    ) {
+        val intent = CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .build()
+            .intent
+        intent.setPackage(
+            CustomTabsClient.getPackageName(
+                activityContext, listOf("com.android.chrome")
+            )
+        )
+        intent.data = authUri(
+            signup,
+            provider,
+            emailProvided
+        )
+        activityContext.startActivity(intent)
     }
 }

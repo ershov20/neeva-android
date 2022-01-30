@@ -165,6 +165,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             } else {
                 intent.data?.let {
                     webModel.currentBrowser.activeTabModel.loadUrl(it, newTab = true)
+                    appNavModel?.showBrowser()
                 }
             }
         }
