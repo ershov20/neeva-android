@@ -1,20 +1,20 @@
 package com.neeva.app
 
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Point
+import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
-import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
+import androidx.window.layout.WindowMetricsCalculator
 import com.apollographql.apollo3.ApolloClient
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.browsing.ActivityCallbacks
@@ -68,7 +68,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     private var appNavModel: AppNavModel? = null
 
     @OptIn(ExperimentalAnimationApi::class)
-    @SuppressLint("ResourceAsColor")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -151,23 +150,30 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
             }
         }
+
+        if (savedInstanceState != null && webModel.currentBrowser.isFullscreen()) {
+            // If the activity was recreated because the user entered a fullscreen video or website,
+            // hide the system bars.
+            onEnterFullscreen()
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        if (intent != null && intent.action == Intent.ACTION_VIEW) {
+
+        if (intent?.action == Intent.ACTION_VIEW) {
             if (Uri.parse(intent.dataString).scheme == "neeva") {
                 neevaUserToken.extractAuthTokenFromIntent(intent)?.let {
                     neevaUserToken.setToken(it)
                     webModel.onAuthTokenUpdated()
-                    appNavModel?.showBrowser()
                 }
             } else {
                 intent.data?.let {
                     webModel.currentBrowser.activeTabModel.loadUrl(it, newTab = true)
-                    appNavModel?.showBrowser()
                 }
             }
+
+            appNavModel?.showBrowser()
         }
     }
 
@@ -199,6 +205,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         val browserWrapper = webModel.currentBrowser
 
         when {
+            browserWrapper.exitFullscreen() -> {
+                return
+            }
+
             onBackPressedDispatcher.hasEnabledCallbacks() -> {
                 onBackPressedDispatcher.onBackPressed()
             }
@@ -217,38 +227,22 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
-    override fun onEnterFullscreen(onBackPressedCallback: OnBackPressedCallback): Int {
-        onBackPressedDispatcher.addCallback(onBackPressedCallback)
+    override fun onEnterFullscreen() {
+        val rootView: View = findViewById(android.R.id.content)
+        rootView.keepScreenOn = true
 
-        // This avoids an extra resize.
-        val attrs: WindowManager.LayoutParams = window.attributes
-        attrs.flags = attrs.flags or WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS
-        window.attributes = attrs
-        val decorView: View = window.decorView
-
-        // Caching the system ui visibility is ok for shell, but likely not ok for real code.
-        val systemVisibilityToRestore = decorView.systemUiVisibility
-        decorView.systemUiVisibility = (
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                or View.SYSTEM_UI_FLAG_LOW_PROFILE
-                or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-            )
-
-        return systemVisibilityToRestore
+        val controller = WindowInsetsControllerCompat(window, rootView)
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.hide(WindowInsetsCompat.Type.systemBars())
     }
 
-    override fun onExitFullscreen(systemVisibilityToRestore: Int) {
-        val decorView: View = window.decorView
-        decorView.systemUiVisibility = systemVisibilityToRestore
-        val attrs: WindowManager.LayoutParams = window.attributes
-        if (attrs.flags and WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS != 0) {
-            attrs.flags = attrs.flags and WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS.inv()
-            window.attributes = attrs
-        }
+    override fun onExitFullscreen() {
+        val rootView: View = findViewById(android.R.id.content)
+        rootView.keepScreenOn = false
+
+        val controller = WindowInsetsControllerCompat(window, rootView)
+        controller.show(WindowInsetsCompat.Type.systemBars())
     }
 
     override fun bringToForeground() {
@@ -276,12 +270,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
-    override fun getDisplaySize(): Point {
-        val windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
-        val display = windowManager.defaultDisplay
-        val point = Point()
-        display.getRealSize(point)
-        return point
+    override fun getDisplaySize(): Rect {
+        return WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(this).bounds
     }
 
     override fun onBottomBarOffsetChanged(offset: Int) {

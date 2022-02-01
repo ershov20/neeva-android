@@ -128,6 +128,7 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.navigation:navigation-compose:$navigation_compose_version"
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
+    implementation 'androidx.window:window:1.0.0'
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
     implementation 'com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha'
     implementation 'com.google.android.material:material:1.5.0'

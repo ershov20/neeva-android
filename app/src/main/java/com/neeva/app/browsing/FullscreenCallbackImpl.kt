@@ -1,36 +1,36 @@
 package com.neeva.app.browsing
 
-import androidx.activity.OnBackPressedCallback
 import org.chromium.weblayer.FullscreenCallback
 
 class FullscreenCallbackImpl(
-    private val onEnterFullscreen: (OnBackPressedCallback) -> Int?,
-    private val onExitFullscreen: (Int) -> Unit
+    private val activityEnterFullscreen: () -> Unit,
+    private val activityExitFullscreen: () -> Unit
 ) : FullscreenCallback() {
-    private var systemVisibilityToRestore = 0
     private var exitRunnable: Runnable? = null
-    private var onBackPressedCallback: OnBackPressedCallback? = null
 
     override fun onEnterFullscreen(exitFullscreenRunnable: Runnable) {
-        val newCallback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                exitFullscreenRunnable.run()
-            }
-        }
-
-        onBackPressedCallback = newCallback
         exitRunnable = exitFullscreenRunnable
-
-        onEnterFullscreen(newCallback)?.let {
-            systemVisibilityToRestore = it
-        }
+        activityEnterFullscreen()
     }
 
     override fun onExitFullscreen() {
-        onBackPressedCallback?.remove()
-        onBackPressedCallback = null
         exitRunnable = null
+        activityExitFullscreen()
+    }
 
-        onExitFullscreen(systemVisibilityToRestore)
+    fun isFullscreen() = exitRunnable != null
+
+    /**
+     * Exits fullscreen if the user is currently in it.
+     * @return True if we asked WebLayer to exit fullscreen, false otherwise.
+     */
+    fun exitFullscreen(): Boolean {
+        exitRunnable?.let {
+            it.run()
+            exitRunnable = null
+            return true
+        }
+
+        return false
     }
 }

@@ -100,16 +100,13 @@ abstract class BrowserWrapper(
     }
 
     private var fullscreenCallback = FullscreenCallbackImpl(
-        onEnterFullscreen = { callback ->
-            activityCallbackProvider()?.onEnterFullscreen(callback)
-        },
-        onExitFullscreen = { flags ->
-            activityCallbackProvider()?.onExitFullscreen(flags)
-        }
+        activityEnterFullscreen = { activityCallbackProvider()?.onEnterFullscreen() },
+        activityExitFullscreen = { activityCallbackProvider()?.onExitFullscreen() }
     )
 
     private val tabListCallback = object : TabListCallback() {
         override fun onActiveTabChanged(activeTab: Tab?) {
+            fullscreenCallback.exitFullscreen()
             activeTabModel.onActiveTabChanged(activeTab)
             tabList.updatedSelectedTab(activeTab?.guid)
         }
@@ -181,10 +178,8 @@ abstract class BrowserWrapper(
     fun initialize() {
         fragment = createBrowserFragment()
 
-        // Have WebLayer Shell retain the fragment instance to simulate the behavior of
-        // external embedders (note that if this is changed, then WebLayer Shell should handle
-        // rotations and resizes itself via its manifest, as otherwise the user loses all state
-        // when the shell is rotated in the foreground).
+        // Keep the WebLayer instance across Activity restarts so that the Browser doesn't get
+        // deleted when the configuration changes (e.g. the screen is rotated in fullscreen).
         fragment.retainInstance = true
     }
 
@@ -245,7 +240,7 @@ abstract class BrowserWrapper(
         registerBrowserCallbacks()
 
         activityCallbackProvider()?.getDisplaySize()?.let { windowSize ->
-            browser.setMinimumSurfaceSize(windowSize.x, windowSize.y)
+            browser.setMinimumSurfaceSize(windowSize.width(), windowSize.height())
         }
 
         // There appears to be a bug in WebLayer that prevents the bottom bar from being rendered,
@@ -404,6 +399,9 @@ abstract class BrowserWrapper(
 
     /** Returns true if the user should be forced to go to the card grid. */
     fun userMustBeShownCardGrid(): Boolean = hasNoTabs() && !urlBarModel.isLazyTab.value
+
+    fun isFullscreen(): Boolean = fullscreenCallback.isFullscreen()
+    fun exitFullscreen(): Boolean = fullscreenCallback.exitFullscreen()
 
     /** Provides access to the WebLayer profile. */
     override fun getProfile(): Profile? = browser?.profile
