@@ -56,14 +56,14 @@ fun FaviconView(
             ),
         Alignment.Center
     ) {
-        bitmap?.asImageBitmap()?.let {
+        if (bitmap != null) {
             Image(
-                bitmap = it,
+                bitmap = bitmap.asImageBitmap(),
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.FillBounds,
             )
-        } ?: run {
+        } else {
             Image(
                 painter = painterResource(R.drawable.globe),
                 contentDescription = null,

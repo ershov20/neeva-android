@@ -87,7 +87,7 @@ abstract class BrowserWrapper(
         urlBarModel = URLBarModel(
             isIncognito = isIncognito,
             activeTabModel = activeTabModel,
-            suggestionFlow = suggestionsModel?.autocompleteSuggestion ?: MutableStateFlow(null),
+            suggestionFlow = suggestionsModel?.autocompleteSuggestionFlow ?: MutableStateFlow(null),
             appContext = appContext,
             coroutineScope = coroutineScope,
             faviconCache = faviconCache,

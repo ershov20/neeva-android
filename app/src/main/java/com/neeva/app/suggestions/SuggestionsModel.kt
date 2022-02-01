@@ -11,12 +11,16 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.type.QuerySuggestionType
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class NavSuggestion(
     val url: Uri,
@@ -47,7 +51,6 @@ class SuggestionsModel(
     coroutineScope: CoroutineScope,
     historyManager: HistoryManager,
     private val apolloClient: ApolloClient,
-    private val domainProvider: DomainProvider,
     dispatchers: Dispatchers
 ) {
     companion object {
@@ -56,22 +59,20 @@ class SuggestionsModel(
 
     private val _suggestionFlow = MutableStateFlow(Suggestions())
     val suggestionFlow: StateFlow<Suggestions> = _suggestionFlow
-
-    private val _autocompleteSuggestion = MutableStateFlow<NavSuggestion?>(null)
-    val autocompleteSuggestion: StateFlow<NavSuggestion?> = _autocompleteSuggestion
+    val autocompleteSuggestionFlow: StateFlow<NavSuggestion?> = _suggestionFlow
+        .map { it.autocompleteSuggestion }
+        .distinctUntilChanged()
+        .stateIn(coroutineScope, SharingStarted.Eagerly, null)
 
     init {
-        historyManager.siteSuggestions
-            .onEach { suggestions ->
-                _autocompleteSuggestion.value =
-                    suggestions.firstOrNull()?.toNavSuggestion(domainProvider)
-
+        coroutineScope.launch(dispatchers.io) {
+            historyManager.historySuggestions.collectLatest { suggestions ->
+                val newSuggestion = suggestions.firstOrNull()
                 _suggestionFlow.value = _suggestionFlow.value.copy(
-                    autocompleteSuggestion = _autocompleteSuggestion.value
+                    autocompleteSuggestion = newSuggestion
                 )
             }
-            .flowOn(dispatchers.io)
-            .launchIn(coroutineScope)
+        }
     }
 
     internal suspend fun getSuggestionsFromBackend(newValue: String?) {
@@ -92,6 +93,10 @@ class SuggestionsModel(
                 if (result == null || response.hasErrors()) {
                     Log.e(TAG, "Failed to parse response.  Has errors: ${response.hasErrors()}")
                 }
+            } catch (e: CancellationException) {
+                // Report nothing because the Flow itself was cancelled -- probably because the user
+                // continued typing something else.  Keep the old suggestions displayed.
+                return
             } catch (e: Exception) {
                 Log.e(TAG, "Caught exception while performing query.  Removing suggestions", e)
             }
@@ -102,22 +107,17 @@ class SuggestionsModel(
 
     private fun updateWith(suggestionResultsData: SuggestionsQuery.Data?) {
         val suggestionResults = suggestionResultsData?.suggest
-        if (suggestionResults == null) {
-            // Clear out all the suggestions.
-            _suggestionFlow.value = Suggestions(
-                autocompleteSuggestion = autocompleteSuggestion.value
-            )
-            return
-        }
+        val queryRowSuggestions = suggestionResults?.querySuggestion
+            ?.map { it.toQueryRowSuggestion() }
+            ?: emptyList()
+        val viewableSuggestions = suggestionResults?.urlSuggestion
+            ?.filter { !it.subtitle.isNullOrEmpty() && !it.title.isNullOrEmpty() }
+            ?.map { it.toNavSuggestion() }
+            ?: emptyList()
 
-        val urlSuggestionsSplit = suggestionResults.urlSuggestion
-            .partition { !it.subtitle.isNullOrEmpty() && !it.title.isNullOrEmpty() }
-        val viewableSuggestions = urlSuggestionsSplit.first
-        _suggestionFlow.value = Suggestions(
-            autocompleteSuggestion = autocompleteSuggestion.value,
-            queryRowSuggestions =
-            suggestionResults.querySuggestion.map { it.toQueryRowSuggestion() },
-            navSuggestions = viewableSuggestions.map { it.toNavSuggestion() }
+        _suggestionFlow.value = _suggestionFlow.value.copy(
+            queryRowSuggestions = queryRowSuggestions,
+            navSuggestions = viewableSuggestions
         )
     }
 }

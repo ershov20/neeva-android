@@ -17,6 +17,7 @@ import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -48,7 +49,6 @@ class RegularBrowserWrapper(
         coroutineScope,
         historyManager,
         apolloClient,
-        domainProvider,
         dispatchers
     ),
     faviconCache = RegularFaviconCache(
@@ -64,19 +64,15 @@ class RegularBrowserWrapper(
     }
 
     init {
-        urlBarModel.queryTextFlow
-            .onEach { queryText ->
+        coroutineScope.launch(dispatchers.io) {
+            urlBarModel.queryTextFlow.collectLatest { queryText ->
                 // Pull new suggestions from the database.
-                coroutineScope.launch(dispatchers.io) {
-                    historyManager.updateSuggestionQuery(queryText)
-                }
+                historyManager.updateSuggestionQuery(queryText)
 
                 // Ask the backend for suggestions appropriate for the currently typed in text.
-                coroutineScope.launch(dispatchers.io) {
-                    suggestionsModel?.getSuggestionsFromBackend(queryText)
-                }
+                suggestionsModel?.getSuggestionsFromBackend(queryText)
             }
-            .launchIn(coroutineScope)
+        }
 
         urlBarModel.isEditing
             .onEach { isEditing -> if (isEditing) spaceStore.refresh() }

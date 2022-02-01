@@ -11,7 +11,6 @@ import com.neeva.app.storage.favicons.FaviconCache
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.FaviconCallback
@@ -57,9 +56,7 @@ class TabCallbacks(
             val url = tab.currentDisplayUrl
 
             coroutineScope.launch {
-                val faviconData = withContext(dispatchers.io) {
-                    faviconCache.saveFavicon(url, favicon)
-                }
+                val faviconData = faviconCache.saveFavicon(url, favicon)
 
                 if (!isIncognito) {
                     url?.let {
@@ -118,14 +115,18 @@ class TabCallbacks(
 
             if (shouldRecordVisit) {
                 visitToCommit?.let { visit ->
-                    historyManager?.upsert(
-                        url = navigation.uri,
-                        title = tab.currentDisplayTitle,
-                        visit = visit
-                    )
+                    val uri = navigation.uri
+                    val title = tab.currentDisplayTitle
 
-                    visitToCommit = null
+                    coroutineScope.launch {
+                        historyManager?.upsert(
+                            url = uri,
+                            title = title,
+                            visit = visit
+                        )
+                    }
                 }
+                visitToCommit = null
             }
         }
     }
@@ -139,7 +140,9 @@ class TabCallbacks(
 
         override fun onTitleUpdated(title: String) {
             tab.currentDisplayUrl?.let {
-                historyManager?.upsert(url = it, title = title)
+                coroutineScope.launch {
+                    historyManager?.upsert(url = it, title = title)
+                }
             }
 
             tabList.updateTabTitle(tab.guid, title)

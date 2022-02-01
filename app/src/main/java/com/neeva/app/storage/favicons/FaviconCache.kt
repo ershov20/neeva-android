@@ -62,8 +62,8 @@ abstract class FaviconCache(
 
     @WorkerThread
     @CallSuper
-    open suspend fun saveFavicon(siteUri: Uri?, bitmap: Bitmap?): Favicon? {
-        bitmap ?: return null
+    open suspend fun saveFavicon(siteUri: Uri?, bitmap: Bitmap?) = withContext(dispatchers.io) {
+        bitmap ?: return@withContext null
 
         // Create an MD5 hash of the Bitmap that we can use to find it later.
         val stream = ByteArrayOutputStream()
@@ -80,16 +80,16 @@ abstract class FaviconCache(
 
         // Don't bother writing the file out again if it already exists.
         try {
-            if (md5File.exists()) return favicon
+            if (md5File.exists()) return@withContext favicon
         } catch (e: SecurityException) {
             Log.e(TAG, "Failed to check if favicon exists: ${md5File.absolutePath}", e)
-            return null
+            return@withContext null
         }
 
         // Write the favicon out to storage.
         var outputStream: OutputStream? = null
         var bufferedOutputStream: BufferedOutputStream? = null
-        return try {
+        return@withContext try {
             faviconDirectory.mkdirs()
             outputStream = getOutputStream(md5File)
             bufferedOutputStream = BufferedOutputStream(outputStream)

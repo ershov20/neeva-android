@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(
@@ -56,9 +57,6 @@ class HistoryManager(
     private val frequentSites: Flow<List<Site>> =
         dao.getFrequentSitesAfterFlow(HISTORY_START_DATE, MAX_FREQUENT_SITES)
 
-    private val _siteSuggestions = MutableStateFlow<List<Site>>(emptyList())
-    val siteSuggestions: StateFlow<List<Site>> = _siteSuggestions
-
     private val _historySuggestions = MutableStateFlow<List<NavSuggestion>>(emptyList())
     val historySuggestions: StateFlow<List<NavSuggestion>> = _historySuggestions
 
@@ -68,15 +66,14 @@ class HistoryManager(
 
     /** Provides non-Neeva sites from history as suggestions. */
     val suggestedSites: Flow<List<Site>> =
-        frequentSites
-            .map { sites ->
-                // Assume that anything pointing at neeva.com should not be recommended to the user.
-                // This includes search suggestions and Spaces, e.g.
-                sites.filterNot {
-                    val registeredDomain = domainProvider.getRegisteredDomain(Uri.parse(it.siteURL))
-                    registeredDomain == NeevaConstants.appHost
-                }
+        frequentSites.map { sites ->
+            // Assume that anything pointing at neeva.com should not be recommended to the user.
+            // This includes search suggestions and Spaces, e.g.
+            sites.filterNot {
+                val registeredDomain = domainProvider.getRegisteredDomain(Uri.parse(it.siteURL))
+                registeredDomain == NeevaConstants.appHost
             }
+        }
 
     /** Updates the query that is being used to fetch history suggestions. */
     suspend fun updateSuggestionQuery(currentInput: String?) {
@@ -86,13 +83,7 @@ class HistoryManager(
             emptyList()
         }
 
-        _siteSuggestions.value = siteSuggestions
-
-        // Determine what history should be suggested as the user types out a query.
-        val combinedSuggestions = _siteSuggestions.value.map { it.toNavSuggestion(domainProvider) }
-
-        // Keep only the unique history items with unique URLs.
-        _historySuggestions.value = combinedSuggestions.distinctBy { it.url }
+        _historySuggestions.value = siteSuggestions.map { it.toNavSuggestion(domainProvider) }
     }
 
     /** Returns the favicon that corresponds to an exact visit in the user's history. */
@@ -103,13 +94,13 @@ class HistoryManager(
     }
 
     /** Inserts or updates an item into the history. */
-    fun upsert(
+    suspend fun upsert(
         url: Uri,
         title: String? = null,
         favicon: Favicon? = null,
         visit: Visit? = null
     ) {
-        coroutineScope.launch(dispatchers.io) {
+        withContext(dispatchers.io) {
             dao.upsert(url, title, favicon, visit)
         }
     }

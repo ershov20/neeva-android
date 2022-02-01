@@ -10,6 +10,7 @@ import com.neeva.app.SuggestionsQuery
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Site
+import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.Suggestions
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.suggestions.toNavSuggestion
@@ -59,7 +60,7 @@ class SuggestionsModelTest : BaseTest() {
 
     @Mock lateinit var domainProvider: DomainProvider
 
-    private lateinit var siteSuggestions: MutableStateFlow<List<Site>>
+    private lateinit var siteSuggestions: MutableStateFlow<List<NavSuggestion>>
     private lateinit var urlBarText: MutableStateFlow<TextFieldValue>
     private lateinit var urlBarIsEditing: MutableStateFlow<Boolean>
     private lateinit var responseData: String
@@ -80,7 +81,7 @@ class SuggestionsModelTest : BaseTest() {
         urlBarIsEditing = MutableStateFlow(false)
 
         historyManager = mock()
-        Mockito.`when`(historyManager.siteSuggestions).thenReturn(siteSuggestions)
+        Mockito.`when`(historyManager.historySuggestions).thenReturn(siteSuggestions)
 
         apolloClient = ApolloClient.Builder()
             .serverUrl("https://fake.url")
@@ -95,7 +96,6 @@ class SuggestionsModelTest : BaseTest() {
             coroutineScopeRule.scope,
             historyManager,
             apolloClient,
-            domainProvider,
             testDispatcher
         )
 
@@ -127,7 +127,7 @@ class SuggestionsModelTest : BaseTest() {
 
     @Test
     fun init_collectsHistorySuggestions() {
-        expectThat(model.autocompleteSuggestion.value).isNull()
+        expectThat(model.autocompleteSuggestionFlow.value).isNull()
         expectThat(model.suggestionFlow.value).isEqualTo(Suggestions())
 
         siteSuggestions.value = listOf(
@@ -135,17 +135,18 @@ class SuggestionsModelTest : BaseTest() {
                 siteURL = "https://www.reddit.com/r/android",
                 title = null,
                 largestFavicon = null
-            ),
+            ).toNavSuggestion(domainProvider),
             Site(
                 siteURL = "https://www.ignored.url",
                 title = null,
                 largestFavicon = null
-            )
+            ).toNavSuggestion(domainProvider)
         )
 
         coroutineScopeRule.scope.advanceUntilIdle()
-        val navSuggestions = siteSuggestions.value.map { it.toNavSuggestion(domainProvider) }
-        expectThat(model.autocompleteSuggestion.value).isEqualTo(navSuggestions.first())
+
+        val navSuggestions = siteSuggestions.value
+        expectThat(model.autocompleteSuggestionFlow.value).isEqualTo(navSuggestions.first())
         expectThat(model.suggestionFlow.value).isEqualTo(
             Suggestions(autocompleteSuggestion = navSuggestions.first())
         )
@@ -173,13 +174,13 @@ class SuggestionsModelTest : BaseTest() {
                 siteURL = "https://www.reddit.com/r/android",
                 title = null,
                 largestFavicon = null
-            )
+            ).toNavSuggestion(domainProvider)
         )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Make sure the autocomplete suggestion has been set and nothing else has.
-        val expectedSuggestion = siteSuggestions.value.first().toNavSuggestion(domainProvider)
-        expectThat(model.autocompleteSuggestion.value).isEqualTo(expectedSuggestion)
+        val expectedSuggestion = siteSuggestions.value.first()
+        expectThat(model.autocompleteSuggestionFlow.value).isEqualTo(expectedSuggestion)
         expectThat(model.suggestionFlow.value).isEqualTo(
             Suggestions(autocompleteSuggestion = expectedSuggestion)
         )
@@ -277,7 +278,7 @@ class SuggestionsModelTest : BaseTest() {
         )
 
         // Make sure that autocomplete suggestion was retained
-        expectThat(model.autocompleteSuggestion.value).isEqualTo(expectedSuggestion)
+        expectThat(model.autocompleteSuggestionFlow.value).isEqualTo(expectedSuggestion)
         expectThat(model.suggestionFlow.value.autocompleteSuggestion).isEqualTo(expectedSuggestion)
     }
 

@@ -108,13 +108,6 @@ class URLBarModel(
         userInputStateValue: URLBarModelState
     ): URLBarModelState {
         var newState = userInputStateValue.copy()
-
-        // If IME is doing any compositing, abort autocompleting.  This avoids *most* issues where
-        // IME's state gets corrupted by the text we tack on afterwards, but the standard LatinIME
-        // can still abort composition if you type too fast, resulting in the IME dropping those
-        // characters entirely.
-        if (userInputStateValue.textFieldValue.composition != null) return newState
-
         val userInput = userInputStateValue.userTypedInput
         val suggestion = suggestionValue.takeIf {
             userInputStateValue.allowAutocomplete || isExactMatch(suggestionValue, userInput)
