@@ -2,6 +2,7 @@ package com.neeva.app.browsing
 
 import android.content.Context
 import android.net.Uri
+import androidx.annotation.NonNull
 import androidx.fragment.app.Fragment
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.Dispatchers
@@ -13,7 +14,9 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.RegularTabScreenshotManager
+import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
@@ -22,7 +25,9 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.chromium.weblayer.BrowsingDataType
 import org.chromium.weblayer.CookieChangedCallback
+import org.chromium.weblayer.CookieManager
 import org.chromium.weblayer.WebLayer
 
 /**
@@ -35,7 +40,7 @@ class RegularBrowserWrapper(
     dispatchers: Dispatchers,
     activityCallbackProvider: () -> ActivityCallbacks?,
     domainProvider: DomainProvider,
-    apolloClient: ApolloClient,
+    val apolloClient: ApolloClient,
     override val historyManager: HistoryManager,
     spaceStore: SpaceStore,
     val neevaUserToken: NeevaUserToken
@@ -92,8 +97,8 @@ class RegularBrowserWrapper(
 
         browser?.profile?.cookieManager?.apply {
             getCookie(Uri.parse(NeevaConstants.appURL)) {
-                it?.split("; ")?.forEach { cookie ->
-                    saveLoginCookieFrom(neevaUserToken, cookie)
+                it?.split(";")?.forEach { cookie ->
+                    saveLoginCookieFrom(neevaUserToken, cookie.trim())
                 }
             }
 
@@ -103,6 +108,9 @@ class RegularBrowserWrapper(
                 object : CookieChangedCallback() {
                     override fun onCookieChanged(cookie: String, cause: Int) {
                         saveLoginCookieFrom(neevaUserToken, cookie)
+                        coroutineScope.launch(dispatchers.io) {
+                            NeevaUser.fetch(apolloClient)
+                        }
                     }
                 }
             )
@@ -131,5 +139,44 @@ class RegularBrowserWrapper(
                 activeTabModel.reload()
             }
         }
+    }
+
+    fun getCookies(cookieManager: CookieManager?, site: Site, callBack: (String) -> Unit) {
+        cookieManager?.apply {
+            getCookie(Uri.parse(site.siteURL)) { cookieString ->
+                callBack(cookieString)
+            }
+        }
+    }
+
+    fun clearNonNeevaCookies(@NonNull @BrowsingDataType flags: IntArray) {
+        coroutineScope.launch(dispatchers.main) {
+            val oldNeevaAuthToken = neevaUserToken.getToken()
+            browser?.profile?.clearBrowsingData(flags) {
+                browser?.profile?.cookieManager
+                    ?.setCookie(
+                        Uri.parse(NeevaConstants.appURL),
+                        "$NeevaConstants.loginCookie=$oldNeevaAuthToken;",
+                        null
+                    )
+            }
+            onAuthTokenUpdated()
+        }
+    }
+
+    fun clearNeevaCookie(siteURL: String, cookieKey: String) {
+        browser?.profile?.cookieManager
+            ?.setCookie(
+                Uri.parse(siteURL),
+                "$cookieKey=;",
+                null
+            )
+    }
+
+    fun clearNeevaCookies() {
+        if (!neevaUserToken.getToken().isNullOrEmpty()) {
+            clearNeevaCookie(NeevaConstants.appURL, NeevaConstants.loginCookie)
+        }
+        onAuthTokenUpdated()
     }
 }

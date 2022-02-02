@@ -39,7 +39,7 @@ import org.chromium.weblayer.TabListCallback
 abstract class BrowserWrapper(
     val isIncognito: Boolean,
     val appContext: Context,
-    val coroutineScope: CoroutineScope,
+    protected val coroutineScope: CoroutineScope,
     val dispatchers: Dispatchers,
     val activityCallbackProvider: () -> ActivityCallbacks?,
     val suggestionsModel: SuggestionsModel?,

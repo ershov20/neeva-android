@@ -23,7 +23,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun ClearBrowsingDataButton(
     text: String,
-    clearHistory: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier
 ) {
     val textState = remember { mutableStateOf(text) }
@@ -35,7 +35,7 @@ fun ClearBrowsingDataButton(
                 Modifier
             } else {
                 Modifier.clickable {
-                    clearHistory()
+                    onClick()
                     textState.value = clearText
                 }
             }
@@ -66,7 +66,7 @@ fun ClearBrowsingDataButton_Preview() {
     NeevaTheme {
         ClearBrowsingDataButton(
             text = stringResource(R.string.debug_long_string_primary),
-            clearHistory = {},
+            onClick = {},
             rowModifier
         )
     }
@@ -87,7 +87,7 @@ fun ClearBrowsingDataButton_Dark_Preview() {
 
         ClearBrowsingDataButton(
             text = stringResource(R.string.debug_long_string_primary),
-            clearHistory = {},
+            onClick = {},
             rowModifier
         )
     }

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
@@ -94,6 +93,7 @@ fun FirstRunScreen() {
     val activityContext = LocalContext.current
     var emailProvided by remember { mutableStateOf("") }
     var signup by remember { mutableStateOf(true) }
+    val appNavModel = LocalEnvironment.current.appNavModel
 
     Column(
         Modifier
@@ -353,7 +353,6 @@ fun FirstRun_PreviewDark() {
 }
 
 object FirstRun {
-    private const val FIRST_RUN_PREFS_FOLDER_NAME = "FIRST_RUN_PREFERENCES"
     private const val FIRST_RUN_DONE_KEY = "HAS_FINISHED_FIRST_RUN"
 
     fun authUri(signup: Boolean, provider: NeevaUser.SSOProvider, loginHint: String = ""): Uri {

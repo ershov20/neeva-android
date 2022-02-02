@@ -8,7 +8,6 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 /**
  * Provides Neeva user identity token. Good for checking if the user is logged in.
  */
-
 class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
     private val KEY_TOKEN = "TOKEN"
 

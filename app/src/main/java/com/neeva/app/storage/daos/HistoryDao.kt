@@ -40,6 +40,15 @@ interface HistoryDao : SiteDao, VisitDao {
     )
     fun getPagedSitesVisitedAfter(thresholdTime: Date): PagingSource<Int, Site>
 
+    @Query(
+        """
+        SELECT *
+        FROM site INNER JOIN visit ON site.siteUID = visit.visitedSiteUID
+        ORDER BY visit.timestamp DESC
+        """
+    )
+    fun getAllSitesVisited(): List<Site>
+
     /** Deletes any entries in the [Site] table that have no corresponding [Visit] information. */
     @Query(
         """

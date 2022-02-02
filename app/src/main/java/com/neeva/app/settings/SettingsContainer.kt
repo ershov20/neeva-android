@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import com.neeva.app.AppNavModel
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.settings.clearBrowsingSettings.ClearBrowsingSettingsPane
 import com.neeva.app.settings.mainSettings.MainSettingsPane
@@ -52,20 +53,30 @@ fun MainSettingsContainer() {
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ProfileSettingsContainer() {
+fun ProfileSettingsContainer(webLayerModel: WebLayerModel) {
     val appNavModel = LocalEnvironment.current.appNavModel
     val settingsModel = LocalEnvironment.current.settingsModel
-    ProfileSettingsPane(onBackPressed = appNavModel::popBackStack) {
-        settingsModel.signOut()
-        appNavModel.showSettings()
-    }
+    val activeTabModel = LocalEnvironment.current.browserWrapper.activeTabModel
+    ProfileSettingsPane(
+        onBackPressed = appNavModel::popBackStack,
+        signUserOut = {
+            settingsModel.signOut()
+            appNavModel.popBackStack()
+            webLayerModel.clearNeevaCookies()
+            webLayerModel.onAuthTokenUpdated()
+            activeTabModel.reload()
+        }
+    )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun ClearBrowsingSettingsContainer() {
+fun ClearBrowsingSettingsContainer(webLayerModel: WebLayerModel) {
     val appNavModel = LocalEnvironment.current.appNavModel
     val settingsModel = LocalEnvironment.current.settingsModel
     val historyManager = LocalEnvironment.current.historyManager
-    ClearBrowsingSettingsPane(getSettingsPaneListener(appNavModel, settingsModel, historyManager))
+    ClearBrowsingSettingsPane(
+        getSettingsPaneListener(appNavModel, settingsModel, historyManager),
+        webLayerModel::clearBrowsingData
+    )
 }

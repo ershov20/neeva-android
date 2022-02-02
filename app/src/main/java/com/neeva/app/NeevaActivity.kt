@@ -130,10 +130,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             }
         }
 
-        lifecycleScope.launchWhenCreated {
-            withContext(dispatchers.io) {
-                NeevaUser.fetch(apolloClient)
-            }
+        lifecycleScope.launch {
+            fetchNeevaUserInfo()
         }
 
         // Display the correct Fragment when the user switches profiles.
@@ -158,6 +156,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
+    suspend fun fetchNeevaUserInfo() {
+        withContext(dispatchers.io) {
+            NeevaUser.fetch(apolloClient)
+        }
+    }
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
@@ -166,6 +170,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 neevaUserToken.extractAuthTokenFromIntent(intent)?.let {
                     neevaUserToken.setToken(it)
                     webModel.onAuthTokenUpdated()
+                    appNavModel?.showBrowser()
+                    webModel.currentBrowser.activeTabModel.reload()
                 }
             } else {
                 intent.data?.let {

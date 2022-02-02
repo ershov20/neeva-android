@@ -19,7 +19,7 @@ object ClearBrowsingSettingsData {
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     titleId = R.string.settings_browsing_history,
-                    togglePreferenceKey = SettingsToggle.SHOW_SEARCH_SUGGESTIONS.key
+                    togglePreferenceKey = SettingsToggle.CLEAR_BROWSING_HISTORY.key
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,

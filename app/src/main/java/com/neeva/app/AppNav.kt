@@ -123,7 +123,7 @@ fun AppNav(
                 AnimatedContentScope.SlideDirection.End
             )
         ) {
-            ProfileSettingsContainer()
+            ProfileSettingsContainer(webLayerModel)
         }
 
         composable(
@@ -137,7 +137,7 @@ fun AppNav(
                 AnimatedContentScope.SlideDirection.End
             )
         ) {
-            ClearBrowsingSettingsContainer()
+            ClearBrowsingSettingsContainer(webLayerModel)
         }
 
         // TODO(dan.alcantara): Should we be using the regular profile's favicon cache here?

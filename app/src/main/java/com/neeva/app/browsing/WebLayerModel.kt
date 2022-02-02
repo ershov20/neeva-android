@@ -11,6 +11,7 @@ import com.neeva.app.LoadingState
 import com.neeva.app.NeevaUserToken
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceStore
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
+import org.chromium.weblayer.BrowsingDataType
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
@@ -35,7 +37,7 @@ import org.chromium.weblayer.WebLayer
 class WebLayerModel(
     private val appContext: Context,
     private val domainProviderImpl: DomainProviderImpl,
-    historyManager: HistoryManager,
+    private val historyManager: HistoryManager,
     apolloClient: ApolloClient,
     spaceStore: SpaceStore,
     private val coroutineScope: CoroutineScope,
@@ -152,6 +154,37 @@ class WebLayerModel(
                 activityCallbacks.get()?.detachIncognitoFragment()
                 incognitoBrowser = null
             }
+        }
+    }
+
+    fun clearNeevaCookies() = regularBrowser::clearNeevaCookies
+
+    fun clearBrowsingData(clearingOptions: MutableMap<String, Boolean>) {
+        val clearCookiesFlags = mutableListOf<Int>()
+        clearingOptions.keys.forEach {
+            if (clearingOptions[it] == true) {
+                when (it) {
+                    SettingsToggle.CLEAR_BROWSING_HISTORY.key -> {
+                        historyManager.clearAllHistory()
+                    }
+                    SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION.key -> {
+                    }
+                    SettingsToggle.CLEAR_DOWNLOADED_FILES.key -> {
+                    }
+                    SettingsToggle.CLEAR_COOKIES.key -> {
+                        clearCookiesFlags.add(BrowsingDataType.COOKIES_AND_SITE_DATA)
+                        // clearCookiesFlags.add(BrowsingDataType.SITE_SETTINGS)
+                    }
+                    SettingsToggle.CLEAR_CACHE.key -> {
+                        clearCookiesFlags.add(BrowsingDataType.CACHE)
+                    }
+                    else -> { }
+                    // TODO(kobec): finish this for the other parameters
+                }
+            }
+        }
+        if (clearCookiesFlags.size > 0) {
+            regularBrowser.clearNonNeevaCookies(clearCookiesFlags.toIntArray())
         }
     }
 }

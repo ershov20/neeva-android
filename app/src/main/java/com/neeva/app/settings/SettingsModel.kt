@@ -54,6 +54,6 @@ class SettingsModel(
     }
 
     fun isSignedIn(): Boolean {
-        return neevaUserToken.getToken().isNullOrEmpty()
+        return !neevaUserToken.getToken().isNullOrEmpty() && NeevaUser.shared.id != null
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -21,12 +22,16 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsPaneListener
 import com.neeva.app.settings.SettingsRow
+import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsTopAppBar
 import com.neeva.app.settings.mainSettings.getFakeSettingsPaneListener
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun ClearBrowsingSettingsPane(settingsPaneListener: SettingsPaneListener) {
+fun ClearBrowsingSettingsPane(
+    settingsPaneListener: SettingsPaneListener,
+    onClearBrowsingData: (MutableMap<String, Boolean>) -> Unit
+) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -75,7 +80,14 @@ fun ClearBrowsingSettingsPane(settingsPaneListener: SettingsPaneListener) {
                         val title = stringResource(id = rowData.titleId)
                         ClearBrowsingDataButton(
                             text = title,
-                            clearHistory = settingsPaneListener.onClearHistory,
+                            onClick = {
+                                onClearBrowsingData(
+                                    getClearingOptions(
+                                        ClearBrowsingSettingsData.data[0].rows,
+                                        settingsPaneListener.getToggleState
+                                    )
+                                )
+                            },
                             modifier = rowModifier
                         )
                     } else {
@@ -91,6 +103,20 @@ fun ClearBrowsingSettingsPane(settingsPaneListener: SettingsPaneListener) {
     }
 }
 
+fun getClearingOptions(
+    rowData: List<SettingsRowData>,
+    getToggleState: (String?) -> MutableState<Boolean>?
+): MutableMap<String, Boolean> {
+    val clearingOptions = mutableMapOf<String, Boolean>()
+    rowData.forEach {
+        if (it.togglePreferenceKey != null) {
+            val clearOptionValue = getToggleState(it.togglePreferenceKey)?.value ?: false
+            clearingOptions[it.togglePreferenceKey] = clearOptionValue
+        }
+    }
+    return clearingOptions
+}
+
 @Preview(name = "Clear Browsing Pane, 1x font size", locale = "en")
 @Preview(name = "Clear Browsing Pane, 2x font size", locale = "en", fontScale = 2.0f)
 @Preview(name = "Clear Browsing Pane, RTL, 1x font size", locale = "he")
@@ -98,7 +124,7 @@ fun ClearBrowsingSettingsPane(settingsPaneListener: SettingsPaneListener) {
 @Composable
 fun ClearBrowsingSettings_Preview() {
     NeevaTheme {
-        ClearBrowsingSettingsPane(getFakeSettingsPaneListener())
+        ClearBrowsingSettingsPane(getFakeSettingsPaneListener(), {})
     }
 }
 
@@ -109,6 +135,6 @@ fun ClearBrowsingSettings_Preview() {
 @Composable
 fun ClearBrowsingSettings_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        ClearBrowsingSettingsPane(getFakeSettingsPaneListener())
+        ClearBrowsingSettingsPane(getFakeSettingsPaneListener(), {})
     }
 }
