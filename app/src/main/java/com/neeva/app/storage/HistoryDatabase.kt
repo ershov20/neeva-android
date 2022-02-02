@@ -15,10 +15,11 @@ import com.neeva.app.storage.entities.Visit
 
 @Database(
     entities = [Site::class, Visit::class],
-    version = 8,
+    version = 9,
     autoMigrations = [
         AutoMigration(from = 6, to = 7, spec = HistoryDatabase.MigrationFrom6To7::class),
-        AutoMigration(from = 7, to = 8, spec = HistoryDatabase.MigrationFrom7To8::class)
+        AutoMigration(from = 7, to = 8, spec = HistoryDatabase.MigrationFrom7To8::class),
+        AutoMigration(from = 8, to = 9, spec = HistoryDatabase.MigrationFrom8To9::class)
     ]
 )
 @TypeConverters(com.neeva.app.storage.TypeConverters::class)
@@ -56,4 +57,10 @@ abstract class HistoryDatabase : RoomDatabase() {
         DeleteTable(tableName = "Domain")
     )
     class MigrationFrom7To8 : AutoMigrationSpec
+
+    @DeleteColumn.Entries(
+        DeleteColumn(tableName = "Visit", columnName = "visitRootID"),
+        DeleteColumn(tableName = "Visit", columnName = "visitType")
+    )
+    class MigrationFrom8To9 : AutoMigrationSpec
 }

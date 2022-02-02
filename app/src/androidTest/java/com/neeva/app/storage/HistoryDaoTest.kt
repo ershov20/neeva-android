@@ -31,11 +31,7 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
                 url = Uri.parse("https://www.a.com"),
                 title = "Title A",
                 favicon = null,
-                visit = Visit(
-                    visitRootID = 0L,
-                    visitType = 0,
-                    timestamp = Date(10000L + i),
-                )
+                visit = Visit(timestamp = Date(10000L + i))
             )
         }
         for (i in 0 until 2) {
@@ -43,22 +39,14 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
                 url = Uri.parse("https://www.b.com"),
                 title = "Title B",
                 favicon = null,
-                visit = Visit(
-                    visitRootID = 0L,
-                    visitType = 0,
-                    timestamp = Date(20000L + i),
-                )
+                visit = Visit(timestamp = Date(20000L + i))
             )
         }
         sitesRepository.upsert(
             url = Uri.parse("https://www.c.com"),
             title = "Title C",
             favicon = null,
-            visit = Visit(
-                visitRootID = 0L,
-                visitType = 0,
-                timestamp = Date(30000L),
-            )
+            visit = Visit(timestamp = Date(30000L))
         )
     }
 

@@ -5,7 +5,6 @@ import android.net.Uri
 import com.neeva.app.Dispatchers
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.TabScreenshotManager
-import com.neeva.app.storage.TypeConverters
 import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
 import java.util.Date
@@ -86,25 +85,25 @@ class TabCallbacks(
         var visitToCommit: Visit? = null
 
         override fun onNavigationStarted(navigation: Navigation) {
-            // TODO(dan.alcantara): Why is visitType set to 0 here?
-            val timestamp = Date()
-            visitToCommit = Visit(
-                timestamp = timestamp,
-                visitRootID = TypeConverters.fromDate(timestamp)!!,
-                visitType = 0
-            )
+            // We can only check if the browser is restoring state when the navigation starts.  Once
+            // we hit the commit phase, it'll return false.
+            val isRestoringState = tab.getBrowserIfAlive()?.isRestoringPreviousState == true
+            if (isRestoringState) return
+
+            visitToCommit = Visit(timestamp = Date())
         }
 
         override fun onNavigationCompleted(navigation: Navigation) = commitVisit(navigation)
         override fun onNavigationFailed(navigation: Navigation) = commitVisit(navigation)
 
         private fun commitVisit(navigation: Navigation) {
-            if (tab.browser.takeUnless { it.isDestroyed }?.activeTab == tab) {
+            if (tab.getBrowserIfAlive()?.activeTab == tab) {
                 tabScreenshotManager.captureAndSaveScreenshot(tab)
             }
 
             // Try to avoid recording visits to history when we are revisiting the same page.
             val shouldRecordVisit = when {
+                visitToCommit == null -> false
                 isIncognito -> false
                 navigation.isSameDocument -> false
                 navigation.isReload -> false

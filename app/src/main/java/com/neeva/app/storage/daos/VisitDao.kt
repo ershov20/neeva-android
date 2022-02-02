@@ -4,12 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.RewriteQueriesToDropUnusedColumns
 import com.neeva.app.storage.entities.Visit
 import java.util.Date
-import kotlinx.coroutines.flow.Flow
 
-@RewriteQueriesToDropUnusedColumns
 @Dao
 interface VisitDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
@@ -42,14 +39,4 @@ interface VisitDao {
     """
     )
     fun getVisitsWithinTimeframe(from: Date, to: Date): List<Visit>
-
-    @Query(
-        """
-        SELECT *
-        FROM Visit
-        WHERE timestamp >= :from AND timestamp < :to
-        ORDER BY timestamp DESC
-    """
-    )
-    fun getVisitsWithinTimeframeFlow(from: Date, to: Date): Flow<List<Visit>>
 }
