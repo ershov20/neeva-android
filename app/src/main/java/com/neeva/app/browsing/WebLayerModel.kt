@@ -173,7 +173,6 @@ class WebLayerModel(
                     }
                     SettingsToggle.CLEAR_COOKIES.key -> {
                         clearCookiesFlags.add(BrowsingDataType.COOKIES_AND_SITE_DATA)
-                        // clearCookiesFlags.add(BrowsingDataType.SITE_SETTINGS)
                     }
                     SettingsToggle.CLEAR_CACHE.key -> {
                         clearCookiesFlags.add(BrowsingDataType.CACHE)

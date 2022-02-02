@@ -150,18 +150,16 @@ class RegularBrowserWrapper(
     }
 
     fun clearNonNeevaCookies(@NonNull @BrowsingDataType flags: IntArray) {
-        coroutineScope.launch(dispatchers.main) {
-            val oldNeevaAuthToken = neevaUserToken.getToken()
-            browser?.profile?.clearBrowsingData(flags) {
-                browser?.profile?.cookieManager
-                    ?.setCookie(
-                        Uri.parse(NeevaConstants.appURL),
-                        "$NeevaConstants.loginCookie=$oldNeevaAuthToken;",
-                        null
-                    )
-            }
-            onAuthTokenUpdated()
+        val oldNeevaAuthToken = neevaUserToken.getToken()
+        browser?.profile?.clearBrowsingData(flags) {
+            browser?.profile?.cookieManager
+                ?.setCookie(
+                    Uri.parse(NeevaConstants.appURL),
+                    "${NeevaConstants.loginCookie}=$oldNeevaAuthToken;",
+                    null
+                )
         }
+        onAuthTokenUpdated()
     }
 
     fun clearNeevaCookie(siteURL: String, cookieKey: String) {
