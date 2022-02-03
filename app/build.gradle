@@ -17,7 +17,17 @@ android {
         targetSdk 30
         versionCode 27
         versionName "0.0.27"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // Make the Android Test Orchestrator clear the app's state between test runs to avoid
+        // having tests interfere with each other.
+        testInstrumentationRunnerArguments clearPackageData: 'true'
+
+        testOptions {
+            execution 'ANDROIDX_TEST_ORCHESTRATOR'
+        }
+
         vectorDrawables {
             useSupportLibrary true
         }
@@ -151,6 +161,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
+    androidTestUtil 'androidx.test:orchestrator:1.4.0'
 
     // Hilt
     kapt "com.google.dagger:hilt-compiler:$dagger_version"

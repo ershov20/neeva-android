@@ -5,13 +5,11 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
-import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.neeva_menu.NeevaMenuItemId
@@ -169,18 +167,6 @@ fun AppNav(
 
         composable(AppNavDestination.FIRST_RUN.route) {
             FirstRunContainer()
-        }
-    }
-
-    // TODO(dan.alcantara): Not the best place to do this, but because of the way AppNav and
-    //                      AppNavModel are currently intertwined, it's the best option we've
-    //                      got until that's fixed.
-    val sharedPreferencesModel = LocalEnvironment.current.sharedPreferencesModel
-    val user = LocalEnvironment.current.neevaUserToken
-    LaunchedEffect(true) {
-        if (FirstRun.shouldShowFirstRun(sharedPreferencesModel, user)) {
-            appNavModel.showFirstRun()
-            FirstRun.firstRunDone(sharedPreferencesModel)
         }
     }
 }

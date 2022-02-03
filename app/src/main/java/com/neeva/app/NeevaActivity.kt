@@ -7,7 +7,10 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowInsetsCompat
@@ -20,6 +23,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.settings.SettingsModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -39,7 +43,10 @@ import org.chromium.weblayer.Tab
 @AndroidEntryPoint
 class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     companion object {
+        // Intent options.
         private const val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
+
+        // Tags for the WebLayer Fragments.  Lets us retrieve them via the FragmentManager.
         private const val TAG_REGULAR_PROFILE = "FRAGMENT_TAG_REGULAR_PROFILE"
         private const val TAG_INCOGNITO_PROFILE = "FRAGMENT_TAG_INCOGNITO_PROFILE"
     }
@@ -65,7 +72,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     private val topControlOffset = MutableStateFlow(0.0f)
     private val bottomControlOffset = MutableStateFlow(0.0f)
 
-    private var appNavModel: AppNavModel? = null
+    internal var appNavModel: AppNavModel? = null
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -88,6 +95,28 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     )
                 }
 
+                // TODO(kobec): SETTINGSMODEL can be created right here with all the lambdas
+
+                // Set up all the classes that'll need to be sent to all of the Composables.
+                val browserWrapper by webModel.browserWrapperFlow.collectAsState()
+                val environment = LocalEnvironmentState(
+                    browserWrapper = browserWrapper,
+                    appNavModel = appNavModel!!,
+                    settingsModel = settingsModel,
+                    historyManager = historyManager,
+                    dispatchers = dispatchers,
+                    sharedPreferencesModel = sharedPreferencesModel,
+                    neevaUserToken = neevaUserToken
+                )
+                CompositionLocalProvider(LocalEnvironment provides environment) {
+                    ActivityUI(
+                        bottomControlOffset = bottomControlOffset,
+                        topControlOffset = topControlOffset,
+                        webLayerModel = webModel,
+                        apolloClient = apolloClient
+                    )
+                }
+
                 LaunchedEffect(appNavModel) {
                     // Refresh the user's Spaces whenever they try to add something to one.
                     appNavModel?.currentDestination?.collect {
@@ -97,19 +126,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     }
                 }
 
-                ActivityUI(
-                    browserWrapperFlow = webModel.browserWrapperFlow,
-                    bottomControlOffset = bottomControlOffset,
-                    topControlOffset = topControlOffset,
-                    appNavModel = appNavModel!!,
-                    webLayerModel = webModel,
-                    settingsModel = settingsModel,
-                    apolloClient = apolloClient,
-                    historyManager = historyManager,
-                    dispatchers = dispatchers,
-                    sharedPreferencesModel = sharedPreferencesModel,
-                    neevaUserToken = neevaUserToken
-                )
+                LaunchedEffect(true) {
+                    if (FirstRun.shouldShowFirstRun(sharedPreferencesModel, neevaUserToken)) {
+                        appNavModel!!.showFirstRun()
+                        FirstRun.firstRunDone(sharedPreferencesModel)
+                    }
+                }
             }
         }
 

@@ -9,8 +9,6 @@ import android.content.SharedPreferences
  * Useful because:
  *      1) nobody needs to hold on to a Context anymore.
  *      2) SharedPref functions don't need to be rewritten.
- *
- * @param T the type of a member in thi
  */
 class SharedPreferencesModel(context: Context) {
     val sharedPreferencesMap: Map<SharedPrefFolder, SharedPreferences> =

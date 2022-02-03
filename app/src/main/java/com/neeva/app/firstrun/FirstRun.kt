@@ -93,7 +93,6 @@ fun FirstRunScreen() {
     val activityContext = LocalContext.current
     var emailProvided by remember { mutableStateOf("") }
     var signup by remember { mutableStateOf(true) }
-    val appNavModel = LocalEnvironment.current.appNavModel
 
     Column(
         Modifier
