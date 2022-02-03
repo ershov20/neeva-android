@@ -74,15 +74,14 @@ fun URLBar() {
             // when the LocationLabel is clicked.
             if (!isEditing) {
                 val displayedLocation by activeTabModel.displayedText.collectAsState()
-                val locationInfoResource: Int? by
-                activeTabModel.locationInfoResource.collectAsState()
+                val isShowingQuery: Boolean by activeTabModel.isShowingQuery.collectAsState()
 
                 LocationLabel(
                     urlBarValue = displayedLocation,
                     showIncognitoBadge = isIncognito,
                     backgroundColor = backgroundColor,
                     foregroundColor = foregroundColor,
-                    locationInfoResource = locationInfoResource,
+                    isShowingQuery = isShowingQuery,
                     onReload = urlBarModel::reload,
                     modifier = Modifier
                         .fillMaxWidth()

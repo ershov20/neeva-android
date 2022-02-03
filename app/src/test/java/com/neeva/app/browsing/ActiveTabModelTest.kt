@@ -2,7 +2,6 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.neeva.app.BaseTest
-import com.neeva.app.R
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
@@ -82,7 +81,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
         expectThat(model.displayedText.value).isEqualTo("www.site.com")
-        expectThat(model.locationInfoResource.value).isEqualTo(R.drawable.ic_baseline_lock_18)
+        expectThat(model.isShowingQuery.value).isFalse()
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -101,7 +100,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(secondTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(secondTab.canGoForward)
         expectThat(model.displayedText.value).isEqualTo("news.othersite.com")
-        expectThat(model.locationInfoResource.value).isNull()
+        expectThat(model.isShowingQuery.value).isFalse()
         expectThat(secondTab.tabCallbacks.size).isEqualTo(1)
         expectThat(secondTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -128,7 +127,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
         expectThat(model.displayedText.value).isEqualTo("www.site.com")
-        expectThat(model.locationInfoResource.value).isEqualTo(R.drawable.ic_baseline_lock_18)
+        expectThat(model.isShowingQuery.value).isFalse()
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -139,7 +138,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
         expectThat(model.titleFlow.value).isEqualTo("")
         expectThat(model.displayedText.value).isEqualTo("")
-        expectThat(model.locationInfoResource.value).isNull()
+        expectThat(model.isShowingQuery.value).isFalse()
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(false)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(false)
 
@@ -162,7 +161,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoForward)
             .isEqualTo(neevaSearchTab.canGoForward)
         expectThat(model.displayedText.value).isEqualTo("query")
-        expectThat(model.locationInfoResource.value).isEqualTo(R.drawable.ic_baseline_search_24)
+        expectThat(model.isShowingQuery.value).isTrue()
         expectThat(neevaSearchTab.tabCallbacks.size).isEqualTo(1)
         expectThat(neevaSearchTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -177,7 +176,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoForward)
             .isEqualTo(neevaSpacesTab.canGoForward)
         expectThat(model.displayedText.value).isEqualTo("neeva.com")
-        expectThat(model.locationInfoResource.value).isEqualTo(R.drawable.ic_baseline_lock_18)
+        expectThat(model.isShowingQuery.value).isFalse()
         expectThat(neevaSpacesTab.tabCallbacks.size).isEqualTo(1)
         expectThat(neevaSpacesTab.navigationCallbacks.size).isEqualTo(1)
     }
@@ -200,7 +199,7 @@ class ActiveTabModelTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
         expectThat(model.displayedText.value).isEqualTo("www.site.com")
-        expectThat(model.locationInfoResource.value).isEqualTo(R.drawable.ic_baseline_lock_18)
+        expectThat(model.isShowingQuery.value).isFalse()
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -214,7 +213,7 @@ class ActiveTabModelTest : BaseTest() {
         mainTab.tabCallbacks.first().onVisibleUriChanged(mainTab.currentUri ?: Uri.EMPTY)
         expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
         expectThat(model.displayedText.value).isEqualTo("news.othersite.com")
-        expectThat(model.locationInfoResource.value).isNull()
+        expectThat(model.isShowingQuery.value).isFalse()
 
         // Check that navigations are kept in sync.
         mainTab.canGoBack = false

@@ -27,6 +27,7 @@ import org.chromium.weblayer.OpenUrlCallback
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabListCallback
+import org.chromium.weblayer.UrlBarController
 
 /**
  * Encapsulates everything that is needed to interact with a WebLayer [Browser].
@@ -57,7 +58,14 @@ abstract class BrowserWrapper(
         get() = tabList.orderedTabList
 
     private lateinit var fragment: Fragment
-    protected var browser: Browser? = null
+
+    /**
+     * Updated whenever the [Browser] is recreated.
+     * If you don't need to monitor changes, you can directly access the [browser] field.
+     */
+    val browserFlow = MutableStateFlow<Browser?>(null)
+    protected val browser: Browser?
+        get() = browserFlow.value
 
     val activeTabModel: ActiveTabModel
     val urlBarModel: URLBarModel
@@ -197,8 +205,8 @@ abstract class BrowserWrapper(
     @Synchronized
     fun createAndAttachBrowser(fragmentAttacher: (Fragment, Boolean) -> Unit) {
         fragmentAttacher.invoke(fragment, isIncognito)
-        if (browser == null) {
-            browser = Browser.fromFragment(fragment)
+        if (browserFlow.value == null) {
+            browserFlow.value = Browser.fromFragment(fragment)
         }
     }
 
@@ -333,7 +341,7 @@ abstract class BrowserWrapper(
         tabList.clear()
         activeTabModel.onActiveTabChanged(null)
 
-        browser = null
+        browserFlow.value = null
         tabListRestorer = null
     }
 
@@ -405,4 +413,6 @@ abstract class BrowserWrapper(
 
     /** Provides access to the WebLayer profile. */
     override fun getProfile(): Profile? = browser?.profile
+
+    fun getUrlBarController(): UrlBarController? = browser?.urlBarController
 }

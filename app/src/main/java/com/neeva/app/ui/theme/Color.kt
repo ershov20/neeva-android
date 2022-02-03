@@ -1,6 +1,10 @@
 package com.neeva.app.ui.theme
 
+import androidx.annotation.ColorRes
 import androidx.compose.ui.graphics.Color
+import com.neeva.app.R
+
+// If any colors are changed here, make sure to update colors.xml, as well.
 
 val BackgroundLight = Color(0xFFFFFFFF)
 val BackgroundDark = Color(0xFF1C1C1E)
@@ -123,4 +127,72 @@ object Ui {
     val Gray97 = Color(0xfff2f4f0)
     val Gray98 = Color(0xfff9faf6)
     val Gray99 = Color(0xfffbfbf8)
+}
+
+/**
+ * Maps colors from Compose colors to resources defined in our XML files.
+ * This function is necessary mainly for interacting with Android Views provided
+ * by WebLayer, which require resource IDs to be passed along.
+ *
+ * @throws IllegalArgumentException if the color passed in has no mapping.
+ */
+@ColorRes
+fun mapComposeColorToResource(color: Color): Int = when (color) {
+    md_theme_light_primary -> R.color.md_theme_light_primary
+    md_theme_light_onPrimary -> R.color.md_theme_light_onPrimary
+    md_theme_light_primaryContainer -> R.color.md_theme_light_primaryContainer
+    md_theme_light_onPrimaryContainer -> R.color.md_theme_light_onPrimaryContainer
+    md_theme_light_secondary -> R.color.md_theme_light_secondary
+    md_theme_light_onSecondary -> R.color.md_theme_light_onSecondary
+    md_theme_light_secondaryContainer -> R.color.md_theme_light_secondaryContainer
+    md_theme_light_onSecondaryContainer -> R.color.md_theme_light_onSecondaryContainer
+    md_theme_light_tertiary -> R.color.md_theme_light_tertiary
+    md_theme_light_onTertiary -> R.color.md_theme_light_onTertiary
+    md_theme_light_tertiaryContainer -> R.color.md_theme_light_tertiaryContainer
+    md_theme_light_onTertiaryContainer -> R.color.md_theme_light_onTertiaryContainer
+    md_theme_light_error -> R.color.md_theme_light_error
+    md_theme_light_errorContainer -> R.color.md_theme_light_errorContainer
+    md_theme_light_onError -> R.color.md_theme_light_onError
+    md_theme_light_onErrorContainer -> R.color.md_theme_light_onErrorContainer
+    md_theme_light_background -> R.color.md_theme_light_background
+    md_theme_light_onBackground -> R.color.md_theme_light_onBackground
+    md_theme_light_surface -> R.color.md_theme_light_surface
+    md_theme_light_onSurface -> R.color.md_theme_light_onSurface
+    md_theme_light_surfaceVariant -> R.color.md_theme_light_surfaceVariant
+    md_theme_light_onSurfaceVariant -> R.color.md_theme_light_onSurfaceVariant
+    md_theme_light_outline -> R.color.md_theme_light_outline
+    md_theme_light_inverseOnSurface -> R.color.md_theme_light_inverseOnSurface
+    md_theme_light_inverseSurface -> R.color.md_theme_light_inverseSurface
+    md_theme_light_inversePrimary -> R.color.md_theme_light_inversePrimary
+    md_theme_light_shadow -> R.color.md_theme_light_shadow
+
+    md_theme_dark_primary -> R.color.md_theme_dark_primary
+    md_theme_dark_onPrimary -> R.color.md_theme_dark_onPrimary
+    md_theme_dark_primaryContainer -> R.color.md_theme_dark_primaryContainer
+    md_theme_dark_onPrimaryContainer -> R.color.md_theme_dark_onPrimaryContainer
+    md_theme_dark_secondary -> R.color.md_theme_dark_secondary
+    md_theme_dark_onSecondary -> R.color.md_theme_dark_onSecondary
+    md_theme_dark_secondaryContainer -> R.color.md_theme_dark_secondaryContainer
+    md_theme_dark_onSecondaryContainer -> R.color.md_theme_dark_onSecondaryContainer
+    md_theme_dark_tertiary -> R.color.md_theme_dark_tertiary
+    md_theme_dark_onTertiary -> R.color.md_theme_dark_onTertiary
+    md_theme_dark_tertiaryContainer -> R.color.md_theme_dark_tertiaryContainer
+    md_theme_dark_onTertiaryContainer -> R.color.md_theme_dark_onTertiaryContainer
+    md_theme_dark_error -> R.color.md_theme_dark_error
+    md_theme_dark_errorContainer -> R.color.md_theme_dark_errorContainer
+    md_theme_dark_onError -> R.color.md_theme_dark_onError
+    md_theme_dark_onErrorContainer -> R.color.md_theme_dark_onErrorContainer
+    md_theme_dark_background -> R.color.md_theme_dark_background
+    md_theme_dark_onBackground -> R.color.md_theme_dark_onBackground
+    md_theme_dark_surface -> R.color.md_theme_dark_surface
+    md_theme_dark_onSurface -> R.color.md_theme_dark_onSurface
+    md_theme_dark_surfaceVariant -> R.color.md_theme_dark_surfaceVariant
+    md_theme_dark_onSurfaceVariant -> R.color.md_theme_dark_onSurfaceVariant
+    md_theme_dark_outline -> R.color.md_theme_dark_outline
+    md_theme_dark_inverseOnSurface -> R.color.md_theme_dark_inverseOnSurface
+    md_theme_dark_inverseSurface -> R.color.md_theme_dark_inverseSurface
+    md_theme_dark_inversePrimary -> R.color.md_theme_dark_inversePrimary
+    md_theme_dark_shadow -> R.color.md_theme_dark_shadow
+
+    else -> throw IllegalArgumentException("Color mapping is undefined")
 }
