@@ -27,12 +27,13 @@ import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsTopAppBar
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
+import java.util.Locale
 
 @Composable
 fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxSize(),
     ) {
         SettingsTopAppBar(
@@ -52,15 +53,14 @@ fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
                             .fillMaxWidth()
                             .defaultMinSize(minHeight = 56.dp)
                             .padding(16.dp)
-                            .background(MaterialTheme.colorScheme.surface)
                             .wrapContentHeight(align = Alignment.Bottom),
                     ) {
                         // TODO(kobec): might be wrong font style
                         if (it.titleId != null) {
                             Text(
-                                text = stringResource(it.titleId),
+                                text = stringResource(it.titleId).uppercase(Locale.getDefault()),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 1
                             )
                         }
@@ -81,9 +81,8 @@ fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
                     val rowModifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 56.dp)
-                        .padding(horizontal = 16.dp)
                         .background(MaterialTheme.colorScheme.surface)
-
+                        .padding(horizontal = 16.dp)
                     SettingsRow(
                         rowData = rowData,
                         settingsPaneListener = settingsPaneListener,

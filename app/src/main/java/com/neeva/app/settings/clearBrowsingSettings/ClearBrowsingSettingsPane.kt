@@ -14,6 +14,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -34,7 +36,7 @@ fun ClearBrowsingSettingsPane(
 ) {
     Column(
         modifier = Modifier
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxSize(),
     ) {
         SettingsTopAppBar(
@@ -54,7 +56,6 @@ fun ClearBrowsingSettingsPane(
                             .fillMaxWidth()
                             .defaultMinSize(minHeight = 56.dp)
                             .padding(16.dp)
-                            .background(MaterialTheme.colorScheme.surface)
                             .wrapContentHeight(align = Alignment.Bottom),
                     ) {
                         // TODO(kobec): might be wrong font style
@@ -63,33 +64,50 @@ fun ClearBrowsingSettingsPane(
                                 text = stringResource(it.titleId),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurface,
-                                maxLines = 1,
+                                maxLines = 1
                             )
                         }
                     }
                 }
-
                 items(it.rows) { rowData ->
                     val rowModifier = Modifier
                         .fillMaxWidth()
                         .defaultMinSize(minHeight = 56.dp)
-                        .padding(horizontal = 16.dp)
                         .background(MaterialTheme.colorScheme.surface)
+                        .padding(horizontal = 16.dp)
 
                     if (rowData.titleId == R.string.settings_clear_selected_data_on_device) {
                         val title = stringResource(id = rowData.titleId)
-                        ClearBrowsingDataButton(
+                        val showDialog = remember { mutableStateOf(false) }
+                        val cleared = remember { mutableStateOf(false) }
+                        ClearDataButton(
                             text = title,
+                            cleared = cleared,
                             onClick = {
-                                onClearBrowsingData(
-                                    getClearingOptions(
-                                        ClearBrowsingSettingsData.data[0].rows,
-                                        settingsPaneListener.getToggleState
-                                    )
-                                )
+                                showDialog.value = true
                             },
                             modifier = rowModifier
                         )
+                        if (showDialog.value) {
+                            SettingsAlertDialogue(
+                                text = stringResource(id = R.string.clear),
+                                confirmString = stringResource(
+                                    id = R.string.clear_browsing_clear_data
+                                ),
+                                confirmAction = {
+                                    onClearBrowsingData(
+                                        getClearingOptions(
+                                            ClearBrowsingSettingsData.data[0].rows,
+                                            settingsPaneListener.getToggleState
+                                        )
+                                    )
+                                    cleared.value = true
+                                    showDialog.value = false
+                                },
+                                dismissString = stringResource(id = R.string.cancel),
+                                dismissAction = { showDialog.value = false }
+                            )
+                        }
                     } else {
                         SettingsRow(
                             rowData = rowData,

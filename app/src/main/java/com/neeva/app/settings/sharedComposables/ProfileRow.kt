@@ -55,7 +55,7 @@ fun ProfileRow(
                 ),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(32.dp)
                     .clip(CircleShape)
             )
             Spacer(modifier = Modifier.width(16.dp))
@@ -65,7 +65,7 @@ fun ProfileRow(
             if (primaryLabel != null) {
                 Text(
                     text = primaryLabel,
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     softWrap = false,
@@ -75,8 +75,8 @@ fun ProfileRow(
             if (secondaryLabel != null) {
                 Text(
                     text = secondaryLabel,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
                     maxLines = 1,
                     softWrap = false,
                     overflow = TextOverflow.Ellipsis

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Switch
+import androidx.compose.material.SwitchDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -36,6 +37,12 @@ fun SettingsToggleRow(
         Switch(
             checked = toggleState.value,
             modifier = Modifier.size(48.dp),
+            colors = SwitchDefaults.colors(
+                checkedThumbColor = MaterialTheme.colorScheme.background,
+                uncheckedThumbColor = MaterialTheme.colorScheme.background,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                uncheckedTrackColor = MaterialTheme.colorScheme.outline
+            ),
             onCheckedChange = getTogglePreferenceSetter(togglePrefKey)
         )
     }
