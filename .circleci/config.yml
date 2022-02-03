@@ -22,7 +22,7 @@ commands:
 
       - run:
           name: Bootstrap Chromium projects
-          command: ./bootstrap.sh release-96-x64
+          command: ./bootstrap.sh release-98-x64
 
       - android/restore-build-cache
       - android/restore-gradle-cache
