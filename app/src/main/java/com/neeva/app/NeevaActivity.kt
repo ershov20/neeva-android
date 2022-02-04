@@ -189,7 +189,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         if (intent?.action == Intent.ACTION_VIEW) {
             if (Uri.parse(intent.dataString).scheme == "neeva") {
-                neevaUserToken.extractAuthTokenFromIntent(intent)?.let {
+                NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
                     neevaUserToken.setToken(it)
                     webModel.onAuthTokenUpdated()
                     appNavModel?.showBrowser()
