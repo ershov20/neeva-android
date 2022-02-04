@@ -10,6 +10,8 @@
     <string name="done">Done</string>
     <string name="new_tab_content_description">Create new tab</string>
 
+    <string name="refresh">Refresh</string>
+    <string name="share">Share</string>
     <string name="downloads">Downloads</string>
     <string name="feedback">Feedback</string>
     <string name="history">History</string>
@@ -29,8 +31,8 @@
     <string name="download_video">Download video</string>
     <string name="download_link">Download link</string>
 
-    <string name="toolbar_go_back">Go back</string>
-    <string name="toolbar_go_forward">Go forward</string>
+    <string name="toolbar_go_back">Back</string>
+    <string name="toolbar_go_forward">Forward</string>
     <string name="toolbar_save_to_space">Save to space</string>
     <string name="toolbar_tab_switcher">Manage your tabs</string>
     <string name="toolbar_neeva_menu">Open main menu</string>
@@ -86,6 +88,7 @@
     <string name="settings_manage_neeva_memory">Manage Neeva Memory</string>
     <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
 
+    <string name="add_to_space">Save</string>
     <string name="space_contains_page">Space contains the current page</string>
     <string name="space_not_contain_page">Space doesn\'t contain the current page</string>
 

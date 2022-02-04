@@ -24,6 +24,8 @@ import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -239,7 +241,7 @@ fun CardGrid(
                     onClick = cardGridListener::onOpenLazyTab
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_add_24),
+                        Icons.Default.Add,
                         contentDescription = stringResource(R.string.new_tab_content_description),
                         tint = LocalContentColor.current
                     )

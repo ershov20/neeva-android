@@ -5,6 +5,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.neeva_menu.NeevaMenuItemId
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -99,4 +100,41 @@ class AppNavModel(
     fun showClearBrowsingSettings() = showSubscreen(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     fun showFirstRun() = showSecondaryScreen(AppNavDestination.FIRST_RUN)
     fun showHistory() = showSecondaryScreen(AppNavDestination.HISTORY)
+
+    fun onMenuItem(id: NeevaMenuItemId) =
+        when (id) {
+            NeevaMenuItemId.HOME -> {
+                webLayerModel.loadUrl(Uri.parse(NeevaConstants.appURL))
+                showBrowser()
+            }
+
+            NeevaMenuItemId.SPACES -> {
+                webLayerModel.loadUrl(Uri.parse(NeevaConstants.appSpacesURL))
+                showBrowser()
+            }
+
+            NeevaMenuItemId.SETTINGS -> {
+                showSettings()
+            }
+
+            NeevaMenuItemId.HISTORY -> {
+                showHistory()
+            }
+
+            NeevaMenuItemId.FORWARD -> {
+                webLayerModel.browserWrapperFlow.value.activeTabModel.goForward()
+            }
+
+            NeevaMenuItemId.REFRESH -> {
+                webLayerModel.browserWrapperFlow.value.activeTabModel.reload()
+            }
+
+            NeevaMenuItemId.REFRESH -> {
+                showAddToSpace()
+            }
+
+            else -> {
+                // Unimplemented screens.
+            }
+        }
 }

@@ -64,6 +64,7 @@ fun ActivityUI(
                     goForward = browserWrapper.activeTabModel::goForward,
                 ),
                 activeTabModel = browserWrapper.activeTabModel,
+                urlBarModel = browserWrapper.urlBarModel,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .offset(y = bottomOffsetDp)

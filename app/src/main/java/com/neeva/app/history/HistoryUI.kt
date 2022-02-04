@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.PagingData
@@ -118,7 +119,7 @@ fun HistoryUI(
                     onClick = { onClose() }
                 ) {
                     Image(
-                        painter = painterResource(R.drawable.ic_baseline_arrow_back_24),
+                        Icons.Default.ArrowBack,
                         contentDescription = stringResource(R.string.close),
                         contentScale = ContentScale.Inside,
                         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)

@@ -37,7 +37,6 @@ import com.neeva.app.R
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.mapComposeColorToResource
-import com.neeva.app.widgets.Button
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.UrlBarOptions
 
@@ -154,14 +153,6 @@ fun LocationLabel(
         }
 
         Spacer(modifier = Modifier.weight(1.0f))
-
-        Button(
-            enabled = true,
-            resID = R.drawable.ic_baseline_refresh_24,
-            contentDescription = stringResource(R.string.reload),
-            onClick = onReload,
-            colorTint = foregroundColor
-        )
     }
 }
 

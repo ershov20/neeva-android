@@ -1,12 +1,14 @@
 package com.neeva.app
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.urlbar.URLBarModel
 
 data class TabToolbarModel(
     val onNeevaMenu: () -> Unit = {},
@@ -37,6 +40,7 @@ data class TabToolbarModel(
 fun TabToolbar(
     model: TabToolbarModel,
     activeTabModel: ActiveTabModel,
+    urlBarModel: URLBarModel,
     modifier: Modifier
 ) {
     val navigationInfo by activeTabModel.navigationInfoFlow.collectAsState()
@@ -44,6 +48,7 @@ fun TabToolbar(
         model = model,
         canGoBackward = navigationInfo.canGoBackward,
         canGoForward = navigationInfo.canGoForward,
+        isIncognito = urlBarModel.isIncognito,
         modifier = modifier
     )
 }
@@ -53,11 +58,24 @@ fun TabToolbar(
     model: TabToolbarModel,
     canGoBackward: Boolean,
     canGoForward: Boolean,
+    isIncognito: Boolean,
     modifier: Modifier = Modifier
 ) {
-    CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.onBackground) {
+    val backgroundColor = if (isIncognito) {
+        MaterialTheme.colorScheme.inverseSurface
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
+    val foregroundColor = if (isIncognito) {
+        MaterialTheme.colorScheme.inverseOnSurface
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    CompositionLocalProvider(LocalContentColor provides foregroundColor) {
         BottomAppBar(
-            backgroundColor = MaterialTheme.colorScheme.background,
+            backgroundColor = backgroundColor,
             modifier = modifier
                 .fillMaxWidth()
                 .height(dimensionResource(id = R.dimen.bottom_toolbar_height))
@@ -69,7 +87,7 @@ fun TabToolbar(
                 modifier = Modifier.weight(1.0f)
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_arrow_back_24),
+                    Icons.Default.ArrowBack,
                     contentDescription = stringResource(id = R.string.toolbar_go_back),
                     tint = LocalContentColor.current.copy(alpha = backAlpha)
                 )
@@ -82,7 +100,7 @@ fun TabToolbar(
                 modifier = Modifier.weight(1.0f)
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_arrow_forward_24),
+                    Icons.Default.ArrowForward,
                     contentDescription = stringResource(id = R.string.toolbar_go_forward),
                     tint = LocalContentColor.current.copy(alpha = forwardAlpha)
                 )
@@ -108,6 +126,7 @@ fun TabToolbar(
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_bookmark_border_24),
                     contentDescription = stringResource(R.string.toolbar_save_to_space),
+                    tint = LocalContentColor.current
                 )
             }
 
@@ -118,24 +137,27 @@ fun TabToolbar(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_grid_view_24),
-                    contentDescription = stringResource(R.string.toolbar_tab_switcher)
+                    contentDescription = stringResource(R.string.toolbar_tab_switcher),
+                    tint = LocalContentColor.current
                 )
             }
         }
     }
 }
 
-class TabToolbarPreviews : BooleanPreviewParameterProvider<TabToolbarPreviews.Params>(3) {
+class TabToolbarPreviews : BooleanPreviewParameterProvider<TabToolbarPreviews.Params>(4) {
     data class Params(
         val darkTheme: Boolean,
         val backEnabled: Boolean,
-        val forwardEnabled: Boolean
+        val forwardEnabled: Boolean,
+        val isIncognito: Boolean
     )
 
     override fun createParams(booleanArray: BooleanArray) = Params(
         darkTheme = booleanArray[0],
         backEnabled = booleanArray[1],
-        forwardEnabled = booleanArray[2]
+        forwardEnabled = booleanArray[2],
+        isIncognito = booleanArray[3]
     )
 
     @Preview("1x scale", locale = "en")
@@ -148,7 +170,8 @@ class TabToolbarPreviews : BooleanPreviewParameterProvider<TabToolbarPreviews.Pa
             TabToolbar(
                 model = TabToolbarModel(),
                 canGoBackward = params.backEnabled,
-                canGoForward = params.forwardEnabled
+                canGoForward = params.forwardEnabled,
+                isIncognito = params.isIncognito
             )
         }
     }

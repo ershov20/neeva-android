@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
+import com.neeva.app.neeva_menu.OverflowMenu
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -36,6 +37,7 @@ fun URLBar() {
     val browserWrapper = LocalEnvironment.current.browserWrapper
     val urlBarModel = browserWrapper.urlBarModel
     val activeTabModel = browserWrapper.activeTabModel
+    val appNavModel = LocalEnvironment.current.appNavModel
     val urlBarModelState = urlBarModel.state.collectAsState()
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
@@ -88,6 +90,10 @@ fun URLBar() {
                         .clickable { urlBarModel.onRequestFocus() }
                 )
             }
+        }
+
+        if (!isEditing) {
+            OverflowMenu(onMenuItem = { appNavModel.onMenuItem(it) })
         }
 
         AnimatedVisibility(

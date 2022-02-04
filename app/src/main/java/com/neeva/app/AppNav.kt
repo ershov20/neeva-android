@@ -1,6 +1,5 @@
 package com.neeva.app
 
-import android.net.Uri
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
@@ -12,7 +11,6 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
-import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.NeevaMenuSheet
 import com.neeva.app.settings.ClearBrowsingSettingsContainer
 import com.neeva.app.settings.MainSettingsContainer
@@ -29,32 +27,6 @@ fun AppNav(
 ) {
     val browserWrapper = LocalEnvironment.current.browserWrapper
     val appNavModel = LocalEnvironment.current.appNavModel
-
-    val onMenuItem = { id: NeevaMenuItemId ->
-        when (id) {
-            NeevaMenuItemId.HOME -> {
-                webLayerModel.loadUrl(Uri.parse(NeevaConstants.appURL))
-                appNavModel.showBrowser()
-            }
-
-            NeevaMenuItemId.SPACES -> {
-                webLayerModel.loadUrl(Uri.parse(NeevaConstants.appSpacesURL))
-                appNavModel.showBrowser()
-            }
-
-            NeevaMenuItemId.SETTINGS -> {
-                appNavModel.showSettings()
-            }
-
-            NeevaMenuItemId.HISTORY -> {
-                appNavModel.showHistory()
-            }
-
-            else -> {
-                // Unimplemented screens.
-            }
-        }
-    }
 
     AnimatedNavHost(
         navController = appNavModel.navController,
@@ -93,7 +65,7 @@ fun AppNav(
                 AnimatedContentScope.SlideDirection.Down
             )
         ) {
-            NeevaMenuSheet(onMenuItem = onMenuItem)
+            NeevaMenuSheet(onMenuItem = { appNavModel.onMenuItem(it) })
         }
 
         composable(

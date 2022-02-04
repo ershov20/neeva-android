@@ -2,6 +2,13 @@ package com.neeva.app.neeva_menu
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.ui.graphics.vector.ImageVector
 import com.neeva.app.R
 
 enum class NeevaMenuItemId {
@@ -10,21 +17,49 @@ enum class NeevaMenuItemId {
     SETTINGS,
     FEEDBACK,
     HISTORY,
-    DOWNLOADS
+    DOWNLOADS,
+    FORWARD,
+    REFRESH,
+    SHARE,
+    ADD_TO_SPACE
 }
 
 data class NeevaMenuItemData(
     val id: NeevaMenuItemId,
     @StringRes val labelId: Int,
-    @DrawableRes val imageResourceID: Int
+    @DrawableRes val imageResourceID: Int? = null,
+    val icon: ImageVector? = null
 )
 
 object NeevaMenuData {
+    val iconMenuRowItems: List<NeevaMenuItemData> = listOf(
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.FORWARD,
+            labelId = R.string.toolbar_go_forward,
+            icon = Icons.Default.ArrowForward
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.REFRESH,
+            labelId = R.string.refresh,
+            icon = Icons.Default.Refresh
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.SHARE,
+            labelId = R.string.share,
+            icon = Icons.Default.Share
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.ADD_TO_SPACE,
+            labelId = R.string.add_to_space,
+            imageResourceID = R.drawable.ic_baseline_bookmark_border_24
+        )
+    )
+
     val tiles: List<NeevaMenuItemData> = listOf(
         NeevaMenuItemData(
             id = NeevaMenuItemId.HOME,
             labelId = R.string.home,
-            imageResourceID = R.drawable.ic_baseline_home_24
+            icon = Icons.Default.Home
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SPACES,
@@ -34,7 +69,7 @@ object NeevaMenuData {
         NeevaMenuItemData(
             id = NeevaMenuItemId.SETTINGS,
             labelId = R.string.settings_main_title,
-            imageResourceID = R.drawable.ic_baseline_settings_24
+            icon = Icons.Default.Settings
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.FEEDBACK,
@@ -55,4 +90,6 @@ object NeevaMenuData {
             imageResourceID = R.drawable.ic_baseline_download_24
         ),
     )
+
+    val menuItems: List<NeevaMenuItemData> = tiles + rows
 }
