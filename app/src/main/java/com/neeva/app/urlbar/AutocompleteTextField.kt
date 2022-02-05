@@ -1,6 +1,9 @@
 package com.neeva.app.urlbar
 
 import android.graphics.Bitmap
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -125,17 +128,23 @@ fun AutocompleteTextField(
                 cursorBrush = SolidColor(LocalContentColor.current)
             )
 
-            IconButton(
-                onClick = { onLocationReplaced("") },
-                modifier = Modifier
-                    .size(40.dp)
-                    .padding(8.dp)
+            AnimatedVisibility(
+                visible = textFieldValue.text.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_baseline_cancel_24),
-                    contentDescription = stringResource(id = R.string.clear),
-                    colorFilter = ColorFilter.tint(LocalContentColor.current)
-                )
+                IconButton(
+                    onClick = { onLocationReplaced("") },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .padding(8.dp)
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_baseline_cancel_24),
+                        contentDescription = stringResource(id = R.string.clear),
+                        colorFilter = ColorFilter.tint(LocalContentColor.current)
+                    )
+                }
             }
         }
     }

@@ -47,7 +47,6 @@ fun LocationLabel(
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
     isShowingQuery: Boolean,
-    onReload: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // WebLayer requires that you pass it an old-school color resource from the XML files.
@@ -74,7 +73,6 @@ fun LocationLabel(
         foregroundColor,
         showIncognitoBadge,
         isShowingQuery,
-        onReload,
         modifier
     )
 }
@@ -87,7 +85,6 @@ fun LocationLabel(
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
     isShowingQuery: Boolean,
-    onReload: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -153,6 +150,10 @@ fun LocationLabel(
         }
 
         Spacer(modifier = Modifier.weight(1.0f))
+
+        // Put a [Box] here that has the same size as the optional icon on the left so that the URL
+        // and query text are properly centered.
+        Box(modifier = iconModifier)
     }
 }
 
@@ -191,8 +192,7 @@ class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPrevi
                 backgroundColor = MaterialTheme.colorScheme.background,
                 foregroundColor = MaterialTheme.colorScheme.onSurface,
                 showIncognitoBadge = params.isIncognito,
-                isShowingQuery = params.isShowingQuery,
-                onReload = {}
+                isShowingQuery = params.isShowingQuery
             )
         }
     }

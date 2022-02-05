@@ -80,11 +80,10 @@ fun URLBar() {
 
                 LocationLabel(
                     urlBarValue = displayedLocation,
-                    showIncognitoBadge = isIncognito,
                     backgroundColor = backgroundColor,
                     foregroundColor = foregroundColor,
+                    showIncognitoBadge = isIncognito,
                     isShowingQuery = isShowingQuery,
-                    onReload = urlBarModel::reload,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { urlBarModel.onRequestFocus() }
@@ -92,7 +91,11 @@ fun URLBar() {
             }
         }
 
-        if (!isEditing) {
+        AnimatedVisibility(
+            visible = !isEditing,
+            enter = expandHorizontally().plus(fadeIn()),
+            exit = shrinkHorizontally().plus(fadeOut())
+        ) {
             OverflowMenu(onMenuItem = { appNavModel.onMenuItem(it) })
         }
 
@@ -102,7 +105,6 @@ fun URLBar() {
             exit = shrinkHorizontally().plus(fadeOut())
         ) {
             val localFocusManager = LocalFocusManager.current
-            val appNavModel = LocalEnvironment.current.appNavModel
             val cancelLambda = {
                 localFocusManager.clearFocus()
                 appNavModel.showBrowser()
