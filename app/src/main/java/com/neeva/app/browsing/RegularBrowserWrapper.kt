@@ -3,7 +3,6 @@ package com.neeva.app.browsing
 import android.content.Context
 import android.net.Uri
 import androidx.annotation.NonNull
-import androidx.fragment.app.Fragment
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
@@ -85,9 +84,8 @@ class RegularBrowserWrapper(
             .launchIn(coroutineScope)
     }
 
-    override fun createBrowserFragment(): Fragment {
-        return WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
-    }
+    override fun createBrowserFragment() =
+        WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
 
     override fun createTabScreenshotManager() = RegularTabScreenshotManager(appContext.cacheDir)
 

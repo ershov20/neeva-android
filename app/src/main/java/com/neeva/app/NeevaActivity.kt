@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -15,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
 import androidx.window.layout.WindowMetricsCalculator
@@ -43,9 +46,6 @@ import org.chromium.weblayer.Tab
 @AndroidEntryPoint
 class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     companion object {
-        // Intent options.
-        private const val EXTRA_START_IN_INCOGNITO = "EXTRA_START_IN_INCOGNITO"
-
         // Tags for the WebLayer Fragments.  Lets us retrieve them via the FragmentManager.
         private const val TAG_REGULAR_PROFILE = "FRAGMENT_TAG_REGULAR_PROFILE"
         private const val TAG_INCOGNITO_PROFILE = "FRAGMENT_TAG_INCOGNITO_PROFILE"
@@ -67,7 +67,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
      * WebLayer provides information about when the bottom and top toolbars need to be scrolled off.
      * We provide a placeholder instead of the real view because WebLayer has a bug that prevents it
      * from rendering Composables properly.
-     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v96.
+     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v98.
      */
     private val topControlOffset = MutableStateFlow(0.0f)
     private val bottomControlOffset = MutableStateFlow(0.0f)
@@ -156,21 +156,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             fetchNeevaUserInfo()
         }
 
-        // Display the correct Fragment when the user switches profiles.
-        lifecycleScope.launch {
-            lifecycle.whenStarted {
-                webModel.browserWrapperFlow.collect {
-                    if (it.isIncognito) {
-                        containerRegularProfile.visibility = View.GONE
-                        containerIncognitoProfile.visibility = View.VISIBLE
-                    } else {
-                        containerRegularProfile.visibility = View.VISIBLE
-                        containerIncognitoProfile.visibility = View.GONE
-                    }
-                }
-            }
-        }
-
         if (savedInstanceState != null && webModel.currentBrowser.isFullscreen()) {
             // If the activity was recreated because the user entered a fullscreen video or website,
             // hide the system bars.
@@ -206,27 +191,65 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     private fun prepareWebLayer() {
-        if (isFinishing || isDestroyed) return
+        when {
+            webModel.initializationState.value != LoadingState.READY -> return
+            isFinishing -> return
+            isDestroyed -> return
+        }
 
-        val topControlPlaceholder = layoutInflater.inflate(R.layout.fake_top_controls, null)
-        val bottomControlPlaceholder = layoutInflater.inflate(R.layout.fake_bottom_controls, null)
+        val topControlPlaceholder = View(this)
+        val bottomControlPlaceholder = View(this)
         webModel.onWebLayerReady(
             topControlPlaceholder,
-            bottomControlPlaceholder
-        ) { fragment, isIncognito ->
-            // Note the commitNow() instead of commit(). We want the fragment to get attached to
-            // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
-            // have to wait until the commit is executed.
-            val transaction = supportFragmentManager.beginTransaction()
+            bottomControlPlaceholder,
+            this::attachWebLayerFragment
+        )
+    }
 
-            if (isIncognito) {
-                transaction.replace(R.id.weblayer_incognito, fragment, TAG_INCOGNITO_PROFILE)
-            } else {
-                transaction.replace(R.id.weblayer_regular, fragment, TAG_REGULAR_PROFILE)
-            }
-
-            transaction.commitNow()
+    /**
+     * Attach the given [Fragment] to the Activity, which allows creation of the [Browser].
+     *
+     * https://github.com/neevaco/neeva-android/issues/244: WebLayer Fragments do some unexpected
+     * things while attached to the Activity.  Most egregiously, even if the Fragment's View is GONE
+     * when the app is backgrounded, upon returning to the app WebLayer will automatically make the
+     * web page visible again -- even if the parent View in the hierarchy is still marked as GONE.
+     *
+     * WebLayerShell avoids this issue entirely by forcing each Activity instance to maintain a
+     * single profile at a time, but that doesn't work with how our tab switcher is designed to
+     * allow switching between the two modes.  Until then, get the opposite Fragment's View
+     * (literally) out of sight by translating it out of the way.
+     *
+     * The more ideal alternative would be to detach Fragments them when the user switches between
+     * regular and incognito modes, but this triggers destruction of the Browser and Profile
+     * associated with the Fragment, which causes all Incognito state to be lost.  This happens even
+     * if we ask WebLayer to persist the state by giving it a specific profile name and
+     * persistenceId when calling WebLayer.createIncognitoBrowserFragment(), which will require
+     * further investigation.
+     */
+    private fun attachWebLayerFragment(fragment: Fragment, isIncognito: Boolean) {
+        // Note the commitNow() instead of commit(). We want the fragment to get attached to
+        // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
+        // have to wait until the commit is executed.
+        val transaction = supportFragmentManager.beginTransaction()
+        lateinit var hiddenContainer: View
+        lateinit var visibleContainer: View
+        if (isIncognito) {
+            transaction.replace(R.id.weblayer_incognito, fragment, TAG_INCOGNITO_PROFILE)
+            visibleContainer = containerIncognitoProfile
+            hiddenContainer = containerRegularProfile
+        } else {
+            transaction.replace(R.id.weblayer_regular, fragment, TAG_REGULAR_PROFILE)
+            visibleContainer = containerRegularProfile
+            hiddenContainer = containerIncognitoProfile
         }
+
+        visibleContainer.visibility = View.VISIBLE
+        visibleContainer.translationX = 0f
+        hiddenContainer.visibility = View.GONE
+        hiddenContainer.translationX = getDisplaySize().width().toFloat()
+        hiddenContainer.requestLayout()
+
+        transaction.commitNow()
     }
 
     override fun onBackPressed() {
@@ -234,6 +257,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         when {
             browserWrapper.exitFullscreen() -> {
+                return
+            }
+
+            browserWrapper.activeTabModel.activeTabFlow.value?.dismissTransientUi() == true -> {
                 return
             }
 
@@ -313,9 +340,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun detachIncognitoFragment() {
-        val fragment = supportFragmentManager.findFragmentByTag(TAG_INCOGNITO_PROFILE) ?: return
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.remove(fragment)
-        transaction.commitNow()
+        // Do a post to avoid a Fragment transaction while one is already occurring to remove the
+        // Incognito fragment, which can happen if the user closed all their incognito tabs
+        // manually.
+        Handler(Looper.getMainLooper()).post {
+            supportFragmentManager.findFragmentByTag(TAG_INCOGNITO_PROFILE)?.let { fragment ->
+                supportFragmentManager.beginTransaction()
+                    .remove(fragment)
+                    .commitNow()
+            }
+        }
     }
 }

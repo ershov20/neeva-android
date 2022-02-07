@@ -128,32 +128,30 @@ class WebLayerModel(
     fun switchToProfile(useIncognito: Boolean) {
         if (currentBrowser.isIncognito == useIncognito) return
 
-        if (useIncognito) {
-            val delegate = incognitoBrowser ?: run {
-                IncognitoBrowserWrapper(
-                    appContext = appContext,
-                    coroutineScope = coroutineScope,
-                    dispatchers = dispatchers,
-                    activityCallbackProvider = activityCallbacks::get,
-                    domainProvider = domainProviderImpl,
-                    onDestroyed = {
-                        incognitoBrowser = null
-                        switchToProfile(useIncognito = false)
-                    }
-                ).also { it.initialize() }
-            }
+        _browserWrapperFlow.value = if (useIncognito) {
+            val delegate = incognitoBrowser ?: IncognitoBrowserWrapper(
+                appContext = appContext,
+                coroutineScope = coroutineScope,
+                dispatchers = dispatchers,
+                activityCallbackProvider = activityCallbacks::get,
+                domainProvider = domainProviderImpl,
+                onDestroyed = {
+                    incognitoBrowser = null
+                    switchToProfile(useIncognito = false)
+                }
+            ).also { it.initialize() }
 
             incognitoBrowser = delegate
-            _browserWrapperFlow.value = delegate
+            delegate
         } else {
-            _browserWrapperFlow.value = regularBrowser
-
             // Delete incognito if there's no reason to keep it around.
             if (incognitoBrowser?.hasNoTabs() == true) {
                 Log.d(TAG, "Culling unnecessary incognito profile")
                 activityCallbacks.get()?.detachIncognitoFragment()
                 incognitoBrowser = null
             }
+
+            regularBrowser
         }
     }
 
