@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.theme.getClickableAlpha
 import com.neeva.app.urlbar.URLBarModel
 
 data class TabToolbarModel(
@@ -80,7 +81,7 @@ fun TabToolbar(
                 .fillMaxWidth()
                 .height(dimensionResource(id = R.dimen.bottom_toolbar_height))
         ) {
-            val backAlpha = if (canGoBackward) 1.0f else 0.25f
+            val backAlpha = getClickableAlpha(canGoBackward)
             IconButton(
                 enabled = canGoBackward,
                 onClick = model.goBack,
@@ -93,7 +94,7 @@ fun TabToolbar(
                 )
             }
 
-            val forwardAlpha = if (canGoForward) 1.0f else 0.25f
+            val forwardAlpha = getClickableAlpha(canGoForward)
             IconButton(
                 enabled = canGoForward,
                 onClick = model.goForward,

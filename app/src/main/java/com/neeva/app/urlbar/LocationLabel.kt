@@ -42,19 +42,22 @@ import org.chromium.weblayer.UrlBarOptions
 
 @Composable
 fun LocationLabel(
-    urlBarValue: String,
     backgroundColor: Color,
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
-    isShowingQuery: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val browserWrapper = LocalBrowserWrapper.current
+
+    val activeTabModel = browserWrapper.activeTabModel
+    val urlBarValue by activeTabModel.displayedText.collectAsState()
+    val isShowingQuery by activeTabModel.isShowingQuery.collectAsState()
+
     // WebLayer requires that you pass it an old-school color resource from the XML files.
     val textSize = MaterialTheme.typography.bodyLarge.fontSize.value
     val colorResource = mapComposeColorToResource(foregroundColor)
 
     // Whenever the Browser changes, ask it for the View we need to display and trigger a recompose.
-    val browserWrapper = LocalBrowserWrapper.current
     val browserFlow: Browser? by browserWrapper.browserFlow.collectAsState()
     val urlBarView: View? = remember(browserFlow) {
         browserFlow?.urlBarController?.createUrlBarView(

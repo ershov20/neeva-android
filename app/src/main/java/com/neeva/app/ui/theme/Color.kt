@@ -196,3 +196,6 @@ fun mapComposeColorToResource(color: Color): Int = when (color) {
 
     else -> throw IllegalArgumentException("Color mapping is undefined")
 }
+
+/** Determines the alpha value to use when rendering controls that can be disabled. */
+fun getClickableAlpha(isEnabled: Boolean): Float = if (isEnabled) 1.0f else 0.25f

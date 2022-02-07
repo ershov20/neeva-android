@@ -38,7 +38,6 @@ fun URLBar() {
     val appNavModel = LocalEnvironment.current.appNavModel
 
     val browserWrapper = LocalBrowserWrapper.current
-    val activeTabModel = browserWrapper.activeTabModel
     val urlBarModel = browserWrapper.urlBarModel
     val urlBarModelState = urlBarModel.state.collectAsState()
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
@@ -77,15 +76,10 @@ fun URLBar() {
             // at the same time because the AutocompleteTextField is the thing that must be focused
             // when the LocationLabel is clicked.
             if (!isEditing) {
-                val displayedLocation by activeTabModel.displayedText.collectAsState()
-                val isShowingQuery: Boolean by activeTabModel.isShowingQuery.collectAsState()
-
                 LocationLabel(
-                    urlBarValue = displayedLocation,
                     backgroundColor = backgroundColor,
                     foregroundColor = foregroundColor,
                     showIncognitoBadge = isIncognito,
-                    isShowingQuery = isShowingQuery,
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { urlBarModel.onRequestFocus() }

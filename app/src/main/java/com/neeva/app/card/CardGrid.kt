@@ -52,6 +52,7 @@ import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.theme.getClickableAlpha
 
 @OptIn(
     ExperimentalAnimationApi::class,
@@ -249,7 +250,7 @@ fun CardGrid(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                val closeButtonAlpha = if (closeButtonEnabled) 1.0f else 0.25f
+                val closeButtonAlpha = getClickableAlpha(closeButtonEnabled)
                 Surface(
                     onClick = cardGridListener::onDone,
                     enabled = closeButtonEnabled,

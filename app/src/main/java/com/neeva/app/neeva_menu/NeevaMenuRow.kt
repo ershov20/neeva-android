@@ -21,7 +21,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun NeevaMenuIcon(
     itemData: NeevaMenuItemData,
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
 ) {
     if (itemData.icon != null) {
         Icon(
