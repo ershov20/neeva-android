@@ -26,7 +26,7 @@ import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.settings.SettingsModel
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
@@ -53,7 +53,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     @Inject lateinit var apolloClient: ApolloClient
     @Inject lateinit var spaceStore: SpaceStore
-    @Inject lateinit var settingsModel: SettingsModel
+    @Inject lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Inject lateinit var neevaUserToken: NeevaUserToken
     @Inject lateinit var webModel: WebLayerModel
@@ -95,12 +95,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     )
                 }
 
-                // TODO(kobec): SETTINGSMODEL can be created right here with all the lambdas
-
                 // Set up all the classes that'll need to be sent to all of the Composables.
                 val environment = LocalEnvironmentState(
                     appNavModel = appNavModel!!,
-                    settingsModel = settingsModel,
+                    settingsDataModel = settingsDataModel,
                     historyManager = historyManager,
                     dispatchers = dispatchers,
                     sharedPreferencesModel = sharedPreferencesModel,

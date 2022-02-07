@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -13,9 +12,10 @@ import com.neeva.app.card.CardsContainer
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.neeva_menu.NeevaMenuSheet
-import com.neeva.app.settings.ClearBrowsingSettingsContainer
-import com.neeva.app.settings.MainSettingsContainer
 import com.neeva.app.settings.ProfileSettingsContainer
+import com.neeva.app.settings.SettingsViewModelImpl
+import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
+import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.Space
 
@@ -27,6 +27,12 @@ fun AppNav(
     modifier: Modifier,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
+    val settingsViewModel = SettingsViewModelImpl(
+        appNavModel,
+        LocalEnvironment.current.settingsDataModel,
+        LocalEnvironment.current.historyManager
+    )
+
     AnimatedNavHost(
         navController = appNavModel.navController,
         startDestination = AppNavDestination.BROWSER.route,
@@ -78,7 +84,7 @@ fun AppNav(
                 AnimatedContentScope.SlideDirection.End
             )
         ) {
-            MainSettingsContainer()
+            MainSettingsPane(settingsViewModel)
         }
 
         composable(
@@ -106,7 +112,10 @@ fun AppNav(
                 AnimatedContentScope.SlideDirection.End
             )
         ) {
-            ClearBrowsingSettingsContainer(webLayerModel)
+            ClearBrowsingPane(
+                settingsViewModel = settingsViewModel,
+                webLayerModel::clearBrowsingData
+            )
         }
 
         composable(

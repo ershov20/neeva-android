@@ -9,7 +9,7 @@ import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.settings.SettingsModel
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.BrowserScaffold
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 
 data class LocalEnvironmentState(
     val appNavModel: AppNavModel,
-    val settingsModel: SettingsModel,
+    val settingsDataModel: SettingsDataModel,
     val historyManager: HistoryManager,
     val dispatchers: Dispatchers,
     val sharedPreferencesModel: SharedPreferencesModel,

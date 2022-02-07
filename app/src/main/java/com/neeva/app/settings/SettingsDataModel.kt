@@ -8,14 +8,14 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.NeevaUser
 
 /**
- * An interface used for anything Settings-related.
+ * A data model for Settings composables.
  *
  * This includes:
- *    - holding toggle state
- *    - triggering signing in/out
- *    - storing Settings-SharedPreferences
+ *    - Holding all toggle MutableStates (which are based on their SharedPref values)
+ *    - Checking if the user is signed out
+ *    - Storing and uses Settings-SharedPreferences
  */
-class SettingsModel(
+class SettingsDataModel(
     val sharedPreferencesModel: SharedPreferencesModel,
     val neevaUserToken: NeevaUserToken
 ) {
@@ -47,13 +47,7 @@ class SettingsModel(
         return toggleKeyName?.let { toggleMap[toggleKeyName] }
     }
 
-    fun signOut() {
-        NeevaUser.shared = NeevaUser()
-        neevaUserToken.removeToken()
-        // TODO(kobec): load different settings preferences per user
-    }
-
-    fun isSignedIn(): Boolean {
-        return !neevaUserToken.getToken().isNullOrEmpty() && NeevaUser.shared.id != null
+    fun isSignedOut(): Boolean {
+        return neevaUserToken.getToken().isNullOrEmpty() || NeevaUser.shared.id == null
     }
 }

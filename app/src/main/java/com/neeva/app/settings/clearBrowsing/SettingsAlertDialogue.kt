@@ -1,4 +1,4 @@
-package com.neeva.app.settings.clearBrowsingSettings
+package com.neeva.app.settings.clearBrowsing
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme

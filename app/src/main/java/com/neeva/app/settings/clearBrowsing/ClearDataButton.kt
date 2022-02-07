@@ -1,4 +1,4 @@
-package com.neeva.app.settings.clearBrowsingSettings
+package com.neeva.app.settings.clearBrowsing
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

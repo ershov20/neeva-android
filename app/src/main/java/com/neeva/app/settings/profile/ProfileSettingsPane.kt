@@ -1,4 +1,4 @@
-package com.neeva.app.settings.profileSettings
+package com.neeva.app.settings.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -51,7 +51,6 @@ fun ProfileSettingsPane(
                     .background(MaterialTheme.colorScheme.surface)
                     .wrapContentHeight(align = Alignment.Bottom),
             ) {
-                // TODO(kobec): might be wrong font style
                 Text(
                     text = stringResource(R.string.settings_signed_into_neeva_with),
                     style = MaterialTheme.typography.labelSmall,

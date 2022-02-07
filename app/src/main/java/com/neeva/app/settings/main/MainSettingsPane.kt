@@ -1,6 +1,5 @@
-package com.neeva.app.settings.mainSettings
+package com.neeva.app.settings.main
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,23 +13,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.settings.SettingsPaneListener
 import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsTopAppBar
+import com.neeva.app.settings.SettingsViewModel
+import com.neeva.app.settings.getFakeSettingsViewModel
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
 import java.util.Locale
 
 @Composable
-fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
+fun MainSettingsPane(settingsViewModel: SettingsViewModel) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -38,7 +36,7 @@ fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
     ) {
         SettingsTopAppBar(
             title = stringResource(MainSettingsData.topAppBarTitleResId),
-            onBackPressed = settingsPaneListener.onBackPressed
+            onBackPressed = settingsViewModel::onBackPressed
         )
 
         LazyColumn(
@@ -55,7 +53,6 @@ fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
                             .padding(16.dp)
                             .wrapContentHeight(align = Alignment.Bottom),
                     ) {
-                        // TODO(kobec): might be wrong font style
                         if (it.titleId != null) {
                             Text(
                                 text = stringResource(it.titleId).uppercase(Locale.getDefault()),
@@ -68,13 +65,13 @@ fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
                 }
                 val onClickMap = mutableMapOf(
                     R.string.settings_clear_browsing_data to
-                        settingsPaneListener.showClearBrowsingSettings,
+                        settingsViewModel::showClearBrowsingSettings,
                     R.string.settings_sign_in_to_join_neeva to
-                        settingsPaneListener.showProfileSettings,
+                        settingsViewModel::showProfileSettings,
                 )
                 if (NeevaUser.shared.id == null) {
                     onClickMap[R.string.settings_sign_in_to_join_neeva] =
-                        settingsPaneListener.showFirstRun
+                        settingsViewModel::showFirstRun
                 }
 
                 items(it.rows) { rowData ->
@@ -85,36 +82,13 @@ fun MainSettingsPane(settingsPaneListener: SettingsPaneListener) {
                         .padding(horizontal = 16.dp)
                     SettingsRow(
                         rowData = rowData,
-                        settingsPaneListener = settingsPaneListener,
+                        settingsViewModel = settingsViewModel,
                         onClick = onClickMap[rowData.titleId] ?: {},
                         modifier = rowModifier
                     )
                 }
             }
         }
-    }
-}
-
-fun getFakeSettingsPaneListener(): SettingsPaneListener {
-    return object : SettingsPaneListener {
-        override val onBackPressed: () -> Unit
-            get() = { }
-        override val getTogglePreferenceSetter: (String?) -> ((Boolean) -> Unit)?
-            get() = { {} }
-        override val getToggleState: (String?) -> MutableState<Boolean>?
-            get() = { mutableStateOf(true) }
-        override val openUrl: (Uri) -> Unit
-            get() = { }
-        override val showFirstRun: () -> Unit
-            get() = { }
-        override val showClearBrowsingSettings: () -> Unit
-            get() = { }
-        override val showProfileSettings: () -> Unit
-            get() = { }
-        override val onClearHistory: () -> Unit
-            get() = {}
-        override val isSignedIn: () -> Boolean
-            get() = { true }
     }
 }
 
@@ -125,7 +99,7 @@ fun getFakeSettingsPaneListener(): SettingsPaneListener {
 @Composable
 fun SettingsMain_Preview() {
     NeevaTheme {
-        MainSettingsPane(getFakeSettingsPaneListener())
+        MainSettingsPane(getFakeSettingsViewModel())
     }
 }
 
@@ -136,6 +110,6 @@ fun SettingsMain_Preview() {
 @Composable
 fun SettingsMain_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        MainSettingsPane(getFakeSettingsPaneListener())
+        MainSettingsPane(getFakeSettingsViewModel())
     }
 }

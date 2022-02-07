@@ -86,7 +86,6 @@ fun ProfileRow(
     }
 }
 
-// TODO(kobec): previews not working because of LocalEnvironment
 @Preview(name = "Profile UI Signed In, 1x font size", locale = "en")
 @Preview(name = "Profile UI Signed In, 2x font size", locale = "en", fontScale = 2.0f)
 @Composable

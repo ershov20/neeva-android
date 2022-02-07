@@ -1,4 +1,4 @@
-package com.neeva.app.settings.clearBrowsingSettings
+package com.neeva.app.settings.clearBrowsing
 
 import android.net.Uri
 import androidx.annotation.StringRes
@@ -9,7 +9,7 @@ import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
-object ClearBrowsingSettingsData {
+object ClearBrowsingData {
     @StringRes
     val topAppBarTitleResId: Int = R.string.settings_clear_browsing_data
     val data = listOf(

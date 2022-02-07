@@ -1,4 +1,4 @@
-package com.neeva.app.settings.clearBrowsingSettings
+package com.neeva.app.settings.clearBrowsing
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,16 +22,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.settings.SettingsPaneListener
 import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsTopAppBar
-import com.neeva.app.settings.mainSettings.getFakeSettingsPaneListener
+import com.neeva.app.settings.SettingsViewModel
+import com.neeva.app.settings.getFakeSettingsViewModel
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun ClearBrowsingSettingsPane(
-    settingsPaneListener: SettingsPaneListener,
+fun ClearBrowsingPane(
+    settingsViewModel: SettingsViewModel,
     onClearBrowsingData: (MutableMap<String, Boolean>) -> Unit
 ) {
     Column(
@@ -40,8 +40,8 @@ fun ClearBrowsingSettingsPane(
             .fillMaxSize(),
     ) {
         SettingsTopAppBar(
-            title = stringResource(ClearBrowsingSettingsData.topAppBarTitleResId),
-            onBackPressed = settingsPaneListener.onBackPressed
+            title = stringResource(ClearBrowsingData.topAppBarTitleResId),
+            onBackPressed = settingsViewModel::onBackPressed
         )
 
         LazyColumn(
@@ -49,7 +49,7 @@ fun ClearBrowsingSettingsPane(
                 .weight(1.0f)
                 .fillMaxWidth()
         ) {
-            ClearBrowsingSettingsData.data.forEach {
+            ClearBrowsingData.data.forEach {
                 item {
                     Box(
                         modifier = Modifier
@@ -58,7 +58,6 @@ fun ClearBrowsingSettingsPane(
                             .padding(16.dp)
                             .wrapContentHeight(align = Alignment.Bottom),
                     ) {
-                        // TODO(kobec): might be wrong font style
                         if (it.titleId != null) {
                             Text(
                                 text = stringResource(it.titleId),
@@ -90,15 +89,15 @@ fun ClearBrowsingSettingsPane(
                         )
                         if (showDialog.value) {
                             SettingsAlertDialogue(
-                                text = stringResource(id = R.string.clear),
+                                text = stringResource(id = R.string.clear_browsing_dialog_text),
                                 confirmString = stringResource(
                                     id = R.string.clear_browsing_clear_data
                                 ),
                                 confirmAction = {
                                     onClearBrowsingData(
                                         getClearingOptions(
-                                            ClearBrowsingSettingsData.data[0].rows,
-                                            settingsPaneListener.getToggleState
+                                            ClearBrowsingData.data[0].rows,
+                                            settingsViewModel::getToggleState
                                         )
                                     )
                                     cleared.value = true
@@ -111,7 +110,7 @@ fun ClearBrowsingSettingsPane(
                     } else {
                         SettingsRow(
                             rowData = rowData,
-                            settingsPaneListener = settingsPaneListener,
+                            settingsViewModel = settingsViewModel,
                             modifier = rowModifier
                         )
                     }
@@ -142,7 +141,7 @@ fun getClearingOptions(
 @Composable
 fun ClearBrowsingSettings_Preview() {
     NeevaTheme {
-        ClearBrowsingSettingsPane(getFakeSettingsPaneListener(), {})
+        ClearBrowsingPane(getFakeSettingsViewModel(), {})
     }
 }
 
@@ -153,6 +152,6 @@ fun ClearBrowsingSettings_Preview() {
 @Composable
 fun ClearBrowsingSettings_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        ClearBrowsingSettingsPane(getFakeSettingsPaneListener(), {})
+        ClearBrowsingPane(getFakeSettingsViewModel(), {})
     }
 }

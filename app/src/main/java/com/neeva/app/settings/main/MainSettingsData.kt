@@ -1,4 +1,4 @@
-package com.neeva.app.settings.mainSettings
+package com.neeva.app.settings.main
 
 import android.net.Uri
 import androidx.annotation.StringRes

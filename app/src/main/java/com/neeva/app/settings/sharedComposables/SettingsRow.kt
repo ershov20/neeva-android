@@ -13,7 +13,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.R
-import com.neeva.app.settings.mainSettings.getFakeSettingsPaneListener
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabel
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
@@ -24,7 +23,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun SettingsRow(
     rowData: SettingsRowData,
-    settingsPaneListener: SettingsPaneListener,
+    settingsViewModel: SettingsViewModel,
     onClick: () -> Unit = {},
     modifier: Modifier
 ) {
@@ -34,7 +33,7 @@ fun SettingsRow(
         title = stringResource(rowData.titleId, versionString)
     }
 
-    val toggleState = settingsPaneListener.getToggleState(rowData.togglePreferenceKey)
+    val toggleState = settingsViewModel.getToggleState(rowData.togglePreferenceKey)
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
             SettingsButtonRow(title, onClick, modifier)
@@ -44,7 +43,7 @@ fun SettingsRow(
         }
         SettingsRowType.LINK -> {
             if (rowData.url != null) {
-                SettingsLinkRow(title, settingsPaneListener.openUrl, rowData.url, modifier)
+                SettingsLinkRow(title, settingsViewModel::openUrl, rowData.url, modifier)
             }
         }
         SettingsRowType.TOGGLE -> {
@@ -53,7 +52,7 @@ fun SettingsRow(
                     title = title,
                     toggleState = toggleState,
                     togglePrefKey = rowData.togglePreferenceKey,
-                    getTogglePreferenceSetter = settingsPaneListener.getTogglePreferenceSetter,
+                    getTogglePreferenceSetter = settingsViewModel::getTogglePreferenceSetter,
                     modifier = modifier
                 )
             }
@@ -62,14 +61,14 @@ fun SettingsRow(
             SettingsNavigationRow(title = title, onClick = onClick, modifier = modifier)
         }
         SettingsRowType.PROFILE -> {
-            if (settingsPaneListener.isSignedIn()) {
-                ProfileRow(onClick = onClick, modifier = modifier)
-            } else {
+            if (settingsViewModel.isSignedOut()) {
                 SettingsButtonRow(
                     title = stringResource(R.string.settings_sign_in_to_join_neeva),
                     onClick = onClick,
                     modifier = modifier
                 )
+            } else {
+                ProfileRow(onClick = onClick, modifier = modifier)
             }
         }
     }
@@ -85,7 +84,7 @@ fun SettingsRow_PreviewToggle() {
                 SettingsRowType.TOGGLE,
                 R.string.debug_long_string_primary
             ),
-            settingsPaneListener = getFakeSettingsPaneListener(),
+            settingsViewModel = getFakeSettingsViewModel(),
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
@@ -109,7 +108,7 @@ fun SettingsRow_PreviewLink() {
                 Uri.parse(""),
                 togglePreferenceKey = ""
             ),
-            settingsPaneListener = getFakeSettingsPaneListener(),
+            settingsViewModel = getFakeSettingsViewModel(),
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
@@ -129,7 +128,7 @@ fun SettingsRow_PreviewLabel() {
                 SettingsRowType.LABEL,
                 R.string.debug_long_string_primary
             ),
-            settingsPaneListener = getFakeSettingsPaneListener(),
+            settingsViewModel = getFakeSettingsViewModel(),
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
