@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.neeva_menu.OverflowMenu
@@ -34,10 +35,11 @@ import com.neeva.app.neeva_menu.OverflowMenu
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun URLBar() {
-    val browserWrapper = LocalEnvironment.current.browserWrapper
-    val urlBarModel = browserWrapper.urlBarModel
-    val activeTabModel = browserWrapper.activeTabModel
     val appNavModel = LocalEnvironment.current.appNavModel
+
+    val browserWrapper = LocalBrowserWrapper.current
+    val activeTabModel = browserWrapper.activeTabModel
+    val urlBarModel = browserWrapper.urlBarModel
     val urlBarModelState = urlBarModel.state.collectAsState()
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 

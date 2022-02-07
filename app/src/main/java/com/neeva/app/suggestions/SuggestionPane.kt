@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.zeroQuery.IncognitoZeroQuery
@@ -19,7 +19,7 @@ fun SuggestionPane() {
         .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
         .historyManager()
 
-    val browserWrapper = LocalEnvironment.current.browserWrapper
+    val browserWrapper = LocalBrowserWrapper.current
     val urlBarModel = browserWrapper.urlBarModel
     val activeTabModel = browserWrapper.activeTabModel
     val faviconCache = browserWrapper.faviconCache

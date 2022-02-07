@@ -56,7 +56,7 @@ fun MainSettingsContainer() {
 fun ProfileSettingsContainer(webLayerModel: WebLayerModel) {
     val appNavModel = LocalEnvironment.current.appNavModel
     val settingsModel = LocalEnvironment.current.settingsModel
-    val activeTabModel = LocalEnvironment.current.browserWrapper.activeTabModel
+    val activeTabModel = webLayerModel.currentBrowser.activeTabModel
     ProfileSettingsPane(
         onBackPressed = appNavModel::popBackStack,
         signUserOut = {

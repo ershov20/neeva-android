@@ -13,6 +13,7 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.favicons.FaviconCache
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -184,4 +185,6 @@ class WebLayerModel(
             regularBrowser.clearNonNeevaCookies(clearCookiesFlags.toIntArray())
         }
     }
+
+    fun getRegularProfileFaviconCache(): FaviconCache = regularBrowser.faviconCache
 }

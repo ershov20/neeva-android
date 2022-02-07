@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
@@ -54,7 +54,7 @@ fun LocationLabel(
     val colorResource = mapComposeColorToResource(foregroundColor)
 
     // Whenever the Browser changes, ask it for the View we need to display and trigger a recompose.
-    val browserWrapper = LocalEnvironment.current.browserWrapper
+    val browserWrapper = LocalBrowserWrapper.current
     val browserFlow: Browser? by browserWrapper.browserFlow.collectAsState()
     val urlBarView: View? = remember(browserFlow) {
         browserFlow?.urlBarController?.createUrlBarView(

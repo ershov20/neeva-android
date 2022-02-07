@@ -11,8 +11,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowInsetsCompat
@@ -32,10 +30,12 @@ import com.neeva.app.settings.SettingsModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
+import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -98,9 +98,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 // TODO(kobec): SETTINGSMODEL can be created right here with all the lambdas
 
                 // Set up all the classes that'll need to be sent to all of the Composables.
-                val browserWrapper by webModel.browserWrapperFlow.collectAsState()
                 val environment = LocalEnvironmentState(
-                    browserWrapper = browserWrapper,
                     appNavModel = appNavModel!!,
                     settingsModel = settingsModel,
                     historyManager = historyManager,
@@ -108,13 +106,16 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     sharedPreferencesModel = sharedPreferencesModel,
                     neevaUserToken = neevaUserToken
                 )
-                CompositionLocalProvider(LocalEnvironment provides environment) {
-                    ActivityUI(
-                        bottomControlOffset = bottomControlOffset,
-                        topControlOffset = topControlOffset,
-                        webLayerModel = webModel,
-                        apolloClient = apolloClient
-                    )
+
+                NeevaTheme {
+                    CompositionLocalProvider(LocalEnvironment provides environment) {
+                        ActivityUI(
+                            bottomControlOffset = bottomControlOffset,
+                            topControlOffset = topControlOffset,
+                            webLayerModel = webModel,
+                            apolloClient = apolloClient
+                        )
+                    }
                 }
 
                 LaunchedEffect(appNavModel) {

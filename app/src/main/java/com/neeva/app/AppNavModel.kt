@@ -59,6 +59,7 @@ class AppNavModel(
 
     /** Shows a screen and allows the user to return to the browser after closing it. */
     private fun showSecondaryScreen(destination: AppNavDestination) {
+        if (navController.currentDestination?.route == destination.route) return
         navController.navigate(destination.route) {
             launchSingleTop = true
             popUpTo(AppNavDestination.BROWSER.route)
@@ -67,6 +68,7 @@ class AppNavModel(
 
     /** Shows a screen and adds the previous screen to the back stack. */
     private fun showSubscreen(destination: AppNavDestination) {
+        if (navController.currentDestination?.route == destination.route) return
         navController.navigate(destination.route) {
             launchSingleTop = true
         }

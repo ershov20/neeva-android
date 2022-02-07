@@ -55,12 +55,12 @@ import com.neeva.app.ui.theme.NeevaTheme
 
 @OptIn(
     ExperimentalAnimationApi::class,
-    androidx.compose.foundation.ExperimentalFoundationApi::class
+    ExperimentalFoundationApi::class
 )
 @Composable
 fun CardsContainer(webLayerModel: WebLayerModel) {
+    val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
     val appNavModel = LocalEnvironment.current.appNavModel
-    val browserWrapper = LocalEnvironment.current.browserWrapper
     val dispatchers = LocalEnvironment.current.dispatchers
 
     val cardGridListener = object : CardGridListener {

@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -22,12 +23,10 @@ import com.neeva.app.spaces.Space
 @Composable
 fun AppNav(
     webLayerModel: WebLayerModel,
+    appNavModel: AppNavModel,
     modifier: Modifier,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
-    val browserWrapper = LocalEnvironment.current.browserWrapper
-    val appNavModel = LocalEnvironment.current.appNavModel
-
     AnimatedNavHost(
         navController = appNavModel.navController,
         startDestination = AppNavDestination.BROWSER.route,
@@ -49,7 +48,7 @@ fun AppNav(
             )
         ) {
             AddToSpaceSheet(
-                activeTabModel = browserWrapper.activeTabModel,
+                webLayerModel = webLayerModel,
                 spaceModifier = spaceModifier
             )
         }
@@ -110,8 +109,6 @@ fun AppNav(
             ClearBrowsingSettingsContainer(webLayerModel)
         }
 
-        // TODO(dan.alcantara): Should we be using the regular profile's favicon cache here?
-        //                      The history UI always shows the regular profile's history.
         composable(
             AppNavDestination.HISTORY.route,
             enterTransition = enterSlideTransition(
@@ -124,7 +121,7 @@ fun AppNav(
             )
         ) {
             HistoryContainer(
-                faviconCache = browserWrapper.faviconCache
+                faviconCache = webLayerModel.getRegularProfileFaviconCache()
             ) {
                 webLayerModel.loadUrl(it)
                 appNavModel.showBrowser()

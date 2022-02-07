@@ -17,7 +17,7 @@ import com.neeva.app.urlbar.URLBar
 
 @Composable
 fun BrowserUI(modifier: Modifier) {
-    val browserWrapper = LocalEnvironment.current.browserWrapper
+    val browserWrapper = LocalBrowserWrapper.current
     val urlBarModel = browserWrapper.urlBarModel
     val activeTabModel = browserWrapper.activeTabModel
 

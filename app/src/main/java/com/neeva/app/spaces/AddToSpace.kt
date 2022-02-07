@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
+import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.OverlaySheet
@@ -45,7 +46,7 @@ import dagger.hilt.EntryPoints
 
 @Composable
 fun AddToSpaceSheet(
-    activeTabModel: ActiveTabModel,
+    webLayerModel: WebLayerModel,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
     val spaceStore = EntryPoints
@@ -53,6 +54,9 @@ fun AddToSpaceSheet(
         .spaceStore()
 
     val appNavModel = LocalEnvironment.current.appNavModel
+
+    val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
+    val activeTabModel = browserWrapper.activeTabModel
 
     OverlaySheet {
         AddToSpaceUI(
