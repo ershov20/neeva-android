@@ -98,7 +98,7 @@ class WebLayerModel(
                 _webLayer.value = webLayer
             }
         } catch (e: UnsupportedVersionException) {
-            throw RuntimeException("Failed to initialize WebLayer, e")
+            throw RuntimeException("Failed to initialize WebLayer", e)
         }
     }
 
