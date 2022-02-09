@@ -53,6 +53,7 @@ fun SettingsRow(
                     toggleState = toggleState,
                     togglePrefKey = rowData.togglePreferenceKey,
                     getTogglePreferenceSetter = settingsViewModel::getTogglePreferenceSetter,
+                    enabled = rowData.enabled,
                     modifier = modifier
                 )
             }

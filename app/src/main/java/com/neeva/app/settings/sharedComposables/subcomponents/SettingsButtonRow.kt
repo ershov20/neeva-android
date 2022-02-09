@@ -26,7 +26,7 @@ fun SettingsButtonRow(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable { onClick() }
+        modifier = Modifier.clickable { onClick() }.then(modifier)
     ) {
         Text(
             text = title,

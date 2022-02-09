@@ -38,14 +38,14 @@ fun ProfileRow(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+        modifier = Modifier
             .then(
                 if (onClick != null) {
                     Modifier.clickable { onClick() }
                 } else {
                     Modifier
                 }
-            )
+            ).then(modifier)
     ) {
         if (pictureUrl != null) {
             Image(

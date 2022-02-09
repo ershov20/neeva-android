@@ -27,6 +27,7 @@ fun SettingsToggleRow(
     toggleState: MutableState<Boolean>,
     togglePrefKey: String,
     getTogglePreferenceSetter: (String?) -> ((Boolean) -> Unit)?,
+    enabled: Boolean = true,
     modifier: Modifier
 ) {
     Row(
@@ -35,6 +36,7 @@ fun SettingsToggleRow(
     ) {
         SettingsLabelText(title, modifier = Modifier.weight(1.0f))
         Switch(
+            enabled = enabled,
             checked = toggleState.value,
             modifier = Modifier.size(48.dp),
             colors = SwitchDefaults.colors(
@@ -58,10 +60,10 @@ fun SettingsToggleRow_Preview() {
     NeevaTheme {
         SettingsToggleRow(
             title = stringResource(R.string.debug_long_string_primary),
-            toggleState,
-            "",
-            { {} },
-            Modifier
+            toggleState = toggleState,
+            togglePrefKey = "",
+            getTogglePreferenceSetter = { {} },
+            modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
                 .padding(16.dp)
@@ -80,10 +82,10 @@ fun SettingsToggleRow_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         SettingsToggleRow(
             title = stringResource(R.string.debug_long_string_primary),
-            toggleState,
-            "",
-            { {} },
-            Modifier
+            toggleState = toggleState,
+            togglePrefKey = "",
+            getTogglePreferenceSetter = { {} },
+            modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
                 .padding(16.dp)

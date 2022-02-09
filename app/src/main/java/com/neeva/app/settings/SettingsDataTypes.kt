@@ -12,6 +12,7 @@ data class SettingsRowData(
     val titleId: Int,
     val url: Uri? = null,
     val togglePreferenceKey: String? = null,
+    val enabled: Boolean = true
 )
 
 enum class SettingsRowType {

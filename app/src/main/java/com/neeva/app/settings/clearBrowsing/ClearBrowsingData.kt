@@ -2,7 +2,7 @@ package com.neeva.app.settings.clearBrowsing
 
 import android.net.Uri
 import androidx.annotation.StringRes
-import com.neeva.app.NeevaConstants.appPrivacyURL
+import com.neeva.app.NeevaConstants.appManageMemory
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsRowData
@@ -34,12 +34,14 @@ object ClearBrowsingData {
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     titleId = R.string.settings_tracking_protection,
-                    togglePreferenceKey = SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION.key
+                    togglePreferenceKey = SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION.key,
+                    enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     titleId = R.string.settings_downloaded_files,
-                    togglePreferenceKey = SettingsToggle.CLEAR_DOWNLOADED_FILES.key
+                    togglePreferenceKey = SettingsToggle.CLEAR_DOWNLOADED_FILES.key,
+                    enabled = false
                 ),
             )
         ),
@@ -57,8 +59,8 @@ object ClearBrowsingData {
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     titleId = R.string.settings_manage_neeva_memory,
-                    url = Uri.parse(appPrivacyURL)
-                ),
+                    url = Uri.parse(appManageMemory)
+                )
             )
         ),
     )

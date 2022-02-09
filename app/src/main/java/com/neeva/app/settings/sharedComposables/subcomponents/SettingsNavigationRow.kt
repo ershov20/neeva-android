@@ -20,7 +20,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SettingsNavigationRow(title: String, onClick: () -> Unit, modifier: Modifier) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable { onClick() }
+        modifier = Modifier.clickable { onClick() }.then(modifier)
     ) {
         SettingsLabelText(text = title, modifier = Modifier.weight(1.0f))
     }

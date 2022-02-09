@@ -30,7 +30,7 @@ fun SettingsLinkRow(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable { openUrl(uri) }
+        modifier = Modifier.clickable { openUrl(uri) }.then(modifier)
     ) {
         SettingsLabelText(text = title, modifier = Modifier.weight(1.0f))
         Image(

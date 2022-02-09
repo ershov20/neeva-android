@@ -49,28 +49,26 @@ object MainSettingsData {
                 SettingsRowData(
                     type = SettingsRowType.NAVIGATION,
                     titleId = R.string.settings_default_browser,
-                    url = Uri.parse(appPrivacyURL)
+                    enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     titleId = R.string.settings_show_search_search_suggestions,
-                    togglePreferenceKey = SettingsToggle.SHOW_SEARCH_SUGGESTIONS.key
+                    togglePreferenceKey = SettingsToggle.SHOW_SEARCH_SUGGESTIONS.key,
+                    enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     titleId = R.string.settings_block_pop_up_windows,
-                    togglePreferenceKey = SettingsToggle.BLOCK_POP_UP_WINDOWS.key
+                    togglePreferenceKey = SettingsToggle.BLOCK_POP_UP_WINDOWS.key,
+                    enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     titleId = R.string.settings_open_copied_links,
-                    togglePreferenceKey = SettingsToggle.OFFER_TO_OPEN_COPIED_LINKS.key
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    titleId = R.string.settings_show_link_previews,
-                    togglePreferenceKey = SettingsToggle.SHOW_LINK_PREVIEWS.key
-                ),
+                    togglePreferenceKey = SettingsToggle.OFFER_TO_OPEN_COPIED_LINKS.key,
+                    enabled = false
+                )
             )
         ),
         SettingsGroupData(
@@ -78,18 +76,19 @@ object MainSettingsData {
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.NAVIGATION,
-                    titleId = R.string.settings_clear_browsing_data,
-                    url = Uri.parse(appPrivacyURL)
+                    titleId = R.string.settings_clear_browsing_data
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     titleId = R.string.settings_close_incognito_tabs,
-                    togglePreferenceKey = SettingsToggle.CLOSE_INCOGNITO_TABS.key
+                    togglePreferenceKey = SettingsToggle.CLOSE_INCOGNITO_TABS.key,
+                    enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     titleId = R.string.settings_tracking_protection,
-                    togglePreferenceKey = SettingsToggle.TRACKING_PROTECTION.key
+                    togglePreferenceKey = SettingsToggle.TRACKING_PROTECTION.key,
+                    enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,
@@ -123,7 +122,7 @@ object MainSettingsData {
                 SettingsRowData(
                     type = SettingsRowType.NAVIGATION,
                     titleId = R.string.settings_licenses,
-                    url = Uri.parse(appTermsURL)
+                    enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,
