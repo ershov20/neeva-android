@@ -13,6 +13,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.BrowserScaffold
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -23,7 +24,7 @@ data class LocalEnvironmentState(
     val historyManager: HistoryManager,
     val dispatchers: Dispatchers,
     val sharedPreferencesModel: SharedPreferencesModel,
-    val neevaUserToken: NeevaUserToken
+    val neevaUser: NeevaUser
 )
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value set") }

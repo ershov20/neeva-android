@@ -6,17 +6,25 @@ import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 
 /**
- * Provides Neeva user identity token. Good for checking if the user is logged in.
+ * Singleton that provides and saves Neeva user identity token to SharedPrefs.
  */
 class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
+    var cachedToken: String = ""
+    init {
+        cachedToken = sharedPreferencesModel.getString(SharedPrefFolder.USER, KEY_TOKEN, "")
+    }
     companion object {
         internal const val KEY_TOKEN = "TOKEN"
 
         fun extractAuthTokenFromIntent(intent: Intent?): String? {
             val dataString = intent?.dataString ?: return null
-
             val dataUri = Uri.parse(dataString)
-            if (dataUri.scheme != "neeva" || dataUri.host != "login") return null
+            // TODO(kobec): waiting on the backend to fix this https://github.com/neevaco/neeva/issues/63900
+            if (!dataString.startsWith("neeva:://login") &&
+                !(dataUri.scheme == "neeva" && dataUri.host == "login")
+            ) {
+                return null
+            }
 
             // The URI is not hierarchical so none of the nicer getQueryForKey calls work.
             val token = dataUri.query?.substringAfter("sessionKey=")
@@ -28,20 +36,17 @@ class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
         return "${NeevaConstants.loginCookie}=${getToken()}"
     }
 
-    fun getToken(): String? {
-        val result = sharedPreferencesModel.getString(SharedPrefFolder.USER, KEY_TOKEN, "")
-        return if (result == "") {
-            null
-        } else {
-            result
-        }
+    fun getToken(): String {
+        return cachedToken
     }
 
     fun setToken(token: String) {
+        cachedToken = token
         return sharedPreferencesModel.setValue(SharedPrefFolder.USER, KEY_TOKEN, token)
     }
 
     fun removeToken() {
+        cachedToken = ""
         sharedPreferencesModel.removeValue(SharedPrefFolder.USER, KEY_TOKEN)
     }
 }

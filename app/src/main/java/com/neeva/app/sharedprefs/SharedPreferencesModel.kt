@@ -36,21 +36,21 @@ class SharedPreferencesModel(context: Context) {
         sharedPreferencesMap[folder]
             ?.edit()
             ?.putBoolean(key, value)
-            ?.apply()
+            ?.commit()
     }
 
     fun setValue(folder: SharedPrefFolder, key: String, value: String) {
         sharedPreferencesMap[folder]
             ?.edit()
             ?.putString(key, value)
-            ?.apply()
+            ?.commit()
     }
 
     fun removeValue(folder: SharedPrefFolder, key: String) {
         sharedPreferencesMap[folder]
             ?.edit()
             ?.remove(key)
-            ?.apply()
+            ?.commit()
     }
 }
 

@@ -8,11 +8,11 @@ import androidx.fragment.app.Fragment
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
-import com.neeva.app.NeevaUserToken
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.favicons.FaviconCache
 import java.lang.ref.WeakReference
 import kotlinx.coroutines.CoroutineScope
@@ -41,9 +41,9 @@ class WebLayerModel(
     private val historyManager: HistoryManager,
     apolloClient: ApolloClient,
     spaceStore: SpaceStore,
-    private val coroutineScope: CoroutineScope,
-    private val dispatchers: Dispatchers,
-    neevaUserToken: NeevaUserToken
+    val coroutineScope: CoroutineScope,
+    val dispatchers: Dispatchers,
+    neevaUser: NeevaUser
 ) {
     companion object {
         val TAG = WebLayerModel::class.simpleName
@@ -62,7 +62,7 @@ class WebLayerModel(
         apolloClient = apolloClient,
         historyManager = historyManager,
         spaceStore = spaceStore,
-        neevaUserToken = neevaUserToken
+        neevaUser = neevaUser
     )
     private var incognitoBrowser: IncognitoBrowserWrapper? = null
 
@@ -156,7 +156,9 @@ class WebLayerModel(
         }
     }
 
-    fun clearNeevaCookies() = regularBrowser::clearNeevaCookies
+    fun clearNeevaCookies() {
+        regularBrowser.clearNeevaCookies()
+    }
 
     fun clearBrowsingData(clearingOptions: MutableMap<String, Boolean>) {
         val clearCookiesFlags = mutableListOf<Int>()

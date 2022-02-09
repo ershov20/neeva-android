@@ -23,12 +23,14 @@ import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsTopAppBar
 import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.settings.getFakeSettingsViewModel
-import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
 import java.util.Locale
 
 @Composable
-fun MainSettingsPane(settingsViewModel: SettingsViewModel) {
+fun MainSettingsPane(
+    settingsViewModel: SettingsViewModel,
+    isSignedOut: () -> Boolean
+) {
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surfaceVariant)
@@ -69,7 +71,7 @@ fun MainSettingsPane(settingsViewModel: SettingsViewModel) {
                     R.string.settings_sign_in_to_join_neeva to
                         settingsViewModel::showProfileSettings,
                 )
-                if (NeevaUser.shared.id == null) {
+                if (isSignedOut()) {
                     onClickMap[R.string.settings_sign_in_to_join_neeva] =
                         settingsViewModel::showFirstRun
                 }
@@ -99,7 +101,10 @@ fun MainSettingsPane(settingsViewModel: SettingsViewModel) {
 @Composable
 fun SettingsMain_Preview() {
     NeevaTheme {
-        MainSettingsPane(getFakeSettingsViewModel())
+        MainSettingsPane(
+            getFakeSettingsViewModel(),
+            isSignedOut = { true }
+        )
     }
 }
 
@@ -110,6 +115,9 @@ fun SettingsMain_Preview() {
 @Composable
 fun SettingsMain_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        MainSettingsPane(getFakeSettingsViewModel())
+        MainSettingsPane(
+            getFakeSettingsViewModel(),
+            isSignedOut = { false }
+        )
     }
 }

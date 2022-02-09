@@ -16,7 +16,6 @@ import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filter
 
 data class SpaceEntityData(
     val url: Uri,
@@ -100,7 +99,7 @@ data class Space(
     }
 }
 
-class SpaceStore(val apolloClient: ApolloClient) {
+class SpaceStore(val apolloClient: ApolloClient, val neevaUser: NeevaUser) {
     enum class State {
         READY,
         REFRESHING,
@@ -142,7 +141,7 @@ class SpaceStore(val apolloClient: ApolloClient) {
                     thumbnail = space.thumbnail,
                     resultCount = space.resultCount ?: 0,
                     isDefaultSpace = space.isDefaultSpace ?: false,
-                    isShared = space.acl?.map { it.userID }?.any { it == NeevaUser.shared.id }
+                    isShared = space.acl?.map { it.userID }?.any { it == neevaUser.data.id }
                         ?: false,
                     isPublic = space.hasPublicACL ?: false,
                     userACL = userACL

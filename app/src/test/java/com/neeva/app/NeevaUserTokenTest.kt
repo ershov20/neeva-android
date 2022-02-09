@@ -14,6 +14,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
+import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
 
@@ -21,11 +22,13 @@ import strikt.assertions.isNull
 @Config(manifest = Config.NONE)
 class NeevaUserTokenTest : BaseTest() {
     @Test
-    fun getToken_resultIsEmpty_returnsNull() {
-        val sharedPreferencesModel = mock<SharedPreferencesModel>()
+    fun getToken_resultIsEmpty_returnsEmpty() {
+        val sharedPreferencesModel = mock<SharedPreferencesModel> {
+            on { getString(any(), eq(NeevaUserToken.KEY_TOKEN), eq("")) } doReturn ""
+        }
         val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
         val result = neevaUserToken.getToken()
-        expectThat(result).isNull()
+        expectThat(result).isEmpty()
     }
 
     fun getToken_stringIsSet_returnsString() {

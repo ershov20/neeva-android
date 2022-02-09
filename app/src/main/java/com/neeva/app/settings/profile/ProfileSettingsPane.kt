@@ -21,12 +21,14 @@ import com.neeva.app.settings.ProfileRow
 import com.neeva.app.settings.SettingsTopAppBar
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.storage.NeevaUser
+import com.neeva.app.storage.NeevaUserData
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun ProfileSettingsPane(
     onBackPressed: () -> Unit,
     signUserOut: () -> Unit,
+    neevaUserData: NeevaUserData
 ) {
     Column(
         modifier = Modifier
@@ -34,7 +36,7 @@ fun ProfileSettingsPane(
             .fillMaxSize(),
     ) {
         SettingsTopAppBar(
-            title = NeevaUser.shared.displayName ?: "",
+            title = neevaUserData.displayName ?: "",
             onBackPressed = onBackPressed
         )
 
@@ -66,9 +68,9 @@ fun ProfileSettingsPane(
                 .background(MaterialTheme.colorScheme.surface)
 
             ProfileRow(
-                primaryLabel = NeevaUser.shared.ssoProvider.name,
-                secondaryLabel = NeevaUser.shared.email,
-                pictureUrl = NeevaUser.shared.pictureUrl,
+                primaryLabel = neevaUserData.ssoProvider.name,
+                secondaryLabel = neevaUserData.email,
+                pictureUrl = neevaUserData.pictureUrl,
                 modifier = rowModifier
             )
             SettingsButtonRow(
@@ -91,7 +93,12 @@ fun SettingsProfile_Preview() {
     NeevaTheme {
         ProfileSettingsPane(
             onBackPressed = {},
-            signUserOut = {}
+            signUserOut = {},
+            neevaUserData = NeevaUserData(
+                displayName = "Jehan Kobe Chang",
+                email = "jehanc@uci.edu",
+                ssoProvider = NeevaUser.SSOProvider.GOOGLE
+            )
         )
     }
 }
@@ -105,7 +112,12 @@ fun SettingsProfile_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         ProfileSettingsPane(
             onBackPressed = {},
-            signUserOut = {}
+            signUserOut = {},
+            neevaUserData = NeevaUserData(
+                displayName = "Jehan Kobe Chang",
+                email = "jehanc@uci.edu",
+                ssoProvider = NeevaUser.SSOProvider.GOOGLE
+            )
         )
     }
 }

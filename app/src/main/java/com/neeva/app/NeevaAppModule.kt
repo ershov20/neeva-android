@@ -10,6 +10,7 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
+import com.neeva.app.storage.NeevaUser
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,16 +66,8 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesSpaceStore(apolloClient: ApolloClient): SpaceStore {
-        return SpaceStore(apolloClient)
-    }
-
-    @Provides
-    fun providesSettingsDataModel(
-        sharedPreferencesModel: SharedPreferencesModel,
-        neevaUserToken: NeevaUserToken
-    ): SettingsDataModel {
-        return SettingsDataModel(sharedPreferencesModel, neevaUserToken)
+    fun providesSpaceStore(apolloClient: ApolloClient, neevaUser: NeevaUser): SpaceStore {
+        return SpaceStore(apolloClient, neevaUser)
     }
 
     @Provides
@@ -83,8 +76,24 @@ object NeevaAppModule {
     }
 
     @Provides
+    @Singleton
     fun providesNeevaUserToken(sharedPreferencesModel: SharedPreferencesModel): NeevaUserToken {
         return NeevaUserToken(sharedPreferencesModel)
+    }
+
+    @Provides
+    @Singleton
+    fun providesNeevaUser(neevaUserToken: NeevaUserToken): NeevaUser {
+        return NeevaUser(neevaUserToken = neevaUserToken)
+    }
+
+    @Provides
+    fun providesSettingsDataModel(
+        sharedPreferencesModel: SharedPreferencesModel,
+    ): SettingsDataModel {
+        return SettingsDataModel(
+            sharedPreferencesModel = sharedPreferencesModel
+        )
     }
 
     @Provides
@@ -97,7 +106,7 @@ object NeevaAppModule {
         spaceStore: SpaceStore,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
-        neevaUserToken: NeevaUserToken
+        neevaUser: NeevaUser
     ): WebLayerModel {
         return WebLayerModel(
             appContext = context,
@@ -107,7 +116,7 @@ object NeevaAppModule {
             spaceStore = spaceStore,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
-            neevaUserToken = neevaUserToken
+            neevaUser = neevaUser
         )
     }
 }

@@ -69,7 +69,14 @@ fun SettingsRow(
                     modifier = modifier
                 )
             } else {
-                ProfileRow(onClick = onClick, modifier = modifier)
+                val userData = settingsViewModel.getNeevaUserData()
+                ProfileRow(
+                    primaryLabel = userData.displayName,
+                    secondaryLabel = userData.email,
+                    pictureUrl = userData.pictureUrl,
+                    onClick = onClick,
+                    modifier = modifier
+                )
             }
         }
     }

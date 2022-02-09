@@ -377,7 +377,7 @@ object FirstRun {
         sharedPreferencesModel: SharedPreferencesModel,
         neevaUserToken: NeevaUserToken
     ): Boolean {
-        return neevaUserToken.getToken().isNullOrEmpty() &&
+        return neevaUserToken.getToken().isEmpty() &&
             !sharedPreferencesModel
                 .getBoolean(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, false)
     }

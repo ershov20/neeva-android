@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.compose.runtime.MutableState
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.storage.NeevaUser
+import com.neeva.app.storage.NeevaUserData
 
 /**
  * An interface handling all Settings-related controller logic.
@@ -20,12 +22,14 @@ interface SettingsViewModel {
     fun showProfileSettings()
     fun clearAllHistory()
     fun isSignedOut(): Boolean
+    fun getNeevaUserData(): NeevaUserData
 }
 
 class SettingsViewModelImpl(
     val appNavModel: AppNavModel,
     val settingsDataModel: SettingsDataModel,
-    val historyManager: HistoryManager
+    val historyManager: HistoryManager,
+    val neevaUser: NeevaUser
 ) : SettingsViewModel {
 
     override fun onBackPressed() {
@@ -61,7 +65,11 @@ class SettingsViewModelImpl(
     }
 
     override fun isSignedOut(): Boolean {
-        return settingsDataModel.isSignedOut()
+        return neevaUser.isSignedOut()
+    }
+
+    override fun getNeevaUserData(): NeevaUserData {
+        return neevaUser.data
     }
 }
 
@@ -84,5 +92,12 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
         override fun clearAllHistory() {}
 
         override fun isSignedOut(): Boolean { return false }
+        override fun getNeevaUserData(): NeevaUserData {
+            return NeevaUserData(
+                displayName = "Jehan Kobe Chang",
+                email = "kobec@neeva.co",
+                pictureUrl = Uri.parse("https://c.neevacdn.net/image/fetch/s")
+            )
+        }
     }
 }

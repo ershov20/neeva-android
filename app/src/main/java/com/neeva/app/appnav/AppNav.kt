@@ -27,10 +27,13 @@ fun AppNav(
     modifier: Modifier,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
+    val settingsDataModel = LocalEnvironment.current.settingsDataModel
+    val neevaUser = LocalEnvironment.current.neevaUser
     val settingsViewModel = SettingsViewModelImpl(
         appNavModel,
-        LocalEnvironment.current.settingsDataModel,
-        LocalEnvironment.current.historyManager
+        settingsDataModel,
+        LocalEnvironment.current.historyManager,
+        neevaUser
     )
 
     AnimatedNavHost(
@@ -58,11 +61,15 @@ fun AppNav(
         }
 
         composable(AppNavDestination.SETTINGS.route) {
-            MainSettingsPane(settingsViewModel)
+            MainSettingsPane(settingsViewModel, neevaUser::isSignedOut)
         }
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {
-            ProfileSettingsContainer(webLayerModel)
+            ProfileSettingsContainer(
+                neevaUser = neevaUser,
+                webLayerModel = webLayerModel,
+                onBackPressed = appNavModel::popBackStack
+            )
         }
 
         composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {

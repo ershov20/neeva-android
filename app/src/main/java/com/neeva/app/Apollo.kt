@@ -35,7 +35,7 @@ private class AuthCookieJar(val neevaUserToken: NeevaUserToken) : CookieJar {
     override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
         val cookies = mutableListOf(browserTypeCookie, browserVersionCookie)
         val token = neevaUserToken.getToken()
-        if (token != null) {
+        if (token.isNotEmpty()) {
             val authCookie = Cookie.Builder().name(loginCookie).secure()
                 .domain(appHost).expiresAt(Long.MAX_VALUE).value(token).build()
             cookies.add(authCookie)

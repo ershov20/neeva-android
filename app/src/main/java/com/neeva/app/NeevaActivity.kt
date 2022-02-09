@@ -56,7 +56,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var spaceStore: SpaceStore
     @Inject lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
-    @Inject lateinit var neevaUserToken: NeevaUserToken
+    @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var webModel: WebLayerModel
     @Inject lateinit var historyManager: HistoryManager
     @Inject lateinit var dispatchers: Dispatchers
@@ -98,7 +98,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     historyManager = historyManager,
                     dispatchers = dispatchers,
                     sharedPreferencesModel = sharedPreferencesModel,
-                    neevaUserToken = neevaUserToken
+                    neevaUser = neevaUser
                 )
 
                 NeevaTheme {
@@ -122,7 +122,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
 
                 LaunchedEffect(true) {
-                    if (FirstRun.shouldShowFirstRun(sharedPreferencesModel, neevaUserToken)) {
+                    if (FirstRun.shouldShowFirstRun(
+                            sharedPreferencesModel,
+                            neevaUser.neevaUserToken
+                        )
+                    ) {
                         appNavModel!!.showFirstRun()
                         FirstRun.firstRunDone(sharedPreferencesModel)
                     }
@@ -163,7 +167,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     private suspend fun fetchNeevaUserInfo() {
         withContext(dispatchers.io) {
-            NeevaUser.fetch(apolloClient)
+            neevaUser.fetch(apolloClient)
         }
     }
 
@@ -177,7 +181,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         if (Uri.parse(intent.dataString).scheme == "neeva") {
             NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
-                neevaUserToken.setToken(it)
+                neevaUser.neevaUserToken.setToken(it)
                 webModel.onAuthTokenUpdated()
                 appNavModel?.showBrowser()
                 webModel.currentBrowser.activeTabModel.reload()

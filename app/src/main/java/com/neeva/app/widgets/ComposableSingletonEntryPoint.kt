@@ -1,6 +1,5 @@
 package com.neeva.app.widgets
 
-import com.neeva.app.NeevaUserToken
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -17,5 +16,4 @@ interface ComposableSingletonEntryPoint {
     fun spaceStore(): SpaceStore
     fun domainProvider(): DomainProvider
     fun sharedPreferences(): SharedPreferencesModel
-    fun userProvider(): NeevaUserToken
 }

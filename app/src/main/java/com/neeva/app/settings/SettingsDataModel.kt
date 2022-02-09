@@ -2,7 +2,6 @@ package com.neeva.app.settings
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import com.neeva.app.NeevaUserToken
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.NeevaUser
@@ -12,12 +11,11 @@ import com.neeva.app.storage.NeevaUser
  *
  * This includes:
  *    - Holding all toggle MutableStates (which are based on their SharedPref values)
- *    - Checking if the user is signed out
+ *    - Checking if the user is signed out to display ProfileRow or not
  *    - Storing and uses Settings-SharedPreferences
  */
 class SettingsDataModel(
-    val sharedPreferencesModel: SharedPreferencesModel,
-    val neevaUserToken: NeevaUserToken
+    val sharedPreferencesModel: SharedPreferencesModel
 ) {
     private val toggleMap = mutableMapOf<String, MutableState<Boolean>>()
 
@@ -47,7 +45,7 @@ class SettingsDataModel(
         return toggleKeyName?.let { toggleMap[toggleKeyName] }
     }
 
-    fun isSignedOut(): Boolean {
-        return neevaUserToken.getToken().isNullOrEmpty() || NeevaUser.shared.id == null
+    fun isSignedOut(neevaUser: NeevaUser): Boolean {
+        return neevaUser.isSignedOut()
     }
 }

@@ -24,15 +24,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
-import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ProfileRow(
-    primaryLabel: String? = NeevaUser.shared.displayName,
-    secondaryLabel: String? = NeevaUser.shared.email,
-    pictureUrl: Uri? = NeevaUser.shared.pictureUrl,
+    primaryLabel: String?,
+    secondaryLabel: String?,
+    pictureUrl: Uri?,
     onClick: (() -> Unit)? = null,
     modifier: Modifier,
 ) {
