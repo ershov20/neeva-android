@@ -6,6 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -21,7 +22,8 @@ enum class NeevaMenuItemId {
     FORWARD,
     REFRESH,
     SHARE,
-    ADD_TO_SPACE
+    ADD_TO_SPACE,
+    FIND_IN_PAGE
 }
 
 data class NeevaMenuItemData(
@@ -91,5 +93,13 @@ object NeevaMenuData {
         ),
     )
 
-    val menuItems: List<NeevaMenuItemData> = tiles + rows
+    private val dropDownOnly: List<NeevaMenuItemData> = listOf(
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.FIND_IN_PAGE,
+            labelId = R.string.find_in_page,
+            icon = Icons.Default.Search
+        ),
+    )
+
+    val menuItems: List<NeevaMenuItemData> = dropDownOnly + tiles + rows
 }

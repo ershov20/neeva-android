@@ -133,6 +133,10 @@ class AppNavModel(
                 showAddToSpace()
             }
 
+            NeevaMenuItemId.FIND_IN_PAGE -> {
+                webLayerModel.browserWrapperFlow.value.activeTabModel.showFindInPage()
+            }
+
             else -> {
                 // Unimplemented screens.
             }

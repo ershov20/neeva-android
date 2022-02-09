@@ -8,6 +8,7 @@ import kotlin.math.roundToInt
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.chromium.weblayer.Browser
+import org.chromium.weblayer.FindInPageCallback
 import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.Navigation
 import org.chromium.weblayer.NavigationCallback
@@ -24,6 +25,17 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
     /** Tracks the URL displayed for the active tab. */
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     val urlFlow: StateFlow<Uri> = _urlFlow
+
+    data class FindInPageInfo(
+        val text: String? = null,
+        val activeMatchIndex: Int = 0,
+        val numberOfMatches: Int = 0,
+        val finalUpdate: Boolean = false
+    )
+
+    /** Tracks the results for find in page */
+    private val _findInPageInfo = MutableStateFlow(FindInPageInfo())
+    val findInPageInfo: StateFlow<FindInPageInfo> = _findInPageInfo
 
     /** Tracks the title displayed for the active tab. */
     private val _titleFlow = MutableStateFlow("")
@@ -121,6 +133,24 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
         }
     }
 
+    private val findInPageCallback = object : FindInPageCallback() {
+        override fun onFindResult(
+            numberOfMatches: Int,
+            activeMatchIndex: Int,
+            finalUpdate: Boolean
+        ) {
+            _findInPageInfo.value = findInPageInfo.value.copy(
+                activeMatchIndex = activeMatchIndex,
+                numberOfMatches = numberOfMatches,
+                finalUpdate = finalUpdate
+            )
+        }
+
+        override fun onFindEnded() {
+            _findInPageInfo.value = FindInPageInfo()
+        }
+    }
+
     fun goBack() {
         if (activeTabFlow.value?.navigationController?.canGoBack() == true) {
             activeTabFlow.value?.navigationController?.goBack()
@@ -132,6 +162,24 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
         if (activeTabFlow.value?.navigationController?.canGoForward() == true) {
             activeTabFlow.value?.navigationController?.goForward()
             updateNavigationInfo()
+        }
+    }
+
+    fun showFindInPage() {
+        activeTabFlow.value?.findInPageController?.setFindInPageCallback(findInPageCallback)
+        _findInPageInfo.value = FindInPageInfo(text = "")
+    }
+
+    fun findInPage(text: String? = null, forward: Boolean = true) {
+        // Expect a call to show first as that registers the callback
+        if (!text.isNullOrEmpty() && findInPageInfo.value.text == null) return
+
+        _findInPageInfo.value = findInPageInfo.value.copy(text = text)
+        if (text != null) {
+            activeTabFlow.value?.findInPageController?.find(text, forward)
+        } else {
+            _findInPageInfo.value = FindInPageInfo()
+            activeTabFlow.value?.findInPageController?.setFindInPageCallback(null)
         }
     }
 
