@@ -4,20 +4,16 @@ import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
 import com.neeva.app.LocalBrowserWrapper
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.zeroQuery.IncognitoZeroQuery
 import com.neeva.app.zeroQuery.ZeroQuery
-import dagger.hilt.EntryPoints
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 fun SuggestionPane() {
-    val historyManager = EntryPoints
-        .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
-        .historyManager()
+    val historyManager = LocalEnvironment.current.historyManager
 
     val browserWrapper = LocalBrowserWrapper.current
     val urlBarModel = browserWrapper.urlBarModel

@@ -13,8 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import com.neeva.app.BrowserUI
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalEnvironment
 import com.neeva.app.TabToolbar
 import com.neeva.app.TabToolbarModel
 import com.neeva.app.browsing.WebLayerModel
@@ -28,7 +28,7 @@ fun BrowserScaffold(
     webLayerModel: WebLayerModel
 ) {
     val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
-    val appNavModel = LocalEnvironment.current.appNavModel
+    val appNavModel = LocalAppNavModel.current
 
     CompositionLocalProvider(LocalBrowserWrapper provides browserWrapper) {
         Box(modifier = Modifier.fillMaxSize()) {

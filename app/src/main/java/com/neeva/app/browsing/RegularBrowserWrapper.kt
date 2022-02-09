@@ -2,7 +2,6 @@ package com.neeva.app.browsing
 
 import android.content.Context
 import android.net.Uri
-import androidx.annotation.NonNull
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
@@ -146,7 +145,7 @@ class RegularBrowserWrapper(
         }
     }
 
-    fun clearNonNeevaCookies(@NonNull @BrowsingDataType flags: IntArray) {
+    fun clearNonNeevaCookies(@BrowsingDataType flags: IntArray) {
         val oldNeevaAuthToken = neevaUser.neevaUserToken.getToken()
         browser?.profile?.clearBrowsingData(flags) {
             browser?.profile?.cookieManager
@@ -160,12 +159,6 @@ class RegularBrowserWrapper(
     }
 
     fun clearNeevaCookies() {
-//        browser?.profile?.cookieManager
-//            ?.setCookie(
-//                Uri.parse(NeevaConstants.appURL),
-//                "${NeevaConstants.loginCookie}=;",
-//                null
-//            )
         neevaUser.neevaUserToken.removeToken()
         onAuthTokenUpdated()
     }

@@ -20,10 +20,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.spaces.Space
@@ -35,11 +35,9 @@ import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.suggestions.toUserVisibleString
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.widgets.CollapsingState
-import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.FaviconView
 import com.neeva.app.widgets.collapsibleHeaderItem
 import com.neeva.app.widgets.collapsibleHeaderItems
-import dagger.hilt.EntryPoints
 
 @Composable
 fun ZeroQuery(
@@ -47,13 +45,9 @@ fun ZeroQuery(
     faviconCache: FaviconCache,
     topContent: @Composable (LazyItemScope.() -> Unit) = {},
 ) {
-    val entryPoint = EntryPoints.get(
-        LocalContext.current.applicationContext,
-        ComposableSingletonEntryPoint::class.java
-    )
-    val domainProvider = entryPoint.domainProvider()
-    val historyManager = entryPoint.historyManager()
-    val spaceStore = entryPoint.spaceStore()
+    val domainProvider = LocalEnvironment.current.domainProvider
+    val historyManager = LocalEnvironment.current.historyManager
+    val spaceStore = LocalEnvironment.current.spaceStore
 
     val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 

@@ -1,9 +1,5 @@
 package com.neeva.app.firstrun
 
-import android.content.Context
-import android.net.Uri
-import androidx.browser.customtabs.CustomTabsClient
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,11 +47,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.neeva.app.LocalEnvironment
-import com.neeva.app.NeevaUserToken
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.R
-import com.neeva.app.sharedprefs.SharedPrefFolder
-import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.Roobert
@@ -64,7 +57,7 @@ import com.neeva.app.widgets.BrandedTextButton
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun FirstRunContainer() {
-    val appNavModel = LocalEnvironment.current.appNavModel
+    val appNavModel = LocalAppNavModel.current
 
     Box(
         Modifier
@@ -93,6 +86,8 @@ fun FirstRunScreen() {
     val activityContext = LocalContext.current
     var emailProvided by remember { mutableStateOf("") }
     var signup by remember { mutableStateOf(true) }
+
+    val firstRunModel = LocalFirstRunModel.current
 
     Column(
         Modifier
@@ -201,7 +196,7 @@ fun FirstRunScreen() {
                 enabled = emailProvided.contains("@"),
                 stringResID = R.string.sign_in_with_okta
             ) {
-                FirstRun.launchLoginIntent(
+                firstRunModel.launchLoginIntent(
                     activityContext = activityContext,
                     provider = NeevaUser.SSOProvider.OKTA,
                     signup = signup,
@@ -234,7 +229,7 @@ fun FirstRunScreen() {
                     R.string.sign_up_with_google
                 }
             ) {
-                FirstRun.launchLoginIntent(
+                firstRunModel.launchLoginIntent(
                     activityContext = activityContext,
                     provider = NeevaUser.SSOProvider.GOOGLE,
                     signup = signup,
@@ -249,7 +244,7 @@ fun FirstRunScreen() {
                     R.string.sign_in_with_microsoft
                 }
             ) {
-                FirstRun.launchLoginIntent(
+                firstRunModel.launchLoginIntent(
                     activityContext = activityContext,
                     provider = NeevaUser.SSOProvider.MICROSOFT,
                     signup = signup,
@@ -348,64 +343,5 @@ fun FirstRun_Preview_Landscape() {
 fun FirstRun_PreviewDark() {
     NeevaTheme(useDarkTheme = true) {
         FirstRunScreen()
-    }
-}
-
-object FirstRun {
-    private const val FIRST_RUN_DONE_KEY = "HAS_FINISHED_FIRST_RUN"
-
-    fun authUri(signup: Boolean, provider: NeevaUser.SSOProvider, loginHint: String = ""): Uri {
-        val builder = Uri.Builder()
-            .scheme("https")
-            .authority("neeva.com")
-            .path("login")
-            .appendQueryParameter("provider", provider.url)
-            .appendQueryParameter("finalPath", provider.finalPath)
-            .appendQueryParameter("signup", signup.toString())
-            .appendQueryParameter("ignoreCountryCode", "true")
-            .appendQueryParameter("loginCallbackType", "ios")
-        return when (provider) {
-            NeevaUser.SSOProvider.OKTA ->
-                builder
-                    .appendQueryParameter("loginHint", loginHint)
-                    .build()
-            else -> builder.build()
-        }
-    }
-
-    fun shouldShowFirstRun(
-        sharedPreferencesModel: SharedPreferencesModel,
-        neevaUserToken: NeevaUserToken
-    ): Boolean {
-        return neevaUserToken.getToken().isEmpty() &&
-            !sharedPreferencesModel
-                .getBoolean(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, false)
-    }
-
-    fun firstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
-        sharedPreferencesModel.setValue(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, true)
-    }
-
-    fun launchLoginIntent(
-        activityContext: Context,
-        provider: NeevaUser.SSOProvider,
-        signup: Boolean,
-        emailProvided: String
-    ) {
-        val intent = CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .build()
-            .intent
-        intent.setPackage(
-            CustomTabsClient.getPackageName(
-                activityContext, listOf("com.android.chrome")
-            )
-        )
-        intent.data = authUri(
-            signup,
-            provider,
-            emailProvided
-        )
-        activityContext.startActivity(intent)
     }
 }

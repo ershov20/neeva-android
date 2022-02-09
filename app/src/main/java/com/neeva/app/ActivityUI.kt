@@ -11,23 +11,27 @@ import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.BrowserScaffold
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 data class LocalEnvironmentState(
-    val appNavModel: AppNavModel,
-    val settingsDataModel: SettingsDataModel,
-    val historyManager: HistoryManager,
     val dispatchers: Dispatchers,
+    val domainProvider: DomainProvider,
+    val historyManager: HistoryManager,
+    val neevaUser: NeevaUser,
+    val settingsDataModel: SettingsDataModel,
     val sharedPreferencesModel: SharedPreferencesModel,
-    val neevaUser: NeevaUser
+    val spaceStore: SpaceStore
 )
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value set") }
+val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("No value set") }
 
 @Composable
 fun ActivityUI(
@@ -37,7 +41,7 @@ fun ActivityUI(
     apolloClient: ApolloClient
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val appNavModel = LocalEnvironment.current.appNavModel
+    val appNavModel = LocalAppNavModel.current
     val dispatchers = LocalEnvironment.current.dispatchers
 
     BrowserScaffold(bottomControlOffset, topControlOffset, webLayerModel)

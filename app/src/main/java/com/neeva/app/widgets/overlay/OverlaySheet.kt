@@ -1,4 +1,4 @@
-package com.neeva.app.widgets
+package com.neeva.app.widgets.overlay
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
@@ -18,17 +18,15 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
-import com.neeva.app.LocalEnvironment
-import com.neeva.app.widgets.overlay.OverlaySheetConfig
-import com.neeva.app.widgets.overlay.OverlaySheetHeightConfig
+import com.neeva.app.LocalAppNavModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun OverlaySheet(
     config: OverlaySheetConfig = OverlaySheetConfig.default,
-    content: @Composable () -> Unit,
+    content: @Composable () -> Unit
 ) {
-    val appNavModel = LocalEnvironment.current.appNavModel
+    val appNavModel = LocalAppNavModel.current
 
     Column(
         modifier = Modifier

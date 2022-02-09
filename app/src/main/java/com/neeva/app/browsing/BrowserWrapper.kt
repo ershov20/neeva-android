@@ -212,11 +212,38 @@ abstract class BrowserWrapper(
     abstract fun createTabScreenshotManager(): TabScreenshotManager
 
     @Synchronized
-    fun createAndAttachBrowser(fragmentAttacher: (Fragment, Boolean) -> Unit) {
+    fun createAndAttachBrowser(
+        topControlsPlaceholder: View,
+        bottomControlsPlaceholder: View,
+        fragmentAttacher: (Fragment, Boolean) -> Unit
+    ) {
         fragmentAttacher.invoke(fragment, isIncognito)
         if (browserFlow.value == null) {
             browserFlow.value = Browser.fromFragment(fragment)
         }
+
+        val browser = this.browser ?: throw IllegalStateException()
+        registerBrowserCallbacks()
+
+        activityCallbackProvider()?.getDisplaySize()?.let { windowSize ->
+            browser.setMinimumSurfaceSize(windowSize.width(), windowSize.height())
+        }
+
+        // There appears to be a bug in WebLayer that prevents the bottom bar from being rendered,
+        // and also prevents Composables from being re-rendered when their state changes.  To get
+        // around this, we pass in a fake view that is the same height as the real bottom toolbar
+        // and listen for the scrolling offsets, which we then apply to the real bottom toolbar.
+        // This is a valid use case according to the BrowserControlsOffsetCallback.
+        val resources = appContext.resources
+        browser.setBottomView(bottomControlsPlaceholder)
+        bottomControlsPlaceholder.layoutParams.height =
+            resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
+        bottomControlsPlaceholder.requestLayout()
+
+        browser.setTopView(topControlsPlaceholder)
+        topControlsPlaceholder.layoutParams.height =
+            resources?.getDimensionPixelSize(com.neeva.app.R.dimen.top_toolbar_height) ?: 0
+        topControlsPlaceholder.requestLayout()
     }
 
     @CallSuper
@@ -251,37 +278,6 @@ abstract class BrowserWrapper(
 
         tabListRestorer = restorer
         return true
-    }
-
-    /** Prepares a Browser to be displayed and used within the current environment. */
-    fun prepareBrowser(
-        topControlsPlaceholder: View,
-        bottomControlsPlaceholder: View
-    ): Fragment {
-        val browser = this.browser ?: throw IllegalStateException()
-        registerBrowserCallbacks()
-
-        activityCallbackProvider()?.getDisplaySize()?.let { windowSize ->
-            browser.setMinimumSurfaceSize(windowSize.width(), windowSize.height())
-        }
-
-        // There appears to be a bug in WebLayer that prevents the bottom bar from being rendered,
-        // and also prevents Composables from being re-rendered when their state changes.  To get
-        // around this, we pass in a fake view that is the same height as the real bottom toolbar
-        // and listen for the scrolling offsets, which we then apply to the real bottom toolbar.
-        // This is a valid use case according to the BrowserControlsOffsetCallback.
-        val resources = appContext.resources
-        browser.setBottomView(bottomControlsPlaceholder)
-        bottomControlsPlaceholder.layoutParams.height =
-            resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
-        bottomControlsPlaceholder.requestLayout()
-
-        browser.setTopView(topControlsPlaceholder)
-        topControlsPlaceholder.layoutParams.height =
-            resources?.getDimensionPixelSize(com.neeva.app.R.dimen.top_toolbar_height) ?: 0
-        topControlsPlaceholder.requestLayout()
-
-        return fragment
     }
 
     /** Called when we detect that the logged in user's auth token has been updated. */

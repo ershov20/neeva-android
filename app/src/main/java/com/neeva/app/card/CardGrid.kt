@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.Dispatchers
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
@@ -61,7 +62,7 @@ import com.neeva.app.ui.theme.getClickableAlpha
 @Composable
 fun CardsContainer(webLayerModel: WebLayerModel) {
     val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
-    val appNavModel = LocalEnvironment.current.appNavModel
+    val appNavModel = LocalAppNavModel.current
     val dispatchers = LocalEnvironment.current.dispatchers
 
     val cardGridListener = object : CardGridListener {

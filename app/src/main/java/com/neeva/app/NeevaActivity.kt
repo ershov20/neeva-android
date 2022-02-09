@@ -25,12 +25,11 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbacks
+import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.firstrun.FirstRun
-import com.neeva.app.history.HistoryManager
-import com.neeva.app.settings.SettingsDataModel
-import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.firstrun.FirstRunModel
+import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.theme.NeevaTheme
@@ -54,12 +53,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     @Inject lateinit var apolloClient: ApolloClient
     @Inject lateinit var spaceStore: SpaceStore
-    @Inject lateinit var settingsDataModel: SettingsDataModel
-    @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Inject lateinit var neevaUser: NeevaUser
-    @Inject lateinit var webModel: WebLayerModel
-    @Inject lateinit var historyManager: HistoryManager
     @Inject lateinit var dispatchers: Dispatchers
+
+    @Inject lateinit var firstRunModel: FirstRunModel
+    @Inject lateinit var localEnvironmentState: LocalEnvironmentState
 
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View
@@ -68,13 +66,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         NeevaActivityViewModel.Factory(intent)
     }
 
+    private val webLayerModel: WebLayerModel by viewModels()
+
     internal var appNavModel: AppNavModel? = null
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        webModel.activityCallbacks = WeakReference(this)
+        webLayerModel.activityCallbacks = WeakReference(this)
 
         setContentView(R.layout.main)
 
@@ -85,28 +85,22 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 appNavModel = remember(navController) {
                     AppNavModel(
                         navController = navController,
-                        webLayerModel = webModel,
+                        webLayerModel = webLayerModel,
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers
                     )
                 }
 
-                // Set up all the classes that'll need to be sent to all of the Composables.
-                val environment = LocalEnvironmentState(
-                    appNavModel = appNavModel!!,
-                    settingsDataModel = settingsDataModel,
-                    historyManager = historyManager,
-                    dispatchers = dispatchers,
-                    sharedPreferencesModel = sharedPreferencesModel,
-                    neevaUser = neevaUser
-                )
-
                 NeevaTheme {
-                    CompositionLocalProvider(LocalEnvironment provides environment) {
+                    CompositionLocalProvider(
+                        LocalEnvironment provides localEnvironmentState,
+                        LocalAppNavModel provides appNavModel!!,
+                        LocalFirstRunModel provides firstRunModel
+                    ) {
                         ActivityUI(
                             bottomControlOffset = activityViewModel.bottomControlOffset,
                             topControlOffset = activityViewModel.topControlOffset,
-                            webLayerModel = webModel,
+                            webLayerModel = webLayerModel,
                             apolloClient = apolloClient
                         )
                     }
@@ -122,13 +116,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
 
                 LaunchedEffect(true) {
-                    if (FirstRun.shouldShowFirstRun(
-                            sharedPreferencesModel,
-                            neevaUser.neevaUserToken
-                        )
-                    ) {
-                        appNavModel!!.showFirstRun()
-                        FirstRun.firstRunDone(sharedPreferencesModel)
+                    if (firstRunModel.shouldShowFirstRun()) {
+                        appNavModel?.showFirstRun()
+                        firstRunModel.firstRunDone()
                     }
                 }
             }
@@ -139,14 +129,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         lifecycleScope.launch {
             lifecycle.whenStarted {
-                webModel.initializationState
-                    .combine(webModel.browserWrapperFlow) { loadingState, browserDelegate ->
-                        Pair(loadingState, browserDelegate)
+                webLayerModel.initializationState
+                    .combine(webLayerModel.browserWrapperFlow) { loadingState, browserWrapper ->
+                        Pair(loadingState, browserWrapper)
                     }
                     .stateIn(lifecycleScope)
-                    .collect { (loadingState, _) ->
+                    .collect { (loadingState, browserWrapper) ->
                         if (loadingState != LoadingState.READY) return@collect
-                        prepareWebLayer()
+                        prepareWebLayer(browserWrapper)
 
                         // Check if there are any Intents that have URLs that need to be loaded.
                         activityViewModel.getPendingLaunchIntent()?.let { processIntent(intent) }
@@ -158,12 +148,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             fetchNeevaUserInfo()
         }
 
-        if (savedInstanceState != null && webModel.currentBrowser.isFullscreen()) {
+        if (savedInstanceState != null && webLayerModel.currentBrowser.isFullscreen()) {
             // If the activity was recreated because the user entered a fullscreen video or website,
             // hide the system bars.
             onEnterFullscreen()
         }
     }
+
+    private fun showBrowser() = appNavModel?.showBrowser()
 
     private suspend fun fetchNeevaUserInfo() {
         withContext(dispatchers.io) {
@@ -182,13 +174,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         if (Uri.parse(intent.dataString).scheme == "neeva") {
             NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
                 neevaUser.neevaUserToken.setToken(it)
-                webModel.onAuthTokenUpdated()
-                appNavModel?.showBrowser()
-                webModel.currentBrowser.activeTabModel.reload()
+                webLayerModel.onAuthTokenUpdated()
+                showBrowser()
+                webLayerModel.currentBrowser.activeTabModel.reload()
             }
         } else {
             intent.data?.let {
-                webModel.currentBrowser.activeTabModel.loadUrl(
+                webLayerModel.currentBrowser.activeTabModel.loadUrl(
                     uri = it,
                     newTab = true,
                     isViaIntent = true
@@ -196,19 +188,20 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             }
         }
 
-        appNavModel?.showBrowser()
+        showBrowser()
     }
 
-    private fun prepareWebLayer() {
+    private fun prepareWebLayer(browserWrapper: BrowserWrapper) {
         when {
-            webModel.initializationState.value != LoadingState.READY -> return
+            webLayerModel.initializationState.value != LoadingState.READY -> return
             isFinishing -> return
             isDestroyed -> return
         }
 
         val topControlPlaceholder = View(this)
         val bottomControlPlaceholder = View(this)
-        webModel.onWebLayerReady(
+        webLayerModel.onWebLayerReady(
+            browserWrapper,
             topControlPlaceholder,
             bottomControlPlaceholder,
             this::attachWebLayerFragment
@@ -262,7 +255,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun onBackPressed() {
-        val browserWrapper = webModel.currentBrowser
+        val browserWrapper = webLayerModel.currentBrowser
 
         when {
             browserWrapper.exitFullscreen() -> {
@@ -316,7 +309,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun bringToForeground() {
-        appNavModel?.showBrowser()
+        showBrowser()
 
         val intent = Intent(this, NeevaActivity::class.java)
         intent.action = Intent.ACTION_MAIN
@@ -329,7 +322,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             // access to the correct resources.
             setOnCreateContextMenuListener(
                 ContextMenuCreator(
-                    webModel.browserWrapperFlow.value,
+                    webLayerModel.browserWrapperFlow.value,
                     contextMenuParams,
                     tab,
                     this@NeevaActivity

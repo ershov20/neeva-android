@@ -2,7 +2,6 @@ package com.neeva.app
 
 import android.content.Context
 import com.apollographql.apollo3.ApolloClient
-import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
@@ -97,26 +96,23 @@ object NeevaAppModule {
     }
 
     @Provides
-    @Singleton
-    fun providesWebLayerModel(
-        @ApplicationContext context: Context,
-        domainProviderImpl: DomainProviderImpl,
-        historyManager: HistoryManager,
-        apolloClient: ApolloClient,
-        spaceStore: SpaceStore,
-        coroutineScope: CoroutineScope,
+    fun providesLocalEnvironment(
         dispatchers: Dispatchers,
-        neevaUser: NeevaUser
-    ): WebLayerModel {
-        return WebLayerModel(
-            appContext = context,
-            domainProviderImpl = domainProviderImpl,
-            historyManager = historyManager,
-            apolloClient = apolloClient,
-            spaceStore = spaceStore,
-            coroutineScope = coroutineScope,
+        domainProvider: DomainProvider,
+        historyManager: HistoryManager,
+        neevaUser: NeevaUser,
+        settingsDataModel: SettingsDataModel,
+        sharedPreferencesModel: SharedPreferencesModel,
+        spaceStore: SpaceStore
+    ): LocalEnvironmentState {
+        return LocalEnvironmentState(
             dispatchers = dispatchers,
-            neevaUser = neevaUser
+            domainProvider = domainProvider,
+            historyManager = historyManager,
+            neevaUser = neevaUser,
+            settingsDataModel = settingsDataModel,
+            sharedPreferencesModel = sharedPreferencesModel,
+            spaceStore = spaceStore
         )
     }
 }

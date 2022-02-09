@@ -7,7 +7,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.appnav.AppNavDestination
-import com.neeva.app.firstrun.FirstRun
+import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Test
@@ -17,13 +17,16 @@ import strikt.assertions.isEqualTo
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class FirstRunTest {
+class FirstRunModelTest {
     @Test
     fun skipFirstRunIfSharedPrefSet() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
         // Set the shared preference.  First run shouldn't be shown.
-        FirstRun.firstRunDone(SharedPreferencesModel(context))
+        val sharedPreferencesModel = SharedPreferencesModel(context)
+        val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
+        val firstRunModel = FirstRunModel(sharedPreferencesModel, neevaUserToken)
+        firstRunModel.firstRunDone()
 
         val intent = Intent.makeMainActivity(ComponentName(context, NeevaActivity::class.java))
         ActivityScenario.launch<NeevaActivity>(intent).use { scenario ->

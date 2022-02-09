@@ -27,15 +27,15 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.neeva_menu.OverflowMenu
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun URLBar() {
-    val appNavModel = LocalEnvironment.current.appNavModel
+    val appNavModel = LocalAppNavModel.current
 
     val browserWrapper = LocalBrowserWrapper.current
     val urlBarModel = browserWrapper.urlBarModel

@@ -66,7 +66,6 @@ fun AppNav(
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {
             ProfileSettingsContainer(
-                neevaUser = neevaUser,
                 webLayerModel = webLayerModel,
                 onBackPressed = appNavModel::popBackStack
             )

@@ -19,12 +19,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Site
@@ -33,9 +33,7 @@ import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.collapsibleSection
-import dagger.hilt.EntryPoints
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Date
@@ -48,12 +46,8 @@ fun HistoryUI(
     faviconCache: FaviconCache,
     now: LocalDate = LocalDate.now()
 ) {
-    val entryPoint = EntryPoints.get(
-        LocalContext.current.applicationContext,
-        ComposableSingletonEntryPoint::class.java
-    )
-    val historyManager = entryPoint.historyManager()
-    val domainProvider = entryPoint.domainProvider()
+    val domainProvider = LocalEnvironment.current.domainProvider
+    val historyManager = LocalEnvironment.current.historyManager
 
     val startOf7DaysAgo = Date.from(now.minusDays(7).atStartOfDay().toInstant(ZoneOffset.UTC))
     val startOfYesterday = Date.from(now.minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC))

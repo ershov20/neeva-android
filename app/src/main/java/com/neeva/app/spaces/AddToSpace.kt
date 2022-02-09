@@ -29,32 +29,27 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.ui.theme.ColorPalette
-import com.neeva.app.widgets.ComposableSingletonEntryPoint
-import com.neeva.app.widgets.OverlaySheet
+import com.neeva.app.widgets.overlay.OverlaySheet
 import com.neeva.app.widgets.overlay.OverlaySheetConfig
-import dagger.hilt.EntryPoints
 
 @Composable
 fun AddToSpaceSheet(
     webLayerModel: WebLayerModel,
     spaceModifier: Space.Companion.SpaceModifier
 ) {
-    val spaceStore = EntryPoints
-        .get(LocalContext.current.applicationContext, ComposableSingletonEntryPoint::class.java)
-        .spaceStore()
-
-    val appNavModel = LocalEnvironment.current.appNavModel
+    val appNavModel = LocalAppNavModel.current
+    val spaceStore = LocalEnvironment.current.spaceStore
 
     val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
     val activeTabModel = browserWrapper.activeTabModel

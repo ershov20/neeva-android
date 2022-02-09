@@ -1,10 +1,12 @@
 package com.neeva.app.browsing
 
-import android.content.Context
+import android.app.Application
 import android.net.Uri
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
@@ -14,8 +16,9 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.favicons.FaviconCache
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.lang.ref.WeakReference
-import kotlinx.coroutines.CoroutineScope
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,16 +38,16 @@ import org.chromium.weblayer.WebLayer
  * classes must be monitored using various callbacks that fire whenever a new tab is opened, or
  * whenever the current tab changes (e.g.).
  */
-class WebLayerModel(
-    private val appContext: Context,
+@HiltViewModel
+class WebLayerModel @Inject constructor(
+    application: Application,
     private val domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
     apolloClient: ApolloClient,
     spaceStore: SpaceStore,
-    val coroutineScope: CoroutineScope,
-    val dispatchers: Dispatchers,
+    private val dispatchers: Dispatchers,
     neevaUser: NeevaUser
-) {
+) : AndroidViewModel(application) {
     companion object {
         val TAG = WebLayerModel::class.simpleName
     }
@@ -54,8 +57,8 @@ class WebLayerModel(
     private val _webLayer = MutableStateFlow<WebLayer?>(null)
 
     private val regularBrowser = RegularBrowserWrapper(
-        appContext = appContext,
-        coroutineScope = coroutineScope,
+        appContext = application,
+        coroutineScope = viewModelScope,
         dispatchers = dispatchers,
         activityCallbackProvider = { activityCallbacks.get() },
         domainProvider = domainProviderImpl,
@@ -76,7 +79,7 @@ class WebLayerModel(
                     if (webLayer == null) LoadingState.LOADING else LoadingState.READY
                 )
             }
-            .stateIn(coroutineScope, SharingStarted.Lazily, LoadingState.LOADING)
+            .stateIn(viewModelScope, SharingStarted.Lazily, LoadingState.LOADING)
 
     private val _browserWrapperFlow = MutableStateFlow<BrowserWrapper>(regularBrowser)
     val browserWrapperFlow: StateFlow<BrowserWrapper> = _browserWrapperFlow
@@ -84,14 +87,14 @@ class WebLayerModel(
         get() = browserWrapperFlow.value
 
     init {
-        coroutineScope.launch(dispatchers.io) {
+        viewModelScope.launch(dispatchers.io) {
             domainProviderImpl.initialize()
-            CacheCleaner(appContext.cacheDir).run()
+            CacheCleaner(application.cacheDir).run()
             internalInitializationState.value = LoadingState.READY
         }
 
         try {
-            WebLayer.loadAsync(appContext) { webLayer ->
+            WebLayer.loadAsync(application) { webLayer ->
                 webLayer.isRemoteDebuggingEnabled = true
                 regularBrowser.initialize()
                 incognitoBrowser?.initialize()
@@ -109,15 +112,15 @@ class WebLayerModel(
      * being registered.
      */
     fun onWebLayerReady(
+        browserWrapper: BrowserWrapper,
         topControlsPlaceholder: View,
         bottomControlsPlaceholder: View,
         fragmentAttacher: (Fragment, Boolean) -> Unit
     ) {
-        currentBrowser.createAndAttachBrowser(fragmentAttacher)
-
-        currentBrowser.prepareBrowser(
+        browserWrapper.createAndAttachBrowser(
             topControlsPlaceholder,
-            bottomControlsPlaceholder
+            bottomControlsPlaceholder,
+            fragmentAttacher
         )
     }
 
@@ -131,8 +134,8 @@ class WebLayerModel(
 
         _browserWrapperFlow.value = if (useIncognito) {
             val delegate = incognitoBrowser ?: IncognitoBrowserWrapper(
-                appContext = appContext,
-                coroutineScope = coroutineScope,
+                appContext = getApplication(),
+                coroutineScope = viewModelScope,
                 dispatchers = dispatchers,
                 activityCallbackProvider = activityCallbacks::get,
                 domainProvider = domainProviderImpl,
@@ -183,7 +186,7 @@ class WebLayerModel(
                 }
             }
         }
-        if (clearCookiesFlags.size > 0) {
+        if (clearCookiesFlags.isNotEmpty()) {
             regularBrowser.clearNonNeevaCookies(clearCookiesFlags.toIntArray())
         }
     }
