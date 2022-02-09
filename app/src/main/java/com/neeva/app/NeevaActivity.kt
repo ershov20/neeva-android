@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.CompositionLocalProvider
@@ -34,8 +35,6 @@ import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -63,14 +62,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View
 
-    /**
-     * WebLayer provides information about when the bottom and top toolbars need to be scrolled off.
-     * We provide a placeholder instead of the real view because WebLayer has a bug that prevents it
-     * from rendering Composables properly.
-     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v98.
-     */
-    private val topControlOffset = MutableStateFlow(0.0f)
-    private val bottomControlOffset = MutableStateFlow(0.0f)
+    private val activityViewModel: NeevaActivityViewModel by viewModels {
+        NeevaActivityViewModel.Factory(intent)
+    }
 
     internal var appNavModel: AppNavModel? = null
 
@@ -108,8 +102,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 NeevaTheme {
                     CompositionLocalProvider(LocalEnvironment provides environment) {
                         ActivityUI(
-                            bottomControlOffset = bottomControlOffset,
-                            topControlOffset = topControlOffset,
+                            bottomControlOffset = activityViewModel.bottomControlOffset,
+                            topControlOffset = activityViewModel.topControlOffset,
                             webLayerModel = webModel,
                             apolloClient = apolloClient
                         )
@@ -147,6 +141,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     .collect { (loadingState, _) ->
                         if (loadingState != LoadingState.READY) return@collect
                         prepareWebLayer()
+
+                        // Check if there are any Intents that have URLs that need to be loaded.
+                        activityViewModel.getPendingLaunchIntent()?.let { processIntent(intent) }
                     }
             }
         }
@@ -162,7 +159,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
-    suspend fun fetchNeevaUserInfo() {
+    private suspend fun fetchNeevaUserInfo() {
         withContext(dispatchers.io) {
             NeevaUser.fetch(apolloClient)
         }
@@ -170,23 +167,30 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
+        processIntent(intent)
+    }
 
-        if (intent?.action == Intent.ACTION_VIEW) {
-            if (Uri.parse(intent.dataString).scheme == "neeva") {
-                NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
-                    neevaUserToken.setToken(it)
-                    webModel.onAuthTokenUpdated()
-                    appNavModel?.showBrowser()
-                    webModel.currentBrowser.activeTabModel.reload()
-                }
-            } else {
-                intent.data?.let {
-                    webModel.currentBrowser.activeTabModel.loadUrl(it, newTab = true)
-                }
+    private fun processIntent(intent: Intent?) {
+        if (intent?.action != Intent.ACTION_VIEW) return
+
+        if (Uri.parse(intent.dataString).scheme == "neeva") {
+            NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
+                neevaUserToken.setToken(it)
+                webModel.onAuthTokenUpdated()
+                appNavModel?.showBrowser()
+                webModel.currentBrowser.activeTabModel.reload()
             }
-
-            appNavModel?.showBrowser()
+        } else {
+            intent.data?.let {
+                webModel.currentBrowser.activeTabModel.loadUrl(
+                    uri = it,
+                    newTab = true,
+                    isViaIntent = true
+                )
+            }
         }
+
+        appNavModel?.showBrowser()
     }
 
     private fun prepareWebLayer() {
@@ -272,7 +276,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             }
 
             browserWrapper.closeActiveChildTab() -> {
+                // Closing the child tab will kick the user back to the parent tab, if possible.
                 return
+            }
+
+            browserWrapper.closeActiveTabIfOpenedViaIntent() -> {
+                // Let Android kick the user back to the calling app.
+                super.onBackPressed()
             }
 
             else -> {
@@ -328,15 +338,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         return WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(this).bounds
     }
 
-    override fun onBottomBarOffsetChanged(offset: Int) {
-        // Move the real bar when WebLayer says that the fake one is moving.
-        bottomControlOffset.value = offset.toFloat()
-    }
+    override fun onBottomBarOffsetChanged(offset: Int) =
+        activityViewModel.onBottomBarOffsetChanged(offset)
 
-    override fun onTopBarOffsetChanged(offset: Int) {
-        // Move the real bar when WebLayer says that the fake one is moving.
-        topControlOffset.value = offset.toFloat()
-    }
+    override fun onTopBarOffsetChanged(offset: Int) =
+        activityViewModel.onTopBarOffsetChanged(offset)
 
     override fun detachIncognitoFragment() {
         // Do a post to avoid a Fragment transaction while one is already occurring to remove the

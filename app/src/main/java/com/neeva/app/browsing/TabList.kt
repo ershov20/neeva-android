@@ -30,7 +30,8 @@ class TabList {
             id = tab.guid,
             url = tab.currentDisplayUrl,
             title = tab.currentDisplayTitle,
-            isSelected = tab.isSelected
+            isSelected = tab.isSelected,
+            data = TabInfo.PersistedData(tab.data)
         )
 
         updateFlow()
@@ -60,24 +61,48 @@ class TabList {
     }
 
     fun updateTabTitle(tabId: String, newTitle: String?) {
-        val existingTab = currentPrimitives[tabId] ?: return
-        if (existingTab.title == newTitle) return
-        currentPrimitives[tabId] = existingTab.copy(title = newTitle)
-        updateFlow()
+        currentPrimitives[tabId]
+            ?.takeUnless { it.title == newTitle }
+            ?.let { existingInfo ->
+                currentPrimitives[tabId] = existingInfo.copy(title = newTitle)
+                updateFlow()
+            }
     }
 
     fun updateUrl(tabId: String, newUrl: Uri?) {
-        val existingTab = currentPrimitives[tabId] ?: return
-        if (existingTab.url == newUrl) return
-        currentPrimitives[tabId] = existingTab.copy(url = newUrl)
-        updateFlow()
+        currentPrimitives[tabId]
+            ?.takeUnless { it.url == newUrl }
+            ?.let { existingInfo ->
+                currentPrimitives[tabId] = existingInfo.copy(url = newUrl)
+                updateFlow()
+            }
     }
 
-    fun updateParentTabId(tabId: String, parentTabId: String?) {
-        val existingTab = currentPrimitives[tabId] ?: return
-        if (existingTab.parentTabId == parentTabId) return
-        currentPrimitives[tabId] = existingTab.copy(parentTabId = parentTabId)
-        updateFlow()
+    fun updateParentInfo(tab: Tab, parentTabId: String?, tabOpenType: TabInfo.TabOpenType) {
+        setPersistedInfo(
+            tab = tab,
+            newData = TabInfo.PersistedData(
+                parentTabId = parentTabId,
+                openType = tabOpenType
+            ),
+            persist = true
+        )
+    }
+
+    internal fun setPersistedInfo(tab: Tab, newData: TabInfo.PersistedData, persist: Boolean) {
+        if (tab.isDestroyed) return
+
+        val tabId = tab.guid
+        currentPrimitives[tabId]
+            ?.takeUnless { it.data == newData }
+            ?.let { existingInfo ->
+                val newInfo = existingInfo.copy(data = newData)
+                currentPrimitives[tabId] = newInfo
+                updateFlow()
+
+                // Save data out to the Tab structure so that WebLayer can restore it for us later.
+                if (persist) tab.data = newInfo.data.toMap()
+            }
     }
 
     internal fun clear() {

@@ -326,7 +326,6 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
                     tabs.add(
                         TabInfo(
                             id = "tab $i",
-                            parentTabId = null,
                             url = Uri.parse("https://www.neeva.com/$i"),
                             title = title,
                             isSelected = i == selectedTabIndex

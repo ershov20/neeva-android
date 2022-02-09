@@ -72,7 +72,11 @@ class TabCallbacks(
 
     private val newTabCallback: NewTabCallback = object : NewTabCallback() {
         override fun onNewTab(newTab: Tab, @NewTabType type: Int) {
-            tabList.updateParentTabId(newTab.guid, parentTabId = tab.guid)
+            tabList.updateParentInfo(
+                tab = newTab,
+                parentTabId = tab.guid,
+                tabOpenType = TabInfo.TabOpenType.CHILD_TAB
+            )
             registerNewTab(newTab, type)
         }
     }

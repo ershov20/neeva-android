@@ -73,9 +73,13 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
         activeTabFlow.value?.navigationController?.reload()
     }
 
-    fun loadUrl(uri: Uri, newTab: Boolean = false) {
+    fun loadUrl(uri: Uri, newTab: Boolean = false, isViaIntent: Boolean = false) {
         if (newTab || activeTabFlow.value == null) {
-            tabCreator.createTabWithUri(uri, parentTabId = null)
+            tabCreator.createTabWithUri(
+                uri = uri,
+                parentTabId = null,
+                isViaIntent = isViaIntent
+            )
             return
         }
 

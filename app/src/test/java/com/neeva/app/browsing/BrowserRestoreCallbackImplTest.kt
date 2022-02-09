@@ -10,6 +10,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -74,7 +75,6 @@ class BrowserRestoreCallbackImplTest {
     @Test
     fun onRestoreCompleted_withActiveTabAndInvalidNavigation_doesNothing() {
         // Arrange: Say that the browser had three tabs and that the active tab was in a bad state.
-        val tabIds = listOf("tab a", "tab b", "tab c")
         val testSetup = TestSetup(listOf("tab a", "tab c"), "tab b")
 
         // Act: Restore the tabs.
@@ -87,17 +87,35 @@ class BrowserRestoreCallbackImplTest {
         verify(testSetup.cleanCache, times(1)).invoke()
     }
 
+    @Test
+    fun onRestoreCompleted_restoresTabData() {
+        // Arrange: Say that the browser had three tabs and that the active tab was in a bad state.
+        val testSetup = TestSetup(listOf("tab a", "tab c"), "tab b")
+
+        // Act: Restore the tabs.
+        testSetup.callback.onRestoreCompleted()
+
+        // Assert: Confirm that the data was pulled back out correctly.
+        testSetup.tabs.forEach {
+            val expectedData = TabInfo.PersistedData(it.data)
+            verify(testSetup.tabList).setPersistedInfo(eq(it), eq(expectedData), eq(false))
+        }
+    }
+
     class TestSetup(
         inactiveTabIds: List<String>,
         activeTabId: String?,
         activeTabNavigationIndex: Int = -1
     ) {
+        val tabList: TabList = mock {}
         val cleanCache: () -> Unit = mock()
         val onEmptyTabList: () -> Unit = mock()
+        val tabs = mutableSetOf<Tab>()
 
         val browser = createMockBrowser(inactiveTabIds, activeTabId, activeTabNavigationIndex)
 
         val callback = BrowserRestoreCallbackImpl(
+            tabList = tabList,
             browser = browser,
             cleanCache = cleanCache,
             onEmptyTabList = onEmptyTabList
@@ -109,11 +127,13 @@ class BrowserRestoreCallbackImplTest {
             activeTabNavigationIndex: Int = -1
         ): Browser {
             // Create a set of Tabs that the Browser will be managing and returning to callers.
-            val tabs = mutableSetOf<Tab>()
+            tabs.clear()
             inactiveTabIds.forEach { tabId ->
+                val dataMap = mapOf(TabInfo.KEY_PARENT_TAB_ID to "parent of tabId")
                 tabs.add(
                     mock {
-                        on { getGuid() }.doReturn(tabId)
+                        on { getGuid() } doReturn(tabId)
+                        on { getData() } doReturn(dataMap)
                     }
                 )
             }

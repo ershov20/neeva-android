@@ -106,7 +106,7 @@ class ContextMenuCreator(
         when (item.itemId) {
             MENU_ID_OPEN_IN_NEW_TAB -> {
                 params.linkUri?.let {
-                    browserWrapper.createTabWithUri(it, parentTabId = tab.guid)
+                    browserWrapper.createTabWithUri(it, parentTabId = tab.guid, isViaIntent = false)
                 }
             }
 

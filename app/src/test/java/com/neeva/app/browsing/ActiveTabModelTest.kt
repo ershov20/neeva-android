@@ -287,7 +287,7 @@ class ActiveTabModelTest : BaseTest() {
     fun loadUrl_withNoActiveTab_createsNewTab() {
         val uri = Uri.parse("https://www.reddit.com")
         model.loadUrl(uri = uri, newTab = false)
-        verify(tabCreator, times(1)).createTabWithUri(eq(uri), eq(null))
+        verify(tabCreator, times(1)).createTabWithUri(eq(uri), eq(null), eq(false))
     }
 
     @Test
@@ -296,7 +296,7 @@ class ActiveTabModelTest : BaseTest() {
 
         val uri = Uri.parse("https://www.reddit.com")
         model.loadUrl(uri = uri, newTab = true)
-        verify(tabCreator, times(1)).createTabWithUri(eq(uri), eq(null))
+        verify(tabCreator, times(1)).createTabWithUri(eq(uri), eq(null), eq(false))
         verify(mainTab.navigationController, never()).navigate(any(), any())
     }
 
@@ -306,7 +306,7 @@ class ActiveTabModelTest : BaseTest() {
 
         val uri = Uri.parse("https://www.reddit.com")
         model.loadUrl(uri = uri, newTab = true)
-        verify(tabCreator, never()).createTabWithUri(any(), any())
+        verify(tabCreator, never()).createTabWithUri(any(), any(), eq(false))
         verify(mainTab.navigationController, never()).navigate(eq(uri), any())
     }
 

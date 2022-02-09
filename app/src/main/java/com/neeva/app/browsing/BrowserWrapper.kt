@@ -27,7 +27,6 @@ import org.chromium.weblayer.OpenUrlCallback
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabListCallback
-import org.chromium.weblayer.UrlBarController
 
 /**
  * Encapsulates everything that is needed to interact with a WebLayer [Browser].
@@ -48,7 +47,8 @@ abstract class BrowserWrapper(
 ) : FaviconCache.ProfileProvider {
     data class CreateNewTabInfo(
         val uri: Uri,
-        val parentTabId: String? = null
+        val parentTabId: String?,
+        val tabOpenType: TabInfo.TabOpenType
     )
 
     private val tabList = TabList()
@@ -90,7 +90,9 @@ abstract class BrowserWrapper(
     init {
         faviconCache.profileProvider = this
 
-        activeTabModel = ActiveTabModel { uri, parentTabId -> createTabWithUri(uri, parentTabId) }
+        activeTabModel = ActiveTabModel { uri, parentTabId, isViaIntent ->
+            createTabWithUri(uri, parentTabId, isViaIntent)
+        }
 
         urlBarModel = URLBarModel(
             isIncognito = isIncognito,
@@ -138,7 +140,10 @@ abstract class BrowserWrapper(
             browser?.let {
                 if (it.activeTab != null) return
 
-                val parentTab = tabInfo?.parentTabId?.let { parentId -> tabList.findTab(parentId) }
+                val parentTab = tabInfo?.data?.parentTabId?.let {
+                    parentId ->
+                    tabList.findTab(parentId)
+                }
                 when {
                     parentTab != null -> it.setActiveTab(parentTab)
                     orderedTabList.value.isNotEmpty() -> it.setActiveTab(tabList.getTab(newIndex))
@@ -151,7 +156,11 @@ abstract class BrowserWrapper(
 
             newTabInfo?.let {
                 selectTab(tab)
-                tabList.updateParentTabId(tab.guid, parentTabId = it.parentTabId)
+                tabList.updateParentInfo(
+                    tab = tab,
+                    parentTabId = it.parentTabId,
+                    tabOpenType = it.tabOpenType
+                )
                 tab.navigationController.navigate(it.uri)
                 newTabInfo = null
             }
@@ -217,10 +226,15 @@ abstract class BrowserWrapper(
         if (tabListRestorer != null) return false
 
         val restorer = BrowserRestoreCallbackImpl(
+            tabList = tabList,
             browser = browser,
             cleanCache = this::cleanCacheDirectory,
             onEmptyTabList = {
-                createTabWithUri(Uri.parse(NeevaConstants.appURL), parentTabId = null)
+                createTabWithUri(
+                    uri = Uri.parse(NeevaConstants.appURL),
+                    parentTabId = null,
+                    isViaIntent = false
+                )
             }
         )
 
@@ -351,9 +365,15 @@ abstract class BrowserWrapper(
      * Because [Browser] only allows you to create a Tab without a URL, we save the URL for when
      * the [TabListCallback] tells us the new tab has been added.
      */
-    fun createTabWithUri(uri: Uri, parentTabId: String?) {
+    fun createTabWithUri(uri: Uri, parentTabId: String?, isViaIntent: Boolean) {
         browser?.let {
-            newTabInfo = CreateNewTabInfo(uri, parentTabId)
+            val tabOpenType = when {
+                parentTabId != null -> TabInfo.TabOpenType.CHILD_TAB
+                isViaIntent -> TabInfo.TabOpenType.VIA_INTENT
+                else -> TabInfo.TabOpenType.DEFAULT
+            }
+
+            newTabInfo = CreateNewTabInfo(uri, parentTabId, tabOpenType)
             it.createTab()
         }
     }
@@ -380,19 +400,29 @@ abstract class BrowserWrapper(
     }
 
     /**
-     * Closes the active Tab if it is a child of another Tab.  No-op if the active tab is not a
-     * child of another Tab.
-     *
-     * @return True if the tab was the child of an existing Tab.
+     * Closes the active Tab if and only if it was opened via a VIEW Intent.
+     * @return True if the tab was closed.
      */
-    fun closeActiveChildTab(): Boolean {
+    fun closeActiveTabIfOpenedViaIntent() =
+        conditionallyCloseActiveTab(TabInfo.TabOpenType.VIA_INTENT)
+
+    /**
+     * Closes the active Tab if and only if it was opened as a child of another Tab.
+     * @return True if the tab was closed.
+     */
+    fun closeActiveChildTab(): Boolean =
+        conditionallyCloseActiveTab(TabInfo.TabOpenType.CHILD_TAB)
+
+    private fun conditionallyCloseActiveTab(expected: TabInfo.TabOpenType): Boolean {
         return browser?.activeTab
             ?.let { activeTab ->
                 val tabInfo = tabList.getTabInfo(activeTab.guid)
-                tabInfo?.parentTabId?.let {
-                    closeTab(tabInfo)
-                    true
-                }
+                tabInfo?.data?.openType
+                    ?.takeIf { it == expected }
+                    ?.let {
+                        closeTab(tabInfo)
+                        true
+                    }
             } ?: false
     }
 
@@ -413,6 +443,4 @@ abstract class BrowserWrapper(
 
     /** Provides access to the WebLayer profile. */
     override fun getProfile(): Profile? = browser?.profile
-
-    fun getUrlBarController(): UrlBarController? = browser?.urlBarController
 }

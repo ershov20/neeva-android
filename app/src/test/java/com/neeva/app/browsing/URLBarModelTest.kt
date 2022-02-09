@@ -76,7 +76,7 @@ class URLBarModelTest : BaseTest() {
     fun loadUrl_withoutLazyTab() {
         val uri = Uri.parse("https://www.reddit.com/r/android")
         model.loadUrl(uri)
-        verify(activeTabModel, times(1)).loadUrl(eq(uri), eq(false))
+        verify(activeTabModel, times(1)).loadUrl(eq(uri), eq(false), eq(false))
     }
 
     @Test
@@ -88,7 +88,7 @@ class URLBarModelTest : BaseTest() {
         // Loading the URL should send it to a new tab.
         val uri = Uri.parse("https://www.reddit.com/r/android")
         model.loadUrl(uri)
-        verify(activeTabModel, times(1)).loadUrl(eq(uri), eq(true))
+        verify(activeTabModel, times(1)).loadUrl(eq(uri), eq(true), eq(false))
     }
 
     @Test
