@@ -1,6 +1,7 @@
 package com.neeva.app.appnav
 
 import android.net.Uri
+import androidx.annotation.MainThread
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import com.neeva.app.Dispatchers
@@ -76,6 +77,7 @@ class AppNavModel(
         navController.popBackStack()
     }
 
+    @MainThread
     fun showBrowser() {
         navController.popBackStack(
             route = AppNavDestination.BROWSER.route,

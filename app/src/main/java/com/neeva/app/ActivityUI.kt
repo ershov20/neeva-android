@@ -19,6 +19,7 @@ import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.BrowserScaffold
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class LocalEnvironmentState(
     val dispatchers: Dispatchers,
@@ -52,8 +53,11 @@ fun ActivityUI(
         appNavModel = appNavModel,
         modifier = Modifier.fillMaxSize()
     ) { space ->
-        coroutineScope.launch(dispatchers.io) {
-            webLayerModel.currentBrowser.activeTabModel.modifySpace(space, apolloClient)
+        coroutineScope.launch {
+            withContext(dispatchers.io) {
+                webLayerModel.currentBrowser.activeTabModel.modifySpace(space, apolloClient)
+            }
+
             appNavModel.showBrowser()
         }
     }
