@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
@@ -17,13 +16,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.widgets.overlay.OverlaySheetConfig
+import com.neeva.app.widgets.overlay.OverlaySheetHeightConfig
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun OverlaySheet(
-    config: OverlaySheetHeightConfig = OverlaySheetHeightConfig.HALF_SCREEN,
+    config: OverlaySheetConfig = OverlaySheetConfig.default,
     content: @Composable () -> Unit,
 ) {
     val appNavModel = LocalEnvironment.current.appNavModel
@@ -38,7 +40,7 @@ fun OverlaySheet(
                 .clickable { appNavModel.showBrowser() }
                 .fillMaxWidth()
                 .then(
-                    when (config) {
+                    when (config.height) {
                         OverlaySheetHeightConfig.HALF_SCREEN -> Modifier.fillMaxHeight(0.5f)
                         OverlaySheetHeightConfig.WRAP_CONTENT -> Modifier.weight(1f)
                     }
@@ -48,22 +50,18 @@ fun OverlaySheet(
 
         Box(
             modifier = Modifier
-                .padding(top = 16.dp)
                 .shadow(4.dp, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                 .fillMaxWidth()
                 .then(
-                    when (config) {
+                    when (config.height) {
                         OverlaySheetHeightConfig.HALF_SCREEN -> Modifier.fillMaxHeight()
                         OverlaySheetHeightConfig.WRAP_CONTENT -> Modifier.wrapContentHeight()
                     }
                 )
+                .pointerInput(Unit) {}
                 .background(MaterialTheme.colorScheme.background)
         ) {
             content()
         }
     }
-}
-
-enum class OverlaySheetHeightConfig {
-    HALF_SCREEN, WRAP_CONTENT
 }

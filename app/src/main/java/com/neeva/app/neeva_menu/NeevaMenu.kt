@@ -18,11 +18,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.OverlaySheet
-import com.neeva.app.widgets.OverlaySheetHeightConfig
+import com.neeva.app.widgets.overlay.OverlaySheetConfig
 
 @Composable
 fun NeevaMenuSheet(onMenuItem: (NeevaMenuItemId) -> Unit) {
-    OverlaySheet(config = OverlaySheetHeightConfig.WRAP_CONTENT) {
+    OverlaySheet(config = OverlaySheetConfig.neevaMenu) {
         NeevaMenuContent(onMenuItem = onMenuItem)
     }
 }

@@ -42,6 +42,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.widgets.ComposableSingletonEntryPoint
 import com.neeva.app.widgets.OverlaySheet
+import com.neeva.app.widgets.overlay.OverlaySheetConfig
 import dagger.hilt.EntryPoints
 
 @Composable
@@ -58,7 +59,7 @@ fun AddToSpaceSheet(
     val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
     val activeTabModel = browserWrapper.activeTabModel
 
-    OverlaySheet {
+    OverlaySheet(config = OverlaySheetConfig.spaces) {
         AddToSpaceUI(
             activeTabModel,
             spaceStore,
