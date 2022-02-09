@@ -6,6 +6,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.firstrun.FirstRun
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

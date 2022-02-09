@@ -22,6 +22,8 @@ import androidx.lifecycle.whenStarted
 import androidx.window.layout.WindowMetricsCalculator
 import com.apollographql.apollo3.ApolloClient
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.neeva.app.appnav.AppNavDestination
+import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel

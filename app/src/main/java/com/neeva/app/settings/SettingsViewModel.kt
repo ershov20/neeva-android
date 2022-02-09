@@ -2,7 +2,7 @@ package com.neeva.app.settings
 
 import android.net.Uri
 import androidx.compose.runtime.MutableState
-import com.neeva.app.AppNavModel
+import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.history.HistoryManager
 
 /**

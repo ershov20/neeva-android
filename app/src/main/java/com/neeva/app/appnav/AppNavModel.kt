@@ -1,8 +1,10 @@
-package com.neeva.app
+package com.neeva.app.appnav
 
 import android.net.Uri
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
+import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.neeva_menu.NeevaMenuItemId
@@ -57,20 +59,16 @@ class AppNavModel(
             .launchIn(coroutineScope)
     }
 
-    /** Shows a screen and allows the user to return to the browser after closing it. */
-    private fun showSecondaryScreen(destination: AppNavDestination) {
+    /** Shows a specific screen or context sheet. */
+    private fun show(destination: AppNavDestination) {
         if (navController.currentDestination?.route == destination.route) return
         navController.navigate(destination.route) {
             launchSingleTop = true
-            popUpTo(AppNavDestination.BROWSER.route)
-        }
-    }
 
-    /** Shows a screen and adds the previous screen to the back stack. */
-    private fun showSubscreen(destination: AppNavDestination) {
-        if (navController.currentDestination?.route == destination.route) return
-        navController.navigate(destination.route) {
-            launchSingleTop = true
+            // If the destination has an explicit parent, pop the stack all the way up to there.
+            // This isn't strictly necessary for most screens, but avoids confusion about the
+            // correct way to navigate somewhere using the NavController.
+            destination.parent?.let { popUpTo(it.route) }
         }
     }
 
@@ -94,14 +92,14 @@ class AppNavModel(
         showBrowser()
     }
 
-    fun showCardGrid() = showSecondaryScreen(AppNavDestination.CARD_GRID)
-    fun showAddToSpace() = showSecondaryScreen(AppNavDestination.ADD_TO_SPACE)
-    fun showNeevaMenu() = showSecondaryScreen(AppNavDestination.NEEVA_MENU)
-    fun showSettings() = showSubscreen(AppNavDestination.SETTINGS)
-    fun showProfileSettings() = showSubscreen(AppNavDestination.PROFILE_SETTINGS)
-    fun showClearBrowsingSettings() = showSubscreen(AppNavDestination.CLEAR_BROWSING_SETTINGS)
-    fun showFirstRun() = showSecondaryScreen(AppNavDestination.FIRST_RUN)
-    fun showHistory() = showSecondaryScreen(AppNavDestination.HISTORY)
+    fun showCardGrid() = show(AppNavDestination.CARD_GRID)
+    fun showAddToSpace() = show(AppNavDestination.ADD_TO_SPACE)
+    fun showNeevaMenu() = show(AppNavDestination.NEEVA_MENU)
+    fun showSettings() = show(AppNavDestination.SETTINGS)
+    fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
+    fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
+    fun showFirstRun() = show(AppNavDestination.FIRST_RUN)
+    fun showHistory() = show(AppNavDestination.HISTORY)
 
     fun onMenuItem(id: NeevaMenuItemId) =
         when (id) {
@@ -131,7 +129,7 @@ class AppNavModel(
                 webLayerModel.browserWrapperFlow.value.activeTabModel.reload()
             }
 
-            NeevaMenuItemId.REFRESH -> {
+            NeevaMenuItemId.ADD_TO_SPACE -> {
                 showAddToSpace()
             }
 

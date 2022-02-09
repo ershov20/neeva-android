@@ -6,6 +6,8 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.appnav.AppNav
+import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
