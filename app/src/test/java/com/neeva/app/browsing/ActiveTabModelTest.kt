@@ -2,6 +2,8 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.neeva.app.BaseTest
+import com.neeva.app.Dispatchers
+import kotlinx.coroutines.CoroutineScope
 import org.chromium.weblayer.FindInPageCallback
 import org.chromium.weblayer.FindInPageController
 import org.chromium.weblayer.NavigationCallback
@@ -44,7 +46,11 @@ class ActiveTabModelTest : BaseTest() {
     override fun setUp() {
         super.setUp()
 
-        model = ActiveTabModel(tabCreator)
+        model = ActiveTabModel(
+            coroutineScope = mock<CoroutineScope>(),
+            dispatchers = mock<Dispatchers>(),
+            tabCreator = tabCreator
+        )
 
         mainTab = MockTabHarness(
             currentTitle = "Title #1",

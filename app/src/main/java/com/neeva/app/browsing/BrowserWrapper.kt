@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
@@ -43,7 +44,8 @@ abstract class BrowserWrapper(
     val dispatchers: Dispatchers,
     val activityCallbackProvider: () -> ActivityCallbacks?,
     val suggestionsModel: SuggestionsModel?,
-    val faviconCache: FaviconCache
+    val faviconCache: FaviconCache,
+    val spaceStore: SpaceStore? = null
 ) : FaviconCache.ProfileProvider {
     data class CreateNewTabInfo(
         val uri: Uri,
@@ -90,7 +92,11 @@ abstract class BrowserWrapper(
     init {
         faviconCache.profileProvider = this
 
-        activeTabModel = ActiveTabModel { uri, parentTabId, isViaIntent ->
+        activeTabModel = ActiveTabModel(
+            spaceStore = spaceStore,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers
+        ) { uri, parentTabId, isViaIntent ->
             createTabWithUri(uri, parentTabId, isViaIntent)
         }
 

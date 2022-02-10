@@ -18,9 +18,6 @@ import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.BrowsingDataType
 import org.chromium.weblayer.CookieChangedCallback
@@ -58,7 +55,8 @@ class RegularBrowserWrapper(
         domainProvider = domainProvider,
         historyManager = historyManager,
         dispatchers = dispatchers
-    )
+    ),
+    spaceStore = spaceStore
 ) {
     companion object {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
@@ -75,11 +73,6 @@ class RegularBrowserWrapper(
                 suggestionsModel?.getSuggestionsFromBackend(queryText)
             }
         }
-
-        urlBarModel.isEditing
-            .onEach { isEditing -> if (isEditing) spaceStore.refresh() }
-            .flowOn(dispatchers.io)
-            .launchIn(coroutineScope)
     }
 
     override fun createBrowserFragment() =

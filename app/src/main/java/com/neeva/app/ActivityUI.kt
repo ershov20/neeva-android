@@ -53,12 +53,14 @@ fun ActivityUI(
         appNavModel = appNavModel,
         modifier = Modifier.fillMaxSize()
     ) { space ->
+        appNavModel.showBrowser()
+
         coroutineScope.launch {
             withContext(dispatchers.io) {
-                webLayerModel.currentBrowser.activeTabModel.modifySpace(space, apolloClient)
+                webLayerModel.currentBrowser.activeTabModel.modifySpace(
+                    space.id, apolloClient
+                )
             }
-
-            appNavModel.showBrowser()
         }
     }
 }

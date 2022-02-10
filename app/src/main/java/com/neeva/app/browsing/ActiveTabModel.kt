@@ -2,11 +2,18 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.spaces.Space
+import com.neeva.app.spaces.SpaceStore
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.FindInPageCallback
 import org.chromium.weblayer.NavigateParams
@@ -16,7 +23,12 @@ import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
 
 /** Monitors changes to the [Browser]'s active tab and emits values related to it. */
-class ActiveTabModel(private val tabCreator: TabCreator) {
+class ActiveTabModel(
+    private val spaceStore: SpaceStore? = null,
+    val coroutineScope: CoroutineScope,
+    val dispatchers: Dispatchers,
+    private val tabCreator: TabCreator
+) {
     data class NavigationInfo(
         val canGoBackward: Boolean = false,
         val canGoForward: Boolean = false
@@ -25,6 +37,18 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
     /** Tracks the URL displayed for the active tab. */
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     val urlFlow: StateFlow<Uri> = _urlFlow
+
+    /** Tracks whether current URL is in any of the user's Spaces. */
+    val currentUrlInSpaceFlow: StateFlow<Boolean> =
+        spaceStore
+            ?.stateFlow
+            ?.filter { it == SpaceStore.State.READY }
+            ?.combine(_urlFlow) {
+                _: SpaceStore.State, url: Uri ->
+                spaceStore.spaceStoreContainsUrl(url)
+            }?.flowOn(dispatchers.io)
+            ?.stateIn(coroutineScope, SharingStarted.Lazily, false)
+            ?: MutableStateFlow(false)
 
     data class FindInPageInfo(
         val text: String? = null,
@@ -183,9 +207,10 @@ class ActiveTabModel(private val tabCreator: TabCreator) {
         }
     }
 
-    /** Adds or removes the active tab from the given [space]. */
-    suspend fun modifySpace(space: Space, apolloClient: ApolloClient) {
-        space.addOrRemove(
+    /** Adds or removes the active tab from the space with given [spaceID]. */
+    suspend fun modifySpace(spaceID: String, apolloClient: ApolloClient) {
+        spaceStore?.addOrRemoveFromSpace(
+            spaceID = spaceID,
             apolloClient = apolloClient,
             url = urlFlow.value,
             title = titleFlow.value

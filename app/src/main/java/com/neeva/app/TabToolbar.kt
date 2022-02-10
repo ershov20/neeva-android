@@ -109,8 +109,17 @@ fun TabToolbar(
                 onClick = model.onAddToSpace,
                 modifier = Modifier.weight(1.0f)
             ) {
+                val activeTabModel = LocalBrowserWrapper.current.activeTabModel
+                val spaceStoreHasUrl by
+                activeTabModel.currentUrlInSpaceFlow.collectAsState()
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_bookmark_border_24),
+                    painter = painterResource(
+                        if (spaceStoreHasUrl) {
+                            R.drawable.ic_baseline_bookmark_24
+                        } else {
+                            R.drawable.ic_baseline_bookmark_border_24
+                        }
+                    ),
                     contentDescription = stringResource(R.string.toolbar_save_to_space),
                     tint = LocalContentColor.current
                 )

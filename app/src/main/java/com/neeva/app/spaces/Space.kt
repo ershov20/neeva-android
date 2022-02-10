@@ -54,61 +54,26 @@ data class Space(
         )
         return BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
     }
-
-    suspend fun addOrRemove(
-        apolloClient: ApolloClient,
-        url: Uri,
-        title: String,
-        description: String? = null
-    ) {
-        if (contentURLs?.contains(url) == true) {
-            val response = apolloClient
-                .mutation(
-                    DeleteSpaceResultByURLMutation(
-                        input = DeleteSpaceResultByURLInput(
-                            spaceID = id,
-                            url = url.toString(),
-                        )
-                    )
-                ).execute()
-
-            response.data?.deleteSpaceResultByURL.let {
-                // TODO Add a toast here
-                android.util.Log.i("Spaces", "Deleted item from space")
-            }
-        } else {
-            val response = apolloClient
-                .mutation(
-                    AddToSpaceMutation(
-                        input = AddSpaceResultByURLInput(
-                            spaceID = id,
-                            url = url.toString(),
-                            title = title,
-                            data = description?.let { Optional.presentIfNotNull(it) }
-                                ?: Optional.Absent,
-                            mediaType = Optional.presentIfNotNull("text/plain")
-                        )
-                    )
-                ).execute()
-
-            response.data?.entityId.let {
-                // TODO Add a toast here
-                android.util.Log.i("Spaces", "Added item to space with id=$it")
-            }
-        }
-    }
 }
 
 class SpaceStore(val apolloClient: ApolloClient, val neevaUser: NeevaUser) {
+    companion object {
+        private const val TAG = "Spaces"
+    }
+
     enum class State {
         READY,
         REFRESHING,
         FAILED
     }
+
     val allSpacesFlow = MutableStateFlow<List<Space>>(emptyList())
     val editableSpacesFlow = MutableStateFlow<List<Space>>(emptyList())
     private var urlToSpacesMap = HashMap<Uri, ArrayList<Space>>()
     val stateFlow = MutableStateFlow(State.READY)
+
+    fun spaceStoreContainsUrl(url: Uri): Boolean =
+        allSpacesFlow.value.any { it.contentURLs?.contains(url) == true }
 
     @OptIn(ExperimentalStdlibApi::class)
     suspend fun refresh() {
@@ -192,6 +157,56 @@ class SpaceStore(val apolloClient: ApolloClient, val neevaUser: NeevaUser) {
             }
 
             stateFlow.emit(State.READY)
+        }
+    }
+
+    suspend fun addOrRemoveFromSpace(
+        spaceID: String,
+        apolloClient: ApolloClient,
+        url: Uri,
+        title: String,
+        description: String? = null
+    ) {
+        val space = allSpacesFlow.value.find { it.id == spaceID }
+
+        space?.apply {
+            if (contentURLs?.contains(url) == true) {
+                val response = apolloClient
+                    .mutation(
+                        DeleteSpaceResultByURLMutation(
+                            input = DeleteSpaceResultByURLInput(
+                                spaceID = id,
+                                url = url.toString(),
+                            )
+                        )
+                    ).execute()
+
+                response.data?.deleteSpaceResultByURL.let {
+                    // TODO Add a toast here: https://github.com/neevaco/neeva-android/issues/287
+                    android.util.Log.i(TAG, "Deleted item from space")
+                    refresh()
+                }
+            } else {
+                val response = apolloClient
+                    .mutation(
+                        AddToSpaceMutation(
+                            input = AddSpaceResultByURLInput(
+                                spaceID = id,
+                                url = url.toString(),
+                                title = title,
+                                data = description?.let { Optional.presentIfNotNull(it) }
+                                    ?: Optional.Absent,
+                                mediaType = Optional.presentIfNotNull("text/plain")
+                            )
+                        )
+                    ).execute()
+
+                response.data?.entityId.let {
+                    // TODO Add a toast here: https://github.com/neevaco/neeva-android/issues/287
+                    android.util.Log.i(TAG, "Added item to space with id=$it")
+                    refresh()
+                }
+            }
         }
     }
 

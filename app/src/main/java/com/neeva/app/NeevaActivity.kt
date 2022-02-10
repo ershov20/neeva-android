@@ -148,6 +148,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             fetchNeevaUserInfo()
         }
 
+        lifecycleScope.launchWhenResumed {
+            spaceStore.refresh()
+        }
+
         if (savedInstanceState != null && webLayerModel.currentBrowser.isFullscreen()) {
             // If the activity was recreated because the user entered a fullscreen video or website,
             // hide the system bars.
