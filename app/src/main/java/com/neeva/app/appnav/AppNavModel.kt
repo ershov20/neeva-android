@@ -1,5 +1,6 @@
 package com.neeva.app.appnav
 
+import android.content.Context
 import android.net.Uri
 import androidx.annotation.MainThread
 import androidx.navigation.NavDestination
@@ -9,6 +10,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.neeva_menu.NeevaMenuItemId
+import com.neeva.app.sharing.ShareModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -103,7 +105,7 @@ class AppNavModel(
     fun showFirstRun() = show(AppNavDestination.FIRST_RUN)
     fun showHistory() = show(AppNavDestination.HISTORY)
 
-    fun onMenuItem(id: NeevaMenuItemId) =
+    fun onMenuItem(id: NeevaMenuItemId, context: Context? = null) =
         when (id) {
             NeevaMenuItemId.HOME -> {
                 webLayerModel.loadUrl(Uri.parse(NeevaConstants.appURL))
@@ -129,6 +131,16 @@ class AppNavModel(
 
             NeevaMenuItemId.REFRESH -> {
                 webLayerModel.browserWrapperFlow.value.activeTabModel.reload()
+            }
+
+            NeevaMenuItemId.SHARE -> {
+                context?.let {
+                    ShareModel().shareURL(
+                        webLayerModel.browserWrapperFlow.value.activeTabModel.urlFlow.value,
+                        webLayerModel.browserWrapperFlow.value.activeTabModel.titleFlow.value,
+                        it
+                    )
+                }
             }
 
             NeevaMenuItemId.ADD_TO_SPACE -> {
