@@ -3,16 +3,16 @@ package com.neeva.app.browsing
 import org.chromium.weblayer.ErrorPage
 import org.chromium.weblayer.ErrorPageCallback
 import org.chromium.weblayer.Navigation
-import org.chromium.weblayer.Tab
 
-class ErrorCallbackImpl(val tab: Tab) : ErrorPageCallback() {
-    // TODO(dan.alcantara): I don't know if we should be overriding this.
+class ErrorCallbackImpl(
+    private val activityCallbackProvider: () -> ActivityCallbacks?
+) : ErrorPageCallback() {
     override fun onBackToSafety(): Boolean {
-        tab.navigationController.goBack()
+        activityCallbackProvider()?.onBackPressed()
         return true
     }
 
-    // TODO(dan.alcantara): Although this should be showing the default error page, it
-    //                      doesn't work.
+    // https://github.com/neevaco/neeva-android/issues/77
+    // Even WebLayerShellActivity shows a blank white screen.
     override fun getErrorPage(navigation: Navigation): ErrorPage? = null
 }

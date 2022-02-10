@@ -166,7 +166,7 @@ class TabCallbacks(
 
     init {
         tab.fullscreenCallback = fullscreenCallback
-        tab.setErrorPageCallback(ErrorCallbackImpl(tab))
+        tab.setErrorPageCallback(ErrorCallbackImpl(activityCallbackProvider))
         tab.setNewTabCallback(newTabCallback)
         tab.navigationController.registerNavigationCallback(navigationCallback)
         tab.registerTabCallback(tabCallback)

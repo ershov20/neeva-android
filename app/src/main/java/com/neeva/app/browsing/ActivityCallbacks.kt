@@ -32,4 +32,7 @@ interface ActivityCallbacks {
      * hierarchy, allowing it to be culled and deleted by WebLayer.
      */
     fun detachIncognitoFragment()
+
+    /** Triggers the logic for the OS-level back button/gesture. */
+    fun onBackPressed()
 }
