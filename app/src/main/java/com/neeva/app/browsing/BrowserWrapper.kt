@@ -170,6 +170,8 @@ abstract class BrowserWrapper(
                 tab.navigationController.navigate(it.uri)
                 newTabInfo = null
             }
+
+            activityCallbackProvider()?.resetToolbarOffset()
         }
 
         override fun onWillDestroyBrowserAndAllTabs() {

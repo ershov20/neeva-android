@@ -27,6 +27,12 @@ interface ActivityCallbacks {
     /** Called when the top bar needs to be translated from its current location as the user scrolls. */
     fun onTopBarOffsetChanged(offset: Int)
 
+    /** Called when the toolbars offset needs to be reset to 0 (completely visible) */
+    fun resetToolbarOffset() {
+        onTopBarOffsetChanged(0)
+        onBottomBarOffsetChanged(0)
+    }
+
     /**
      * Called when the Fragment containing the Incognito profile should be removed from the
      * hierarchy, allowing it to be culled and deleted by WebLayer.
