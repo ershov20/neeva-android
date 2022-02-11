@@ -15,8 +15,8 @@ android {
         applicationId "com.neeva.app"
         minSdk 28
         targetSdk 30
-        versionCode 27
-        versionName "0.0.27"
+        versionCode 31
+        versionName "0.0.31"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
