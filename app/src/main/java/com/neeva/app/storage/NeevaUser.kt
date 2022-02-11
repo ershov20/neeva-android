@@ -1,9 +1,7 @@
 package com.neeva.app.storage
 
 import android.net.Uri
-import android.util.Log
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.exception.ApolloNetworkException
+import com.neeva.app.ApolloWrapper
 import com.neeva.app.NeevaUserToken
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.browsing.WebLayerModel
@@ -37,31 +35,28 @@ class NeevaUser(
         return neevaUserToken.getToken().isEmpty() || data.id == null
     }
 
-    suspend fun fetch(apolloClient: ApolloClient) {
-        if (neevaUserToken.getToken().isNotEmpty()) {
-            isLoading = true
-            try {
-                val response = apolloClient
-                    .query(UserInfoQuery())
-                    .execute()
+    suspend fun fetch(apolloWrapper: ApolloWrapper) {
+        if (neevaUserToken.getToken().isEmpty()) return
 
-                response.data?.user?.let { userQuery ->
-                    data = NeevaUserData(
-                        id = userQuery.id,
-                        displayName = userQuery.profile.displayName,
-                        email = userQuery.profile.email,
-                        pictureUrl = Uri.parse(userQuery.profile.pictureURL),
-                        ssoProvider = SSOProvider.values()
-                            .firstOrNull { it.url == userQuery.authProvider }
-                            ?: SSOProvider.UNKNOWN
-                    )
-                }
-            } catch (e: ApolloNetworkException) {
-                Log.e(TAG, "Failed to perform request", e)
-                clearUser()
+        isLoading = true
+        val response = apolloWrapper.performQuery(UserInfoQuery())
+        if (response != null) {
+            response.data?.user?.let { userQuery ->
+                data = NeevaUserData(
+                    id = userQuery.id,
+                    displayName = userQuery.profile.displayName,
+                    email = userQuery.profile.email,
+                    pictureUrl = Uri.parse(userQuery.profile.pictureURL),
+                    ssoProvider = SSOProvider.values()
+                        .firstOrNull { it.url == userQuery.authProvider }
+                        ?: SSOProvider.UNKNOWN
+                )
             }
-            isLoading = false
+        } else {
+            clearUser()
         }
+
+        isLoading = false
     }
 
     enum class SSOProvider(val url: String, val finalPath: String) {

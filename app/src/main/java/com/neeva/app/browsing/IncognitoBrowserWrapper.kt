@@ -29,7 +29,8 @@ class IncognitoBrowserWrapper private constructor(
     dispatchers = dispatchers,
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = null,
-    faviconCache = incognitoFaviconCache
+    faviconCache = incognitoFaviconCache,
+    spaceStore = null
 ) {
     constructor(
         appContext: Context,

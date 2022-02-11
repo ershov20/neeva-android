@@ -1,12 +1,11 @@
 package com.neeva.app.browsing
 
 import androidx.compose.ui.text.input.TextFieldValue
-import com.apollographql.apollo3.ApolloClient
-import com.apollographql.apollo3.network.okHttpClient
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.SuggestionsQuery
+import com.neeva.app.TestApolloWrapper
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Site
@@ -23,12 +22,6 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
-import okhttp3.Interceptor
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Protocol
-import okhttp3.Response
-import okhttp3.ResponseBody
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,10 +56,9 @@ class SuggestionsModelTest : BaseTest() {
     private lateinit var siteSuggestions: MutableStateFlow<List<NavSuggestion>>
     private lateinit var urlBarText: MutableStateFlow<TextFieldValue>
     private lateinit var urlBarIsEditing: MutableStateFlow<Boolean>
-    private lateinit var responseData: String
 
     private lateinit var historyManager: HistoryManager
-    private lateinit var apolloClient: ApolloClient
+    private lateinit var apolloWrapper: TestApolloWrapper
 
     private lateinit var model: SuggestionsModel
 
@@ -83,41 +75,16 @@ class SuggestionsModelTest : BaseTest() {
         historyManager = mock()
         Mockito.`when`(historyManager.historySuggestions).thenReturn(siteSuggestions)
 
-        apolloClient = ApolloClient.Builder()
-            .serverUrl("https://fake.url")
-            .okHttpClient(
-                OkHttpClient.Builder()
-                    .addInterceptor(TestInterceptor())
-                    .build()
-            )
-            .build()
+        apolloWrapper = TestApolloWrapper()
 
         model = SuggestionsModel(
             coroutineScopeRule.scope,
             historyManager,
-            apolloClient,
+            apolloWrapper,
             testDispatcher
         )
 
         coroutineScopeRule.scope.advanceUntilIdle()
-    }
-
-    inner class TestInterceptor : Interceptor {
-        override fun intercept(chain: Interceptor.Chain): Response {
-            val responseBody = ResponseBody.create(
-                "application/json".toMediaTypeOrNull(),
-                responseData
-            )
-
-            return Response.Builder()
-                .request(chain.request())
-                .protocol(Protocol.HTTP_2)
-                .message("Success")
-                .code(200)
-                .body(responseBody)
-                .addHeader("content-type", "application/json")
-                .build()
-        }
     }
 
     override fun tearDown() {
@@ -154,7 +121,7 @@ class SuggestionsModelTest : BaseTest() {
 
     @Test
     fun onUrlBarChanged_withEmptyString_doesNoQuery() {
-        responseData = FULL_RESPONSE
+        apolloWrapper.addResponse(FULL_RESPONSE)
 
         coroutineScopeRule.scope.advanceUntilIdle()
         runBlocking {
@@ -166,7 +133,7 @@ class SuggestionsModelTest : BaseTest() {
 
     @Test
     fun onUrlBarChanged_withNonEmptyString_firesRequestAndProcessesResult() {
-        responseData = FULL_RESPONSE
+        apolloWrapper.addResponse(FULL_RESPONSE)
 
         // Set the autocomplete suggestion.
         siteSuggestions.value = listOf(

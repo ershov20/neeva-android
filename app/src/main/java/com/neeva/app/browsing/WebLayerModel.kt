@@ -7,7 +7,7 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
 import com.neeva.app.history.HistoryManager
@@ -43,7 +43,7 @@ class WebLayerModel @Inject constructor(
     application: Application,
     private val domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
-    apolloClient: ApolloClient,
+    apolloWrapper: ApolloWrapper,
     spaceStore: SpaceStore,
     private val dispatchers: Dispatchers,
     neevaUser: NeevaUser
@@ -62,7 +62,7 @@ class WebLayerModel @Inject constructor(
         dispatchers = dispatchers,
         activityCallbackProvider = { activityCallbacks.get() },
         domainProvider = domainProviderImpl,
-        apolloClient = apolloClient,
+        apolloWrapper = apolloWrapper,
         historyManager = historyManager,
         spaceStore = spaceStore,
         neevaUser = neevaUser

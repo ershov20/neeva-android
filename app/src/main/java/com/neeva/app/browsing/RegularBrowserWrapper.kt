@@ -2,7 +2,7 @@ package com.neeva.app.browsing
 
 import android.content.Context
 import android.net.Uri
-import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.browserTypeCookie
@@ -34,7 +34,7 @@ class RegularBrowserWrapper(
     dispatchers: Dispatchers,
     activityCallbackProvider: () -> ActivityCallbacks?,
     domainProvider: DomainProvider,
-    val apolloClient: ApolloClient,
+    private val apolloWrapper: ApolloWrapper,
     override val historyManager: HistoryManager,
     spaceStore: SpaceStore,
     val neevaUser: NeevaUser
@@ -47,7 +47,7 @@ class RegularBrowserWrapper(
     suggestionsModel = SuggestionsModel(
         coroutineScope,
         historyManager,
-        apolloClient,
+        apolloWrapper,
         dispatchers
     ),
     faviconCache = RegularFaviconCache(
@@ -98,7 +98,7 @@ class RegularBrowserWrapper(
                     override fun onCookieChanged(cookie: String, cause: Int) {
                         saveLoginCookieFrom(neevaUser.neevaUserToken, cookie)
                         coroutineScope.launch(dispatchers.io) {
-                            neevaUser.fetch(apolloClient)
+                            neevaUser.fetch(apolloWrapper)
                         }
                     }
                 }

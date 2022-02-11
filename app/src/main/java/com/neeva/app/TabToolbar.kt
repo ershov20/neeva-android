@@ -110,8 +110,7 @@ fun TabToolbar(
                 modifier = Modifier.weight(1.0f)
             ) {
                 val activeTabModel = LocalBrowserWrapper.current.activeTabModel
-                val spaceStoreHasUrl by
-                activeTabModel.currentUrlInSpaceFlow.collectAsState()
+                val spaceStoreHasUrl by activeTabModel.currentUrlInSpaceFlow.collectAsState()
                 Icon(
                     painter = painterResource(
                         if (spaceStoreHasUrl) {

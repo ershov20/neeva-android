@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
@@ -38,8 +37,7 @@ val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("No value set") }
 fun ActivityUI(
     bottomControlOffset: StateFlow<Float>,
     topControlOffset: StateFlow<Float>,
-    webLayerModel: WebLayerModel,
-    apolloClient: ApolloClient
+    webLayerModel: WebLayerModel
 ) {
     val coroutineScope = rememberCoroutineScope()
     val appNavModel = LocalAppNavModel.current
@@ -57,9 +55,7 @@ fun ActivityUI(
 
         coroutineScope.launch {
             withContext(dispatchers.io) {
-                webLayerModel.currentBrowser.activeTabModel.modifySpace(
-                    space.id, apolloClient
-                )
+                webLayerModel.currentBrowser.activeTabModel.modifySpace(space.id)
             }
         }
     }

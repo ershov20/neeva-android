@@ -17,7 +17,7 @@ import com.neeva.app.settings.SettingsViewModelImpl
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.spaces.AddToSpaceSheet
-import com.neeva.app.spaces.Space
+import com.neeva.app.spaces.SpaceModifier
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -25,7 +25,7 @@ fun AppNav(
     webLayerModel: WebLayerModel,
     appNavModel: AppNavModel,
     modifier: Modifier,
-    spaceModifier: Space.Companion.SpaceModifier
+    spaceModifier: SpaceModifier
 ) {
     val settingsDataModel = LocalEnvironment.current.settingsDataModel
     val neevaUser = LocalEnvironment.current.neevaUser

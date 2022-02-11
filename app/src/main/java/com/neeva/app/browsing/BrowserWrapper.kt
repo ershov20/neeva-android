@@ -45,7 +45,7 @@ abstract class BrowserWrapper(
     val activityCallbackProvider: () -> ActivityCallbacks?,
     val suggestionsModel: SuggestionsModel?,
     val faviconCache: FaviconCache,
-    val spaceStore: SpaceStore? = null
+    val spaceStore: SpaceStore?
 ) : FaviconCache.ProfileProvider {
     data class CreateNewTabInfo(
         val uri: Uri,

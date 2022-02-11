@@ -1,7 +1,7 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
-import com.apollographql.apollo3.ApolloClient
+import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.spaces.SpaceStore
@@ -43,10 +43,10 @@ class ActiveTabModel(
         spaceStore
             ?.stateFlow
             ?.filter { it == SpaceStore.State.READY }
-            ?.combine(_urlFlow) {
-                _: SpaceStore.State, url: Uri ->
+            ?.combine(_urlFlow) { _: SpaceStore.State, url: Uri ->
                 spaceStore.spaceStoreContainsUrl(url)
-            }?.flowOn(dispatchers.io)
+            }
+            ?.flowOn(dispatchers.io)
             ?.stateIn(coroutineScope, SharingStarted.Lazily, false)
             ?: MutableStateFlow(false)
 
@@ -208,13 +208,12 @@ class ActiveTabModel(
     }
 
     /** Adds or removes the active tab from the space with given [spaceID]. */
-    suspend fun modifySpace(spaceID: String, apolloClient: ApolloClient) {
+    suspend fun modifySpace(spaceID: String) {
         spaceStore?.addOrRemoveFromSpace(
             spaceID = spaceID,
-            apolloClient = apolloClient,
             url = urlFlow.value,
             title = titleFlow.value
-        )
+        ) ?: Log.e(TAG, "Cannot modify space in Incognito mode")
     }
 
     private fun updateNavigationInfo() {
@@ -222,5 +221,9 @@ class ActiveTabModel(
             activeTabFlow.value?.navigationController?.canGoBack() ?: false,
             activeTabFlow.value?.navigationController?.canGoForward() ?: false
         )
+    }
+
+    companion object {
+        private val TAG = ActiveTabModel::class.simpleName
     }
 }

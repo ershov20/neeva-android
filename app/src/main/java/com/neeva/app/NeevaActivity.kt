@@ -20,7 +20,6 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.whenStarted
 import androidx.window.layout.WindowMetricsCalculator
-import com.apollographql.apollo3.ApolloClient
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
@@ -51,7 +50,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         private const val TAG_INCOGNITO_PROFILE = "FRAGMENT_TAG_INCOGNITO_PROFILE"
     }
 
-    @Inject lateinit var apolloClient: ApolloClient
+    @Inject lateinit var apolloWrapper: ApolloWrapper
     @Inject lateinit var spaceStore: SpaceStore
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var dispatchers: Dispatchers
@@ -100,8 +99,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         ActivityUI(
                             bottomControlOffset = activityViewModel.bottomControlOffset,
                             topControlOffset = activityViewModel.topControlOffset,
-                            webLayerModel = webLayerModel,
-                            apolloClient = apolloClient
+                            webLayerModel = webLayerModel
                         )
                     }
                 }
@@ -163,7 +161,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     private suspend fun fetchNeevaUserInfo() {
         withContext(dispatchers.io) {
-            neevaUser.fetch(apolloClient)
+            neevaUser.fetch(apolloWrapper)
         }
     }
 

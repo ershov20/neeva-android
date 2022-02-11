@@ -46,7 +46,7 @@ import com.neeva.app.widgets.overlay.OverlaySheetConfig
 @Composable
 fun AddToSpaceSheet(
     webLayerModel: WebLayerModel,
-    spaceModifier: Space.Companion.SpaceModifier
+    spaceModifier: SpaceModifier
 ) {
     val appNavModel = LocalAppNavModel.current
     val spaceStore = LocalEnvironment.current.spaceStore
@@ -69,7 +69,7 @@ fun AddToSpaceSheet(
 fun AddToSpaceUI(
     activeTabModel: ActiveTabModel,
     spaceStore: SpaceStore,
-    spaceModifier: Space.Companion.SpaceModifier,
+    spaceModifier: SpaceModifier,
     onDismiss: () -> Unit
 ) {
     val spaces: List<Space> by spaceStore.editableSpacesFlow.collectAsState()

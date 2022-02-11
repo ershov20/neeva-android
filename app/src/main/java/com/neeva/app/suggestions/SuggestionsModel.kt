@@ -2,7 +2,7 @@ package com.neeva.app.suggestions
 
 import android.net.Uri
 import android.util.Log
-import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
@@ -50,7 +50,7 @@ data class Suggestions(
 class SuggestionsModel(
     coroutineScope: CoroutineScope,
     historyManager: HistoryManager,
-    private val apolloClient: ApolloClient,
+    private val apolloWrapper: ApolloWrapper,
     dispatchers: Dispatchers
 ) {
     companion object {
@@ -84,15 +84,8 @@ class SuggestionsModel(
         // If the query is blank, don't bother firing the query.
         var result: SuggestionsQuery.Data? = null
         if (newValue.isNotBlank()) {
-            val query = apolloClient.query(SuggestionsQuery(query = newValue))
-
             try {
-                val response = query.execute()
-                result = response.data
-
-                if (result == null || response.hasErrors()) {
-                    Log.e(TAG, "Failed to parse response.  Has errors: ${response.hasErrors()}")
-                }
+                result = apolloWrapper.performQuery(SuggestionsQuery(query = newValue))?.data
             } catch (e: CancellationException) {
                 // Report nothing because the Flow itself was cancelled -- probably because the user
                 // continued typing something else.  Keep the old suggestions displayed.

@@ -1,7 +1,6 @@
 package com.neeva.app
 
 import android.content.Context
-import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
@@ -39,11 +38,8 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesApolloClient(
-        @ApplicationContext context: Context,
-        neevaUserToken: NeevaUserToken
-    ): ApolloClient {
-        return createApolloClient(context, neevaUserToken)
+    fun providesApolloWrapper(neevaUserToken: NeevaUserToken): ApolloWrapper {
+        return ApolloWrapper(neevaUserToken)
     }
 
     @Provides
@@ -65,8 +61,8 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesSpaceStore(apolloClient: ApolloClient, neevaUser: NeevaUser): SpaceStore {
-        return SpaceStore(apolloClient, neevaUser)
+    fun providesSpaceStore(apolloWrapper: ApolloWrapper, neevaUser: NeevaUser): SpaceStore {
+        return SpaceStore(apolloWrapper, neevaUser)
     }
 
     @Provides
