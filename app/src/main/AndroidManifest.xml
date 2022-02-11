@@ -23,7 +23,6 @@
         <activity
             android:name=".NeevaActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.NeevaSearchBrowser.NoActionBar"
             android:launchMode="singleTask">
 
@@ -42,7 +41,7 @@
         </activity>
 
         <meta-data android:name="org.chromium.weblayer.WebLayerPackage"
-            android:value="com.neeva.app" />
+            android:value="${applicationId}" />
 
         <meta-data
             android:name="com.google.android.gms.version"

@@ -13,10 +13,13 @@ android {
 
     defaultConfig {
         applicationId "com.neeva.app"
+        testApplicationId "com.neeva.app.test"
+        namespace "com.neeva.app"
+
         minSdk 28
         targetSdk 30
-        versionCode 31
-        versionName "0.0.31"
+        versionCode 33
+        versionName "0.0.33"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -26,6 +29,11 @@ android {
 
         testOptions {
             execution 'ANDROIDX_TEST_ORCHESTRATOR'
+
+            // Make sure that the unit tests can get access to whatever resources they need.
+            unitTests {
+                includeAndroidResources = true
+            }
         }
 
         vectorDrawables {
@@ -40,6 +48,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-DEBUG'
+        }
+
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -101,14 +114,9 @@ android {
     sourceSets {
         findByName("main")?.java?.srcDirs(project.file("src/main/kotlin"))
 
-        // Allow the instrumentation tests to get access to the Room DB schemas.
-        androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
-    }
-
-    testOptions {
-        // Make sure that the unit tests can get access to whatever resources they need.
-        unitTests {
-            includeAndroidResources = true
+        androidTest {
+            // Allow the instrumentation tests to get access to the Room DB schemas.
+            assets.srcDirs += files("$projectDir/schemas".toString())
         }
     }
 }
@@ -116,13 +124,6 @@ android {
 dependencies {
     implementation project(path: ':weblayer')
     implementation project(path: ':chromium:gen:org__chromium__weblayer__support')
-
-    // region https://github.com/neevaco/neeva-android/issues/54
-    // Pulling this dependency in allows us to define the constant @integer/google_play_services_version
-    // in our Android Manifest.  We use the GMS version that matches the value we used when building
-    // the WebLayerSupport APK, which was version 17.0.0.
-    implementation "com.google.android.gms:play-services-base:$play_services_version"
-    // endregion
 
     implementation 'androidx.activity:activity-compose:1.4.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -138,11 +139,12 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.navigation:navigation-compose:$navigation_compose_version"
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
-    implementation 'androidx.preference:preference:1.2.0'
+    implementation 'androidx.preference:preference-ktx:1.2.0'
     implementation 'androidx.window:window:1.0.0'
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
     implementation 'com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha'
     implementation 'com.google.android.material:material:1.5.0'
+    implementation "com.google.android.gms:play-services-base:$play_services_version"
     implementation "io.coil-kt:coil-compose:$coil_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
@@ -162,7 +164,7 @@ dependencies {
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
-    androidTestUtil 'androidx.test:orchestrator:1.4.0'
+    androidTestUtil 'androidx.test:orchestrator:1.4.1'
 
     // Hilt
     kapt "com.google.dagger:hilt-compiler:$dagger_version"
