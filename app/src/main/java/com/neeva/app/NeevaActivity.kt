@@ -31,6 +31,7 @@ import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
+import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
@@ -51,12 +52,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     @Inject lateinit var apolloWrapper: ApolloWrapper
-    @Inject lateinit var spaceStore: SpaceStore
-    @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var dispatchers: Dispatchers
-
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var localEnvironmentState: LocalEnvironmentState
+    @Inject lateinit var neevaUser: NeevaUser
+    @Inject lateinit var spaceStore: SpaceStore
+    @Inject lateinit var snackbarModel: SnackbarModel
 
     private lateinit var containerRegularProfile: View
     private lateinit var containerIncognitoProfile: View

@@ -1,79 +1,82 @@
 package com.neeva.app.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalDensity
-import com.neeva.app.BrowserUI
-import com.neeva.app.LocalAppNavModel
+import com.neeva.app.BottomToolbar
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.TabToolbar
-import com.neeva.app.TabToolbarModel
+import com.neeva.app.LocalEnvironment
+import com.neeva.app.TopToolbar
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.suggestions.SuggestionPane
 import kotlinx.coroutines.flow.StateFlow
 
-// TODO(dan.alcantara): Investigate using Compose Scaffold.
 @Composable
 fun BrowserScaffold(
     bottomControlOffset: StateFlow<Float>,
     topControlOffset: StateFlow<Float>,
     webLayerModel: WebLayerModel
 ) {
-    val appNavModel = LocalAppNavModel.current
+    val snackbarModel = LocalEnvironment.current.snackbarModel
 
     val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
+    val urlBarModel = browserWrapper.urlBarModel
     val activeTabModel = browserWrapper.activeTabModel
 
+    val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
+
     CompositionLocalProvider(LocalBrowserWrapper provides browserWrapper) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Full sized, drawn below everything else.  Conditionally shown when the current tab's
-            // renderer has died and the user is actively viewing the tab.
-            CrashedTabContainer(
-                onReload = activeTabModel::reload,
-                modifier = Modifier.fillMaxSize()
-            )
+        Column(modifier = Modifier.fillMaxSize()) {
+            TopToolbar(topControlOffset)
 
-            // Bottom controls: Back, forward, app menu, ...
-            val bottomOffset by bottomControlOffset.collectAsState()
-            val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
-            TabToolbar(
-                model = TabToolbarModel(
-                    onNeevaMenu = appNavModel::showNeevaMenu,
-                    onAddToSpace = appNavModel::showAddToSpace,
-                    onTabSwitcher = {
-                        browserWrapper.takeScreenshotOfActiveTab {
-                            appNavModel.showCardGrid()
-                        }
-                    },
-                    goBack = browserWrapper.activeTabModel::goBack,
-                    goForward = browserWrapper.activeTabModel::goForward,
-                ),
-                activeTabModel = browserWrapper.activeTabModel,
-                urlBarModel = browserWrapper.urlBarModel,
+            // We have to use a Box with no background because the WebLayer Fragments are displayed in
+            // regular Android Views underneath this View in the hierarchy.
+            Box(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .offset(y = bottomOffsetDp)
-            )
+                    .weight(1.0f)
+                    .fillMaxWidth()
+            ) {
+                val shouldDisplayCrashedTab
+                    by browserWrapper.shouldDisplayCrashedTab.collectAsState(false)
 
-            // Top controls: URL bar, Suggestions, Zero Query, ...
-            // Placed after the bottom controls so that it is drawn over the bottom controls
-            // when necessary.
-            val topOffset by topControlOffset.collectAsState()
-            val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
-            BrowserUI(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .offset(y = topOffsetDp)
-                    .background(MaterialTheme.colorScheme.background)
-            )
+                // Full sized views, drawn below the two toolbars.
+                when {
+                    isEditing -> {
+                        SuggestionPane(modifier = Modifier.fillMaxSize())
+                    }
+
+                    shouldDisplayCrashedTab -> {
+                        CrashedTab(
+                            onReload = activeTabModel::reload,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    else -> {
+                        // TODO(dan.alcantara): This is where the WebLayer Views _should_ go, but
+                        // WebLayer has a different idea of where its Android Views should live in
+                        // the hierarchy and doesn't seem to work well inside of a Composable
+                        // Scaffold, which has its own mechanisms for auto-hiding toolbars.
+                    }
+                }
+
+                SnackbarHost(
+                    hostState = snackbarModel.snackbarHostState,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
+
+            if (!isEditing) {
+                BottomToolbar(bottomControlOffset)
+            }
         }
     }
 }

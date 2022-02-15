@@ -15,38 +15,19 @@ import androidx.compose.material.Text
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
-@Composable
-fun CrashedTabContainer(
-    onReload: () -> Unit,
-    modifier: Modifier
-) {
-    val browserWrapper = LocalBrowserWrapper.current
-    val shouldDisplayCrashedTab by browserWrapper.shouldDisplayCrashedTab.collectAsState(false)
-
-    if (shouldDisplayCrashedTab) {
-        CrashedTab(onReload, modifier)
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun CrashedTab(
     onReload: () -> Unit,
@@ -54,11 +35,7 @@ fun CrashedTab(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        modifier = modifier
-            .fillMaxSize(1.0f)
-            // TODO(dan.alcantara): Temporarily add this until we change how BrowserScaffold
-            //                      sandwiches the content between the two toolbars.
-            .padding(vertical = dimensionResource(id = R.dimen.bottom_toolbar_height))
+        modifier = modifier.fillMaxSize(1.0f)
     ) {
         ConstraintLayout(
             modifier = Modifier

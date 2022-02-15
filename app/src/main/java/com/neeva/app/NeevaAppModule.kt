@@ -9,6 +9,7 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.NeevaUser
+import com.neeva.app.ui.SnackbarModel
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,6 +45,15 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
+    fun providesSnackbarModel(
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers
+    ): SnackbarModel {
+        return SnackbarModel(coroutineScope, dispatchers)
+    }
+
+    @Provides
+    @Singleton
     fun providesDatabase(@ApplicationContext context: Context): HistoryDatabase {
         return HistoryDatabase.create(context)
     }
@@ -61,8 +71,13 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesSpaceStore(apolloWrapper: ApolloWrapper, neevaUser: NeevaUser): SpaceStore {
-        return SpaceStore(apolloWrapper, neevaUser)
+    fun providesSpaceStore(
+        @ApplicationContext context: Context,
+        apolloWrapper: ApolloWrapper,
+        neevaUser: NeevaUser,
+        snackbarModel: SnackbarModel
+    ): SpaceStore {
+        return SpaceStore(context, apolloWrapper, neevaUser, snackbarModel)
     }
 
     @Provides
@@ -99,6 +114,7 @@ object NeevaAppModule {
         neevaUser: NeevaUser,
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
+        snackbarModel: SnackbarModel,
         spaceStore: SpaceStore
     ): LocalEnvironmentState {
         return LocalEnvironmentState(
@@ -108,6 +124,7 @@ object NeevaAppModule {
             neevaUser = neevaUser,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
+            snackbarModel = snackbarModel,
             spaceStore = spaceStore
         )
     }

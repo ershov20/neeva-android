@@ -1,6 +1,8 @@
 package com.neeva.app.spaces
 
+import android.content.Context
 import android.net.Uri
+import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
@@ -9,10 +11,12 @@ import com.neeva.app.TestApolloWrapper
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.NeevaUserData
 import com.neeva.app.type.SpaceACLLevel
+import com.neeva.app.ui.SnackbarModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -30,6 +34,10 @@ import strikt.assertions.isTrue
 @Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
 class SpaceStoreTest : BaseTest() {
+    @Mock
+    private lateinit var snackbarModel: SnackbarModel
+
+    private lateinit var context: Context
     private lateinit var neevaUser: NeevaUser
     private lateinit var apolloWrapper: TestApolloWrapper
     private lateinit var spaceStore: SpaceStore
@@ -37,13 +45,14 @@ class SpaceStoreTest : BaseTest() {
     override fun setUp() {
         super.setUp()
 
+        context = ApplicationProvider.getApplicationContext()
         val neevaUserToken: NeevaUserToken = mock()
         neevaUser = NeevaUser(
             data = NeevaUserData("c5rgtdldv9enb8j1gupg"),
             neevaUserToken = neevaUserToken
         )
         apolloWrapper = TestApolloWrapper(neevaUserToken = neevaUserToken)
-        spaceStore = SpaceStore(apolloWrapper, neevaUser)
+        spaceStore = SpaceStore(context, apolloWrapper, neevaUser, snackbarModel)
     }
 
     override fun tearDown() {

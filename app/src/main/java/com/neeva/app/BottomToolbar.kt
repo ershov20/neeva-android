@@ -2,6 +2,7 @@ package com.neeva.app
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
@@ -15,6 +16,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,6 +27,7 @@ import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.getClickableAlpha
 import com.neeva.app.urlbar.URLBarModel
+import kotlinx.coroutines.flow.StateFlow
 
 data class TabToolbarModel(
     val onNeevaMenu: () -> Unit = {},
@@ -34,15 +37,46 @@ data class TabToolbarModel(
     val goForward: () -> Unit = {}
 )
 
+/**
+ * Bottom controls: Back, forward, app menu, ...
+ */
 @Composable
-fun TabToolbar(
+fun BottomToolbar(
+    bottomControlOffset: StateFlow<Float>,
+    modifier: Modifier = Modifier
+) {
+    val appNavModel = LocalAppNavModel.current
+    val browserWrapper = LocalBrowserWrapper.current
+
+    val bottomOffset by bottomControlOffset.collectAsState()
+    val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
+    BottomToolbar(
+        model = TabToolbarModel(
+            onNeevaMenu = appNavModel::showNeevaMenu,
+            onAddToSpace = appNavModel::showAddToSpace,
+            onTabSwitcher = {
+                browserWrapper.takeScreenshotOfActiveTab {
+                    appNavModel.showCardGrid()
+                }
+            },
+            goBack = browserWrapper.activeTabModel::goBack,
+            goForward = browserWrapper.activeTabModel::goForward,
+        ),
+        activeTabModel = browserWrapper.activeTabModel,
+        urlBarModel = browserWrapper.urlBarModel,
+        modifier = modifier.offset(y = bottomOffsetDp)
+    )
+}
+
+@Composable
+fun BottomToolbar(
     model: TabToolbarModel,
     activeTabModel: ActiveTabModel,
     urlBarModel: URLBarModel,
     modifier: Modifier
 ) {
     val navigationInfo by activeTabModel.navigationInfoFlow.collectAsState()
-    TabToolbar(
+    BottomToolbar(
         model = model,
         canGoBackward = navigationInfo.canGoBackward,
         canGoForward = navigationInfo.canGoForward,
@@ -52,7 +86,7 @@ fun TabToolbar(
 }
 
 @Composable
-fun TabToolbar(
+fun BottomToolbar(
     model: TabToolbarModel,
     canGoBackward: Boolean,
     canGoForward: Boolean,
@@ -139,7 +173,7 @@ fun TabToolbar(
     }
 }
 
-class TabToolbarPreviews : BooleanPreviewParameterProvider<TabToolbarPreviews.Params>(4) {
+class BottomToolbarPreviews : BooleanPreviewParameterProvider<BottomToolbarPreviews.Params>(4) {
     data class Params(
         val darkTheme: Boolean,
         val backEnabled: Boolean,
@@ -159,9 +193,9 @@ class TabToolbarPreviews : BooleanPreviewParameterProvider<TabToolbarPreviews.Pa
     @Preview("RTL, 1x scale", locale = "he")
     @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
     @Composable
-    fun Default(@PreviewParameter(TabToolbarPreviews::class) params: Params) {
+    fun Default(@PreviewParameter(BottomToolbarPreviews::class) params: Params) {
         NeevaTheme(useDarkTheme = params.darkTheme) {
-            TabToolbar(
+            BottomToolbar(
                 model = TabToolbarModel(),
                 canGoBackward = params.backEnabled,
                 canGoForward = params.forwardEnabled,

@@ -106,4 +106,9 @@
 
     <string name="tab_crashed_title">Uh oh!</string>
     <string name="tab_crashed_body">Something went wrong while displaying this web page</string>
+
+    <string name="space_add_url">Added site to \"%1s\"</string>
+    <string name="space_remove_url">Removed site from \"%1s\"</string>
+
+    <string name="generic_error">Something went wrong</string>
 </resources>

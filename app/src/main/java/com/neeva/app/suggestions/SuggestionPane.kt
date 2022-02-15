@@ -1,18 +1,19 @@
 package com.neeva.app.suggestions
 
 import android.net.Uri
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
-import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.zeroQuery.IncognitoZeroQuery
 import com.neeva.app.zeroQuery.ZeroQuery
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun SuggestionPane() {
+fun SuggestionPane(modifier: Modifier = Modifier) {
     val historyManager = LocalEnvironment.current.historyManager
 
     val browserWrapper = LocalBrowserWrapper.current
@@ -51,42 +52,44 @@ fun SuggestionPane() {
         else -> false
     }
 
-    if (showSuggestionList) {
-        SuggestionList(
-            topSuggestion = topSuggestion,
-            queryRowSuggestions = queryRowSuggestions,
-            queryNavSuggestions = queryNavSuggestions,
-            historySuggestions = historySuggestions,
-            faviconCache = faviconCache,
-            onOpenUrl = urlBarModel::loadUrl
-        ) {
-            updateUrlBarContents(urlBarModel, it)
-        }
-    } else if (browserWrapper.isIncognito) {
-        IncognitoZeroQuery()
-    } else {
-        ZeroQuery(urlBarModel = urlBarModel, faviconCache = faviconCache) {
-            if (!isLazyTab && currentURL.toString().isNotBlank()) {
-                CurrentPageRow(
-                    faviconBitmap = faviconBitmap,
-                    label = if (isShowingQuery) {
-                        displayedText
-                    } else {
-                        currentURL.toString()
-                    },
-                    isShowingQuery = isShowingQuery
+    Surface(modifier = modifier) {
+        when {
+            showSuggestionList -> {
+                SuggestionList(
+                    topSuggestion = topSuggestion,
+                    queryRowSuggestions = queryRowSuggestions,
+                    queryNavSuggestions = queryNavSuggestions,
+                    historySuggestions = historySuggestions,
+                    faviconCache = faviconCache,
+                    onOpenUrl = urlBarModel::loadUrl
                 ) {
-                    updateUrlBarContents(
-                        urlBarModel,
-                        if (isShowingQuery) displayedText else currentURL.toString()
-                    )
+                    urlBarModel.replaceLocationBarText(it)
+                }
+            }
+
+            browserWrapper.isIncognito -> {
+                IncognitoZeroQuery()
+            }
+
+            else -> {
+                ZeroQuery(urlBarModel = urlBarModel, faviconCache = faviconCache) {
+                    if (!isLazyTab && currentURL.toString().isNotBlank()) {
+                        CurrentPageRow(
+                            faviconBitmap = faviconBitmap,
+                            label = if (isShowingQuery) {
+                                displayedText
+                            } else {
+                                currentURL.toString()
+                            },
+                            isShowingQuery = isShowingQuery
+                        ) {
+                            urlBarModel.replaceLocationBarText(
+                                if (isShowingQuery) displayedText else currentURL.toString()
+                            )
+                        }
+                    }
                 }
             }
         }
     }
-}
-
-/** Updates what is being displayed in the URL bar to match the given string and focuses it for editing. */
-private fun updateUrlBarContents(urlBarModel: URLBarModel, newContents: String) {
-    urlBarModel.replaceLocationBarText(newContents)
 }

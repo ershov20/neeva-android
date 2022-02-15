@@ -1,5 +1,6 @@
 package com.neeva.app.spaces
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.apollographql.apollo3.api.Optional
@@ -8,14 +9,21 @@ import com.neeva.app.ApolloWrapper
 import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
+import com.neeva.app.R
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
+import com.neeva.app.ui.SnackbarModel
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Manages interactions with the user's Spaces. */
-class SpaceStore(val apolloWrapper: ApolloWrapper, val neevaUser: NeevaUser) {
+class SpaceStore(
+    private val appContext: Context,
+    private val apolloWrapper: ApolloWrapper,
+    private val neevaUser: NeevaUser,
+    private val snackbarModel: SnackbarModel
+) {
     companion object {
         private val TAG = SpaceStore::class.simpleName
     }
@@ -123,18 +131,19 @@ class SpaceStore(val apolloWrapper: ApolloWrapper, val neevaUser: NeevaUser) {
         val space = allSpacesFlow.value.find { it.id == spaceID } ?: return false
 
         return if (space.contentURLs?.contains(url) == true) {
-            removeFromSpace(space.id, url)
+            removeFromSpace(space, url)
         } else {
-            addToSpace(space.id, url, title, description)
+            addToSpace(space, url, title, description)
         }
     }
 
     suspend fun addToSpace(
-        spaceID: String,
+        space: Space,
         url: Uri,
         title: String,
         description: String? = null
     ): Boolean {
+        val spaceID = space.id
         val response = apolloWrapper.performMutation(
             AddToSpaceMutation(
                 input = AddSpaceResultByURLInput(
@@ -149,14 +158,19 @@ class SpaceStore(val apolloWrapper: ApolloWrapper, val neevaUser: NeevaUser) {
         )
 
         return response?.data?.entityId?.let {
-            // TODO Add a toast here: https://github.com/neevaco/neeva-android/issues/287
             Log.i(TAG, "Added item to space with id=$it")
+            snackbarModel.show(appContext.getString(R.string.space_add_url, space.name))
             refresh()
             true
-        } ?: false
+        } ?: run {
+            val errorString = appContext.getString(R.string.generic_error)
+            snackbarModel.show(errorString)
+            false
+        }
     }
 
-    suspend fun removeFromSpace(spaceID: String, uri: Uri): Boolean {
+    suspend fun removeFromSpace(space: Space, uri: Uri): Boolean {
+        val spaceID = space.id
         val response = apolloWrapper.performMutation(
             DeleteSpaceResultByURLMutation(
                 input = DeleteSpaceResultByURLInput(
@@ -167,12 +181,16 @@ class SpaceStore(val apolloWrapper: ApolloWrapper, val neevaUser: NeevaUser) {
         )
 
         return response?.data?.deleteSpaceResultByURL?.let {
-            // TODO Add a toast here: https://github.com/neevaco/neeva-android/issues/287
-            // TODO(yusuf): The result isn't checked here.
-            Log.i(TAG, "Deleted item from space")
+            val successString = appContext.getString(R.string.space_remove_url, space.name)
+            Log.i(TAG, successString)
+            snackbarModel.show(successString)
             refresh()
             true
-        } ?: false
+        } ?: run {
+            val errorString = appContext.getString(R.string.generic_error)
+            snackbarModel.show(errorString)
+            false
+        }
     }
 
     private fun onUpdateSpaceURLs(space: Space, urls: Set<Uri>, data: List<SpaceEntityData>) {

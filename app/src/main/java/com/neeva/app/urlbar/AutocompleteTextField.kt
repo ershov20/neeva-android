@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
@@ -55,6 +56,8 @@ fun AutocompleteTextField(
     val focusRequester = remember { FocusRequester() }
     urlBarModel.focusRequester = focusRequester
 
+    val focusManager = LocalFocusManager.current
+
     AutocompleteTextField(
         textFieldValue = urlBarModelState.textFieldValue,
         faviconBitmap = urlBarModelState.faviconBitmap,
@@ -62,7 +65,10 @@ fun AutocompleteTextField(
         onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
         focusRequester = focusRequester,
         onFocusChanged = { urlBarModel.onFocusChanged(it.isFocused) },
-        onLoadUrl = { urlBarModel.loadUrl(urlBarModelState.uriToLoad) },
+        onLoadUrl = {
+            urlBarModel.loadUrl(urlBarModelState.uriToLoad)
+            focusManager.clearFocus()
+        },
         backgroundColor = backgroundColor,
         foregroundColor = foregroundColor
     )
@@ -105,7 +111,7 @@ fun AutocompleteTextField(
                         if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
                             // If we're seeing a hardware enter key, intercept it to prevent adding
                             // a newline to the URL.
-                            onLoadUrl.invoke()
+                            onLoadUrl()
                             true
                         } else {
                             false
@@ -123,7 +129,7 @@ fun AutocompleteTextField(
                     autoCorrect = false
                 ),
                 keyboardActions = KeyboardActions(
-                    onGo = { onLoadUrl.invoke() }
+                    onGo = { onLoadUrl() }
                 ),
                 cursorBrush = SolidColor(LocalContentColor.current)
             )

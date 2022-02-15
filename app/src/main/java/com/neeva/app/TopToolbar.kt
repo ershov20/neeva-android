@@ -1,28 +1,43 @@
 package com.neeva.app
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.Surface
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.neeva.app.suggestions.SuggestionPane
 import com.neeva.app.ui.theme.SelectionHighlight
 import com.neeva.app.urlbar.FindInPageToolbar
 import com.neeva.app.urlbar.URLBar
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun BrowserUI(modifier: Modifier) {
+fun TopToolbar(
+    topControlOffset: StateFlow<Float>
+) {
+    // Top controls: URL bar, Suggestions, Zero Query, ...
+    val topOffset by topControlOffset.collectAsState()
+    val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
+    TopToolbar(
+        modifier = Modifier
+            .offset(y = topOffsetDp)
+            .background(MaterialTheme.colorScheme.background)
+    )
+}
+
+@Composable
+fun TopToolbar(modifier: Modifier) {
     val browserWrapper = LocalBrowserWrapper.current
-    val urlBarModel = browserWrapper.urlBarModel
     val activeTabModel = browserWrapper.activeTabModel
 
-    val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
     val progress: Int by activeTabModel.progressFlow.collectAsState()
     val findInPageInfo by activeTabModel.findInPageInfo.collectAsState()
 
@@ -47,12 +62,6 @@ fun BrowserUI(modifier: Modifier) {
                 color = SelectionHighlight,
                 backgroundColor = Color.LightGray
             )
-        }
-
-        if (isEditing) {
-            Surface(modifier = Modifier.weight(1.0f)) {
-                SuggestionPane()
-            }
         }
     }
 }

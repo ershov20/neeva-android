@@ -16,10 +16,12 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.BrowserScaffold
+import com.neeva.app.ui.SnackbarModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** Classes that should be passed around the entire Composable hierarchy. */
 data class LocalEnvironmentState(
     val dispatchers: Dispatchers,
     val domainProvider: DomainProvider,
@@ -27,6 +29,7 @@ data class LocalEnvironmentState(
     val neevaUser: NeevaUser,
     val settingsDataModel: SettingsDataModel,
     val sharedPreferencesModel: SharedPreferencesModel,
+    val snackbarModel: SnackbarModel,
     val spaceStore: SpaceStore
 )
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
