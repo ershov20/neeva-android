@@ -14,10 +14,12 @@ import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
@@ -58,6 +60,12 @@ abstract class BrowserWrapper(
 
     val orderedTabList: StateFlow<List<TabInfo>>
         get() = tabList.orderedTabList
+
+    /** Tracks if the active tab needs to be reloaded due to a renderer crash. */
+    val shouldDisplayCrashedTab: Flow<Boolean> =
+        tabList.orderedTabList.map {
+            it.any { tabInfo -> tabInfo.isSelected && tabInfo.isCrashed }
+        }
 
     private lateinit var fragment: Fragment
 

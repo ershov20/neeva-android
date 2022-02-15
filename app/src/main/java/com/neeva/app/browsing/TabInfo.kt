@@ -8,6 +8,7 @@ data class TabInfo(
     val url: Uri?,
     val title: String?,
     val isSelected: Boolean,
+    val isCrashed: Boolean = false,
     val data: PersistedData = PersistedData(null, TabOpenType.DEFAULT)
 ) {
     companion object {

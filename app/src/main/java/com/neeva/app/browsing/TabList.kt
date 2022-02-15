@@ -10,23 +10,23 @@ import org.chromium.weblayer.Tab
  * with each.
  */
 class TabList {
-    private val currentTabs: MutableList<Tab> = mutableListOf()
-    private val currentPrimitives: MutableMap<String, TabInfo> = mutableMapOf()
+    private val tabs: MutableList<Tab> = mutableListOf()
+    private val tabInfoMap: MutableMap<String, TabInfo> = mutableMapOf()
 
     private val _orderedTabList = MutableStateFlow<List<TabInfo>>(emptyList())
     val orderedTabList: StateFlow<List<TabInfo>> = _orderedTabList
 
-    fun hasNoTabs(): Boolean = currentTabs.isEmpty()
-    fun indexOf(tab: Tab) = currentTabs.indexOf(tab)
-    fun findTab(id: String) = currentTabs.firstOrNull { it.guid == id }
-    fun getTab(index: Int) = currentTabs[index]
-    fun getTabInfo(id: String) = currentPrimitives[id]
+    fun hasNoTabs(): Boolean = tabs.isEmpty()
+    fun indexOf(tab: Tab) = tabs.indexOf(tab)
+    fun findTab(id: String) = tabs.firstOrNull { it.guid == id }
+    fun getTab(index: Int) = tabs[index]
+    fun getTabInfo(id: String) = tabInfoMap[id]
 
     fun add(tab: Tab) {
-        if (currentTabs.contains(tab)) return
-        currentTabs.add(tab)
+        if (tabs.contains(tab)) return
+        tabs.add(tab)
 
-        currentPrimitives[tab.guid] = TabInfo(
+        tabInfoMap[tab.guid] = TabInfo(
             id = tab.guid,
             url = tab.currentDisplayUrl,
             title = tab.currentDisplayTitle,
@@ -39,18 +39,18 @@ class TabList {
 
     /** Removes the given Tab from the list.  If we had a corresponding TabInfo, it is returned. */
     fun remove(tab: Tab): TabInfo? {
-        currentTabs.remove(tab)
-        val childInfo = currentPrimitives.remove(tab.guid)
+        tabs.remove(tab)
+        val childInfo = tabInfoMap.remove(tab.guid)
         updateFlow()
         return childInfo
     }
 
     fun updatedSelectedTab(selectedTabId: String?) {
-        currentPrimitives.keys.forEach { tabId ->
+        tabInfoMap.keys.forEach { tabId ->
             val newSelectedValue = selectedTabId != null && tabId == selectedTabId
-            currentPrimitives[tabId]?.let { currentData ->
+            tabInfoMap[tabId]?.let { currentData ->
                 if (currentData.isSelected != newSelectedValue) {
-                    currentPrimitives[tabId] = currentData.copy(
+                    tabInfoMap[tabId] = currentData.copy(
                         isSelected = newSelectedValue
                     )
                 }
@@ -61,19 +61,28 @@ class TabList {
     }
 
     fun updateTabTitle(tabId: String, newTitle: String?) {
-        currentPrimitives[tabId]
+        tabInfoMap[tabId]
             ?.takeUnless { it.title == newTitle }
             ?.let { existingInfo ->
-                currentPrimitives[tabId] = existingInfo.copy(title = newTitle)
+                tabInfoMap[tabId] = existingInfo.copy(title = newTitle)
                 updateFlow()
             }
     }
 
     fun updateUrl(tabId: String, newUrl: Uri?) {
-        currentPrimitives[tabId]
+        tabInfoMap[tabId]
             ?.takeUnless { it.url == newUrl }
             ?.let { existingInfo ->
-                currentPrimitives[tabId] = existingInfo.copy(url = newUrl)
+                tabInfoMap[tabId] = existingInfo.copy(url = newUrl)
+                updateFlow()
+            }
+    }
+
+    fun updateIsCrashed(tabId: String, isCrashed: Boolean) {
+        tabInfoMap[tabId]
+            ?.takeUnless { it.isCrashed == isCrashed }
+            ?.let { existingInfo ->
+                tabInfoMap[tabId] = existingInfo.copy(isCrashed = isCrashed)
                 updateFlow()
             }
     }
@@ -93,11 +102,11 @@ class TabList {
         if (tab.isDestroyed) return
 
         val tabId = tab.guid
-        currentPrimitives[tabId]
+        tabInfoMap[tabId]
             ?.takeUnless { it.data == newData }
             ?.let { existingInfo ->
                 val newInfo = existingInfo.copy(data = newData)
-                currentPrimitives[tabId] = newInfo
+                tabInfoMap[tabId] = newInfo
                 updateFlow()
 
                 // Save data out to the Tab structure so that WebLayer can restore it for us later.
@@ -106,12 +115,12 @@ class TabList {
     }
 
     internal fun clear() {
-        currentTabs.clear()
-        currentPrimitives.clear()
+        tabs.clear()
+        tabInfoMap.clear()
         updateFlow()
     }
 
     private fun updateFlow() {
-        _orderedTabList.value = currentTabs.map { currentPrimitives[it.guid]!! }
+        _orderedTabList.value = tabs.map { tabInfoMap[it.guid]!! }
     }
 }

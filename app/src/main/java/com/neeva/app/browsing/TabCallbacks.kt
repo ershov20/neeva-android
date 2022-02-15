@@ -89,12 +89,14 @@ class TabCallbacks(
         var visitToCommit: Visit? = null
 
         override fun onNavigationStarted(navigation: Navigation) {
+            tabList.updateIsCrashed(tab.guid, isCrashed = false)
+
             // We can only check if the browser is restoring state when the navigation starts.  Once
             // we hit the commit phase, it'll return false.
             val isRestoringState = tab.getBrowserIfAlive()?.isRestoringPreviousState == true
-            if (isRestoringState) return
-
-            visitToCommit = Visit(timestamp = Date())
+            if (!isRestoringState) {
+                visitToCommit = Visit(timestamp = Date())
+            }
         }
 
         override fun onNavigationCompleted(navigation: Navigation) = commitVisit(navigation)
@@ -159,10 +161,13 @@ class TabCallbacks(
             if (tab != browser.activeTab) return
             activityCallbackProvider()?.showContextMenuForTab(params, tab)
         }
-    }
 
-    /** Handles when the Tab crashes. */
-    private val crashTabCallback = CrashTabCallback(tab)
+        override fun onRenderProcessGone() {
+            if (!tab.isDestroyed && !tab.willAutomaticallyReloadAfterCrash()) {
+                tabList.updateIsCrashed(tab.guid, isCrashed = true)
+            }
+        }
+    }
 
     init {
         tab.fullscreenCallback = fullscreenCallback
@@ -170,7 +175,6 @@ class TabCallbacks(
         tab.setNewTabCallback(newTabCallback)
         tab.navigationController.registerNavigationCallback(navigationCallback)
         tab.registerTabCallback(tabCallback)
-        tab.registerTabCallback(crashTabCallback)
     }
 
     fun unregisterCallbacks() {
@@ -184,6 +188,5 @@ class TabCallbacks(
         tab.setNewTabCallback(null)
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
         tab.unregisterTabCallback(tabCallback)
-        tab.unregisterTabCallback(crashTabCallback)
     }
 }

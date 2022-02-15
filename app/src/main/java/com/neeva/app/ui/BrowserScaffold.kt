@@ -27,11 +27,20 @@ fun BrowserScaffold(
     topControlOffset: StateFlow<Float>,
     webLayerModel: WebLayerModel
 ) {
-    val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
     val appNavModel = LocalAppNavModel.current
+
+    val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
+    val activeTabModel = browserWrapper.activeTabModel
 
     CompositionLocalProvider(LocalBrowserWrapper provides browserWrapper) {
         Box(modifier = Modifier.fillMaxSize()) {
+            // Full sized, drawn below everything else.  Conditionally shown when the current tab's
+            // renderer has died and the user is actively viewing the tab.
+            CrashedTabContainer(
+                onReload = activeTabModel::reload,
+                modifier = Modifier.fillMaxSize()
+            )
+
             // Bottom controls: Back, forward, app menu, ...
             val bottomOffset by bottomControlOffset.collectAsState()
             val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }

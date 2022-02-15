@@ -103,4 +103,7 @@
     <string name="incognito_zero_query_footer">Your activity <b>might still be visible</b> to your internet service provider, school, or employer.</string>
     <string name="clear_browsing_dialog_text">This action will clear all of your private data. It cannot be undone.</string>
     <string name="clear_browsing_clear_data">Clear Data</string>
+
+    <string name="tab_crashed_title">Uh oh!</string>
+    <string name="tab_crashed_body">Something went wrong while displaying this web page</string>
 </resources>

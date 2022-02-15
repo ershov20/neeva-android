@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.suggestions.SuggestionPane
 import com.neeva.app.ui.theme.SelectionHighlight
 import com.neeva.app.urlbar.FindInPageToolbar
@@ -25,8 +24,7 @@ fun BrowserUI(modifier: Modifier) {
 
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
     val progress: Int by activeTabModel.progressFlow.collectAsState()
-    val findInPageInfo: ActiveTabModel.FindInPageInfo
-        by activeTabModel.findInPageInfo.collectAsState()
+    val findInPageInfo by activeTabModel.findInPageInfo.collectAsState()
 
     Column(modifier = modifier) {
         if (findInPageInfo.text != null) {
