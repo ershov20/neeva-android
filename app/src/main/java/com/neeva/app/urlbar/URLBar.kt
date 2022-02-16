@@ -22,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +30,7 @@ import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.neeva_menu.OverflowMenu
+import com.neeva.app.ui.theme.Dimensions
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -61,15 +61,23 @@ fun URLBar() {
         Box(
             modifier = Modifier
                 .weight(1.0f)
-                .padding(8.dp)
-                .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.primary)
+                .padding(Dimensions.PADDING_SMALL)
         ) {
+            val childModifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 40.dp)
+                .background(
+                    color = backgroundColor,
+                    shape = RoundedCornerShape(24.dp)
+                )
+                .padding(start = 12.dp)
+
             AutocompleteTextField(
                 urlBarModel = urlBarModel,
                 urlBarModelState = urlBarModelState.value,
                 backgroundColor = backgroundColor,
-                foregroundColor = foregroundColor
+                foregroundColor = foregroundColor,
+                modifier = childModifier
             )
 
             // We need to have both the AutocompleteTextField and the LocationLabel in the URLBar
@@ -77,12 +85,9 @@ fun URLBar() {
             // when the LocationLabel is clicked.
             if (!isEditing) {
                 LocationLabel(
-                    backgroundColor = backgroundColor,
                     foregroundColor = foregroundColor,
                     showIncognitoBadge = isIncognito,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { urlBarModel.onRequestFocus() }
+                    modifier = childModifier.clickable { urlBarModel.onRequestFocus() }
                 )
             }
         }
@@ -112,8 +117,7 @@ fun URLBar() {
                         onClickLabel = stringResource(id = R.string.cancel),
                         onClick = cancelLambda
                     )
-                    .defaultMinSize(minHeight = 40.dp)
-                    .padding(horizontal = 8.dp),
+                    .defaultMinSize(minHeight = 48.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

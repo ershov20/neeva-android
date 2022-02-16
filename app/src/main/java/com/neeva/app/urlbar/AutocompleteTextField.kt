@@ -4,16 +4,14 @@ import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +25,6 @@ import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
@@ -40,9 +37,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
@@ -51,7 +48,8 @@ fun AutocompleteTextField(
     urlBarModel: URLBarModel,
     urlBarModelState: URLBarModelState,
     backgroundColor: Color,
-    foregroundColor: Color
+    foregroundColor: Color,
+    modifier: Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
     urlBarModel.focusRequester = focusRequester
@@ -70,7 +68,8 @@ fun AutocompleteTextField(
             focusManager.clearFocus()
         },
         backgroundColor = backgroundColor,
-        foregroundColor = foregroundColor
+        foregroundColor = foregroundColor,
+        modifier = modifier
     )
 }
 
@@ -84,27 +83,25 @@ fun AutocompleteTextField(
     onFocusChanged: (FocusState) -> Unit,
     onLoadUrl: () -> Unit,
     backgroundColor: Color,
-    foregroundColor: Color
+    foregroundColor: Color,
+    modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .defaultMinSize(minHeight = 40.dp)
-            .fillMaxWidth()
-            .background(backgroundColor)
+        modifier = modifier
     ) {
         CompositionLocalProvider(LocalContentColor provides foregroundColor) {
             FaviconView(
                 bitmap = faviconBitmap,
-                bordered = false,
-                modifier = Modifier.padding(start = 8.dp)
+                bordered = false
             )
+
+            Spacer(Modifier.width(Dimensions.PADDING_SMALL))
 
             BasicTextField(
                 value = textFieldValue,
                 onValueChange = onLocationEdited,
                 modifier = Modifier
-                    .padding(start = 8.dp)
                     .focusRequester(focusRequester)
                     .onFocusChanged(onFocusChanged)
                     .onPreviewKeyEvent {
@@ -140,15 +137,12 @@ fun AutocompleteTextField(
                 exit = fadeOut()
             ) {
                 IconButton(
-                    onClick = { onLocationReplaced("") },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .padding(8.dp)
+                    onClick = { onLocationReplaced("") }
                 ) {
-                    Image(
+                    Icon(
                         painter = painterResource(id = R.drawable.ic_baseline_cancel_24),
                         contentDescription = stringResource(id = R.string.clear),
-                        colorFilter = ColorFilter.tint(LocalContentColor.current)
+                        tint = LocalContentColor.current
                     )
                 }
             }

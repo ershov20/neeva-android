@@ -6,13 +6,12 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +27,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -35,6 +35,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.mapComposeColorToResource
 import org.chromium.weblayer.Browser
@@ -42,7 +43,6 @@ import org.chromium.weblayer.UrlBarOptions
 
 @Composable
 fun LocationLabel(
-    backgroundColor: Color,
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
     modifier: Modifier = Modifier
@@ -72,7 +72,6 @@ fun LocationLabel(
     LocationLabel(
         urlBarView,
         urlBarValue,
-        backgroundColor,
         foregroundColor,
         showIncognitoBadge,
         isShowingQuery,
@@ -84,7 +83,6 @@ fun LocationLabel(
 fun LocationLabel(
     urlBarView: View?,
     urlBarValue: String,
-    backgroundColor: Color,
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
     isShowingQuery: Boolean,
@@ -93,84 +91,87 @@ fun LocationLabel(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .background(backgroundColor)
-            .wrapContentSize(Alignment.Center)
-            .defaultMinSize(minHeight = 40.dp)
     ) {
-        val iconSize = 24.dp
-        val iconModifier = Modifier
-            .padding(8.dp)
-            .size(iconSize)
+        val iconSize = 32.dp
+        val iconModifier = Modifier.size(iconSize)
         if (showIncognitoBadge) {
             Image(
                 painter = painterResource(R.drawable.ic_incognito),
                 contentDescription = stringResource(R.string.incognito),
-                modifier = iconModifier,
+                modifier = iconModifier.padding(end = Dimensions.PADDING_SMALL),
                 colorFilter = ColorFilter.tint(foregroundColor)
             )
-        } else {
-            Box(modifier = iconModifier)
         }
 
-        Spacer(modifier = Modifier.weight(1.0f))
+        Row(
+            modifier = Modifier.weight(1.0f),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (isShowingQuery) {
+                Image(
+                    painter = painterResource(R.drawable.ic_baseline_search_24),
+                    contentDescription = "secure site",
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .size(16.dp),
+                    colorFilter = ColorFilter.tint(foregroundColor),
+                    contentScale = ContentScale.Fit
+                )
+                Text(
+                    text = urlBarValue.ifEmpty { "Search or enter address" },
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    color = foregroundColor,
+                    overflow = TextOverflow.Ellipsis
+                )
+            } else {
+                AndroidView(
+                    factory = { FrameLayout(it) },
+                    update = { rootView: FrameLayout ->
+                        if (urlBarView == null || urlBarView.parent == rootView) return@AndroidView
 
-        if (isShowingQuery) {
-            Image(
-                painter = painterResource(R.drawable.ic_baseline_search_24),
-                contentDescription = "secure site",
-                modifier = Modifier
-                    .padding(8.dp)
-                    .size(16.dp),
-                colorFilter = ColorFilter.tint(foregroundColor),
-                contentScale = ContentScale.Fit
-            )
-            Text(
-                text = urlBarValue.ifEmpty { "Search or enter address" },
-                style = MaterialTheme.typography.bodyLarge,
-                maxLines = 1,
-                color = foregroundColor
-            )
-        } else {
-            AndroidView(
-                factory = { FrameLayout(it) },
-                update = { rootView: FrameLayout ->
-                    if (urlBarView == null || urlBarView.parent == rootView) return@AndroidView
-
-                    // Attach the URL Bar provided by WebLayer to our hierarchy.
-                    rootView.removeAllViews()
-                    urlBarView.run {
-                        (parent as? ViewGroup)?.removeView(this)
-                        rootView.addView(
-                            this,
-                            FrameLayout.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT
+                        // Attach the URL Bar provided by WebLayer to our hierarchy.
+                        rootView.removeAllViews()
+                        urlBarView.run {
+                            (parent as? ViewGroup)?.removeView(this)
+                            rootView.addView(
+                                this,
+                                FrameLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT
+                                )
                             )
-                        )
+                        }
                     }
-                }
-            )
+                )
+            }
         }
 
-        Spacer(modifier = Modifier.weight(1.0f))
-
-        // Put a [Box] here that has the same size as the optional icon on the left so that the URL
-        // and query text are properly centered.
-        Box(modifier = iconModifier)
+        if (showIncognitoBadge) {
+            // Add a spacer that has the same size as the optional icon on the left so that the URL
+            // and query text are properly centered.
+            Spacer(modifier = iconModifier)
+        } else {
+            // Add some padding on the right to account for the lack of an icon.
+            Spacer(modifier = Modifier.width(12.dp))
+        }
     }
 }
 
-class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPreviews.Params>(3) {
+class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPreviews.Params>(4) {
     data class Params(
         val darkTheme: Boolean,
         val isIncognito: Boolean,
-        val isShowingQuery: Boolean
+        val isShowingQuery: Boolean,
+        val useLongText: Boolean
     )
 
     override fun createParams(booleanArray: BooleanArray) = Params(
         darkTheme = booleanArray[0],
         isIncognito = booleanArray[1],
-        isShowingQuery = booleanArray[2]
+        isShowingQuery = booleanArray[2],
+        useLongText = booleanArray[3]
     )
 
     @Preview("1x font scale", locale = "en")
@@ -181,21 +182,35 @@ class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPrevi
     fun LocationLabelPreview(
         @PreviewParameter(LocationLabelPreviews::class) params: Params
     ) {
+        val urlBarText = if (params.isShowingQuery) {
+            if (params.useLongText) {
+                stringResource(id = R.string.debug_long_string_primary)
+            } else {
+                stringResource(id = R.string.debug_short_url)
+            }
+        } else {
+            if (params.useLongText) {
+                stringResource(id = R.string.debug_long_url)
+            } else {
+                stringResource(id = R.string.debug_short_url)
+            }
+        }
+
         NeevaTheme(useDarkTheme = params.darkTheme) {
             // Create a proxy for the Weblayer URL bar.
-            val urlBarView = TextView(LocalContext.current)
-            urlBarView.text = stringResource(id = R.string.debug_short_url)
-            urlBarView.setTextColor(MaterialTheme.colorScheme.onSurface.toArgb())
-            urlBarView.maxLines = 1
-            urlBarView.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
+            val weblayerUrlBar = TextView(LocalContext.current)
+            weblayerUrlBar.text = urlBarText
+            weblayerUrlBar.setTextColor(MaterialTheme.colorScheme.onSurface.toArgb())
+            weblayerUrlBar.maxLines = 1
+            weblayerUrlBar.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
 
             LocationLabel(
-                urlBarView = urlBarView,
-                urlBarValue = stringResource(id = R.string.debug_short_url),
-                backgroundColor = MaterialTheme.colorScheme.background,
+                urlBarView = weblayerUrlBar,
+                urlBarValue = urlBarText,
                 foregroundColor = MaterialTheme.colorScheme.onSurface,
                 showIncognitoBadge = params.isIncognito,
-                isShowingQuery = params.isShowingQuery
+                isShowingQuery = params.isShowingQuery,
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
     }
