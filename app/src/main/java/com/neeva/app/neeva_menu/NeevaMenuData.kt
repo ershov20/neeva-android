@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -22,7 +23,7 @@ enum class NeevaMenuItemId {
     FORWARD,
     REFRESH,
     SHARE,
-    ADD_TO_SPACE,
+    SHOW_PAGE_INFO,
     FIND_IN_PAGE
 }
 
@@ -51,9 +52,9 @@ object NeevaMenuData {
             icon = Icons.Default.Share
         ),
         NeevaMenuItemData(
-            id = NeevaMenuItemId.ADD_TO_SPACE,
-            labelId = R.string.add_to_space,
-            imageResourceID = R.drawable.ic_baseline_bookmark_border_24
+            id = NeevaMenuItemId.SHOW_PAGE_INFO,
+            labelId = R.string.page_info,
+            icon = Icons.Default.Info
         )
     )
 

@@ -44,10 +44,32 @@ class SpaceStore(
     fun spaceStoreContainsUrl(url: Uri): Boolean = urlToSpacesMap[url]?.isNotEmpty() ?: false
 
     suspend fun refresh() {
-        if (stateFlow.value == State.REFRESHING) return
+        if (stateFlow.value == State.REFRESHING) {
+            val errorString = appContext.getString(R.string.generic_error)
+            snackbarModel.show(errorString)
+            return
+        }
+
         stateFlow.value = State.REFRESHING
 
         val succeeded = performRefresh()
+        stateFlow.value = if (succeeded) {
+            State.READY
+        } else {
+            State.FAILED
+        }
+    }
+
+    private suspend fun refreshSpace(space: Space) {
+        if (stateFlow.value == State.REFRESHING) {
+            val errorString = appContext.getString(R.string.generic_error)
+            snackbarModel.show(errorString)
+            return
+        }
+
+        stateFlow.value = State.REFRESHING
+
+        val succeeded = performFetch(listOf(space))
         stateFlow.value = if (succeeded) {
             State.READY
         } else {
@@ -93,6 +115,10 @@ class SpaceStore(
         editableSpacesFlow.value = spaceList
             .filter { it.userACL == SpaceACLLevel.Owner || it.userACL == SpaceACLLevel.Edit }
 
+        return performFetch(spacesToFetch)
+    }
+
+    private suspend fun performFetch(spacesToFetch: List<Space>): Boolean {
         // Get updated data for any Spaces that have changed since the last fetch.
         val spacesDataResponse = apolloWrapper.performQuery(
             GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id }))
@@ -160,7 +186,7 @@ class SpaceStore(
         return response?.data?.entityId?.let {
             Log.i(TAG, "Added item to space with id=$it")
             snackbarModel.show(appContext.getString(R.string.space_add_url, space.name))
-            refresh()
+            refreshSpace(space)
             true
         } ?: run {
             val errorString = appContext.getString(R.string.generic_error)
@@ -184,7 +210,13 @@ class SpaceStore(
             val successString = appContext.getString(R.string.space_remove_url, space.name)
             Log.i(TAG, successString)
             snackbarModel.show(successString)
-            refresh()
+            urlToSpacesMap[uri]?.let {
+                it.remove(space)
+                if (it.isEmpty()) {
+                    urlToSpacesMap.remove(uri)
+                }
+            }
+            refreshSpace(space)
             true
         } ?: run {
             val errorString = appContext.getString(R.string.generic_error)

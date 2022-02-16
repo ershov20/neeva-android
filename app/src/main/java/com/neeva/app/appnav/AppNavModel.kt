@@ -143,8 +143,8 @@ class AppNavModel(
                 }
             }
 
-            NeevaMenuItemId.ADD_TO_SPACE -> {
-                showAddToSpace()
+            NeevaMenuItemId.SHOW_PAGE_INFO -> {
+                webLayerModel.currentBrowser.showPageInfo()
             }
 
             NeevaMenuItemId.FIND_IN_PAGE -> {

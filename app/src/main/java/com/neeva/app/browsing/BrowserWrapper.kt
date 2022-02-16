@@ -27,6 +27,7 @@ import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserRestoreCallback
 import org.chromium.weblayer.NewTabType
 import org.chromium.weblayer.OpenUrlCallback
+import org.chromium.weblayer.PageInfoDisplayOptions
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabListCallback
@@ -410,6 +411,10 @@ abstract class BrowserWrapper(
         val tab = browser?.activeTab
         tabScreenshotManager.captureAndSaveScreenshot(tab, onCompleted)
     }
+
+    fun showPageInfo() = browserFlow.value?.urlBarController?.showPageInfo(
+        PageInfoDisplayOptions.builder().build()
+    )
 
     /**
      * Closes the active Tab if and only if it was opened via a VIEW Intent.

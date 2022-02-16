@@ -3,7 +3,9 @@ package com.neeva.app.spaces
 import android.content.Context
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
+import com.neeva.app.AddToSpaceMutation
 import com.neeva.app.BaseTest
+import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaUserToken
@@ -13,6 +15,7 @@ import com.neeva.app.storage.NeevaUserData
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -245,6 +248,123 @@ class SpaceStoreTest : BaseTest() {
         expectThat(apolloWrapper.performedMutations).isEmpty()
     }
 
+    @Test
+    fun addToSpace_mutatesAndRefreshesWithGetSpacesOnly() = runTest {
+        apolloWrapper.addResponse(RESPONSE_LIST_SPACE_QUERY)
+        apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY)
+
+        spaceStore.refresh()
+
+        spaceStore.allSpacesFlow.value.let { allSpaces ->
+            expectThat(allSpaces).hasSize(2)
+            allSpaces[0].apply {
+                expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
+                expectThat(contentURLs!!).isEmpty()
+            }
+            allSpaces[1].apply {
+                expectThat(id).isEqualTo(SPACE_2.pageMetadata!!.pageID)
+                expectThat(lastModifiedTs).isEqualTo("2022-02-10T02:10:38Z")
+                expectThat(contentURLs!!).containsExactly(
+                    Uri.parse("https://developer.android.com/jetpack/compose/testing")
+                )
+            }
+        }
+        expectThat(
+            spaceStore.spaceStoreContainsUrl(
+                Uri.parse("https://developer.android.com/jetpack/compose/testing")
+            )
+        ).isTrue()
+        expectThat(
+            spaceStore.spaceStoreContainsUrl(Uri.parse("https://reddit.com/r/android"))
+        ).isFalse()
+
+        expectThat(apolloWrapper.performedQueries).hasSize(2)
+        expectThat(apolloWrapper.performedQueries[0]).isA<ListSpacesQuery>()
+        expectThat(apolloWrapper.performedQueries[1]).isA<GetSpacesDataQuery>()
+        expectThat(apolloWrapper.performedMutations).isEmpty()
+
+        apolloWrapper.addResponse(RESPONSE_ADD_TO_SPACE_MUTATION)
+        apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY_SECOND_SPACE_ONLY_URL_ADDED)
+
+        val success = spaceStore.addOrRemoveFromSpace(
+            SPACE_2.pageMetadata?.pageID!!,
+            Uri.parse("https://example.com"),
+            "Example page"
+        )
+
+        expectThat(success).isTrue()
+
+        expectThat(apolloWrapper.performedMutations).hasSize(1)
+        expectThat(apolloWrapper.performedMutations[0]).isA<AddToSpaceMutation>()
+
+        expectThat(apolloWrapper.performedQueries).hasSize(3)
+        expectThat(apolloWrapper.performedQueries[2]).isA<GetSpacesDataQuery>()
+
+        expectThat(
+            spaceStore.spaceStoreContainsUrl(
+                Uri.parse("https://example.com")
+            )
+        ).isTrue()
+    }
+
+    @Test
+    fun deleteFromSpace_mutatesAndRefreshesWithGetSpacesOnly() = runTest {
+        apolloWrapper.addResponse(RESPONSE_LIST_SPACE_QUERY)
+        apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY)
+
+        spaceStore.refresh()
+
+        spaceStore.allSpacesFlow.value.let { allSpaces ->
+            expectThat(allSpaces).hasSize(2)
+            allSpaces[0].apply {
+                expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
+                expectThat(contentURLs!!).isEmpty()
+            }
+            allSpaces[1].apply {
+                expectThat(id).isEqualTo(SPACE_2.pageMetadata!!.pageID)
+                expectThat(lastModifiedTs).isEqualTo("2022-02-10T02:10:38Z")
+                expectThat(contentURLs!!).containsExactly(
+                    Uri.parse("https://developer.android.com/jetpack/compose/testing")
+                )
+            }
+        }
+        expectThat(
+            spaceStore.spaceStoreContainsUrl(
+                Uri.parse("https://developer.android.com/jetpack/compose/testing")
+            )
+        ).isTrue()
+        expectThat(
+            spaceStore.spaceStoreContainsUrl(Uri.parse("https://reddit.com/r/android"))
+        ).isFalse()
+
+        expectThat(apolloWrapper.performedQueries).hasSize(2)
+        expectThat(apolloWrapper.performedQueries[0]).isA<ListSpacesQuery>()
+        expectThat(apolloWrapper.performedQueries[1]).isA<GetSpacesDataQuery>()
+        expectThat(apolloWrapper.performedMutations).isEmpty()
+
+        apolloWrapper.addResponse(RESPONSE_DELETE_FROM_SPACE_MUTATION)
+        apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY_SECOND_SPACE_ONLY_URL_DELETED)
+
+        val success = spaceStore.addOrRemoveFromSpace(
+            SPACE_2.pageMetadata?.pageID!!,
+            spaceStore.allSpacesFlow.value.last().contentURLs?.first()!!,
+            ""
+        )
+
+        expectThat(success).isTrue()
+
+        expectThat(apolloWrapper.performedMutations).hasSize(1)
+        expectThat(apolloWrapper.performedMutations[0]).isA<DeleteSpaceResultByURLMutation>()
+        expectThat(apolloWrapper.performedQueries).hasSize(3)
+        expectThat(apolloWrapper.performedQueries[2]).isA<GetSpacesDataQuery>()
+
+        expectThat(
+            spaceStore.spaceStoreContainsUrl(
+                Uri.parse("https://developer.android.com/jetpack/compose/testing")
+            )
+        ).isFalse()
+    }
+
     companion object {
         private val SPACE_1 = ListSpacesQuery.Space(
             pageMetadata = ListSpacesQuery.PageMetadata(pageID = "c5rgtmtdv9enb8j1gv60"),
@@ -449,6 +569,71 @@ class SpaceStoreTest : BaseTest() {
                         }
                     ]
                 }
+            }
+        }
+        """.trimIndent()
+
+        private val RESPONSE_GET_SPACES_DATA_QUERY_SECOND_SPACE_ONLY_URL_ADDED = """{
+            "data":{
+                "getSpace":{
+                    "space":[
+                        {
+                            "pageMetadata":{
+                                "pageID":"nEgvD5HST7e62eEmhf0kkxx4xnEuNHBeEXxbGcoo"
+                            },
+                            "space":{
+                                "entities":[
+                                    {
+                                        "spaceEntity":{
+                                            "url":"https://developer.android.com/jetpack/compose/testing",
+                                            "title":"Testing your Compose layout | Jetpack Compose | Android Developers",
+                                            "snippet":null,
+                                            "thumbnail":"data:image/jpeg;base64,garbage"
+                                        },
+                                        "spaceEntity":{
+                                            "url":"https://example.com",
+                                            "title":"Example page",
+                                            "snippet":null,
+                                            "thumbnail":"data:image/jpeg;base64,also garbage"
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+        """.trimIndent()
+
+        private val RESPONSE_GET_SPACES_DATA_QUERY_SECOND_SPACE_ONLY_URL_DELETED = """{
+            "data":{
+                "getSpace":{
+                    "space":[
+                        {
+                            "pageMetadata":{
+                                "pageID":"nEgvD5HST7e62eEmhf0kkxx4xnEuNHBeEXxbGcoo"
+                            },
+                            "space":{
+                                "entities":[]
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+        """.trimIndent()
+
+        private val RESPONSE_ADD_TO_SPACE_MUTATION = """{
+            "data":{
+                "entityId":"nEgvD5HST7e62eEmfg0kkxx4xnEuNHBeEXxbGcoo"
+            }
+        }
+        """.trimIndent()
+
+        private val RESPONSE_DELETE_FROM_SPACE_MUTATION = """{
+            "data":{
+                "deleteSpaceResultByURL":true
             }
         }
         """.trimIndent()

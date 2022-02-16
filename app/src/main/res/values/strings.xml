@@ -23,6 +23,7 @@
     <string name="settings_main_title">Settings</string>
     <string name="spaces">Spaces</string>
     <string name="tabs">Tabs</string>
+    <string name="page_info">Page Info</string>string>
 
     <string name="find_in_page">Find in page</string>
     <string name="next">Next</string>
