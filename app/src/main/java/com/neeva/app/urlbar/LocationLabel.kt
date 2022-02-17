@@ -38,7 +38,6 @@ import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.mapComposeColorToResource
-import org.chromium.weblayer.Browser
 import org.chromium.weblayer.UrlBarOptions
 
 @Composable
@@ -57,10 +56,10 @@ fun LocationLabel(
     val textSize = MaterialTheme.typography.bodyLarge.fontSize.value
     val colorResource = mapComposeColorToResource(foregroundColor)
 
-    // Whenever the Browser changes, ask it for the View we need to display and trigger a recompose.
-    val browserFlow: Browser? by browserWrapper.browserFlow.collectAsState()
-    val urlBarView: View? = remember(browserFlow) {
-        browserFlow?.urlBarController?.createUrlBarView(
+    // Whenever the UrlBarController changes, ask it for the View we need to display and recompose.
+    val urlBarController by browserWrapper.urlBarControllerFlow.collectAsState(null)
+    val urlBarView: View? = remember(urlBarController) {
+        urlBarController?.createUrlBarView(
             UrlBarOptions.builder()
                 .setTextSizeSP(textSize)
                 .setIconColor(colorResource)

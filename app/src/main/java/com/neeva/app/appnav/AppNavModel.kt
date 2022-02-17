@@ -126,18 +126,18 @@ class AppNavModel(
             }
 
             NeevaMenuItemId.FORWARD -> {
-                webLayerModel.browserWrapperFlow.value.activeTabModel.goForward()
+                webLayerModel.currentBrowser.activeTabModel.goForward()
             }
 
             NeevaMenuItemId.REFRESH -> {
-                webLayerModel.browserWrapperFlow.value.activeTabModel.reload()
+                webLayerModel.currentBrowser.activeTabModel.reload()
             }
 
             NeevaMenuItemId.SHARE -> {
                 context?.let {
                     ShareModel().shareURL(
-                        webLayerModel.browserWrapperFlow.value.activeTabModel.urlFlow.value,
-                        webLayerModel.browserWrapperFlow.value.activeTabModel.titleFlow.value,
+                        webLayerModel.currentBrowser.activeTabModel.urlFlow.value,
+                        webLayerModel.currentBrowser.activeTabModel.titleFlow.value,
                         it
                     )
                 }
@@ -148,7 +148,7 @@ class AppNavModel(
             }
 
             NeevaMenuItemId.FIND_IN_PAGE -> {
-                webLayerModel.browserWrapperFlow.value.activeTabModel.showFindInPage()
+                webLayerModel.currentBrowser.activeTabModel.showFindInPage()
             }
 
             else -> {

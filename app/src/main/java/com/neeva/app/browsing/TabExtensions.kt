@@ -30,5 +30,5 @@ val Tab.currentDisplayTitle: String?
 
 val Tab.isSelected: Boolean
     get() {
-        return browser.activeTab == this
+        return getBrowserIfAlive()?.activeTab == this
     }

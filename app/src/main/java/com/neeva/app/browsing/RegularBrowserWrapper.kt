@@ -18,7 +18,7 @@ import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import org.chromium.weblayer.BrowsingDataType
+import org.chromium.weblayer.Browser
 import org.chromium.weblayer.CookieChangedCallback
 import org.chromium.weblayer.WebLayer
 
@@ -35,7 +35,7 @@ class RegularBrowserWrapper(
     private val apolloWrapper: ApolloWrapper,
     override val historyManager: HistoryManager,
     spaceStore: SpaceStore,
-    val neevaUser: NeevaUser
+    private val neevaUser: NeevaUser
 ) : BrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -59,6 +59,9 @@ class RegularBrowserWrapper(
     companion object {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
         private const val PERSISTENCE_ID = "Neeva_Browser"
+
+        /** Asks WebLayer to get the regular user profile. The Browser does not need to be alive. */
+        fun getProfile(webLayer: WebLayer) = webLayer.getProfile(NON_INCOGNITO_PROFILE_NAME)
     }
 
     init {
@@ -78,11 +81,11 @@ class RegularBrowserWrapper(
 
     override fun createTabScreenshotManager() = RegularTabScreenshotManager(appContext.cacheDir)
 
-    override fun registerBrowserCallbacks(): Boolean {
-        val wasRegistered = super.registerBrowserCallbacks()
+    override fun registerBrowserCallbacks(browser: Browser): Boolean {
+        val wasRegistered = super.registerBrowserCallbacks(browser)
         if (!wasRegistered) return false
 
-        browser?.profile?.cookieManager?.apply {
+        browser.profile.cookieManager.apply {
             getCookie(Uri.parse(NeevaConstants.appURL)) {
                 it?.split(";")?.forEach { cookie ->
                     saveLoginCookieFrom(neevaUser.neevaUserToken, cookie)
@@ -115,34 +118,5 @@ class RegularBrowserWrapper(
         }
 
         return true
-    }
-
-    override fun onAuthTokenUpdated() {
-        browser?.profile?.cookieManager?.setCookie(
-            Uri.parse(NeevaConstants.appURL),
-            neevaUser.neevaUserToken.loginCookieString()
-        ) { success ->
-            if (success && activeTabModel.urlFlow.value.toString() == NeevaConstants.appURL) {
-                activeTabModel.reload()
-            }
-        }
-    }
-
-    fun clearNonNeevaCookies(@BrowsingDataType flags: IntArray) {
-        val oldNeevaAuthToken = neevaUser.neevaUserToken.getToken()
-        browser?.profile?.clearBrowsingData(flags) {
-            browser?.profile?.cookieManager
-                ?.setCookie(
-                    Uri.parse(NeevaConstants.appURL),
-                    "${NeevaConstants.loginCookie}=$oldNeevaAuthToken;",
-                    null
-                )
-        }
-        onAuthTokenUpdated()
-    }
-
-    fun clearNeevaCookies() {
-        neevaUser.neevaUserToken.removeToken()
-        onAuthTokenUpdated()
     }
 }

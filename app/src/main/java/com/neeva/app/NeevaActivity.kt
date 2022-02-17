@@ -27,6 +27,7 @@ import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.browsing.isSelected
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.spaces.SpaceStore
@@ -60,9 +61,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var localEnvironmentState: LocalEnvironmentState
-
-    private lateinit var containerRegularProfile: View
-    private lateinit var containerIncognitoProfile: View
 
     private val activityViewModel: NeevaActivityViewModel by viewModels {
         NeevaActivityViewModel.Factory(intent)
@@ -124,9 +122,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
             }
         }
-
-        containerRegularProfile = findViewById(R.id.weblayer_regular)
-        containerIncognitoProfile = findViewById(R.id.weblayer_incognito)
 
         lifecycleScope.launch {
             lifecycle.whenStarted {
@@ -216,45 +211,31 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     /**
      * Attach the given [Fragment] to the Activity, which allows creation of the [Browser].
      *
-     * https://github.com/neevaco/neeva-android/issues/244: WebLayer Fragments do some unexpected
-     * things while attached to the Activity.  Most egregiously, even if the Fragment's View is GONE
-     * when the app is backgrounded, upon returning to the app WebLayer will automatically make the
-     * web page visible again -- even if the parent View in the hierarchy is still marked as GONE.
-     *
-     * WebLayerShell avoids this issue entirely by forcing each Activity instance to maintain a
-     * single profile at a time, but that doesn't work with how our tab switcher is designed to
-     * allow switching between the two modes.  Until then, get the opposite Fragment's View
-     * (literally) out of sight by translating it out of the way.
-     *
-     * The more ideal alternative would be to detach Fragments them when the user switches between
-     * regular and incognito modes, but this triggers destruction of the Browser and Profile
-     * associated with the Fragment, which causes all Incognito state to be lost.  This happens even
-     * if we ask WebLayer to persist the state by giving it a specific profile name and
-     * persistenceId when calling WebLayer.createIncognitoBrowserFragment(), which will require
-     * further investigation.
+     * If the user is swapping between Profiles, the Fragment associated with the previous Profile
+     * is detached to prevent WebLayer from restarting/reshowing the Fragment automatically when the
+     * app is foregrounded again.
      */
     private fun attachWebLayerFragment(fragment: Fragment, isIncognito: Boolean) {
         // Note the commitNow() instead of commit(). We want the fragment to get attached to
         // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
         // have to wait until the commit is executed.
-        val transaction = supportFragmentManager.beginTransaction()
-        lateinit var hiddenContainer: View
-        lateinit var visibleContainer: View
-        if (isIncognito) {
-            transaction.replace(R.id.weblayer_incognito, fragment, TAG_INCOGNITO_PROFILE)
-            visibleContainer = containerIncognitoProfile
-            hiddenContainer = containerRegularProfile
-        } else {
-            transaction.replace(R.id.weblayer_regular, fragment, TAG_REGULAR_PROFILE)
-            visibleContainer = containerRegularProfile
-            hiddenContainer = containerIncognitoProfile
-        }
+        val regularFragment = supportFragmentManager.findFragmentByTag(TAG_REGULAR_PROFILE)
+        val incognitoFragment = supportFragmentManager.findFragmentByTag(TAG_INCOGNITO_PROFILE)
 
-        visibleContainer.visibility = View.VISIBLE
-        visibleContainer.translationX = 0f
-        hiddenContainer.visibility = View.GONE
-        hiddenContainer.translationX = getDisplaySize().width().toFloat()
-        hiddenContainer.requestLayout()
+        val transaction = supportFragmentManager.beginTransaction()
+        if (isIncognito) {
+            regularFragment?.let { transaction.detach(it) }
+
+            incognitoFragment
+                ?.let { transaction.attach(it) }
+                ?: run { transaction.add(R.id.weblayer_fragment, fragment, TAG_INCOGNITO_PROFILE) }
+        } else {
+            incognitoFragment?.let { transaction.detach(it) }
+
+            regularFragment
+                ?.let { transaction.attach(it) }
+                ?: run { transaction.add(R.id.weblayer_fragment, fragment, TAG_REGULAR_PROFILE) }
+        }
 
         transaction.commitNow()
     }
@@ -322,15 +303,17 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
-        tab.takeUnless { it.isDestroyed }?.browser?.fragment?.view?.apply {
+        if (tab.isDestroyed || !tab.isSelected) return
+
+        findViewById<View>(R.id.weblayer_fragment)?.apply {
             // Need to use the NeevaActivity as the context because the WebLayer View doesn't have
             // access to the correct resources.
             setOnCreateContextMenuListener(
                 ContextMenuCreator(
-                    webLayerModel.browserWrapperFlow.value,
+                    webLayerModel.currentBrowser,
                     contextMenuParams,
                     tab,
-                    this@NeevaActivity
+                    context
                 )
             )
 

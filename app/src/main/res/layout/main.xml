@@ -4,15 +4,9 @@
     android:layout_height="match_parent">
 
     <FrameLayout
-        android:id="@+id/weblayer_regular"
+        android:id="@+id/weblayer_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-
-    <FrameLayout
-        android:id="@+id/weblayer_incognito"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
 
     <androidx.compose.ui.platform.ComposeView
         android:id="@+id/browser_ui"

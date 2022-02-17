@@ -31,6 +31,7 @@ import org.chromium.weblayer.PageInfoDisplayOptions
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabListCallback
+import org.chromium.weblayer.UrlBarController
 
 /**
  * Encapsulates everything that is needed to interact with a WebLayer [Browser].
@@ -68,15 +69,18 @@ abstract class BrowserWrapper(
             it.any { tabInfo -> tabInfo.isSelected && tabInfo.isCrashed }
         }
 
+    private val browserInitializationLock = Object()
+
     private lateinit var fragment: Fragment
 
     /**
      * Updated whenever the [Browser] is recreated.
      * If you don't need to monitor changes, you can directly access the [browser] field.
      */
-    val browserFlow = MutableStateFlow<Browser?>(null)
+    private val browserFlow = MutableStateFlow<Browser?>(null)
+
     protected val browser: Browser?
-        get() = browserFlow.value
+        get() = browserFlow.value?.takeUnless { it.isDestroyed }
 
     val activeTabModel: ActiveTabModel
     val urlBarModel: URLBarModel
@@ -97,6 +101,8 @@ abstract class BrowserWrapper(
     abstract val historyManager: HistoryManager?
 
     private var tabListRestorer: BrowserRestoreCallback? = null
+
+    val urlBarControllerFlow: Flow<UrlBarController?> = browserFlow.map { it?.urlBarController }
 
     init {
         faviconCache.profileProvider = this
@@ -228,19 +234,18 @@ abstract class BrowserWrapper(
     /** Creates a [TabScreenshotManager] that can be used to persist preview images of tabs. */
     abstract fun createTabScreenshotManager(): TabScreenshotManager
 
-    @Synchronized
     fun createAndAttachBrowser(
         topControlsPlaceholder: View,
         bottomControlsPlaceholder: View,
         fragmentAttacher: (Fragment, Boolean) -> Unit
-    ) {
+    ) = synchronized(browserInitializationLock) {
         fragmentAttacher.invoke(fragment, isIncognito)
         if (browserFlow.value == null) {
             browserFlow.value = Browser.fromFragment(fragment)
         }
 
         val browser = this.browser ?: throw IllegalStateException()
-        registerBrowserCallbacks()
+        registerBrowserCallbacks(browser)
 
         activityCallbackProvider()?.getDisplaySize()?.let { windowSize ->
             browser.setMinimumSurfaceSize(windowSize.width(), windowSize.height())
@@ -264,9 +269,7 @@ abstract class BrowserWrapper(
     }
 
     @CallSuper
-    @Synchronized
-    open fun registerBrowserCallbacks(): Boolean {
-        val browser = this.browser ?: return false
+    protected open fun registerBrowserCallbacks(browser: Browser): Boolean {
         if (tabListRestorer != null) return false
 
         val restorer = BrowserRestoreCallbackImpl(
@@ -296,9 +299,6 @@ abstract class BrowserWrapper(
         tabListRestorer = restorer
         return true
     }
-
-    /** Called when we detect that the logged in user's auth token has been updated. */
-    open fun onAuthTokenUpdated() {}
 
     /**
      * Registers all the callbacks that are necessary for the Tab when it is opened.
@@ -352,24 +352,26 @@ abstract class BrowserWrapper(
     /** Removes all the callbacks that are set up to interact with WebLayer. */
     @CallSuper
     open fun unregisterBrowserAndTabCallbacks() {
-        browser?.apply {
-            unregisterTabListCallback(tabListCallback)
-            unregisterBrowserControlsOffsetCallback(browserControlsOffsetCallback)
-            tabListRestorer?.let { unregisterBrowserRestoreCallback(it) }
-        }
+        synchronized(browserInitializationLock) {
+            browser?.apply {
+                unregisterTabListCallback(tabListCallback)
+                unregisterBrowserControlsOffsetCallback(browserControlsOffsetCallback)
+                tabListRestorer?.let { unregisterBrowserRestoreCallback(it) }
+            }
 
-        // Avoid a ConcurrentModificationException by iterating on a copy of the keys rather than
-        // the map itself.
-        tabCallbackMap.keys.toList().forEach {
-            unregisterTabCallbacks(it)
-            tabList.remove(it)
-        }
-        tabCallbackMap.clear()
-        tabList.clear()
-        activeTabModel.onActiveTabChanged(null)
+            // Avoid a ConcurrentModificationException by iterating on a copy of the keys rather than
+            // the map itself.
+            tabCallbackMap.keys.toList().forEach {
+                unregisterTabCallbacks(it)
+                tabList.remove(it)
+            }
+            tabCallbackMap.clear()
+            tabList.clear()
+            activeTabModel.onActiveTabChanged(null)
 
-        browserFlow.value = null
-        tabListRestorer = null
+            browserFlow.value = null
+            tabListRestorer = null
+        }
     }
 
     /**
@@ -404,7 +406,7 @@ abstract class BrowserWrapper(
         // Screenshot the previous tab right before it is replaced to keep it as fresh as possible.
         takeScreenshotOfActiveTab()
 
-        tab.browser.setActiveTab(tab)
+        browser?.setActiveTab(tab)
     }
 
     fun takeScreenshotOfActiveTab(onCompleted: () -> Unit = {}) {

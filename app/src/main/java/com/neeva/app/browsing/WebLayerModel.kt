@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
+import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsToggle
@@ -27,6 +28,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowsingDataType
+import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
@@ -46,7 +48,7 @@ class WebLayerModel @Inject constructor(
     apolloWrapper: ApolloWrapper,
     spaceStore: SpaceStore,
     private val dispatchers: Dispatchers,
-    neevaUser: NeevaUser
+    private val neevaUser: NeevaUser
 ) : AndroidViewModel(application) {
     companion object {
         val TAG = WebLayerModel::class.simpleName
@@ -68,6 +70,7 @@ class WebLayerModel @Inject constructor(
         neevaUser = neevaUser
     )
     private var incognitoBrowser: IncognitoBrowserWrapper? = null
+    private lateinit var regularProfile: Profile
 
     /** Keeps track of the initialization pipeline. */
     private val internalInitializationState = MutableStateFlow(LoadingState.UNINITIALIZED)
@@ -96,8 +99,12 @@ class WebLayerModel @Inject constructor(
         try {
             WebLayer.loadAsync(application) { webLayer ->
                 webLayer.isRemoteDebuggingEnabled = true
+
+                regularProfile = RegularBrowserWrapper.getProfile(webLayer)
                 regularBrowser.initialize()
+
                 incognitoBrowser?.initialize()
+
                 _webLayer.value = webLayer
             }
         } catch (e: UnsupportedVersionException) {
@@ -123,8 +130,6 @@ class WebLayerModel @Inject constructor(
             fragmentAttacher
         )
     }
-
-    fun onAuthTokenUpdated() = currentBrowser.onAuthTokenUpdated()
 
     /** Loads the given [url] in a new tab. */
     fun loadUrl(url: Uri) = currentBrowser.activeTabModel.loadUrl(url, true)
@@ -159,14 +164,35 @@ class WebLayerModel @Inject constructor(
         }
     }
 
+    fun onAuthTokenUpdated() {
+        regularProfile.cookieManager.setCookie(
+            Uri.parse(NeevaConstants.appURL),
+            neevaUser.neevaUserToken.loginCookieString()
+        ) { success ->
+            val currentUrl = regularBrowser.activeTabModel.urlFlow.value
+            if (success && currentUrl.toString().startsWith(NeevaConstants.appURL)) {
+                regularBrowser.activeTabModel.reload()
+            }
+        }
+    }
+
     fun clearNeevaCookies() {
-        regularBrowser.clearNeevaCookies()
+        neevaUser.neevaUserToken.removeToken()
+        onAuthTokenUpdated()
         regularBrowser.activeTabModel.reload()
     }
 
     fun clearNonNeevaCookies(clearCookiesFlags: List<Int>) {
         if (clearCookiesFlags.isNotEmpty()) {
-            regularBrowser.clearNonNeevaCookies(clearCookiesFlags.toIntArray())
+            val oldNeevaAuthToken = neevaUser.neevaUserToken.getToken()
+            regularProfile.clearBrowsingData(clearCookiesFlags.toIntArray()) {
+                regularProfile.cookieManager.setCookie(
+                    Uri.parse(NeevaConstants.appURL),
+                    "${NeevaConstants.loginCookie}=$oldNeevaAuthToken;",
+                    null
+                )
+            }
+            onAuthTokenUpdated()
         }
     }
 
