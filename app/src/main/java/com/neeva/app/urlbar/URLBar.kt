@@ -14,13 +14,13 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -111,15 +111,7 @@ fun URLBar() {
                 appNavModel.showBrowser()
             }
 
-            Box(
-                Modifier
-                    .clickable(
-                        onClickLabel = stringResource(id = R.string.cancel),
-                        onClick = cancelLambda
-                    )
-                    .defaultMinSize(minHeight = 48.dp),
-                contentAlignment = Alignment.Center
-            ) {
+            TextButton(onClick = cancelLambda) {
                 Text(
                     text = stringResource(id = R.string.cancel),
                     textAlign = TextAlign.Center,
