@@ -460,4 +460,21 @@ abstract class BrowserWrapper(
 
     /** Provides access to the WebLayer profile. */
     override fun getProfile(): Profile? = browser?.profile
+
+    /** Returns a list of cookies split by key and values. */
+    fun getCookiePairs(uri: Uri, callback: (List<CookiePair>) -> Unit) {
+        browser?.profile?.cookieManager?.apply {
+            getCookie(uri) { cookiesString ->
+                val cookies = cookiesString
+                    .split(";")
+                    .map { cookie ->
+                        val parsedCookie = cookie.trim().split("=")
+                        CookiePair(parsedCookie.first(), parsedCookie.last())
+                    }
+                callback(cookies)
+            }
+        }
+    }
 }
+
+class CookiePair(val key: String, val value: String)

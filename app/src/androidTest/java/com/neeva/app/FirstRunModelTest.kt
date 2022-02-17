@@ -9,6 +9,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Test
 import org.junit.runner.RunWith

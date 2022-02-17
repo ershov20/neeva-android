@@ -11,17 +11,15 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.spaces.SpaceStore
-import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.RegularTabScreenshotManager
-import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
+import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.BrowsingDataType
 import org.chromium.weblayer.CookieChangedCallback
-import org.chromium.weblayer.CookieManager
 import org.chromium.weblayer.WebLayer
 
 /**
@@ -87,7 +85,7 @@ class RegularBrowserWrapper(
         browser?.profile?.cookieManager?.apply {
             getCookie(Uri.parse(NeevaConstants.appURL)) {
                 it?.split(";")?.forEach { cookie ->
-                    saveLoginCookieFrom(neevaUser.neevaUserToken, cookie.trim())
+                    saveLoginCookieFrom(neevaUser.neevaUserToken, cookie)
                 }
             }
 
@@ -126,14 +124,6 @@ class RegularBrowserWrapper(
         ) { success ->
             if (success && activeTabModel.urlFlow.value.toString() == NeevaConstants.appURL) {
                 activeTabModel.reload()
-            }
-        }
-    }
-
-    fun getCookies(cookieManager: CookieManager?, site: Site, callBack: (String) -> Unit) {
-        cookieManager?.apply {
-            getCookie(Uri.parse(site.siteURL)) { cookieString ->
-                callBack(cookieString)
             }
         }
     }

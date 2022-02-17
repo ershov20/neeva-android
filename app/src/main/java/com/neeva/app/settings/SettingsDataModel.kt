@@ -4,7 +4,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
-import com.neeva.app.storage.NeevaUser
+import com.neeva.app.userdata.NeevaUser
 
 /**
  * A data model for Settings composables.

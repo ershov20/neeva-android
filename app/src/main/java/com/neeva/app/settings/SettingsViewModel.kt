@@ -4,8 +4,8 @@ import android.net.Uri
 import androidx.compose.runtime.MutableState
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.storage.NeevaUser
-import com.neeva.app.storage.NeevaUserData
+import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserData
 
 /**
  * An interface handling all Settings-related controller logic.
@@ -96,7 +96,7 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
             return NeevaUserData(
                 displayName = "Jehan Kobe Chang",
                 email = "kobec@neeva.co",
-                pictureUrl = Uri.parse("https://c.neevacdn.net/image/fetch/s")
+                pictureURL = Uri.parse("https://c.neevacdn.net/image/fetch/s")
             )
         }
     }

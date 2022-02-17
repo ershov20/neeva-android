@@ -20,9 +20,9 @@ import com.neeva.app.R
 import com.neeva.app.settings.ProfileRow
 import com.neeva.app.settings.SettingsTopAppBar
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
-import com.neeva.app.storage.NeevaUser
-import com.neeva.app.storage.NeevaUserData
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserData
 
 @Composable
 fun ProfileSettingsPane(
@@ -70,7 +70,7 @@ fun ProfileSettingsPane(
             ProfileRow(
                 primaryLabel = neevaUserData.ssoProvider.name,
                 secondaryLabel = neevaUserData.email,
-                pictureUrl = neevaUserData.pictureUrl,
+                pictureUrl = neevaUserData.pictureURL,
                 modifier = rowModifier
             )
             SettingsButtonRow(

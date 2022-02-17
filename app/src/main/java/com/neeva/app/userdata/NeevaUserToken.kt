@@ -1,7 +1,8 @@
-package com.neeva.app
+package com.neeva.app.userdata
 
 import android.content.Intent
 import android.net.Uri
+import com.neeva.app.NeevaConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 
@@ -11,7 +12,7 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
     var cachedToken: String = ""
     init {
-        cachedToken = sharedPreferencesModel.getString(SharedPrefFolder.USER, KEY_TOKEN, "")
+        cachedToken = getTokenFromSharedPref()
     }
     companion object {
         internal const val KEY_TOKEN = "TOKEN"
@@ -38,6 +39,10 @@ class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
 
     fun getToken(): String {
         return cachedToken
+    }
+
+    fun getTokenFromSharedPref(): String {
+        return sharedPreferencesModel.getString(SharedPrefFolder.USER, KEY_TOKEN, "")
     }
 
     fun setToken(token: String) {

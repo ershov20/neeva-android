@@ -1,8 +1,7 @@
-package com.neeva.app.storage
+package com.neeva.app.userdata
 
 import android.net.Uri
 import com.neeva.app.ApolloWrapper
-import com.neeva.app.NeevaUserToken
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.browsing.WebLayerModel
 
@@ -10,7 +9,7 @@ data class NeevaUserData(
     val id: String? = null,
     val displayName: String? = null,
     val email: String? = null,
-    val pictureUrl: Uri? = null,
+    val pictureURL: Uri? = null,
     val ssoProvider: NeevaUser.SSOProvider = NeevaUser.SSOProvider.UNKNOWN,
 )
 
@@ -28,7 +27,6 @@ class NeevaUser(
     fun signOut(webLayerModel: WebLayerModel? = null) {
         clearUser()
         webLayerModel?.clearNeevaCookies()
-        webLayerModel?.currentBrowser?.activeTabModel?.reload()
     }
 
     fun isSignedOut(): Boolean {
@@ -46,7 +44,7 @@ class NeevaUser(
                     id = userQuery.id,
                     displayName = userQuery.profile.displayName,
                     email = userQuery.profile.email,
-                    pictureUrl = Uri.parse(userQuery.profile.pictureURL),
+                    pictureURL = Uri.parse(userQuery.profile.pictureURL),
                     ssoProvider = SSOProvider.values()
                         .firstOrNull { it.url == userQuery.authProvider }
                         ?: SSOProvider.UNKNOWN

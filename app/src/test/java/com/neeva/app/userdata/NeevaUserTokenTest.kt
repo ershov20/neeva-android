@@ -1,7 +1,9 @@
-package com.neeva.app
+package com.neeva.app.userdata
 
 import android.content.Intent
 import android.net.Uri
+import com.neeva.app.BaseTest
+import com.neeva.app.NeevaConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import org.junit.Test
@@ -31,6 +33,7 @@ class NeevaUserTokenTest : BaseTest() {
         expectThat(result).isEmpty()
     }
 
+    @Test
     fun getToken_stringIsSet_returnsString() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
             on { getString(any(), eq(NeevaUserToken.KEY_TOKEN), any()) } doReturn "whatever"

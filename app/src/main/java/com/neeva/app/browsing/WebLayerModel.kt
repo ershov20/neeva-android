@@ -14,8 +14,8 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceStore
-import com.neeva.app.storage.NeevaUser
 import com.neeva.app.storage.favicons.FaviconCache
+import com.neeva.app.userdata.NeevaUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -161,6 +161,13 @@ class WebLayerModel @Inject constructor(
 
     fun clearNeevaCookies() {
         regularBrowser.clearNeevaCookies()
+        regularBrowser.activeTabModel.reload()
+    }
+
+    fun clearNonNeevaCookies(clearCookiesFlags: List<Int>) {
+        if (clearCookiesFlags.isNotEmpty()) {
+            regularBrowser.clearNonNeevaCookies(clearCookiesFlags.toIntArray())
+        }
     }
 
     fun clearBrowsingData(clearingOptions: MutableMap<String, Boolean>) {
@@ -186,9 +193,7 @@ class WebLayerModel @Inject constructor(
                 }
             }
         }
-        if (clearCookiesFlags.isNotEmpty()) {
-            regularBrowser.clearNonNeevaCookies(clearCookiesFlags.toIntArray())
-        }
+        clearNonNeevaCookies(clearCookiesFlags)
     }
 
     fun getRegularProfileFaviconCache(): FaviconCache = regularBrowser.faviconCache

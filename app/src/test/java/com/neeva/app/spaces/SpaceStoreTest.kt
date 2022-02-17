@@ -8,12 +8,12 @@ import com.neeva.app.BaseTest
 import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
-import com.neeva.app.NeevaUserToken
 import com.neeva.app.TestApolloWrapper
-import com.neeva.app.storage.NeevaUser
-import com.neeva.app.storage.NeevaUserData
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserData
+import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.test.runTest

@@ -10,11 +10,11 @@ import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.R
-import com.neeva.app.storage.NeevaUser
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Manages interactions with the user's Spaces. */

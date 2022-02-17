@@ -5,10 +5,10 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.compositionLocalOf
-import com.neeva.app.NeevaUserToken
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
-import com.neeva.app.storage.NeevaUser
+import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserToken
 import javax.inject.Inject
 
 class FirstRunModel @Inject constructor(

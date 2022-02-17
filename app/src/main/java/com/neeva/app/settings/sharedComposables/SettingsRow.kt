@@ -73,7 +73,7 @@ fun SettingsRow(
                 ProfileRow(
                     primaryLabel = userData.displayName,
                     secondaryLabel = userData.email,
-                    pictureUrl = userData.pictureUrl,
+                    pictureUrl = userData.pictureURL,
                     onClick = onClick,
                     modifier = modifier
                 )

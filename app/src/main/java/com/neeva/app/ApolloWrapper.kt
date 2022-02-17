@@ -12,6 +12,7 @@ import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.browserTypeCookie
 import com.neeva.app.NeevaConstants.browserVersionCookie
 import com.neeva.app.NeevaConstants.loginCookie
+import com.neeva.app.userdata.NeevaUserToken
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -100,7 +101,8 @@ open class ApolloWrapper(
 }
 
 fun saveLoginCookieFrom(neevaUserToken: NeevaUserToken, cookie: String) {
-    if (cookie.split("=").first() == loginCookie) {
-        neevaUserToken.setToken(cookie.split("=").last())
+    val parsedCookie = cookie.trim().split("=")
+    if (parsedCookie.first() == loginCookie) {
+        neevaUserToken.setToken(parsedCookie.last())
     }
 }

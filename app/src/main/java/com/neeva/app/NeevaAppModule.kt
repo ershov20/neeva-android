@@ -8,8 +8,9 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
-import com.neeva.app.storage.NeevaUser
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserToken
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
