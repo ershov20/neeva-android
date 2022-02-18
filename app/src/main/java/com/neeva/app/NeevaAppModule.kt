@@ -40,8 +40,12 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesApolloWrapper(neevaUserToken: NeevaUserToken): ApolloWrapper {
-        return ApolloWrapper(neevaUserToken)
+    fun providesApolloWrapper(
+        neevaUserToken: NeevaUserToken,
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers
+    ): ApolloWrapper {
+        return ApolloWrapper(neevaUserToken, null, coroutineScope, dispatchers)
     }
 
     @Provides

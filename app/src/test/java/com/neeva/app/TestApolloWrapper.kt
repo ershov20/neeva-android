@@ -6,6 +6,7 @@ import com.apollographql.apollo3.api.Mutation
 import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.network.okHttpClient
 import com.neeva.app.userdata.NeevaUserToken
+import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -29,7 +30,9 @@ class TestApolloWrapper(
                 .addInterceptor(testInterceptor)
                 .build()
         )
-        .build()
+        .build(),
+    coroutineScope = mock<CoroutineScope>(),
+    dispatchers = mock<Dispatchers>()
 ) {
     val performedQueries = mutableListOf<Any>()
     val performedMutations = mutableListOf<Any>()

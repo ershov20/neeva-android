@@ -13,6 +13,8 @@ import com.neeva.app.NeevaConstants.browserTypeCookie
 import com.neeva.app.NeevaConstants.browserVersionCookie
 import com.neeva.app.NeevaConstants.loginCookie
 import com.neeva.app.userdata.NeevaUserToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -23,7 +25,9 @@ import okhttp3.Response
 /** Manages an Apollo client that can be used to fire queries and mutations at the Neeva backend. */
 open class ApolloWrapper(
     private val neevaUserToken: NeevaUserToken,
-    _apolloClient: ApolloClient? = null
+    _apolloClient: ApolloClient? = null,
+    val coroutineScope: CoroutineScope,
+    val dispatchers: Dispatchers
 ) : CookieJar, Interceptor {
     val apolloClient: ApolloClient = _apolloClient ?: createApolloClient()
 
@@ -60,6 +64,16 @@ open class ApolloWrapper(
     }
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
+
+    open fun <D : Mutation.Data> performMutation(
+        mutation: Mutation<D>,
+        callback: (ApolloResponse<D>?) -> Unit
+    ) {
+        coroutineScope.launch(dispatchers.io) {
+            val response = performMutation(mutation)
+            callback(response)
+        }
+    }
 
     open suspend fun <D : Query.Data> performQuery(query: Query<D>): ApolloResponse<D>? {
         return try {
