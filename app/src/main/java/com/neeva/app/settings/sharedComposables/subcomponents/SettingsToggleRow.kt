@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material3.MaterialTheme
@@ -15,10 +16,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -34,62 +38,66 @@ fun SettingsToggleRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
     ) {
-        SettingsLabelText(title, modifier = Modifier.weight(1.0f))
+        SettingsLabelText(title, enabled = enabled, modifier = Modifier.weight(1.0f))
         Switch(
             enabled = enabled,
             checked = toggleState.value,
-            modifier = Modifier.size(48.dp),
             colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.background,
-                uncheckedThumbColor = MaterialTheme.colorScheme.background,
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                uncheckedTrackColor = MaterialTheme.colorScheme.outline
+                checkedThumbColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
+                checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
+                uncheckedTrackColor = MaterialTheme.colorScheme.outline,
+                disabledCheckedThumbColor = MaterialTheme.colorScheme.inverseOnSurface,
+                disabledUncheckedThumbColor = MaterialTheme.colorScheme.inverseOnSurface,
+                disabledCheckedTrackColor = MaterialTheme.colorScheme.onSurface,
+                disabledUncheckedTrackColor = MaterialTheme.colorScheme.onSurface,
             ),
-            onCheckedChange = getTogglePreferenceSetter(togglePrefKey)
+            onCheckedChange = getTogglePreferenceSetter(togglePrefKey),
+            modifier = Modifier.size(48.dp).then(
+                if (!enabled) {
+                    modifier.alpha(ContentAlpha.disabled)
+                } else {
+                    modifier
+                }
+            )
         )
     }
 }
 
-@Preview(name = "Settings Toggle, 1x font size", locale = "en")
-@Preview(name = "Settings Toggle, 2x font size", locale = "en", fontScale = 2.0f)
-@Preview(name = "Settings Toggle, RTL, 1x font size", locale = "he")
-@Preview(name = "Settings Toggle, RTL, 2x font size", locale = "he", fontScale = 2.0f)
-@Composable
-fun SettingsToggleRow_Preview() {
-    var toggleState = remember { mutableStateOf(true) }
-    NeevaTheme {
-        SettingsToggleRow(
-            title = stringResource(R.string.debug_long_string_primary),
-            toggleState = toggleState,
-            togglePrefKey = "",
-            getTogglePreferenceSetter = { {} },
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surface)
-        )
-    }
-}
+class SettingsToggleRowPreviews :
+    BooleanPreviewParameterProvider<SettingsToggleRowPreviews.Params>(3) {
+    data class Params(
+        val darkTheme: Boolean,
+        val isEnabled: Boolean
+    )
 
-@Preview(name = "Settings Toggle Dark, 1x font size", locale = "en")
-@Preview(name = "Settings Toggle Dark, 2x font size", locale = "en", fontScale = 2.0f)
-@Preview(name = "Settings Toggle Dark, RTL, 1x font size", locale = "he")
-@Preview(name = "Settings Toggle Dark, RTL, 2x font size", locale = "he", fontScale = 2.0f)
-@Composable
-fun SettingsToggleRow_Dark_Preview() {
-    var toggleState = remember { mutableStateOf(true) }
-    NeevaTheme(useDarkTheme = true) {
-        SettingsToggleRow(
-            title = stringResource(R.string.debug_long_string_primary),
-            toggleState = toggleState,
-            togglePrefKey = "",
-            getTogglePreferenceSetter = { {} },
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surface)
-        )
+    override fun createParams(booleanArray: BooleanArray) = Params(
+        darkTheme = booleanArray[0],
+        isEnabled = booleanArray[1]
+    )
+
+    @Preview("1x scale", locale = "en")
+    @Preview("2x scale", locale = "en", fontScale = 2.0f)
+    @Preview("RTL, 1x scale", locale = "he")
+    @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
+    @Composable
+    fun SettingsToggleRowPreview_Preview(
+        @PreviewParameter(SettingsToggleRowPreviews::class) params: Params
+    ) {
+        var toggleState = remember { mutableStateOf(true) }
+        NeevaTheme(useDarkTheme = params.darkTheme) {
+            SettingsToggleRow(
+                title = stringResource(R.string.debug_long_string_primary),
+                enabled = params.isEnabled,
+                toggleState = toggleState,
+                togglePrefKey = "",
+                getTogglePreferenceSetter = { {} },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .defaultMinSize(minHeight = 56.dp)
+                    .padding(16.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+            )
+        }
     }
 }
