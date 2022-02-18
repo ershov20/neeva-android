@@ -11,10 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.neeva.app.ui.theme.SelectionHighlight
 import com.neeva.app.urlbar.FindInPageToolbar
 import com.neeva.app.urlbar.URLBar
 import kotlinx.coroutines.flow.StateFlow
@@ -59,8 +57,8 @@ fun TopToolbar(modifier: Modifier) {
                 modifier = Modifier
                     .height(2.dp)
                     .fillMaxWidth(),
-                color = SelectionHighlight,
-                backgroundColor = Color.LightGray
+                color = MaterialTheme.colorScheme.primary,
+                backgroundColor = MaterialTheme.colorScheme.primaryContainer
             )
         }
     }
