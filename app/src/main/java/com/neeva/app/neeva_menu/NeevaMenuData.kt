@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.neeva.app.R
 
@@ -24,7 +25,8 @@ enum class NeevaMenuItemId {
     REFRESH,
     SHARE,
     SHOW_PAGE_INFO,
-    FIND_IN_PAGE
+    FIND_IN_PAGE,
+    UPDATE
 }
 
 data class NeevaMenuItemData(
@@ -95,6 +97,11 @@ object NeevaMenuData {
     )
 
     private val dropDownOnly: List<NeevaMenuItemData> = listOf(
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.UPDATE,
+            labelId = R.string.update_available,
+            icon = Icons.Default.Warning
+        ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.FIND_IN_PAGE,
             labelId = R.string.find_in_page,

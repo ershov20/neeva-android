@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -24,6 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.IconButton
@@ -251,22 +250,17 @@ fun CardGrid(
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                val closeButtonAlpha = getClickableAlpha(closeButtonEnabled)
-                Surface(
+                TextButton(
                     onClick = cardGridListener::onDone,
-                    enabled = closeButtonEnabled,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .defaultMinSize(minWidth = 48.dp)
+                    enabled = closeButtonEnabled
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = R.string.done),
-                            color = LocalContentColor.current.copy(alpha = closeButtonAlpha),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
+                    val closeButtonAlpha = getClickableAlpha(closeButtonEnabled)
+                    Text(
+                        modifier = Modifier.padding(8.dp),
+                        text = stringResource(id = R.string.done),
+                        color = LocalContentColor.current.copy(alpha = closeButtonAlpha),
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
         }

@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.core.view.WindowInsetsCompat
@@ -30,6 +32,8 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.isSelected
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
+import com.neeva.app.neeva_menu.LocalMenuData
+import com.neeva.app.neeva_menu.LocalMenuDataState
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.theme.NeevaTheme
@@ -81,6 +85,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         findViewById<ComposeView>(R.id.browser_ui).apply {
             setContent {
                 val navController = rememberAnimatedNavController()
+                val isUpdateAvailable by activityViewModel.isUpdateAvailableFlow.collectAsState()
 
                 appNavModel = remember(navController) {
                     AppNavModel(
@@ -95,7 +100,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     CompositionLocalProvider(
                         LocalEnvironment provides localEnvironmentState,
                         LocalAppNavModel provides appNavModel!!,
-                        LocalFirstRunModel provides firstRunModel
+                        LocalFirstRunModel provides firstRunModel,
+                        LocalMenuData provides LocalMenuDataState(
+                            isUpdateAvailableVisible = isUpdateAvailable
+                        )
                     ) {
                         ActivityUI(
                             bottomControlOffset = activityViewModel.bottomControlOffset,
@@ -166,6 +174,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         processIntent(intent)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        activityViewModel.checkForUpdates(this)
     }
 
     private fun processIntent(intent: Intent?) {

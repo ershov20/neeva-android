@@ -92,6 +92,7 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
         override fun clearAllHistory() {}
 
         override fun isSignedOut(): Boolean { return false }
+
         override fun getNeevaUserData(): NeevaUserData {
             return NeevaUserData(
                 displayName = "Jehan Kobe Chang",

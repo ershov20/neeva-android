@@ -1,15 +1,23 @@
 package com.neeva.app
 
+import android.content.Context
 import android.content.Intent
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory
+import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import java.lang.IllegalArgumentException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class NeevaActivityViewModel(
     /** Intent that must be processed once WebLayer has finished initializing. */
     private var pendingLaunchIntent: Intent?
 ) : ViewModel() {
+    private val _isUpdateAvailableFlow = MutableStateFlow(false)
+    val isUpdateAvailableFlow: StateFlow<Boolean> = _isUpdateAvailableFlow
+
     /**
      * WebLayer provides information about when the bottom and top toolbars need to be scrolled off.
      * We provide a placeholder instead of the real view because WebLayer has a bug that prevents it
@@ -45,5 +53,26 @@ class NeevaActivityViewModel(
             }
             throw IllegalArgumentException("Unexpected ViewModel class: $modelClass")
         }
+    }
+
+    internal fun checkForUpdates(context: Context) {
+        if (BuildConfig.DEBUG) {
+            Log.i(TAG, "Skipping update check for debug build")
+            return
+        }
+
+        val appUpdateManager = AppUpdateManagerFactory.create(context)
+        appUpdateManager.appUpdateInfo
+            .addOnSuccessListener { info ->
+                _isUpdateAvailableFlow.value = info.updateAvailability() == UPDATE_AVAILABLE
+                Log.i(TAG, "Update check result: ${_isUpdateAvailableFlow.value}")
+            }
+            .addOnFailureListener {
+                Log.w(TAG, "Failed to check for update", it)
+            }
+    }
+
+    companion object {
+        private val TAG = NeevaActivityViewModel::class.simpleName
     }
 }
