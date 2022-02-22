@@ -30,7 +30,6 @@ import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.flow.StateFlow
 
 data class TabToolbarModel(
-    val onNeevaMenu: () -> Unit = {},
     val onAddToSpace: () -> Unit = {},
     val onTabSwitcher: () -> Unit = {},
     val goBack: () -> Unit = {},
@@ -52,7 +51,6 @@ fun BottomToolbar(
     val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
     BottomToolbar(
         model = TabToolbarModel(
-            onNeevaMenu = appNavModel::showNeevaMenu,
             onAddToSpace = appNavModel::showAddToSpace,
             onTabSwitcher = {
                 browserWrapper.takeScreenshotOfActiveTab {

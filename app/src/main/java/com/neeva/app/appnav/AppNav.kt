@@ -11,7 +11,6 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
-import com.neeva.app.neeva_menu.NeevaMenuSheet
 import com.neeva.app.settings.ProfileSettingsContainer
 import com.neeva.app.settings.SettingsViewModelImpl
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
@@ -54,10 +53,6 @@ fun AppNav(
                 webLayerModel = webLayerModel,
                 spaceModifier = spaceModifier
             )
-        }
-
-        composable(AppNavDestination.NEEVA_MENU.route) {
-            NeevaMenuSheet(onMenuItem = { appNavModel.onMenuItem(it) })
         }
 
         composable(AppNavDestination.SETTINGS.route) {

@@ -60,7 +60,7 @@ object NeevaMenuData {
         )
     )
 
-    val tiles: List<NeevaMenuItemData> = listOf(
+    val menuItems: List<NeevaMenuItemData> = listOf(
         NeevaMenuItemData(
             id = NeevaMenuItemId.HOME,
             labelId = R.string.home,
@@ -70,6 +70,26 @@ object NeevaMenuData {
             id = NeevaMenuItemId.SPACES,
             labelId = R.string.spaces,
             imageResourceID = R.drawable.ic_baseline_bookmarks_24
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.HISTORY,
+            labelId = R.string.history,
+            imageResourceID = R.drawable.ic_baseline_history_24
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.DOWNLOADS,
+            labelId = R.string.downloads,
+            imageResourceID = R.drawable.ic_baseline_download_24
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.UPDATE,
+            labelId = R.string.update_available,
+            icon = Icons.Default.Warning
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.FIND_IN_PAGE,
+            labelId = R.string.find_in_page,
+            icon = Icons.Default.Search
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SETTINGS,
@@ -82,32 +102,4 @@ object NeevaMenuData {
             imageResourceID = R.drawable.ic_baseline_feedback_24
         )
     )
-
-    val rows: List<NeevaMenuItemData> = listOf(
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.HISTORY,
-            labelId = R.string.history,
-            imageResourceID = R.drawable.ic_baseline_history_24
-        ),
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.DOWNLOADS,
-            labelId = R.string.downloads,
-            imageResourceID = R.drawable.ic_baseline_download_24
-        ),
-    )
-
-    private val dropDownOnly: List<NeevaMenuItemData> = listOf(
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.UPDATE,
-            labelId = R.string.update_available,
-            icon = Icons.Default.Warning
-        ),
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.FIND_IN_PAGE,
-            labelId = R.string.find_in_page,
-            icon = Icons.Default.Search
-        ),
-    )
-
-    val menuItems: List<NeevaMenuItemData> = dropDownOnly + tiles + rows
 }

@@ -99,7 +99,6 @@ class AppNavModel(
 
     fun showCardGrid() = show(AppNavDestination.CARD_GRID)
     fun showAddToSpace() = show(AppNavDestination.ADD_TO_SPACE)
-    fun showNeevaMenu() = show(AppNavDestination.NEEVA_MENU)
     fun showSettings() = show(AppNavDestination.SETTINGS)
     fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)

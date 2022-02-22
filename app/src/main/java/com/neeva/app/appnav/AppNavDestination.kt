@@ -14,7 +14,6 @@ enum class AppNavDestination(
     BROWSER,
 
     ADD_TO_SPACE(parent = BROWSER, slidesOutToward = SlideDirection.Down),
-    NEEVA_MENU(parent = BROWSER, slidesOutToward = SlideDirection.Down),
     HISTORY(parent = BROWSER, slidesOutToward = SlideDirection.End),
     CARD_GRID(parent = BROWSER, fadesOut = true),
     FIRST_RUN(parent = BROWSER, fadesOut = true),

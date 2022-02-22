@@ -26,6 +26,8 @@
     <string name="tabs">Tabs</string>
     <string name="page_info">Page Info</string>string>
 
+    <string name="open_new_tab">Open new tab</string>
+    <string name="open_new_incognito_tab">Open new incognito tab</string>
     <string name="find_in_page">Find in page</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
