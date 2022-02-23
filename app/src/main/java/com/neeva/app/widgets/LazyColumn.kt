@@ -148,7 +148,7 @@ fun CollapsibleHeader(
         Text(
             text = label,
             modifier = Modifier.padding(16.dp),
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.outline,
             maxLines = 1,
         )

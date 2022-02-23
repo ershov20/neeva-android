@@ -27,7 +27,8 @@ fun SuggestionSectionHeader(stringRes: Int) {
                 bottom = 4.dp
             ),
         text = stringResource(id = stringRes),
-        fontSize = 14.sp
+        fontSize = 14.sp,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 

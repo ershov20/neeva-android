@@ -13,6 +13,7 @@ fun HistoryContainer(faviconCache: FaviconCache, onOpenUrl: (Uri) -> Unit) {
 
     HistoryUI(
         onClose = appNavModel::showBrowser,
+        onClearHistory = appNavModel::showClearBrowsingSettings,
         onOpenUrl = onOpenUrl,
         faviconCache = faviconCache
     )

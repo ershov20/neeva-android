@@ -33,6 +33,7 @@ import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.widgets.BrandedTextButton
 import com.neeva.app.widgets.collapsibleSection
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun HistoryUI(
     onClose: () -> Unit,
+    onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
     faviconCache: FaviconCache,
     now: LocalDate = LocalDate.now()
@@ -72,6 +74,7 @@ fun HistoryUI(
         historyToday = historyToday,
         historyYesterday = historyYesterday,
         historyBefore = historyThisWeek,
+        onClearHistory = onClearHistory,
         onClose = onClose,
         onOpenUrl = onOpenUrl,
         faviconCache = faviconCache,
@@ -85,6 +88,7 @@ fun HistoryUI(
     historyYesterday: LazyPagingItems<Site>,
     historyBefore: LazyPagingItems<Site>,
     onClose: () -> Unit,
+    onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
     faviconCache: FaviconCache,
     domainProvider: DomainProvider
@@ -92,7 +96,6 @@ fun HistoryUI(
     val isTodayDisplayed = remember { mutableStateOf(true) }
     val isYesterdayDisplayed = remember { mutableStateOf(true) }
     val isThisWeekDisplayed = remember { mutableStateOf(true) }
-
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -127,6 +130,14 @@ fun HistoryUI(
                 .weight(1.0f)
                 .fillMaxWidth()
         ) {
+
+            item {
+                BrandedTextButton(
+                    enabled = true,
+                    stringResID = R.string.settings_clear_browsing_data,
+                    onClick = onClearHistory
+                )
+            }
             collapsibleSection(
                 label = R.string.history_today,
                 displayedItems = historyToday,
@@ -214,6 +225,7 @@ fun HistoryUI_Preview() {
             historyYesterday = itemsYesterday.collectAsLazyPagingItems(),
             historyBefore = itemsThisWeek.collectAsLazyPagingItems(),
             onClose = {},
+            onClearHistory = {},
             onOpenUrl = {},
             faviconCache = mockFaviconCache,
             domainProvider = mockFaviconCache.domainProvider
