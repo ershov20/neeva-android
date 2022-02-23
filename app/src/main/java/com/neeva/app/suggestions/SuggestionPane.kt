@@ -23,7 +23,7 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
     val suggestionsModel = browserWrapper.suggestionsModel
 
     val isUrlBarBlank by urlBarModel.isUserQueryBlank.collectAsState(true)
-    val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState()
+    val isLazyTab: Boolean by browserWrapper.isLazyTabFlow.collectAsState()
     val historySuggestions by historyManager.historySuggestions.collectAsState()
     val currentURL: Uri by activeTabModel.urlFlow.collectAsState()
     val displayedText: String by activeTabModel.displayedText.collectAsState()
@@ -61,7 +61,7 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
                     queryNavSuggestions = queryNavSuggestions,
                     historySuggestions = historySuggestions,
                     faviconCache = faviconCache,
-                    onOpenUrl = urlBarModel::loadUrl
+                    onOpenUrl = browserWrapper::loadUrl
                 ) {
                     urlBarModel.replaceLocationBarText(it)
                 }

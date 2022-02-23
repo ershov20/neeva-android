@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
@@ -45,6 +46,7 @@ fun ZeroQuery(
     faviconCache: FaviconCache,
     topContent: @Composable (LazyItemScope.() -> Unit) = {},
 ) {
+    val browserWrapper = LocalBrowserWrapper.current
     val domainProvider = LocalEnvironment.current.domainProvider
     val historyManager = LocalEnvironment.current.historyManager
     val spaceStore = LocalEnvironment.current.spaceStore
@@ -76,7 +78,7 @@ fun ZeroQuery(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier
                                 .clickable(onClickLabel = title) {
-                                    urlBarModel.loadUrl(Uri.parse(site.siteURL))
+                                    browserWrapper.loadUrl(Uri.parse(site.siteURL))
                                 }
                                 .padding(horizontal = 16.dp)
                                 .width(64.dp)
@@ -111,7 +113,7 @@ fun ZeroQuery(
             ) { search ->
                 QuerySuggestionRow(
                     suggestion = search,
-                    onLoadUrl = urlBarModel::loadUrl,
+                    onLoadUrl = browserWrapper::loadUrl,
                     onEditUrl = { urlBarModel.replaceLocationBarText(search.query) }
                 )
             }
@@ -124,7 +126,7 @@ fun ZeroQuery(
                 items = spaces.subList(0, minOf(3, spaces.size)),
             ) { space ->
                 SpaceRow(space = space) {
-                    urlBarModel.loadUrl(space.url)
+                    browserWrapper.loadUrl(space.url)
                 }
             }
         }

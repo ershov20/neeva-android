@@ -37,7 +37,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
+import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
@@ -51,6 +53,8 @@ fun AutocompleteTextField(
     foregroundColor: Color,
     modifier: Modifier
 ) {
+    val browserWrapper: BrowserWrapper = LocalBrowserWrapper.current
+
     val focusRequester = remember { FocusRequester() }
     urlBarModel.focusRequester = focusRequester
 
@@ -64,7 +68,7 @@ fun AutocompleteTextField(
         focusRequester = focusRequester,
         onFocusChanged = { urlBarModel.onFocusChanged(it.isFocused) },
         onLoadUrl = {
-            urlBarModel.loadUrl(urlBarModelState.uriToLoad)
+            browserWrapper.loadUrl(urlBarModelState.uriToLoad)
             focusManager.clearFocus()
         },
         backgroundColor = backgroundColor,

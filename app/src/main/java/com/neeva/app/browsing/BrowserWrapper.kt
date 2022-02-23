@@ -2,6 +2,7 @@ package com.neeva.app.browsing
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.fragment.app.Fragment
@@ -13,11 +14,13 @@ import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
+import com.neeva.app.urlbar.URLBarModelImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -43,25 +46,18 @@ import org.chromium.weblayer.UrlBarController
  */
 abstract class BrowserWrapper(
     val isIncognito: Boolean,
-    val appContext: Context,
+    protected val appContext: Context,
     protected val coroutineScope: CoroutineScope,
-    val dispatchers: Dispatchers,
-    val activityCallbackProvider: () -> ActivityCallbacks?,
+    protected val dispatchers: Dispatchers,
+    protected val activityCallbackProvider: () -> ActivityCallbacks?,
     val suggestionsModel: SuggestionsModel?,
     val faviconCache: FaviconCache,
-    val spaceStore: SpaceStore?
+    protected val spaceStore: SpaceStore?
 ) : FaviconCache.ProfileProvider {
-    data class CreateNewTabInfo(
-        val uri: Uri,
-        val parentTabId: String?,
-        val tabOpenType: TabInfo.TabOpenType
-    )
-
     private val tabList = TabList()
     private val tabCallbackMap: HashMap<Tab, TabCallbacks> = HashMap()
 
-    val orderedTabList: StateFlow<List<TabInfo>>
-        get() = tabList.orderedTabList
+    val orderedTabList: StateFlow<List<TabInfo>> get() = tabList.orderedTabList
 
     /** Tracks if the active tab needs to be reloaded due to a renderer crash. */
     val shouldDisplayCrashedTab: Flow<Boolean> =
@@ -82,8 +78,13 @@ abstract class BrowserWrapper(
     protected val browser: Browser?
         get() = browserFlow.value?.takeUnless { it.isDestroyed }
 
-    val activeTabModel: ActiveTabModel
+    private val _activeTabModel: ActiveTabModelImpl
+    val activeTabModel: ActiveTabModel get() = _activeTabModel
+
     val urlBarModel: URLBarModel
+
+    private val _findInPageModel: FindInPageModelImpl = FindInPageModelImpl()
+    val findInPageModel: FindInPageModel get() = _findInPageModel
 
     /** Tracks whether the user needs to be kept in the CardGrid if they're on that screen. */
     val userMustStayInCardGridFlow: StateFlow<Boolean>
@@ -104,10 +105,13 @@ abstract class BrowserWrapper(
 
     val urlBarControllerFlow: Flow<UrlBarController?> = browserFlow.map { it?.urlBarController }
 
+    private var _isLazyTabFlow = MutableStateFlow(false)
+    val isLazyTabFlow: StateFlow<Boolean> = _isLazyTabFlow
+
     init {
         faviconCache.profileProvider = this
 
-        activeTabModel = ActiveTabModel(
+        _activeTabModel = ActiveTabModelImpl(
             spaceStore = spaceStore,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers
@@ -115,19 +119,23 @@ abstract class BrowserWrapper(
             createTabWithUri(uri, parentTabId, isViaIntent)
         }
 
-        urlBarModel = URLBarModel(
-            isIncognito = isIncognito,
-            activeTabModel = activeTabModel,
+        urlBarModel = URLBarModelImpl(
             suggestionFlow = suggestionsModel?.autocompleteSuggestionFlow ?: MutableStateFlow(null),
             appContext = appContext,
             coroutineScope = coroutineScope,
-            faviconCache = faviconCache,
-            dispatchers = dispatchers
+            dispatchers = dispatchers,
+            faviconCache = faviconCache
         )
 
         userMustStayInCardGridFlow = orderedTabList
-            .combine(urlBarModel.isLazyTab) { tabs, isLazyTab -> tabs.isEmpty() && !isLazyTab }
+            .combine(_isLazyTabFlow) { tabs, isLazyTab -> tabs.isEmpty() && !isLazyTab }
             .stateIn(coroutineScope, SharingStarted.Eagerly, false)
+
+        coroutineScope.launch {
+            urlBarModel.isEditing.collectLatest { isEditing ->
+                _isLazyTabFlow.value = _isLazyTabFlow.value && isEditing
+            }
+        }
     }
 
     private var fullscreenCallback = FullscreenCallbackImpl(
@@ -138,7 +146,7 @@ abstract class BrowserWrapper(
     private val tabListCallback = object : TabListCallback() {
         override fun onActiveTabChanged(activeTab: Tab?) {
             fullscreenCallback.exitFullscreen()
-            activeTabModel.onActiveTabChanged(activeTab)
+            _activeTabModel.onActiveTabChanged(activeTab)
             tabList.updatedSelectedTab(activeTab?.guid)
         }
 
@@ -367,7 +375,7 @@ abstract class BrowserWrapper(
             }
             tabCallbackMap.clear()
             tabList.clear()
-            activeTabModel.onActiveTabChanged(null)
+            _activeTabModel.onActiveTabChanged(null)
 
             browserFlow.value = null
             tabListRestorer = null
@@ -449,13 +457,16 @@ abstract class BrowserWrapper(
      * Allows the user to use the URL bar and see suggestions without opening a tab until they
      * trigger a navigation.
      */
-    fun openLazyTab() = urlBarModel.openLazyTab()
+    fun openLazyTab() {
+        _isLazyTabFlow.value = true
+        urlBarModel.onRequestFocus()
+    }
 
     /** Returns true if the [Browser] is maintaining no tabs. */
     fun hasNoTabs(): Boolean = tabList.hasNoTabs()
 
     /** Returns true if the user should be forced to go to the card grid. */
-    fun userMustBeShownCardGrid(): Boolean = hasNoTabs() && !urlBarModel.isLazyTab.value
+    fun userMustBeShownCardGrid(): Boolean = hasNoTabs() && !_isLazyTabFlow.value
 
     fun isFullscreen(): Boolean = fullscreenCallback.isFullscreen()
     fun exitFullscreen(): Boolean = fullscreenCallback.exitFullscreen()
@@ -476,6 +487,64 @@ abstract class BrowserWrapper(
                 callback(cookies)
             }
         }
+    }
+
+    // region: Active tab operations
+    fun goBack() = _activeTabModel.goBack()
+    fun goForward() = _activeTabModel.goForward()
+    fun reload() = _activeTabModel.reload()
+
+    /**
+     * Load the given [uri].
+     *
+     * If the user is currently in the process of opening a new tab, this will open a new Tab with
+     * the URL.
+     */
+    fun loadUrl(
+        uri: Uri,
+        newTab: Boolean = _isLazyTabFlow.value,
+        isViaIntent: Boolean = false
+    ) {
+        _activeTabModel.loadUrl(uri, newTab, isViaIntent)
+    }
+
+    /** Asynchronously adds or removes the active tab from the space with given [spaceID]. */
+    fun modifySpace(spaceID: String) {
+        coroutineScope.launch(dispatchers.io) {
+            spaceStore?.addOrRemoveFromSpace(
+                spaceID = spaceID,
+                url = activeTabModel.urlFlow.value,
+                title = activeTabModel.titleFlow.value
+            ) ?: Log.e(TAG, "Cannot modify space in Incognito mode")
+        }
+    }
+
+    /** Dismisses any transient dialogs or popups that are covering the page. */
+    fun dismissTransientUi(): Boolean {
+        return _activeTabModel.activeTabFlow.value?.dismissTransientUi() ?: false
+    }
+
+    fun canGoBackward(): Boolean {
+        return _activeTabModel.navigationInfoFlow.value.canGoBackward
+    }
+    // endregion
+
+    // region: Find In Page
+    fun showFindInPage() {
+        _findInPageModel.showFindInPage(_activeTabModel.activeTab)
+    }
+
+    fun updateFindInPageQuery(text: String?) {
+        _findInPageModel.updateFindInPageQuery(_activeTabModel.activeTab, text)
+    }
+
+    fun scrollToFindInPageResult(forward: Boolean) {
+        _findInPageModel.scrollToFindInPageResult(_activeTabModel.activeTab, forward)
+    }
+    // endregion
+
+    companion object {
+        val TAG = BrowserWrapper::class.simpleName
     }
 }
 

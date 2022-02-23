@@ -35,18 +35,18 @@ fun TopToolbar(
 fun TopToolbar(modifier: Modifier) {
     val browserWrapper = LocalBrowserWrapper.current
     val activeTabModel = browserWrapper.activeTabModel
+    val findInPageModel = browserWrapper.findInPageModel
 
     val progress: Int by activeTabModel.progressFlow.collectAsState()
-    val findInPageInfo by activeTabModel.findInPageInfo.collectAsState()
+    val findInPageInfo by findInPageModel.findInPageInfo.collectAsState()
 
     Column(modifier = modifier) {
         if (findInPageInfo.text != null) {
             FindInPageToolbar(
                 findInPageInfo = findInPageInfo,
-                findInPageText = findInPageInfo.text!!
-            ) { text: String?, forward: Boolean ->
-                browserWrapper.activeTabModel.findInPage(text, forward)
-            }
+                onUpdateQuery = { browserWrapper.updateFindInPageQuery(it) },
+                onScrollToResult = { forward -> browserWrapper.scrollToFindInPageResult(forward) }
+            )
         } else {
             URLBar()
         }

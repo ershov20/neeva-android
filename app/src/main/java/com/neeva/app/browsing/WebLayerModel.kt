@@ -132,7 +132,7 @@ class WebLayerModel @Inject constructor(
     }
 
     /** Loads the given [url] in a new tab. */
-    fun loadUrl(url: Uri) = currentBrowser.activeTabModel.loadUrl(url, true)
+    fun loadUrl(url: Uri) = currentBrowser.loadUrl(url, newTab = true)
 
     fun switchToProfile(useIncognito: Boolean) {
         if (currentBrowser.isIncognito == useIncognito) return
@@ -171,7 +171,7 @@ class WebLayerModel @Inject constructor(
         ) { success ->
             val currentUrl = regularBrowser.activeTabModel.urlFlow.value
             if (success && currentUrl.toString().startsWith(NeevaConstants.appURL)) {
-                regularBrowser.activeTabModel.reload()
+                regularBrowser.reload()
             }
         }
     }
@@ -179,7 +179,7 @@ class WebLayerModel @Inject constructor(
     fun clearNeevaCookies() {
         neevaUser.neevaUserToken.removeToken()
         onAuthTokenUpdated()
-        regularBrowser.activeTabModel.reload()
+        regularBrowser.reload()
     }
 
     fun clearNonNeevaCookies(clearCookiesFlags: List<Int>) {

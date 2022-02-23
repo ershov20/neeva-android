@@ -26,7 +26,6 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.getClickableAlpha
-import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.flow.StateFlow
 
 data class TabToolbarModel(
@@ -57,11 +56,11 @@ fun BottomToolbar(
                     appNavModel.showCardGrid()
                 }
             },
-            goBack = browserWrapper.activeTabModel::goBack,
-            goForward = browserWrapper.activeTabModel::goForward,
+            goBack = browserWrapper::goBack,
+            goForward = browserWrapper::goForward,
         ),
         activeTabModel = browserWrapper.activeTabModel,
-        urlBarModel = browserWrapper.urlBarModel,
+        isIncognito = browserWrapper.isIncognito,
         modifier = modifier.offset(y = bottomOffsetDp)
     )
 }
@@ -70,7 +69,7 @@ fun BottomToolbar(
 fun BottomToolbar(
     model: TabToolbarModel,
     activeTabModel: ActiveTabModel,
-    urlBarModel: URLBarModel,
+    isIncognito: Boolean,
     modifier: Modifier
 ) {
     val navigationInfo by activeTabModel.navigationInfoFlow.collectAsState()
@@ -78,7 +77,7 @@ fun BottomToolbar(
         model = model,
         canGoBackward = navigationInfo.canGoBackward,
         canGoForward = navigationInfo.canGoForward,
-        isIncognito = urlBarModel.isIncognito,
+        isIncognito = isIncognito,
         modifier = modifier
     )
 }

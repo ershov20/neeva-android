@@ -3,7 +3,6 @@ package com.neeva.app
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
@@ -18,8 +17,6 @@ import com.neeva.app.ui.BrowserScaffold
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 /** Classes that should be passed around the entire Composable hierarchy. */
 data class LocalEnvironmentState(
@@ -44,9 +41,7 @@ fun ActivityUI(
     topControlOffset: StateFlow<Float>,
     webLayerModel: WebLayerModel
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val appNavModel = LocalAppNavModel.current
-    val dispatchers = LocalEnvironment.current.dispatchers
 
     BrowserScaffold(bottomControlOffset, topControlOffset, webLayerModel)
 
@@ -57,11 +52,6 @@ fun ActivityUI(
         modifier = Modifier.fillMaxSize()
     ) { space ->
         appNavModel.showBrowser()
-
-        coroutineScope.launch {
-            withContext(dispatchers.io) {
-                webLayerModel.currentBrowser.activeTabModel.modifySpace(space.id)
-            }
-        }
+        webLayerModel.currentBrowser.modifySpace(space.id)
     }
 }

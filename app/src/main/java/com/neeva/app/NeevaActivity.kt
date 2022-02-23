@@ -193,11 +193,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 neevaUser.neevaUserToken.setToken(it)
                 webLayerModel.onAuthTokenUpdated()
                 showBrowser()
-                webLayerModel.currentBrowser.activeTabModel.reload()
+                webLayerModel.currentBrowser.reload()
             }
         } else {
             intent.data?.let {
-                webLayerModel.currentBrowser.activeTabModel.loadUrl(
+                webLayerModel.currentBrowser.loadUrl(
                     uri = it,
                     newTab = true,
                     isViaIntent = true
@@ -261,11 +261,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         val browserWrapper = webLayerModel.currentBrowser
 
         when {
-            browserWrapper.exitFullscreen() -> {
-                return
-            }
-
-            browserWrapper.activeTabModel.activeTabFlow.value?.dismissTransientUi() == true -> {
+            browserWrapper.exitFullscreen() || browserWrapper.dismissTransientUi() == true -> {
                 return
             }
 
@@ -273,8 +269,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 onBackPressedDispatcher.onBackPressed()
             }
 
-            browserWrapper.activeTabModel.navigationInfoFlow.value.canGoBackward -> {
-                browserWrapper.activeTabModel.goBack()
+            browserWrapper.canGoBackward() -> {
+                browserWrapper.goBack()
             }
 
             browserWrapper.closeActiveChildTab() -> {

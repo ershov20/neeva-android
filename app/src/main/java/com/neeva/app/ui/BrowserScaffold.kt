@@ -29,7 +29,6 @@ fun BrowserScaffold(
 
     val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
     val urlBarModel = browserWrapper.urlBarModel
-    val activeTabModel = browserWrapper.activeTabModel
 
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
@@ -55,7 +54,7 @@ fun BrowserScaffold(
 
                     shouldDisplayCrashedTab -> {
                         CrashedTab(
-                            onReload = activeTabModel::reload,
+                            onReload = browserWrapper::reload,
                             modifier = Modifier.fillMaxSize()
                         )
                     }

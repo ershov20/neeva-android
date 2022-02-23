@@ -28,19 +28,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.browsing.ActiveTabModel
+import com.neeva.app.browsing.FindInPageInfo
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun FindInPageToolbar(
-    findInPageInfo: ActiveTabModel.FindInPageInfo,
-    findInPageText: String,
-    onFindInPageUpdate: (String?, Boolean) -> Unit
+    findInPageInfo: FindInPageInfo,
+    onUpdateQuery: (String?) -> Unit,
+    onScrollToResult: (forward: Boolean) -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
     val dismissLambda = {
-        onFindInPageUpdate(null, true)
+        onUpdateQuery(null)
     }
+    val findInPageText = findInPageInfo.text ?: ""
 
     TopAppBar(
         backgroundColor = MaterialTheme.colorScheme.background
@@ -51,7 +52,7 @@ fun FindInPageToolbar(
                 .fillMaxHeight()
                 .focusRequester(focusRequester),
             value = findInPageText,
-            onValueChange = { onFindInPageUpdate(it, true) },
+            onValueChange = { onUpdateQuery(it) },
             singleLine = true,
             textStyle = MaterialTheme.typography.bodyLarge,
             keyboardOptions = KeyboardOptions(
@@ -83,14 +84,14 @@ fun FindInPageToolbar(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
-        IconButton(onClick = { onFindInPageUpdate(findInPageText, false) }) {
+        IconButton(onClick = { onScrollToResult(false) }) {
             Icon(
                 Icons.Default.KeyboardArrowUp,
                 contentDescription = stringResource(id = R.string.previous),
                 tint = MaterialTheme.colorScheme.onBackground
             )
         }
-        IconButton(onClick = { onFindInPageUpdate(findInPageText, true) }) {
+        IconButton(onClick = { onScrollToResult(true) }) {
             Icon(
                 Icons.Default.KeyboardArrowDown,
                 contentDescription = stringResource(id = R.string.next),
@@ -122,9 +123,9 @@ fun FindInPageToolbar(
 fun FindInPagePreview() {
     NeevaTheme(useDarkTheme = false) {
         FindInPageToolbar(
-            findInPageInfo = ActiveTabModel.FindInPageInfo(),
-            findInPageText = "preview",
-            onFindInPageUpdate = { _: String?, _: Boolean -> }
+            findInPageInfo = FindInPageInfo(text = "preview"),
+            onUpdateQuery = {},
+            onScrollToResult = {}
         )
     }
 }
@@ -137,9 +138,9 @@ fun FindInPagePreview() {
 fun FindInPagePreview_DarkTheme() {
     NeevaTheme(useDarkTheme = true) {
         FindInPageToolbar(
-            findInPageInfo = ActiveTabModel.FindInPageInfo(),
-            findInPageText = "preview",
-            onFindInPageUpdate = { _: String?, _: Boolean -> }
+            findInPageInfo = FindInPageInfo(text = "preview"),
+            onUpdateQuery = {},
+            onScrollToResult = {}
         )
     }
 }

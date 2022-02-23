@@ -42,7 +42,7 @@ fun URLBar() {
     val urlBarModelState = urlBarModel.state.collectAsState()
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
-    val isIncognito: Boolean = urlBarModel.isIncognito
+    val isIncognito: Boolean = browserWrapper.isIncognito
     val backgroundColor = if (isIncognito) {
         MaterialTheme.colorScheme.inverseSurface
     } else {

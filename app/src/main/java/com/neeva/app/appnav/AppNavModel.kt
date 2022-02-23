@@ -147,11 +147,11 @@ class AppNavModel(
             }
 
             NeevaMenuItemId.FORWARD -> {
-                webLayerModel.currentBrowser.activeTabModel.goForward()
+                webLayerModel.currentBrowser.goForward()
             }
 
             NeevaMenuItemId.REFRESH -> {
-                webLayerModel.currentBrowser.activeTabModel.reload()
+                webLayerModel.currentBrowser.reload()
             }
 
             NeevaMenuItemId.SHARE -> {
@@ -172,7 +172,7 @@ class AppNavModel(
             }
 
             NeevaMenuItemId.FIND_IN_PAGE -> {
-                webLayerModel.currentBrowser.activeTabModel.showFindInPage()
+                webLayerModel.currentBrowser.showFindInPage()
             }
 
             NeevaMenuItemId.FEEDBACK -> {

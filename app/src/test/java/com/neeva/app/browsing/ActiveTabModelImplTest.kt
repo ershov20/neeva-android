@@ -4,8 +4,6 @@ import android.net.Uri
 import com.neeva.app.BaseTest
 import com.neeva.app.Dispatchers
 import kotlinx.coroutines.CoroutineScope
-import org.chromium.weblayer.FindInPageCallback
-import org.chromium.weblayer.FindInPageController
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
@@ -18,7 +16,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
-import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -33,10 +30,10 @@ import strikt.assertions.isTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
-class ActiveTabModelTest : BaseTest() {
+class ActiveTabModelImplTest : BaseTest() {
     @Mock lateinit var tabCreator: TabCreator
 
-    private lateinit var model: ActiveTabModel
+    private lateinit var model: ActiveTabModelImpl
 
     private lateinit var mainTab: MockTabHarness
     private lateinit var neevaSearchTab: MockTabHarness
@@ -46,7 +43,7 @@ class ActiveTabModelTest : BaseTest() {
     override fun setUp() {
         super.setUp()
 
-        model = ActiveTabModel(
+        model = ActiveTabModelImpl(
             coroutineScope = mock<CoroutineScope>(),
             dispatchers = mock<Dispatchers>(),
             tabCreator = tabCreator
@@ -319,73 +316,6 @@ class ActiveTabModelTest : BaseTest() {
         verify(mainTab.navigationController, never()).navigate(eq(uri), any())
     }
 
-    @Test
-    fun findInPage_textIsNullByDefault() {
-        model.findInPage()
-        expectThat(model.findInPageInfo.value).isEqualTo(ActiveTabModel.FindInPageInfo())
-    }
-
-    @Test
-    fun findInPage_whenNotShown_textIsNullWithNonNullInput() {
-        model.findInPage("test")
-        expectThat(model.findInPageInfo.value).isEqualTo(ActiveTabModel.FindInPageInfo())
-    }
-
-    @Test
-    fun findInPage_whenShown_textIsEmpty() {
-        model.showFindInPage()
-        expectThat(model.findInPageInfo.value).isEqualTo(ActiveTabModel.FindInPageInfo(text = ""))
-    }
-
-    @Test
-    fun findInPage_whenShownWithTab_textIsPropagated() {
-        model.onActiveTabChanged(mainTab.tab)
-        verify(mainTab.findInPageController, times(0)).setFindInPageCallback(any())
-
-        model.showFindInPage()
-        verify(mainTab.findInPageController, times(1))
-            .setFindInPageCallback(mainTab.findInPageCallback)
-
-        var text = "test"
-        model.findInPage(text)
-        verify(mainTab.findInPageController, times(1))
-            .find(text, true)
-        expectThat(model.findInPageInfo.value.text).isEqualTo(text)
-    }
-
-    @Test
-    fun findInPage_whenShownWithTab_callbackUpdatesInfo() {
-        model.onActiveTabChanged(mainTab.tab)
-
-        model.showFindInPage()
-        mainTab.findInPageCallback?.onFindResult(5, 2, false)
-        expectThat(model.findInPageInfo.value)
-            .isEqualTo(ActiveTabModel.FindInPageInfo("", 2, 5, false))
-    }
-
-    @Test
-    fun findInPage_whenShownWithNoTab_callbackIsNotPropagated() {
-        model.showFindInPage()
-        model.findInPage("test")
-        expectThat(model.findInPageInfo.value.numberOfMatches).isEqualTo(0)
-    }
-
-    @Test
-    fun findInPage_whenShownWithTab_callbackIsPropagated() {
-        model.onActiveTabChanged(mainTab.tab)
-
-        model.showFindInPage()
-        var text = "test"
-        model.findInPage(text)
-        expectThat(model.findInPageInfo.value.numberOfMatches).isEqualTo(text.length)
-        expectThat(model.findInPageInfo.value.activeMatchIndex).isEqualTo(text.length / 2)
-
-        text = "longer_text"
-        model.findInPage(text)
-        expectThat(model.findInPageInfo.value.numberOfMatches).isEqualTo(text.length)
-        expectThat(model.findInPageInfo.value.activeMatchIndex).isEqualTo(text.length / 2)
-    }
-
     class MockTabHarness(
         var currentTitle: String? = null,
         var currentUri: Uri? = null,
@@ -394,7 +324,6 @@ class ActiveTabModelTest : BaseTest() {
     ) {
         val tabCallbacks = mutableSetOf<TabCallback>()
         val navigationCallbacks = mutableSetOf<NavigationCallback>()
-        var findInPageCallback: FindInPageCallback? = null
 
         val navigationController = mock<NavigationController> {
             on { registerNavigationCallback(any()) } doAnswer {
@@ -420,26 +349,8 @@ class ActiveTabModelTest : BaseTest() {
             on { canGoForward() } doAnswer { canGoForward }
         }
 
-        val findInPageController = mock<FindInPageController> {
-            on { setFindInPageCallback(any()) } doAnswer {
-                findInPageCallback = it.getArgument(0) as FindInPageCallback
-                true
-            }
-
-            on { find(any(), any()) } doAnswer {
-                val text = it.getArgument(0) as String
-                val forward = it.getArgument(1) as Boolean
-                findInPageCallback?.onFindResult(
-                    text.length, text.length / 2, false
-                )
-                Unit
-            }
-        }
-
         val tab = mock<Tab> {
             on { navigationController } doReturn navigationController
-
-            on { findInPageController } doReturn findInPageController
 
             on { registerTabCallback(any()) } doAnswer {
                 val callback = it.getArgument(0) as TabCallback
