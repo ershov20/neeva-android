@@ -123,4 +123,5 @@
     <string name="space_remove_url">Removed site from \"%1s\"</string>
 
     <string name="generic_error">Something went wrong</string>
+    <string name="navigate_to_profile">Navigate to Profile</string>
 </resources>

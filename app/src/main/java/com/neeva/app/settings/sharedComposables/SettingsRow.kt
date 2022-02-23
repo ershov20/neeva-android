@@ -63,7 +63,12 @@ fun SettingsRow(
             }
         }
         SettingsRowType.NAVIGATION -> {
-            SettingsNavigationRow(title = title, onClick = onClick, modifier = modifier)
+            SettingsNavigationRow(
+                title = title,
+                enabled = rowData.enabled,
+                onClick = onClick,
+                modifier = modifier
+            )
         }
         SettingsRowType.PROFILE -> {
             if (settingsViewModel.isSignedOut()) {

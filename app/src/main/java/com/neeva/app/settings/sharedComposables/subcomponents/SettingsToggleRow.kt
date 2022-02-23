@@ -65,7 +65,7 @@ fun SettingsToggleRow(
 }
 
 class SettingsToggleRowPreviews :
-    BooleanPreviewParameterProvider<SettingsToggleRowPreviews.Params>(3) {
+    BooleanPreviewParameterProvider<SettingsToggleRowPreviews.Params>(2) {
     data class Params(
         val darkTheme: Boolean,
         val isEnabled: Boolean
@@ -81,7 +81,7 @@ class SettingsToggleRowPreviews :
     @Preview("RTL, 1x scale", locale = "he")
     @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
     @Composable
-    fun SettingsToggleRowPreview_Preview(
+    fun SettingsToggleRow_Preview(
         @PreviewParameter(SettingsToggleRowPreviews::class) params: Params
     ) {
         var toggleState = remember { mutableStateOf(true) }

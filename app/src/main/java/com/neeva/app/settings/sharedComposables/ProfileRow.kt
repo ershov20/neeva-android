@@ -19,11 +19,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
+import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
 
 @OptIn(ExperimentalCoilApi::class)
@@ -44,7 +49,8 @@ fun ProfileRow(
                 } else {
                     Modifier
                 }
-            ).then(modifier)
+            )
+            .then(modifier)
     ) {
         if (pictureUrl != null) {
             Image(
@@ -60,7 +66,7 @@ fun ProfileRow(
             Spacer(modifier = Modifier.width(16.dp))
         }
 
-        Column {
+        Column(modifier = Modifier.weight(1f)) {
             if (primaryLabel != null) {
                 Text(
                     text = primaryLabel,
@@ -81,6 +87,15 @@ fun ProfileRow(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+        }
+        if (onClick != null) {
+            // TODO(dan.alcantara) Use Material Icons extended library when CircleCI issues are resolved
+            Image(
+                painter = painterResource(R.drawable.ic_navigate_next),
+                contentDescription = stringResource(R.string.navigate_to_profile),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
+            )
         }
     }
 }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -34,8 +33,7 @@ fun SettingsLinkRow(
         Image(
             painter = painterResource(R.drawable.ic_baseline_open_in_new_24),
             contentDescription = title,
-            contentScale = ContentScale.Inside,
-            modifier = Modifier.size(48.dp),
+            contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
         )
     }
