@@ -30,8 +30,10 @@ data class LocalEnvironmentState(
     val settingsDataModel: SettingsDataModel,
     val sharedPreferencesModel: SharedPreferencesModel,
     val snackbarModel: SnackbarModel,
-    val spaceStore: SpaceStore
+    val spaceStore: SpaceStore,
+    val apolloWrapper: ApolloWrapper
 )
+
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value set") }
 val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("No value set") }

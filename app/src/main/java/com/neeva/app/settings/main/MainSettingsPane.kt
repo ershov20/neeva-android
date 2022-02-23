@@ -20,9 +20,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsRow
-import com.neeva.app.settings.SettingsTopAppBar
 import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.settings.getFakeSettingsViewModel
+import com.neeva.app.ui.theme.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
 import java.util.Locale
 
@@ -36,7 +36,7 @@ fun MainSettingsPane(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxSize(),
     ) {
-        SettingsTopAppBar(
+        FullScreenDialogTopBar(
             title = stringResource(MainSettingsData.topAppBarTitleResId),
             onBackPressed = settingsViewModel::onBackPressed
         )

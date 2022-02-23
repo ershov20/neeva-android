@@ -2,4 +2,5 @@
 <resources>
     <string name="debug_long_string_primary" translatable="false">אחת שתיים שלוש ארבע חמש שש שבע שמונה תשע עשר אחת עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרה</string>
     <string name="debug_long_string_secondary" translatable="false">עשר אחת עשרה שתים עשרה שלוש עשרה ארבע עשרה חמש עשרהאחת שתיים שלוש ארבע חמש שש שבע שמונה תשע</string>
+    <string name="debug_short_action" translatable="false">שמר</string>
 </resources>

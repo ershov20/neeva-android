@@ -120,7 +120,8 @@ object NeevaAppModule {
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
         snackbarModel: SnackbarModel,
-        spaceStore: SpaceStore
+        spaceStore: SpaceStore,
+        apolloWrapper: ApolloWrapper
     ): LocalEnvironmentState {
         return LocalEnvironmentState(
             dispatchers = dispatchers,
@@ -130,7 +131,8 @@ object NeevaAppModule {
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
             snackbarModel = snackbarModel,
-            spaceStore = spaceStore
+            spaceStore = spaceStore,
+            apolloWrapper = apolloWrapper
         )
     }
 }

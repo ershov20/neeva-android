@@ -1,14 +1,21 @@
 package com.neeva.app.appnav
 
+import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
+import com.neeva.app.feedback.FeedbackView
+import com.neeva.app.feedback.FeedbackViewModelImpl
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.settings.ProfileSettingsContainer
@@ -17,6 +24,7 @@ import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.SpaceModifier
+import kotlinx.coroutines.coroutineScope
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -34,6 +42,20 @@ fun AppNav(
         LocalEnvironment.current.historyManager,
         neevaUser
     )
+
+    val feedbackViewModel = FeedbackViewModelImpl(
+        appNavModel,
+        activeTabModel = webLayerModel.currentBrowser.activeTabModel,
+        user = neevaUser,
+        coroutineScope = rememberCoroutineScope()
+    ) {
+        appNavModel.showBrowser()
+        webLayerModel.currentBrowser.createTabWithUri(
+            Uri.parse(NeevaConstants.appHelpCenterURL),
+            parentTabId = null,
+            isViaIntent = false
+        )
+    }
 
     AnimatedNavHost(
         navController = appNavModel.navController,
@@ -90,6 +112,15 @@ fun AppNav(
 
         composable(AppNavDestination.FIRST_RUN.route) {
             FirstRunContainer()
+        }
+
+        composable(AppNavDestination.FEEDBACK.route) {
+            feedbackViewModel.createScreenshot(
+                context = LocalContext.current,
+                view = LocalView.current
+            )
+
+            FeedbackView(feedbackViewModel)
         }
     }
 }

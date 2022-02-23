@@ -4,4 +4,5 @@
     <string name="debug_long_url" translatable="false">www.url.com/path/to/nowhere/in/particular</string>
     <string name="debug_long_string_primary" translatable="false">String that is a really long string and stuff and extends for a while</string>
     <string name="debug_long_string_secondary" translatable="false">Secondary string that is also a really long string and stuff and extends for a while</string>
+    <string name="debug_short_action" translatable="false">save</string>
 </resources>

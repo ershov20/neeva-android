@@ -104,6 +104,7 @@ class AppNavModel(
     fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     fun showFirstRun() = show(AppNavDestination.FIRST_RUN)
     fun showHistory() = show(AppNavDestination.HISTORY)
+    fun showFeedback() = show(AppNavDestination.FEEDBACK)
 
     fun onMenuItem(id: NeevaMenuItemId, context: Context? = null) =
         when (id) {
@@ -149,6 +150,10 @@ class AppNavModel(
 
             NeevaMenuItemId.FIND_IN_PAGE -> {
                 webLayerModel.currentBrowser.activeTabModel.showFindInPage()
+            }
+
+            NeevaMenuItemId.FEEDBACK -> {
+                showFeedback()
             }
 
             NeevaMenuItemId.UPDATE -> {

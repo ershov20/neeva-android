@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsRowData
-import com.neeva.app.settings.SettingsTopAppBar
 import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.settings.getFakeSettingsViewModel
+import com.neeva.app.ui.theme.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -39,7 +39,7 @@ fun ClearBrowsingPane(
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .fillMaxSize(),
     ) {
-        SettingsTopAppBar(
+        FullScreenDialogTopBar(
             title = stringResource(ClearBrowsingData.topAppBarTitleResId),
             onBackPressed = settingsViewModel::onBackPressed
         )

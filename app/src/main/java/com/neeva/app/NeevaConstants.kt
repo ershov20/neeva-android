@@ -14,7 +14,7 @@ object NeevaConstants {
     var appPrivacyURL: String = "${appMarketingURL}privacy"
     var appTermsURL: String = "${appMarketingURL}terms"
     var appWelcomeToursURL: String = "$appURL#modal-hello"
-    var appHelpCenterURL: String = "https://help.neeva.com/"
+    var appHelpCenterURL: String = "https://help.$appHost/"
     var appManageMemory: String = "${appMarketingURL}settings#memory-mode"
 
     val loginCookie: String = "httpd~login"

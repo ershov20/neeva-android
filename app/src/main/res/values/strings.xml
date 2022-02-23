@@ -108,6 +108,14 @@
     <string name="clear_browsing_dialog_text">This action will clear all of your private data. It cannot be undone.</string>
     <string name="clear_browsing_clear_data">Clear Data</string>
 
+    <string name="submit_feedback">Send</string>
+    <string name="submit_feedback_help_center_title">Need help or want instant answers to FAQs?</string>
+    <string name="submit_feedback_help_center_link">Visit our help center!</string>
+    <string name="submit_feedback_share_screenshot">Share Screenshot</string>
+    <string name="submit_feedback_view_edit_screenshot">View or edit</string>
+    <string name="submit_feedback_view_share_url">Share URL</string>
+    <string name="submit_feedback_textfield_placeholder">Please share your questions, issues, or feature requests. Your feedback helps us improve Neeva!</string>
+  
     <string name="tab_crashed_title">Uh oh!</string>
     <string name="tab_crashed_body">Something went wrong while displaying this web page</string>
 

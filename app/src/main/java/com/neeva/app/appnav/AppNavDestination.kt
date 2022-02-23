@@ -20,7 +20,8 @@ enum class AppNavDestination(
 
     SETTINGS(parent = BROWSER, slidesOutToward = SlideDirection.End),
     PROFILE_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
-    CLEAR_BROWSING_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End);
+    CLEAR_BROWSING_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
+    FEEDBACK(parent = BROWSER, slidesOutToward = SlideDirection.End);
 
     val route: String = this.name
 

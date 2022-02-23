@@ -18,8 +18,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.settings.ProfileRow
-import com.neeva.app.settings.SettingsTopAppBar
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
+import com.neeva.app.ui.theme.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
@@ -35,7 +35,7 @@ fun ProfileSettingsPane(
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize(),
     ) {
-        SettingsTopAppBar(
+        FullScreenDialogTopBar(
             title = neevaUserData.displayName ?: "",
             onBackPressed = onBackPressed
         )
