@@ -11,7 +11,14 @@ data class SettingsRowData(
     val type: SettingsRowType,
     val titleId: Int,
     val url: Uri? = null,
+
+    /** If the setting is stored in SharedPreferences: this indicates its key. */
     val togglePreferenceKey: String? = null,
+
+    /** Whether or not to open the URL by firing an Intent, allow other apps to capture it. */
+    val openUrlViaIntent: Boolean = false,
+
+    /** Whether or not the user can interact with the menu item. */
     val enabled: Boolean = true
 )
 

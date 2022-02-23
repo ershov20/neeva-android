@@ -16,7 +16,7 @@ interface SettingsViewModel {
     fun onBackPressed()
     fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit)?
     fun getToggleState(key: String?): MutableState<Boolean>?
-    fun openUrl(uri: Uri)
+    fun openUrl(uri: Uri, openViaIntent: Boolean)
     fun showFirstRun()
     fun showClearBrowsingSettings()
     fun showProfileSettings()
@@ -31,7 +31,6 @@ class SettingsViewModelImpl(
     val historyManager: HistoryManager,
     val neevaUser: NeevaUser
 ) : SettingsViewModel {
-
     override fun onBackPressed() {
         appNavModel.popBackStack()
     }
@@ -44,8 +43,12 @@ class SettingsViewModelImpl(
         return settingsDataModel.getToggleState(key)
     }
 
-    override fun openUrl(uri: Uri) {
-        appNavModel.openUrl(uri)
+    override fun openUrl(uri: Uri, openViaIntent: Boolean) {
+        if (openViaIntent) {
+            appNavModel.openUrlViaIntent(uri)
+        } else {
+            appNavModel.openUrl(uri)
+        }
     }
 
     override fun showFirstRun() {
@@ -81,7 +84,7 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
 
         override fun getToggleState(key: String?): MutableState<Boolean>? { return null }
 
-        override fun openUrl(uri: Uri) {}
+        override fun openUrl(uri: Uri, openViaIntent: Boolean) {}
 
         override fun showFirstRun() {}
 

@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
@@ -86,13 +87,16 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             setContent {
                 val navController = rememberAnimatedNavController()
                 val isUpdateAvailable by activityViewModel.isUpdateAvailableFlow.collectAsState()
+                val context = LocalContext.current
 
                 appNavModel = remember(navController) {
                     AppNavModel(
+                        context = context,
                         navController = navController,
                         webLayerModel = webLayerModel,
                         coroutineScope = lifecycleScope,
-                        dispatchers = dispatchers
+                        dispatchers = dispatchers,
+                        snackbarModel = snackbarModel
                     )
                 }
 

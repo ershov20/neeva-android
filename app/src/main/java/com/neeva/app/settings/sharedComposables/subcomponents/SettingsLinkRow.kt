@@ -1,6 +1,5 @@
 package com.neeva.app.settings.sharedComposables.subcomponents
 
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,13 +23,12 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun SettingsLinkRow(
     title: String,
-    openUrl: (Uri) -> Unit,
-    uri: Uri,
+    openUrl: () -> Unit,
     modifier: Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { openUrl(uri) }.then(modifier)
+        modifier = Modifier.clickable { openUrl() }.then(modifier)
     ) {
         SettingsLabelText(text = title, modifier = Modifier.weight(1.0f))
         Image(
@@ -55,7 +53,7 @@ fun SettingsLinkRow_Preview() {
         .padding(16.dp)
         .background(MaterialTheme.colorScheme.surface)
     NeevaTheme {
-        SettingsLinkRow(title = "A Label", openUrl = {}, Uri.EMPTY, rowModifier)
+        SettingsLinkRow(title = "A Label", openUrl = {}, rowModifier)
     }
 }
 
@@ -71,6 +69,6 @@ fun SettingsLinkRow_Dark_Preview() {
         .padding(16.dp)
         .background(MaterialTheme.colorScheme.surface)
     NeevaTheme(useDarkTheme = true) {
-        SettingsLinkRow(title = "A Label", openUrl = {}, Uri.EMPTY, rowModifier)
+        SettingsLinkRow(title = "A Label", openUrl = {}, rowModifier)
     }
 }

@@ -1,6 +1,5 @@
 package com.neeva.app.neeva_menu
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +18,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,12 +30,11 @@ import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
 fun ColumnScope.OverflowMenuContents(
-    onMenuItem: (NeevaMenuItemId, Context?) -> Unit,
+    onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
     expandedMutator: (Boolean) -> Unit
 ) {
     val menuItemState = LocalMenuData.current
-    val context = LocalContext.current
 
     Row(
         modifier = Modifier.padding(12.dp).fillMaxWidth(),
@@ -50,7 +47,7 @@ fun ColumnScope.OverflowMenuContents(
                 modifier = Modifier
                     .clickable(enabled = isEnabled) {
                         expandedMutator(false)
-                        onMenuItem(data.id, context)
+                        onMenuItem(data.id)
                     }
                     .padding(horizontal = Dimensions.PADDING_SMALL)
                     .widthIn(min = 48.dp)
@@ -83,7 +80,7 @@ fun ColumnScope.OverflowMenuContents(
             modifier = Modifier.alpha(alpha),
             onClick = {
                 expandedMutator(false)
-                onMenuItem(data.id, context)
+                onMenuItem(data.id)
             }
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -137,7 +134,7 @@ class OverflowMenuContentsPreviews :
                         .background(MaterialTheme.colorScheme.surface)
                 ) {
                     OverflowMenuContents(
-                        onMenuItem = { _, _ -> },
+                        onMenuItem = {},
                         disabledMenuItems = disabledMenuItems,
                         expandedMutator = {}
                     )

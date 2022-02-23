@@ -1,17 +1,20 @@
 package com.neeva.app.appnav
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.annotation.MainThread
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.neeva_menu.NeevaMenuItemId
-import com.neeva.app.sharing.ShareModel
+import com.neeva.app.ui.SnackbarModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,10 +26,12 @@ import kotlinx.coroutines.flow.onEach
 
 /** Triggers navigations to various screens in the app. */
 class AppNavModel(
+    private val context: Context,
     val navController: NavHostController,
     private val webLayerModel: WebLayerModel,
     private val coroutineScope: CoroutineScope,
-    private val dispatchers: Dispatchers
+    private val dispatchers: Dispatchers,
+    private val snackbarModel: SnackbarModel
 ) {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     val currentDestination: StateFlow<NavDestination?> = _currentDestination
@@ -97,6 +102,21 @@ class AppNavModel(
         showBrowser()
     }
 
+    fun openUrlViaIntent(uri: Uri) {
+        safeStartActivityForIntent(Intent(Intent.ACTION_VIEW, uri))
+        showBrowser()
+    }
+
+    /** Safely fire an Intent out. */
+    fun safeStartActivityForIntent(intent: Intent) {
+        try {
+            context.startActivity(intent)
+        } catch (e: ActivityNotFoundException) {
+            snackbarModel.show(context.getString(R.string.generic_error))
+            Log.e(TAG, "Failed to start Activity for $intent")
+        }
+    }
+
     fun showCardGrid() = show(AppNavDestination.CARD_GRID)
     fun showAddToSpace() = show(AppNavDestination.ADD_TO_SPACE)
     fun showSettings() = show(AppNavDestination.SETTINGS)
@@ -106,7 +126,7 @@ class AppNavModel(
     fun showHistory() = show(AppNavDestination.HISTORY)
     fun showFeedback() = show(AppNavDestination.FEEDBACK)
 
-    fun onMenuItem(id: NeevaMenuItemId, context: Context? = null) =
+    fun onMenuItem(id: NeevaMenuItemId) {
         when (id) {
             NeevaMenuItemId.HOME -> {
                 webLayerModel.loadUrl(Uri.parse(NeevaConstants.appURL))
@@ -135,13 +155,16 @@ class AppNavModel(
             }
 
             NeevaMenuItemId.SHARE -> {
-                context?.let {
-                    ShareModel().shareURL(
-                        webLayerModel.currentBrowser.activeTabModel.urlFlow.value,
-                        webLayerModel.currentBrowser.activeTabModel.titleFlow.value,
-                        it
-                    )
+                val activeTabModel = webLayerModel.currentBrowser.activeTabModel
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    type = "text/plain"
+
+                    putExtra(Intent.EXTRA_TEXT, activeTabModel.urlFlow.value.toString())
+                    putExtra(Intent.EXTRA_TITLE, activeTabModel.titleFlow.value)
                 }
+
+                safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
             }
 
             NeevaMenuItemId.SHOW_PAGE_INFO -> {
@@ -157,16 +180,16 @@ class AppNavModel(
             }
 
             NeevaMenuItemId.UPDATE -> {
-                context?.startActivity(
-                    Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
-                    )
-                )
+                openUrlViaIntent(NeevaConstants.playStoreUri)
             }
 
             else -> {
                 // Unimplemented screens.
             }
         }
+    }
+
+    companion object {
+        val TAG = AppNavModel::class.simpleName
+    }
 }

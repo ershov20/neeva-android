@@ -2,6 +2,7 @@ package com.neeva.app.settings.main
 
 import android.net.Uri
 import androidx.annotation.StringRes
+import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.appConnectionsURL
 import com.neeva.app.NeevaConstants.appHelpCenterURL
 import com.neeva.app.NeevaConstants.appPrivacyURL
@@ -116,8 +117,10 @@ object MainSettingsData {
             R.string.settings_about,
             listOf(
                 SettingsRowData(
-                    type = SettingsRowType.LABEL,
-                    titleId = R.string.settings_neeva_browser_version
+                    type = SettingsRowType.LINK,
+                    titleId = R.string.settings_neeva_browser_version,
+                    url = NeevaConstants.playStoreUri,
+                    openUrlViaIntent = true
                 ),
                 SettingsRowData(
                     type = SettingsRowType.NAVIGATION,

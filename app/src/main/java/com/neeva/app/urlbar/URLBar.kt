@@ -97,7 +97,7 @@ fun URLBar() {
             enter = expandHorizontally().plus(fadeIn()),
             exit = shrinkHorizontally().plus(fadeOut())
         ) {
-            OverflowMenu(onMenuItem = { id, context -> appNavModel.onMenuItem(id, context) })
+            OverflowMenu(onMenuItem = { id -> appNavModel.onMenuItem(id) })
         }
 
         AnimatedVisibility(

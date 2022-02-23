@@ -1,6 +1,5 @@
 package com.neeva.app.neeva_menu
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
@@ -39,7 +38,7 @@ data class LocalMenuDataState(
 val LocalMenuData = compositionLocalOf<LocalMenuDataState> { error("No value set") }
 
 @Composable
-fun OverflowMenu(onMenuItem: (NeevaMenuItemId, Context?) -> Unit) {
+fun OverflowMenu(onMenuItem: (NeevaMenuItemId) -> Unit) {
     val browserWrapper = LocalBrowserWrapper.current
     val activeTabModelState by browserWrapper.activeTabModel.navigationInfoFlow.collectAsState()
 
@@ -56,7 +55,7 @@ fun OverflowMenu(onMenuItem: (NeevaMenuItemId, Context?) -> Unit) {
 
 @Composable
 fun OverflowMenu(
-    onMenuItem: (NeevaMenuItemId, Context?) -> Unit,
+    onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
     isInitiallyExpanded: Boolean = false
 ) {
@@ -126,7 +125,7 @@ class OverflowMenuPreviews : BooleanPreviewParameterProvider<OverflowMenuPreview
             ) {
                 Surface(color = MaterialTheme.colorScheme.surface) {
                     OverflowMenu(
-                        onMenuItem = { _, _ -> },
+                        onMenuItem = {},
                         isInitiallyExpanded = false,
                         disabledMenuItems = emptyList()
                     )

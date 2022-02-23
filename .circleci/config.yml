@@ -56,7 +56,7 @@ jobs:
       - bootstrap-checkout
 
       - android/run-tests:
-          test-command: ./gradlew lint test
+          test-command: ./gradlew lint :app:testDebugUnitTest
       
       - run:
           name: Saving lint results

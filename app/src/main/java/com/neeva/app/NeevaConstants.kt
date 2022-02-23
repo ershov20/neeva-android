@@ -1,21 +1,24 @@
 package com.neeva.app
 
+import android.net.Uri
 import okhttp3.Cookie
 
 object NeevaConstants {
-    var appHost: String = "neeva.com"
-    var appURL: String = "https://$appHost/"
-    var appMarketingURL: String = appURL
-    var appSearchURL: String = "${appURL}search"
-    var appSpacesURL: String = "${appURL}spaces"
-    var appConnectionsURL: String = "${appURL}connections"
-    var appSettingsURL: String = "${appURL}settings"
-    var appReferralURL: String = "${appSettingsURL}referrals"
-    var appPrivacyURL: String = "${appMarketingURL}privacy"
-    var appTermsURL: String = "${appMarketingURL}terms"
-    var appWelcomeToursURL: String = "$appURL#modal-hello"
-    var appHelpCenterURL: String = "https://help.$appHost/"
-    var appManageMemory: String = "${appMarketingURL}settings#memory-mode"
+    val appHost: String = "neeva.com"
+    val appURL: String = "https://$appHost/"
+    val appMarketingURL: String = appURL
+    val appSearchURL: String = "${appURL}search"
+    val appSpacesURL: String = "${appURL}spaces"
+    val appConnectionsURL: String = "${appURL}connections"
+    val appSettingsURL: String = "${appURL}settings"
+    val appReferralURL: String = "$appSettingsURL/referrals"
+    val appPrivacyURL: String = "${appMarketingURL}privacy"
+    val appTermsURL: String = "${appMarketingURL}terms"
+    val appWelcomeToursURL: String = "$appURL#modal-hello"
+    val appHelpCenterURL: String = "https://help.$appHost/"
+    val appManageMemory: String = "${appMarketingURL}settings#memory-mode"
+
+    val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
 
     val loginCookie: String = "httpd~login"
     val browserTypeCookie = Cookie.Builder()

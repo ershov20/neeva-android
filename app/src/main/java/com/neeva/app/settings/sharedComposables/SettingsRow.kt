@@ -43,7 +43,11 @@ fun SettingsRow(
         }
         SettingsRowType.LINK -> {
             if (rowData.url != null) {
-                SettingsLinkRow(title, settingsViewModel::openUrl, rowData.url, modifier)
+                SettingsLinkRow(
+                    title,
+                    { settingsViewModel.openUrl(rowData.url, rowData.openUrlViaIntent) },
+                    modifier
+                )
             }
         }
         SettingsRowType.TOGGLE -> {
