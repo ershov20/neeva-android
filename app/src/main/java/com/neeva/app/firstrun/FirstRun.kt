@@ -226,7 +226,7 @@ fun FirstRunScreen() {
                 stringResID = if (signup) {
                     R.string.sign_up_with_google
                 } else {
-                    R.string.sign_up_with_google
+                    R.string.sign_in_with_google
                 }
             ) {
                 firstRunModel.launchLoginIntent(
