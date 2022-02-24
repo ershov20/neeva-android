@@ -51,6 +51,7 @@ fun HistoryUI(
     val domainProvider = LocalEnvironment.current.domainProvider
     val historyManager = LocalEnvironment.current.historyManager
 
+    val startOfTime = Date(0L)
     val startOf7DaysAgo = Date.from(now.minusDays(7).atStartOfDay().toInstant(ZoneOffset.UTC))
     val startOfYesterday = Date.from(now.minusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC))
     val startOfToday = Date.from(now.atStartOfDay().toInstant(ZoneOffset.UTC))
@@ -70,10 +71,15 @@ fun HistoryUI(
         historyManager.getHistoryBetween(startOf7DaysAgo, startOfYesterday)
     }.collectAsLazyPagingItems()
 
+    val historyBeforeThisWeek = remember(startOf7DaysAgo) {
+        historyManager.getHistoryBetween(startOfTime, startOf7DaysAgo)
+    }.collectAsLazyPagingItems()
+
     HistoryUI(
         historyToday = historyToday,
         historyYesterday = historyYesterday,
-        historyBefore = historyThisWeek,
+        historyThisWeek = historyThisWeek,
+        historyBeforeThisWeek = historyBeforeThisWeek,
         onClearHistory = onClearHistory,
         onClose = onClose,
         onOpenUrl = onOpenUrl,
@@ -86,7 +92,8 @@ fun HistoryUI(
 fun HistoryUI(
     historyToday: LazyPagingItems<Site>,
     historyYesterday: LazyPagingItems<Site>,
-    historyBefore: LazyPagingItems<Site>,
+    historyThisWeek: LazyPagingItems<Site>,
+    historyBeforeThisWeek: LazyPagingItems<Site>,
     onClose: () -> Unit,
     onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
@@ -96,6 +103,8 @@ fun HistoryUI(
     val isTodayDisplayed = remember { mutableStateOf(true) }
     val isYesterdayDisplayed = remember { mutableStateOf(true) }
     val isThisWeekDisplayed = remember { mutableStateOf(true) }
+    val isBeforeThisWeekDisplayed = remember { mutableStateOf(true) }
+
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.background)
@@ -130,7 +139,6 @@ fun HistoryUI(
                 .weight(1.0f)
                 .fillMaxWidth()
         ) {
-
             item {
                 BrandedTextButton(
                     enabled = true,
@@ -138,6 +146,7 @@ fun HistoryUI(
                     onClick = onClearHistory
                 )
             }
+
             collapsibleSection(
                 label = R.string.history_today,
                 displayedItems = historyToday,
@@ -160,8 +169,18 @@ fun HistoryUI(
 
             collapsibleSection(
                 label = R.string.history_this_week,
-                displayedItems = historyBefore,
+                displayedItems = historyThisWeek,
                 isExpanded = isThisWeekDisplayed
+            ) { site ->
+                site?.let {
+                    NavSuggestion(faviconCache, onOpenUrl, site.toNavSuggestion(domainProvider))
+                }
+            }
+
+            collapsibleSection(
+                label = R.string.history_earlier,
+                displayedItems = historyBeforeThisWeek,
+                isExpanded = isBeforeThisWeekDisplayed
             ) { site ->
                 site?.let {
                     NavSuggestion(faviconCache, onOpenUrl, site.toNavSuggestion(domainProvider))
@@ -215,17 +234,32 @@ fun HistoryUI_Preview() {
         )
     }
 
+    // Add one item for each day before this week.
+    val historyBeforeThisWeek = mutableListOf<Site>()
+    for (daysAgo in 10 until 25) {
+        historyBeforeThisWeek.add(
+            Site(
+                siteUID = ids++,
+                siteURL = "https://www.site$ids.com/${daysAgo}_days_ago",
+                title = null,
+                largestFavicon = null
+            )
+        )
+    }
+
     val itemsToday = flowOf(PagingData.from(historyToday))
     val itemsYesterday = flowOf(PagingData.from(historyYesterday))
     val itemsThisWeek = flowOf(PagingData.from(historyThisWeek))
+    val itemsBeforeThisWeek = flowOf(PagingData.from(historyBeforeThisWeek))
 
     NeevaTheme {
         HistoryUI(
             historyToday = itemsToday.collectAsLazyPagingItems(),
             historyYesterday = itemsYesterday.collectAsLazyPagingItems(),
-            historyBefore = itemsThisWeek.collectAsLazyPagingItems(),
-            onClose = {},
+            historyThisWeek = itemsThisWeek.collectAsLazyPagingItems(),
+            historyBeforeThisWeek = itemsBeforeThisWeek.collectAsLazyPagingItems(),
             onClearHistory = {},
+            onClose = {},
             onOpenUrl = {},
             faviconCache = mockFaviconCache,
             domainProvider = mockFaviconCache.domainProvider
