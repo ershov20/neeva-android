@@ -3,6 +3,7 @@ package com.neeva.app.appnav
 import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -24,7 +25,6 @@ import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.SpaceModifier
-import kotlinx.coroutines.coroutineScope
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -82,17 +82,22 @@ fun AppNav(
         }
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {
-            ProfileSettingsContainer(
-                webLayerModel = webLayerModel,
-                onBackPressed = appNavModel::popBackStack
-            )
+            /** Surface used to block touch propagation behind the surface. */
+            Surface {
+                ProfileSettingsContainer(
+                    webLayerModel = webLayerModel,
+                    onBackPressed = appNavModel::popBackStack
+                )
+            }
         }
 
         composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {
-            ClearBrowsingPane(
-                settingsViewModel = settingsViewModel,
-                webLayerModel::clearBrowsingData
-            )
+            Surface {
+                ClearBrowsingPane(
+                    settingsViewModel = settingsViewModel,
+                    webLayerModel::clearBrowsingData
+                )
+            }
         }
 
         composable(AppNavDestination.HISTORY.route) {
