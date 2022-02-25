@@ -18,7 +18,7 @@ interface SettingsViewModel {
     fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit)?
     fun getToggleState(key: String?): MutableState<Boolean>?
     fun openUrl(uri: Uri, openViaIntent: Boolean)
-    fun navigateToSubPane(settingsRowTitleId: Int, isSignedOut: Boolean): () -> Unit
+    fun getMainSettingsNavigation(): Map<Int, (() -> Unit)?>
     fun clearAllHistory()
     fun isSignedOut(): Boolean
     fun getNeevaUserData(): NeevaUserData
@@ -51,22 +51,16 @@ class SettingsViewModelImpl(
         }
     }
 
-    private val onClickMap = mapOf(
-        R.string.settings_sign_in_to_join_neeva to
-            appNavModel::showProfileSettings,
-        R.string.settings_clear_browsing_data to
-            appNavModel::showClearBrowsingSettings,
-        R.string.settings_default_browser to
-            appNavModel::showDefaultBrowserSettings
-    )
-    override fun navigateToSubPane(settingsRowTitleId: Int, isSignedOut: Boolean): () -> Unit {
-        if (
-            settingsRowTitleId == R.string.settings_sign_in_to_join_neeva &&
-            isSignedOut
-        ) {
-            return appNavModel::showFirstRun
+    override fun getMainSettingsNavigation(): Map<Int, (() -> Unit)?> {
+        val navMap = mutableMapOf<Int, (() -> Unit)?>(
+            R.string.settings_sign_in_to_join_neeva to appNavModel::showProfileSettings,
+            R.string.settings_clear_browsing_data to appNavModel::showClearBrowsingSettings,
+            R.string.settings_default_browser to appNavModel::showDefaultBrowserSettings
+        )
+        if (isSignedOut()) {
+            navMap[R.string.settings_sign_in_to_join_neeva] = appNavModel::showFirstRun
         }
-        return onClickMap[settingsRowTitleId] ?: {}
+        return navMap
     }
 
     override fun clearAllHistory() {
@@ -96,9 +90,7 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
 
         override fun openUrl(uri: Uri, openViaIntent: Boolean) {}
 
-        override fun navigateToSubPane(settingsRowTitleId: Int, isSignedOut: Boolean): () -> Unit {
-            return {}
-        }
+        override fun getMainSettingsNavigation(): Map<Int, (() -> Unit)?> { return mapOf() }
 
         override fun clearAllHistory() {}
 

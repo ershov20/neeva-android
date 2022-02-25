@@ -18,6 +18,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun MainSettingsPane(
     settingsViewModel: SettingsViewModel
 ) {
+    val buttonClickMap = settingsViewModel.getMainSettingsNavigation()
     Column(
         modifier = Modifier
             .background(MaterialTheme.colorScheme.surfaceVariant),
@@ -33,7 +34,11 @@ fun MainSettingsPane(
         ) {
             MainSettingsData.data.forEach { groupData ->
                 item {
-                    SettingsGroupView(settingsViewModel, groupData, {})
+                    SettingsGroupView(
+                        settingsViewModel,
+                        groupData,
+                        buttonOnClicks = buttonClickMap
+                    )
                 }
             }
         }

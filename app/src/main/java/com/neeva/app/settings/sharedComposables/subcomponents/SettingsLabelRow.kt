@@ -20,7 +20,7 @@ import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun SettingsLabel(
+fun SettingsLabelRow(
     title: String,
     modifier: Modifier
 ) {
@@ -63,7 +63,7 @@ fun SettingsLabel_Preview() {
         .background(MaterialTheme.colorScheme.surface)
 
     NeevaTheme {
-        SettingsLabel(
+        SettingsLabelRow(
             title = stringResource(id = R.string.debug_long_string_primary),
             rowModifier
         )
@@ -82,6 +82,9 @@ fun SettingsLabel_Dark_Preview() {
         .padding(16.dp)
         .background(MaterialTheme.colorScheme.surface)
     NeevaTheme(useDarkTheme = true) {
-        SettingsLabel(title = stringResource(id = R.string.debug_long_string_primary), rowModifier)
+        SettingsLabelRow(
+            title = stringResource(id = R.string.debug_long_string_primary),
+            rowModifier
+        )
     }
 }

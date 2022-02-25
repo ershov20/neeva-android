@@ -19,13 +19,15 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsViewModel
+import com.neeva.app.ui.theme.Dimensions
 import java.util.Locale
 
 @Composable
 fun SettingsGroupView(
     settingsViewModel: SettingsViewModel,
     groupData: SettingsGroupData,
-    onClearBrowsingData: (MutableMap<String, Boolean>) -> Unit
+    onClearBrowsingData: ((Map<String, Boolean>) -> Unit)? = null,
+    buttonOnClicks: Map<Int, (() -> Unit)?> = mapOf()
 ) {
     Box(
         modifier = Modifier
@@ -43,7 +45,7 @@ fun SettingsGroupView(
                     modifier = Modifier.padding(10.dp)
                 )
             }
-            SettingRowsView(settingsViewModel, groupData, onClearBrowsingData)
+            SettingRowsView(settingsViewModel, groupData, onClearBrowsingData, buttonOnClicks)
         }
     }
 }
@@ -52,7 +54,8 @@ fun SettingsGroupView(
 fun SettingRowsView(
     settingsViewModel: SettingsViewModel,
     groupData: SettingsGroupData,
-    onClearBrowsingData: (MutableMap<String, Boolean>) -> Unit
+    onClearBrowsingData: ((Map<String, Boolean>) -> Unit)?,
+    buttonOnClicks: Map<Int, (() -> Unit)?>
 ) {
     Column(
         modifier = Modifier.background(
@@ -64,11 +67,13 @@ fun SettingRowsView(
                 .clip(RoundedCornerShape(12.dp))
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = Dimensions.PADDING_LARGE)
+            val onClick = buttonOnClicks[rowData.titleId]
             SettingsRow(
                 rowData = rowData,
                 settingsViewModel = settingsViewModel,
                 onClearBrowsingData = onClearBrowsingData,
+                onClick = onClick,
                 modifier = rowModifier
             )
         }

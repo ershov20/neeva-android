@@ -15,23 +15,21 @@ import com.neeva.app.NeevaBrowser
 import com.neeva.app.R
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabel
+import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabelRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsNavigationRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsToggleRow
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.userdata.NeevaUser
 
 @Composable
 fun SettingsRow(
     rowData: SettingsRowData,
     settingsViewModel: SettingsViewModel,
-    onClearBrowsingData: (MutableMap<String, Boolean>) -> Unit,
+    onClearBrowsingData: ((Map<String, Boolean>) -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
     modifier: Modifier
 ) {
-    var navOnClick = settingsViewModel.navigateToSubPane(
-        rowData.titleId,
-        settingsViewModel.isSignedOut()
-    )
     var title = stringResource(rowData.titleId)
     val versionString = NeevaBrowser.versionString
     if (rowData.titleId == R.string.settings_neeva_browser_version && versionString != null) {
@@ -42,11 +40,11 @@ fun SettingsRow(
 
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
-            SettingsButtonRow(title, {}, modifier)
+            onClick?.let { SettingsButtonRow(title, it, modifier) }
         }
 
         SettingsRowType.LABEL -> {
-            SettingsLabel(title, modifier)
+            SettingsLabelRow(title, modifier)
         }
 
         SettingsRowType.LINK -> {
@@ -73,41 +71,61 @@ fun SettingsRow(
         }
 
         SettingsRowType.NAVIGATION -> {
-            SettingsNavigationRow(
-                title = title,
-                enabled = rowData.enabled,
-                onClick = navOnClick,
-                modifier = modifier
-            )
+            if (onClick != null) {
+                SettingsNavigationRow(
+                    title = title,
+                    enabled = rowData.enabled,
+                    onClick = onClick,
+                    modifier = modifier
+                )
+            }
         }
 
         SettingsRowType.PROFILE -> {
             if (settingsViewModel.isSignedOut()) {
-                SettingsButtonRow(
-                    title = stringResource(R.string.settings_sign_in_to_join_neeva),
-                    onClick = navOnClick,
-                    modifier = modifier
-                )
+                if (onClick != null) {
+                    SettingsButtonRow(
+                        title = stringResource(R.string.settings_sign_in_to_join_neeva),
+                        onClick = onClick,
+                        modifier = modifier
+                    )
+                }
             } else {
                 val userData = settingsViewModel.getNeevaUserData()
+                var primaryLabel = userData.displayName
+                if (rowData.showSSOProviderAsPrimaryLabel) {
+                    primaryLabel = getFormattedSSOProviderName(userData.ssoProvider)
+                }
                 ProfileRow(
-                    primaryLabel = userData.displayName,
+                    primaryLabel = primaryLabel,
                     secondaryLabel = userData.email,
                     pictureUrl = userData.pictureURL,
-                    onClick = navOnClick,
+                    onClick = onClick,
                     modifier = modifier
                 )
             }
         }
 
         SettingsRowType.CLEAR_DATA_BUTTON -> {
-            ClearDataButtonView(
-                getToggleState = settingsViewModel::getToggleState,
-                rowData = rowData,
-                onClearBrowsingData = onClearBrowsingData,
-                rowModifier = modifier
-            )
+            if (onClearBrowsingData != null) {
+                ClearDataButtonView(
+                    getToggleState = settingsViewModel::getToggleState,
+                    rowData = rowData,
+                    onClearBrowsingData = onClearBrowsingData,
+                    rowModifier = modifier
+                )
+            }
         }
+    }
+}
+
+fun getFormattedSSOProviderName(ssoProvider: NeevaUser.SSOProvider): String {
+    return when (ssoProvider) {
+        NeevaUser.SSOProvider.GOOGLE -> "Google"
+        NeevaUser.SSOProvider.MICROSOFT -> "Microsoft"
+        NeevaUser.SSOProvider.OKTA -> "Okta"
+        NeevaUser.SSOProvider.APPLE -> "Apple"
+        NeevaUser.SSOProvider.UNKNOWN -> "Unknown"
     }
 }
 

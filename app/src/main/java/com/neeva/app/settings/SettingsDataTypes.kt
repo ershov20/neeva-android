@@ -19,7 +19,10 @@ data class SettingsRowData(
     val openUrlViaIntent: Boolean = false,
 
     /** Whether or not the user can interact with the menu item. */
-    val enabled: Boolean = true
+    val enabled: Boolean = true,
+
+    /** Intended for use with ProfileRow. */
+    val showSSOProviderAsPrimaryLabel: Boolean = false
 )
 
 enum class SettingsRowType {

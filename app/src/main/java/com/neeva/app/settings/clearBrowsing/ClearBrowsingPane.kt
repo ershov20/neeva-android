@@ -19,7 +19,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun ClearBrowsingPane(
     settingsViewModel: SettingsViewModel,
-    onClearBrowsingData: (MutableMap<String, Boolean>) -> Unit
+    onClearBrowsingData: (Map<String, Boolean>) -> Unit
 ) {
     Surface {
         Column(
@@ -38,7 +38,11 @@ fun ClearBrowsingPane(
             ) {
                 ClearBrowsingData.data.forEach { groupData ->
                     item {
-                        SettingsGroupView(settingsViewModel, groupData, onClearBrowsingData)
+                        SettingsGroupView(
+                            settingsViewModel,
+                            groupData,
+                            onClearBrowsingData
+                        )
                     }
                 }
             }

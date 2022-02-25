@@ -196,7 +196,7 @@ class WebLayerModel @Inject constructor(
         }
     }
 
-    fun clearBrowsingData(clearingOptions: MutableMap<String, Boolean>) {
+    fun clearBrowsingData(clearingOptions: Map<String, Boolean>) {
         val clearCookiesFlags = mutableListOf<Int>()
         clearingOptions.keys.forEach {
             if (clearingOptions[it] == true) {
