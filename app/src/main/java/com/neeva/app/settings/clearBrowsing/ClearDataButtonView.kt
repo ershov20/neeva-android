@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,7 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +28,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun ClearDataButtonView(
     getToggleState: (key: String?) -> MutableState<Boolean>?,
     rowData: SettingsRowData,
-    onClearBrowsingData: (MutableMap<String, Boolean>) -> Unit,
+    onClearBrowsingData: (Map<String, Boolean>) -> Unit,
     rowModifier: Modifier
 ) {
     val title = stringResource(id = rowData.titleId)
@@ -51,7 +49,7 @@ fun ClearDataButtonView(
             confirmAction = {
                 onClearBrowsingData(
                     getClearingOptionsMap(
-                        ClearBrowsingData.data[0].rows,
+                        ClearBrowsingPaneData.data[0].rows,
                         getToggleState
                     )
                 )
@@ -75,7 +73,6 @@ fun ClearDataButton(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
             .then(
                 if (cleared.value) {
                     Modifier

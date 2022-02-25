@@ -1,19 +1,16 @@
 package com.neeva.app.settings.sharedComposables
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.settings.SettingsGroupData
@@ -29,24 +26,21 @@ fun SettingsGroupView(
     onClearBrowsingData: ((Map<String, Boolean>) -> Unit)? = null,
     buttonOnClicks: Map<Int, (() -> Unit)?> = mapOf()
 ) {
-    Box(
-        modifier = Modifier
+    Column(
+        Modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 56.dp)
             .wrapContentHeight(align = Alignment.Bottom)
     ) {
-        Column {
-            if (groupData.titleId != null) {
-                Text(
-                    text = stringResource(groupData.titleId).uppercase(Locale.getDefault()),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.padding(10.dp)
-                )
-            }
-            SettingRowsView(settingsViewModel, groupData, onClearBrowsingData, buttonOnClicks)
+        if (groupData.titleId != null) {
+            Text(
+                text = stringResource(groupData.titleId).uppercase(Locale.getDefault()),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.padding(Dimensions.PADDING_SMALL)
+            )
         }
+        SettingRowsView(settingsViewModel, groupData, onClearBrowsingData, buttonOnClicks)
     }
 }
 
@@ -64,7 +58,6 @@ fun SettingRowsView(
     ) {
         groupData.rows.forEach { rowData ->
             val rowModifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
                 .padding(horizontal = Dimensions.PADDING_LARGE)

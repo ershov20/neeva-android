@@ -1,4 +1,4 @@
-package com.neeva.app.settings.defaultBrowser
+package com.neeva.app.settings.setDefaultAndroidBrowser
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -22,7 +22,7 @@ import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.ui.theme.FullScreenDialogTopBar
 
 @Composable
-fun DefaultBrowserPane(
+fun SetDefaultAndroidBrowserPane(
     settingsViewModel: SettingsViewModel
 ) {
     Surface {
@@ -39,7 +39,7 @@ fun DefaultBrowserPane(
 
             Text(
                 text = stringResource(id = R.string.switch_default_browser),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.CenterHorizontally)

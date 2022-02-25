@@ -28,7 +28,7 @@ fun ClearBrowsingPane(
                 .fillMaxSize(),
         ) {
             FullScreenDialogTopBar(
-                title = stringResource(ClearBrowsingData.topAppBarTitleResId),
+                title = stringResource(ClearBrowsingPaneData.topAppBarTitleResId),
                 onBackPressed = settingsViewModel::onBackPressed
             )
 
@@ -36,7 +36,7 @@ fun ClearBrowsingPane(
                 modifier = Modifier
                     .weight(1.0f)
             ) {
-                ClearBrowsingData.data.forEach { groupData ->
+                ClearBrowsingPaneData.data.forEach { groupData ->
                     item {
                         SettingsGroupView(
                             settingsViewModel,

@@ -9,7 +9,7 @@ import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
-object ClearBrowsingData {
+object ClearBrowsingPaneData {
     @StringRes
     val topAppBarTitleResId: Int = R.string.settings_clear_browsing_data
     val data = listOf(

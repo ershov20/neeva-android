@@ -21,8 +21,8 @@ import com.neeva.app.history.HistoryContainer
 import com.neeva.app.settings.ProfileSettingsContainer
 import com.neeva.app.settings.SettingsViewModelImpl
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
-import com.neeva.app.settings.defaultBrowser.DefaultBrowserPane
 import com.neeva.app.settings.main.MainSettingsPane
+import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.SpaceModifier
 
@@ -97,7 +97,7 @@ fun AppNav(
         }
 
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {
-            DefaultBrowserPane(
+            SetDefaultAndroidBrowserPane(
                 settingsViewModel = settingsViewModel
             )
         }
