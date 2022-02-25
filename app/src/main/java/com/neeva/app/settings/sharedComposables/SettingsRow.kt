@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.R
+import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabel
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
@@ -24,9 +25,13 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SettingsRow(
     rowData: SettingsRowData,
     settingsViewModel: SettingsViewModel,
-    onClick: () -> Unit = {},
+    onClearBrowsingData: (MutableMap<String, Boolean>) -> Unit,
     modifier: Modifier
 ) {
+    var navOnClick = settingsViewModel.navigateToSubPane(
+        rowData.titleId,
+        settingsViewModel.isSignedOut()
+    )
     var title = stringResource(rowData.titleId)
     val versionString = NeevaBrowser.versionString
     if (rowData.titleId == R.string.settings_neeva_browser_version && versionString != null) {
@@ -34,13 +39,16 @@ fun SettingsRow(
     }
 
     val toggleState = settingsViewModel.getToggleState(rowData.togglePreferenceKey)
+
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
-            SettingsButtonRow(title, onClick, modifier)
+            SettingsButtonRow(title, {}, modifier)
         }
+
         SettingsRowType.LABEL -> {
             SettingsLabel(title, modifier)
         }
+
         SettingsRowType.LINK -> {
             if (rowData.url != null) {
                 SettingsLinkRow(
@@ -50,6 +58,7 @@ fun SettingsRow(
                 )
             }
         }
+
         SettingsRowType.TOGGLE -> {
             if (toggleState != null && rowData.togglePreferenceKey != null) {
                 SettingsToggleRow(
@@ -62,19 +71,21 @@ fun SettingsRow(
                 )
             }
         }
+
         SettingsRowType.NAVIGATION -> {
             SettingsNavigationRow(
                 title = title,
                 enabled = rowData.enabled,
-                onClick = onClick,
+                onClick = navOnClick,
                 modifier = modifier
             )
         }
+
         SettingsRowType.PROFILE -> {
             if (settingsViewModel.isSignedOut()) {
                 SettingsButtonRow(
                     title = stringResource(R.string.settings_sign_in_to_join_neeva),
-                    onClick = onClick,
+                    onClick = navOnClick,
                     modifier = modifier
                 )
             } else {
@@ -83,10 +94,19 @@ fun SettingsRow(
                     primaryLabel = userData.displayName,
                     secondaryLabel = userData.email,
                     pictureUrl = userData.pictureURL,
-                    onClick = onClick,
+                    onClick = navOnClick,
                     modifier = modifier
                 )
             }
+        }
+
+        SettingsRowType.CLEAR_DATA_BUTTON -> {
+            ClearDataButtonView(
+                getToggleState = settingsViewModel::getToggleState,
+                rowData = rowData,
+                onClearBrowsingData = onClearBrowsingData,
+                rowModifier = modifier
+            )
         }
     }
 }
@@ -102,6 +122,7 @@ fun SettingsRow_PreviewToggle() {
                 R.string.debug_long_string_primary
             ),
             settingsViewModel = getFakeSettingsViewModel(),
+            onClearBrowsingData = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
@@ -126,6 +147,7 @@ fun SettingsRow_PreviewLink() {
                 togglePreferenceKey = ""
             ),
             settingsViewModel = getFakeSettingsViewModel(),
+            onClearBrowsingData = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)
@@ -146,6 +168,7 @@ fun SettingsRow_PreviewLabel() {
                 R.string.debug_long_string_primary
             ),
             settingsViewModel = getFakeSettingsViewModel(),
+            onClearBrowsingData = {},
             modifier = Modifier
                 .fillMaxWidth()
                 .defaultMinSize(minHeight = 56.dp)

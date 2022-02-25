@@ -1,6 +1,7 @@
 package com.neeva.app.settings
 
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.browsing.WebLayerModel
@@ -13,12 +14,15 @@ fun ProfileSettingsContainer(
     onBackPressed: () -> Unit
 ) {
     val neevaUser = LocalEnvironment.current.neevaUser
-    ProfileSettingsPane(
-        onBackPressed = onBackPressed,
-        signUserOut = {
-            neevaUser.signOut(webLayerModel)
-            onBackPressed()
-        },
-        neevaUserData = neevaUser.data
-    )
+    /** Surface used to block touch propagation behind the surface. */
+    Surface {
+        ProfileSettingsPane(
+            onBackPressed = onBackPressed,
+            signUserOut = {
+                neevaUser.signOut(webLayerModel)
+                onBackPressed()
+            },
+            neevaUserData = neevaUser.data
+        )
+    }
 }

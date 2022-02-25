@@ -49,8 +49,7 @@ object MainSettingsData {
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.NAVIGATION,
-                    titleId = R.string.settings_default_browser,
-                    enabled = false
+                    titleId = R.string.settings_default_browser
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,

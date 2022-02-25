@@ -3,7 +3,6 @@ package com.neeva.app.appnav
 import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -22,6 +21,7 @@ import com.neeva.app.history.HistoryContainer
 import com.neeva.app.settings.ProfileSettingsContainer
 import com.neeva.app.settings.SettingsViewModelImpl
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
+import com.neeva.app.settings.defaultBrowser.DefaultBrowserPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.SpaceModifier
@@ -78,26 +78,27 @@ fun AppNav(
         }
 
         composable(AppNavDestination.SETTINGS.route) {
-            MainSettingsPane(settingsViewModel, neevaUser::isSignedOut)
+            MainSettingsPane(settingsViewModel)
         }
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {
-            /** Surface used to block touch propagation behind the surface. */
-            Surface {
-                ProfileSettingsContainer(
-                    webLayerModel = webLayerModel,
-                    onBackPressed = appNavModel::popBackStack
-                )
-            }
+            ProfileSettingsContainer(
+                webLayerModel = webLayerModel,
+                onBackPressed = appNavModel::popBackStack
+            )
         }
 
         composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {
-            Surface {
-                ClearBrowsingPane(
-                    settingsViewModel = settingsViewModel,
-                    webLayerModel::clearBrowsingData
-                )
-            }
+            ClearBrowsingPane(
+                settingsViewModel = settingsViewModel,
+                webLayerModel::clearBrowsingData
+            )
+        }
+
+        composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {
+            DefaultBrowserPane(
+                settingsViewModel = settingsViewModel
+            )
         }
 
         composable(AppNavDestination.HISTORY.route) {

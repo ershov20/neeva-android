@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import android.util.Log
 import androidx.annotation.MainThread
 import androidx.navigation.NavDestination
@@ -102,6 +103,10 @@ class AppNavModel(
         showBrowser()
     }
 
+    fun openAndroidDefaultBrowserSettings() {
+        safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+    }
+
     fun openUrlViaIntent(uri: Uri) {
         safeStartActivityForIntent(Intent(Intent.ACTION_VIEW, uri))
         showBrowser()
@@ -122,6 +127,7 @@ class AppNavModel(
     fun showSettings() = show(AppNavDestination.SETTINGS)
     fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
+    fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
     fun showFirstRun() = show(AppNavDestination.FIRST_RUN)
     fun showHistory() = show(AppNavDestination.HISTORY)
     fun showFeedback() = show(AppNavDestination.FEEDBACK)

@@ -48,7 +48,7 @@ object ClearBrowsingData {
         SettingsGroupData(
             rows = listOf(
                 SettingsRowData(
-                    type = SettingsRowType.BUTTON,
+                    type = SettingsRowType.CLEAR_DATA_BUTTON,
                     titleId = R.string.settings_clear_selected_data_on_device
                 ),
             )

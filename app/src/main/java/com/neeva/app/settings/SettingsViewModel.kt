@@ -2,6 +2,7 @@ package com.neeva.app.settings
 
 import android.net.Uri
 import androidx.compose.runtime.MutableState
+import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.userdata.NeevaUser
@@ -17,12 +18,11 @@ interface SettingsViewModel {
     fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit)?
     fun getToggleState(key: String?): MutableState<Boolean>?
     fun openUrl(uri: Uri, openViaIntent: Boolean)
-    fun showFirstRun()
-    fun showClearBrowsingSettings()
-    fun showProfileSettings()
+    fun navigateToSubPane(settingsRowTitleId: Int, isSignedOut: Boolean): () -> Unit
     fun clearAllHistory()
     fun isSignedOut(): Boolean
     fun getNeevaUserData(): NeevaUserData
+    fun openAndroidDefaultBrowserSettings()
 }
 
 class SettingsViewModelImpl(
@@ -51,16 +51,22 @@ class SettingsViewModelImpl(
         }
     }
 
-    override fun showFirstRun() {
-        appNavModel.showFirstRun()
-    }
-
-    override fun showClearBrowsingSettings() {
-        appNavModel.showClearBrowsingSettings()
-    }
-
-    override fun showProfileSettings() {
-        appNavModel.showProfileSettings()
+    private val onClickMap = mapOf(
+        R.string.settings_sign_in_to_join_neeva to
+            appNavModel::showProfileSettings,
+        R.string.settings_clear_browsing_data to
+            appNavModel::showClearBrowsingSettings,
+        R.string.settings_default_browser to
+            appNavModel::showDefaultBrowserSettings
+    )
+    override fun navigateToSubPane(settingsRowTitleId: Int, isSignedOut: Boolean): () -> Unit {
+        if (
+            settingsRowTitleId == R.string.settings_sign_in_to_join_neeva &&
+            isSignedOut
+        ) {
+            return appNavModel::showFirstRun
+        }
+        return onClickMap[settingsRowTitleId] ?: {}
     }
 
     override fun clearAllHistory() {
@@ -74,6 +80,10 @@ class SettingsViewModelImpl(
     override fun getNeevaUserData(): NeevaUserData {
         return neevaUser.data
     }
+
+    override fun openAndroidDefaultBrowserSettings() {
+        appNavModel.openAndroidDefaultBrowserSettings()
+    }
 }
 
 internal fun getFakeSettingsViewModel(): SettingsViewModel {
@@ -86,11 +96,9 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
 
         override fun openUrl(uri: Uri, openViaIntent: Boolean) {}
 
-        override fun showFirstRun() {}
-
-        override fun showClearBrowsingSettings() {}
-
-        override fun showProfileSettings() {}
+        override fun navigateToSubPane(settingsRowTitleId: Int, isSignedOut: Boolean): () -> Unit {
+            return {}
+        }
 
         override fun clearAllHistory() {}
 
@@ -103,5 +111,7 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
                 pictureURL = Uri.parse("https://c.neevacdn.net/image/fetch/s")
             )
         }
+
+        override fun openAndroidDefaultBrowserSettings() { }
     }
 }

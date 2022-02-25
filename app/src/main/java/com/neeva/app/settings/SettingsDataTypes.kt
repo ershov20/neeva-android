@@ -28,7 +28,8 @@ enum class SettingsRowType {
     TOGGLE,
     NAVIGATION,
     PROFILE,
-    BUTTON
+    BUTTON,
+    CLEAR_DATA_BUTTON
 }
 
 enum class SettingsToggle(

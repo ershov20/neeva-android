@@ -125,4 +125,10 @@
 
     <string name="generic_error">Something went wrong</string>
     <string name="navigate_to_profile">Navigate to Profile</string>
+    <string name="switch_default_browser">Switch Your Default Browser</string>
+    <string name="switch_default_browser_instructions">Open links in Neeva automatically by making it your Default Browser App.\n\n
+        1. Go to Settings\n\n
+        2. Tap Browser App\n\n
+        3. Select Neeva Search &amp; Browser</string>
+    <string name="go_to_settings">Go to Settings</string>
 </resources>
