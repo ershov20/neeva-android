@@ -34,7 +34,9 @@ android {
 }
 
 dependencies {
+    implementation "androidx.activity:activity-ktx:$androidx_activity_version"
+    implementation "androidx.appcompat:appcompat:$androidx_appcompat_version"
     implementation 'androidx.mediarouter:mediarouter:1.2.5'
-    implementation 'androidx.preference:preference:1.1.1'
-    implementation 'com.google.android.material:material:1.5.0'
+    implementation "androidx.preference:preference:$androidx_preference_version"
+    implementation "com.google.android.material:material:$google_android_material_version"
 }

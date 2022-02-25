@@ -126,6 +126,7 @@ dependencies {
     implementation project(path: ':chromium:gen:org__chromium__weblayer__support')
 
     implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation "androidx.activity:activity-ktx:$androidx_activity_version"
     implementation 'androidx.appcompat:appcompat:1.4.1'
     implementation 'androidx.browser:browser:1.4.0'
     implementation 'androidx.core:core-ktx:1.7.0'
@@ -140,11 +141,11 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
     implementation "androidx.navigation:navigation-compose:$navigation_compose_version"
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
-    implementation 'androidx.preference:preference-ktx:1.2.0'
+    implementation "androidx.preference:preference-ktx:$androidx_preference_version"
     implementation 'androidx.window:window:1.0.0'
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
-    implementation 'com.google.accompanist:accompanist-navigation-animation:0.24.1-alpha'
-    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'com.google.accompanist:accompanist-navigation-animation:0.24.2-alpha'
+    implementation "com.google.android.material:material:$google_android_material_version"
     implementation "com.google.android.gms:play-services-base:$play_services_version"
     implementation 'com.google.android.play:core-ktx:1.8.1'
     implementation "io.coil-kt:coil-compose:$coil_version"
@@ -153,7 +154,7 @@ dependencies {
 
     testImplementation 'app.cash.turbine:turbine:0.7.0'
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.6'
+    testImplementation 'org.robolectric:robolectric:4.7.3'
     testImplementation "io.strikt:strikt-core:$strikt_version"
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
