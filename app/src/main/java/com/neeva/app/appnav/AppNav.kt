@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -36,25 +37,31 @@ fun AppNav(
 ) {
     val settingsDataModel = LocalEnvironment.current.settingsDataModel
     val neevaUser = LocalEnvironment.current.neevaUser
-    val settingsViewModel = SettingsViewModelImpl(
-        appNavModel,
-        settingsDataModel,
-        LocalEnvironment.current.historyManager,
-        neevaUser
-    )
+    val historyManager = LocalEnvironment.current.historyManager
+    val coroutineScope = rememberCoroutineScope()
 
-    val feedbackViewModel = FeedbackViewModelImpl(
-        appNavModel,
-        activeTabModel = webLayerModel.currentBrowser.activeTabModel,
-        user = neevaUser,
-        coroutineScope = rememberCoroutineScope()
-    ) {
-        appNavModel.showBrowser()
-        webLayerModel.currentBrowser.createTabWithUri(
-            Uri.parse(NeevaConstants.appHelpCenterURL),
-            parentTabId = null,
-            isViaIntent = false
+    val settingsViewModel = remember {
+        SettingsViewModelImpl(
+            appNavModel,
+            settingsDataModel,
+            historyManager,
+            neevaUser
         )
+    }
+
+    val feedbackViewModel = remember {
+        FeedbackViewModelImpl(
+            appNavModel,
+            user = neevaUser,
+            coroutineScope = coroutineScope
+        ) {
+            appNavModel.showBrowser()
+            webLayerModel.currentBrowser.createTabWithUri(
+                Uri.parse(NeevaConstants.appHelpCenterURL),
+                parentTabId = null,
+                isViaIntent = false
+            )
+        }
     }
 
     AnimatedNavHost(
@@ -127,7 +134,10 @@ fun AppNav(
                 view = LocalView.current
             )
 
-            FeedbackView(feedbackViewModel)
+            FeedbackView(
+                feedbackViewModel = feedbackViewModel,
+                currentURL = webLayerModel.currentBrowser.activeTabModel.urlFlow
+            )
         }
     }
 }

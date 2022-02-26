@@ -11,7 +11,6 @@ import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.SendFeedbackMutation
 import com.neeva.app.appnav.AppNavModel
-import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.type.FeedbackSource
 import com.neeva.app.type.SendFeedbackV2Input
 import com.neeva.app.userdata.NeevaUser
@@ -27,18 +26,16 @@ interface FeedbackViewModel {
     fun onSubmitFeedbackPressed(
         feedback: String,
         shareScreenshot: Boolean,
-        shareURL: Boolean,
+        url: String?,
         apolloWrapper: ApolloWrapper,
         dispatchers: Dispatchers
     )
 
-    fun getCurrentURL(): String
     fun createScreenshot(view: View, context: Context)
 }
 
 class FeedbackViewModelImpl(
     val appNavModel: AppNavModel,
-    val activeTabModel: ActiveTabModel,
     val user: NeevaUser,
     val coroutineScope: CoroutineScope,
     val openHelpCenter: () -> Unit
@@ -56,14 +53,26 @@ class FeedbackViewModelImpl(
     override fun onSubmitFeedbackPressed(
         feedback: String,
         shareScreenshot: Boolean,
-        shareURL: Boolean,
+        url: String?,
         apolloWrapper: ApolloWrapper,
         dispatchers: Dispatchers
     ) {
+        val source = if (user.isSignedOut()) {
+            FeedbackSource.AndroidAppLoggedOut
+        } else {
+            FeedbackSource.AndroidApp
+        }
+
+        val feedback = if (url != null) {
+            feedback + "\n\nCurrent URL: $url"
+        } else {
+            feedback
+        }
+
         val input = SendFeedbackV2Input(
             feedback = Optional.presentIfNotNull(feedback),
-            source = Optional.presentIfNotNull(FeedbackSource.App),
-            shareResults = Optional.presentIfNotNull(shareURL),
+            source = Optional.presentIfNotNull(source),
+            shareResults = Optional.presentIfNotNull(true),
             userProvidedEmail = Optional.presentIfNotNull(user.data.email)
         )
         val sendFeedbackMutation = SendFeedbackMutation(input = input)
@@ -73,10 +82,6 @@ class FeedbackViewModelImpl(
         }
 
         appNavModel.popBackStack()
-    }
-
-    override fun getCurrentURL(): String {
-        return activeTabModel.urlFlow.value.toString()
     }
 
     override fun createScreenshot(view: View, context: Context) {
@@ -109,12 +114,11 @@ internal fun getFakeFeedbackViewModel(): FeedbackViewModel {
         override fun onSubmitFeedbackPressed(
             feedback: String,
             shareScreenshot: Boolean,
-            shareURL: Boolean,
+            url: String?,
             apolloWrapper: ApolloWrapper,
             dispatchers: Dispatchers
         ) {}
 
-        override fun getCurrentURL(): String { return "" }
         override fun createScreenshot(view: View, context: Context) {}
     }
 }

@@ -25,6 +25,7 @@
     <string name="spaces">Spaces</string>
     <string name="tabs">Tabs</string>
     <string name="page_info">Page Info</string>string>
+    <string name="save">Save</string>
 
     <string name="open_new_tab">Open new tab</string>
     <string name="open_new_incognito_tab">Open new incognito tab</string>
@@ -99,7 +100,6 @@
     <string name="settings_manage_neeva_memory">Manage Neeva Memory</string>
     <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
 
-    <string name="add_to_space">Save</string>
     <string name="space_contains_page">Space contains the current page</string>
     <string name="space_not_contain_page">Space doesn\'t contain the current page</string>
 
@@ -116,6 +116,7 @@
     <string name="submit_feedback_view_edit_screenshot">View or edit</string>
     <string name="submit_feedback_view_share_url">Share URL</string>
     <string name="submit_feedback_textfield_placeholder">Please share your questions, issues, or feature requests. Your feedback helps us improve Neeva!</string>
+    <string name="edit_feedback_url">Edit URL</string>
   
     <string name="tab_crashed_title">Uh oh!</string>
     <string name="tab_crashed_body">Something went wrong while displaying this web page</string>
