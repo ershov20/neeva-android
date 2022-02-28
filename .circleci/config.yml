@@ -83,6 +83,8 @@ jobs:
           command: yes | sdkmanager --update || exit 0
 
       - android/start-emulator-and-run-tests:
+          additional-avd-args: -d "pixel_2"
+          additional-emulator-args: -partition-size 1536
           post-emulator-launch-assemble-command: ''
           system-image: system-images;android-28;default;x86_64
           test-command: ./gradlew :app:connectedDebugAndroidTest
