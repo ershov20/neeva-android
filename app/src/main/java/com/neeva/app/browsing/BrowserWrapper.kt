@@ -408,6 +408,8 @@ abstract class BrowserWrapper(
 
     fun closeTab(primitive: TabInfo) = tabList.findTab(primitive.id)?.dispatchBeforeUnloadAndClose()
 
+    fun closeAllTabs() = tabList.forEach { it.dispatchBeforeUnloadAndClose() }
+
     fun selectTab(primitive: TabInfo) = tabList.findTab(primitive.id)?.let { selectTab(it) }
 
     fun selectTab(tab: Tab) {

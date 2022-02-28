@@ -123,4 +123,8 @@ class TabList {
     private fun updateFlow() {
         _orderedTabList.value = tabs.map { tabInfoMap[it.guid]!! }
     }
+
+    internal fun forEach(closure: (Tab) -> Unit) {
+        tabs.forEach(action = closure)
+    }
 }

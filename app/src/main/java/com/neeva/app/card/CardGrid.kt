@@ -22,13 +22,15 @@ import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.material.BottomAppBar
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -72,6 +74,10 @@ fun CardsContainer(webLayerModel: WebLayerModel) {
 
         override fun onCloseTab(tab: TabInfo) {
             webLayerModel.currentBrowser.closeTab(tab)
+        }
+
+        override fun onCloseAllTabs() {
+            webLayerModel.currentBrowser.closeAllTabs()
         }
 
         override fun onOpenLazyTab() {
@@ -121,6 +127,7 @@ fun CardsContainer(webLayerModel: WebLayerModel) {
 interface CardGridListener {
     fun onSelectTab(tab: TabInfo)
     fun onCloseTab(tab: TabInfo)
+    fun onCloseAllTabs()
     fun onOpenLazyTab()
     fun onDone()
     fun onSwitchToIncognitoProfile()
@@ -237,8 +244,22 @@ fun CardGrid(
             BottomAppBar(
                 backgroundColor = MaterialTheme.colorScheme.background
             ) {
+                val deleteEnabled = tabs.isNotEmpty()
                 IconButton(
-                    enabled = true,
+                    enabled = deleteEnabled,
+                    onClick = cardGridListener::onCloseAllTabs
+                ) {
+                    val deleteButtonAlpha = getClickableAlpha(deleteEnabled)
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.close_all_content_description),
+                        tint = LocalContentColor.current.copy(
+                            alpha = deleteButtonAlpha
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(
                     onClick = cardGridListener::onOpenLazyTab
                 ) {
                     Icon(
@@ -247,18 +268,20 @@ fun CardGrid(
                         tint = LocalContentColor.current
                     )
                 }
-
                 Spacer(modifier = Modifier.weight(1f))
-
+                val closeButtonAlpha = getClickableAlpha(closeButtonEnabled)
                 TextButton(
                     onClick = cardGridListener::onDone,
-                    enabled = closeButtonEnabled
+                    enabled = closeButtonEnabled,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = LocalContentColor.current.copy(
+                            alpha = closeButtonAlpha
+                        )
+                    )
                 ) {
-                    val closeButtonAlpha = getClickableAlpha(closeButtonEnabled)
                     Text(
                         modifier = Modifier.padding(8.dp),
                         text = stringResource(id = R.string.done),
-                        color = LocalContentColor.current.copy(alpha = closeButtonAlpha),
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -299,6 +322,7 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
             val cardGridListener = object : CardGridListener {
                 override fun onSelectTab(tab: TabInfo) {}
                 override fun onCloseTab(tab: TabInfo) {}
+                override fun onCloseAllTabs() {}
                 override fun onOpenLazyTab() {}
                 override fun onDone() {}
                 override fun onSwitchToIncognitoProfile() {}
