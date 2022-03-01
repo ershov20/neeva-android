@@ -202,7 +202,12 @@ fun HistoryUI(
                 isExpanded = isBeforeThisWeekDisplayed
             ) { site ->
                 site?.let {
-                    NavSuggestion(faviconCache, onOpenUrl, site.toNavSuggestion(domainProvider))
+                    NavSuggestion(
+                        faviconCache,
+                        onOpenUrl,
+                        onTapSuggestion,
+                        site.toNavSuggestion(domainProvider)
+                    )
                 }
             }
         }
