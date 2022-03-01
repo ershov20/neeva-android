@@ -31,6 +31,7 @@ import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.suggestions.SuggestionType
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.BrandedTextButton
@@ -45,6 +46,7 @@ fun HistoryUI(
     onClose: () -> Unit,
     onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
+    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null,
     faviconCache: FaviconCache,
     now: LocalDate = LocalDate.now()
 ) {
@@ -83,6 +85,7 @@ fun HistoryUI(
         onClearHistory = onClearHistory,
         onClose = onClose,
         onOpenUrl = onOpenUrl,
+        onTapSuggestion = onTapSuggestion,
         faviconCache = faviconCache,
         domainProvider = domainProvider
     )
@@ -97,6 +100,7 @@ fun HistoryUI(
     onClose: () -> Unit,
     onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
+    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null,
     faviconCache: FaviconCache,
     domainProvider: DomainProvider
 ) {
@@ -153,7 +157,12 @@ fun HistoryUI(
                 isExpanded = isTodayDisplayed
             ) { site ->
                 site?.let {
-                    NavSuggestion(faviconCache, onOpenUrl, site.toNavSuggestion(domainProvider))
+                    NavSuggestion(
+                        faviconCache,
+                        onOpenUrl,
+                        onTapSuggestion,
+                        site.toNavSuggestion(domainProvider)
+                    )
                 }
             }
 
@@ -163,7 +172,12 @@ fun HistoryUI(
                 isExpanded = isYesterdayDisplayed
             ) { site ->
                 site?.let {
-                    NavSuggestion(faviconCache, onOpenUrl, site.toNavSuggestion(domainProvider))
+                    NavSuggestion(
+                        faviconCache,
+                        onOpenUrl,
+                        onTapSuggestion,
+                        site.toNavSuggestion(domainProvider)
+                    )
                 }
             }
 
@@ -173,7 +187,12 @@ fun HistoryUI(
                 isExpanded = isThisWeekDisplayed
             ) { site ->
                 site?.let {
-                    NavSuggestion(faviconCache, onOpenUrl, site.toNavSuggestion(domainProvider))
+                    NavSuggestion(
+                        faviconCache,
+                        onOpenUrl,
+                        onTapSuggestion,
+                        site.toNavSuggestion(domainProvider)
+                    )
                 }
             }
 

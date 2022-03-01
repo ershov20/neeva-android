@@ -7,6 +7,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.TestApolloWrapper
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.suggestions.NavSuggestion
@@ -62,6 +63,8 @@ class SuggestionsModelTest : BaseTest() {
 
     private lateinit var model: SuggestionsModel
 
+    private lateinit var clientLogger: ClientLogger
+
     override fun setUp() {
         super.setUp()
         testDispatcher = Dispatchers(
@@ -77,11 +80,14 @@ class SuggestionsModelTest : BaseTest() {
 
         apolloWrapper = TestApolloWrapper()
 
+        clientLogger = mock()
+
         model = SuggestionsModel(
             coroutineScopeRule.scope,
             historyManager,
             apolloWrapper,
-            testDispatcher
+            testDispatcher,
+            clientLogger
         )
 
         coroutineScopeRule.scope.advanceUntilIdle()

@@ -39,6 +39,7 @@ fun URLBar() {
 
     val browserWrapper = LocalBrowserWrapper.current
     val urlBarModel = browserWrapper.urlBarModel
+    val suggestionsModel = browserWrapper.suggestionsModel
     val urlBarModelState = urlBarModel.state.collectAsState()
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
@@ -74,6 +75,7 @@ fun URLBar() {
 
             AutocompleteTextField(
                 urlBarModel = urlBarModel,
+                suggestionsModel = suggestionsModel,
                 urlBarModelState = urlBarModelState.value,
                 backgroundColor = backgroundColor,
                 foregroundColor = foregroundColor,

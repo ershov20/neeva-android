@@ -20,23 +20,24 @@ enum class ClientLoggerStatus {
 class ClientLogger(
     private val apolloWrapper: ApolloWrapper,
 ) {
-
     val env: ClientLogEnvironment =
         if (BuildConfig.DEBUG) ClientLogEnvironment.Dev else ClientLogEnvironment.Prod
     private val status: ClientLoggerStatus = ClientLoggerStatus.ENABLED
 
-    fun logCounter(path: String, attributes: List<ClientLogCounterAttribute>?) {
+    fun logCounter(path: LogConfig.Interaction, attributes: List<ClientLogCounterAttribute>?) {
         if (status != ClientLoggerStatus.ENABLED) {
             return
         }
 
         // Check feature flag when we start supporting it
-
         val clientLogBase =
             NeevaBrowser.versionString?.let { version ->
                 ClientLogBase("co.neeva.app.android.browser", version, env)
             }
-        val clientLogCounter = ClientLogCounter(path, Optional.presentIfNotNull(attributes))
+        val clientLogCounter = ClientLogCounter(
+            path.interactionName,
+            Optional.presentIfNotNull(attributes)
+        )
         val clientLog = ClientLog(Optional.presentIfNotNull(clientLogCounter))
         val logMutation = LogMutation(
             ClientLogInput(

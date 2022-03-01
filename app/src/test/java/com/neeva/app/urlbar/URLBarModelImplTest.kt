@@ -11,6 +11,7 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.NavSuggestion
+import com.neeva.app.suggestions.SuggestionType
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
@@ -129,7 +130,8 @@ class URLBarModelImplTest : BaseTest() {
         val autocompleteSuggestion = NavSuggestion(
             url = Uri.parse("https://www.reddit.com/r/android"),
             label = "Primary label",
-            secondaryLabel = "https://www.reddit.com/r/android"
+            secondaryLabel = "https://www.reddit.com/r/android",
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
         )
 
         val inputState = URLBarModelState(
@@ -151,7 +153,8 @@ class URLBarModelImplTest : BaseTest() {
         val autocompleteSuggestion = NavSuggestion(
             url = Uri.parse("https://www.reddit.com/r/android"),
             label = "Primary label",
-            secondaryLabel = "https://www.reddit.com/r/android"
+            secondaryLabel = "https://www.reddit.com/r/android",
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
         )
 
         val inputState = URLBarModelState(
@@ -186,7 +189,8 @@ class URLBarModelImplTest : BaseTest() {
         val autocompleteSuggestion = NavSuggestion(
             url = Uri.parse("https://www.reddit.com/r/android"),
             label = "Primary label",
-            secondaryLabel = "https://www.reddit.com/r/android"
+            secondaryLabel = "https://www.reddit.com/r/android",
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
         )
 
         expectThat(URLBarModelImpl.computeAutocompleteText(autocompleteSuggestion, "http"))
@@ -203,7 +207,8 @@ class URLBarModelImplTest : BaseTest() {
         val autocompleteSuggestion = NavSuggestion(
             url = Uri.parse("https://news.google.com"),
             label = "Primary label",
-            secondaryLabel = "https://news.google.com"
+            secondaryLabel = "https://news.google.com",
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
         )
 
         expectThat(URLBarModelImpl.computeAutocompleteText(autocompleteSuggestion, "http"))

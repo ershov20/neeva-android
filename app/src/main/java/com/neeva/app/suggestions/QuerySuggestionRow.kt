@@ -8,9 +8,15 @@ import androidx.compose.runtime.Composable
 fun QuerySuggestionRow(
     suggestion: QueryRowSuggestion,
     onLoadUrl: (Uri) -> Unit,
-    onEditUrl: (() -> Unit)? = null
+    onEditUrl: (() -> Unit)? = null,
+    onTapSuggestion: ((SuggestionType, Int) -> Unit)? = null
 ) {
-    val onTapRow = { onLoadUrl(suggestion.url) }
+    val onTapRow = {
+        onLoadUrl(suggestion.url)
+        if (onTapSuggestion != null) {
+            onTapSuggestion(SuggestionType.QUERY_SUGGESTION, 0)
+        }
+    }
 
     when {
         suggestion.annotationType == AnnotationType.Dictionary &&

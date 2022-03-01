@@ -8,6 +8,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.NeevaConstants.browserTypeCookie
 import com.neeva.app.NeevaConstants.browserVersionCookie
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.spaces.SpaceStore
@@ -35,7 +36,8 @@ class RegularBrowserWrapper(
     private val apolloWrapper: ApolloWrapper,
     override val historyManager: HistoryManager,
     spaceStore: SpaceStore,
-    private val neevaUser: NeevaUser
+    private val neevaUser: NeevaUser,
+    clientLogger: ClientLogger
 ) : BrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -46,7 +48,8 @@ class RegularBrowserWrapper(
         coroutineScope,
         historyManager,
         apolloWrapper,
-        dispatchers
+        dispatchers,
+        clientLogger
     ),
     faviconCache = RegularFaviconCache(
         filesDir = appContext.cacheDir,

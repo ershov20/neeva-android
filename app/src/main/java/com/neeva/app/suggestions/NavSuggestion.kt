@@ -15,12 +15,14 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun NavSuggestion(
     faviconCache: FaviconCache,
     onOpenUrl: (Uri) -> Unit,
+    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null,
     navSuggestion: NavSuggestion
 ) {
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
     NavSuggestion(
         faviconBitmap = faviconBitmap,
         onOpenUrl = onOpenUrl,
+        onTapSuggestion = onTapSuggestion,
         navSuggestion = navSuggestion
     )
 }
@@ -29,11 +31,15 @@ fun NavSuggestion(
 fun NavSuggestion(
     faviconBitmap: Bitmap?,
     onOpenUrl: (Uri) -> Unit,
+    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null,
     navSuggestion: NavSuggestion
 ) {
     NavSuggestionRow(
         primaryLabel = navSuggestion.label,
-        onTapRow = { onOpenUrl.invoke(navSuggestion.url) },
+        onTapRow = {
+            onOpenUrl.invoke(navSuggestion.url)
+            onTapSuggestion?.invoke(navSuggestion.type, navSuggestion.position)
+        },
         secondaryLabel = navSuggestion.secondaryLabel,
         faviconBitmap = faviconBitmap
     )
@@ -52,7 +58,8 @@ fun NavSuggestion_Preview() {
             navSuggestion = NavSuggestion(
                 url = Uri.parse("https://www.neeva.com"),
                 label = stringResource(id = R.string.debug_long_string_primary),
-                secondaryLabel = stringResource(id = R.string.debug_long_string_secondary)
+                secondaryLabel = stringResource(id = R.string.debug_long_string_secondary),
+                type = SuggestionType.MEMORIZED_SUGGESTION
             )
         )
     }
@@ -70,7 +77,8 @@ fun NavSuggestion_PreviewWithSolidFavicon() {
             navSuggestion = NavSuggestion(
                 url = uri,
                 label = "Primary label",
-                secondaryLabel = "Secondary label"
+                secondaryLabel = "Secondary label",
+                type = SuggestionType.MEMORIZED_SUGGESTION
             )
         )
     }

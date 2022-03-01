@@ -2,6 +2,7 @@ package com.neeva.app
 
 import android.content.Context
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsDataModel
@@ -46,6 +47,12 @@ object NeevaAppModule {
         dispatchers: Dispatchers
     ): ApolloWrapper {
         return ApolloWrapper(neevaUserToken, null, coroutineScope, dispatchers)
+    }
+
+    @Provides
+    @Singleton
+    fun providesClientLogger(apolloWrapper: ApolloWrapper): ClientLogger {
+        return ClientLogger(apolloWrapper)
     }
 
     @Provides

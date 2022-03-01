@@ -26,7 +26,8 @@ fun SuggestionList(
     historySuggestions: List<NavSuggestion>,
     faviconCache: FaviconCache,
     onOpenUrl: (Uri) -> Unit,
-    onEditUrl: (String) -> Unit
+    onEditUrl: (String) -> Unit,
+    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null
 ) {
     LazyColumn(
         modifier = Modifier
@@ -44,7 +45,7 @@ fun SuggestionList(
 
         topSuggestion?.let {
             item {
-                NavSuggestion(faviconCache, onOpenUrl, it)
+                NavSuggestion(faviconCache, onOpenUrl, onTapSuggestion, it)
             }
         }
 
@@ -62,7 +63,8 @@ fun SuggestionList(
                     QuerySuggestionRow(
                         suggestion = queryRowSuggestion,
                         onLoadUrl = onOpenUrl,
-                        onEditUrl = { onEditUrl(queryRowSuggestion.query) }
+                        onEditUrl = { onEditUrl(queryRowSuggestion.query) },
+                        onTapSuggestion = onTapSuggestion
                     )
                 }
 
@@ -70,7 +72,7 @@ fun SuggestionList(
                     queryNavSuggestions.filter { it.queryIndex == index },
                     { "${it.url} ${it.queryIndex}" }
                 ) {
-                    NavSuggestion(faviconCache, onOpenUrl, it)
+                    NavSuggestion(faviconCache, onOpenUrl, onTapSuggestion, it)
                 }
 
                 if (index != queryRowSuggestions.size - 1) {
@@ -90,7 +92,7 @@ fun SuggestionList(
                     unassociatedSuggestions,
                     { "${it.url} ${it.queryIndex}" }
                 ) {
-                    NavSuggestion(faviconCache, onOpenUrl, it)
+                    NavSuggestion(faviconCache, onOpenUrl, onTapSuggestion, it)
                 }
             }
         }
@@ -108,7 +110,7 @@ fun SuggestionList(
                 historySuggestions,
                 { "${it.url} ${it.queryIndex}" }
             ) {
-                NavSuggestion(faviconCache, onOpenUrl, it)
+                NavSuggestion(faviconCache, onOpenUrl, onTapSuggestion, it)
             }
         }
     }
@@ -135,7 +137,8 @@ fun SuggestionList_PreviewFullyLoaded() {
             topSuggestion = NavSuggestion(
                 url = Uri.parse("https://www.reddit.com"),
                 label = stringResource(R.string.debug_long_string_primary),
-                secondaryLabel = stringResource(R.string.debug_long_string_secondary)
+                secondaryLabel = stringResource(R.string.debug_long_string_secondary),
+                type = SuggestionType.AUTOCOMPLETE_SUGGESTION
             ),
             queryRowSuggestions = listOf(
                 QueryRowSuggestion(
@@ -159,50 +162,59 @@ fun SuggestionList_PreviewFullyLoaded() {
                     url = Uri.parse("Suggestion 1"),
                     label = "Suggestion 1 for query 3",
                     secondaryLabel = stringResource(R.string.debug_long_string_secondary),
-                    queryIndex = 2
+                    queryIndex = 2,
+                    type = SuggestionType.MEMORIZED_SUGGESTION
                 ),
                 NavSuggestion(
                     url = Uri.parse("Suggestion 2"),
                     label = "Suggestion 2 for query 3",
                     secondaryLabel = stringResource(R.string.debug_long_string_secondary),
-                    queryIndex = 2
+                    queryIndex = 2,
+                    type = SuggestionType.MEMORIZED_SUGGESTION
                 ),
                 NavSuggestion(
                     url = Uri.parse("Suggestion 3"),
                     label = "Suggestion 1 for query 1",
                     secondaryLabel = stringResource(R.string.debug_long_string_secondary),
-                    queryIndex = 0
+                    queryIndex = 0,
+                    type = SuggestionType.MEMORIZED_SUGGESTION
                 ),
                 NavSuggestion(
                     url = Uri.parse("Suggestion 4"),
                     label = "Unassociated suggestion #1",
-                    secondaryLabel = "Suggestion 4"
+                    secondaryLabel = "Suggestion 4",
+                    type = SuggestionType.MEMORIZED_SUGGESTION
                 ),
                 NavSuggestion(
                     url = Uri.parse("Suggestion 5"),
                     label = "Unassociated suggestion #2",
-                    secondaryLabel = "Suggestion 5"
+                    secondaryLabel = "Suggestion 5",
+                    type = SuggestionType.MEMORIZED_SUGGESTION
                 ),
             ),
             historySuggestions = listOf(
                 NavSuggestion(
                     url = Uri.parse("Suggestion 1"),
                     label = "History suggestion 1",
-                    secondaryLabel = stringResource(R.string.debug_long_string_secondary)
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary),
+                    type = SuggestionType.HISTORY_SUGGESTION
                 ),
                 NavSuggestion(
                     url = Uri.parse("Suggestion 2"),
                     label = "History suggestion 2",
-                    secondaryLabel = stringResource(R.string.debug_long_string_secondary)
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary),
+                    type = SuggestionType.HISTORY_SUGGESTION
                 ),
                 NavSuggestion(
                     url = Uri.parse("Suggestion 3"),
                     label = "History suggestion 3",
-                    secondaryLabel = stringResource(R.string.debug_long_string_secondary)
+                    secondaryLabel = stringResource(R.string.debug_long_string_secondary),
+                    type = SuggestionType.HISTORY_SUGGESTION
                 ),
             ),
             faviconCache = mockFaviconCache,
-            onOpenUrl = {}
-        ) {}
+            onOpenUrl = {},
+            onEditUrl = {}
+        )
     }
 }

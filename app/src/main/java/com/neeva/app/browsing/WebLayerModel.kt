@@ -12,6 +12,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
 import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceStore
@@ -48,7 +49,8 @@ class WebLayerModel @Inject constructor(
     apolloWrapper: ApolloWrapper,
     spaceStore: SpaceStore,
     private val dispatchers: Dispatchers,
-    private val neevaUser: NeevaUser
+    private val neevaUser: NeevaUser,
+    private val clientLogger: ClientLogger
 ) : AndroidViewModel(application) {
     companion object {
         val TAG = WebLayerModel::class.simpleName
@@ -67,7 +69,8 @@ class WebLayerModel @Inject constructor(
         apolloWrapper = apolloWrapper,
         historyManager = historyManager,
         spaceStore = spaceStore,
-        neevaUser = neevaUser
+        neevaUser = neevaUser,
+        clientLogger = clientLogger
     )
     private var incognitoBrowser: IncognitoBrowserWrapper? = null
     private lateinit var regularProfile: Profile

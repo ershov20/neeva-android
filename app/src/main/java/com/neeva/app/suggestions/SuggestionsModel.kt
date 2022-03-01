@@ -8,6 +8,8 @@ import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.type.QuerySuggestionType
@@ -26,7 +28,9 @@ data class NavSuggestion(
     val url: Uri,
     val label: String,
     val secondaryLabel: String,
-    val queryIndex: Int? = null
+    val queryIndex: Int? = null,
+    val type: SuggestionType,
+    val position: Int? = null
 )
 
 data class QueryRowSuggestion(
@@ -46,12 +50,22 @@ data class Suggestions(
     val navSuggestions: List<NavSuggestion> = emptyList()
 )
 
+enum class SuggestionType {
+    AUTOCOMPLETE_SUGGESTION,
+    QUERY_SUGGESTION,
+    HISTORY_SUGGESTION,
+    MEMORIZED_SUGGESTION,
+    NO_SUGGESTION_URL,
+    NO_SUGGESTION_QUERY
+}
+
 /** Maintains a list of suggestions from the backend that correspond to the current query. */
 class SuggestionsModel(
     coroutineScope: CoroutineScope,
     historyManager: HistoryManager,
     private val apolloWrapper: ApolloWrapper,
-    dispatchers: Dispatchers
+    dispatchers: Dispatchers,
+    val clientLogger: ClientLogger
 ) {
     companion object {
         val TAG = SuggestionsModel::class.simpleName
@@ -113,13 +127,33 @@ class SuggestionsModel(
             navSuggestions = viewableSuggestions
         )
     }
+
+    fun logSuggestionTap(type: SuggestionType, pos: Int?) {
+        val interactionType = when (type) {
+            SuggestionType.QUERY_SUGGESTION ->
+                LogConfig.Interaction.QUERY_SUGGESTION
+            SuggestionType.AUTOCOMPLETE_SUGGESTION ->
+                LogConfig.Interaction.AUTOCOMPLETE_SUGGESTION
+            SuggestionType.HISTORY_SUGGESTION ->
+                LogConfig.Interaction.HISTORY_SUGGESTION
+            SuggestionType.MEMORIZED_SUGGESTION ->
+                LogConfig.Interaction.MEMORIZED_SUGGESTION
+            SuggestionType.NO_SUGGESTION_URL ->
+                LogConfig.Interaction.NO_SUGGESTION_URL
+            SuggestionType.NO_SUGGESTION_QUERY ->
+                LogConfig.Interaction.NO_SUGGESTION_QUERY
+            else -> return
+        }
+        clientLogger.logCounter(interactionType, null)
+    }
 }
 
 fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() = NavSuggestion(
     url = Uri.parse(suggestedURL),
     label = subtitle ?: "",
     secondaryLabel = title ?: "",
-    queryIndex = sourceQueryIndex
+    queryIndex = sourceQueryIndex,
+    type = SuggestionType.MEMORIZED_SUGGESTION
 )
 
 fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() = QueryRowSuggestion(
@@ -145,7 +179,8 @@ fun Site.toNavSuggestion(domainProvider: DomainProvider): NavSuggestion {
     return NavSuggestion(
         url = uri,
         label = toUserVisibleString(domainProvider),
-        secondaryLabel = uri.toString()
+        secondaryLabel = uri.toString(),
+        type = SuggestionType.HISTORY_SUGGESTION
     )
 }
 

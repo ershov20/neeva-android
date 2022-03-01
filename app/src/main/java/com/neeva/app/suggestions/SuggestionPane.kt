@@ -61,10 +61,12 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
                     queryNavSuggestions = queryNavSuggestions,
                     historySuggestions = historySuggestions,
                     faviconCache = faviconCache,
-                    onOpenUrl = browserWrapper::loadUrl
-                ) {
-                    urlBarModel.replaceLocationBarText(it)
-                }
+                    onOpenUrl = browserWrapper::loadUrl,
+                    onEditUrl = {
+                        urlBarModel.replaceLocationBarText(it)
+                    },
+                    onTapSuggestion = suggestionsModel?.let { it::logSuggestionTap }
+                )
             }
 
             browserWrapper.isIncognito -> {

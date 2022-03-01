@@ -68,8 +68,13 @@ class URLBarModelImpl(
                 // If there isn't a match, show the search provider's icon if the URI will perform
                 // a search.
                 val isSearchUri = userInputStateValue.uriToLoad.isNeevaSearchUri()
-                return newState.copy(faviconBitmap = if (isSearchUri) neevaFavicon else null)
+                return newState.copy(
+                    faviconBitmap = if (isSearchUri) neevaFavicon else null,
+                    hasAutocompleteSuggestion = false
+                )
             }
+
+        newState = newState.copy(hasAutocompleteSuggestion = suggestion != null)
 
         // Display the user's text with the autocomplete suggestion tacked on.
         val newTextFieldValue = TextFieldValue(

@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
+import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
@@ -48,6 +49,7 @@ import com.neeva.app.widgets.FaviconView
 @Composable
 fun AutocompleteTextField(
     urlBarModel: URLBarModel,
+    suggestionsModel: SuggestionsModel?,
     urlBarModelState: URLBarModelState,
     backgroundColor: Color,
     foregroundColor: Color,
@@ -70,6 +72,7 @@ fun AutocompleteTextField(
         onLoadUrl = {
             browserWrapper.loadUrl(urlBarModelState.uriToLoad)
             focusManager.clearFocus()
+            suggestionsModel?.logSuggestionTap(urlBarModelState.getSuggestionType(), null)
         },
         backgroundColor = backgroundColor,
         foregroundColor = foregroundColor,
@@ -113,6 +116,7 @@ fun AutocompleteTextField(
                             // If we're seeing a hardware enter key, intercept it to prevent adding
                             // a newline to the URL.
                             onLoadUrl()
+
                             true
                         } else {
                             false

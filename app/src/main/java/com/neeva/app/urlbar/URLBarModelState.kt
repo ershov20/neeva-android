@@ -3,6 +3,8 @@ package com.neeva.app.urlbar
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.ui.text.input.TextFieldValue
+import com.neeva.app.browsing.isNeevaSearchUri
+import com.neeva.app.suggestions.SuggestionType
 
 data class URLBarModelState(
     /** Whether or not the user is editing the URL bar and should be shown suggestions. */
@@ -21,9 +23,20 @@ data class URLBarModelState(
     val uriToLoad: Uri = Uri.EMPTY,
 
     /** Favicon associated with the [uriToLoad]. */
-    val faviconBitmap: Bitmap? = null
+    val faviconBitmap: Bitmap? = null,
+
+    /** Whether we have autocomplete suggestion on the url bar. */
+    val hasAutocompleteSuggestion: Boolean = false
 ) {
     /** Alerts observers to what the user is currently typing. */
     val queryText: String?
         get() = userTypedInput.takeIf { isEditing }
+
+    fun getSuggestionType(): SuggestionType {
+        return when {
+            hasAutocompleteSuggestion -> SuggestionType.AUTOCOMPLETE_SUGGESTION
+            uriToLoad.isNeevaSearchUri() -> SuggestionType.NO_SUGGESTION_QUERY
+            else -> SuggestionType.NO_SUGGESTION_URL
+        }
+    }
 }
