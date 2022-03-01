@@ -10,7 +10,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -244,46 +243,59 @@ fun CardGrid(
             BottomAppBar(
                 backgroundColor = MaterialTheme.colorScheme.background
             ) {
-                val deleteEnabled = tabs.isNotEmpty()
-                IconButton(
-                    enabled = deleteEnabled,
-                    onClick = cardGridListener::onCloseAllTabs
-                ) {
-                    val deleteButtonAlpha = getClickableAlpha(deleteEnabled)
-                    Icon(
-                        Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.close_all_content_description),
-                        tint = LocalContentColor.current.copy(
-                            alpha = deleteButtonAlpha
+                Box(modifier = Modifier.weight(1.0f)) {
+                    val deleteEnabled = tabs.isNotEmpty()
+                    IconButton(
+                        enabled = deleteEnabled,
+                        onClick = cardGridListener::onCloseAllTabs,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    ) {
+                        val deleteButtonAlpha = getClickableAlpha(deleteEnabled)
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = stringResource(
+                                R.string.close_all_content_description
+                            ),
+                            tint = LocalContentColor.current.copy(
+                                alpha = deleteButtonAlpha
+                            )
                         )
-                    )
+                    }
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(
-                    onClick = cardGridListener::onOpenLazyTab
-                ) {
-                    Icon(
-                        Icons.Default.Add,
-                        contentDescription = stringResource(R.string.new_tab_content_description),
-                        tint = LocalContentColor.current
-                    )
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                val closeButtonAlpha = getClickableAlpha(closeButtonEnabled)
-                TextButton(
-                    onClick = cardGridListener::onDone,
-                    enabled = closeButtonEnabled,
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = LocalContentColor.current.copy(
-                            alpha = closeButtonAlpha
+
+                Box(modifier = Modifier.weight(1f)) {
+                    IconButton(
+                        onClick = cardGridListener::onOpenLazyTab,
+                        modifier = Modifier.align(Alignment.Center)
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = stringResource(
+                                R.string.new_tab_content_description
+                            ),
+                            tint = LocalContentColor.current
                         )
-                    )
-                ) {
-                    Text(
-                        modifier = Modifier.padding(8.dp),
-                        text = stringResource(id = R.string.done),
-                        style = MaterialTheme.typography.titleMedium
-                    )
+                    }
+                }
+
+                Box(modifier = Modifier.weight(1f)) {
+                    val closeButtonAlpha = getClickableAlpha(closeButtonEnabled)
+                    TextButton(
+                        onClick = cardGridListener::onDone,
+                        enabled = closeButtonEnabled,
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = LocalContentColor.current.copy(
+                                alpha = closeButtonAlpha
+                            )
+                        ),
+                        modifier = Modifier.align(Alignment.CenterEnd)
+                    ) {
+                        Text(
+                            modifier = Modifier.padding(8.dp),
+                            text = stringResource(id = R.string.done),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
                 }
             }
         }
