@@ -114,7 +114,9 @@
     <string name="submit_feedback_help_center_title">Need help or want instant answers to FAQs?</string>
     <string name="submit_feedback_help_center_link">Visit our help center!</string>
     <string name="submit_feedback_share_screenshot">Share Screenshot</string>
-    <string name="submit_feedback_view_edit_screenshot">View or edit</string>
+    <string name="submit_feedback_share_screenshot_preview">Feedback Screenshot</string>
+    <string name="submit_feedback_remove_screenshot">Remove</string>
+    <string name="submit_feedback_upload_screenshot">Upload</string>
     <string name="submit_feedback_view_share_url">Share URL</string>
     <string name="submit_feedback_textfield_placeholder">Please share your questions, issues, or feature requests. Your feedback helps us improve Neeva!</string>
     <string name="edit_feedback_url">Edit URL</string>

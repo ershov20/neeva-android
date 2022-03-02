@@ -131,6 +131,7 @@ class AppNavModel(
     fun showFirstRun() = show(AppNavDestination.FIRST_RUN)
     fun showHistory() = show(AppNavDestination.HISTORY)
     fun showFeedback() = show(AppNavDestination.FEEDBACK)
+    fun showFeedbackPreviewImage() = show(AppNavDestination.FEEDBACK_PREVIEW_IMAGE)
 
     fun onMenuItem(id: NeevaMenuItemId) {
         when (id) {

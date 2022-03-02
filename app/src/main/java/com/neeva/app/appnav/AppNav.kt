@@ -7,14 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
+import com.neeva.app.feedback.FeedbackPreviewImageView
 import com.neeva.app.feedback.FeedbackView
 import com.neeva.app.feedback.FeedbackViewModelImpl
 import com.neeva.app.firstrun.FirstRunContainer
@@ -129,14 +128,16 @@ fun AppNav(
         }
 
         composable(AppNavDestination.FEEDBACK.route) {
-            feedbackViewModel.createScreenshot(
-                context = LocalContext.current,
-                view = LocalView.current
-            )
-
             FeedbackView(
                 feedbackViewModel = feedbackViewModel,
                 currentURL = webLayerModel.currentBrowser.activeTabModel.urlFlow
+            )
+        }
+
+        composable(AppNavDestination.FEEDBACK_PREVIEW_IMAGE.route) {
+            FeedbackPreviewImageView(
+                appNavModel = appNavModel,
+                imageUri = feedbackViewModel.imageUri
             )
         }
     }

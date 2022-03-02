@@ -1,13 +1,19 @@
 package com.neeva.app.feedback
 
 import android.net.Uri
+import androidx.activity.compose.ManagedActivityResultLauncher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,12 +31,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -40,6 +47,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberImagePainter
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.ui.theme.FullScreenDialogTopBar
@@ -52,13 +60,21 @@ fun FeedbackView(
     feedbackViewModel: FeedbackViewModel,
     currentURL: StateFlow<Uri>
 ) {
-    var text = remember { mutableStateOf("") }
-    val shouldShareScreenshot = remember { mutableStateOf(false) }
+    var text = rememberSaveable { mutableStateOf("") }
+
+    val imageUri: MutableState<Uri?> = rememberSaveable { mutableStateOf(null) }
+    val imageGalleryLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ) {
+        imageUri.value = it
+    }
+
     val shouldShareURL = remember { mutableStateOf(true) }
     val url = remember { mutableStateOf(currentURL.value.toString()) }
 
     val apolloWrapper = LocalEnvironment.current.apolloWrapper
     val dispatchers = LocalEnvironment.current.dispatchers
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -72,14 +88,15 @@ fun FeedbackView(
             buttonPressed = {
                 feedbackViewModel.onSubmitFeedbackPressed(
                     feedback = text.value,
-                    shareScreenshot = shouldShareScreenshot.value,
+                    imageUri = imageUri.value,
                     url = if (shouldShareURL.value) {
                         url.value
                     } else {
                         null
                     },
                     apolloWrapper = apolloWrapper,
-                    dispatchers = dispatchers
+                    dispatchers = dispatchers,
+                    contentResolver = context.contentResolver
                 )
             }
         )
@@ -160,7 +177,11 @@ fun FeedbackView(
                 shape = RoundedCornerShape(10.dp)
             )
 
-            ShareScreenshotView(shouldShareScreenshot)
+            ShareScreenshotView(
+                feedbackViewModel,
+                imageUri,
+                imageGalleryLauncher
+            )
 
             ShareURLView(
                 url,
@@ -172,29 +193,94 @@ fun FeedbackView(
 
 @Composable
 private fun ShareScreenshotView(
-    toggleState: MutableState<Boolean>
+    feedbackViewModel: FeedbackViewModel,
+    imageUri: MutableState<Uri?>,
+    imageGalleryLauncher: ManagedActivityResultLauncher<String, Uri?>
 ) {
     FeedbackOptionBox(
-        toggleState = toggleState,
-        enabled = false,
-        verticalSpacing = -16.dp,
-        title = {
-            Text(
-                stringResource(
-                    R.string.submit_feedback_share_screenshot
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold
-            )
+        bottomPadding = if (imageUri.value != null) {
+            16.dp
+        } else {
+            0.dp
+        },
+        header = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(
+                            top = if (imageUri.value == null) {
+                                8.dp
+                            } else {
+                                0.dp
+                            }
+                        )
+                ) {
+                    Text(
+                        stringResource(
+                            R.string.submit_feedback_share_screenshot
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                if (imageUri.value != null) {
+                    TextButton(
+                        modifier = Modifier
+                            .defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
+                        contentPadding = PaddingValues(0.dp),
+                        onClick = {
+                            imageUri.value = null
+                        }
+                    ) {
+                        Text(
+                            stringResource(
+                                R.string.submit_feedback_remove_screenshot
+                            ),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
         }
     ) {
-        TextButton(
-            contentPadding = PaddingValues(2.dp),
-            onClick = { /*TODO*/ }
-        ) {
-            Text(
-                text = stringResource(R.string.submit_feedback_view_edit_screenshot),
-                color = Color.Gray
+        if (imageUri.value == null) {
+            TextButton(
+                modifier = Modifier
+                    .padding(
+                        bottom = if (imageUri.value != null) {
+                            8.dp
+                        } else {
+                            0.dp
+                        }
+                    )
+                    .defaultMinSize(minWidth = 1.dp),
+                contentPadding = PaddingValues(0.dp),
+                onClick = {
+                    imageGalleryLauncher.launch("image/*")
+                }
+            ) {
+                Text(
+                    text = stringResource(R.string.submit_feedback_upload_screenshot),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        } else {
+            Image(
+                modifier = Modifier
+                    .height(200.dp)
+                    .clickable {
+                        feedbackViewModel.showImagePreview(imageUri.value ?: Uri.EMPTY)
+                    },
+                painter = rememberImagePainter(imageUri.value),
+                contentDescription = stringResource(
+                    R.string.submit_feedback_share_screenshot_preview
+                )
             )
         }
     }
@@ -207,15 +293,44 @@ private fun ShareURLView(
 ) {
     FeedbackOptionBox(
         modifier = Modifier.padding(bottom = 12.dp),
-        toggleState = toggleState,
-        title = {
-            Text(
-                stringResource(
-                    R.string.submit_feedback_view_share_url
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold
-            )
+        header = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(top = 8.dp)
+                ) {
+                    Text(
+                        stringResource(
+                            R.string.submit_feedback_view_share_url
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Switch(
+                    checked = toggleState.value,
+                    modifier = Modifier
+                        .height(IntrinsicSize.Min),
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
+                        checkedTrackColor = MaterialTheme.colorScheme.inversePrimary,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.outline,
+                        disabledCheckedThumbColor = MaterialTheme.colorScheme.inverseOnSurface,
+                        disabledUncheckedThumbColor = MaterialTheme.colorScheme.inverseOnSurface,
+                        disabledCheckedTrackColor = MaterialTheme.colorScheme.onSurface,
+                        disabledUncheckedTrackColor = MaterialTheme.colorScheme.onSurface,
+                    ),
+                    onCheckedChange = { toggleState.value = it }
+                )
+            }
         }
     ) {
         TextField(
@@ -244,10 +359,9 @@ private fun ShareURLView(
 @Composable
 private fun FeedbackOptionBox(
     modifier: Modifier = Modifier,
-    toggleState: MutableState<Boolean>,
-    enabled: Boolean = true,
     verticalSpacing: Dp = -8.dp,
-    title: @Composable (() -> Unit),
+    bottomPadding: Dp = 0.dp,
+    header: @Composable (() -> Unit),
     content: @Composable (() -> Unit)
 ) {
     Box(
@@ -261,41 +375,12 @@ private fun FeedbackOptionBox(
             )
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 14.dp),
+            modifier = Modifier
+                .padding(horizontal = 14.dp)
+                .padding(bottom = bottomPadding),
             verticalArrangement = Arrangement.spacedBy(verticalSpacing)
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                ) {
-                    title()
-                }
-
-                Switch(
-                    checked = toggleState.value,
-                    modifier = Modifier
-                        .height(IntrinsicSize.Min),
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.primary,
-                        uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
-                        checkedTrackColor = MaterialTheme.colorScheme.inversePrimary,
-                        uncheckedTrackColor = MaterialTheme.colorScheme.outline,
-                        disabledCheckedThumbColor = MaterialTheme.colorScheme.inverseOnSurface,
-                        disabledUncheckedThumbColor = MaterialTheme.colorScheme.inverseOnSurface,
-                        disabledCheckedTrackColor = MaterialTheme.colorScheme.onSurface,
-                        disabledUncheckedTrackColor = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    onCheckedChange = { toggleState.value = it },
-                    enabled = enabled
-                )
-            }
-
+            header()
             content()
         }
     }
