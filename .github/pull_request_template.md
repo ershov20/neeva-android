@@ -9,13 +9,14 @@ or attempting to add new functionality_
 ## Checklists
 
 ### How was this tested?
-[ ] I tested this manually
-[ ] I added automated tests
-[ ] Existing automated tests are enough to cover my changes
+- [ ] I tested this manually
+- [ ] I added automated tests
+- [ ] Existing automated tests are enough to cover my changes
 
 ### Manual test cases
 If manually tested, describe the different scenarios you followed to ensure
-that your changes work.
+that your changes work.  Make sure that you've tested as many pathways as
+possible -- not just the [happy path](https://en.wikipedia.org/wiki/Happy_path).
 
 ### Screenshots and screen recordings
 Images or videos showing the effect of your PR.  Examples include:
