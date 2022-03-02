@@ -20,8 +20,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.whenStarted
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.appnav.AppNavDestination
@@ -43,8 +44,8 @@ import com.neeva.app.userdata.NeevaUserToken
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.ContextMenuParams
@@ -136,18 +137,19 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
 
         lifecycleScope.launch {
-            lifecycle.whenStarted {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 webLayerModel.initializationState
                     .combine(webLayerModel.browserWrapperFlow) { loadingState, browserWrapper ->
                         Pair(loadingState, browserWrapper)
                     }
-                    .stateIn(lifecycleScope)
-                    .collect { (loadingState, browserWrapper) ->
-                        if (loadingState != LoadingState.READY) return@collect
-                        prepareWebLayer(browserWrapper)
+                    .collectLatest { (loadingState, browserWrapper) ->
+                        if (loadingState != LoadingState.READY) return@collectLatest
 
-                        // Check if there are any Intents that have URLs that need to be loaded.
-                        activityViewModel.getPendingLaunchIntent()?.let { processIntent(intent) }
+                        if (prepareWebLayer(browserWrapper)) {
+                            // Check if there are any Intents that have URLs that need to be loaded.
+                            activityViewModel.getPendingLaunchIntent()
+                                ?.let { processIntent(intent) }
+                        }
                     }
             }
         }
@@ -208,21 +210,23 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         showBrowser()
     }
 
-    private fun prepareWebLayer(browserWrapper: BrowserWrapper) {
+    private fun prepareWebLayer(browserWrapper: BrowserWrapper): Boolean {
         when {
-            webLayerModel.initializationState.value != LoadingState.READY -> return
-            isFinishing -> return
-            isDestroyed -> return
+            webLayerModel.initializationState.value != LoadingState.READY -> return false
+            isFinishing -> return false
+            isDestroyed -> return false
         }
 
         val topControlPlaceholder = View(this)
         val bottomControlPlaceholder = View(this)
-        webLayerModel.onWebLayerReady(
+        webLayerModel.prepareBrowserWrapper(
             browserWrapper,
             topControlPlaceholder,
             bottomControlPlaceholder,
             this::attachWebLayerFragment
         )
+
+        return true
     }
 
     /**
@@ -233,27 +237,50 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
      * app is foregrounded again.
      */
     private fun attachWebLayerFragment(fragment: Fragment, isIncognito: Boolean) {
-        // Note the commitNow() instead of commit(). We want the fragment to get attached to
-        // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
-        // have to wait until the commit is executed.
+        // Look for any existing WebLayer fragments.  Fragments may already exist if:
+        // * The user swapped to the other Browser profile and then back
+        // * The Activity died in the background or it was recreated because of a config change
         val regularFragment = supportFragmentManager.findFragmentByTag(TAG_REGULAR_PROFILE)
         val incognitoFragment = supportFragmentManager.findFragmentByTag(TAG_INCOGNITO_PROFILE)
 
-        val transaction = supportFragmentManager.beginTransaction()
+        val otherProfileFragment: Fragment?
+        val existingFragment: Fragment?
+        val fragmentTag: String
+
         if (isIncognito) {
-            regularFragment?.let { transaction.detach(it) }
-
-            incognitoFragment
-                ?.let { transaction.attach(it) }
-                ?: run { transaction.add(R.id.weblayer_fragment, fragment, TAG_INCOGNITO_PROFILE) }
+            otherProfileFragment = regularFragment
+            existingFragment = incognitoFragment
+            fragmentTag = TAG_INCOGNITO_PROFILE
         } else {
-            incognitoFragment?.let { transaction.detach(it) }
-
-            regularFragment
-                ?.let { transaction.attach(it) }
-                ?: run { transaction.add(R.id.weblayer_fragment, fragment, TAG_REGULAR_PROFILE) }
+            otherProfileFragment = incognitoFragment
+            existingFragment = regularFragment
+            fragmentTag = TAG_REGULAR_PROFILE
         }
 
+        val transaction = supportFragmentManager.beginTransaction()
+
+        // Detach the Fragment for the other profile so that WebLayer knows that the user isn't
+        // actively using that Profile.  This also prevents WebLayer from automatically reshowing
+        // the Browser attached to that Fragment as soon as the Activity starts up.
+        otherProfileFragment?.let { transaction.detach(it) }
+
+        if (existingFragment != null) {
+            if (fragment == existingFragment) {
+                // Re-attach the Fragment so that WebLayer knows that it is now active.
+                transaction.attach(fragment)
+            } else {
+                // In cases where the Activity restarts, the Fragments from the previous WebLayer
+                // initialization stick around in memory.  Remove it and add the new one.
+                transaction.remove(existingFragment)
+                transaction.add(R.id.weblayer_fragment, fragment, fragmentTag)
+            }
+        } else {
+            transaction.add(R.id.weblayer_fragment, fragment, fragmentTag)
+        }
+
+        // Note the commitNow() instead of commit(). We want the fragment to get attached to
+        // activity synchronously, so we can use all the functionality immediately. Otherwise we'd
+        // have to wait until the commit is executed.
         transaction.commitNow()
     }
 
@@ -261,7 +288,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         val browserWrapper = webLayerModel.currentBrowser
 
         when {
-            browserWrapper.exitFullscreen() || browserWrapper.dismissTransientUi() == true -> {
+            browserWrapper.exitFullscreen() || browserWrapper.dismissTransientUi() -> {
                 return
             }
 

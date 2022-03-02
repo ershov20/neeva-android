@@ -223,7 +223,10 @@ abstract class BrowserWrapper(
         }
     }
 
-    fun initialize() {
+    internal fun initialize() {
+        // TODO(https://github.com/neevaco/neeva-android/issues/318): We should try to reuse any
+        // existing Fragments that were kept by the FragmentManager after the Activity died in the
+        // background.
         fragment = createBrowserFragment()
 
         // Keep the WebLayer instance across Activity restarts so that the Browser doesn't get

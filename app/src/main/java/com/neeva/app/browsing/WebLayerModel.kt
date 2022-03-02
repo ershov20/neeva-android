@@ -58,7 +58,7 @@ class WebLayerModel @Inject constructor(
 
     var activityCallbacks: WeakReference<ActivityCallbacks> = WeakReference(null)
 
-    private val _webLayer = MutableStateFlow<WebLayer?>(null)
+    private val webLayer = MutableStateFlow<WebLayer?>(null)
 
     private val regularBrowser = RegularBrowserWrapper(
         appContext = application,
@@ -75,11 +75,13 @@ class WebLayerModel @Inject constructor(
     private var incognitoBrowser: IncognitoBrowserWrapper? = null
     private lateinit var regularProfile: Profile
 
-    /** Keeps track of the initialization pipeline. */
+    /** Keeps track of the non-WebLayer initialization pipeline. */
     private val internalInitializationState = MutableStateFlow(LoadingState.UNINITIALIZED)
+
+    /** Keeps track of when everything is ready to use. */
     val initializationState: StateFlow<LoadingState> =
         internalInitializationState
-            .combine(_webLayer) { internalState, webLayer ->
+            .combine(webLayer) { internalState, webLayer ->
                 LoadingState.from(
                     internalState,
                     if (webLayer == null) LoadingState.LOADING else LoadingState.READY
@@ -88,9 +90,8 @@ class WebLayerModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.Lazily, LoadingState.LOADING)
 
     private val _browserWrapperFlow = MutableStateFlow<BrowserWrapper>(regularBrowser)
-    val browserWrapperFlow: StateFlow<BrowserWrapper> = _browserWrapperFlow
-    val currentBrowser
-        get() = browserWrapperFlow.value
+    val browserWrapperFlow: StateFlow<BrowserWrapper> get() = _browserWrapperFlow
+    val currentBrowser get() = browserWrapperFlow.value
 
     init {
         viewModelScope.launch(dispatchers.io) {
@@ -104,11 +105,11 @@ class WebLayerModel @Inject constructor(
                 webLayer.isRemoteDebuggingEnabled = true
 
                 regularProfile = RegularBrowserWrapper.getProfile(webLayer)
-                regularBrowser.initialize()
 
+                regularBrowser.initialize()
                 incognitoBrowser?.initialize()
 
-                _webLayer.value = webLayer
+                this.webLayer.value = webLayer
             }
         } catch (e: UnsupportedVersionException) {
             throw RuntimeException("Failed to initialize WebLayer", e)
@@ -121,7 +122,7 @@ class WebLayerModel @Inject constructor(
      * you should guard against two different instances of the same observer and or callback from
      * being registered.
      */
-    fun onWebLayerReady(
+    fun prepareBrowserWrapper(
         browserWrapper: BrowserWrapper,
         topControlsPlaceholder: View,
         bottomControlsPlaceholder: View,
@@ -137,6 +138,13 @@ class WebLayerModel @Inject constructor(
     /** Loads the given [url] in a new tab. */
     fun loadUrl(url: Uri) = currentBrowser.loadUrl(url, newTab = true)
 
+    /**
+     * Switches the user to the specified profile.
+     *
+     * If the user is trying to switch to Incognito after the Browser has been destroyed, it creates
+     * a new one on the fly.  If the user is trying to switch back to regular mode after closing all
+     * of their Incognito tabs, the Incognito profile is destroyed.
+     */
     fun switchToProfile(useIncognito: Boolean) {
         if (currentBrowser.isIncognito == useIncognito) return
 
@@ -156,7 +164,7 @@ class WebLayerModel @Inject constructor(
             incognitoBrowser = delegate
             delegate
         } else {
-            // Delete incognito if there's no reason to keep it around.
+            // Delete the Incognito profile if the user has closed all of their tabs.
             if (incognitoBrowser?.hasNoTabs() == true) {
                 Log.d(TAG, "Culling unnecessary incognito profile")
                 activityCallbacks.get()?.detachIncognitoFragment()
