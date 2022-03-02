@@ -1,5 +1,6 @@
 package com.neeva.app
 
+import android.app.SearchManager
 import android.content.Intent
 import android.graphics.Rect
 import android.net.Uri
@@ -32,6 +33,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.isSelected
+import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.neeva_menu.LocalMenuData
@@ -188,22 +190,40 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     private fun processIntent(intent: Intent?) {
-        if (intent?.action != Intent.ACTION_VIEW) return
-
-        if (Uri.parse(intent.dataString).scheme == "neeva") {
-            NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
-                neevaUser.neevaUserToken.setToken(it)
-                webLayerModel.onAuthTokenUpdated()
-                showBrowser()
-                webLayerModel.currentBrowser.reload()
+        when (intent?.action) {
+            Intent.ACTION_VIEW -> {
+                if (Uri.parse(intent.dataString).scheme == "neeva") {
+                    NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
+                        neevaUser.neevaUserToken.setToken(it)
+                        webLayerModel.onAuthTokenUpdated()
+                        showBrowser()
+                        webLayerModel.currentBrowser.reload()
+                    }
+                } else {
+                    intent.data?.let {
+                        webLayerModel.currentBrowser.loadUrl(
+                            uri = it,
+                            newTab = true,
+                            isViaIntent = true
+                        )
+                    }
+                }
             }
-        } else {
-            intent.data?.let {
-                webLayerModel.currentBrowser.loadUrl(
-                    uri = it,
-                    newTab = true,
-                    isViaIntent = true
-                )
+
+            Intent.ACTION_WEB_SEARCH -> {
+                intent.extras?.getString(SearchManager.QUERY)?.let {
+                    val searchUri = it.toSearchUri()
+
+                    webLayerModel.currentBrowser.loadUrl(
+                        uri = searchUri,
+                        newTab = true,
+                        isViaIntent = true
+                    )
+                }
+            }
+
+            else -> {
+                return
             }
         }
 
