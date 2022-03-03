@@ -6,17 +6,19 @@ import okhttp3.Cookie
 object NeevaConstants {
     val appHost: String = "neeva.com"
     val appURL: String = "https://$appHost/"
-    val appMarketingURL: String = appURL
     val appSearchURL: String = "${appURL}search"
     val appSpacesURL: String = "${appURL}spaces"
     val appConnectionsURL: String = "${appURL}connections"
+
     val appSettingsURL: String = "${appURL}settings"
-    val appReferralURL: String = "$appSettingsURL/referrals"
-    val appPrivacyURL: String = "${appMarketingURL}privacy"
-    val appTermsURL: String = "${appMarketingURL}terms"
+    val appReferralURL: String = "${appURL}settings/referrals"
+    val appManageMemory: String = "${appURL}settings#memory-mode"
+
+    val appPrivacyURL: String = "${appURL}privacy"
+    val appTermsURL: String = "${appURL}terms"
+
     val appWelcomeToursURL: String = "$appURL#modal-hello"
     val appHelpCenterURL: String = "https://help.$appHost/"
-    val appManageMemory: String = "${appMarketingURL}settings#memory-mode"
 
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
 

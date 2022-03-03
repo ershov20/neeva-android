@@ -113,10 +113,3 @@ open class ApolloWrapper(
         private val TAG = ApolloWrapper::class.simpleName
     }
 }
-
-fun saveLoginCookieFrom(neevaUserToken: NeevaUserToken, cookie: String) {
-    val parsedCookie = cookie.trim().split("=")
-    if (parsedCookie.first() == loginCookie) {
-        neevaUserToken.setToken(parsedCookie.last())
-    }
-}

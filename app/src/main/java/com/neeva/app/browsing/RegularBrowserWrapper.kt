@@ -5,12 +5,9 @@ import android.net.Uri
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.NeevaConstants.browserTypeCookie
-import com.neeva.app.NeevaConstants.browserVersionCookie
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.saveLoginCookieFrom
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.favicons.RegularFaviconCache
@@ -88,30 +85,37 @@ class RegularBrowserWrapper(
         val wasRegistered = super.registerBrowserCallbacks(browser)
         if (!wasRegistered) return false
 
+        // Keep track of the user's login cookie, which we need for various operations.  These
+        // actions should never be performed on the Incognito profile to avoid contaminating the
+        // user's data with their Incognito history.
         browser.profile.cookieManager.apply {
-            getCookie(Uri.parse(NeevaConstants.appURL)) {
-                it?.split(";")?.forEach { cookie ->
-                    saveLoginCookieFrom(neevaUser.neevaUserToken, cookie)
-                }
+            // Asynchronously parse out a pre-existing login cookie and store it locally.
+            getCookiePairs(Uri.parse(NeevaConstants.appURL)) { cookies ->
+                cookies
+                    .filter { it.key == NeevaConstants.loginCookie }
+                    .forEach { neevaUser.neevaUserToken.setToken(it.value) }
             }
 
+            // If Neeva's login cookie changes, we need to save it and refetch the user's data.
             addCookieChangedCallback(
                 Uri.parse(NeevaConstants.appURL),
                 NeevaConstants.loginCookie,
                 object : CookieChangedCallback() {
                     override fun onCookieChanged(cookie: String, cause: Int) {
-                        saveLoginCookieFrom(neevaUser.neevaUserToken, cookie)
+                        val key = cookie.trim().substringBefore('=')
+                        if (key != NeevaConstants.loginCookie || !cookie.contains('=')) return
+
+                        val value = cookie.trim().substringAfter('=')
+                        neevaUser.neevaUserToken.setToken(value)
                         coroutineScope.launch(dispatchers.io) {
                             neevaUser.fetch(apolloWrapper)
                         }
                     }
                 }
             )
-            setCookie(
-                Uri.parse(NeevaConstants.appURL),
-                browserTypeCookie.toString() + browserVersionCookie.toString()
-            ) {}
 
+            // If we have a cookie saved in the app, set the cookie in the Profile.  This handles
+            // scenarios where the user logs via the app.
             if (neevaUser.neevaUserToken.getToken().isNotEmpty()) {
                 setCookie(
                     Uri.parse(NeevaConstants.appURL),

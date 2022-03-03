@@ -46,7 +46,7 @@ class WebLayerModel @Inject constructor(
     application: Application,
     private val domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
-    apolloWrapper: ApolloWrapper,
+    private val apolloWrapper: ApolloWrapper,
     spaceStore: SpaceStore,
     private val dispatchers: Dispatchers,
     private val neevaUser: NeevaUser,
@@ -154,6 +154,7 @@ class WebLayerModel @Inject constructor(
                 coroutineScope = viewModelScope,
                 dispatchers = dispatchers,
                 activityCallbackProvider = activityCallbacks::get,
+                apolloWrapper = apolloWrapper,
                 domainProvider = domainProviderImpl,
                 onDestroyed = {
                     incognitoBrowser = null

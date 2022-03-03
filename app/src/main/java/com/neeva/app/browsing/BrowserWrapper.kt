@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserRestoreCallback
@@ -42,7 +43,7 @@ import org.chromium.weblayer.UrlBarController
  * [Browser] represents everything required to interact with a set of tabs that are associated with
  * a particular [org.chromium.weblayer.Profile].  Subclasses must be careful to ensure that anything
  * done is allowed by the incognito state defined by the Profile, which means that we are explicitly
- * trying to avoid recording history or automatically firing queries via Apollo (e.g.).
+ * trying to avoid recording history or automatically firing queries & mutations via Apollo (e.g.).
  */
 abstract class BrowserWrapper(
     val isIncognito: Boolean,
@@ -307,6 +308,14 @@ abstract class BrowserWrapper(
             }
         )
 
+        // Let Neeva know that it's serving an Android client.
+        browser.profile.cookieManager.setCookie(
+            Uri.parse(NeevaConstants.appURL),
+            NeevaConstants.browserTypeCookie.toString() +
+                NeevaConstants.browserVersionCookie.toString(),
+            null
+        )
+
         tabListRestorer = restorer
         return true
     }
@@ -504,14 +513,35 @@ abstract class BrowserWrapper(
      *
      * If the user is currently in the process of opening a new tab, this will open a new Tab with
      * the URL.
+     *
+     * If the BrowserWrapper needs to redirect the user to another URI (e.g. if the user is
+     * performing a search in Incognito for the first time), this call will complete asynchronously.
      */
     fun loadUrl(
         uri: Uri,
         newTab: Boolean = _isLazyTabFlow.value,
         isViaIntent: Boolean = false
     ) {
-        _activeTabModel.loadUrl(uri, newTab, isViaIntent)
+        if (!shouldInterceptLoad(uri)) {
+            _activeTabModel.loadUrl(uri, newTab, isViaIntent)
+        } else {
+            coroutineScope.launch {
+                val redirectedUri = withContext(dispatchers.io) {
+                    getReplacementUrl(uri)
+                }
+
+                withContext(dispatchers.main) {
+                    _activeTabModel.loadUrl(redirectedUri, newTab, isViaIntent)
+                }
+            }
+        }
     }
+
+    /** Checks whether or not the BrowserWrapper wants to block loading of the given [uri]. */
+    open fun shouldInterceptLoad(uri: Uri) = false
+
+    /** Returns a URI that should be loaded in place of the given [uri]. */
+    open suspend fun getReplacementUrl(uri: Uri) = uri
 
     /** Asynchronously adds or removes the active tab from the space with given [spaceID]. */
     fun modifySpace(spaceID: String) {
