@@ -87,9 +87,10 @@ object NeevaAppModule {
         @ApplicationContext context: Context,
         apolloWrapper: ApolloWrapper,
         neevaUser: NeevaUser,
-        snackbarModel: SnackbarModel
+        snackbarModel: SnackbarModel,
+        dispatchers: Dispatchers
     ): SpaceStore {
-        return SpaceStore(context, apolloWrapper, neevaUser, snackbarModel)
+        return SpaceStore(context, apolloWrapper, neevaUser, snackbarModel, dispatchers)
     }
 
     @Provides

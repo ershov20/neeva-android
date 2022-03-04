@@ -1,13 +1,23 @@
 package com.neeva.app.spaces
 
+import android.graphics.Bitmap
 import com.neeva.app.ListSpacesQuery
+import com.neeva.app.storage.entities.Space
+import java.io.File
+
+/** Saves the given [Bitmap] as thumbnail to the given directory. */
+fun interface ThumbnailSaver {
+    suspend fun saveThumbnail(id: String, bitmap: Bitmap?): File?
+}
 
 /**
  * Converts the data provided in the Apollo response into a [Space].
  *
  * @return The [Space] if it was successfully created, null otherwise.
  */
-internal fun ListSpacesQuery.Space.toSpace(userId: String?): Space? {
+internal fun ListSpacesQuery.Space.toSpace(
+    userId: String?
+): Space? {
     val id = pageMetadata?.pageID ?: return null
     val querySpace = space ?: return null
     val name = querySpace.name ?: return null
@@ -18,7 +28,7 @@ internal fun ListSpacesQuery.Space.toSpace(userId: String?): Space? {
         id = id,
         name = name,
         lastModifiedTs = lastModifiedTs,
-        thumbnail = querySpace.thumbnail,
+        thumbnail = null,
         resultCount = querySpace.resultCount ?: 0,
         isDefaultSpace = querySpace.isDefaultSpace ?: false,
         isShared = querySpace.acl?.any { it.userID == userId } ?: false,

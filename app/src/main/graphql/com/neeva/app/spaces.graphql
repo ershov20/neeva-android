@@ -15,11 +15,6 @@ query ListSpaces($kind: ListSpacesKind = All) {
           userID
         }
         hasPublicACL
-        thumbnail
-        thumbnailSize {
-          height
-          width
-        }
         resultCount
         isDefaultSpace
       }
@@ -34,7 +29,11 @@ query GetSpacesData($ids: [String!]) {
         pageID
       }
       space {
+	thumbnail
         entities {
+          metadata {
+            docID
+          }
           spaceEntity {
             url
             title

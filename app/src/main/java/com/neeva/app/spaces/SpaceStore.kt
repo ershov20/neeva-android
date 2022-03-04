@@ -3,29 +3,39 @@ package com.neeva.app.spaces
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.annotation.VisibleForTesting
+import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.AddToSpaceMutation
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.DeleteSpaceResultByURLMutation
+import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.R
+import com.neeva.app.storage.BitmapIO
+import com.neeva.app.storage.entities.Space
+import com.neeva.app.storage.entities.SpaceEntityData
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
+import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 
 /** Manages interactions with the user's Spaces. */
 class SpaceStore(
     private val appContext: Context,
     private val apolloWrapper: ApolloWrapper,
     private val neevaUser: NeevaUser,
-    private val snackbarModel: SnackbarModel
+    private val snackbarModel: SnackbarModel,
+    private val dispatchers: Dispatchers
 ) {
     companion object {
         private val TAG = SpaceStore::class.simpleName
+        private const val DIRECTORY = "spaces"
     }
 
     enum class State {
@@ -38,42 +48,48 @@ class SpaceStore(
     val editableSpacesFlow = MutableStateFlow<List<Space>>(emptyList())
     val stateFlow = MutableStateFlow(State.READY)
 
+    @VisibleForTesting
+    val thumbnailDirectory = File(appContext.cacheDir, DIRECTORY)
+
     /** Mapping of URIs to [Space]s that contain them. */
     private val urlToSpacesMap = mutableMapOf<Uri, MutableList<Space>>()
 
+    private var isRefreshPending: Boolean = false
+    private var cleanUpThumbnails: Boolean = true
+
     fun spaceStoreContainsUrl(url: Uri): Boolean = urlToSpacesMap[url]?.isNotEmpty() ?: false
 
-    suspend fun refresh() {
+    suspend fun refresh(space: Space? = null) {
+        if (neevaUser.neevaUserToken.getToken().isEmpty()) return
+
         if (stateFlow.value == State.REFRESHING) {
-            val errorString = appContext.getString(R.string.generic_error)
-            snackbarModel.show(errorString)
+            isRefreshPending = true
             return
         }
 
         stateFlow.value = State.REFRESHING
+        val succeeded = if (space == null) {
+            performRefresh()
+        } else {
+            performFetch(listOf(space))
+        }
 
-        val succeeded = performRefresh()
         stateFlow.value = if (succeeded) {
             State.READY
         } else {
             State.FAILED
         }
-    }
 
-    private suspend fun refreshSpace(space: Space) {
-        if (stateFlow.value == State.REFRESHING) {
-            val errorString = appContext.getString(R.string.generic_error)
-            snackbarModel.show(errorString)
-            return
+        if (cleanUpThumbnails) {
+            cleanUpThumbnails = false
+            withContext(dispatchers.io) {
+                cleanupSpacesThumbnails()
+            }
         }
 
-        stateFlow.value = State.REFRESHING
-
-        val succeeded = performFetch(listOf(space))
-        stateFlow.value = if (succeeded) {
-            State.READY
-        } else {
-            State.FAILED
+        if (isRefreshPending) {
+            isRefreshPending = false
+            refresh()
         }
     }
 
@@ -89,19 +105,23 @@ class SpaceStore(
 
         // Fetch all the of the user's Spaces.
         val spacesToFetch = mutableListOf<Space>()
+
         val spaceList = listSpaces.space
             .map { listSpacesQuery ->
-                val newSpace = listSpacesQuery.toSpace(neevaUser.data.id) ?: return@map null
+                val newSpace = listSpacesQuery.toSpace(
+                    neevaUser.data.id
+                ) ?: return@map null
 
                 val oldSpace = oldSpaceMap[newSpace.id]
+                newSpace.thumbnail = oldSpace?.thumbnail
                 if (oldSpace != null &&
                     oldSpace.lastModifiedTs == newSpace.lastModifiedTs &&
                     oldSpace.contentData != null &&
                     oldSpace.contentURLs != null
                 ) {
                     // The Space hasn't been updated since the last fetch.
-                    // At this point, newSpace doesn't contain any URLs or data so we have to reuse
-                    // the data that was previously fetched.
+                    // At this point, newSpace doesn't contain thumbnail, any URLs or data so we
+                    // have to reuse the data that was previously fetched.
                     onUpdateSpaceURLs(newSpace, oldSpace.contentURLs!!, oldSpace.contentData!!)
                 } else {
                     spacesToFetch.add(newSpace)
@@ -119,30 +139,47 @@ class SpaceStore(
     }
 
     private suspend fun performFetch(spacesToFetch: List<Space>): Boolean {
+        if (spacesToFetch.isEmpty()) return true
         // Get updated data for any Spaces that have changed since the last fetch.
         val spacesDataResponse = apolloWrapper.performQuery(
             GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id }))
         ) ?: return false
 
         spacesDataResponse.data?.getSpace?.space?.forEach { spaceQuery ->
+            val spaceID = spaceQuery.pageMetadata?.pageID ?: return@forEach
             val entityQueries = spaceQuery.space?.entities ?: return@forEach
 
-            val entities = entityQueries
-                .map { entityQuery ->
-                    val url = Uri.parse(entityQuery.spaceEntity?.url) ?: return@map null
+            val entities =
+                entityQueries.filter { it.metadata?.docID != null }.map { entityQuery ->
+                    val thumbnailUri = entityQuery.spaceEntity?.thumbnail?.let {
+                        BitmapIO.saveBitmap(
+                            thumbnailDirectory.resolve(spaceID),
+                            dispatchers,
+                            entityQuery.metadata?.docID,
+                            it
+                        )?.toUri()
+                    }
                     SpaceEntityData(
-                        url,
+                        id = entityQuery.metadata?.docID!!,
+                        url = entityQuery.spaceEntity?.url?.let { Uri.parse(it) },
                         title = entityQuery.spaceEntity?.title,
                         snippet = entityQuery.spaceEntity?.snippet,
-                        thumbnail = entityQuery.spaceEntity?.thumbnail
+                        thumbnail = thumbnailUri
                     )
                 }
-                .filterNotNull()
 
-            val contentUrls = entities.map { it.url }.toSet()
+            val contentUrls = entities.mapNotNull { it.url }.toSet()
             spacesToFetch
-                .firstOrNull { space -> space.id == spaceQuery.pageMetadata?.pageID }
-                ?.let { space -> onUpdateSpaceURLs(space, contentUrls, entities) }
+                .firstOrNull { space -> space.id == spaceQuery.pageMetadata.pageID }
+                ?.let { space ->
+                    onUpdateSpaceURLs(space, contentUrls, entities)
+                    space.thumbnail = BitmapIO.saveBitmap(
+                        directory = thumbnailDirectory.resolve(space.id),
+                        dispatchers = dispatchers,
+                        id = space.id,
+                        bitmapString = spaceQuery.space.thumbnail
+                    )?.toUri()
+                }
         }
 
         return true
@@ -161,6 +198,16 @@ class SpaceStore(
         } else {
             addToSpace(space, url, title, description)
         }
+    }
+
+    private suspend fun cleanupSpacesThumbnails() {
+        val idList = allSpacesFlow.value.map { it.id }
+        thumbnailDirectory
+            .list { file, _ -> file.isDirectory }
+            ?.filterNot { folderName -> idList.contains(folderName) }
+            ?.forEach {
+                thumbnailDirectory.resolve(it).deleteRecursively()
+            }
     }
 
     suspend fun addToSpace(
@@ -186,7 +233,7 @@ class SpaceStore(
         return response?.data?.entityId?.let {
             Log.i(TAG, "Added item to space with id=$it")
             snackbarModel.show(appContext.getString(R.string.space_add_url, space.name))
-            refreshSpace(space)
+            refresh(space = space)
             true
         } ?: run {
             val errorString = appContext.getString(R.string.generic_error)
@@ -216,7 +263,7 @@ class SpaceStore(
                     urlToSpacesMap.remove(uri)
                 }
             }
-            refreshSpace(space)
+            refresh(space = space)
             true
         } ?: run {
             val errorString = appContext.getString(R.string.generic_error)

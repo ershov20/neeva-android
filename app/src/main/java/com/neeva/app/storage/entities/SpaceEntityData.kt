@@ -1,10 +1,11 @@
-package com.neeva.app.spaces
+package com.neeva.app.storage.entities
 
 import android.net.Uri
 
 data class SpaceEntityData(
-    val url: Uri,
+    val id: String,
+    val url: Uri?,
     val title: String?,
     val snippet: String?,
-    val thumbnail: String?,
+    val thumbnail: Uri?,
 )

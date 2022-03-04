@@ -1,5 +1,6 @@
 package com.neeva.app.spaces
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,9 +17,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +42,8 @@ import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.storage.BitmapIO
+import com.neeva.app.storage.entities.Space
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.widgets.overlay.OverlaySheet
 import com.neeva.app.widgets.overlay.OverlaySheetConfig
@@ -111,10 +116,19 @@ fun AddToSpaceUI(
     }
 }
 
+/** Returns a [State] that can be used in a Composable for obtaining a Bitmap. */
+@Composable
+fun getThumbnailAsync(uri: Uri?): State<ImageBitmap?> {
+    // By keying this on [uri], we can avoid recompositions until [uri] changes.  This avoids
+    // infinite loops of recompositions that can be triggered via [Flow.collectAsState()].
+    return produceState<ImageBitmap?>(initialValue = null, uri) {
+        value = BitmapIO.loadBitmap(uri)?.asImageBitmap()
+    }
+}
+
 @Composable
 fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -> Unit) {
-    val thumbnail: ImageBitmap? =
-        space.thumbnailAsBitmap()?.asImageBitmap()
+    val thumbnail: ImageBitmap? by getThumbnailAsync(uri = space.thumbnail)
 
     Row(
         modifier = Modifier
@@ -148,7 +162,7 @@ fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -
                 }
             } else {
                 Image(
-                    bitmap = thumbnail,
+                    bitmap = thumbnail!!,
                     contentDescription = null,
                     modifier = Modifier
                         .clip(RoundedCornerShape(6.dp))

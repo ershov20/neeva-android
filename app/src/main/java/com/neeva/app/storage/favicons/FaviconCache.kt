@@ -1,7 +1,6 @@
 package com.neeva.app.storage.favicons
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.annotation.CallSuper
@@ -14,24 +13,18 @@ import androidx.core.net.toUri
 import com.neeva.app.Dispatchers
 import com.neeva.app.previewDispatchers
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.math.BigInteger
 import java.nio.file.Files
-import java.security.MessageDigest
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.withContext
-import okhttp3.internal.closeQuietly
 import org.chromium.weblayer.Profile
 
 /**
@@ -65,60 +58,21 @@ abstract class FaviconCache(
     open suspend fun saveFavicon(siteUri: Uri?, bitmap: Bitmap?) = withContext(dispatchers.io) {
         bitmap ?: return@withContext null
 
-        // Create an MD5 hash of the Bitmap that we can use to find it later.
-        val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
-        val bitmapBytes = stream.toByteArray()
-        val hashBytes = MessageDigest.getInstance("MD5").digest(bitmapBytes)
-        val md5Hash = BigInteger(1, hashBytes).toString(Character.MAX_RADIX)
-        val md5File = File(faviconDirectory, md5Hash)
-        val favicon = Favicon(
-            faviconURL = md5File.toUri().toString(),
+        val bitmapFile = BitmapIO.saveBitmap(
+            directory = faviconDirectory,
+            dispatchers = dispatchers,
+            bitmap = bitmap
+        )
+
+        return@withContext Favicon(
+            faviconURL = bitmapFile?.toUri().toString(),
             width = bitmap.width,
             height = bitmap.height
         )
-
-        // Don't bother writing the file out again if it already exists.
-        try {
-            if (md5File.exists()) return@withContext favicon
-        } catch (e: SecurityException) {
-            Log.e(TAG, "Failed to check if favicon exists: ${md5File.absolutePath}", e)
-            return@withContext null
-        }
-
-        // Write the favicon out to storage.
-        var outputStream: OutputStream? = null
-        var bufferedOutputStream: BufferedOutputStream? = null
-        return@withContext try {
-            faviconDirectory.mkdirs()
-            outputStream = getOutputStream(md5File)
-            bufferedOutputStream = BufferedOutputStream(outputStream)
-            bufferedOutputStream.write(bitmapBytes)
-            favicon
-        } catch (e: IOException) {
-            Log.e(TAG, "Failed to write favicon to storage")
-            null
-        } finally {
-            bufferedOutputStream?.closeQuietly()
-            outputStream?.closeQuietly()
-        }
     }
 
-    @WorkerThread
     suspend fun loadFavicon(fileUri: Uri): Bitmap? {
-        var inputStream: InputStream? = null
-        var bufferedStream: BufferedInputStream? = null
-        return try {
-            inputStream = getInputStream(fileUri.toFile())
-            bufferedStream = BufferedInputStream(inputStream)
-            BitmapFactory.decodeStream(bufferedStream)
-        } catch (e: IOException) {
-            Log.e(TAG, "Failed to restore favicon from storage")
-            null
-        } finally {
-            bufferedStream?.closeQuietly()
-            inputStream?.closeQuietly()
-        }
+        return BitmapIO.loadBitmap(fileUri, ::getInputStream)
     }
 
     open fun getInputStream(file: File): InputStream = FileInputStream(file)
