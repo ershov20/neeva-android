@@ -39,7 +39,7 @@ fun AppNav(
     val historyManager = LocalEnvironment.current.historyManager
     val coroutineScope = rememberCoroutineScope()
 
-    val settingsViewModel = remember {
+    val settingsViewModel = remember(appNavModel, settingsDataModel, historyManager, neevaUser) {
         SettingsViewModelImpl(
             appNavModel,
             settingsDataModel,
@@ -48,17 +48,16 @@ fun AppNav(
         )
     }
 
-    val feedbackViewModel = remember {
+    val feedbackViewModel = remember(appNavModel, neevaUser, coroutineScope, webLayerModel) {
         FeedbackViewModelImpl(
             appNavModel,
             user = neevaUser,
             coroutineScope = coroutineScope
         ) {
             appNavModel.showBrowser()
-            webLayerModel.currentBrowser.createTabWithUri(
-                Uri.parse(NeevaConstants.appHelpCenterURL),
-                parentTabId = null,
-                isViaIntent = false
+            webLayerModel.currentBrowser.loadUrl(
+                uri = Uri.parse(NeevaConstants.appHelpCenterURL),
+                inNewTab = true
             )
         }
     }
@@ -112,7 +111,7 @@ fun AppNav(
             HistoryContainer(
                 faviconCache = webLayerModel.getRegularProfileFaviconCache()
             ) {
-                webLayerModel.loadUrl(it)
+                webLayerModel.currentBrowser.loadUrl(it, inNewTab = true)
                 appNavModel.showBrowser()
             }
         }

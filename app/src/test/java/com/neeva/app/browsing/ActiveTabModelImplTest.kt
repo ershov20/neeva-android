@@ -4,6 +4,7 @@ import android.net.Uri
 import com.neeva.app.BaseTest
 import com.neeva.app.Dispatchers
 import kotlinx.coroutines.CoroutineScope
+import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
@@ -11,8 +12,8 @@ import org.chromium.weblayer.TabCallback
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -31,8 +32,6 @@ import strikt.assertions.isTrue
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class ActiveTabModelImplTest : BaseTest() {
-    @Mock lateinit var tabCreator: TabCreator
-
     private lateinit var model: ActiveTabModelImpl
 
     private lateinit var mainTab: MockTabHarness
@@ -45,8 +44,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
         model = ActiveTabModelImpl(
             coroutineScope = mock<CoroutineScope>(),
-            dispatchers = mock<Dispatchers>(),
-            tabCreator = tabCreator
+            dispatchers = mock<Dispatchers>()
         )
 
         mainTab = MockTabHarness(
@@ -71,7 +69,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
     @Test
     fun onActiveTabChanged_updatesValuesAfterTabSwitches() {
-        expectThat(model.activeTabFlow.value).isNull()
+        expectThat(model.activeTab).isNull()
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
         expectThat(model.titleFlow.value).isEqualTo("")
@@ -80,7 +78,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
         // Set the first tab as active and confirm the flows were updated.
         model.onActiveTabChanged(mainTab.tab)
-        expectThat(model.activeTabFlow.value).isEqualTo(mainTab.tab)
+        expectThat(model.activeTab).isEqualTo(mainTab.tab)
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
@@ -99,7 +97,7 @@ class ActiveTabModelImplTest : BaseTest() {
             canGoForward = true
         )
         model.onActiveTabChanged(secondTab.tab)
-        expectThat(model.activeTabFlow.value).isEqualTo(secondTab.tab)
+        expectThat(model.activeTab).isEqualTo(secondTab.tab)
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(secondTab.currentUri)
         expectThat(model.titleFlow.value).isEqualTo(secondTab.currentTitle)
@@ -117,7 +115,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
     @Test
     fun onActiveTabChanged_updatesValuesAfterNullActiveTab() {
-        expectThat(model.activeTabFlow.value).isNull()
+        expectThat(model.activeTab).isNull()
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
         expectThat(model.titleFlow.value).isEqualTo("")
@@ -126,7 +124,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
         // Set the first tab as active and confirm the flows were updated.
         model.onActiveTabChanged(mainTab.tab)
-        expectThat(model.activeTabFlow.value).isEqualTo(mainTab.tab)
+        expectThat(model.activeTab).isEqualTo(mainTab.tab)
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
@@ -139,7 +137,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
         // Set the second tab as active and confirm the flows were updated.
         model.onActiveTabChanged(null)
-        expectThat(model.activeTabFlow.value).isEqualTo(null)
+        expectThat(model.activeTab).isEqualTo(null)
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
         expectThat(model.titleFlow.value).isEqualTo("")
@@ -158,7 +156,7 @@ class ActiveTabModelImplTest : BaseTest() {
         model.onActiveTabChanged(neevaSearchTab.tab)
         expectThat(mainTab.tabCallbacks.size).isEqualTo(0)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(0)
-        expectThat(model.activeTabFlow.value).isEqualTo(neevaSearchTab.tab)
+        expectThat(model.activeTab).isEqualTo(neevaSearchTab.tab)
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(neevaSearchTab.currentUri)
         expectThat(model.titleFlow.value).isEqualTo(neevaSearchTab.currentTitle)
@@ -174,7 +172,7 @@ class ActiveTabModelImplTest : BaseTest() {
         model.onActiveTabChanged(neevaSpacesTab.tab)
         expectThat(neevaSearchTab.tabCallbacks.size).isEqualTo(0)
         expectThat(neevaSearchTab.navigationCallbacks.size).isEqualTo(0)
-        expectThat(model.activeTabFlow.value).isEqualTo(neevaSpacesTab.tab)
+        expectThat(model.activeTab).isEqualTo(neevaSpacesTab.tab)
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(neevaSpacesTab.currentUri)
         expectThat(model.titleFlow.value).isEqualTo(neevaSpacesTab.currentTitle)
@@ -189,7 +187,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
     @Test
     fun onActiveTabChanged_monitorsChangesToTab() {
-        expectThat(model.activeTabFlow.value).isNull()
+        expectThat(model.activeTab).isNull()
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
         expectThat(model.titleFlow.value).isEqualTo("")
@@ -198,7 +196,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
         // Set the first tab as active and confirm the flows were updated.
         model.onActiveTabChanged(mainTab.tab)
-        expectThat(model.activeTabFlow.value).isEqualTo(mainTab.tab)
+        expectThat(model.activeTab).isEqualTo(mainTab.tab)
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
@@ -290,30 +288,22 @@ class ActiveTabModelImplTest : BaseTest() {
     }
 
     @Test
-    fun loadUrl_withNoActiveTab_createsNewTab() {
-        val uri = Uri.parse("https://www.reddit.com")
-        model.loadUrl(uri = uri, newTab = false)
-        verify(tabCreator, times(1)).createTabWithUri(eq(uri), eq(null), eq(false))
-    }
-
-    @Test
-    fun loadUrl_withActiveTabInNewTab_loadsInNewTab() {
-        model.onActiveTabChanged(mainTab.tab)
-
-        val uri = Uri.parse("https://www.reddit.com")
-        model.loadUrl(uri = uri, newTab = true)
-        verify(tabCreator, times(1)).createTabWithUri(eq(uri), eq(null), eq(false))
-        verify(mainTab.navigationController, never()).navigate(any(), any())
-    }
-
-    @Test
-    fun loadUrl_withActiveTabInSameTab_loadsInSameTab() {
-        model.onActiveTabChanged(mainTab.tab)
+    fun loadUrl() {
+        // Set the tab.
+        val harness = MockTabHarness(
+            currentTitle = "Title",
+            currentUri = Uri.parse("https://www.site.com/"),
+            canGoBack = false,
+            canGoForward = false
+        )
+        model.onActiveTabChanged(harness.tab)
 
         val uri = Uri.parse("https://www.reddit.com")
-        model.loadUrl(uri = uri, newTab = true)
-        verify(tabCreator, never()).createTabWithUri(any(), any(), eq(false))
-        verify(mainTab.navigationController, never()).navigate(eq(uri), any())
+        model.loadUrlInActiveTab(uri)
+
+        val navigateParamsCaptor = argumentCaptor<NavigateParams>()
+        verify(harness.navigationController).navigate(eq(uri), navigateParamsCaptor.capture())
+        expectThat(navigateParamsCaptor.lastValue.isIntentProcessingDisabled).isTrue()
     }
 
     class MockTabHarness(

@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
+import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
@@ -45,7 +46,7 @@ import org.chromium.weblayer.UrlBarController
  * done is allowed by the incognito state defined by the Profile, which means that we are explicitly
  * trying to avoid recording history or automatically firing queries & mutations via Apollo (e.g.).
  */
-abstract class BrowserWrapper(
+abstract class BrowserWrapper internal constructor(
     val isIncognito: Boolean,
     protected val appContext: Context,
     protected val coroutineScope: CoroutineScope,
@@ -53,8 +54,44 @@ abstract class BrowserWrapper(
     protected val activityCallbackProvider: () -> ActivityCallbacks?,
     val suggestionsModel: SuggestionsModel?,
     val faviconCache: FaviconCache,
-    protected val spaceStore: SpaceStore?
+    protected val spaceStore: SpaceStore?,
+    private val _activeTabModel: ActiveTabModelImpl,
+    private val _urlBarModel: URLBarModelImpl,
+    private val _findInPageModel: FindInPageModelImpl
 ) : FaviconCache.ProfileProvider {
+    constructor(
+        isIncognito: Boolean,
+        appContext: Context,
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+        activityCallbackProvider: () -> ActivityCallbacks?,
+        suggestionsModel: SuggestionsModel?,
+        faviconCache: FaviconCache,
+        spaceStore: SpaceStore?
+    ) : this(
+        isIncognito = isIncognito,
+        appContext = appContext,
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers,
+        activityCallbackProvider = activityCallbackProvider,
+        suggestionsModel = suggestionsModel,
+        faviconCache = faviconCache,
+        spaceStore = spaceStore,
+        _activeTabModel = ActiveTabModelImpl(
+            spaceStore = spaceStore,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers
+        ),
+        _urlBarModel = URLBarModelImpl(
+            suggestionFlow = suggestionsModel?.autocompleteSuggestionFlow ?: MutableStateFlow(null),
+            appContext = appContext,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            faviconCache = faviconCache
+        ),
+        _findInPageModel = FindInPageModelImpl()
+    )
+
     private val tabList = TabList()
     private val tabCallbackMap: HashMap<Tab, TabCallbacks> = HashMap()
 
@@ -79,13 +116,9 @@ abstract class BrowserWrapper(
     protected val browser: Browser?
         get() = browserFlow.value?.takeUnless { it.isDestroyed }
 
-    private val _activeTabModel: ActiveTabModelImpl
     val activeTabModel: ActiveTabModel get() = _activeTabModel
-
-    val urlBarModel: URLBarModel
-
-    private val _findInPageModel: FindInPageModelImpl = FindInPageModelImpl()
     val findInPageModel: FindInPageModel get() = _findInPageModel
+    val urlBarModel: URLBarModel get() = _urlBarModel
 
     /** Tracks whether the user needs to be kept in the CardGrid if they're on that screen. */
     val userMustStayInCardGridFlow: StateFlow<Boolean>
@@ -111,22 +144,6 @@ abstract class BrowserWrapper(
 
     init {
         faviconCache.profileProvider = this
-
-        _activeTabModel = ActiveTabModelImpl(
-            spaceStore = spaceStore,
-            coroutineScope = coroutineScope,
-            dispatchers = dispatchers
-        ) { uri, parentTabId, isViaIntent ->
-            createTabWithUri(uri, parentTabId, isViaIntent)
-        }
-
-        urlBarModel = URLBarModelImpl(
-            suggestionFlow = suggestionsModel?.autocompleteSuggestionFlow ?: MutableStateFlow(null),
-            appContext = appContext,
-            coroutineScope = coroutineScope,
-            dispatchers = dispatchers,
-            faviconCache = faviconCache
-        )
 
         userMustStayInCardGridFlow = orderedTabList
             .combine(_isLazyTabFlow) { tabs, isLazyTab -> tabs.isEmpty() && !isLazyTab }
@@ -224,17 +241,6 @@ abstract class BrowserWrapper(
         }
     }
 
-    internal fun initialize() {
-        // TODO(https://github.com/neevaco/neeva-android/issues/318): We should try to reuse any
-        // existing Fragments that were kept by the FragmentManager after the Activity died in the
-        // background.
-        fragment = createBrowserFragment()
-
-        // Keep the WebLayer instance across Activity restarts so that the Browser doesn't get
-        // deleted when the configuration changes (e.g. the screen is rotated in fullscreen).
-        fragment.retainInstance = true
-    }
-
     /**
      * Creates a Fragment that contains the [Browser] used to interface with WebLayer.
      *
@@ -246,14 +252,31 @@ abstract class BrowserWrapper(
     /** Creates a [TabScreenshotManager] that can be used to persist preview images of tabs. */
     abstract fun createTabScreenshotManager(): TabScreenshotManager
 
+    /** Returns the [Browser] from the given [fragment]. */
+    internal open fun getBrowserFromFragment(fragment: Fragment): Browser? {
+        return Browser.fromFragment(fragment)
+    }
+
     fun createAndAttachBrowser(
         topControlsPlaceholder: View,
         bottomControlsPlaceholder: View,
         fragmentAttacher: (Fragment, Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
+        if (!::fragment.isInitialized) {
+            // TODO(https://github.com/neevaco/neeva-android/issues/318): We should try to reuse any
+            // existing Fragments that were kept by the FragmentManager after the Activity died in
+            // the background.
+            fragment = createBrowserFragment()
+
+            // Keep the WebLayer instance across Activity restarts so that the Browser doesn't get
+            // deleted when the configuration changes (e.g. the screen is rotated in fullscreen).
+            fragment.retainInstance = true
+        }
+
         fragmentAttacher.invoke(fragment, isIncognito)
+
         if (browserFlow.value == null) {
-            browserFlow.value = Browser.fromFragment(fragment)
+            browserFlow.value = getBrowserFromFragment(fragment)
         }
 
         val browser = this.browser ?: throw IllegalStateException()
@@ -400,7 +423,7 @@ abstract class BrowserWrapper(
      * Because [Browser] only allows you to create a Tab without a URL, we save the URL for when
      * the [TabListCallback] tells us the new tab has been added.
      */
-    fun createTabWithUri(uri: Uri, parentTabId: String?, isViaIntent: Boolean) {
+    private fun createTabWithUri(uri: Uri, parentTabId: String?, isViaIntent: Boolean) {
         browser?.let {
             val tabOpenType = when {
                 parentTabId != null -> TabInfo.TabOpenType.CHILD_TAB
@@ -519,11 +542,12 @@ abstract class BrowserWrapper(
      */
     fun loadUrl(
         uri: Uri,
-        newTab: Boolean = _isLazyTabFlow.value,
-        isViaIntent: Boolean = false
+        inNewTab: Boolean = _isLazyTabFlow.value,
+        isViaIntent: Boolean = false,
+        parentTabId: String? = null
     ) {
         if (!shouldInterceptLoad(uri)) {
-            _activeTabModel.loadUrl(uri, newTab, isViaIntent)
+            loadUrlInternal(uri, inNewTab, isViaIntent, parentTabId)
         } else {
             coroutineScope.launch {
                 val redirectedUri = withContext(dispatchers.io) {
@@ -531,9 +555,27 @@ abstract class BrowserWrapper(
                 }
 
                 withContext(dispatchers.main) {
-                    _activeTabModel.loadUrl(redirectedUri, newTab, isViaIntent)
+                    loadUrlInternal(redirectedUri, inNewTab, isViaIntent, parentTabId)
                 }
             }
+        }
+    }
+
+    @MainThread
+    private fun loadUrlInternal(
+        uri: Uri,
+        newTab: Boolean,
+        isViaIntent: Boolean = false,
+        parentTabId: String? = null
+    ) {
+        if (newTab || _activeTabModel.activeTab == null) {
+            createTabWithUri(
+                uri = uri,
+                parentTabId = parentTabId,
+                isViaIntent = isViaIntent
+            )
+        } else {
+            _activeTabModel.loadUrlInActiveTab(uri)
         }
     }
 
@@ -556,7 +598,7 @@ abstract class BrowserWrapper(
 
     /** Dismisses any transient dialogs or popups that are covering the page. */
     fun dismissTransientUi(): Boolean {
-        return _activeTabModel.activeTabFlow.value?.dismissTransientUi() ?: false
+        return _activeTabModel.activeTab?.dismissTransientUi() ?: false
     }
 
     fun canGoBackward(): Boolean {

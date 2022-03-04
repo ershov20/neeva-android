@@ -69,35 +69,6 @@ class URLBarModelImplTest : BaseTest() {
         )
     }
 
-    /* Disabled: Functionality was moved to BrowserWrapper, which isn't easy to test at the moment.
-    @Test
-    fun loadUrl_withoutLazyTab() {
-        val uri = Uri.parse("https://www.reddit.com/r/android")
-        model.loadUrl(uri)
-        verify(activeTabModel, times(1)).loadUrl(eq(uri), eq(false), eq(false))
-    }
-
-    @Test
-    fun loadUrl_withLazyTab() {
-        // Open a lazy tab.
-        model.openLazyTab()
-        expectThat(urlBarModelText).isEqualTo("")
-
-        // Loading the URL should send it to a new tab.
-        val uri = Uri.parse("https://www.reddit.com/r/android")
-        model.loadUrl(uri)
-        verify(activeTabModel, times(1)).loadUrl(eq(uri), eq(true), eq(false))
-    }
-
-    @Test
-    fun onFocusChanged_withLazyTabAndThenUnfocusing_stopsLazyTab() {
-        model.openLazyTab()
-        expectThat(model.isLazyTab.value).isEqualTo(true)
-        model.onFocusChanged(false)
-        expectThat(model.isLazyTab.value).isEqualTo(false)
-    }
-    */
-
     @Test
     fun replaceLocationBarText() {
         // Focus the URL bar so that it can be edited.  This should normally be called when the

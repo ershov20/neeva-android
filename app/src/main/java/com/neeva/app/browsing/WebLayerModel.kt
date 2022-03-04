@@ -103,12 +103,7 @@ class WebLayerModel @Inject constructor(
         try {
             WebLayer.loadAsync(application) { webLayer ->
                 webLayer.isRemoteDebuggingEnabled = true
-
                 regularProfile = RegularBrowserWrapper.getProfile(webLayer)
-
-                regularBrowser.initialize()
-                incognitoBrowser?.initialize()
-
                 this.webLayer.value = webLayer
             }
         } catch (e: UnsupportedVersionException) {
@@ -135,9 +130,6 @@ class WebLayerModel @Inject constructor(
         )
     }
 
-    /** Loads the given [url] in a new tab. */
-    fun loadUrl(url: Uri) = currentBrowser.loadUrl(url, newTab = true)
-
     /**
      * Switches the user to the specified profile.
      *
@@ -160,7 +152,7 @@ class WebLayerModel @Inject constructor(
                     incognitoBrowser = null
                     switchToProfile(useIncognito = false)
                 }
-            ).also { it.initialize() }
+            )
 
             incognitoBrowser = delegate
             delegate

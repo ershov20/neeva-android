@@ -203,7 +203,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     intent.data?.let {
                         webLayerModel.currentBrowser.loadUrl(
                             uri = it,
-                            newTab = true,
+                            inNewTab = true,
                             isViaIntent = true
                         )
                     }
@@ -216,7 +216,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
                     webLayerModel.currentBrowser.loadUrl(
                         uri = searchUri,
-                        newTab = true,
+                        inNewTab = true,
                         isViaIntent = true
                     )
                 }

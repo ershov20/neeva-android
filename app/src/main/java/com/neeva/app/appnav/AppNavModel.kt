@@ -99,7 +99,7 @@ class AppNavModel(
     }
 
     fun openUrl(url: Uri) {
-        webLayerModel.loadUrl(url)
+        webLayerModel.currentBrowser.loadUrl(url, inNewTab = true)
         showBrowser()
     }
 
@@ -136,12 +136,18 @@ class AppNavModel(
     fun onMenuItem(id: NeevaMenuItemId) {
         when (id) {
             NeevaMenuItemId.HOME -> {
-                webLayerModel.loadUrl(Uri.parse(NeevaConstants.appURL))
+                webLayerModel.currentBrowser.loadUrl(
+                    Uri.parse(NeevaConstants.appURL),
+                    inNewTab = true
+                )
                 showBrowser()
             }
 
             NeevaMenuItemId.SPACES -> {
-                webLayerModel.loadUrl(Uri.parse(NeevaConstants.appSpacesURL))
+                webLayerModel.currentBrowser.loadUrl(
+                    Uri.parse(NeevaConstants.appSpacesURL),
+                    inNewTab = true
+                )
                 showBrowser()
             }
 

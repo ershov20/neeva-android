@@ -23,8 +23,7 @@ import org.chromium.weblayer.TabCallback
 class ActiveTabModelImpl(
     private val spaceStore: SpaceStore? = null,
     val coroutineScope: CoroutineScope,
-    val dispatchers: Dispatchers,
-    private val tabCreator: TabCreator
+    val dispatchers: Dispatchers
 ) : ActiveTabModel {
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     override val urlFlow: StateFlow<Uri> = _urlFlow
@@ -33,9 +32,7 @@ class ActiveTabModelImpl(
         spaceStore
             ?.stateFlow
             ?.filter { it == SpaceStore.State.READY }
-            ?.combine(_urlFlow) { _: SpaceStore.State, url: Uri ->
-                spaceStore.spaceStoreContainsUrl(url)
-            }
+            ?.combine(_urlFlow) { _, url -> spaceStore.spaceStoreContainsUrl(url) }
             ?.flowOn(dispatchers.io)
             ?.stateIn(coroutineScope, SharingStarted.Lazily, false)
             ?: MutableStateFlow(false)
@@ -56,11 +53,11 @@ class ActiveTabModelImpl(
     override val isShowingQuery: StateFlow<Boolean> = _isShowingQuery
 
     /** Tracks which tab is currently active. */
-    internal val activeTabFlow = MutableStateFlow<Tab?>(null)
+    private val activeTabFlow = MutableStateFlow<Tab?>(null)
     internal val activeTab: Tab? get() = activeTabFlow.value
 
     internal fun onActiveTabChanged(newActiveTab: Tab?) {
-        val previousTab = activeTabFlow.value
+        val previousTab = activeTab
         previousTab?.apply {
             unregisterTabCallback(selectedTabCallback)
             navigationController.unregisterNavigationCallback(selectedTabNavigationCallback)
@@ -83,23 +80,14 @@ class ActiveTabModelImpl(
     }
 
     fun reload() {
-        activeTabFlow.value?.navigationController?.reload()
+        activeTab?.navigationController?.reload()
     }
 
     /** Don't call this directly.  Instead, use [BrowserWrapper.loadUrl]. */
-    internal fun loadUrl(uri: Uri, newTab: Boolean = false, isViaIntent: Boolean = false) {
-        if (newTab || activeTabFlow.value == null) {
-            tabCreator.createTabWithUri(
-                uri = uri,
-                parentTabId = null,
-                isViaIntent = isViaIntent
-            )
-            return
-        }
-
+    internal fun loadUrlInActiveTab(uri: Uri) {
         // Disable intent processing for urls typed in. Allows the user to navigate to app urls.
         val navigateParamsBuilder = NavigateParams.Builder().disableIntentProcessing()
-        activeTabFlow.value?.navigationController?.navigate(uri, navigateParamsBuilder.build())
+        activeTab?.navigationController?.navigate(uri, navigateParamsBuilder.build())
     }
 
     private fun updateUrl(uri: Uri) {
@@ -136,23 +124,23 @@ class ActiveTabModelImpl(
     }
 
     fun goBack() {
-        if (activeTabFlow.value?.navigationController?.canGoBack() == true) {
-            activeTabFlow.value?.navigationController?.goBack()
+        if (activeTab?.navigationController?.canGoBack() == true) {
+            activeTab?.navigationController?.goBack()
             updateNavigationInfo()
         }
     }
 
     fun goForward() {
-        if (activeTabFlow.value?.navigationController?.canGoForward() == true) {
-            activeTabFlow.value?.navigationController?.goForward()
+        if (activeTab?.navigationController?.canGoForward() == true) {
+            activeTab?.navigationController?.goForward()
             updateNavigationInfo()
         }
     }
 
     private fun updateNavigationInfo() {
         _navigationInfoFlow.value = ActiveTabModel.NavigationInfo(
-            activeTabFlow.value?.navigationController?.canGoBack() ?: false,
-            activeTabFlow.value?.navigationController?.canGoForward() ?: false
+            activeTab?.navigationController?.canGoBack() ?: false,
+            activeTab?.navigationController?.canGoForward() ?: false
         )
     }
 }
