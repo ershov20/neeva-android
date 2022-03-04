@@ -5,6 +5,8 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.compositionLocalOf
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUser
@@ -13,10 +15,21 @@ import javax.inject.Inject
 
 class FirstRunModel @Inject constructor(
     private val sharedPreferencesModel: SharedPreferencesModel,
-    private val neevaUserToken: NeevaUserToken
+    private val neevaUserToken: NeevaUserToken,
+    private var clientLogger: ClientLogger
 ) {
     companion object {
         private const val FIRST_RUN_DONE_KEY = "HAS_FINISHED_FIRST_RUN"
+        private const val SHOULD_LOG_FIRST_LOGIN_KEY = "SHOULD_LOG_FIRST_LOGIN"
+
+        fun firstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
+            sharedPreferencesModel.setValue(
+                SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, true
+            )
+            sharedPreferencesModel.setValue(
+                SharedPrefFolder.FIRST_RUN, SHOULD_LOG_FIRST_LOGIN_KEY, true
+            )
+        }
     }
 
     private fun authUri(
@@ -49,7 +62,23 @@ class FirstRunModel @Inject constructor(
     }
 
     fun firstRunDone() {
-        sharedPreferencesModel.setValue(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, true)
+        firstRunDone(sharedPreferencesModel)
+    }
+
+    fun shouldLogFirstLogin(): Boolean {
+        return sharedPreferencesModel.getBoolean(
+            SharedPrefFolder.FIRST_RUN, SHOULD_LOG_FIRST_LOGIN_KEY, false
+        )
+    }
+
+    fun setShouldLogFirstLogin(value: Boolean) {
+        sharedPreferencesModel.setValue(
+            SharedPrefFolder.FIRST_RUN, SHOULD_LOG_FIRST_LOGIN_KEY, value
+        )
+    }
+
+    fun logEvent(interaction: LogConfig.Interaction) {
+        clientLogger.logCounter(interaction, null)
     }
 
     fun launchLoginIntent(

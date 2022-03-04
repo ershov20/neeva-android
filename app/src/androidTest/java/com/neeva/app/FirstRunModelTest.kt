@@ -25,9 +25,7 @@ class FirstRunModelTest {
 
         // Set the shared preference.  First run shouldn't be shown.
         val sharedPreferencesModel = SharedPreferencesModel(context)
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
-        val firstRunModel = FirstRunModel(sharedPreferencesModel, neevaUserToken)
-        firstRunModel.firstRunDone()
+        FirstRunModel.firstRunDone(sharedPreferencesModel)
 
         val intent = Intent.makeMainActivity(ComponentName(context, NeevaActivity::class.java))
         ActivityScenario.launch<NeevaActivity>(intent).use { scenario ->

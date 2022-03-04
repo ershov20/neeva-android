@@ -36,6 +36,8 @@ import com.neeva.app.browsing.isSelected
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.neeva_menu.LocalMenuData
 import com.neeva.app.neeva_menu.LocalMenuDataState
 import com.neeva.app.spaces.SpaceStore
@@ -70,6 +72,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var localEnvironmentState: LocalEnvironmentState
 
+    @Inject lateinit var clientLogger: ClientLogger
+
     private val activityViewModel: NeevaActivityViewModel by viewModels {
         NeevaActivityViewModel.Factory(intent)
     }
@@ -99,7 +103,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         webLayerModel = webLayerModel,
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers,
-                        snackbarModel = snackbarModel
+                        snackbarModel = snackbarModel,
+                        clientLogger = clientLogger
                     )
                 }
 
@@ -187,6 +192,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     override fun onStart() {
         super.onStart()
         activityViewModel.checkForUpdates(this)
+        clientLogger.logCounter(LogConfig.Interaction.APP_ENTER_FOREGROUND, null)
     }
 
     private fun processIntent(intent: Intent?) {
@@ -198,6 +204,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         webLayerModel.onAuthTokenUpdated()
                         showBrowser()
                         webLayerModel.currentBrowser.reload()
+                        if (firstRunModel.shouldLogFirstLogin()) {
+                            clientLogger.logCounter(
+                                LogConfig.Interaction.LOGIN_AFTER_FIRST_RUN, null
+                            )
+                            firstRunModel.setShouldLogFirstLogin(false)
+                        }
                     }
                 } else {
                     intent.data?.let {

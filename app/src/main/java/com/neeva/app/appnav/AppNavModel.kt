@@ -14,6 +14,8 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.ui.SnackbarModel
 import kotlinx.coroutines.CoroutineScope
@@ -32,7 +34,8 @@ class AppNavModel(
     private val webLayerModel: WebLayerModel,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
-    private val snackbarModel: SnackbarModel
+    private val snackbarModel: SnackbarModel,
+    private val clientLogger: ClientLogger
 ) {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     val currentDestination: StateFlow<NavDestination?> = _currentDestination
@@ -128,7 +131,10 @@ class AppNavModel(
     fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
-    fun showFirstRun() = show(AppNavDestination.FIRST_RUN)
+    fun showFirstRun() {
+        show(AppNavDestination.FIRST_RUN)
+        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION, null)
+    }
     fun showHistory() = show(AppNavDestination.HISTORY)
     fun showFeedback() = show(AppNavDestination.FEEDBACK)
     fun showFeedbackPreviewImage() = show(AppNavDestination.FEEDBACK_PREVIEW_IMAGE)

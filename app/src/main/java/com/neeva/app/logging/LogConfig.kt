@@ -2,6 +2,7 @@ package com.neeva.app.logging
 
 class LogConfig {
     enum class Interaction(val interactionName: String) {
+        // Search as you type (SAYT)
         QUERY_SUGGESTION("QuerySuggestion"),
         MEMORIZED_SUGGESTION("MemorizedSuggestion"),
         HISTORY_SUGGESTION("HistorySuggestion"),
@@ -15,7 +16,19 @@ class LogConfig {
         OPEN_SUGGESTED_SEARCH("OpenSuggsetedSearch"),
         OPEN_SUGGESTED_SITE("OpenSuggestedSite"),
         TAB_SUGGESTION("TabSuggestion"),
-        EDIT_CURRENT_URL("EditCurrentUrl")
+        EDIT_CURRENT_URL("EditCurrentUrl"),
+
+        // Session
+        APP_ENTER_FOREGROUND("AppEnterForeground"),
+
+        // Auth
+        AUTH_IMPRESSION("AuthImpression"),
+        AUTH_SIGN_IN("AuthSignin"),
+        AUTH_SIGN_UP("AuthSignup"),
+        AUTH_SIGN_UP_WITH_GOOGLE("AuthOptionsSignupWithGoogle"),
+        AUTH_SIGN_UP_WITH_MICROSOFT("AuthOptionsSignupWithMicrosoft"),
+        AUTH_CLOSE("AuthClose"),
+        LOGIN_AFTER_FIRST_RUN("LoginAfterFirstRun")
     }
 
     companion object {

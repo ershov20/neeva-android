@@ -34,7 +34,7 @@ class RegularBrowserWrapper(
     override val historyManager: HistoryManager,
     spaceStore: SpaceStore,
     private val neevaUser: NeevaUser,
-    clientLogger: ClientLogger
+    val clientLogger: ClientLogger
 ) : BrowserWrapper(
     isIncognito = false,
     appContext = appContext,

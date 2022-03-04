@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.R
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.Roobert
 import com.neeva.app.userdata.NeevaUser
@@ -58,6 +59,7 @@ import com.neeva.app.widgets.BrandedTextButton
 @Composable
 fun FirstRunContainer() {
     val appNavModel = LocalAppNavModel.current
+    val firstRunModel = LocalFirstRunModel.current
 
     Box(
         Modifier
@@ -67,7 +69,10 @@ fun FirstRunContainer() {
         FirstRunScreen()
 
         IconButton(
-            onClick = { appNavModel.showBrowser() },
+            onClick = {
+                appNavModel.showBrowser()
+                firstRunModel.logEvent(LogConfig.Interaction.AUTH_CLOSE)
+            },
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .background(MaterialTheme.colorScheme.primaryContainer)
@@ -142,6 +147,7 @@ fun FirstRunScreen() {
             )
             ToggleSignUpText(false) {
                 signup = true
+                firstRunModel.logEvent(LogConfig.Interaction.AUTH_SIGN_UP)
             }
             TextField(
                 modifier = Modifier
@@ -235,6 +241,7 @@ fun FirstRunScreen() {
                     signup = signup,
                     emailProvided = emailProvided
                 )
+                firstRunModel.logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_GOOGLE)
             }
             BrandedTextButton(
                 enabled = true,
@@ -250,11 +257,13 @@ fun FirstRunScreen() {
                     signup = signup,
                     emailProvided = emailProvided
                 )
+                firstRunModel.logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_MICROSOFT)
             }
             if (signup) {
                 Spacer(modifier = Modifier.weight(1.0f))
                 ToggleSignUpText(true) {
                     signup = false
+                    firstRunModel.logEvent(LogConfig.Interaction.AUTH_SIGN_IN)
                 }
             }
         }
