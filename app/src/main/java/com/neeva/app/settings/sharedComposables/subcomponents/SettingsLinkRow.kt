@@ -29,7 +29,7 @@ fun SettingsLinkRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable { openUrl() }.then(modifier)
     ) {
-        SettingsLabelText(text = title, modifier = Modifier.weight(1.0f))
+        SettingsLabelText(primaryLabel = title, columnModifier = Modifier.weight(1f))
         Image(
             painter = painterResource(R.drawable.ic_baseline_open_in_new_24),
             contentDescription = title,

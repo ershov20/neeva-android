@@ -22,6 +22,8 @@ interface SettingsViewModel {
     fun clearAllHistory()
     fun isSignedOut(): Boolean
     fun getNeevaUserData(): NeevaUserData
+
+    /** Meant for system images lower than Android Q */
     fun openAndroidDefaultBrowserSettings()
 }
 

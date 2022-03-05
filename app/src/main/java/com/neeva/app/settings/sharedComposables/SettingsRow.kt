@@ -14,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.R
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
+import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
+import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultBrowserRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabelRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
@@ -26,6 +28,7 @@ import com.neeva.app.userdata.NeevaUser
 fun SettingsRow(
     rowData: SettingsRowData,
     settingsViewModel: SettingsViewModel,
+    setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager? = null,
     onClearBrowsingData: ((Map<String, Boolean>) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     modifier: Modifier
@@ -44,7 +47,7 @@ fun SettingsRow(
         }
 
         SettingsRowType.LABEL -> {
-            SettingsLabelRow(title, modifier)
+            SettingsLabelRow(primaryLabel = title, rowModifier = modifier)
         }
 
         SettingsRowType.LINK -> {
@@ -72,12 +75,24 @@ fun SettingsRow(
 
         SettingsRowType.NAVIGATION -> {
             if (onClick != null) {
-                SettingsNavigationRow(
-                    title = title,
-                    enabled = rowData.enabled,
-                    onClick = onClick,
-                    modifier = modifier
-                )
+                // TODO(kobec): discuss with Dan to figure out a better way to deal with special cases like Set Android Default Browser
+                // https://github.com/neevaco/neeva-android/pull/376#discussion_r816329896
+                if (rowData.titleId == R.string.settings_default_browser &&
+                    setDefaultAndroidBrowserManager != null
+                ) {
+                    SetDefaultBrowserRow(
+                        setDefaultAndroidBrowserManager,
+                        navigateToPane = onClick,
+                        rowModifier = modifier
+                    )
+                } else {
+                    SettingsNavigationRow(
+                        primaryLabel = title,
+                        enabled = rowData.enabled,
+                        onClick = onClick,
+                        modifier = modifier
+                    )
+                }
             }
         }
 

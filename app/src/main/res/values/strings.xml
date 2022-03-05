@@ -135,4 +135,5 @@
         2. Tap Browser App\n\n
         3. Select Neeva Search &amp; Browser</string>
     <string name="go_to_settings">Go to Settings</string>
+    <string name="setNeevaAsDefaultBrowser">Set Neeva as your default browser</string>
 </resources>

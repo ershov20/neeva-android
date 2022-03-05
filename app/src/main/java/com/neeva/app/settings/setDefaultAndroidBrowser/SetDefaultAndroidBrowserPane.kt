@@ -21,6 +21,10 @@ import com.neeva.app.R
 import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.ui.theme.FullScreenDialogTopBar
 
+/**
+ * If the user opened this Settings Pane, the phone we are running on has a
+ * system image lower than Android Q. RoleManager dialog will be unavailable here.
+ */
 @Composable
 fun SetDefaultAndroidBrowserPane(
     settingsViewModel: SettingsViewModel
@@ -55,7 +59,9 @@ fun SetDefaultAndroidBrowserPane(
             )
 
             Button(
-                onClick = { settingsViewModel.openAndroidDefaultBrowserSettings() },
+                onClick = {
+                    settingsViewModel.openAndroidDefaultBrowserSettings()
+                },
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()

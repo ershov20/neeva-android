@@ -10,13 +10,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.settings.getFakeSettingsViewModel
+import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.settings.sharedComposables.SettingsGroupView
 import com.neeva.app.ui.theme.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun MainSettingsPane(
-    settingsViewModel: SettingsViewModel
+    settingsViewModel: SettingsViewModel,
+    setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager? = null
 ) {
     val buttonClickMap = settingsViewModel.getMainSettingsNavigation()
     Column(
@@ -37,6 +39,7 @@ fun MainSettingsPane(
                     SettingsGroupView(
                         settingsViewModel,
                         groupData,
+                        setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
                         buttonOnClicks = buttonClickMap
                     )
                 }

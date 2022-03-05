@@ -38,7 +38,7 @@ fun SettingsToggleRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
     ) {
-        SettingsLabelText(title, enabled = enabled, modifier = Modifier.weight(1.0f))
+        SettingsLabelText(title, enabled = enabled, columnModifier = Modifier.weight(1.0f))
         Switch(
             enabled = enabled,
             checked = toggleState.value,

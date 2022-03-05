@@ -24,7 +24,8 @@ import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun SettingsNavigationRow(
-    title: String,
+    primaryLabel: String,
+    secondaryLabel: String? = null,
     enabled: Boolean = true,
     onClick: () -> Unit,
     modifier: Modifier
@@ -33,11 +34,16 @@ fun SettingsNavigationRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable { onClick() }.then(modifier)
     ) {
-        SettingsLabelText(text = title, enabled = enabled, modifier = Modifier.weight(1.0f))
+        SettingsLabelText(
+            primaryLabel = primaryLabel,
+            secondaryLabel = secondaryLabel,
+            enabled = enabled,
+            columnModifier = Modifier.weight(1.0f)
+        )
         // TODO(dan.alcantara) Use Material Icons extended library when CircleCI issues are resolved
         Image(
             painter = painterResource(R.drawable.ic_navigate_next),
-            contentDescription = title,
+            contentDescription = primaryLabel,
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
         )
@@ -66,10 +72,10 @@ class SettingsNavigationRowPreviews :
     ) {
         NeevaTheme(useDarkTheme = params.darkTheme) {
             SettingsNavigationRow(
-                title = stringResource(R.string.debug_long_string_primary),
+                primaryLabel = stringResource(R.string.debug_long_string_primary),
                 enabled = params.isEnabled,
                 onClick = {},
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .defaultMinSize(minHeight = 56.dp)
                     .padding(16.dp)

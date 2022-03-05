@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalSetDefaultAndroidBrowserManager
 import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
@@ -37,6 +38,7 @@ fun AppNav(
     val settingsDataModel = LocalEnvironment.current.settingsDataModel
     val neevaUser = LocalEnvironment.current.neevaUser
     val historyManager = LocalEnvironment.current.historyManager
+    val setDefaultAndroidBrowserManager = LocalSetDefaultAndroidBrowserManager.current
     val coroutineScope = rememberCoroutineScope()
 
     val settingsViewModel = remember(appNavModel, settingsDataModel, historyManager, neevaUser) {
@@ -83,7 +85,10 @@ fun AppNav(
         }
 
         composable(AppNavDestination.SETTINGS.route) {
-            MainSettingsPane(settingsViewModel)
+            MainSettingsPane(
+                settingsViewModel = settingsViewModel,
+                setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager
+            )
         }
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {

@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsViewModel
+import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.ui.theme.Dimensions
 import java.util.Locale
 
@@ -23,6 +24,7 @@ import java.util.Locale
 fun SettingsGroupView(
     settingsViewModel: SettingsViewModel,
     groupData: SettingsGroupData,
+    setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager? = null,
     onClearBrowsingData: ((Map<String, Boolean>) -> Unit)? = null,
     buttonOnClicks: Map<Int, (() -> Unit)?> = mapOf()
 ) {
@@ -40,7 +42,13 @@ fun SettingsGroupView(
                 modifier = Modifier.padding(Dimensions.PADDING_SMALL)
             )
         }
-        SettingRowsView(settingsViewModel, groupData, onClearBrowsingData, buttonOnClicks)
+        SettingRowsView(
+            settingsViewModel,
+            groupData,
+            setDefaultAndroidBrowserManager,
+            onClearBrowsingData,
+            buttonOnClicks
+        )
     }
 }
 
@@ -48,6 +56,7 @@ fun SettingsGroupView(
 fun SettingRowsView(
     settingsViewModel: SettingsViewModel,
     groupData: SettingsGroupData,
+    setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager?,
     onClearBrowsingData: ((Map<String, Boolean>) -> Unit)?,
     buttonOnClicks: Map<Int, (() -> Unit)?>
 ) {
@@ -65,6 +74,7 @@ fun SettingRowsView(
             SettingsRow(
                 rowData = rowData,
                 settingsViewModel = settingsViewModel,
+                setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
                 onClearBrowsingData = onClearBrowsingData,
                 onClick = onClick,
                 modifier = rowModifier

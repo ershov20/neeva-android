@@ -41,7 +41,7 @@ fun ClearBrowsingPane(
                         SettingsGroupView(
                             settingsViewModel,
                             groupData,
-                            onClearBrowsingData
+                            onClearBrowsingData = onClearBrowsingData
                         )
                     }
                 }

@@ -40,6 +40,7 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.neeva_menu.LocalMenuData
 import com.neeva.app.neeva_menu.LocalMenuDataState
+import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.theme.NeevaTheme
@@ -82,12 +83,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     internal var appNavModel: AppNavModel? = null
 
+    private lateinit var setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
+
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         webLayerModel.activityCallbacks = WeakReference(this)
-
         setContentView(R.layout.main)
 
         findViewById<ComposeView>(R.id.browser_ui).apply {
@@ -115,7 +117,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         LocalFirstRunModel provides firstRunModel,
                         LocalMenuData provides LocalMenuDataState(
                             isUpdateAvailableVisible = isUpdateAvailable
-                        )
+                        ),
+                        LocalSetDefaultAndroidBrowserManager
+                            provides setDefaultAndroidBrowserManager
                     ) {
                         ActivityUI(
                             bottomControlOffset = activityViewModel.bottomControlOffset,
@@ -142,6 +146,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
             }
         }
+
+        setDefaultAndroidBrowserManager = SetDefaultAndroidBrowserManager.create(this)
 
         lifecycleScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -318,7 +324,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     override fun onBackPressed() {
         val browserWrapper = webLayerModel.currentBrowser
-
         when {
             browserWrapper.exitFullscreen() || browserWrapper.dismissTransientUi() -> {
                 return

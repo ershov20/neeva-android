@@ -11,6 +11,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.BrowserScaffold
@@ -34,6 +35,9 @@ data class LocalEnvironmentState(
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value set") }
 val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("No value set") }
+val LocalSetDefaultAndroidBrowserManager = compositionLocalOf<SetDefaultAndroidBrowserManager> {
+    error("No value set")
+}
 
 @Composable
 fun ActivityUI(
