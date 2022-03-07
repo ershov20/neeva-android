@@ -2,7 +2,6 @@ package com.neeva.app
 
 import android.app.SearchManager
 import android.content.Intent
-import android.graphics.Rect
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -50,7 +49,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.ContextMenuParams
@@ -150,20 +148,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         setDefaultAndroidBrowserManager = SetDefaultAndroidBrowserManager.create(this)
 
         lifecycleScope.launch {
+            // Keep track of when the BrowserWrapper changes so that the Activity can attach their
+            // Fragments and create their Browsers.  This is important for catching when the
+            // Activity is recreated due to a configuration change, like entering fullscreen and
+            // automatically switching to landscape when watching a video.
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                webLayerModel.initializationState
-                    .combine(webLayerModel.browserWrapperFlow) { loadingState, browserWrapper ->
-                        Pair(loadingState, browserWrapper)
-                    }
-                    .collectLatest { (loadingState, browserWrapper) ->
-                        if (loadingState != LoadingState.READY) return@collectLatest
-
-                        if (prepareWebLayer(browserWrapper)) {
-                            // Check if there are any Intents that have URLs that need to be loaded.
-                            activityViewModel.getPendingLaunchIntent()
-                                ?.let { processIntent(intent) }
-                        }
-                    }
+                webLayerModel.initializedBrowserFlow.collectLatest { prepareBrowser(it) }
             }
         }
 
@@ -248,23 +238,26 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         showBrowser()
     }
 
-    private fun prepareWebLayer(browserWrapper: BrowserWrapper): Boolean {
+    private fun prepareBrowser(browserWrapper: BrowserWrapper) {
         when {
-            webLayerModel.initializationState.value != LoadingState.READY -> return false
-            isFinishing -> return false
-            isDestroyed -> return false
+            isFinishing -> return
+            isDestroyed -> return
         }
 
+        val displaySize =
+            WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(this).bounds
         val topControlPlaceholder = View(this)
         val bottomControlPlaceholder = View(this)
-        webLayerModel.prepareBrowserWrapper(
-            browserWrapper,
+
+        browserWrapper.createAndAttachBrowser(
             topControlPlaceholder,
             bottomControlPlaceholder,
+            displaySize,
             this::attachWebLayerFragment
         )
 
-        return true
+        // Check if there are any Intents that have URLs that need to be loaded.
+        activityViewModel.getPendingLaunchIntent()?.let { processIntent(it) }
     }
 
     /**
@@ -398,17 +391,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
-    override fun getDisplaySize(): Rect {
-        return WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(this).bounds
-    }
-
     override fun onBottomBarOffsetChanged(offset: Int) =
         activityViewModel.onBottomBarOffsetChanged(offset)
 
     override fun onTopBarOffsetChanged(offset: Int) =
         activityViewModel.onTopBarOffsetChanged(offset)
 
-    override fun detachIncognitoFragment() {
+    override fun removeIncognitoFragment() {
         // Do a post to avoid a Fragment transaction while one is already occurring to remove the
         // Incognito fragment, which can happen if the user closed all their incognito tabs
         // manually.

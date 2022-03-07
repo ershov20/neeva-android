@@ -3,8 +3,6 @@ package com.neeva.app.browsing
 import android.app.Application
 import android.net.Uri
 import android.util.Log
-import android.view.View
-import androidx.fragment.app.Fragment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.neeva.app.ApolloWrapper
@@ -21,10 +19,12 @@ import com.neeva.app.userdata.NeevaUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
@@ -93,6 +93,12 @@ class WebLayerModel @Inject constructor(
     val browserWrapperFlow: StateFlow<BrowserWrapper> get() = _browserWrapperFlow
     val currentBrowser get() = browserWrapperFlow.value
 
+    /** Tracks the current BrowserWrapper, emitting them only while the pipeline is initialized. */
+    val initializedBrowserFlow: Flow<BrowserWrapper> =
+        initializationState
+            .filter { it == LoadingState.READY }
+            .combine(_browserWrapperFlow) { _, browserWrapper -> browserWrapper }
+
     init {
         viewModelScope.launch(dispatchers.io) {
             domainProviderImpl.initialize()
@@ -109,25 +115,6 @@ class WebLayerModel @Inject constructor(
         } catch (e: UnsupportedVersionException) {
             throw RuntimeException("Failed to initialize WebLayer", e)
         }
-    }
-
-    /**
-     * Prepares the WebLayerModel to interface with the Browser.  Note that this is triggered every
-     * time the Activity is recreated, which includes when the screen is rotated.  This means that
-     * you should guard against two different instances of the same observer and or callback from
-     * being registered.
-     */
-    fun prepareBrowserWrapper(
-        browserWrapper: BrowserWrapper,
-        topControlsPlaceholder: View,
-        bottomControlsPlaceholder: View,
-        fragmentAttacher: (Fragment, Boolean) -> Unit
-    ) {
-        browserWrapper.createAndAttachBrowser(
-            topControlsPlaceholder,
-            bottomControlsPlaceholder,
-            fragmentAttacher
-        )
     }
 
     /**
@@ -160,7 +147,7 @@ class WebLayerModel @Inject constructor(
             // Delete the Incognito profile if the user has closed all of their tabs.
             if (incognitoBrowser?.hasNoTabs() == true) {
                 Log.d(TAG, "Culling unnecessary incognito profile")
-                activityCallbacks.get()?.detachIncognitoFragment()
+                activityCallbacks.get()?.removeIncognitoFragment()
                 incognitoBrowser = null
             }
 

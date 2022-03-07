@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.content.Context
+import android.graphics.Rect
 import android.net.Uri
 import android.util.Log
 import android.view.View
@@ -257,10 +258,12 @@ abstract class BrowserWrapper internal constructor(
         return Browser.fromFragment(fragment)
     }
 
+    /** Prepares the WebLayer Browser to interface with our app. */
     fun createAndAttachBrowser(
         topControlsPlaceholder: View,
         bottomControlsPlaceholder: View,
-        fragmentAttacher: (Fragment, Boolean) -> Unit
+        displaySize: Rect,
+        fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
         if (!::fragment.isInitialized) {
             // TODO(https://github.com/neevaco/neeva-android/issues/318): We should try to reuse any
@@ -273,18 +276,15 @@ abstract class BrowserWrapper internal constructor(
             fragment.retainInstance = true
         }
 
-        fragmentAttacher.invoke(fragment, isIncognito)
-
+        fragmentAttacher(fragment, isIncognito)
         if (browserFlow.value == null) {
             browserFlow.value = getBrowserFromFragment(fragment)
         }
 
-        val browser = this.browser ?: throw IllegalStateException()
+        val browser = browserFlow.value ?: throw IllegalStateException()
         registerBrowserCallbacks(browser)
 
-        activityCallbackProvider()?.getDisplaySize()?.let { windowSize ->
-            browser.setMinimumSurfaceSize(windowSize.width(), windowSize.height())
-        }
+        browser.setMinimumSurfaceSize(displaySize.width(), displaySize.height())
 
         // There appears to be a bug in WebLayer that prevents the bottom bar from being rendered,
         // and also prevents Composables from being re-rendered when their state changes.  To get
@@ -305,7 +305,12 @@ abstract class BrowserWrapper internal constructor(
 
     @CallSuper
     protected open fun registerBrowserCallbacks(browser: Browser): Boolean {
-        if (tabListRestorer != null) return false
+        if (tabListRestorer != null) {
+            // If the tabListRestorer is non-null, we've previously registered callbacks on the
+            // Browser.  This happens because the WebLayer Fragment survives Activity recreation.
+            // Bail early to avoid adding additional copies of observers and callbacks.
+            return false
+        }
 
         val restorer = BrowserRestoreCallbackImpl(
             tabList = tabList,

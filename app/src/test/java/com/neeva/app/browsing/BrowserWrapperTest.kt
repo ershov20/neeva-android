@@ -57,7 +57,6 @@ class BrowserWrapperTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    private lateinit var activityCallbacks: ActivityCallbacks
     private lateinit var browser: Browser
     private lateinit var browserWrapper: BrowserWrapper
     private lateinit var context: Context
@@ -67,6 +66,7 @@ class BrowserWrapperTest : BaseTest() {
 
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
     @Mock private lateinit var activeTabModel: ActiveTabModelImpl
+    @Mock private lateinit var activityCallbacks: ActivityCallbacks
     @Mock private lateinit var browserFragment: BrowserFragment
     @Mock private lateinit var findInPageModel: FindInPageModelImpl
     @Mock private lateinit var cookieManager: CookieManager
@@ -95,10 +95,6 @@ class BrowserWrapperTest : BaseTest() {
             main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
             io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
         )
-
-        activityCallbacks = mock {
-            on { getDisplaySize() } doReturn Rect(0, 0, 100, 200)
-        }
 
         profile = mock {
             on { getCookieManager() } doReturn cookieManager
@@ -169,7 +165,12 @@ class BrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         val redirectUri = Uri.parse("https://www.example.com/incognito_redirect")
 
-        browserWrapper.createAndAttachBrowser(topPlaceholder, bottomPlaceholder, fragmentAttacher)
+        browserWrapper.createAndAttachBrowser(
+            topPlaceholder,
+            bottomPlaceholder,
+            Rect(0, 0, 100, 200),
+            fragmentAttacher
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Say that the user's Browser currently has an active tab open.
@@ -193,7 +194,12 @@ class BrowserWrapperTest : BaseTest() {
 
     @Test
     fun createAndAttachBrowser_hooksIntoAndroidViewHierarchy() {
-        browserWrapper.createAndAttachBrowser(topPlaceholder, bottomPlaceholder, fragmentAttacher)
+        browserWrapper.createAndAttachBrowser(
+            topPlaceholder,
+            bottomPlaceholder,
+            Rect(0, 0, 100, 200),
+            fragmentAttacher
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         verify(browser).setTopView(topPlaceholder)
@@ -210,7 +216,13 @@ class BrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(topPlaceholder, bottomPlaceholder, fragmentAttacher)
+        val bounds =
+            browserWrapper.createAndAttachBrowser(
+                topPlaceholder,
+                bottomPlaceholder,
+                Rect(0, 0, 100, 200),
+                fragmentAttacher
+            )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Say that the user's Browser currently has an active tab open.
@@ -234,7 +246,12 @@ class BrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(topPlaceholder, bottomPlaceholder, fragmentAttacher)
+        browserWrapper.createAndAttachBrowser(
+            topPlaceholder,
+            bottomPlaceholder,
+            Rect(0, 0, 100, 200),
+            fragmentAttacher
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Say that the user's Browser currently has no active tabs open.
@@ -275,7 +292,12 @@ class BrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(topPlaceholder, bottomPlaceholder, fragmentAttacher)
+        browserWrapper.createAndAttachBrowser(
+            topPlaceholder,
+            bottomPlaceholder,
+            Rect(0, 0, 100, 200),
+            fragmentAttacher
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         browserWrapper.loadUrl(
@@ -310,7 +332,12 @@ class BrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(topPlaceholder, bottomPlaceholder, fragmentAttacher)
+        browserWrapper.createAndAttachBrowser(
+            topPlaceholder,
+            bottomPlaceholder,
+            Rect(0, 0, 100, 200),
+            fragmentAttacher
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         browserWrapper.loadUrl(
@@ -343,7 +370,12 @@ class BrowserWrapperTest : BaseTest() {
     @Test
     fun loadUrl_withLazyTab() {
         val expectedUri = Uri.parse("https://www.example.com")
-        browserWrapper.createAndAttachBrowser(topPlaceholder, bottomPlaceholder, fragmentAttacher)
+        browserWrapper.createAndAttachBrowser(
+            topPlaceholder,
+            bottomPlaceholder,
+            Rect(0, 0, 100, 200),
+            fragmentAttacher
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Opening a lazy tab should tell the URL bar to take focus so that the user can see zero
@@ -377,7 +409,12 @@ class BrowserWrapperTest : BaseTest() {
     @Test
     fun lazyTab_tracksEditingState() {
         val expectedUri = Uri.parse("https://www.example.com")
-        browserWrapper.createAndAttachBrowser(topPlaceholder, bottomPlaceholder, fragmentAttacher)
+        browserWrapper.createAndAttachBrowser(
+            topPlaceholder,
+            bottomPlaceholder,
+            Rect(0, 0, 100, 200),
+            fragmentAttacher
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Say that the user has an active tab.
