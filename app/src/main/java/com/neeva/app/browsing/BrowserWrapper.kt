@@ -6,7 +6,6 @@ import android.net.Uri
 import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
-import androidx.annotation.MainThread
 import androidx.fragment.app.Fragment
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
@@ -17,6 +16,7 @@ import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.URLBarModelImpl
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserRestoreCallback
@@ -124,14 +123,6 @@ abstract class BrowserWrapper internal constructor(
     /** Tracks whether the user needs to be kept in the CardGrid if they're on that screen. */
     val userMustStayInCardGridFlow: StateFlow<Boolean>
 
-    /**
-     * Keeps track of data that must be applied to the next tab that is created.  This is necessary
-     * because the [Browser] doesn't allow you to create a tab and navigate to somewhere in the same
-     * call.  Rather, the [Browser] creates the tab asynchronously and we are expected to detect
-     * when it is opened.
-     */
-    private var newTabInfo: CreateNewTabInfo? = null
-
     val tabScreenshotManager: TabScreenshotManager by lazy { createTabScreenshotManager() }
 
     abstract val historyManager: HistoryManager?
@@ -142,6 +133,9 @@ abstract class BrowserWrapper internal constructor(
 
     private var _isLazyTabFlow = MutableStateFlow(false)
     val isLazyTabFlow: StateFlow<Boolean> = _isLazyTabFlow
+
+    /** Tracks when the WebLayer [Browser] has finished restoration and the [tabList] is ready. */
+    private val isBrowserRestored = CompletableDeferred<Boolean>()
 
     init {
         faviconCache.profileProvider = this
@@ -201,18 +195,6 @@ abstract class BrowserWrapper internal constructor(
 
         override fun onTabAdded(tab: Tab) {
             onNewTabAdded(tab)
-
-            newTabInfo?.let {
-                selectTab(tab)
-                tabList.updateParentInfo(
-                    tab = tab,
-                    parentTabId = it.parentTabId,
-                    tabOpenType = it.tabOpenType
-                )
-                tab.navigationController.navigate(it.uri)
-                newTabInfo = null
-            }
-
             activityCallbackProvider()?.resetToolbarOffset()
         }
 
@@ -322,12 +304,14 @@ abstract class BrowserWrapper internal constructor(
                     parentTabId = null,
                     isViaIntent = false
                 )
-            }
-        )
+            },
+            afterRestoreCompleted = { isBrowserRestored.complete(true) }
+        ).also {
+            tabListRestorer = it
+        }
 
         browser.registerTabListCallback(tabListCallback)
         browser.registerBrowserControlsOffsetCallback(browserControlsOffsetCallback)
-        browser.registerBrowserRestoreCallback(restorer)
 
         browser.profile.setTablessOpenUrlCallback(
             object : OpenUrlCallback() {
@@ -344,7 +328,16 @@ abstract class BrowserWrapper internal constructor(
             null
         )
 
-        tabListRestorer = restorer
+        browser.registerBrowserRestoreCallback(restorer)
+        if (!browser.isRestoringPreviousState) {
+            // WebLayer's Browser initialization can be finicky: If the [Browser] was already fully
+            // restored when we added the callback, then our callback doesn't fire.  This can happen
+            // if the app dies in the background, with WebLayer's Fragments automatically being
+            // creating the Browser before we have a chance to hook into it.
+            // We work around this by manually calling onRestoreCompleted() if it's already done.
+            restorer.onRestoreCompleted()
+        }
+
         return true
     }
 
@@ -422,12 +415,7 @@ abstract class BrowserWrapper internal constructor(
         }
     }
 
-    /**
-     * Creates a new tab and shows the given [uri].
-     *
-     * Because [Browser] only allows you to create a Tab without a URL, we save the URL for when
-     * the [TabListCallback] tells us the new tab has been added.
-     */
+    /** Creates a new tab and shows the given [uri]. */
     private fun createTabWithUri(uri: Uri, parentTabId: String?, isViaIntent: Boolean) {
         browser?.let {
             val tabOpenType = when {
@@ -436,8 +424,18 @@ abstract class BrowserWrapper internal constructor(
                 else -> TabInfo.TabOpenType.DEFAULT
             }
 
-            newTabInfo = CreateNewTabInfo(uri, parentTabId, tabOpenType)
-            it.createTab()
+            val newTab = it.createTab()
+            newTab.navigationController.navigate(uri)
+
+            // onTabAdded should have been called by this point, allowing us to store the extra
+            // information about the Tab.
+            tabList.updateParentInfo(
+                tab = newTab,
+                parentTabId = parentTabId,
+                tabOpenType = tabOpenType
+            )
+
+            selectTab(newTab)
         }
     }
 
@@ -452,7 +450,7 @@ abstract class BrowserWrapper internal constructor(
 
     fun selectTab(primitive: TabInfo) = tabList.findTab(primitive.id)?.let { selectTab(it) }
 
-    fun selectTab(tab: Tab) {
+    private fun selectTab(tab: Tab) {
         // Screenshot the previous tab right before it is replaced to keep it as fresh as possible.
         takeScreenshotOfActiveTab()
 
@@ -537,51 +535,44 @@ abstract class BrowserWrapper internal constructor(
     fun reload() = _activeTabModel.reload()
 
     /**
-     * Load the given [uri].
+     * Start a load of the given [uri].
      *
-     * If the user is currently in the process of opening a new tab, this will open a new Tab with
-     * the URL.
+     * If the user is currently in the process of opening a new tab lazily, this will open a new Tab
+     * with the URL.
      *
      * If the BrowserWrapper needs to redirect the user to another URI (e.g. if the user is
-     * performing a search in Incognito for the first time), this call will complete asynchronously.
+     * performing a search in Incognito for the first time), the load may be delayed by a network
+     * call to get the updated URL.
      */
     fun loadUrl(
         uri: Uri,
         inNewTab: Boolean = _isLazyTabFlow.value,
         isViaIntent: Boolean = false,
-        parentTabId: String? = null
-    ) {
-        if (!shouldInterceptLoad(uri)) {
-            loadUrlInternal(uri, inNewTab, isViaIntent, parentTabId)
+        parentTabId: String? = null,
+        onLoadStarted: () -> Unit = {}
+    ) = coroutineScope.launch {
+        // Wait until the Browser finishes restoration.  If you try to load a URL in a new tab
+        // before restoration has completed, the Browser may drop the request on the floor.
+        isBrowserRestored.await()
+
+        // Check if the user needs to be redirected somewhere else.
+        val urlToLoad = if (shouldInterceptLoad(uri)) {
+            getReplacementUrl(uri)
         } else {
-            coroutineScope.launch {
-                val redirectedUri = withContext(dispatchers.io) {
-                    getReplacementUrl(uri)
-                }
-
-                withContext(dispatchers.main) {
-                    loadUrlInternal(redirectedUri, inNewTab, isViaIntent, parentTabId)
-                }
-            }
+            uri
         }
-    }
 
-    @MainThread
-    private fun loadUrlInternal(
-        uri: Uri,
-        newTab: Boolean,
-        isViaIntent: Boolean = false,
-        parentTabId: String? = null
-    ) {
-        if (newTab || _activeTabModel.activeTab == null) {
+        if (inNewTab || _activeTabModel.activeTab == null) {
             createTabWithUri(
-                uri = uri,
+                uri = urlToLoad,
                 parentTabId = parentTabId,
                 isViaIntent = isViaIntent
             )
         } else {
-            _activeTabModel.loadUrlInActiveTab(uri)
+            _activeTabModel.loadUrlInActiveTab(urlToLoad)
         }
+
+        onLoadStarted()
     }
 
     /** Checks whether or not the BrowserWrapper wants to block loading of the given [uri]. */

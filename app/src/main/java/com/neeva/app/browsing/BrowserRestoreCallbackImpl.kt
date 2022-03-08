@@ -10,7 +10,8 @@ class BrowserRestoreCallbackImpl(
     private val tabList: TabList,
     private val browser: Browser,
     private val cleanCache: () -> Unit,
-    private val onEmptyTabList: () -> Unit
+    private val onEmptyTabList: () -> Unit,
+    private val afterRestoreCompleted: () -> Unit
 ) : BrowserRestoreCallback() {
     override fun onRestoreCompleted() {
         super.onRestoreCompleted()
@@ -30,5 +31,7 @@ class BrowserRestoreCallbackImpl(
         }
 
         cleanCache()
+
+        afterRestoreCompleted()
     }
 }

@@ -152,7 +152,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             // Fragments and create their Browsers.  This is important for catching when the
             // Activity is recreated due to a configuration change, like entering fullscreen and
             // automatically switching to landscape when watching a video.
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
                 webLayerModel.initializedBrowserFlow.collectLatest { prepareBrowser(it) }
             }
         }
@@ -212,7 +212,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         webLayerModel.currentBrowser.loadUrl(
                             uri = it,
                             inNewTab = true,
-                            isViaIntent = true
+                            isViaIntent = true,
+                            onLoadStarted = this::showBrowser
                         )
                     }
                 }
@@ -225,7 +226,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     webLayerModel.currentBrowser.loadUrl(
                         uri = searchUri,
                         inNewTab = true,
-                        isViaIntent = true
+                        isViaIntent = true,
+                        onLoadStarted = this::showBrowser
                     )
                 }
             }

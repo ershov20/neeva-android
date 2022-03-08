@@ -102,8 +102,11 @@ class AppNavModel(
     }
 
     fun openUrl(url: Uri) {
-        webLayerModel.currentBrowser.loadUrl(url, inNewTab = true)
-        showBrowser()
+        webLayerModel.currentBrowser.loadUrl(
+            uri = url,
+            inNewTab = true,
+            onLoadStarted = this::showBrowser
+        )
     }
 
     fun openAndroidDefaultBrowserSettings() {
@@ -142,19 +145,11 @@ class AppNavModel(
     fun onMenuItem(id: NeevaMenuItemId) {
         when (id) {
             NeevaMenuItemId.HOME -> {
-                webLayerModel.currentBrowser.loadUrl(
-                    Uri.parse(NeevaConstants.appURL),
-                    inNewTab = true
-                )
-                showBrowser()
+                openUrl(Uri.parse(NeevaConstants.appURL))
             }
 
             NeevaMenuItemId.SPACES -> {
-                webLayerModel.currentBrowser.loadUrl(
-                    Uri.parse(NeevaConstants.appSpacesURL),
-                    inNewTab = true
-                )
-                showBrowser()
+                openUrl(Uri.parse(NeevaConstants.appSpacesURL))
             }
 
             NeevaMenuItemId.SETTINGS -> {

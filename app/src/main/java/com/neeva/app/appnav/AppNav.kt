@@ -64,10 +64,10 @@ fun AppNav(
             user = neevaUser,
             coroutineScope = coroutineScope
         ) {
-            appNavModel.showBrowser()
             webLayerModel.currentBrowser.loadUrl(
                 uri = Uri.parse(NeevaConstants.appHelpCenterURL),
-                inNewTab = true
+                inNewTab = true,
+                onLoadStarted = appNavModel::showBrowser
             )
         }
     }
@@ -120,8 +120,11 @@ fun AppNav(
             HistoryContainer(
                 faviconCache = webLayerModel.getRegularProfileFaviconCache()
             ) {
-                webLayerModel.currentBrowser.loadUrl(it, inNewTab = true)
-                appNavModel.showBrowser()
+                webLayerModel.currentBrowser.loadUrl(
+                    uri = it,
+                    inNewTab = true,
+                    onLoadStarted = appNavModel::showBrowser
+                )
             }
         }
 

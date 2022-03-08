@@ -105,20 +105,22 @@ class IncognitoBrowserWrapper private constructor(
 
     /** Perform the mutation necessary to get the Incognito URL. */
     override suspend fun getReplacementUrl(uri: Uri): Uri {
-        val toApi = Uri.Builder()
-            .path(uri.path)
-            .encodedQuery(uri.encodedQuery)
-            .fragment(uri.fragment)
-            .build()
+        val redirectUri: String? = withContext(dispatchers.io) {
+            val toApi = Uri.Builder()
+                .path(uri.path)
+                .encodedQuery(uri.encodedQuery)
+                .fragment(uri.fragment)
+                .build()
 
-        val response = apolloWrapper.performMutation(
-            StartIncognitoMutation(
-                StartIncognitoInput(
-                    redirect = Optional.presentIfNotNull(toApi.toString())
+            val response = apolloWrapper.performMutation(
+                StartIncognitoMutation(
+                    StartIncognitoInput(
+                        redirect = Optional.presentIfNotNull(toApi.toString())
+                    )
                 )
             )
-        )
-        val redirectUri = response?.data?.result
+            response?.data?.result
+        }
 
         return withContext(dispatchers.main) {
             if (redirectUri != null) {

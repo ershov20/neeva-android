@@ -39,8 +39,6 @@ class TabCallbacks(
     fullscreenCallback: FullscreenCallback,
     private val tabScreenshotManager: TabScreenshotManager
 ) {
-    private val browser: Browser get() = tab.browser
-
     /**
      * Triggered whenever a new Favicon is available for the given tab.  These are persisted
      * into the databases and provided to whatever UI needs them.
@@ -139,7 +137,7 @@ class TabCallbacks(
     /** General callbacks for the tab that allow it to interface with our app. */
     private val tabCallback = object : TabCallback() {
         override fun bringTabToFront() {
-            browser.setActiveTab(tab)
+            tab.getBrowserIfAlive()?.setActiveTab(tab)
             activityCallbackProvider()?.bringToForeground()
         }
 
@@ -158,7 +156,7 @@ class TabCallbacks(
         }
 
         override fun showContextMenu(params: ContextMenuParams) {
-            if (tab != browser.activeTab) return
+            if (tab != tab.getBrowserIfAlive()?.activeTab) return
             activityCallbackProvider()?.showContextMenuForTab(params, tab)
         }
 

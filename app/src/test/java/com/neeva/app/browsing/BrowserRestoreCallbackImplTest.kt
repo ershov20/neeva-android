@@ -32,6 +32,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: We should have received a callback about there being no tabs to restore.
+        verify(testSetup.restoreCompletedCallback).invoke()
         verify(testSetup.onEmptyTabList, times(1)).invoke()
 
         verify(testSetup.cleanCache, times(1)).invoke()
@@ -47,6 +48,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: It should have navigated the active tab.
+        verify(testSetup.restoreCompletedCallback).invoke()
         val uriCaptor = argumentCaptor<Uri>()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.browser.activeTab!!.navigationController, times(1))
@@ -66,6 +68,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: It should have not navigated anywhere.
+        verify(testSetup.restoreCompletedCallback).invoke()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.browser.activeTab!!.navigationController, never()).navigate(any())
 
@@ -81,6 +84,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: Because there were multiple tabs restored, navigation logic shouldn't kick in.
+        verify(testSetup.restoreCompletedCallback).invoke()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.browser.activeTab!!.navigationController, never()).navigate(any())
 
@@ -96,6 +100,7 @@ class BrowserRestoreCallbackImplTest {
         testSetup.callback.onRestoreCompleted()
 
         // Assert: Confirm that the data was pulled back out correctly.
+        verify(testSetup.restoreCompletedCallback).invoke()
         testSetup.tabs.forEach {
             val expectedData = TabInfo.PersistedData(it.data)
             verify(testSetup.tabList).setPersistedInfo(eq(it), eq(expectedData), eq(false))
@@ -111,6 +116,7 @@ class BrowserRestoreCallbackImplTest {
         val cleanCache: () -> Unit = mock()
         val onEmptyTabList: () -> Unit = mock()
         val tabs = mutableSetOf<Tab>()
+        val restoreCompletedCallback: () -> Unit = mock()
 
         val browser = createMockBrowser(inactiveTabIds, activeTabId, activeTabNavigationIndex)
 
@@ -118,7 +124,8 @@ class BrowserRestoreCallbackImplTest {
             tabList = tabList,
             browser = browser,
             cleanCache = cleanCache,
-            onEmptyTabList = onEmptyTabList
+            onEmptyTabList = onEmptyTabList,
+            afterRestoreCompleted = restoreCompletedCallback
         )
 
         private fun createMockBrowser(
