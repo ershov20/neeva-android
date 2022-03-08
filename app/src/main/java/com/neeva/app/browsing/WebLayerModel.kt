@@ -125,6 +125,9 @@ class WebLayerModel @Inject constructor(
      * of their Incognito tabs, the Incognito profile is destroyed.
      */
     fun switchToProfile(useIncognito: Boolean) {
+        // Make sure that the ClientLogger is disabled when the user enters Incognito.
+        clientLogger.onProfileSwitch(useIncognito)
+
         if (currentBrowser.isIncognito == useIncognito) return
 
         _browserWrapperFlow.value = if (useIncognito) {

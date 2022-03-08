@@ -106,6 +106,8 @@ class IncognitoBrowserWrapper private constructor(
     /** Perform the mutation necessary to get the Incognito URL. */
     override suspend fun getReplacementUrl(uri: Uri): Uri {
         val redirectUri: String? = withContext(dispatchers.io) {
+            // The `StartIncognito` endpoint requires sending a relative URI, which we manually
+            // construct by creating a new URI using the relevant parts.
             val toApi = Uri.Builder()
                 .path(uri.path)
                 .encodedQuery(uri.encodedQuery)

@@ -46,8 +46,8 @@ open class ApolloWrapper(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
             .addHeader("User-Agent", "NeevaBrowserAndroid")
-            .addHeader("X-Neeva-Client-ID", "co.neeva.app.android.browser")
-            .addHeader("X-Neeva-Client-Version", "0.0.1")
+            .addHeader("X-Neeva-Client-ID", NeevaConstants.browserIdentifier)
+            .addHeader("X-Neeva-Client-Version", BuildConfig.VERSION_NAME)
             .build()
         return chain.proceed(request)
     }

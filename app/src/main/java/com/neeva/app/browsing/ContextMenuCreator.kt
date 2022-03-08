@@ -16,19 +16,22 @@ import org.chromium.weblayer.Tab
 
 /** Creates a context menu for a link that has been long-pressed. */
 class ContextMenuCreator(
-    private val browserWrapper: BrowserWrapper,
+    private val webLayerModel: WebLayerModel,
     private val params: ContextMenuParams,
     private val tab: Tab,
     private val context: Context
 ) : View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener {
-    companion object {
-        private const val MENU_ID_COPY_LINK_URI = 1
-        private const val MENU_ID_COPY_LINK_TEXT = 2
-        private const val MENU_ID_DOWNLOAD_IMAGE = 3
-        private const val MENU_ID_DOWNLOAD_VIDEO = 4
-        private const val MENU_ID_DOWNLOAD_LINK = 5
-        private const val MENU_ID_OPEN_IN_NEW_TAB = 6
+    enum class MenuIds {
+        COPY_LINK_URI,
+        COPY_LINK_TEXT,
+        DOWNLOAD_IMAGE,
+        DOWNLOAD_VIDEO,
+        DOWNLOAD_LINK,
+        OPEN_IN_NEW_TAB,
+        OPEN_IN_NEW_INCOGNITO_TAB
     }
+
+    private val isCurrentTabIncognito: Boolean = webLayerModel.currentBrowser.isIncognito
 
     override fun onCreateContextMenu(
         menu: ContextMenu,
@@ -63,33 +66,66 @@ class ContextMenuCreator(
             }
 
         if (params.linkUri != null) {
-            val openNewTabItem =
-                menu.add(Menu.NONE, MENU_ID_OPEN_IN_NEW_TAB, Menu.NONE, "Open in new tab")
-            openNewTabItem.setOnMenuItemClickListener(this)
+            if (!isCurrentTabIncognito) {
+                menu.add(
+                    Menu.NONE,
+                    MenuIds.OPEN_IN_NEW_TAB.ordinal,
+                    Menu.NONE,
+                    R.string.menu_open_in_new_tab
+                ).also { it.setOnMenuItemClickListener(this) }
+            }
 
-            val copyLinkUriItem =
-                menu.add(Menu.NONE, MENU_ID_COPY_LINK_URI, Menu.NONE, "Copy link address")
-            copyLinkUriItem.setOnMenuItemClickListener(this)
+            menu.add(
+                Menu.NONE,
+                MenuIds.OPEN_IN_NEW_INCOGNITO_TAB.ordinal,
+                Menu.NONE,
+                R.string.menu_open_in_new_incognito_tab
+            ).also { it.setOnMenuItemClickListener(this) }
+
+            menu.add(
+                Menu.NONE,
+                MenuIds.COPY_LINK_URI.ordinal,
+                Menu.NONE,
+                R.string.menu_copy_link_address
+            ).also { it.setOnMenuItemClickListener(this) }
         }
 
         if (!params.linkText.isNullOrEmpty()) {
-            val copyLinkTextItem =
-                menu.add(Menu.NONE, MENU_ID_COPY_LINK_TEXT, Menu.NONE, "Copy link text")
-            copyLinkTextItem.setOnMenuItemClickListener(this)
+            menu.add(
+                Menu.NONE,
+                MenuIds.COPY_LINK_TEXT.ordinal,
+                Menu.NONE,
+                context.getString(R.string.menu_copy_link_text)
+            ).also { it.setOnMenuItemClickListener(this) }
         }
 
         if (params.canDownload) {
             val downloadMenuItem = when {
                 params.isImage -> {
-                    menu.add(Menu.NONE, MENU_ID_DOWNLOAD_IMAGE, Menu.NONE, R.string.download_image)
+                    menu.add(
+                        Menu.NONE,
+                        MenuIds.DOWNLOAD_IMAGE.ordinal,
+                        Menu.NONE,
+                        R.string.menu_download_image
+                    )
                 }
 
                 params.isVideo -> {
-                    menu.add(Menu.NONE, MENU_ID_DOWNLOAD_VIDEO, Menu.NONE, R.string.download_video)
+                    menu.add(
+                        Menu.NONE,
+                        MenuIds.DOWNLOAD_VIDEO.ordinal,
+                        Menu.NONE,
+                        R.string.menu_download_video
+                    )
                 }
 
                 params.linkUri != null -> {
-                    menu.add(Menu.NONE, MENU_ID_DOWNLOAD_LINK, Menu.NONE, R.string.download_link)
+                    menu.add(
+                        Menu.NONE,
+                        MenuIds.DOWNLOAD_LINK.ordinal,
+                        Menu.NONE,
+                        R.string.menu_download_link
+                    )
                 }
 
                 else -> null
@@ -104,9 +140,10 @@ class ContextMenuCreator(
         val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
         when (item.itemId) {
-            MENU_ID_OPEN_IN_NEW_TAB -> {
+            MenuIds.OPEN_IN_NEW_TAB.ordinal -> {
                 params.linkUri?.let {
-                    browserWrapper.loadUrl(
+                    webLayerModel.switchToProfile(useIncognito = false)
+                    webLayerModel.currentBrowser.loadUrl(
                         uri = it,
                         inNewTab = true,
                         parentTabId = tab.guid
@@ -114,19 +151,37 @@ class ContextMenuCreator(
                 }
             }
 
-            MENU_ID_COPY_LINK_URI -> {
+            MenuIds.OPEN_IN_NEW_INCOGNITO_TAB.ordinal -> {
+                // Only keep track of the parent tab if it is also an Incognito tab.  This avoids
+                // situations where the user hits "back" to close the tab and the app can't figure
+                // out where to redirect the user.
+                val parentTabId = tab.guid.takeIf { isCurrentTabIncognito }
+
+                params.linkUri?.let {
+                    webLayerModel.switchToProfile(useIncognito = true)
+                    webLayerModel.currentBrowser.loadUrl(
+                        uri = it,
+                        inNewTab = true,
+                        parentTabId = parentTabId
+                    )
+                }
+            }
+
+            MenuIds.COPY_LINK_URI.ordinal -> {
                 clipboard.setPrimaryClip(
                     ClipData.newPlainText("link address", params.linkUri.toString())
                 )
             }
 
-            MENU_ID_COPY_LINK_TEXT -> {
+            MenuIds.COPY_LINK_TEXT.ordinal -> {
                 clipboard.setPrimaryClip(
                     ClipData.newPlainText("link text", params.linkText)
                 )
             }
 
-            MENU_ID_DOWNLOAD_IMAGE, MENU_ID_DOWNLOAD_VIDEO, MENU_ID_DOWNLOAD_LINK -> {
+            MenuIds.DOWNLOAD_IMAGE.ordinal,
+            MenuIds.DOWNLOAD_VIDEO.ordinal,
+            MenuIds.DOWNLOAD_LINK.ordinal -> {
                 tab.download(params)
             }
         }

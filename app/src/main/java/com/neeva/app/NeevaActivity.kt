@@ -382,7 +382,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             // access to the correct resources.
             setOnCreateContextMenuListener(
                 ContextMenuCreator(
-                    webLayerModel.currentBrowser,
+                    webLayerModel,
                     contextMenuParams,
                     tab,
                     context

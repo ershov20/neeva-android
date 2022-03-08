@@ -39,10 +39,6 @@
     <string name="empty_incognito_tabs_title">Create and manage Incognito tabs</string>
     <string name="empty_tab_hint">Tap + below to create a new tab</string>
 
-    <string name="download_image">Download image</string>
-    <string name="download_video">Download video</string>
-    <string name="download_link">Download link</string>
-
     <string name="toolbar_go_back">Back</string>
     <string name="toolbar_go_forward">Forward</string>
     <string name="toolbar_save_to_space">Save to space</string>
@@ -136,4 +132,12 @@
         3. Select Neeva Search &amp; Browser</string>
     <string name="go_to_settings">Go to Settings</string>
     <string name="set_neeva_as_default_browser">Set Neeva as your default browser</string>
+
+    <string name="menu_download_image">Download image</string>
+    <string name="menu_download_video">Download video</string>
+    <string name="menu_download_link">Download link</string>
+    <string name="menu_open_in_new_tab">Open in new tab</string>
+    <string name="menu_open_in_new_incognito_tab">Open in new incognito tab</string>
+    <string name="menu_copy_link_address">Copy link address</string>
+    <string name="menu_copy_link_text">Copy link text</string>
 </resources>

@@ -22,7 +22,10 @@ object NeevaConstants {
 
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
 
-    val loginCookie: String = "httpd~login"
+    /** Identifies the Android client when making backend requests. */
+    const val browserIdentifier = "co.neeva.app.android.browser"
+
+    const val loginCookie: String = "httpd~login"
     val browserTypeCookie = Cookie.Builder()
         .name("BrowserType")
         .secure()
@@ -35,6 +38,6 @@ object NeevaConstants {
         .secure()
         .domain(appHost)
         .expiresAt(Long.MAX_VALUE)
-        .value(NeevaBrowser.versionString ?: "0.0.1")
+        .value(BuildConfig.VERSION_NAME)
         .build()
 }

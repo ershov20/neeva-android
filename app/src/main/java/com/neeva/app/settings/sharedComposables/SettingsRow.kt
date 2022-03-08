@@ -7,7 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.neeva.app.NeevaBrowser
+import com.neeva.app.BuildConfig
 import com.neeva.app.R
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultBrowserRow
@@ -28,8 +28,8 @@ fun SettingsRow(
     modifier: Modifier
 ) {
     var title = stringResource(rowData.titleId)
-    val versionString = NeevaBrowser.versionString
-    if (rowData.titleId == R.string.settings_neeva_browser_version && versionString != null) {
+    val versionString = BuildConfig.VERSION_NAME
+    if (rowData.titleId == R.string.settings_neeva_browser_version) {
         title = stringResource(rowData.titleId, versionString)
     }
 

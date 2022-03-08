@@ -4,7 +4,7 @@ import com.apollographql.apollo3.api.Optional
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.BuildConfig
 import com.neeva.app.LogMutation
-import com.neeva.app.NeevaBrowser
+import com.neeva.app.NeevaConstants
 import com.neeva.app.type.ClientLog
 import com.neeva.app.type.ClientLogBase
 import com.neeva.app.type.ClientLogCounter
@@ -20,9 +20,18 @@ enum class ClientLoggerStatus {
 class ClientLogger(
     private val apolloWrapper: ApolloWrapper,
 ) {
-    val env: ClientLogEnvironment =
+    private val env: ClientLogEnvironment =
         if (BuildConfig.DEBUG) ClientLogEnvironment.Dev else ClientLogEnvironment.Prod
-    private val status: ClientLoggerStatus = ClientLoggerStatus.ENABLED
+    private var status: ClientLoggerStatus = ClientLoggerStatus.ENABLED
+
+    /** Enables or disables logging, based on whether the user is in private browsing mode. */
+    fun onProfileSwitch(useIncognito: Boolean) {
+        status = if (useIncognito) {
+            ClientLoggerStatus.DISABLED
+        } else {
+            ClientLoggerStatus.ENABLED
+        }
+    }
 
     fun logCounter(path: LogConfig.Interaction, attributes: List<ClientLogCounterAttribute>?) {
         if (status != ClientLoggerStatus.ENABLED) {
@@ -31,9 +40,7 @@ class ClientLogger(
 
         // Check feature flag when we start supporting it
         val clientLogBase =
-            NeevaBrowser.versionString?.let { version ->
-                ClientLogBase("co.neeva.app.android.browser", version, env)
-            }
+            ClientLogBase(NeevaConstants.browserIdentifier, BuildConfig.VERSION_NAME, env)
         val clientLogCounter = ClientLogCounter(
             path.interactionName,
             Optional.presentIfNotNull(attributes)
