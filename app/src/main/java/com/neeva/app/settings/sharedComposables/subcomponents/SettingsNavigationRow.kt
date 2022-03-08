@@ -4,9 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,8 +14,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -75,11 +72,8 @@ class SettingsNavigationRowPreviews :
                 primaryLabel = stringResource(R.string.debug_long_string_primary),
                 enabled = params.isEnabled,
                 onClick = {},
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 56.dp)
-                    .padding(16.dp)
-                    .background(MaterialTheme.colorScheme.surface)
+                modifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }
     }

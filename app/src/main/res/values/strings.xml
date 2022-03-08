@@ -22,7 +22,7 @@
     <string name="incognito">Incognito</string>
     <string name="suggested_sites">Suggested sites</string>
     <string name="searches">Searches</string>
-    <string name="settings_main_title">Settings</string>
+    <string name="settings">Settings</string>
     <string name="spaces">Spaces</string>
     <string name="tabs">Tabs</string>
     <string name="page_info">Page Info</string>string>
@@ -135,5 +135,5 @@
         2. Tap Browser App\n\n
         3. Select Neeva Search &amp; Browser</string>
     <string name="go_to_settings">Go to Settings</string>
-    <string name="setNeevaAsDefaultBrowser">Set Neeva as your default browser</string>
+    <string name="set_neeva_as_default_browser">Set Neeva as your default browser</string>
 </resources>

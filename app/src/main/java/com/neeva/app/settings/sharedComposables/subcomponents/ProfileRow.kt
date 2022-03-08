@@ -7,9 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -29,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
+import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.ui.theme.NeevaTheme
 
 @OptIn(ExperimentalCoilApi::class)
@@ -110,11 +108,7 @@ fun ProfileUI_SignedInPreview() {
             secondaryLabel = "kobec@neeva.co",
             pictureUrl = Uri.parse("https://c.neevacdn.net/image/fetch/s"),
             onClick = {},
-            Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surface)
+            SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }
@@ -129,11 +123,7 @@ fun ProfileUI_SignedIn_Dark_Preview() {
             secondaryLabel = "kobec@neeva.co",
             pictureUrl = null,
             onClick = {},
-            Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surface)
+            SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }

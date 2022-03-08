@@ -19,10 +19,10 @@ import com.neeva.app.feedback.FeedbackView
 import com.neeva.app.feedback.FeedbackViewModelImpl
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
-import com.neeva.app.settings.ProfileSettingsContainer
 import com.neeva.app.settings.SettingsViewModelImpl
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.main.MainSettingsPane
+import com.neeva.app.settings.profile.ProfileSettingsPane
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
 import com.neeva.app.spaces.AddToSpaceSheet
 import com.neeva.app.spaces.SpaceModifier
@@ -41,12 +41,20 @@ fun AppNav(
     val setDefaultAndroidBrowserManager = LocalSetDefaultAndroidBrowserManager.current
     val coroutineScope = rememberCoroutineScope()
 
-    val settingsViewModel = remember(appNavModel, settingsDataModel, historyManager, neevaUser) {
+    val settingsViewModel = remember(
+        appNavModel,
+        settingsDataModel,
+        historyManager,
+        neevaUser,
+        webLayerModel,
+        setDefaultAndroidBrowserManager
+    ) {
         SettingsViewModelImpl(
             appNavModel,
             settingsDataModel,
-            historyManager,
-            neevaUser
+            neevaUser,
+            webLayerModel,
+            setDefaultAndroidBrowserManager
         )
     }
 
@@ -86,23 +94,19 @@ fun AppNav(
 
         composable(AppNavDestination.SETTINGS.route) {
             MainSettingsPane(
-                settingsViewModel = settingsViewModel,
-                setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager
+                settingsViewModel = settingsViewModel
             )
         }
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {
-            ProfileSettingsContainer(
-                webLayerModel = webLayerModel,
-                neevaUser = neevaUser,
+            ProfileSettingsPane(
                 settingsViewModel = settingsViewModel
             )
         }
 
         composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {
             ClearBrowsingPane(
-                settingsViewModel = settingsViewModel,
-                webLayerModel::clearBrowsingData
+                settingsViewModel = settingsViewModel
             )
         }
 

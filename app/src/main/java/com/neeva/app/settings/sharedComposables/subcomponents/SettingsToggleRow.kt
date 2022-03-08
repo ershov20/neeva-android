@@ -2,9 +2,6 @@ package com.neeva.app.settings.sharedComposables.subcomponents
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Switch
@@ -22,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -92,11 +90,8 @@ class SettingsToggleRowPreviews :
                 toggleState = toggleState,
                 togglePrefKey = "",
                 getTogglePreferenceSetter = { {} },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 56.dp)
-                    .padding(16.dp)
-                    .background(MaterialTheme.colorScheme.surface)
+                modifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }
     }

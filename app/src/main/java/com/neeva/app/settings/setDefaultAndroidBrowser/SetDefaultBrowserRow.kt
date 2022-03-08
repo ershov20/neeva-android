@@ -29,13 +29,13 @@ fun SetDefaultBrowserRow(
         )
     } else if (setDefaultAndroidBrowserManager.isRoleManagerAvailable()) {
         SettingsNavigationRow(
-            primaryLabel = stringResource(id = R.string.setNeevaAsDefaultBrowser),
+            primaryLabel = stringResource(id = R.string.set_neeva_as_default_browser),
             onClick = { setDefaultAndroidBrowserManager.requestToBeDefaultBrowser() },
             modifier = rowModifier
         )
     } else {
         SettingsNavigationRow(
-            primaryLabel = stringResource(id = R.string.setNeevaAsDefaultBrowser),
+            primaryLabel = stringResource(id = R.string.set_neeva_as_default_browser),
             onClick = navigateToPane,
             modifier = rowModifier
         )

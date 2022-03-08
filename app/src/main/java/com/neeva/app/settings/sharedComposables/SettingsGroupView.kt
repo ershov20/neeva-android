@@ -2,7 +2,6 @@ package com.neeva.app.settings.sharedComposables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -12,21 +11,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsViewModel
-import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.ui.theme.Dimensions
 import java.util.Locale
 
 @Composable
 fun SettingsGroupView(
     settingsViewModel: SettingsViewModel,
-    groupData: SettingsGroupData,
-    setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager? = null,
-    onClearBrowsingData: ((Map<String, Boolean>) -> Unit)? = null,
-    buttonOnClicks: Map<Int, (() -> Unit)?> = mapOf()
+    groupData: SettingsGroupData
 ) {
     Column(
         Modifier
@@ -44,10 +38,7 @@ fun SettingsGroupView(
         }
         SettingRowsView(
             settingsViewModel,
-            groupData,
-            setDefaultAndroidBrowserManager,
-            onClearBrowsingData,
-            buttonOnClicks
+            groupData
         )
     }
 }
@@ -55,10 +46,7 @@ fun SettingsGroupView(
 @Composable
 fun SettingRowsView(
     settingsViewModel: SettingsViewModel,
-    groupData: SettingsGroupData,
-    setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager?,
-    onClearBrowsingData: ((Map<String, Boolean>) -> Unit)?,
-    buttonOnClicks: Map<Int, (() -> Unit)?>
+    groupData: SettingsGroupData
 ) {
     Column(
         modifier = Modifier.background(
@@ -66,18 +54,13 @@ fun SettingRowsView(
         )
     ) {
         groupData.rows.forEach { rowData ->
-            val rowModifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .padding(horizontal = Dimensions.PADDING_LARGE)
-            val onClick = buttonOnClicks[rowData.titleId]
+            var onClick = settingsViewModel.getMainSettingsNavigation()[rowData.titleId]
             SettingsRow(
                 rowData = rowData,
                 settingsViewModel = settingsViewModel,
-                setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
-                onClearBrowsingData = onClearBrowsingData,
                 onClick = onClick,
-                modifier = rowModifier
+                modifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }
     }

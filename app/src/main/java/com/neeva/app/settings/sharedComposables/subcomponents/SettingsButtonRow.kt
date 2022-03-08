@@ -3,9 +3,6 @@ package com.neeva.app.settings.sharedComposables.subcomponents
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -44,17 +41,11 @@ fun SettingsButtonRow(
 @Preview(name = "Settings Button, RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
 fun SettingsButton_Preview() {
-    val rowModifier = Modifier
-        .fillMaxWidth()
-        .defaultMinSize(minHeight = 56.dp)
-        .padding(16.dp)
-        .background(MaterialTheme.colorScheme.surface)
-
     NeevaTheme {
         SettingsButtonRow(
             title = stringResource(R.string.debug_long_string_primary),
             onClick = {},
-            rowModifier
+            SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }
@@ -66,16 +57,10 @@ fun SettingsButton_Preview() {
 @Composable
 fun SettingsButton_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        val rowModifier = Modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 56.dp)
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.surface)
-
         SettingsButtonRow(
             title = stringResource(R.string.debug_long_string_primary),
             onClick = {},
-            rowModifier
+            SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }

@@ -4,9 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,8 +12,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -45,13 +42,12 @@ fun SettingsLinkRow(
 @Preview(name = "Settings Link Row, RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
 fun SettingsLinkRow_Preview() {
-    val rowModifier = Modifier
-        .fillMaxWidth()
-        .defaultMinSize(minHeight = 56.dp)
-        .padding(16.dp)
-        .background(MaterialTheme.colorScheme.surface)
     NeevaTheme {
-        SettingsLinkRow(title = "A Label", openUrl = {}, rowModifier)
+        SettingsLinkRow(
+            title = "A Label",
+            openUrl = {},
+            SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
+        )
     }
 }
 
@@ -61,12 +57,11 @@ fun SettingsLinkRow_Preview() {
 @Preview(name = "Settings Link Row Dark, RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
 fun SettingsLinkRow_Dark_Preview() {
-    val rowModifier = Modifier
-        .fillMaxWidth()
-        .defaultMinSize(minHeight = 56.dp)
-        .padding(16.dp)
-        .background(MaterialTheme.colorScheme.surface)
     NeevaTheme(useDarkTheme = true) {
-        SettingsLinkRow(title = "A Label", openUrl = {}, rowModifier)
+        SettingsLinkRow(
+            title = "A Label",
+            openUrl = {},
+            SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
+        )
     }
 }

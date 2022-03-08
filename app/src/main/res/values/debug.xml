@@ -5,4 +5,7 @@
     <string name="debug_long_string_primary" translatable="false">String that is a really long string and stuff and extends for a while</string>
     <string name="debug_long_string_secondary" translatable="false">Secondary string that is also a really long string and stuff and extends for a while</string>
     <string name="debug_short_action" translatable="false">save</string>
+
+    <string name="settings_debug_local" translatable="false">DEBUG -- LOCAL</string>
+    <string name="settings_local_feature_flags" translatable="false">Local Feature Flags</string>
 </resources>

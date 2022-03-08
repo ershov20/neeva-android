@@ -22,9 +22,7 @@ fun SettingsAlertDialogue(
 ) {
     AlertDialog(
         onDismissRequest = dismissAction,
-        text = {
-            Text(text = text)
-        },
+        text = { Text(text = text) },
         confirmButton = {
             TextButton(
                 onClick = confirmAction

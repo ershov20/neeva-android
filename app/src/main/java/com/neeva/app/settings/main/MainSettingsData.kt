@@ -12,14 +12,16 @@ import com.neeva.app.NeevaConstants.appTermsURL
 import com.neeva.app.NeevaConstants.appWelcomeToursURL
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
+import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
-object MainSettingsData {
+object MainSettingsData : SettingsPaneDataInterface {
     @StringRes
-    val topAppBarTitleResId: Int = R.string.settings_main_title
-    val data = listOf(
+    override val topAppBarTitleResId: Int = R.string.settings
+    override val shouldShowUserName: Boolean = false
+    override val data = listOf(
         SettingsGroupData(
             R.string.company_name,
             listOf(

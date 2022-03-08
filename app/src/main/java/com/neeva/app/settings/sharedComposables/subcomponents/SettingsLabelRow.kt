@@ -3,9 +3,6 @@ package com.neeva.app.settings.sharedComposables.subcomponents
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,8 +14,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -98,16 +95,12 @@ class SettingsLabelRowPreviews :
     fun SettingsNavigationRow_SingleLabel_Preview(
         @PreviewParameter(SettingsLabelRowPreviews::class) params: Params
     ) {
-        val rowModifier = Modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 56.dp)
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.surface)
         NeevaTheme(useDarkTheme = params.darkTheme) {
             SettingsLabelRow(
                 primaryLabel = stringResource(id = R.string.debug_long_string_primary),
                 enabled = params.isEnabled,
-                rowModifier = rowModifier
+                rowModifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }
     }
@@ -120,17 +113,13 @@ class SettingsLabelRowPreviews :
     fun SettingsNavigationRow_DoubleLabel_Preview(
         @PreviewParameter(SettingsLabelRowPreviews::class) params: Params
     ) {
-        val rowModifier = Modifier
-            .fillMaxWidth()
-            .defaultMinSize(minHeight = 56.dp)
-            .padding(16.dp)
-            .background(MaterialTheme.colorScheme.surface)
         NeevaTheme(useDarkTheme = params.darkTheme) {
             SettingsLabelRow(
                 primaryLabel = stringResource(id = R.string.debug_long_string_primary),
                 secondaryLabel = stringResource(id = R.string.debug_long_string_primary),
                 enabled = params.isEnabled,
-                rowModifier = rowModifier
+                rowModifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }
     }

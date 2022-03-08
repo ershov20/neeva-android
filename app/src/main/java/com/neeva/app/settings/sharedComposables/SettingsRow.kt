@@ -2,20 +2,16 @@ package com.neeva.app.settings
 
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.R
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
-import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultBrowserRow
+import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabelRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
@@ -28,8 +24,6 @@ import com.neeva.app.userdata.NeevaUser
 fun SettingsRow(
     rowData: SettingsRowData,
     settingsViewModel: SettingsViewModel,
-    setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager? = null,
-    onClearBrowsingData: ((Map<String, Boolean>) -> Unit)? = null,
     onClick: (() -> Unit)? = null,
     modifier: Modifier
 ) {
@@ -43,7 +37,11 @@ fun SettingsRow(
 
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
-            onClick?.let { SettingsButtonRow(title, it, modifier) }
+            if (rowData.titleId == R.string.settings_sign_out) {
+                SettingsButtonRow(title, settingsViewModel::signOut, modifier)
+            } else {
+                onClick?.let { SettingsButtonRow(title, it, modifier) }
+            }
         }
 
         SettingsRowType.LABEL -> {
@@ -77,11 +75,9 @@ fun SettingsRow(
             if (onClick != null) {
                 // TODO(kobec): discuss with Dan to figure out a better way to deal with special cases like Set Android Default Browser
                 // https://github.com/neevaco/neeva-android/pull/376#discussion_r816329896
-                if (rowData.titleId == R.string.settings_default_browser &&
-                    setDefaultAndroidBrowserManager != null
-                ) {
+                if (rowData.titleId == R.string.settings_default_browser) {
                     SetDefaultBrowserRow(
-                        setDefaultAndroidBrowserManager,
+                        settingsViewModel.getSetDefaultAndroidBrowserManager(),
                         navigateToPane = onClick,
                         rowModifier = modifier
                     )
@@ -122,14 +118,12 @@ fun SettingsRow(
         }
 
         SettingsRowType.CLEAR_DATA_BUTTON -> {
-            if (onClearBrowsingData != null) {
-                ClearDataButtonView(
-                    getToggleState = settingsViewModel::getToggleState,
-                    rowData = rowData,
-                    onClearBrowsingData = onClearBrowsingData,
-                    rowModifier = modifier
-                )
-            }
+            ClearDataButtonView(
+                getToggleState = settingsViewModel::getToggleState,
+                rowData = rowData,
+                onClearBrowsingData = settingsViewModel::clearBrowsingData,
+                rowModifier = modifier
+            )
         }
     }
 }
@@ -155,12 +149,7 @@ fun SettingsRow_PreviewToggle() {
                 R.string.debug_long_string_primary
             ),
             settingsViewModel = getFakeSettingsViewModel(),
-            onClearBrowsingData = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surface)
+            modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }
@@ -180,12 +169,7 @@ fun SettingsRow_PreviewLink() {
                 togglePreferenceKey = ""
             ),
             settingsViewModel = getFakeSettingsViewModel(),
-            onClearBrowsingData = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surface)
+            modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }
@@ -201,12 +185,7 @@ fun SettingsRow_PreviewLabel() {
                 R.string.debug_long_string_primary
             ),
             settingsViewModel = getFakeSettingsViewModel(),
-            onClearBrowsingData = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 56.dp)
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surface)
+            modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }

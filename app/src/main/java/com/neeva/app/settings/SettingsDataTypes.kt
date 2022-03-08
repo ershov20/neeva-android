@@ -2,6 +2,12 @@ package com.neeva.app.settings
 
 import android.net.Uri
 
+interface SettingsPaneDataInterface {
+    val topAppBarTitleResId: Int
+    val shouldShowUserName: Boolean
+    val data: List<SettingsGroupData>
+}
+
 data class SettingsGroupData(
     val titleId: Int? = null,
     val rows: List<SettingsRowData>
@@ -22,7 +28,9 @@ data class SettingsRowData(
     val enabled: Boolean = true,
 
     /** Intended for use with ProfileRow. */
-    val showSSOProviderAsPrimaryLabel: Boolean = false
+    val showSSOProviderAsPrimaryLabel: Boolean = false,
+
+    val debugSetting: Boolean = false
 )
 
 enum class SettingsRowType {

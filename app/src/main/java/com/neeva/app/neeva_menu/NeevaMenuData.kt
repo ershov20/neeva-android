@@ -93,7 +93,7 @@ object NeevaMenuData {
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SETTINGS,
-            labelId = R.string.settings_main_title,
+            labelId = R.string.settings,
             icon = Icons.Default.Settings
         ),
         NeevaMenuItemData(

@@ -4,7 +4,9 @@ import android.net.Uri
 import androidx.compose.runtime.MutableState
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
-import com.neeva.app.history.HistoryManager
+import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.settings.setDefaultAndroidBrowser.FakeSetDefaultAndroidBrowserManager
+import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 
@@ -14,24 +16,41 @@ import com.neeva.app.userdata.NeevaUserData
  * Uses SettingsDataModel to provide UI State.
  */
 interface SettingsViewModel {
+    //region For General Settings Pane UI behavior
     fun onBackPressed()
     fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit)?
     fun getToggleState(key: String?): MutableState<Boolean>?
     fun openUrl(uri: Uri, openViaIntent: Boolean)
+    //endregion
+
+    //region Main Settings
     fun getMainSettingsNavigation(): Map<Int, (() -> Unit)?>
-    fun clearAllHistory()
+    //endregion
+
+    //region Profile Settings
     fun isSignedOut(): Boolean
     fun getNeevaUserData(): NeevaUserData
+    fun signOut()
+    //endregion
 
-    /** Meant for system images lower than Android Q */
+    //region Clear Browsing Data
+    fun clearBrowsingData(clearingOptions: Map<String, Boolean>)
+    //endregion
+
+    //region Set Default Android Browser
+    fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager
+
+    // Meant for system images lower than Android Q
     fun openAndroidDefaultBrowserSettings()
+    //endregion
 }
 
 class SettingsViewModelImpl(
-    val appNavModel: AppNavModel,
-    val settingsDataModel: SettingsDataModel,
-    val historyManager: HistoryManager,
-    val neevaUser: NeevaUser
+    private val appNavModel: AppNavModel,
+    private val settingsDataModel: SettingsDataModel,
+    private val neevaUser: NeevaUser,
+    private val webLayerModel: WebLayerModel,
+    private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
 ) : SettingsViewModel {
     override fun onBackPressed() {
         appNavModel.popBackStack()
@@ -65,10 +84,6 @@ class SettingsViewModelImpl(
         return navMap
     }
 
-    override fun clearAllHistory() {
-        historyManager.clearAllHistory()
-    }
-
     override fun isSignedOut(): Boolean {
         return neevaUser.isSignedOut()
     }
@@ -77,11 +92,25 @@ class SettingsViewModelImpl(
         return neevaUser.data
     }
 
+    override fun signOut() {
+        neevaUser.signOut(webLayerModel)
+        onBackPressed()
+    }
+
+    override fun clearBrowsingData(clearingOptions: Map<String, Boolean>) {
+        webLayerModel.clearBrowsingData(clearingOptions)
+    }
+
+    override fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager {
+        return setDefaultAndroidBrowserManager
+    }
+
     override fun openAndroidDefaultBrowserSettings() {
         appNavModel.openAndroidDefaultBrowserSettings()
     }
 }
 
+/** For Preview testing. */
 internal fun getFakeSettingsViewModel(): SettingsViewModel {
     return object : SettingsViewModel {
         override fun onBackPressed() {}
@@ -94,8 +123,6 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
 
         override fun getMainSettingsNavigation(): Map<Int, (() -> Unit)?> { return mapOf() }
 
-        override fun clearAllHistory() {}
-
         override fun isSignedOut(): Boolean { return false }
 
         override fun getNeevaUserData(): NeevaUserData {
@@ -104,6 +131,14 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
                 email = "kobec@neeva.co",
                 pictureURL = Uri.parse("https://c.neevacdn.net/image/fetch/s")
             )
+        }
+
+        override fun signOut() {}
+
+        override fun clearBrowsingData(clearingOptions: Map<String, Boolean>) {}
+
+        override fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager {
+            return FakeSetDefaultAndroidBrowserManager()
         }
 
         override fun openAndroidDefaultBrowserSettings() { }

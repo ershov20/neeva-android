@@ -2,11 +2,15 @@ package com.neeva.app.settings.profile
 
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
+import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 
-object ProfileSettingsPaneData {
-    val data = listOf(
+object ProfileSettingsPaneData : SettingsPaneDataInterface {
+    // For Profile Settings, the TopAppBar Title is the user's display name.
+    override val topAppBarTitleResId: Int = -1
+    override val shouldShowUserName: Boolean = true
+    override val data = listOf(
         SettingsGroupData(
             R.string.settings_signed_into_neeva_with,
             listOf(

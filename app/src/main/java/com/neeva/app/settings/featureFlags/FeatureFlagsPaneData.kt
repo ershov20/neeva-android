@@ -1,4 +1,4 @@
-package com.neeva.app.settings.clearBrowsing
+package com.neeva.app.settings.featureFlags
 
 import android.net.Uri
 import androidx.annotation.StringRes
@@ -10,7 +10,7 @@ import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
-object ClearBrowsingPaneData : SettingsPaneDataInterface {
+object FeatureFlagsPaneData : SettingsPaneDataInterface {
     @StringRes
     override val topAppBarTitleResId: Int = R.string.settings_clear_browsing_data
     override val shouldShowUserName: Boolean = false
@@ -64,6 +64,6 @@ object ClearBrowsingPaneData : SettingsPaneDataInterface {
                     url = Uri.parse(appManageMemory)
                 )
             )
-        ),
+        )
     )
 }
