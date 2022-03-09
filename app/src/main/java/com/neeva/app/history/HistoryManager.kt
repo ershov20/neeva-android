@@ -54,8 +54,6 @@ class HistoryManager(
         }.flow
     }
 
-    fun getAllHistory(): List<Site> = dao.getAllSitesVisited()
-
     private val frequentSites: Flow<List<Site>> =
         dao.getFrequentSitesAfterFlow(HISTORY_START_DATE, MAX_FREQUENT_SITES)
 

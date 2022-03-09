@@ -11,7 +11,7 @@ import androidx.compose.ui.res.stringResource
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsViewModel
-import com.neeva.app.ui.theme.FullScreenDialogTopBar
+import com.neeva.app.ui.FullScreenDialogTopBar
 
 @Composable
 fun SettingsPane(

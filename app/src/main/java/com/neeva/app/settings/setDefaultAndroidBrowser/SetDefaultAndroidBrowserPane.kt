@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsViewModel
-import com.neeva.app.ui.theme.FullScreenDialogTopBar
+import com.neeva.app.ui.FullScreenDialogTopBar
 
 /**
  * If the user opened this Settings Pane, the phone we are running on has a

@@ -12,8 +12,8 @@
     <string name="new_tab_content_description">Create new tab</string>
     <string name="close_all_content_description">Close all tabs</string>
     <string name="update_available">Update available</string>
+    <string name="url_bar_placeholder">Search or enter address</string>
 
-    <string name="refresh">Refresh</string>
     <string name="share">Share</string>
     <string name="downloads">Downloads</string>
     <string name="feedback">Feedback</string>

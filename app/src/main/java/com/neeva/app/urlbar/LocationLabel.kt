@@ -6,12 +6,14 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
+import com.neeva.app.neeva_menu.NeevaMenuItemId
+import com.neeva.app.neeva_menu.OverflowMenu
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
@@ -44,6 +48,8 @@ import org.chromium.weblayer.UrlBarOptions
 fun LocationLabel(
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
+    onMenuItem: (id: NeevaMenuItemId) -> Unit,
+    onEditUrl: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val browserWrapper = LocalBrowserWrapper.current
@@ -69,12 +75,14 @@ fun LocationLabel(
     }
 
     LocationLabel(
-        urlBarView,
-        urlBarValue,
-        foregroundColor,
-        showIncognitoBadge,
-        isShowingQuery,
-        modifier
+        urlBarView = urlBarView,
+        urlBarValue = urlBarValue,
+        foregroundColor = foregroundColor,
+        showIncognitoBadge = showIncognitoBadge,
+        isShowingQuery = isShowingQuery,
+        onMenuItem = onMenuItem,
+        onEditUrl = onEditUrl,
+        modifier = modifier
     )
 }
 
@@ -85,32 +93,40 @@ fun LocationLabel(
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
     isShowingQuery: Boolean,
+    onMenuItem: (id: NeevaMenuItemId) -> Unit,
+    onEditUrl: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+        modifier = modifier.clickable { onEditUrl() }
     ) {
-        val iconSize = 32.dp
-        val iconModifier = Modifier.size(iconSize)
+        val iconSize = 18.dp
+        val iconModifier = Modifier.padding(end = Dimensions.PADDING_LARGE).size(iconSize)
         if (showIncognitoBadge) {
-            Image(
+            Icon(
                 painter = painterResource(R.drawable.ic_incognito),
                 contentDescription = stringResource(R.string.incognito),
-                modifier = iconModifier.padding(end = Dimensions.PADDING_SMALL),
-                colorFilter = ColorFilter.tint(foregroundColor)
+                modifier = iconModifier,
+                tint = foregroundColor
             )
+        } else {
+            // Add a spacer that has the same size as the optional icon so that the URL and query
+            // text are properly centered.
+            Spacer(modifier = iconModifier)
         }
 
         Row(
-            modifier = Modifier.weight(1.0f),
+            modifier = Modifier
+                .weight(1.0f)
+                .fillMaxHeight(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (isShowingQuery) {
                 Image(
                     painter = painterResource(R.drawable.ic_baseline_search_24),
-                    contentDescription = "secure site",
+                    contentDescription = stringResource(R.string.search),
                     modifier = Modifier
                         .padding(8.dp)
                         .size(16.dp),
@@ -118,7 +134,7 @@ fun LocationLabel(
                     contentScale = ContentScale.Fit
                 )
                 Text(
-                    text = urlBarValue.ifEmpty { "Search or enter address" },
+                    text = urlBarValue,
                     style = MaterialTheme.typography.bodyLarge,
                     maxLines = 1,
                     color = foregroundColor,
@@ -147,14 +163,10 @@ fun LocationLabel(
             }
         }
 
-        if (showIncognitoBadge) {
-            // Add a spacer that has the same size as the optional icon on the left so that the URL
-            // and query text are properly centered.
-            Spacer(modifier = iconModifier)
-        } else {
-            // Add some padding on the right to account for the lack of an icon.
-            Spacer(modifier = Modifier.width(12.dp))
-        }
+        OverflowMenu(
+            onMenuItem = onMenuItem,
+            foregroundColor = foregroundColor
+        )
     }
 }
 
@@ -209,6 +221,8 @@ class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPrevi
                 foregroundColor = MaterialTheme.colorScheme.onSurface,
                 showIncognitoBadge = params.isIncognito,
                 isShowingQuery = params.isShowingQuery,
+                onMenuItem = {},
+                onEditUrl = {},
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }

@@ -54,8 +54,8 @@ fun NeevaMenuRectangleItem_PreviewShortText() {
     NeevaTheme {
         NeevaMenuTileItem(
             itemData = NeevaMenuItemData(
-                id = NeevaMenuItemId.HOME,
-                labelId = R.string.home,
+                id = NeevaMenuItemId.SPACES,
+                labelId = R.string.spaces,
                 icon = Icons.Default.Home
             ),
             onMenuItem = {}
@@ -70,7 +70,7 @@ fun NeevaMenuRectangleItem_PreviewLongText() {
     NeevaTheme {
         NeevaMenuTileItem(
             itemData = NeevaMenuItemData(
-                id = NeevaMenuItemId.HOME,
+                id = NeevaMenuItemId.SPACES,
                 labelId = R.string.debug_long_string_primary,
                 icon = Icons.Default.Home
             ),

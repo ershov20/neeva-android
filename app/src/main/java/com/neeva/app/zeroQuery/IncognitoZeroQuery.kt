@@ -39,6 +39,7 @@ fun IncognitoZeroQuery() {
     val backgroundColor = MaterialTheme.colorScheme.inverseSurface
 
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .verticalScroll(rememberScrollState())
             .fillMaxSize()

@@ -8,7 +8,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -32,12 +32,10 @@ data class TabToolbarModel(
     val onAddToSpace: () -> Unit = {},
     val onTabSwitcher: () -> Unit = {},
     val goBack: () -> Unit = {},
-    val goForward: () -> Unit = {}
+    val share: () -> Unit = {}
 )
 
-/**
- * Bottom controls: Back, forward, app menu, ...
- */
+/**  Contains all the controls available to the user in the bottom toolbar. */
 @Composable
 fun BottomToolbar(
     bottomControlOffset: StateFlow<Float>,
@@ -57,7 +55,7 @@ fun BottomToolbar(
                 }
             },
             goBack = browserWrapper::goBack,
-            goForward = browserWrapper::goForward,
+            share = appNavModel::shareCurrentPage
         ),
         activeTabModel = browserWrapper.activeTabModel,
         isIncognito = browserWrapper.isIncognito,
@@ -76,7 +74,6 @@ fun BottomToolbar(
     BottomToolbar(
         model = model,
         canGoBackward = navigationInfo.canGoBackward,
-        canGoForward = navigationInfo.canGoForward,
         isIncognito = isIncognito,
         modifier = modifier
     )
@@ -86,7 +83,6 @@ fun BottomToolbar(
 fun BottomToolbar(
     model: TabToolbarModel,
     canGoBackward: Boolean,
-    canGoForward: Boolean,
     isIncognito: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -122,16 +118,15 @@ fun BottomToolbar(
                 )
             }
 
-            val forwardAlpha = getClickableAlpha(canGoForward)
             IconButton(
-                enabled = canGoForward,
-                onClick = model.goForward,
+                enabled = true,
+                onClick = model.share,
                 modifier = Modifier.weight(1.0f)
             ) {
                 Icon(
-                    Icons.Default.ArrowForward,
-                    contentDescription = stringResource(id = R.string.toolbar_go_forward),
-                    tint = LocalContentColor.current.copy(alpha = forwardAlpha)
+                    Icons.Default.Share,
+                    contentDescription = stringResource(id = R.string.share),
+                    tint = LocalContentColor.current
                 )
             }
 
@@ -161,7 +156,7 @@ fun BottomToolbar(
                 modifier = Modifier.weight(1.0f)
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_baseline_grid_view_24),
+                    painter = painterResource(R.drawable.ic_baseline_filter_none_24),
                     contentDescription = stringResource(R.string.toolbar_tab_switcher),
                     tint = LocalContentColor.current
                 )
@@ -170,19 +165,17 @@ fun BottomToolbar(
     }
 }
 
-class BottomToolbarPreviews : BooleanPreviewParameterProvider<BottomToolbarPreviews.Params>(4) {
+class BottomToolbarPreviews : BooleanPreviewParameterProvider<BottomToolbarPreviews.Params>(3) {
     data class Params(
         val darkTheme: Boolean,
         val backEnabled: Boolean,
-        val forwardEnabled: Boolean,
         val isIncognito: Boolean
     )
 
     override fun createParams(booleanArray: BooleanArray) = Params(
         darkTheme = booleanArray[0],
         backEnabled = booleanArray[1],
-        forwardEnabled = booleanArray[2],
-        isIncognito = booleanArray[3]
+        isIncognito = booleanArray[2]
     )
 
     @Preview("1x scale", locale = "en")
@@ -195,7 +188,6 @@ class BottomToolbarPreviews : BooleanPreviewParameterProvider<BottomToolbarPrevi
             BottomToolbar(
                 model = TabToolbarModel(),
                 canGoBackward = params.backEnabled,
-                canGoForward = params.forwardEnabled,
                 isIncognito = params.isIncognito
             )
         }

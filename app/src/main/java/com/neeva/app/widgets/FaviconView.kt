@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,10 +32,17 @@ import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
+/**
+ * Draws an icon representing a particular site.
+ *
+ * When determining what image to display, the [imageOverride] is prioritized over the [bitmap].  If
+ * both are null, then a generic icon is displayed.
+ */
 @Composable
 fun FaviconView(
     bitmap: Bitmap?,
     modifier: Modifier = Modifier,
+    imageOverride: ImageVector? = null,
     bordered: Boolean = true,
     size: Dp = 20.dp
 ) {
@@ -56,21 +64,35 @@ fun FaviconView(
             ),
         Alignment.Center
     ) {
-        if (bitmap != null) {
-            Image(
-                bitmap = bitmap.asImageBitmap(),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillBounds,
-            )
-        } else {
-            Image(
-                painter = painterResource(R.drawable.globe),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillBounds,
-                colorFilter = ColorFilter.tint(LocalContentColor.current)
-            )
+        when {
+            imageOverride != null -> {
+                Image(
+                    imageVector = imageOverride,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds,
+                    colorFilter = ColorFilter.tint(LocalContentColor.current)
+                )
+            }
+
+            bitmap != null -> {
+                Image(
+                    bitmap = bitmap.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds,
+                )
+            }
+
+            else -> {
+                Image(
+                    painter = painterResource(R.drawable.globe),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.FillBounds,
+                    colorFilter = ColorFilter.tint(LocalContentColor.current)
+                )
+            }
         }
     }
 }

@@ -1,24 +1,16 @@
 package com.neeva.app.history
 
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.PagingData
@@ -33,6 +25,7 @@ import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.SuggestionType
 import com.neeva.app.suggestions.toNavSuggestion
+import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.BrandedTextButton
 import com.neeva.app.widgets.collapsibleSection
@@ -114,28 +107,9 @@ fun HistoryUI(
             .background(MaterialTheme.colorScheme.background)
             .fillMaxSize()
     ) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = stringResource(R.string.history),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.titleLarge
-                )
-            },
-            backgroundColor = MaterialTheme.colorScheme.surface,
-            navigationIcon = {
-                IconButton(
-                    onClick = { onClose() }
-                ) {
-                    Image(
-                        Icons.Default.ArrowBack,
-                        contentDescription = stringResource(R.string.close),
-                        contentScale = ContentScale.Inside,
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
-                    )
-                }
-            }
+        FullScreenDialogTopBar(
+            title = stringResource(R.string.history),
+            onBackPressed = onClose
         )
 
         LazyColumn(

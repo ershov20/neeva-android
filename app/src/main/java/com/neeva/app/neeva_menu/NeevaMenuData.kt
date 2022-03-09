@@ -4,12 +4,10 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.neeva.app.R
@@ -22,7 +20,7 @@ enum class NeevaMenuItemId {
     HISTORY,
     DOWNLOADS,
     FORWARD,
-    REFRESH,
+    RELOAD,
     SHARE,
     SHOW_PAGE_INFO,
     FIND_IN_PAGE,
@@ -44,14 +42,9 @@ object NeevaMenuData {
             icon = Icons.Default.ArrowForward
         ),
         NeevaMenuItemData(
-            id = NeevaMenuItemId.REFRESH,
-            labelId = R.string.refresh,
+            id = NeevaMenuItemId.RELOAD,
+            labelId = R.string.reload,
             icon = Icons.Default.Refresh
-        ),
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.SHARE,
-            labelId = R.string.share,
-            icon = Icons.Default.Share
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SHOW_PAGE_INFO,
@@ -61,26 +54,6 @@ object NeevaMenuData {
     )
 
     val menuItems: List<NeevaMenuItemData> = listOf(
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.HOME,
-            labelId = R.string.home,
-            icon = Icons.Default.Home
-        ),
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.SPACES,
-            labelId = R.string.spaces,
-            imageResourceID = R.drawable.ic_baseline_bookmarks_24
-        ),
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.HISTORY,
-            labelId = R.string.history,
-            imageResourceID = R.drawable.ic_baseline_history_24
-        ),
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.DOWNLOADS,
-            labelId = R.string.downloads,
-            imageResourceID = R.drawable.ic_baseline_download_24
-        ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.UPDATE,
             labelId = R.string.update_available,
@@ -92,14 +65,29 @@ object NeevaMenuData {
             icon = Icons.Default.Search
         ),
         NeevaMenuItemData(
-            id = NeevaMenuItemId.SETTINGS,
-            labelId = R.string.settings,
-            icon = Icons.Default.Settings
+            id = NeevaMenuItemId.SPACES,
+            labelId = R.string.spaces,
+            imageResourceID = R.drawable.ic_baseline_bookmarks_24
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.FEEDBACK,
             labelId = R.string.feedback,
             imageResourceID = R.drawable.ic_baseline_feedback_24
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.SETTINGS,
+            labelId = R.string.settings,
+            icon = Icons.Default.Settings
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.HISTORY,
+            labelId = R.string.history,
+            imageResourceID = R.drawable.ic_baseline_history_24
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.DOWNLOADS,
+            labelId = R.string.downloads,
+            imageResourceID = R.drawable.ic_baseline_download_24
         )
     )
 }

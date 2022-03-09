@@ -50,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
-import com.neeva.app.ui.theme.FullScreenDialogTopBar
+import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -142,12 +142,22 @@ class AppNavModel(
     fun showFeedback() = show(AppNavDestination.FEEDBACK)
     fun showFeedbackPreviewImage() = show(AppNavDestination.FEEDBACK_PREVIEW_IMAGE)
 
+    /** Fires a Share Intent for the currently displayed page. */
+    fun shareCurrentPage() {
+        val activeTabModel = webLayerModel.currentBrowser.activeTabModel
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+
+            putExtra(Intent.EXTRA_TEXT, activeTabModel.urlFlow.value.toString())
+            putExtra(Intent.EXTRA_TITLE, activeTabModel.titleFlow.value)
+        }
+
+        safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
+    }
+
     fun onMenuItem(id: NeevaMenuItemId) {
         when (id) {
-            NeevaMenuItemId.HOME -> {
-                openUrl(Uri.parse(NeevaConstants.appURL))
-            }
-
             NeevaMenuItemId.SPACES -> {
                 openUrl(Uri.parse(NeevaConstants.appSpacesURL))
             }
@@ -164,21 +174,8 @@ class AppNavModel(
                 webLayerModel.currentBrowser.goForward()
             }
 
-            NeevaMenuItemId.REFRESH -> {
+            NeevaMenuItemId.RELOAD -> {
                 webLayerModel.currentBrowser.reload()
-            }
-
-            NeevaMenuItemId.SHARE -> {
-                val activeTabModel = webLayerModel.currentBrowser.activeTabModel
-                val sendIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    type = "text/plain"
-
-                    putExtra(Intent.EXTRA_TEXT, activeTabModel.urlFlow.value.toString())
-                    putExtra(Intent.EXTRA_TITLE, activeTabModel.titleFlow.value)
-                }
-
-                safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
             }
 
             NeevaMenuItemId.SHOW_PAGE_INFO -> {

@@ -1,8 +1,6 @@
 package com.neeva.app.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -83,7 +82,7 @@ fun CrashedTab(
                         end.linkTo(parent.end)
                     }
                     .padding(Dimensions.PADDING_LARGE)
-                    .scrollable(rememberScrollState(), orientation = Orientation.Vertical)
+                    .verticalScroll(rememberScrollState())
             ) {
                 Text(
                     text = stringResource(id = R.string.tab_crashed_title),

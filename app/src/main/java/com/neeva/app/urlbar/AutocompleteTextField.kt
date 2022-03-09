@@ -4,13 +4,17 @@ import android.graphics.Bitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -28,7 +32,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -51,8 +54,8 @@ fun AutocompleteTextField(
     urlBarModel: URLBarModel,
     suggestionsModel: SuggestionsModel?,
     urlBarModelState: URLBarModelState,
-    backgroundColor: Color,
     foregroundColor: Color,
+    placeholderColor: Color,
     modifier: Modifier
 ) {
     val browserWrapper: BrowserWrapper = LocalBrowserWrapper.current
@@ -65,17 +68,17 @@ fun AutocompleteTextField(
     AutocompleteTextField(
         textFieldValue = urlBarModelState.textFieldValue,
         faviconBitmap = urlBarModelState.faviconBitmap,
+        focusRequester = focusRequester,
         onLocationEdited = { urlBarModel.onLocationBarTextChanged(it) },
         onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
-        focusRequester = focusRequester,
         onFocusChanged = { urlBarModel.onFocusChanged(it.isFocused) },
         onLoadUrl = {
             browserWrapper.loadUrl(urlBarModelState.uriToLoad)
             focusManager.clearFocus()
             suggestionsModel?.logSuggestionTap(urlBarModelState.getSuggestionType(), null)
         },
-        backgroundColor = backgroundColor,
         foregroundColor = foregroundColor,
+        placeholderColor = placeholderColor,
         modifier = modifier
     )
 }
@@ -89,8 +92,8 @@ fun AutocompleteTextField(
     onLocationReplaced: (String) -> Unit,
     onFocusChanged: (FocusState) -> Unit,
     onLoadUrl: () -> Unit,
-    backgroundColor: Color,
     foregroundColor: Color,
+    placeholderColor: Color,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -105,39 +108,56 @@ fun AutocompleteTextField(
 
             Spacer(Modifier.width(Dimensions.PADDING_SMALL))
 
-            BasicTextField(
-                value = textFieldValue,
-                onValueChange = onLocationEdited,
-                modifier = Modifier
-                    .focusRequester(focusRequester)
-                    .onFocusChanged(onFocusChanged)
-                    .onPreviewKeyEvent {
-                        if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
-                            // If we're seeing a hardware enter key, intercept it to prevent adding
-                            // a newline to the URL.
-                            onLoadUrl()
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.weight(1.0f)
+            ) {
+                // [BasicTextField]s don't have support for Placeholders, and [TextField] isn't
+                // styled in a way we can use.  Instead, just add a Text that disappears as soon as
+                // the user starts typing something.
+                if (textFieldValue.text.isEmpty()) {
+                    Text(
+                        text = stringResource(R.string.url_bar_placeholder),
+                        modifier = Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = placeholderColor
+                    )
+                }
 
-                            true
-                        } else {
-                            false
+                BasicTextField(
+                    value = textFieldValue,
+                    onValueChange = onLocationEdited,
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
+                        .onFocusChanged(onFocusChanged)
+                        .onPreviewKeyEvent {
+                            if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
+                                // If we're seeing a hardware enter key, intercept it to prevent
+                                // adding a newline to the URL.
+                                onLoadUrl()
+
+                                true
+                            } else {
+                                false
+                            }
                         }
-                    }
-                    .weight(1.0f),
-                singleLine = true,
-                textStyle = TextStyle(
-                    color = LocalContentColor.current,
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                ),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Uri,
-                    imeAction = ImeAction.Go,
-                    autoCorrect = false
-                ),
-                keyboardActions = KeyboardActions(
-                    onGo = { onLoadUrl() }
-                ),
-                cursorBrush = SolidColor(LocalContentColor.current)
-            )
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    textStyle = TextStyle(
+                        color = LocalContentColor.current,
+                        fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Uri,
+                        imeAction = ImeAction.Go,
+                        autoCorrect = false
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onGo = { onLoadUrl() }
+                    ),
+                    cursorBrush = SolidColor(LocalContentColor.current)
+                )
+            }
 
             AnimatedVisibility(
                 visible = textFieldValue.text.isNotEmpty(),
@@ -148,7 +168,7 @@ fun AutocompleteTextField(
                     onClick = { onLocationReplaced("") }
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_cancel_24),
+                        imageVector = Icons.Default.Clear,
                         contentDescription = stringResource(id = R.string.clear),
                         tint = LocalContentColor.current
                     )
@@ -159,16 +179,18 @@ fun AutocompleteTextField(
 }
 
 class AutocompleteTextFieldPreviews :
-    BooleanPreviewParameterProvider<AutocompleteTextFieldPreviews.Params>(2) {
+    BooleanPreviewParameterProvider<AutocompleteTextFieldPreviews.Params>(3) {
     data class Params(
         val darkTheme: Boolean,
-        val useLongText: Boolean
+        val useLongText: Boolean,
+        val showPlaceholder: Boolean
     )
 
     override fun createParams(booleanArray: BooleanArray): Params {
         return Params(
             darkTheme = booleanArray[0],
-            useLongText = booleanArray[1]
+            useLongText = booleanArray[1],
+            showPlaceholder = booleanArray[2]
         )
     }
 
@@ -178,18 +200,26 @@ class AutocompleteTextFieldPreviews :
     @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
     @Composable
     fun Default(@PreviewParameter(AutocompleteTextFieldPreviews::class) params: Params) {
-        val textFieldValue = if (params.useLongText) {
-            val text = stringResource(id = R.string.debug_long_string_primary)
-            TextFieldValue(
-                text = text,
-                selection = TextRange(7, text.length)
-            )
-        } else {
-            val text = "something else"
-            TextFieldValue(
-                text = text,
-                selection = TextRange(text.length)
-            )
+        val textFieldValue = when {
+            params.showPlaceholder -> {
+                TextFieldValue()
+            }
+
+            params.useLongText -> {
+                val text = stringResource(id = R.string.debug_long_string_primary)
+                TextFieldValue(
+                    text = text,
+                    selection = TextRange(7, text.length)
+                )
+            }
+
+            else -> {
+                val text = "something else"
+                TextFieldValue(
+                    text = text,
+                    selection = TextRange(text.length)
+                )
+            }
         }
 
         NeevaTheme(useDarkTheme = params.darkTheme) {
@@ -201,8 +231,8 @@ class AutocompleteTextFieldPreviews :
                 onLocationReplaced = {},
                 onFocusChanged = {},
                 onLoadUrl = {},
-                backgroundColor = MaterialTheme.colorScheme.background,
-                foregroundColor = MaterialTheme.colorScheme.onSurface
+                foregroundColor = MaterialTheme.colorScheme.onSurface,
+                placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

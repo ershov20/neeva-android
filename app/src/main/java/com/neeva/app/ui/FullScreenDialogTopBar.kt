@@ -1,4 +1,4 @@
-package com.neeva.app.ui.theme
+package com.neeva.app.ui
 
 import androidx.compose.material.IconButton
 import androidx.compose.material.TextButton
@@ -13,7 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.R
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun FullScreenDialogTopBar(
@@ -81,18 +81,14 @@ class FullScreenDialogTopBarPreviews :
         NeevaTheme(useDarkTheme = params.darkTheme) {
             if (params.addButton) {
                 FullScreenDialogTopBar(
-                    title = androidx.compose.ui.res.stringResource(
-                        com.neeva.app.R.string.debug_long_string_primary
-                    ),
+                    title = stringResource(R.string.debug_long_string_primary),
                     onBackPressed = {},
-                    buttonTitle = androidx.compose.ui.res.stringResource
-                    (com.neeva.app.R.string.debug_short_action),
+                    buttonTitle = stringResource(R.string.debug_short_action),
                     buttonPressed = {}
                 )
             } else {
                 FullScreenDialogTopBar(
-                    title = stringResource
-                    (R.string.debug_long_string_primary),
+                    title = stringResource(R.string.debug_long_string_primary),
                     onBackPressed = {}
                 )
             }

@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
-import com.neeva.app.ui.theme.FullScreenDialogTopBar
+import com.neeva.app.ui.FullScreenDialogTopBar
 
 @Composable
 fun FeedbackPreviewImageView(

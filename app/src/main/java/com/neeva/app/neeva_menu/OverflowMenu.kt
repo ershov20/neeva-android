@@ -2,6 +2,7 @@ package com.neeva.app.neeva_menu
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DropdownMenu
@@ -21,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -38,7 +40,10 @@ data class LocalMenuDataState(
 val LocalMenuData = compositionLocalOf<LocalMenuDataState> { error("No value set") }
 
 @Composable
-fun OverflowMenu(onMenuItem: (NeevaMenuItemId) -> Unit) {
+fun OverflowMenu(
+    onMenuItem: (NeevaMenuItemId) -> Unit,
+    foregroundColor: Color
+) {
     val browserWrapper = LocalBrowserWrapper.current
     val activeTabModelState by browserWrapper.activeTabModel.navigationInfoFlow.collectAsState()
 
@@ -50,13 +55,18 @@ fun OverflowMenu(onMenuItem: (NeevaMenuItemId) -> Unit) {
         disabledMenuItems.add(NeevaMenuItemId.FORWARD)
     }
 
-    OverflowMenu(onMenuItem = onMenuItem, disabledMenuItems = disabledMenuItems)
+    OverflowMenu(
+        onMenuItem = onMenuItem,
+        disabledMenuItems = disabledMenuItems,
+        foregroundColor = foregroundColor
+    )
 }
 
 @Composable
 fun OverflowMenu(
     onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
+    foregroundColor: Color,
     isInitiallyExpanded: Boolean = false
 ) {
     val menuItemState = LocalMenuData.current
@@ -68,13 +78,12 @@ fun OverflowMenu(
                 Icon(
                     Icons.Default.MoreVert,
                     contentDescription = stringResource(id = R.string.toolbar_neeva_menu),
-                    tint = MaterialTheme.colorScheme.onSurface
+                    tint = foregroundColor
                 )
 
                 if (menuItemState.isUpdateAvailableVisible) {
                     Box(
-                        modifier =
-                        Modifier
+                        modifier = Modifier
                             .size(8.dp)
                             .background(
                                 color = MaterialTheme.colorScheme.primary,
@@ -86,10 +95,14 @@ fun OverflowMenu(
             }
         }
 
+        // The dropdown's width is arbitrarily set to 250.dp to avoid Compose shrinking the menu to
+        // wrap the menu item contents.
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            Modifier.background(MaterialTheme.colorScheme.surface)
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .defaultMinSize(minWidth = 250.dp)
         ) {
             OverflowMenuContents(
                 onMenuItem = onMenuItem,
@@ -126,8 +139,9 @@ class OverflowMenuPreviews : BooleanPreviewParameterProvider<OverflowMenuPreview
                 Surface(color = MaterialTheme.colorScheme.surface) {
                     OverflowMenu(
                         onMenuItem = {},
-                        isInitiallyExpanded = false,
-                        disabledMenuItems = emptyList()
+                        disabledMenuItems = emptyList(),
+                        foregroundColor = MaterialTheme.colorScheme.onSurface,
+                        isInitiallyExpanded = false
                     )
                 }
             }
