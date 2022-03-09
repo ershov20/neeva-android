@@ -131,7 +131,7 @@ abstract class BrowserWrapper internal constructor(
 
     val urlBarControllerFlow: Flow<UrlBarController?> = browserFlow.map { it?.urlBarController }
 
-    private var _isLazyTabFlow = MutableStateFlow(false)
+    private val _isLazyTabFlow = MutableStateFlow(false)
     val isLazyTabFlow: StateFlow<Boolean> = _isLazyTabFlow
 
     /** Tracks when the WebLayer [Browser] has finished restoration and the [tabList] is ready. */
@@ -504,9 +504,10 @@ abstract class BrowserWrapper internal constructor(
 
     /** Returns true if the [Browser] is maintaining no tabs. */
     fun hasNoTabs(): Boolean = tabList.hasNoTabs()
+    fun hasNoTabsFlow(): Flow<Boolean> = tabList.hasNoTabsFlow
 
     /** Returns true if the user should be forced to go to the card grid. */
-    fun userMustBeShownCardGrid(): Boolean = hasNoTabs() && !_isLazyTabFlow.value
+    fun userMustBeShownCardGrid(): Boolean = tabList.hasNoTabs() && !_isLazyTabFlow.value
 
     fun isFullscreen(): Boolean = fullscreenCallback.isFullscreen()
     fun exitFullscreen(): Boolean = fullscreenCallback.exitFullscreen()

@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.Dispatchers
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.previewDispatchers
@@ -49,6 +50,24 @@ import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 import kotlinx.coroutines.withContext
+
+@Composable
+fun TabCard(
+    tabInfo: TabInfo,
+    onSelect: () -> Unit,
+    onClose: () -> Unit,
+    faviconCache: FaviconCache,
+    screenshotProvider: (id: String) -> Bitmap?
+) {
+    TabCard(
+        tabInfo = tabInfo,
+        onSelect = onSelect,
+        onClose = onClose,
+        faviconCache = faviconCache,
+        screenshotProvider = screenshotProvider,
+        dispatchers = LocalEnvironment.current.dispatchers
+    )
+}
 
 @Composable
 fun TabCard(

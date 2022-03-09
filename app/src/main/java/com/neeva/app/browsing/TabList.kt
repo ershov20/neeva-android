@@ -1,8 +1,10 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import org.chromium.weblayer.Tab
 
 /**
@@ -15,6 +17,7 @@ class TabList {
 
     private val _orderedTabList = MutableStateFlow<List<TabInfo>>(emptyList())
     val orderedTabList: StateFlow<List<TabInfo>> = _orderedTabList
+    val hasNoTabsFlow: Flow<Boolean> = _orderedTabList.map { it.isEmpty() }
 
     fun hasNoTabs(): Boolean = tabs.isEmpty()
     fun indexOf(tab: Tab) = tabs.indexOf(tab)

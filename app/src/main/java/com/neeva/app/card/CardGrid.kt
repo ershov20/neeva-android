@@ -2,36 +2,21 @@ package com.neeva.app.card
 
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyGridState
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,100 +26,36 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.unit.dp
-import com.neeva.app.Dispatchers
-import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
+import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
-import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.previewDispatchers
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.ui.theme.getClickableAlpha
 
-@OptIn(
-    ExperimentalAnimationApi::class,
-    ExperimentalFoundationApi::class
-)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardsContainer(webLayerModel: WebLayerModel) {
-    val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
-    val appNavModel = LocalAppNavModel.current
-    val dispatchers = LocalEnvironment.current.dispatchers
-
-    val cardGridListener = object : CardGridListener {
-        override fun onSelectTab(tab: TabInfo) {
-            webLayerModel.currentBrowser.selectTab(tab)
-            appNavModel.showBrowser()
-        }
-
-        override fun onCloseTab(tab: TabInfo) {
-            webLayerModel.currentBrowser.closeTab(tab)
-        }
-
-        override fun onCloseAllTabs() {
-            webLayerModel.currentBrowser.closeAllTabs()
-        }
-
-        override fun onOpenLazyTab() {
-            webLayerModel.currentBrowser.openLazyTab()
-            appNavModel.showBrowser()
-        }
-
-        override fun onDone() {
-            appNavModel.showBrowser()
-        }
-
-        override fun onSwitchToIncognitoProfile() {
-            appNavModel.showCardGrid()
-            webLayerModel.switchToProfile(true)
-        }
-
-        override fun onSwitchToRegularProfile() {
-            appNavModel.showCardGrid()
-            webLayerModel.switchToProfile(false)
-        }
-    }
+fun CardGrid(
+    browserWrapper: BrowserWrapper,
+    selectedScreen: SelectedScreen,
+    cardGridModel: CardGridModel,
+    modifier: Modifier = Modifier
+) {
     // Reset the scroll state of the LazyVerticalGrid every time the active tab changes.
-    // TODO(dan.alcantara): We'll need to investigate how this should work with tab groups
-    //                      and child tabs.
     val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
     val activeTabIndex: Int = tabs.indexOfFirst { it.isSelected }.coerceAtLeast(0)
     val gridState = LazyGridState(activeTabIndex)
 
-    Surface {
-        CardGrid(
-            selectedScreen = if (browserWrapper.isIncognito) {
-                SelectedScreen.INCOGNITO_TABS
-            } else {
-                SelectedScreen.REGULAR_TABS
-            },
-            gridState = gridState,
-            closeButtonEnabled = !browserWrapper.hasNoTabs(),
-            cardGridListener = cardGridListener,
-            tabs = tabs,
-            faviconCache = browserWrapper.faviconCache,
-            screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot,
-            dispatchers = dispatchers
-        )
-    }
-}
-
-interface CardGridListener {
-    fun onSelectTab(tab: TabInfo)
-    fun onCloseTab(tab: TabInfo)
-    fun onCloseAllTabs()
-    fun onOpenLazyTab()
-    fun onDone()
-    fun onSwitchToIncognitoProfile()
-    fun onSwitchToRegularProfile()
-}
-
-enum class SelectedScreen {
-    INCOGNITO_TABS, REGULAR_TABS, SPACES
+    CardGrid(
+        selectedScreen = selectedScreen,
+        gridState = gridState,
+        cardGridModel = cardGridModel,
+        tabs = tabs,
+        faviconCache = browserWrapper.faviconCache,
+        screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot,
+        modifier = modifier
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -142,12 +63,11 @@ enum class SelectedScreen {
 fun CardGrid(
     selectedScreen: SelectedScreen,
     gridState: LazyGridState,
-    closeButtonEnabled: Boolean,
-    cardGridListener: CardGridListener,
+    cardGridModel: CardGridModel,
     tabs: List<TabInfo>,
     faviconCache: FaviconCache,
     screenshotProvider: (tabId: String) -> Bitmap?,
-    dispatchers: Dispatchers
+    modifier: Modifier = Modifier
 ) {
     // TODO(dan.alcantara): Material3 doesn't seem to have a MaterialTheme.colors.isLight function.
     val emptyLogoId = if (isSystemInDarkTheme()) {
@@ -164,19 +84,7 @@ fun CardGrid(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        ModeSwitcher(selectedScreen = selectedScreen) {
-            when (it) {
-                SelectedScreen.REGULAR_TABS -> cardGridListener.onSwitchToRegularProfile()
-                SelectedScreen.INCOGNITO_TABS -> cardGridListener.onSwitchToIncognitoProfile()
-                SelectedScreen.SPACES -> TODO("Not implemented")
-            }
-        }
-
+    Column(modifier = modifier.fillMaxWidth()) {
         val contentModifier = Modifier
             .fillMaxWidth()
             .weight(1f)
@@ -227,75 +135,11 @@ fun CardGrid(
                 items(tabs) { tab ->
                     TabCard(
                         tabInfo = tab,
-                        onSelect = { cardGridListener.onSelectTab(tab) },
-                        onClose = { cardGridListener.onCloseTab(tab) },
+                        onSelect = { cardGridModel.selectTab(tab) },
+                        onClose = { cardGridModel.closeTab(tab) },
                         faviconCache = faviconCache,
-                        screenshotProvider = screenshotProvider,
-                        dispatchers = dispatchers
+                        screenshotProvider = screenshotProvider
                     )
-                }
-            }
-        }
-
-        CompositionLocalProvider(
-            LocalContentColor provides MaterialTheme.colorScheme.onBackground
-        ) {
-            BottomAppBar(
-                backgroundColor = MaterialTheme.colorScheme.background
-            ) {
-                Box(modifier = Modifier.weight(1.0f)) {
-                    val deleteEnabled = tabs.isNotEmpty()
-                    IconButton(
-                        enabled = deleteEnabled,
-                        onClick = cardGridListener::onCloseAllTabs,
-                        modifier = Modifier.align(Alignment.CenterStart)
-                    ) {
-                        val deleteButtonAlpha = getClickableAlpha(deleteEnabled)
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = stringResource(
-                                R.string.close_all_content_description
-                            ),
-                            tint = LocalContentColor.current.copy(
-                                alpha = deleteButtonAlpha
-                            )
-                        )
-                    }
-                }
-
-                Box(modifier = Modifier.weight(1f)) {
-                    IconButton(
-                        onClick = cardGridListener::onOpenLazyTab,
-                        modifier = Modifier.align(Alignment.Center)
-                    ) {
-                        Icon(
-                            Icons.Default.Add,
-                            contentDescription = stringResource(
-                                R.string.new_tab_content_description
-                            ),
-                            tint = LocalContentColor.current
-                        )
-                    }
-                }
-
-                Box(modifier = Modifier.weight(1f)) {
-                    val closeButtonAlpha = getClickableAlpha(closeButtonEnabled)
-                    TextButton(
-                        onClick = cardGridListener::onDone,
-                        enabled = closeButtonEnabled,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = LocalContentColor.current.copy(
-                                alpha = closeButtonAlpha
-                            )
-                        ),
-                        modifier = Modifier.align(Alignment.CenterEnd)
-                    ) {
-                        Text(
-                            modifier = Modifier.padding(8.dp),
-                            text = stringResource(id = R.string.done),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
                 }
             }
         }
@@ -331,15 +175,7 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
 
         NeevaTheme(useDarkTheme = darkTheme) {
             val gridState = rememberLazyGridState()
-            val cardGridListener = object : CardGridListener {
-                override fun onSelectTab(tab: TabInfo) {}
-                override fun onCloseTab(tab: TabInfo) {}
-                override fun onCloseAllTabs() {}
-                override fun onOpenLazyTab() {}
-                override fun onDone() {}
-                override fun onSwitchToIncognitoProfile() {}
-                override fun onSwitchToRegularProfile() {}
-            }
+            val cardGridContainerModel = mockCardGridContainerModel
 
             val tabs = mutableListOf<TabInfo>()
             if (!params.emptyTabList) {
@@ -368,12 +204,10 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
             CardGrid(
                 selectedScreen = selectedScreen,
                 gridState = gridState,
-                closeButtonEnabled = !params.emptyTabList,
-                cardGridListener = cardGridListener,
+                cardGridModel = cardGridContainerModel,
                 tabs = tabs,
                 faviconCache = mockFaviconCache,
-                screenshotProvider = { null },
-                dispatchers = previewDispatchers
+                screenshotProvider = { null }
             )
         }
     }

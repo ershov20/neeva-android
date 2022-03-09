@@ -26,7 +26,7 @@ class IncognitoBrowserWrapper private constructor(
     dispatchers: Dispatchers,
     activityCallbackProvider: () -> ActivityCallbacks?,
     private val apolloWrapper: ApolloWrapper,
-    private val onDestroyed: () -> Unit,
+    private val onDestroyed: (IncognitoBrowserWrapper) -> Unit,
     private val tempDirectory: File,
     private val incognitoFaviconCache: IncognitoFaviconCache
 ) : BrowserWrapper(
@@ -46,7 +46,7 @@ class IncognitoBrowserWrapper private constructor(
         activityCallbackProvider: () -> ActivityCallbacks?,
         apolloWrapper: ApolloWrapper,
         domainProvider: DomainProvider,
-        onDestroyed: () -> Unit,
+        onDestroyed: (IncognitoBrowserWrapper) -> Unit,
         tempDirectory: File = Files.createTempDirectory(FOLDER_PREFIX).toFile()
     ) : this(
         appContext = appContext,
@@ -96,7 +96,7 @@ class IncognitoBrowserWrapper private constructor(
 
         super.unregisterBrowserAndTabCallbacks()
 
-        onDestroyed()
+        onDestroyed(this)
     }
 
     override fun shouldInterceptLoad(uri: Uri): Boolean {

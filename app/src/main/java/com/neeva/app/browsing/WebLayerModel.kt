@@ -131,30 +131,37 @@ class WebLayerModel @Inject constructor(
         if (currentBrowser.isIncognito == useIncognito) return
 
         _browserWrapperFlow.value = if (useIncognito) {
-            val delegate = incognitoBrowser ?: IncognitoBrowserWrapper(
-                appContext = getApplication(),
-                coroutineScope = viewModelScope,
-                dispatchers = dispatchers,
-                activityCallbackProvider = activityCallbacks::get,
-                apolloWrapper = apolloWrapper,
-                domainProvider = domainProviderImpl,
-                onDestroyed = {
-                    incognitoBrowser = null
-                    switchToProfile(useIncognito = false)
-                }
-            )
-
+            val delegate = incognitoBrowser ?: createIncognitoBrowserWrapper()
             incognitoBrowser = delegate
             delegate
         } else {
-            // Delete the Incognito profile if the user has closed all of their tabs.
-            if (incognitoBrowser?.hasNoTabs() == true) {
-                Log.d(TAG, "Culling unnecessary incognito profile")
-                activityCallbacks.get()?.removeIncognitoFragment()
-                incognitoBrowser = null
-            }
-
             regularBrowser
+        }
+    }
+
+    private fun createIncognitoBrowserWrapper() = IncognitoBrowserWrapper(
+        appContext = getApplication(),
+        coroutineScope = viewModelScope,
+        dispatchers = dispatchers,
+        activityCallbackProvider = activityCallbacks::get,
+        apolloWrapper = apolloWrapper,
+        domainProvider = domainProviderImpl,
+        onDestroyed = {
+            // Because this is asynchronous, make sure that the destroyed one is the one we are
+            // currently tracking.
+            if (it != incognitoBrowser) return@IncognitoBrowserWrapper
+
+            incognitoBrowser = null
+            switchToProfile(useIncognito = false)
+        }
+    )
+
+    /** Delete the Incognito profile if the user has closed all of their tabs. */
+    fun deleteIncognitoProfileIfUnused() {
+        if (!currentBrowser.isIncognito && incognitoBrowser?.hasNoTabs() == true) {
+            Log.d(TAG, "Culling unnecessary incognito profile")
+            activityCallbacks.get()?.removeIncognitoFragment()
+            incognitoBrowser = null
         }
     }
 
