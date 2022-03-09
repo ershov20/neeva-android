@@ -21,6 +21,7 @@ import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.settings.SettingsViewModelImpl
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
+import com.neeva.app.settings.featureFlags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.settings.profile.ProfileSettingsPane
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
@@ -112,6 +113,12 @@ fun AppNav(
 
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {
             SetDefaultAndroidBrowserPane(
+                settingsViewModel = settingsViewModel
+            )
+        }
+
+        composable(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS.route) {
+            FeatureFlagsPane(
                 settingsViewModel = settingsViewModel
             )
         }

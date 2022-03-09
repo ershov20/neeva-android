@@ -112,11 +112,9 @@ object NeevaAppModule {
 
     @Provides
     fun providesSettingsDataModel(
-        sharedPreferencesModel: SharedPreferencesModel,
+        sharedPreferencesModel: SharedPreferencesModel
     ): SettingsDataModel {
-        return SettingsDataModel(
-            sharedPreferencesModel = sharedPreferencesModel
-        )
+        return SettingsDataModel(sharedPreferencesModel = sharedPreferencesModel)
     }
 
     @Provides

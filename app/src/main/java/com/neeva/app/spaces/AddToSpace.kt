@@ -88,7 +88,6 @@ fun AddToSpaceUI(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // TODO(kobec): might be wrong font style
                 Text(
                     "Save to Spaces",
                     style = MaterialTheme.typography.titleMedium,

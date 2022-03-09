@@ -141,7 +141,6 @@ fun TabCard(
             Box(modifier = Modifier.padding(end = 8.dp)) {
                 FaviconView(faviconBitmap)
             }
-            // TODO(kobec): figure out if we really need that modifier padding here...
             Text(
                 text = tabInfo.title ?: tabInfo.url?.toString() ?: "",
                 style = MaterialTheme.typography.bodyMedium,

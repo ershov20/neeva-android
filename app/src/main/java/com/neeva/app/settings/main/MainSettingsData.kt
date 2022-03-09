@@ -134,6 +134,16 @@ object MainSettingsData : SettingsPaneDataInterface {
                     url = Uri.parse(appTermsURL)
                 ),
             )
+        ),
+        SettingsGroupData(
+            R.string.settings_debug_local,
+            listOf(
+                SettingsRowData(
+                    type = SettingsRowType.NAVIGATION,
+                    titleId = R.string.settings_debug_local_feature_flags
+                )
+            ),
+            isForDebugOnly = true
         )
     )
 }

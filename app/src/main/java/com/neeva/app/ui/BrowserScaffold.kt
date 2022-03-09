@@ -16,6 +16,7 @@ import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.TopToolbar
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.settings.LocalDebugFlags
 import com.neeva.app.suggestions.SuggestionPane
 import kotlinx.coroutines.flow.StateFlow
 
@@ -25,6 +26,11 @@ fun BrowserScaffold(
     topControlOffset: StateFlow<Float>,
     webLayerModel: WebLayerModel
 ) {
+    //region DEBUG BOTTOM_URL_BAR
+    val DEBUG_bottomURLBarEnabled = LocalEnvironment.current.settingsDataModel
+        .getToggleState(LocalDebugFlags.DEBUG_BOTTOM_URL_BAR.key)?.value ?: false
+    //endregion
+
     val snackbarModel = LocalEnvironment.current.snackbarModel
 
     val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
@@ -34,7 +40,9 @@ fun BrowserScaffold(
 
     CompositionLocalProvider(LocalBrowserWrapper provides browserWrapper) {
         Column(modifier = Modifier.fillMaxSize()) {
-            TopToolbar(topControlOffset)
+            if (!DEBUG_bottomURLBarEnabled) {
+                TopToolbar(topControlOffset)
+            }
 
             // We have to use a Box with no background because the WebLayer Fragments are displayed in
             // regular Android Views underneath this View in the hierarchy.
@@ -71,6 +79,10 @@ fun BrowserScaffold(
                     hostState = snackbarModel.snackbarHostState,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
+            }
+
+            if (DEBUG_bottomURLBarEnabled) {
+                TopToolbar(bottomControlOffset)
             }
 
             if (!isEditing) {

@@ -7,5 +7,8 @@
     <string name="debug_short_action" translatable="false">save</string>
 
     <string name="settings_debug_local" translatable="false">DEBUG -- LOCAL</string>
-    <string name="settings_local_feature_flags" translatable="false">Local Feature Flags</string>
+    <string name="settings_debug_local_feature_flags" translatable="false">Local Feature Flags</string>
+    <string name="settings_debug_flags" translatable="false">Flags</string>
+
+    <string name="settings_debug_bottom_url_bar" translatable="false">Bottom URL Bar</string>
 </resources>

@@ -134,6 +134,7 @@ class AppNavModel(
     fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
+    fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
     fun showFirstRun() {
         show(AppNavDestination.FIRST_RUN)
         clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION, null)

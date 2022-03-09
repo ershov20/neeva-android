@@ -27,19 +27,21 @@ fun SettingsGroupView(
             .fillMaxWidth()
             .wrapContentHeight(align = Alignment.Bottom)
     ) {
-        if (groupData.titleId != null) {
-            Text(
-                text = stringResource(groupData.titleId).uppercase(Locale.getDefault()),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                modifier = Modifier.padding(Dimensions.PADDING_SMALL)
+        if (settingsViewModel.isDebugMode() || !groupData.isForDebugOnly) {
+            if (groupData.titleId != null) {
+                Text(
+                    text = stringResource(groupData.titleId).uppercase(Locale.getDefault()),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    modifier = Modifier.padding(Dimensions.PADDING_SMALL)
+                )
+            }
+            SettingRowsView(
+                settingsViewModel,
+                groupData
             )
         }
-        SettingRowsView(
-            settingsViewModel,
-            groupData
-        )
     }
 }
 
@@ -59,8 +61,15 @@ fun SettingRowsView(
                 rowData = rowData,
                 settingsViewModel = settingsViewModel,
                 onClick = onClick,
-                modifier = SettingsUIConstants
-                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+                modifier = Modifier
+                    .then(
+                        if (groupData.isForDebugOnly) {
+                            Modifier.background(MaterialTheme.colorScheme.errorContainer)
+                        } else {
+                            Modifier.background(MaterialTheme.colorScheme.surface)
+                        }
+                    )
+                    .then(SettingsUIConstants.rowModifier)
             )
         }
     }

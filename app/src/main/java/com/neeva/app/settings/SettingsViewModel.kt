@@ -43,6 +43,10 @@ interface SettingsViewModel {
     // Meant for system images lower than Android Q
     fun openAndroidDefaultBrowserSettings()
     //endregion
+
+    //region Debug Settings
+    fun isDebugMode(): Boolean
+    //
 }
 
 class SettingsViewModelImpl(
@@ -76,7 +80,8 @@ class SettingsViewModelImpl(
         val navMap = mutableMapOf<Int, (() -> Unit)?>(
             R.string.settings_sign_in_to_join_neeva to appNavModel::showProfileSettings,
             R.string.settings_clear_browsing_data to appNavModel::showClearBrowsingSettings,
-            R.string.settings_default_browser to appNavModel::showDefaultBrowserSettings
+            R.string.settings_default_browser to appNavModel::showDefaultBrowserSettings,
+            R.string.settings_debug_local_feature_flags to appNavModel::showLocalFeatureFlagsPane
         )
         if (isSignedOut()) {
             navMap[R.string.settings_sign_in_to_join_neeva] = appNavModel::showFirstRun
@@ -107,6 +112,10 @@ class SettingsViewModelImpl(
 
     override fun openAndroidDefaultBrowserSettings() {
         appNavModel.openAndroidDefaultBrowserSettings()
+    }
+
+    override fun isDebugMode(): Boolean {
+        return settingsDataModel.isDebugMode
     }
 }
 
@@ -142,5 +151,7 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
         }
 
         override fun openAndroidDefaultBrowserSettings() { }
+
+        override fun isDebugMode(): Boolean { return true }
     }
 }

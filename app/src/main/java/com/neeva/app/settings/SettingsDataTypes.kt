@@ -1,6 +1,8 @@
 package com.neeva.app.settings
 
 import android.net.Uri
+import androidx.annotation.StringRes
+import com.neeva.app.R
 
 interface SettingsPaneDataInterface {
     val topAppBarTitleResId: Int
@@ -10,7 +12,8 @@ interface SettingsPaneDataInterface {
 
 data class SettingsGroupData(
     val titleId: Int? = null,
-    val rows: List<SettingsRowData>
+    val rows: List<SettingsRowData>,
+    val isForDebugOnly: Boolean = false
 )
 
 data class SettingsRowData(
@@ -28,9 +31,7 @@ data class SettingsRowData(
     val enabled: Boolean = true,
 
     /** Intended for use with ProfileRow. */
-    val showSSOProviderAsPrimaryLabel: Boolean = false,
-
-    val debugSetting: Boolean = false
+    val showSSOProviderAsPrimaryLabel: Boolean = false
 )
 
 enum class SettingsRowType {
@@ -57,5 +58,13 @@ enum class SettingsToggle(
     CLEAR_CACHE("CLEAR_CACHE", true),
     CLEAR_COOKIES("CLEAR_COOKIES", true),
     CLEAR_BROWSING_TRACKING_PROTECTION("CLEAR_BROWSING_TRACKING_PROTECTION", false),
-    CLEAR_DOWNLOADED_FILES("CLEAR_DOWNLOADED_FILES", false),
+    CLEAR_DOWNLOADED_FILES("CLEAR_DOWNLOADED_FILES", false)
+}
+
+enum class LocalDebugFlags(
+    val key: String,
+    @StringRes val flagDisplayName_stringId: Int,
+    val defaultValue: Boolean
+) {
+    DEBUG_BOTTOM_URL_BAR("DEBUG_BOTTOM_URL_BAR", R.string.settings_debug_bottom_url_bar, false)
 }
