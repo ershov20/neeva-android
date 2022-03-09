@@ -37,16 +37,20 @@ class TestApolloWrapper(
     val performedQueries = mutableListOf<Any>()
     val performedMutations = mutableListOf<Any>()
 
-    override suspend fun <D : Query.Data> performQuery(query: Query<D>): ApolloResponse<D>? {
+    override suspend fun <D : Query.Data> performQuery(
+        query: Query<D>,
+        userMustBeLoggedIn: Boolean
+    ): ApolloResponse<D>? {
         performedQueries.add(query)
-        return super.performQuery(query)
+        return super.performQuery(query, userMustBeLoggedIn)
     }
 
     override suspend fun <D : Mutation.Data> performMutation(
-        mutation: Mutation<D>
+        mutation: Mutation<D>,
+        userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
         performedMutations.add(mutation)
-        return super.performMutation(mutation)
+        return super.performMutation(mutation, userMustBeLoggedIn)
     }
 
     fun tearDown() {

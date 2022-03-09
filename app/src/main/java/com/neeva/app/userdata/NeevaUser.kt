@@ -37,7 +37,7 @@ class NeevaUser(
         if (neevaUserToken.getToken().isEmpty()) return
 
         isLoading = true
-        val response = apolloWrapper.performQuery(UserInfoQuery())
+        val response = apolloWrapper.performQuery(UserInfoQuery(), userMustBeLoggedIn = false)
         if (response != null) {
             response.data?.user?.let { userQuery ->
                 data = NeevaUserData(

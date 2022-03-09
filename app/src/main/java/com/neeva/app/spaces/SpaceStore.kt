@@ -94,7 +94,8 @@ class SpaceStore(
     }
 
     private suspend fun performRefresh(): Boolean {
-        val response = apolloWrapper.performQuery(ListSpacesQuery()) ?: return false
+        val response =
+            apolloWrapper.performQuery(ListSpacesQuery(), userMustBeLoggedIn = true) ?: return false
 
         // If there are no spaces to process, but the response was fine, just indicate success.
         val listSpaces = response.data?.listSpaces ?: return true
@@ -140,9 +141,11 @@ class SpaceStore(
 
     private suspend fun performFetch(spacesToFetch: List<Space>): Boolean {
         if (spacesToFetch.isEmpty()) return true
+
         // Get updated data for any Spaces that have changed since the last fetch.
         val spacesDataResponse = apolloWrapper.performQuery(
-            GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id }))
+            GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id })),
+            userMustBeLoggedIn = true
         ) ?: return false
 
         spacesDataResponse.data?.getSpace?.space?.forEach { spaceQuery ->
@@ -227,7 +230,8 @@ class SpaceStore(
                         ?: Optional.Absent,
                     mediaType = Optional.presentIfNotNull("text/plain")
                 )
-            )
+            ),
+            userMustBeLoggedIn = true
         )
 
         return response?.data?.entityId?.let {
@@ -250,7 +254,8 @@ class SpaceStore(
                     spaceID = spaceID,
                     url = uri.toString(),
                 )
-            )
+            ),
+            userMustBeLoggedIn = true
         )
 
         return response?.data?.deleteSpaceResultByURL?.let {

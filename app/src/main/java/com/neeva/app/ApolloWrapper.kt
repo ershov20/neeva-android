@@ -8,7 +8,6 @@ import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.exception.ApolloException
 import com.apollographql.apollo3.network.okHttpClient
 import com.neeva.app.NeevaConstants.appHost
-import com.neeva.app.NeevaConstants.appURL
 import com.neeva.app.NeevaConstants.browserTypeCookie
 import com.neeva.app.NeevaConstants.browserVersionCookie
 import com.neeva.app.NeevaConstants.loginCookie
@@ -33,7 +32,7 @@ open class ApolloWrapper(
 
     private fun createApolloClient(): ApolloClient {
         return ApolloClient.Builder()
-            .serverUrl("${appURL}graphql")
+            .serverUrl(NeevaConstants.apolloURL)
             .okHttpClient(
                 OkHttpClient.Builder()
                     .addInterceptor(this)
@@ -65,17 +64,15 @@ open class ApolloWrapper(
 
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
 
-    open fun <D : Mutation.Data> performMutation(
-        mutation: Mutation<D>,
-        callback: (ApolloResponse<D>?) -> Unit
-    ) {
-        coroutineScope.launch(dispatchers.io) {
-            val response = performMutation(mutation)
-            callback(response)
+    open suspend fun <D : Query.Data> performQuery(
+        query: Query<D>,
+        userMustBeLoggedIn: Boolean
+    ): ApolloResponse<D>? {
+        if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
+            Log.i(TAG, "Could not perform query because user was not logged in: $query")
+            return null
         }
-    }
 
-    open suspend fun <D : Query.Data> performQuery(query: Query<D>): ApolloResponse<D>? {
         return try {
             val response = apolloClient.query(query).execute()
             if (response.hasErrors()) {
@@ -91,9 +88,26 @@ open class ApolloWrapper(
         }
     }
 
+    open fun <D : Mutation.Data> performMutationAsync(
+        mutation: Mutation<D>,
+        userMustBeLoggedIn: Boolean,
+        callback: (ApolloResponse<D>?) -> Unit
+    ) {
+        coroutineScope.launch(dispatchers.io) {
+            val response = performMutation(mutation, userMustBeLoggedIn)
+            callback(response)
+        }
+    }
+
     open suspend fun <D : Mutation.Data> performMutation(
-        mutation: Mutation<D>
+        mutation: Mutation<D>,
+        userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
+        if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
+            Log.i(TAG, "Could not perform mutation because user was not logged in: $mutation")
+            return null
+        }
+
         return try {
             val response = apolloClient.mutation(mutation).execute()
             if (response.hasErrors()) {

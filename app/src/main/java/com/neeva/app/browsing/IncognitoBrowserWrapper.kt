@@ -115,11 +115,12 @@ class IncognitoBrowserWrapper private constructor(
                 .build()
 
             val response = apolloWrapper.performMutation(
-                StartIncognitoMutation(
+                mutation = StartIncognitoMutation(
                     StartIncognitoInput(
                         redirect = Optional.presentIfNotNull(toApi.toString())
                     )
-                )
+                ),
+                userMustBeLoggedIn = true
             )
             response?.data?.result
         }

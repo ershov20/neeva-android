@@ -99,7 +99,10 @@ class SuggestionsModel(
         var result: SuggestionsQuery.Data? = null
         if (newValue.isNotBlank()) {
             try {
-                result = apolloWrapper.performQuery(SuggestionsQuery(query = newValue))?.data
+                result = apolloWrapper.performQuery(
+                    SuggestionsQuery(query = newValue),
+                    userMustBeLoggedIn = false
+                )?.data
             } catch (e: CancellationException) {
                 // Report nothing because the Flow itself was cancelled -- probably because the user
                 // continued typing something else.  Keep the old suggestions displayed.

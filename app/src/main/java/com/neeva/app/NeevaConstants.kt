@@ -20,6 +20,8 @@ object NeevaConstants {
     val appWelcomeToursURL: String = "$appURL#modal-hello"
     val appHelpCenterURL: String = "https://help.$appHost/"
 
+    val apolloURL: String = "${appURL}graphql"
+
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
 
     /** Identifies the Android client when making backend requests. */

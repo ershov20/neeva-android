@@ -53,6 +53,6 @@ class ClientLogger(
             )
         )
 
-        apolloWrapper.performMutation(logMutation, { })
+        apolloWrapper.performMutationAsync(mutation = logMutation, userMustBeLoggedIn = false) {}
     }
 }

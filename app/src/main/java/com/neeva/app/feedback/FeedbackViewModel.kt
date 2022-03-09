@@ -89,7 +89,10 @@ class FeedbackViewModelImpl(
         val sendFeedbackMutation = SendFeedbackMutation(input = input)
 
         coroutineScope.launch(dispatchers.io) {
-            apolloWrapper.performMutation(sendFeedbackMutation)
+            apolloWrapper.performMutation(
+                mutation = sendFeedbackMutation,
+                userMustBeLoggedIn = false
+            )
         }
 
         appNavModel.popBackStack()
