@@ -103,17 +103,23 @@ fun SettingsRow(
                 }
             } else {
                 val userData = settingsViewModel.getNeevaUserData()
-                var primaryLabel = userData.displayName
                 if (rowData.showSSOProviderAsPrimaryLabel) {
-                    primaryLabel = getFormattedSSOProviderName(userData.ssoProvider)
+                    ProfileRow(
+                        primaryLabel = getFormattedSSOProviderName(userData.ssoProvider),
+                        secondaryLabel = userData.email,
+                        pictureUrl = userData.pictureURL,
+                        onClick = null,
+                        modifier = modifier
+                    )
+                } else {
+                    ProfileRow(
+                        primaryLabel = userData.displayName,
+                        secondaryLabel = userData.email,
+                        pictureUrl = userData.pictureURL,
+                        onClick = onClick,
+                        modifier = modifier
+                    )
                 }
-                ProfileRow(
-                    primaryLabel = primaryLabel,
-                    secondaryLabel = userData.email,
-                    pictureUrl = userData.pictureURL,
-                    onClick = onClick,
-                    modifier = modifier
-                )
             }
         }
 
