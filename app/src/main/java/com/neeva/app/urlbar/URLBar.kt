@@ -3,6 +3,7 @@ package com.neeva.app.urlbar
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
@@ -65,7 +67,7 @@ fun URLBar() {
                     color = backgroundColor,
                     shape = RoundedCornerShape(24.dp)
                 )
-                .padding(start = 12.dp)
+                .clip(shape = RoundedCornerShape(24.dp))
 
             AutocompleteTextField(
                 urlBarModel = urlBarModel,
@@ -84,8 +86,7 @@ fun URLBar() {
                     foregroundColor = foregroundColor,
                     showIncognitoBadge = isIncognito,
                     onMenuItem = appNavModel::onMenuItem,
-                    onEditUrl = urlBarModel::onRequestFocus,
-                    modifier = childModifier
+                    modifier = childModifier.clickable { urlBarModel.onRequestFocus() }
                 )
             }
         }

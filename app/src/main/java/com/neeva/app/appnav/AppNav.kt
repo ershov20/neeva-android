@@ -38,14 +38,12 @@ fun AppNav(
 ) {
     val settingsDataModel = LocalEnvironment.current.settingsDataModel
     val neevaUser = LocalEnvironment.current.neevaUser
-    val historyManager = LocalEnvironment.current.historyManager
     val setDefaultAndroidBrowserManager = LocalSetDefaultAndroidBrowserManager.current
     val coroutineScope = rememberCoroutineScope()
 
     val settingsViewModel = remember(
         appNavModel,
         settingsDataModel,
-        historyManager,
         neevaUser,
         webLayerModel,
         setDefaultAndroidBrowserManager

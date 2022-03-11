@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.CookieChangedCallback
+import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebLayer
 
 /**
@@ -125,5 +126,10 @@ class RegularBrowserWrapper(
         }
 
         return true
+    }
+
+    override fun onBlankTabCreated(tab: Tab) {
+        // Direct the tab to go to the home page instead of leaving it on `about:blank`.
+        tab.navigationController.navigate(Uri.parse(NeevaConstants.appURL))
     }
 }

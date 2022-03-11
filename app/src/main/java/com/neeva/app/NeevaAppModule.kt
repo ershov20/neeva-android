@@ -94,6 +94,7 @@ object NeevaAppModule {
     }
 
     @Provides
+    @Singleton
     fun providesSharedPreferences(@ApplicationContext context: Context): SharedPreferencesModel {
         return SharedPreferencesModel(context)
     }
@@ -111,6 +112,7 @@ object NeevaAppModule {
     }
 
     @Provides
+    @Singleton
     fun providesSettingsDataModel(
         sharedPreferencesModel: SharedPreferencesModel
     ): SettingsDataModel {
@@ -118,6 +120,7 @@ object NeevaAppModule {
     }
 
     @Provides
+    @Singleton
     fun providesLocalEnvironment(
         dispatchers: Dispatchers,
         domainProvider: DomainProvider,

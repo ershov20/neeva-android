@@ -6,7 +6,6 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,7 +48,6 @@ fun LocationLabel(
     foregroundColor: Color,
     showIncognitoBadge: Boolean,
     onMenuItem: (id: NeevaMenuItemId) -> Unit,
-    onEditUrl: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val browserWrapper = LocalBrowserWrapper.current
@@ -81,7 +79,6 @@ fun LocationLabel(
         showIncognitoBadge = showIncognitoBadge,
         isShowingQuery = isShowingQuery,
         onMenuItem = onMenuItem,
-        onEditUrl = onEditUrl,
         modifier = modifier
     )
 }
@@ -94,12 +91,11 @@ fun LocationLabel(
     showIncognitoBadge: Boolean,
     isShowingQuery: Boolean,
     onMenuItem: (id: NeevaMenuItemId) -> Unit,
-    onEditUrl: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.clickable { onEditUrl() }
+        modifier = modifier.padding(start = Dimensions.PADDING_MEDIUM)
     ) {
         val iconSize = 18.dp
         val iconModifier = Modifier.padding(end = Dimensions.PADDING_LARGE).size(iconSize)
@@ -222,7 +218,6 @@ class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPrevi
                 showIncognitoBadge = params.isIncognito,
                 isShowingQuery = params.isShowingQuery,
                 onMenuItem = {},
-                onEditUrl = {},
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }

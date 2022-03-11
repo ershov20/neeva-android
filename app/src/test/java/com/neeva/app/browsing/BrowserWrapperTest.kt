@@ -87,6 +87,7 @@ class BrowserWrapperTest : BaseTest() {
     private lateinit var mockTabs: MutableList<Tab>
 
     private var shouldInterceptLoad: Boolean = false
+    private var wasBlankTabCreated: Boolean = false
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun setUp() {
@@ -160,6 +161,10 @@ class BrowserWrapperTest : BaseTest() {
                 } else {
                     throw IllegalStateException()
                 }
+            }
+
+            override fun onBlankTabCreated(tab: Tab) {
+                wasBlankTabCreated = true
             }
         }
     }

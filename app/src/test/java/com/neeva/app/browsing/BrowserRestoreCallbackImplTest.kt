@@ -1,14 +1,11 @@
 package com.neeva.app.browsing
 
-import android.net.Uri
-import com.neeva.app.NeevaConstants
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -17,8 +14,6 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
@@ -47,13 +42,10 @@ class BrowserRestoreCallbackImplTest {
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
 
-        // Assert: It should have navigated the active tab.
+        // Assert: It should have done something with the tab.
         verify(testSetup.restoreCompletedCallback).invoke()
-        val uriCaptor = argumentCaptor<Uri>()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
-        verify(testSetup.browser.activeTab!!.navigationController, times(1))
-            .navigate(uriCaptor.capture())
-        expectThat(uriCaptor.lastValue).isEqualTo(Uri.parse(NeevaConstants.appURL))
+        verify(testSetup.onBlankTabCreated).invoke(any())
 
         verify(testSetup.cleanCache, times(1)).invoke()
     }
@@ -67,10 +59,10 @@ class BrowserRestoreCallbackImplTest {
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
 
-        // Assert: It should have not navigated anywhere.
+        // Assert: It should not have done anything with the tab.
         verify(testSetup.restoreCompletedCallback).invoke()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
-        verify(testSetup.browser.activeTab!!.navigationController, never()).navigate(any())
+        verify(testSetup.onBlankTabCreated, never()).invoke(any())
 
         verify(testSetup.cleanCache, times(1)).invoke()
     }
@@ -83,10 +75,10 @@ class BrowserRestoreCallbackImplTest {
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
 
-        // Assert: Because there were multiple tabs restored, navigation logic shouldn't kick in.
+        // Assert: Because there were multiple tabs restored, "blank tab" logic shouldn't kick in.
         verify(testSetup.restoreCompletedCallback).invoke()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
-        verify(testSetup.browser.activeTab!!.navigationController, never()).navigate(any())
+        verify(testSetup.onBlankTabCreated, never()).invoke(any())
 
         verify(testSetup.cleanCache, times(1)).invoke()
     }
@@ -114,6 +106,7 @@ class BrowserRestoreCallbackImplTest {
     ) {
         val tabList: TabList = mock {}
         val cleanCache: () -> Unit = mock()
+        val onBlankTabCreated: (Tab) -> Unit = mock()
         val onEmptyTabList: () -> Unit = mock()
         val tabs = mutableSetOf<Tab>()
         val restoreCompletedCallback: () -> Unit = mock()
@@ -124,6 +117,7 @@ class BrowserRestoreCallbackImplTest {
             tabList = tabList,
             browser = browser,
             cleanCache = cleanCache,
+            onBlankTabCreated = onBlankTabCreated,
             onEmptyTabList = onEmptyTabList,
             afterRestoreCompleted = restoreCompletedCallback
         )

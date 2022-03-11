@@ -285,6 +285,13 @@ abstract class BrowserWrapper internal constructor(
         topControlsPlaceholder.requestLayout()
     }
 
+    /**
+     * WebLayer automatically creates an empty tab in some situations (e.g. browser profile
+     * creation).  Override this to do something with the tab, like navigate somewhere else or
+     * close the tab entirely.
+     */
+    protected abstract fun onBlankTabCreated(tab: Tab)
+
     @CallSuper
     protected open fun registerBrowserCallbacks(browser: Browser): Boolean {
         if (tabListRestorer != null) {
@@ -298,6 +305,7 @@ abstract class BrowserWrapper internal constructor(
             tabList = tabList,
             browser = browser,
             cleanCache = this::cleanCacheDirectory,
+            onBlankTabCreated = this::onBlankTabCreated,
             onEmptyTabList = {
                 createTabWithUri(
                     uri = Uri.parse(NeevaConstants.appURL),
@@ -336,6 +344,7 @@ abstract class BrowserWrapper internal constructor(
             // creating the Browser before we have a chance to hook into it.
             // We work around this by manually calling onRestoreCompleted() if it's already done.
             restorer.onRestoreCompleted()
+            _activeTabModel.onActiveTabChanged(browser.activeTab)
         }
 
         return true

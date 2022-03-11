@@ -17,6 +17,7 @@ import java.nio.file.Files
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebLayer
 
 /** Maintains the logic for an Incognito browser profile. */
@@ -127,7 +128,7 @@ class IncognitoBrowserWrapper private constructor(
 
         return withContext(dispatchers.main) {
             if (redirectUri != null) {
-                Log.d(TAG, "Incognito URI acquired; redirecting")
+                Log.i(TAG, "Incognito URI acquired; redirecting")
                 isIncognitoMutationPerformed = true
                 Uri.parse(redirectUri)
             } else {
@@ -135,5 +136,10 @@ class IncognitoBrowserWrapper private constructor(
                 uri
             }
         }
+    }
+
+    override fun onBlankTabCreated(tab: Tab) {
+        // We don't want to leave the user in a state where an `about:blank` tab exists.
+        tab.dispatchBeforeUnloadAndClose()
     }
 }
