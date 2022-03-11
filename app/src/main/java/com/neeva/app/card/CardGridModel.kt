@@ -7,27 +7,15 @@ import com.neeva.app.browsing.WebLayerModel
 
 interface CardGridModel {
     fun switchScreen(selectedScreen: SelectedScreen)
-    fun selectTab(tab: TabInfo)
-    fun openLazyTab()
-    fun closeTab(tab: TabInfo)
-    fun closeAllTabs()
+    fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo)
+    fun closeTab(browserWrapper: BrowserWrapper, tab: TabInfo)
+    fun openLazyTab(browserWrapper: BrowserWrapper)
+    fun closeAllTabs(browserWrapper: BrowserWrapper)
     fun showBrowser()
-}
-
-val mockCardGridContainerModel by lazy {
-    object : CardGridModel {
-        override fun switchScreen(selectedScreen: SelectedScreen) {}
-        override fun selectTab(tab: TabInfo) {}
-        override fun openLazyTab() {}
-        override fun closeTab(tab: TabInfo) {}
-        override fun closeAllTabs() {}
-        override fun showBrowser() {}
-    }
 }
 
 class CardGridModelImpl(
     private val webLayerModel: WebLayerModel,
-    private val currentBrowserWrapper: BrowserWrapper,
     private val appNavModel: AppNavModel
 ) : CardGridModel {
     override fun switchScreen(selectedScreen: SelectedScreen) {
@@ -41,27 +29,25 @@ class CardGridModelImpl(
                 appNavModel.showCardGrid()
                 webLayerModel.switchToProfile(useIncognito = true)
             }
-
-            SelectedScreen.SPACES -> TODO("Not implemented")
         }
     }
 
-    override fun selectTab(tab: TabInfo) {
-        currentBrowserWrapper.selectTab(tab)
+    override fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo) {
+        browserWrapper.selectTab(tab)
         showBrowser()
     }
 
-    override fun openLazyTab() {
-        currentBrowserWrapper.openLazyTab()
+    override fun closeTab(browserWrapper: BrowserWrapper, tab: TabInfo) {
+        browserWrapper.closeTab(tab)
+    }
+
+    override fun openLazyTab(browserWrapper: BrowserWrapper) {
+        browserWrapper.openLazyTab()
         showBrowser()
     }
 
-    override fun closeTab(tab: TabInfo) {
-        currentBrowserWrapper.closeTab(tab)
-    }
-
-    override fun closeAllTabs() {
-        currentBrowserWrapper.closeAllTabs()
+    override fun closeAllTabs(browserWrapper: BrowserWrapper) {
+        browserWrapper.closeAllTabs()
     }
 
     override fun showBrowser() {

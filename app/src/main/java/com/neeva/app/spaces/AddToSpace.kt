@@ -56,7 +56,7 @@ fun AddToSpaceSheet(
     val appNavModel = LocalAppNavModel.current
     val spaceStore = LocalEnvironment.current.spaceStore
 
-    val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
+    val browserWrapper by webLayerModel.currentBrowserFlow.collectAsState()
     val activeTabModel = browserWrapper.activeTabModel
 
     OverlaySheet(config = OverlaySheetConfig.spaces) {

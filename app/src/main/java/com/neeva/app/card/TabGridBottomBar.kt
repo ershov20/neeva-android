@@ -21,7 +21,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.R
-import com.neeva.app.browsing.BrowserWrapper
+import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
@@ -29,16 +29,18 @@ import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
 fun TabGridBottomBar(
-    currentBrowser: BrowserWrapper,
+    webLayerModel: WebLayerModel,
     cardGridModel: CardGridModel
 ) {
-    val hasNoTabs = currentBrowser.hasNoTabsFlow().collectAsState(false)
+    val currentBrowserState = webLayerModel.currentBrowserFlow.collectAsState()
+    val currentBrowser = currentBrowserState.value
 
+    val hasNoTabs = currentBrowser.hasNoTabsFlow().collectAsState(false)
     TabGridBottomBar(
         isDeleteEnabled = !hasNoTabs.value,
         isCloseButtonEnabled = !hasNoTabs.value,
-        onCloseAllTabs = cardGridModel::closeAllTabs,
-        onOpenLazyTab = cardGridModel::openLazyTab,
+        onCloseAllTabs = { cardGridModel.closeAllTabs(currentBrowser) },
+        onOpenLazyTab = { cardGridModel.openLazyTab(currentBrowser) },
         onDone = cardGridModel::showBrowser
     )
 }

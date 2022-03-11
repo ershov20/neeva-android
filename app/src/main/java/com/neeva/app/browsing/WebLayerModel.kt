@@ -24,7 +24,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
@@ -33,6 +35,20 @@ import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
+
+data class BrowsersState(
+    val regularBrowser: RegularBrowserWrapper,
+    val incognitoBrowserWrapper: IncognitoBrowserWrapper?,
+    val isCurrentlyIncognito: Boolean = false
+) {
+    fun getCurrentBrowser(): BrowserWrapper {
+        return if (isCurrentlyIncognito) {
+            incognitoBrowserWrapper ?: throw IllegalStateException()
+        } else {
+            regularBrowser
+        }
+    }
+}
 
 /**
  * Manages and maintains the interface between the Neeva browser and WebLayer.
@@ -60,21 +76,6 @@ class WebLayerModel @Inject constructor(
 
     private val webLayer = MutableStateFlow<WebLayer?>(null)
 
-    private val regularBrowser = RegularBrowserWrapper(
-        appContext = application,
-        coroutineScope = viewModelScope,
-        dispatchers = dispatchers,
-        activityCallbackProvider = { activityCallbacks.get() },
-        domainProvider = domainProviderImpl,
-        apolloWrapper = apolloWrapper,
-        historyManager = historyManager,
-        spaceStore = spaceStore,
-        neevaUser = neevaUser,
-        clientLogger = clientLogger
-    )
-    private var incognitoBrowser: IncognitoBrowserWrapper? = null
-    private lateinit var regularProfile: Profile
-
     /** Keeps track of the non-WebLayer initialization pipeline. */
     private val internalInitializationState = MutableStateFlow(LoadingState.UNINITIALIZED)
 
@@ -89,15 +90,44 @@ class WebLayerModel @Inject constructor(
             }
             .stateIn(viewModelScope, SharingStarted.Lazily, LoadingState.LOADING)
 
-    private val _browserWrapperFlow = MutableStateFlow<BrowserWrapper>(regularBrowser)
-    val browserWrapperFlow: StateFlow<BrowserWrapper> get() = _browserWrapperFlow
-    val currentBrowser get() = browserWrapperFlow.value
+    private lateinit var regularProfile: Profile
+
+    private val regularBrowser = RegularBrowserWrapper(
+        appContext = application,
+        coroutineScope = viewModelScope,
+        dispatchers = dispatchers,
+        activityCallbackProvider = { activityCallbacks.get() },
+        domainProvider = domainProviderImpl,
+        apolloWrapper = apolloWrapper,
+        historyManager = historyManager,
+        spaceStore = spaceStore,
+        neevaUser = neevaUser,
+        clientLogger = clientLogger
+    )
+    private var incognitoBrowser: IncognitoBrowserWrapper? = null
+        set(value) {
+            field = value
+            _browsersFlow.value = _browsersFlow.value.copy(incognitoBrowserWrapper = value)
+        }
+    private val _browsersFlow = MutableStateFlow(BrowsersState(regularBrowser, incognitoBrowser))
+
+    /** Keeps track of the current BrowserWrappers for the regular and incognito profiles. */
+    val browsersFlow: StateFlow<BrowsersState> get() = _browsersFlow
+
+    /** Allows consumers to keep track of which BrowserWrapper is currently active. */
+    val currentBrowserFlow: StateFlow<BrowserWrapper> = _browsersFlow
+        .map { it.getCurrentBrowser() }
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Lazily, regularBrowser)
+
+    /** Returns the currently active BrowserWrapper. */
+    val currentBrowser get() = currentBrowserFlow.value
 
     /** Tracks the current BrowserWrapper, emitting them only while the pipeline is initialized. */
     val initializedBrowserFlow: Flow<BrowserWrapper> =
         initializationState
             .filter { it == LoadingState.READY }
-            .combine(_browserWrapperFlow) { _, browserWrapper -> browserWrapper }
+            .combine(currentBrowserFlow) { _, browserWrapper -> browserWrapper }
 
     init {
         viewModelScope.launch(dispatchers.io) {
@@ -128,15 +158,13 @@ class WebLayerModel @Inject constructor(
         // Make sure that the ClientLogger is disabled when the user enters Incognito.
         clientLogger.onProfileSwitch(useIncognito)
 
-        if (currentBrowser.isIncognito == useIncognito) return
+        if (_browsersFlow.value.isCurrentlyIncognito == useIncognito) return
 
-        _browserWrapperFlow.value = if (useIncognito) {
-            val delegate = incognitoBrowser ?: createIncognitoBrowserWrapper()
-            incognitoBrowser = delegate
-            delegate
-        } else {
-            regularBrowser
+        if (useIncognito && incognitoBrowser == null) {
+            incognitoBrowser = createIncognitoBrowserWrapper()
         }
+
+        _browsersFlow.value = _browsersFlow.value.copy(isCurrentlyIncognito = useIncognito)
     }
 
     private fun createIncognitoBrowserWrapper() = IncognitoBrowserWrapper(

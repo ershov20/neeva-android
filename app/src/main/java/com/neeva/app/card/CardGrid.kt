@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +39,6 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun CardGrid(
     browserWrapper: BrowserWrapper,
-    selectedScreen: SelectedScreen,
     cardGridModel: CardGridModel,
     modifier: Modifier = Modifier
 ) {
@@ -48,9 +48,10 @@ fun CardGrid(
     val gridState = LazyGridState(activeTabIndex)
 
     CardGrid(
-        selectedScreen = selectedScreen,
+        isIncognito = browserWrapper.isIncognito,
         gridState = gridState,
-        cardGridModel = cardGridModel,
+        onSelect = { tabInfo -> cardGridModel.selectTab(browserWrapper, tabInfo) },
+        onClose = { tabInfo -> cardGridModel.closeTab(browserWrapper, tabInfo) },
         tabs = tabs,
         faviconCache = browserWrapper.faviconCache,
         screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot,
@@ -61,85 +62,89 @@ fun CardGrid(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardGrid(
-    selectedScreen: SelectedScreen,
+    isIncognito: Boolean,
     gridState: LazyGridState,
-    cardGridModel: CardGridModel,
+    onSelect: (TabInfo) -> Unit,
+    onClose: (TabInfo) -> Unit,
     tabs: List<TabInfo>,
     faviconCache: FaviconCache,
     screenshotProvider: (tabId: String) -> Bitmap?,
     modifier: Modifier = Modifier
 ) {
-    // TODO(dan.alcantara): Material3 doesn't seem to have a MaterialTheme.colors.isLight function.
-    val emptyLogoId = if (isSystemInDarkTheme()) {
-        when (selectedScreen) {
-            SelectedScreen.REGULAR_TABS -> R.drawable.ic_empty_regular_tabs_dark
-            SelectedScreen.INCOGNITO_TABS -> R.drawable.ic_empty_incognito_tabs_dark
-            else -> TODO("Not implemented")
+    val emptyLogoId: Int
+    val emptyStringId: Int
+    if (isIncognito) {
+        // TODO(dan.alcantara): Material3 doesn't seem to have a MaterialTheme.colors.isLight().
+        emptyLogoId = if (isSystemInDarkTheme()) {
+            R.drawable.ic_empty_incognito_tabs_dark
+        } else {
+            R.drawable.ic_empty_incognito_tabs_light
         }
+        emptyStringId = R.string.empty_incognito_tabs_title
     } else {
-        when (selectedScreen) {
-            SelectedScreen.REGULAR_TABS -> R.drawable.ic_empty_regular_tabs_light
-            SelectedScreen.INCOGNITO_TABS -> R.drawable.ic_empty_incognito_tabs_light
-            else -> TODO("Not implemented")
+        emptyLogoId = if (isSystemInDarkTheme()) {
+            R.drawable.ic_empty_regular_tabs_dark
+        } else {
+            R.drawable.ic_empty_regular_tabs_light
         }
+        emptyStringId = R.string.empty_regular_tabs_title
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        val contentModifier = Modifier
-            .fillMaxWidth()
-            .weight(1f)
-        if (tabs.isEmpty()) {
-            Box(
-                modifier = contentModifier,
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column {
+            val contentModifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+            if (tabs.isEmpty()) {
+                Box(
+                    modifier = contentModifier,
+                    contentAlignment = Alignment.Center
                 ) {
-                    Image(
-                        painter = painterResource(emptyLogoId),
-                        contentDescription = null
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(emptyLogoId),
+                            contentDescription = null
+                        )
 
-                    Text(
-                        text = stringResource(
-                            when (selectedScreen) {
-                                SelectedScreen.REGULAR_TABS -> R.string.empty_regular_tabs_title
-                                SelectedScreen.INCOGNITO_TABS -> R.string.empty_incognito_tabs_title
-                                else -> TODO("Not implemented")
-                            }
-                        ),
-                        style = MaterialTheme.typography.headlineSmall,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        Text(
+                            text = stringResource(emptyStringId),
+                            style = MaterialTheme.typography.headlineSmall,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.fillMaxWidth()
+                        )
 
-                    Text(
-                        text = stringResource(R.string.empty_tab_hint),
-                        style = MaterialTheme.typography.labelLarge,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                        Text(
+                            text = stringResource(R.string.empty_tab_hint),
+                            style = MaterialTheme.typography.labelLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-            }
-        } else {
-            LazyVerticalGrid(
-                cells = GridCells.Fixed(2),
-                state = gridState,
-                modifier = contentModifier
-            ) {
-                items(tabs) { tab ->
-                    TabCard(
-                        tabInfo = tab,
-                        onSelect = { cardGridModel.selectTab(tab) },
-                        onClose = { cardGridModel.closeTab(tab) },
-                        faviconCache = faviconCache,
-                        screenshotProvider = screenshotProvider
-                    )
+            } else {
+                LazyVerticalGrid(
+                    cells = GridCells.Fixed(2),
+                    state = gridState,
+                    modifier = contentModifier
+                ) {
+                    items(tabs) { tab ->
+                        TabCard(
+                            tabInfo = tab,
+                            onSelect = { onSelect(tab) },
+                            onClose = { onClose(tab) },
+                            faviconCache = faviconCache,
+                            screenshotProvider = screenshotProvider
+                        )
+                    }
                 }
             }
         }
@@ -167,16 +172,9 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
     @Composable
     fun CardGrid_Preview(@PreviewParameter(CardGridPreviews::class) params: Params) {
         val darkTheme = params.darkTheme
-        val selectedScreen = if (params.isIncognito) {
-            SelectedScreen.INCOGNITO_TABS
-        } else {
-            SelectedScreen.REGULAR_TABS
-        }
 
         NeevaTheme(useDarkTheme = darkTheme) {
             val gridState = rememberLazyGridState()
-            val cardGridContainerModel = mockCardGridContainerModel
-
             val tabs = mutableListOf<TabInfo>()
             if (!params.emptyTabList) {
                 val selectedTabIndex = 5
@@ -202,9 +200,10 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
             }
 
             CardGrid(
-                selectedScreen = selectedScreen,
+                isIncognito = params.isIncognito,
                 gridState = gridState,
-                cardGridModel = cardGridContainerModel,
+                onSelect = {},
+                onClose = {},
                 tabs = tabs,
                 faviconCache = mockFaviconCache,
                 screenshotProvider = { null }

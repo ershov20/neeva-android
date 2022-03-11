@@ -33,7 +33,7 @@ fun BrowserScaffold(
 
     val snackbarModel = LocalEnvironment.current.snackbarModel
 
-    val browserWrapper by webLayerModel.browserWrapperFlow.collectAsState()
+    val browserWrapper by webLayerModel.currentBrowserFlow.collectAsState()
     val urlBarModel = browserWrapper.urlBarModel
 
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
