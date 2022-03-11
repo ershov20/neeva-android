@@ -49,7 +49,7 @@ data class SuggestedSite(
 fun ZeroQuery(
     urlBarModel: URLBarModel,
     faviconCache: FaviconCache,
-    topContent: @Composable (LazyItemScope.() -> Unit) = {},
+    topContent: @Composable (LazyItemScope.(modifier: Modifier) -> Unit) = {},
 ) {
     val browserWrapper = LocalBrowserWrapper.current
     val domainProvider = LocalEnvironment.current.domainProvider
@@ -90,7 +90,7 @@ fun ZeroQuery(
 
     LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         item {
-            topContent()
+            topContent(Modifier)
         }
 
         collapsibleSection(

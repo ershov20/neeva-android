@@ -35,14 +35,29 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun IncognitoZeroQuery() {
+fun IncognitoZeroQuery(topContent: @Composable () -> Unit = {}) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        topContent()
+
+        IncognitoZeroQueryDisclaimer(
+            modifier = Modifier.weight(1.0f)
+        )
+    }
+}
+
+@Composable
+fun IncognitoZeroQueryDisclaimer(
+    modifier: Modifier
+) {
     val backgroundColor = MaterialTheme.colorScheme.inverseSurface
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .verticalScroll(rememberScrollState())
-            .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .padding(Dimensions.PADDING_LARGE)
     ) {

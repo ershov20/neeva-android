@@ -1,11 +1,46 @@
 package com.neeva.app.suggestions
 
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
+import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.ui.theme.NeevaTheme
+
+@Composable
+fun CurrentPageRow(browserWrapper: BrowserWrapper) {
+    val activeTabModel = browserWrapper.activeTabModel
+    val faviconCache = browserWrapper.faviconCache
+    val urlBarModel = browserWrapper.urlBarModel
+
+    val currentURL: Uri by activeTabModel.urlFlow.collectAsState()
+    val isLazyTab: Boolean by browserWrapper.isLazyTabFlow.collectAsState()
+    val displayedText: String by activeTabModel.displayedText.collectAsState()
+    val isShowingQuery: Boolean by activeTabModel.isShowingQuery.collectAsState()
+    val faviconBitmap by faviconCache.getFaviconAsync(currentURL)
+
+    val label = if (isShowingQuery) {
+        displayedText
+    } else {
+        currentURL.toString()
+    }
+
+    if (!isLazyTab && currentURL.toString().isNotBlank()) {
+        CurrentPageRow(
+            faviconBitmap = faviconBitmap,
+            label = label,
+            isShowingQuery = isShowingQuery
+        ) {
+            urlBarModel.replaceLocationBarText(
+                if (isShowingQuery) displayedText else currentURL.toString()
+            )
+        }
+    }
+}
 
 @Composable
 fun CurrentPageRow(

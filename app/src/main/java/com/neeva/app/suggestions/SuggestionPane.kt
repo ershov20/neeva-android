@@ -1,6 +1,5 @@
 package com.neeva.app.suggestions
 
-import android.net.Uri
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -18,18 +17,11 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
 
     val browserWrapper = LocalBrowserWrapper.current
     val urlBarModel = browserWrapper.urlBarModel
-    val activeTabModel = browserWrapper.activeTabModel
     val faviconCache = browserWrapper.faviconCache
     val suggestionsModel = browserWrapper.suggestionsModel
 
     val isUrlBarBlank by urlBarModel.isUserQueryBlank.collectAsState(true)
-    val isLazyTab: Boolean by browserWrapper.isLazyTabFlow.collectAsState()
     val historySuggestions by historyManager.historySuggestions.collectAsState()
-    val currentURL: Uri by activeTabModel.urlFlow.collectAsState()
-    val displayedText: String by activeTabModel.displayedText.collectAsState()
-    val isShowingQuery: Boolean by activeTabModel.isShowingQuery.collectAsState()
-
-    val faviconBitmap by faviconCache.getFaviconAsync(currentURL)
 
     val suggestionFlow = suggestionsModel?.suggestionFlow ?: MutableStateFlow(Suggestions())
     val suggestions by suggestionFlow.collectAsState()
@@ -70,26 +62,14 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
             }
 
             browserWrapper.isIncognito -> {
-                IncognitoZeroQuery()
+                IncognitoZeroQuery {
+                    CurrentPageRow(browserWrapper)
+                }
             }
 
             else -> {
                 ZeroQuery(urlBarModel = urlBarModel, faviconCache = faviconCache) {
-                    if (!isLazyTab && currentURL.toString().isNotBlank()) {
-                        CurrentPageRow(
-                            faviconBitmap = faviconBitmap,
-                            label = if (isShowingQuery) {
-                                displayedText
-                            } else {
-                                currentURL.toString()
-                            },
-                            isShowingQuery = isShowingQuery
-                        ) {
-                            urlBarModel.replaceLocationBarText(
-                                if (isShowingQuery) displayedText else currentURL.toString()
-                            )
-                        }
-                    }
+                    CurrentPageRow(browserWrapper)
                 }
             }
         }

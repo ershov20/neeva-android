@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,70 +49,73 @@ fun BaseSuggestionRow(
     drawableTint: Color? = null,
     mainContent: @Composable (modifier: Modifier) -> Unit
 ) {
-    Row(
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(
-                onClickLabel = onTapRowContentDescription
-            ) {
+            .clickable(onClickLabel = onTapRowContentDescription) {
                 onTapRow.invoke()
             }
-            .padding(
-                horizontal = 12.dp,
-                vertical = 10.dp
-            ),
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        val iconModifier = Modifier
-        when {
-            !imageURL.isNullOrBlank() -> {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(
+                    horizontal = 12.dp,
+                    vertical = 10.dp
+                ),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val iconModifier = Modifier
+            when {
+                !imageURL.isNullOrBlank() -> {
+                    Image(
+                        painter = rememberImagePainter(
+                            data = imageURL,
+                            builder = { crossfade(true) }
+                        ),
+                        contentDescription = null,
+                        modifier = iconModifier
+                            .size(20.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                    )
+                }
+
+                drawableID != null -> {
+                    Image(
+                        painter = painterResource(drawableID),
+                        contentDescription = null,
+                        modifier = iconModifier.size(20.dp),
+                        colorFilter = drawableTint?.let { ColorFilter.tint(it) }
+                    )
+                }
+
+                else -> {
+                    FaviconView(
+                        bitmap = faviconBitmap,
+                        modifier = iconModifier
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            mainContent(Modifier.weight(1.0f))
+
+            if (onTapEdit != null) {
                 Image(
-                    painter = rememberImagePainter(
-                        data = imageURL,
-                        builder = { crossfade(true) }
-                    ),
+                    painter = painterResource(id = R.drawable.ic_baseline_north_west_24),
                     contentDescription = null,
-                    modifier = iconModifier
-                        .size(20.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                    contentScale = ContentScale.Inside,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clickable(
+                            onClickLabel = stringResource(R.string.edit_content_description)
+                        ) {
+                            onTapEdit()
+                        },
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
                 )
             }
-
-            drawableID != null -> {
-                Image(
-                    painter = painterResource(drawableID),
-                    contentDescription = null,
-                    modifier = iconModifier.size(20.dp),
-                    colorFilter = drawableTint?.let { ColorFilter.tint(it) }
-                )
-            }
-
-            else -> {
-                FaviconView(
-                    bitmap = faviconBitmap,
-                    modifier = iconModifier
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        mainContent(Modifier.weight(1.0f))
-
-        if (onTapEdit != null) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_baseline_north_west_24),
-                contentDescription = null,
-                contentScale = ContentScale.Inside,
-                modifier = Modifier
-                    .size(48.dp)
-                    .clickable(
-                        onClickLabel = stringResource(R.string.edit_content_description)
-                    ) {
-                        onTapEdit()
-                    },
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
-            )
         }
     }
 }
