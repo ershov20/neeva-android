@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
+import com.neeva.app.ui.SectionHeader
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -34,15 +35,6 @@ fun SuggestionList(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        item {
-            Box(
-                Modifier
-                    .height(2.dp)
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            )
-        }
-
         topSuggestion?.let {
             item {
                 NavSuggestion(faviconCache, onOpenUrl, onTapSuggestion, it)
@@ -51,11 +43,9 @@ fun SuggestionList(
 
         // Display search results.
         if (queryRowSuggestions.isNotEmpty() || queryNavSuggestions.isNotEmpty()) {
-            item { SuggestionDivider() }
-
             // Display all queries with their associated navigations.
             item {
-                SuggestionSectionHeader(stringRes = R.string.neeva_search)
+                SectionHeader(R.string.neeva_search)
             }
 
             queryRowSuggestions.forEachIndexed { index, queryRowSuggestion ->
@@ -99,11 +89,9 @@ fun SuggestionList(
 
         // Display results from the user's navigation history.
         if (historySuggestions.isNotEmpty()) {
-            item { SuggestionDivider() }
-
             // Display all queries with their associated navigations.
             item {
-                SuggestionSectionHeader(stringRes = R.string.history)
+                SectionHeader(R.string.history)
             }
 
             items(

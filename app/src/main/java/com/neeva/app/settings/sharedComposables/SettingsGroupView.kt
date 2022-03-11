@@ -3,19 +3,15 @@ package com.neeva.app.settings.sharedComposables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsViewModel
-import com.neeva.app.ui.theme.Dimensions
-import java.util.Locale
+import com.neeva.app.ui.SectionHeader
 
 @Composable
 fun SettingsGroupView(
@@ -28,15 +24,8 @@ fun SettingsGroupView(
             .wrapContentHeight(align = Alignment.Bottom)
     ) {
         if (settingsViewModel.isDebugMode() || !groupData.isForDebugOnly) {
-            if (groupData.titleId != null) {
-                Text(
-                    text = stringResource(groupData.titleId).uppercase(Locale.getDefault()),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    modifier = Modifier.padding(Dimensions.PADDING_SMALL)
-                )
-            }
+            groupData.titleId?.let { SectionHeader(it) }
+
             SettingRowsView(
                 settingsViewModel,
                 groupData
