@@ -105,9 +105,12 @@ class HistoryManager(
         }
     }
 
-    fun clearAllHistory() {
+    fun clearHistory(fromMillis: Long) {
         coroutineScope.launch(dispatchers.io) {
-            dao.deleteHistoryWithinTimeframe(Date(0L), Date())
+            dao.deleteHistoryWithinTimeframe(
+                Date(fromMillis),
+                Date()
+            )
         }
     }
 

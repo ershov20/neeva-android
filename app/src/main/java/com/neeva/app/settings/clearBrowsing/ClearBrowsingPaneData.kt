@@ -67,3 +67,10 @@ object ClearBrowsingPaneData : SettingsPaneDataInterface {
         ),
     )
 }
+
+enum class TimeClearingOption(@StringRes val string_id: Int) {
+    LAST_HOUR(R.string.clear_browsing_last_hour),
+    TODAY(R.string.clear_browsing_today),
+    TODAY_AND_YESTERDAY(R.string.clear_browsing_today_and_yesterday),
+    EVERYTHING(R.string.clear_browsing_everything)
+}

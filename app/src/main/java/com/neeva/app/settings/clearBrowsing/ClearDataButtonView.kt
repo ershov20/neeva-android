@@ -28,35 +28,32 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun ClearDataButtonView(
     getToggleState: (key: String?) -> MutableState<Boolean>?,
     rowData: SettingsRowData,
-    onClearBrowsingData: (Map<String, Boolean>) -> Unit,
+    onClearBrowsingData: (Map<String, Boolean>, TimeClearingOption) -> Unit,
     rowModifier: Modifier
 ) {
     val title = stringResource(id = rowData.titleId)
     val showDialog = remember { mutableStateOf(false) }
     val cleared = remember { mutableStateOf(false) }
+
     ClearDataButton(
         text = title,
         cleared = cleared,
-        onClick = {
-            showDialog.value = true
-        },
+        onClick = { showDialog.value = true },
         rowModifier = rowModifier
     )
     if (showDialog.value) {
-        SettingsAlertDialogue(
-            text = stringResource(id = R.string.clear_browsing_dialog_text),
-            confirmString = stringResource(id = R.string.clear_browsing_clear_data),
-            confirmAction = {
+        ClearBrowsingDialog(
+            confirmAction = { timeClearingOption ->
                 onClearBrowsingData(
                     getClearingOptionsMap(
                         ClearBrowsingPaneData.data[0].rows,
                         getToggleState
-                    )
+                    ),
+                    timeClearingOption
                 )
                 cleared.value = true
                 showDialog.value = false
             },
-            dismissString = stringResource(id = R.string.cancel),
             dismissAction = { showDialog.value = false }
         )
     }

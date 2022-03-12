@@ -1,14 +1,17 @@
 package com.neeva.app.settings
 
 import android.net.Uri
+import android.text.format.DateUtils
 import androidx.compose.runtime.MutableState
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.settings.clearBrowsing.TimeClearingOption
 import com.neeva.app.settings.setDefaultAndroidBrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
+import java.util.Date
 
 /**
  * An interface handling all Settings-related controller logic.
@@ -34,7 +37,10 @@ interface SettingsViewModel {
     //endregion
 
     //region Clear Browsing Data
-    fun clearBrowsingData(clearingOptions: Map<String, Boolean>)
+    fun clearBrowsingData(
+        clearingOptions: Map<String, Boolean>,
+        timeClearingOption: TimeClearingOption
+    )
     //endregion
 
     //region Set Default Android Browser
@@ -102,8 +108,18 @@ class SettingsViewModelImpl(
         onBackPressed()
     }
 
-    override fun clearBrowsingData(clearingOptions: Map<String, Boolean>) {
-        webLayerModel.clearBrowsingData(clearingOptions)
+    override fun clearBrowsingData(
+        clearingOptions: Map<String, Boolean>,
+        timeClearingOption: TimeClearingOption
+    ) {
+        val toMillis = Date().time
+        val fromMillis = when (timeClearingOption) {
+            TimeClearingOption.LAST_HOUR -> toMillis - DateUtils.HOUR_IN_MILLIS
+            TimeClearingOption.TODAY -> toMillis - DateUtils.DAY_IN_MILLIS
+            TimeClearingOption.TODAY_AND_YESTERDAY -> toMillis - DateUtils.DAY_IN_MILLIS * 2
+            TimeClearingOption.EVERYTHING -> 0L
+        }
+        webLayerModel.clearBrowsingData(clearingOptions, fromMillis, toMillis)
     }
 
     override fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager {
@@ -144,7 +160,10 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
 
         override fun signOut() {}
 
-        override fun clearBrowsingData(clearingOptions: Map<String, Boolean>) {}
+        override fun clearBrowsingData(
+            clearingOptions: Map<String, Boolean>,
+            timeClearingOption: TimeClearingOption
+        ) {}
 
         override fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager {
             return FakeSetDefaultAndroidBrowserManager()

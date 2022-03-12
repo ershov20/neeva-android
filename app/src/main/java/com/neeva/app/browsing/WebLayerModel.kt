@@ -211,10 +211,16 @@ class WebLayerModel @Inject constructor(
         regularBrowser.reload()
     }
 
-    fun clearNonNeevaCookies(clearCookiesFlags: List<Int>) {
+    fun clearNonNeevaCookies(clearCookiesFlags: List<Int>, fromMillis: Long, toMillis: Long) {
         if (clearCookiesFlags.isNotEmpty()) {
             val oldNeevaAuthToken = neevaUser.neevaUserToken.getToken()
-            regularProfile.clearBrowsingData(clearCookiesFlags.toIntArray()) {
+
+            regularProfile.clearBrowsingData(
+                clearCookiesFlags.toIntArray(),
+                fromMillis,
+                toMillis
+            ) {
+                // Since all cookies got cleared, add back the original Neeva Cookie after it finished clearing.
                 regularProfile.cookieManager.setCookie(
                     Uri.parse(NeevaConstants.appURL),
                     "${NeevaConstants.loginCookie}=$oldNeevaAuthToken;",
@@ -225,13 +231,17 @@ class WebLayerModel @Inject constructor(
         }
     }
 
-    fun clearBrowsingData(clearingOptions: Map<String, Boolean>) {
+    fun clearBrowsingData(
+        clearingOptions: Map<String, Boolean>,
+        fromMillis: Long,
+        toMillis: Long
+    ) {
         val clearCookiesFlags = mutableListOf<Int>()
         clearingOptions.keys.forEach {
             if (clearingOptions[it] == true) {
                 when (it) {
                     SettingsToggle.CLEAR_BROWSING_HISTORY.key -> {
-                        historyManager.clearAllHistory()
+                        historyManager.clearHistory(fromMillis)
                     }
                     SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION.key -> {
                     }
@@ -248,7 +258,7 @@ class WebLayerModel @Inject constructor(
                 }
             }
         }
-        clearNonNeevaCookies(clearCookiesFlags)
+        clearNonNeevaCookies(clearCookiesFlags, fromMillis, toMillis)
     }
 
     fun getRegularProfileFaviconCache(): FaviconCache = regularBrowser.faviconCache
