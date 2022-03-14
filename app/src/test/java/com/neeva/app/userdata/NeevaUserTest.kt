@@ -132,7 +132,7 @@ class NeevaUserTest : BaseTest() {
                 id = "response_id",
                 displayName = "response_displayName",
                 email = "response_email",
-                pictureURL = Uri.parse("response_pictureUrl"),
+                pictureURI = Uri.parse("response_pictureUrl"),
                 ssoProvider = NeevaUser.SSOProvider.UNKNOWN
             )
         )

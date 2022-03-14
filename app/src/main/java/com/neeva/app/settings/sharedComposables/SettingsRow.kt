@@ -107,7 +107,7 @@ fun SettingsRow(
                     ProfileRow(
                         primaryLabel = getFormattedSSOProviderName(userData.ssoProvider),
                         secondaryLabel = userData.email,
-                        pictureUrl = userData.pictureURL,
+                        pictureURI = userData.pictureURI,
                         onClick = null,
                         modifier = modifier
                     )
@@ -115,7 +115,7 @@ fun SettingsRow(
                     ProfileRow(
                         primaryLabel = userData.displayName,
                         secondaryLabel = userData.email,
-                        pictureUrl = userData.pictureURL,
+                        pictureURI = userData.pictureURI,
                         onClick = onClick,
                         modifier = modifier
                     )

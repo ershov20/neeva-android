@@ -9,7 +9,7 @@ data class NeevaUserData(
     val id: String? = null,
     val displayName: String? = null,
     val email: String? = null,
-    val pictureURL: Uri? = null,
+    val pictureURI: Uri? = null,
     val ssoProvider: NeevaUser.SSOProvider = NeevaUser.SSOProvider.UNKNOWN,
 )
 
@@ -44,7 +44,7 @@ class NeevaUser(
                     id = userQuery.id,
                     displayName = userQuery.profile.displayName,
                     email = userQuery.profile.email,
-                    pictureURL = Uri.parse(userQuery.profile.pictureURL),
+                    pictureURI = Uri.parse(userQuery.profile.pictureURL),
                     ssoProvider = SSOProvider.values()
                         .firstOrNull { it.url == userQuery.authProvider }
                         ?: SSOProvider.UNKNOWN

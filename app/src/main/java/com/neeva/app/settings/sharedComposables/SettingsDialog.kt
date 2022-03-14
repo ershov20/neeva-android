@@ -95,8 +95,8 @@ fun RadioButtonGroup(
     }
 }
 
-class SettingsAlertDialoguePreviews :
-    BooleanPreviewParameterProvider<SettingsAlertDialoguePreviews.Params>(2) {
+class SettingsDialogPreviews :
+    BooleanPreviewParameterProvider<SettingsDialogPreviews.Params>(2) {
     data class Params(
         val darkTheme: Boolean,
         val hasRadioOptions: Boolean
@@ -107,13 +107,13 @@ class SettingsAlertDialoguePreviews :
         hasRadioOptions = booleanArray[1]
     )
 
-    @Preview("SettingsAlertDialogue 1x", locale = "en")
-    @Preview("SettingsAlertDialogue 2x", locale = "en", fontScale = 2.0f)
-    @Preview("SettingsAlertDialogue RTL, 1x", locale = "he")
-    @Preview("SettingsAlertDialogue RTL, 2x", locale = "he", fontScale = 2.0f)
+    @Preview("Settings Dialog 1x", locale = "en")
+    @Preview("Settings Dialog 2x", locale = "en", fontScale = 2.0f)
+    @Preview("Settings Dialog RTL, 1x", locale = "he")
+    @Preview("Settings Dialog RTL, 2x", locale = "he", fontScale = 2.0f)
     @Composable
     fun DefaultPreview(
-        @PreviewParameter(SettingsAlertDialoguePreviews::class) params: Params
+        @PreviewParameter(SettingsDialogPreviews::class) params: Params
     ) {
         NeevaTheme(useDarkTheme = params.darkTheme) {
             var radioOptions: List<Int>? = null

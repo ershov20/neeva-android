@@ -154,7 +154,7 @@ internal fun getFakeSettingsViewModel(): SettingsViewModel {
             return NeevaUserData(
                 displayName = "Jehan Kobe Chang",
                 email = "kobec@neeva.co",
-                pictureURL = Uri.parse("https://c.neevacdn.net/image/fetch/s")
+                pictureURI = Uri.parse("https://c.neevacdn.net/image/fetch/s")
             )
         }
 

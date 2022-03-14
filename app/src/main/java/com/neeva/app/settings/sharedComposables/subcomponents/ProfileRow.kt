@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,19 +25,23 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
+import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
+import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.userdata.NeevaUser
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ProfileRow(
     primaryLabel: String?,
     secondaryLabel: String?,
-    pictureUrl: Uri?,
+    pictureURI: Uri?,
     onClick: (() -> Unit)? = null,
     modifier: Modifier,
 ) {
@@ -50,20 +57,8 @@ fun ProfileRow(
             )
             .then(modifier)
     ) {
-        if (pictureUrl != null) {
-            Image(
-                painter = rememberImagePainter(
-                    data = pictureUrl,
-                    builder = { crossfade(true) }
-                ),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(CircleShape)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-        }
-
+        ProfileImage(pictureURI = pictureURI, modifier = Modifier.size(32.dp).clip(CircleShape))
+        Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             if (primaryLabel != null) {
                 Text(
@@ -98,32 +93,99 @@ fun ProfileRow(
     }
 }
 
-@Preview(name = "Profile UI Signed In, 1x font size", locale = "en")
-@Preview(name = "Profile UI Signed In, 2x font size", locale = "en", fontScale = 2.0f)
 @Composable
-fun ProfileUI_SignedInPreview() {
-    NeevaTheme {
-        ProfileRow(
-            primaryLabel = "Jehan Kobe Chang",
-            secondaryLabel = "kobec@neeva.co",
-            pictureUrl = Uri.parse("https://c.neevacdn.net/image/fetch/s"),
-            onClick = {},
-            SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
+private fun ProfileImage(pictureURI: Uri?, modifier: Modifier) {
+    if (pictureURI != null) {
+        Image(
+            painter = rememberImagePainter(
+                data = pictureURI,
+                builder = { crossfade(true) }
+            ),
+            contentDescription = null,
+            modifier = modifier
+        )
+    } else {
+        Icon(
+            Icons.Rounded.AccountCircle,
+            contentDescription = null,
+            modifier = modifier,
+            tint = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
 
-@Preview(name = "Profile UI Signed In Dark, 1x font size", locale = "en")
-@Preview(name = "Profile UI Signed In Dark, 2x font size", locale = "en", fontScale = 2.0f)
-@Composable
-fun ProfileUI_SignedIn_Dark_Preview() {
-    NeevaTheme(useDarkTheme = true) {
-        ProfileRow(
-            primaryLabel = "Jehan Kobe Chang",
-            secondaryLabel = "kobec@neeva.co",
-            pictureUrl = null,
-            onClick = {},
-            SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
-        )
+class ProfileRowPreviews :
+    BooleanPreviewParameterProvider<ProfileRowPreviews.Params>(3) {
+    data class Params(
+        val darkTheme: Boolean,
+        val isSignedIn: Boolean,
+        val showSSOProviderAsPrimaryLabel: Boolean,
+        val invalidProfileUrl: Boolean,
+        val navigatable: Boolean
+    )
+
+    override fun createParams(booleanArray: BooleanArray) = Params(
+        darkTheme = booleanArray[0],
+        isSignedIn = booleanArray[1],
+        showSSOProviderAsPrimaryLabel = booleanArray[2],
+        invalidProfileUrl = booleanArray[3],
+        navigatable = booleanArray[4]
+    )
+
+    @Preview("ProfileRowPreviews 1x", locale = "en")
+    @Preview("ProfileRowPreviews 2x", locale = "en", fontScale = 2.0f)
+    @Preview("ProfileRowPreviews RTL, 1x", locale = "he")
+    @Preview("ProfileRowPreviews RTL, 2x", locale = "he", fontScale = 2.0f)
+    @Composable
+    fun DefaultPreview(
+        @PreviewParameter(ProfileRowPreviews::class) params: Params
+    ) {
+        var pictureURI: Uri? = if (!params.invalidProfileUrl) {
+            Uri.parse("")
+        } else {
+            null
+        }
+
+        var onClick: (() -> Unit)? = if (params.navigatable) {
+            {}
+        } else {
+            null
+        }
+
+        NeevaTheme(useDarkTheme = params.darkTheme) {
+            when (params.isSignedIn) {
+                true -> {
+                    SettingsButtonRow(
+                        title = stringResource(R.string.settings_sign_in_to_join_neeva),
+                        onClick = { },
+                        modifier = SettingsUIConstants
+                            .rowModifier.background(MaterialTheme.colorScheme.surface)
+                    )
+                }
+                false -> {
+                    if (params.showSSOProviderAsPrimaryLabel) {
+                        ProfileRow(
+                            primaryLabel = getFormattedSSOProviderName(
+                                NeevaUser.SSOProvider.GOOGLE
+                            ),
+                            secondaryLabel = "kobec@neeva.co",
+                            pictureURI = pictureURI,
+                            onClick = null,
+                            modifier = SettingsUIConstants
+                                .rowModifier.background(MaterialTheme.colorScheme.surface)
+                        )
+                    } else {
+                        ProfileRow(
+                            primaryLabel = "Jehan Kobe Chang",
+                            secondaryLabel = "kobec@neeva.co",
+                            pictureURI = pictureURI,
+                            onClick = onClick,
+                            modifier = SettingsUIConstants
+                                .rowModifier.background(MaterialTheme.colorScheme.surface)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
