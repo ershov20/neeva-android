@@ -2,28 +2,21 @@ package com.neeva.app.zeroQuery
 
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
@@ -35,9 +28,8 @@ import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
-import com.neeva.app.suggestions.toUserVisibleString
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.widgets.FaviconView
 import com.neeva.app.widgets.collapsibleSection
 
 data class SuggestedSite(
@@ -99,32 +91,15 @@ fun ZeroQuery(
             isExpanded = isSuggestedSitesExpanded,
             isDisplayedAsRow = true
         ) { suggestedSite ->
-            val faviconBitmap by faviconCache.getFaviconAsync(Uri.parse(suggestedSite.site.siteURL))
-            val title = suggestedSite.site.title
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .clickable(onClickLabel = title) {
+            // Force the size of the icon be 64.dp plus the padding on its sides.
+            Box(modifier = Modifier.width(64.dp + (Dimensions.PADDING_LARGE * 2))) {
+                ZeroQuerySuggestedSite(
+                    suggestedSite = suggestedSite,
+                    faviconCache = faviconCache,
+                    domainProvider = domainProvider,
+                    onClick = {
                         browserWrapper.loadUrl(Uri.parse(suggestedSite.site.siteURL))
                     }
-                    .padding(horizontal = 16.dp)
-                    .width(64.dp)
-            ) {
-                FaviconView(
-                    bitmap = faviconBitmap,
-                    imageOverride = suggestedSite.iconOverride,
-                    bordered = false,
-                    size = 48.dp
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = suggestedSite.site.toUserVisibleString(domainProvider),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
