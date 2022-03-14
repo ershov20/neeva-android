@@ -2,10 +2,15 @@ package com.neeva.app.zeroQuery
 
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +35,11 @@ import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.widgets.collapsibleSection
+import com.neeva.app.widgets.GridLayout
+import com.neeva.app.widgets.collapsible.CollapsingSectionState
+import com.neeva.app.widgets.collapsible.collapsibleSection
+import com.neeva.app.widgets.collapsible.collapsibleThreeStateSection
+import com.neeva.app.widgets.collapsible.setNextState
 
 data class SuggestedSite(
     val site: Site,
@@ -55,9 +64,9 @@ fun ZeroQuery(
 
     val homeLabel = stringResource(id = R.string.home)
 
-    val isSuggestedSitesExpanded = remember { mutableStateOf(true) }
-    val isSuggestedQueriesExpanded = remember { mutableStateOf(true) }
-    val isSpacesExpanded = remember { mutableStateOf(true) }
+    val isSuggestedSitesExpanded = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
+    val isSuggestedQueriesExpanded = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
+    val isSpacesExpanded = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
 
     val suggestedSitesPlusHome: List<SuggestedSite> = remember(suggestedSites) {
         suggestedSites
@@ -85,47 +94,72 @@ fun ZeroQuery(
             topContent(Modifier)
         }
 
-        collapsibleSection(
+        collapsibleThreeStateSection(
             label = R.string.suggested_sites,
-            displayedItems = suggestedSitesPlusHome,
-            isExpanded = isSuggestedSitesExpanded,
-            isDisplayedAsRow = true
-        ) { suggestedSite ->
-            // Force the size of the icon be 64.dp plus the padding on its sides.
-            Box(modifier = Modifier.width(64.dp + (Dimensions.PADDING_LARGE * 2))) {
-                ZeroQuerySuggestedSite(
-                    suggestedSite = suggestedSite,
-                    faviconCache = faviconCache,
-                    domainProvider = domainProvider,
-                    onClick = {
-                        browserWrapper.loadUrl(Uri.parse(suggestedSite.site.siteURL))
+            collapsingSectionState = isSuggestedSitesExpanded,
+            updateCollapsingHeaderState = {
+                isSuggestedSitesExpanded.value =
+                    isSuggestedSitesExpanded.value.next(allowCompactState = true)
+            },
+            expandedContent = {
+                // Draw everything as a 4x2 grid with the width evenly divided.
+                GridLayout(4, suggestedSitesPlusHome) { suggestedSite ->
+                    ZeroQuerySuggestedSite(
+                        suggestedSite = suggestedSite,
+                        faviconCache = faviconCache,
+                        domainProvider = domainProvider,
+                        onClick = browserWrapper::loadUrl
+                    )
+                }
+            },
+            compactContent = {
+                // Draw everything as a scrollable Row in the main list.  Keep all of the icons the
+                // same width (64.dp + large padding + large padding).
+                Row(
+                    modifier = Modifier
+                        .padding(vertical = Dimensions.PADDING_LARGE)
+                        .horizontalScroll(rememberScrollState())
+                ) {
+                    suggestedSitesPlusHome.forEach { suggestedSite ->
+                        Box(modifier = Modifier.width(64.dp + Dimensions.PADDING_LARGE * 2)) {
+                            ZeroQuerySuggestedSite(
+                                suggestedSite = suggestedSite,
+                                faviconCache = faviconCache,
+                                domainProvider = domainProvider,
+                                onClick = browserWrapper::loadUrl
+                            )
+                        }
                     }
-                )
+                }
             }
-        }
+        )
 
         if (suggestedQueries.isNotEmpty()) {
             collapsibleSection(
                 label = R.string.searches,
-                displayedItems = suggestedQueries,
-                isExpanded = isSuggestedQueriesExpanded
-            ) { search ->
-                QuerySuggestionRow(
-                    suggestion = search,
-                    onLoadUrl = browserWrapper::loadUrl,
-                    onEditUrl = { urlBarModel.replaceLocationBarText(search.query) }
-                )
+                collapsingSectionState = isSuggestedQueriesExpanded,
+                updateCollapsingHeaderState = isSuggestedQueriesExpanded::setNextState
+            ) {
+                items(suggestedQueries) { search ->
+                    QuerySuggestionRow(
+                        suggestion = search,
+                        onLoadUrl = browserWrapper::loadUrl,
+                        onEditUrl = { urlBarModel.replaceLocationBarText(search.query) }
+                    )
+                }
             }
         }
 
         if (spaces.isNotEmpty()) {
             collapsibleSection(
                 label = R.string.spaces,
-                displayedItems = spaces.subList(0, minOf(3, spaces.size)),
-                isExpanded = isSpacesExpanded
-            ) { space ->
-                SpaceRow(space = space) {
-                    browserWrapper.loadUrl(space.url)
+                collapsingSectionState = isSpacesExpanded,
+                updateCollapsingHeaderState = isSpacesExpanded::setNextState
+            ) {
+                items(spaces.subList(0, minOf(3, spaces.size))) { space ->
+                    SpaceRow(space = space) {
+                        browserWrapper.loadUrl(space.url)
+                    }
                 }
             }
         }

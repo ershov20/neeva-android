@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.items
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -28,7 +29,9 @@ import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.BrandedTextButton
-import com.neeva.app.widgets.collapsibleSection
+import com.neeva.app.widgets.collapsible.CollapsingSectionState
+import com.neeva.app.widgets.collapsible.collapsibleSection
+import com.neeva.app.widgets.collapsible.setNextState
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Date
@@ -97,10 +100,10 @@ fun HistoryUI(
     faviconCache: FaviconCache,
     domainProvider: DomainProvider
 ) {
-    val isTodayDisplayed = remember { mutableStateOf(true) }
-    val isYesterdayDisplayed = remember { mutableStateOf(true) }
-    val isThisWeekDisplayed = remember { mutableStateOf(true) }
-    val isBeforeThisWeekDisplayed = remember { mutableStateOf(true) }
+    val isTodayDisplayed = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
+    val isYesterdayDisplayed = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
+    val isThisWeekDisplayed = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
+    val isBeforeThisWeekDisplayed = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
 
     Column(
         modifier = Modifier
@@ -127,61 +130,69 @@ fun HistoryUI(
 
             collapsibleSection(
                 label = R.string.history_today,
-                displayedItems = historyToday,
-                isExpanded = isTodayDisplayed
-            ) { site ->
-                site?.let {
-                    NavSuggestion(
-                        faviconCache,
-                        onOpenUrl,
-                        onTapSuggestion,
-                        site.toNavSuggestion(domainProvider)
-                    )
+                collapsingSectionState = isTodayDisplayed,
+                updateCollapsingHeaderState = isTodayDisplayed::setNextState,
+            ) {
+                items(historyToday) { site ->
+                    site?.let {
+                        NavSuggestion(
+                            faviconCache,
+                            onOpenUrl,
+                            onTapSuggestion,
+                            site.toNavSuggestion(domainProvider)
+                        )
+                    }
                 }
             }
 
             collapsibleSection(
                 label = R.string.history_yesterday,
-                displayedItems = historyYesterday,
-                isExpanded = isYesterdayDisplayed
-            ) { site ->
-                site?.let {
-                    NavSuggestion(
-                        faviconCache,
-                        onOpenUrl,
-                        onTapSuggestion,
-                        site.toNavSuggestion(domainProvider)
-                    )
+                collapsingSectionState = isYesterdayDisplayed,
+                updateCollapsingHeaderState = isYesterdayDisplayed::setNextState
+            ) {
+                items(historyYesterday) { site ->
+                    site?.let {
+                        NavSuggestion(
+                            faviconCache,
+                            onOpenUrl,
+                            onTapSuggestion,
+                            site.toNavSuggestion(domainProvider)
+                        )
+                    }
                 }
             }
 
             collapsibleSection(
                 label = R.string.history_this_week,
-                displayedItems = historyThisWeek,
-                isExpanded = isThisWeekDisplayed
-            ) { site ->
-                site?.let {
-                    NavSuggestion(
-                        faviconCache,
-                        onOpenUrl,
-                        onTapSuggestion,
-                        site.toNavSuggestion(domainProvider)
-                    )
+                collapsingSectionState = isThisWeekDisplayed,
+                updateCollapsingHeaderState = isThisWeekDisplayed::setNextState
+            ) {
+                items(historyThisWeek) { site ->
+                    site?.let {
+                        NavSuggestion(
+                            faviconCache,
+                            onOpenUrl,
+                            onTapSuggestion,
+                            site.toNavSuggestion(domainProvider)
+                        )
+                    }
                 }
             }
 
             collapsibleSection(
                 label = R.string.history_earlier,
-                displayedItems = historyBeforeThisWeek,
-                isExpanded = isBeforeThisWeekDisplayed
-            ) { site ->
-                site?.let {
-                    NavSuggestion(
-                        faviconCache,
-                        onOpenUrl,
-                        onTapSuggestion,
-                        site.toNavSuggestion(domainProvider)
-                    )
+                collapsingSectionState = isBeforeThisWeekDisplayed,
+                updateCollapsingHeaderState = isBeforeThisWeekDisplayed::setNextState
+            ) {
+                items(historyBeforeThisWeek) { site ->
+                    site?.let {
+                        NavSuggestion(
+                            faviconCache,
+                            onOpenUrl,
+                            onTapSuggestion,
+                            site.toNavSuggestion(domainProvider)
+                        )
+                    }
                 }
             }
         }
