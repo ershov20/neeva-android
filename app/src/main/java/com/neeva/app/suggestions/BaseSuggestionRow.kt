@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Surface
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,14 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
@@ -58,11 +59,10 @@ fun BaseSuggestionRow(
             }
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
-                .padding(
-                    horizontal = 12.dp,
-                    vertical = 10.dp
-                ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+                .padding(start = Dimensions.PADDING_MEDIUM),
             verticalAlignment = Alignment.CenterVertically
         ) {
             val iconModifier = Modifier
@@ -97,24 +97,23 @@ fun BaseSuggestionRow(
                 }
             }
 
-            Spacer(modifier = Modifier.width(12.dp))
+            // Keep the icon away from the content.
+            Spacer(modifier = Modifier.width(Dimensions.PADDING_MEDIUM))
 
             mainContent(Modifier.weight(1.0f))
 
             if (onTapEdit != null) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_baseline_north_west_24),
-                    contentDescription = null,
-                    contentScale = ContentScale.Inside,
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clickable(
-                            onClickLabel = stringResource(R.string.edit_content_description)
-                        ) {
-                            onTapEdit()
-                        },
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
-                )
+                IconButton(onClick = onTapEdit) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_baseline_north_west_24),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            } else {
+                // If there's no edit icon, add an extra spacer to prevent the content from hitting
+                // the edge.
+                Spacer(modifier = Modifier.width(Dimensions.PADDING_MEDIUM))
             }
         }
     }
@@ -132,7 +131,11 @@ fun BaseSuggestionRow_Preview() {
             onTapEdit = null,
             faviconBitmap = null
         ) {
-            Box(modifier = it.background(Color.Magenta).height(56.dp))
+            Box(
+                modifier = it
+                    .background(Color.Magenta)
+                    .height(56.dp)
+            )
         }
     }
 }
@@ -149,7 +152,11 @@ fun BaseSuggestionRow_PreviewEditable() {
             onTapEdit = {},
             faviconBitmap = null
         ) {
-            Box(modifier = it.background(Color.Magenta).height(56.dp))
+            Box(
+                modifier = it
+                    .background(Color.Magenta)
+                    .height(56.dp)
+            )
         }
     }
 }
