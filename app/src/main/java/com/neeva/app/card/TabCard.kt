@@ -81,7 +81,7 @@ fun TabCard(
     var thumbnail by remember { mutableStateOf<Bitmap?>(null) }
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(tabInfo.url)
 
-    LaunchedEffect(key1 = tabInfo) {
+    LaunchedEffect(key1 = tabInfo.id) {
         withContext(dispatchers.io) {
             thumbnail = screenshotProvider(tabInfo.id)
         }

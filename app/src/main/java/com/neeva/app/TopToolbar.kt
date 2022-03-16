@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
-import androidx.compose.material.LinearProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -58,7 +58,7 @@ fun TopToolbar(modifier: Modifier) {
                     .height(2.dp)
                     .fillMaxWidth(),
                 color = MaterialTheme.colorScheme.primary,
-                backgroundColor = MaterialTheme.colorScheme.primaryContainer
+                trackColor = MaterialTheme.colorScheme.primaryContainer
             )
         }
     }

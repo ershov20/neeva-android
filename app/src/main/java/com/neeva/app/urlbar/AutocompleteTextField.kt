@@ -13,15 +13,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,7 +55,6 @@ fun AutocompleteTextField(
     urlBarModel: URLBarModel,
     suggestionsModel: SuggestionsModel?,
     urlBarModelState: URLBarModelState,
-    foregroundColor: Color,
     placeholderColor: Color,
     modifier: Modifier
 ) {
@@ -78,7 +77,6 @@ fun AutocompleteTextField(
             focusManager.clearFocus()
             suggestionsModel?.logSuggestionTap(urlBarModelState.getSuggestionType(), null)
         },
-        foregroundColor = foregroundColor,
         placeholderColor = placeholderColor,
         modifier = modifier
     )
@@ -93,7 +91,6 @@ fun AutocompleteTextField(
     onLocationReplaced: (String) -> Unit,
     onFocusChanged: (FocusState) -> Unit,
     onLoadUrl: () -> Unit,
-    foregroundColor: Color,
     placeholderColor: Color,
     modifier: Modifier = Modifier
 ) {
@@ -101,79 +98,76 @@ fun AutocompleteTextField(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.padding(start = Dimensions.PADDING_MEDIUM)
     ) {
-        CompositionLocalProvider(LocalContentColor provides foregroundColor) {
-            FaviconView(
-                bitmap = faviconBitmap,
-                bordered = false
-            )
+        FaviconView(
+            bitmap = faviconBitmap,
+            bordered = false
+        )
 
-            Spacer(Modifier.width(Dimensions.PADDING_SMALL))
+        Spacer(Modifier.width(Dimensions.PADDING_SMALL))
 
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier.weight(1.0f)
-            ) {
-                // [BasicTextField]s don't have support for Placeholders, and [TextField] isn't
-                // styled in a way we can use.  Instead, just add a Text that disappears as soon as
-                // the user starts typing something.
-                if (textFieldValue.text.isEmpty()) {
-                    Text(
-                        text = stringResource(R.string.url_bar_placeholder),
-                        modifier = Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = placeholderColor
-                    )
-                }
-
-                BasicTextField(
-                    value = textFieldValue,
-                    onValueChange = onLocationEdited,
-                    modifier = Modifier
-                        .focusRequester(focusRequester)
-                        .onFocusChanged(onFocusChanged)
-                        .onPreviewKeyEvent {
-                            if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
-                                // If we're seeing a hardware enter key, intercept it to prevent
-                                // adding a newline to the URL.
-                                onLoadUrl()
-
-                                true
-                            } else {
-                                false
-                            }
-                        }
-                        .fillMaxWidth(),
-                    singleLine = true,
-                    textStyle = TextStyle(
-                        color = LocalContentColor.current,
-                        fontSize = MaterialTheme.typography.bodyLarge.fontSize
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Uri,
-                        imeAction = ImeAction.Go,
-                        autoCorrect = false
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onGo = { onLoadUrl() }
-                    ),
-                    cursorBrush = SolidColor(LocalContentColor.current)
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.weight(1.0f)
+        ) {
+            // [BasicTextField]s don't have support for Placeholders, and [TextField] isn't
+            // styled in a way we can use.  Instead, just add a Text that disappears as soon as
+            // the user starts typing something.
+            if (textFieldValue.text.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.url_bar_placeholder),
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = placeholderColor
                 )
             }
 
-            AnimatedVisibility(
-                visible = textFieldValue.text.isNotEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut()
+            BasicTextField(
+                value = textFieldValue,
+                onValueChange = onLocationEdited,
+                modifier = Modifier
+                    .focusRequester(focusRequester)
+                    .onFocusChanged(onFocusChanged)
+                    .onPreviewKeyEvent {
+                        if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
+                            // If we're seeing a hardware enter key, intercept it to prevent
+                            // adding a newline to the URL.
+                            onLoadUrl()
+                            true
+                        } else {
+                            false
+                        }
+                    }
+                    .fillMaxWidth(),
+                singleLine = true,
+                textStyle = TextStyle(
+                    color = LocalContentColor.current,
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                ),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Uri,
+                    imeAction = ImeAction.Go,
+                    autoCorrect = false
+                ),
+                keyboardActions = KeyboardActions(
+                    onGo = { onLoadUrl() }
+                ),
+                cursorBrush = SolidColor(LocalContentColor.current)
+            )
+        }
+
+        AnimatedVisibility(
+            visible = textFieldValue.text.isNotEmpty(),
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            IconButton(
+                onClick = { onLocationReplaced("") }
             ) {
-                IconButton(
-                    onClick = { onLocationReplaced("") }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(id = R.string.clear),
-                        tint = LocalContentColor.current
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = stringResource(id = R.string.clear),
+                    tint = LocalContentColor.current
+                )
             }
         }
     }
@@ -224,17 +218,18 @@ class AutocompleteTextFieldPreviews :
         }
 
         NeevaTheme(useDarkTheme = params.darkTheme) {
-            AutocompleteTextField(
-                textFieldValue = textFieldValue,
-                faviconBitmap = null,
-                focusRequester = FocusRequester(),
-                onLocationEdited = {},
-                onLocationReplaced = {},
-                onFocusChanged = {},
-                onLoadUrl = {},
-                foregroundColor = MaterialTheme.colorScheme.onSurface,
-                placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Surface {
+                AutocompleteTextField(
+                    textFieldValue = textFieldValue,
+                    faviconBitmap = null,
+                    focusRequester = FocusRequester(),
+                    onLocationEdited = {},
+                    onLocationReplaced = {},
+                    onFocusChanged = {},
+                    onLoadUrl = {},
+                    placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

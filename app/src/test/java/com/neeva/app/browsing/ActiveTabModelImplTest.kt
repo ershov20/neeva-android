@@ -2,8 +2,8 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.neeva.app.BaseTest
-import com.neeva.app.Dispatchers
-import kotlinx.coroutines.CoroutineScope
+import com.neeva.app.NeevaConstants
+import com.neeva.app.browsing.ActiveTabModel.DisplayMode
 import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NavigationController
@@ -24,6 +24,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
+import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isNull
@@ -35,6 +36,7 @@ class ActiveTabModelImplTest : BaseTest() {
     private lateinit var model: ActiveTabModelImpl
 
     private lateinit var mainTab: MockTabHarness
+    private lateinit var neevaHomepageTab: MockTabHarness
     private lateinit var neevaSearchTab: MockTabHarness
     private lateinit var neevaSpacesTab: MockTabHarness
 
@@ -43,14 +45,20 @@ class ActiveTabModelImplTest : BaseTest() {
         super.setUp()
 
         model = ActiveTabModelImpl(
-            coroutineScope = mock<CoroutineScope>(),
-            dispatchers = mock<Dispatchers>()
+            coroutineScope = mock(),
+            dispatchers = mock()
         )
 
         mainTab = MockTabHarness(
             currentTitle = "Title #1",
             currentUri = Uri.parse("https://www.site.com/1"),
             canGoBack = true,
+            canGoForward = true
+        )
+        neevaHomepageTab = MockTabHarness(
+            currentTitle = "Neeva homepage",
+            currentUri = Uri.parse(NeevaConstants.appURL),
+            canGoBack = false,
             canGoForward = false
         )
         neevaSearchTab = MockTabHarness(
@@ -84,8 +92,8 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedText.value).isEqualTo("www.site.com")
-        expectThat(model.isShowingQuery.value).isFalse()
+        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -103,8 +111,8 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo(secondTab.currentTitle)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(secondTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(secondTab.canGoForward)
-        expectThat(model.displayedText.value).isEqualTo("news.othersite.com")
-        expectThat(model.isShowingQuery.value).isFalse()
+        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("news.othersite.com")
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
         expectThat(secondTab.tabCallbacks.size).isEqualTo(1)
         expectThat(secondTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -130,8 +138,8 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedText.value).isEqualTo("www.site.com")
-        expectThat(model.isShowingQuery.value).isFalse()
+        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -141,14 +149,33 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.progressFlow.value).isEqualTo(100)
         expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
         expectThat(model.titleFlow.value).isEqualTo("")
-        expectThat(model.displayedText.value).isEqualTo("")
-        expectThat(model.isShowingQuery.value).isFalse()
+        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("")
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(false)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(false)
 
         // The first tab's callbacks should have been unregistered.
         expectThat(mainTab.tabCallbacks.size).isEqualTo(0)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(0)
+    }
+
+    @Test
+    fun mode_onNeevaHomepage_showsPlaceholder() {
+        model.onActiveTabChanged(neevaHomepageTab.tab)
+        expectThat(mainTab.tabCallbacks.size).isEqualTo(0)
+        expectThat(mainTab.navigationCallbacks.size).isEqualTo(0)
+        expectThat(model.activeTab).isEqualTo(neevaHomepageTab.tab)
+        expectThat(model.progressFlow.value).isEqualTo(100)
+        expectThat(model.urlFlow.value).isEqualTo(neevaHomepageTab.currentUri)
+        expectThat(model.titleFlow.value).isEqualTo(neevaHomepageTab.currentTitle)
+        expectThat(model.navigationInfoFlow.value.canGoBackward)
+            .isEqualTo(neevaHomepageTab.canGoBack)
+        expectThat(model.navigationInfoFlow.value.canGoForward)
+            .isEqualTo(neevaHomepageTab.canGoForward)
+        expectThat(model.displayedInfoFlow.value.displayedText).isEmpty()
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.PLACEHOLDER)
+        expectThat(neevaHomepageTab.tabCallbacks.size).isEqualTo(1)
+        expectThat(neevaHomepageTab.navigationCallbacks.size).isEqualTo(1)
     }
 
     @Test
@@ -164,8 +191,8 @@ class ActiveTabModelImplTest : BaseTest() {
             .isEqualTo(neevaSearchTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward)
             .isEqualTo(neevaSearchTab.canGoForward)
-        expectThat(model.displayedText.value).isEqualTo("query")
-        expectThat(model.isShowingQuery.value).isTrue()
+        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("query")
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.QUERY)
         expectThat(neevaSearchTab.tabCallbacks.size).isEqualTo(1)
         expectThat(neevaSearchTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -179,8 +206,8 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(neevaSpacesTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward)
             .isEqualTo(neevaSpacesTab.canGoForward)
-        expectThat(model.displayedText.value).isEqualTo("neeva.com")
-        expectThat(model.isShowingQuery.value).isFalse()
+        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("neeva.com")
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
         expectThat(neevaSpacesTab.tabCallbacks.size).isEqualTo(1)
         expectThat(neevaSpacesTab.navigationCallbacks.size).isEqualTo(1)
     }
@@ -202,8 +229,8 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedText.value).isEqualTo("www.site.com")
-        expectThat(model.isShowingQuery.value).isFalse()
+        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
         expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
 
@@ -216,8 +243,8 @@ class ActiveTabModelImplTest : BaseTest() {
         mainTab.currentUri = Uri.parse("http://news.othersite.com/2")
         mainTab.tabCallbacks.first().onVisibleUriChanged(mainTab.currentUri ?: Uri.EMPTY)
         expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
-        expectThat(model.displayedText.value).isEqualTo("news.othersite.com")
-        expectThat(model.isShowingQuery.value).isFalse()
+        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("news.othersite.com")
+        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
 
         // Check that navigations are kept in sync.
         mainTab.canGoBack = false

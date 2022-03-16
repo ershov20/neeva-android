@@ -5,13 +5,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -41,8 +40,7 @@ val LocalMenuData = compositionLocalOf<LocalMenuDataState> { error("No value set
 
 @Composable
 fun OverflowMenu(
-    onMenuItem: (NeevaMenuItemId) -> Unit,
-    foregroundColor: Color
+    onMenuItem: (NeevaMenuItemId) -> Unit
 ) {
     val browserWrapper = LocalBrowserWrapper.current
     val activeTabModelState by browserWrapper.activeTabModel.navigationInfoFlow.collectAsState()
@@ -57,8 +55,7 @@ fun OverflowMenu(
 
     OverflowMenu(
         onMenuItem = onMenuItem,
-        disabledMenuItems = disabledMenuItems,
-        foregroundColor = foregroundColor
+        disabledMenuItems = disabledMenuItems
     )
 }
 
@@ -66,7 +63,6 @@ fun OverflowMenu(
 fun OverflowMenu(
     onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
-    foregroundColor: Color,
     isInitiallyExpanded: Boolean = false
 ) {
     val menuItemState = LocalMenuData.current
@@ -77,8 +73,7 @@ fun OverflowMenu(
             Box {
                 Icon(
                     Icons.Default.MoreVert,
-                    contentDescription = stringResource(id = R.string.toolbar_neeva_menu),
-                    tint = foregroundColor
+                    contentDescription = stringResource(id = R.string.toolbar_neeva_menu)
                 )
 
                 if (menuItemState.isUpdateAvailableVisible) {
@@ -136,11 +131,10 @@ class OverflowMenuPreviews : BooleanPreviewParameterProvider<OverflowMenuPreview
                     isUpdateAvailableVisible = params.isUpdateAvailableVisible
                 )
             ) {
-                Surface(color = MaterialTheme.colorScheme.surface) {
+                Surface {
                     OverflowMenu(
                         onMenuItem = {},
                         disabledMenuItems = emptyList(),
-                        foregroundColor = MaterialTheme.colorScheme.onSurface,
                         isInitiallyExpanded = false
                     )
                 }

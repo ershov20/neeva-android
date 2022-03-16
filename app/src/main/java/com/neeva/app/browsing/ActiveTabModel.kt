@@ -10,11 +10,23 @@ interface ActiveTabModel {
         val canGoForward: Boolean = false
     )
 
+    /** Tracks if is being shown a query, a URL, or the placeholder text in the URL bar. */
+    enum class DisplayMode {
+        URL, QUERY, PLACEHOLDER
+    }
+
+    data class DisplayedInfo(
+        val mode: DisplayMode = DisplayMode.URL,
+
+        /** Text that should be displayed to the user.  Either the current URL or current query. */
+        val displayedText: String = "",
+    )
+
     /** Tracks the URL displayed for the active tab. */
     val urlFlow: StateFlow<Uri>
 
     /** Tracks whether current URL is in any of the user's Spaces. */
-    val currentUrlInSpaceFlow: StateFlow<Boolean>
+    val isCurrentUrlInSpaceFlow: StateFlow<Boolean>
 
     /** Tracks the title displayed for the active tab. */
     val titleFlow: StateFlow<String>
@@ -25,9 +37,6 @@ interface ActiveTabModel {
     /** Indicates how much of the website for the current page has loaded. */
     val progressFlow: StateFlow<Int>
 
-    /** Text that should be displayed to the user. */
-    val displayedText: StateFlow<String>
-
-    /** Tracks whether or not the user is being shown a query in the URL bar. */
-    val isShowingQuery: StateFlow<Boolean>
+    /** Tracks what should be displayed to the user in the URL bar. */
+    val displayedInfoFlow: StateFlow<DisplayedInfo>
 }

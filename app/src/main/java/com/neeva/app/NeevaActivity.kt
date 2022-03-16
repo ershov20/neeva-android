@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import android.view.WindowManager
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -244,6 +245,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         when {
             isFinishing -> return
             isDestroyed -> return
+        }
+
+        // Hide the contents of the screen from Android Recents when the user switches to another
+        // app while looking at an Incognito tab.
+        if (browserWrapper.isIncognito) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
         }
 
         val displaySize =

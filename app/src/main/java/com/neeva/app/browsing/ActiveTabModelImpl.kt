@@ -28,7 +28,7 @@ class ActiveTabModelImpl(
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     override val urlFlow: StateFlow<Uri> = _urlFlow
 
-    override val currentUrlInSpaceFlow: StateFlow<Boolean> =
+    override val isCurrentUrlInSpaceFlow: StateFlow<Boolean> =
         spaceStore
             ?.stateFlow
             ?.filter { it == SpaceStore.State.READY }
@@ -46,11 +46,9 @@ class ActiveTabModelImpl(
     private val _progressFlow = MutableStateFlow(100)
     override val progressFlow: StateFlow<Int> = _progressFlow
 
-    private val _displayedText = MutableStateFlow("")
-    override val displayedText: StateFlow<String> = _displayedText
-
-    private val _isShowingQuery = MutableStateFlow(false)
-    override val isShowingQuery: StateFlow<Boolean> = _isShowingQuery
+    private val _locationLabelInfoFlow = MutableStateFlow(ActiveTabModel.DisplayedInfo())
+    override val displayedInfoFlow: StateFlow<ActiveTabModel.DisplayedInfo> =
+        _locationLabelInfoFlow
 
     /** Tracks which tab is currently active. */
     private val activeTabFlow = MutableStateFlow<Tab?>(null)
@@ -91,12 +89,32 @@ class ActiveTabModelImpl(
     }
 
     private fun updateUrl(uri: Uri) {
+        val isNeevaHomepage = uri.toString() == NeevaConstants.appURL
         val isNeevaSearch = uri.toString().startsWith(NeevaConstants.appSearchURL)
         val query = if (isNeevaSearch) uri.getQueryParameter("q") else null
 
+        val mode = when {
+            // Show the query if the user is actively searching.
+            query != null -> ActiveTabModel.DisplayMode.QUERY
+
+            // If on the homepage or the user did an empty search, show placeholder text.
+            isNeevaSearch || isNeevaHomepage -> ActiveTabModel.DisplayMode.PLACEHOLDER
+
+            // Display the current URL.
+            else -> ActiveTabModel.DisplayMode.URL
+        }
+
+        val displayedText = when (mode) {
+            ActiveTabModel.DisplayMode.QUERY -> query
+            ActiveTabModel.DisplayMode.URL -> uri.host
+            else -> null
+        }
+
         _urlFlow.value = uri
-        _displayedText.value = query ?: uri.host ?: ""
-        _isShowingQuery.value = query != null
+        _locationLabelInfoFlow.value = ActiveTabModel.DisplayedInfo(
+            displayedText = displayedText ?: "",
+            mode = mode
+        )
     }
 
     private val selectedTabCallback: TabCallback = object : TabCallback() {

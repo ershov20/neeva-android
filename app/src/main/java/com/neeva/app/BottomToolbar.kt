@@ -4,12 +4,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material.BottomAppBar
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -136,7 +136,7 @@ fun BottomToolbar(
                 modifier = Modifier.weight(1.0f)
             ) {
                 val activeTabModel = LocalBrowserWrapper.current.activeTabModel
-                val spaceStoreHasUrl by activeTabModel.currentUrlInSpaceFlow.collectAsState()
+                val spaceStoreHasUrl by activeTabModel.isCurrentUrlInSpaceFlow.collectAsState()
                 Icon(
                     painter = painterResource(
                         if (spaceStoreHasUrl) {

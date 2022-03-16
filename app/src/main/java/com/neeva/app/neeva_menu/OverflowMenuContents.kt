@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,26 +73,27 @@ fun ColumnScope.OverflowMenuContents(
         }
 
         val isEnabled = !disabledMenuItems.contains(data.id)
-        val alpha = if (isEnabled) 1.0f else 0.25f
+        val alpha = getClickableAlpha(isEnabled)
 
         DropdownMenuItem(
-            enabled = isEnabled,
-            modifier = Modifier.alpha(alpha),
-            onClick = {
-                expandedMutator(false)
-                onMenuItem(data.id)
-            }
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            leadingIcon = {
                 NeevaMenuIcon(itemData = data)
+            },
+            text = {
                 Text(
                     modifier = Modifier.padding(horizontal = 8.dp),
                     text = stringResource(id = data.labelId),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+            },
+            enabled = isEnabled,
+            modifier = Modifier.alpha(alpha),
+            onClick = {
+                expandedMutator(false)
+                onMenuItem(data.id)
             }
-        }
+        )
     }
 }
 

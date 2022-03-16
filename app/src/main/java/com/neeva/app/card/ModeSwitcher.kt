@@ -54,7 +54,7 @@ fun ModeSwitcher(
     val currentBrowser by webLayerModel.currentBrowserFlow.collectAsState()
 
     // Keep track of what screen is currently being viewed by the user.
-    val selectedScreen: MutableState<SelectedScreen> = remember {
+    val selectedScreen: MutableState<SelectedScreen> = remember(currentBrowser) {
         mutableStateOf(
             if (currentBrowser.isIncognito) {
                 SelectedScreen.INCOGNITO_TABS
@@ -62,11 +62,6 @@ fun ModeSwitcher(
                 SelectedScreen.REGULAR_TABS
             }
         )
-    }
-    selectedScreen.value = if (currentBrowser.isIncognito) {
-        SelectedScreen.INCOGNITO_TABS
-    } else {
-        SelectedScreen.REGULAR_TABS
     }
 
     ModeSwitcher(
@@ -193,7 +188,7 @@ fun ModeSwitcher(
             )
 
             Icon(
-                painter = painterResource(R.drawable.ic_tabs),
+                painter = painterResource(R.drawable.ic_baseline_filter_none_24),
                 contentDescription = stringResource(R.string.tabs),
                 tint = regularIconColor,
                 modifier = Modifier

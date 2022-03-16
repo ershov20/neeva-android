@@ -3,7 +3,6 @@ package com.neeva.app.settings.sharedComposables.subcomponents
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +21,7 @@ import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
 fun SettingsToggleRow(
@@ -51,13 +51,7 @@ fun SettingsToggleRow(
                 disabledUncheckedTrackColor = MaterialTheme.colorScheme.onSurface,
             ),
             onCheckedChange = getTogglePreferenceSetter(togglePrefKey),
-            modifier = Modifier.size(48.dp).then(
-                if (!enabled) {
-                    modifier.alpha(ContentAlpha.disabled)
-                } else {
-                    modifier
-                }
-            )
+            modifier = Modifier.size(48.dp).alpha(getClickableAlpha(enabled))
         )
     }
 }

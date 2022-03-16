@@ -3,7 +3,6 @@ package com.neeva.app.settings.sharedComposables.subcomponents
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +17,7 @@ import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
 fun SettingsLabelRow(
@@ -54,13 +54,7 @@ fun SettingsLabelText(
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = textModifier.then(
-                if (!enabled) {
-                    textModifier.alpha(ContentAlpha.disabled)
-                } else {
-                    textModifier
-                }
-            )
+            modifier = textModifier.alpha(getClickableAlpha(enabled))
         )
         if (secondaryLabel != null) {
             Text(

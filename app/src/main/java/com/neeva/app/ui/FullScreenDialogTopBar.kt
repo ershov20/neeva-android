@@ -1,13 +1,14 @@
 package com.neeva.app.ui
 
-import androidx.compose.material.IconButton
-import androidx.compose.material.TextButton
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -24,7 +25,7 @@ fun FullScreenDialogTopBar(
     buttonTitle: String? = null,
     buttonPressed: (() -> Unit)? = null
 ) {
-    TopAppBar(
+    SmallTopAppBar(
         title = {
             Text(
                 text = title,
@@ -33,7 +34,7 @@ fun FullScreenDialogTopBar(
                 style = MaterialTheme.typography.titleLarge
             )
         },
-        backgroundColor = MaterialTheme.colorScheme.surface,
+        colors = TopAppBarDefaults.mediumTopAppBarColors(MaterialTheme.colorScheme.surface),
         navigationIcon = {
             IconButton(
                 onClick = { onBackPressed() }
