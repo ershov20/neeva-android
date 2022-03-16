@@ -42,7 +42,7 @@ class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
     }
 
     fun getTokenFromSharedPref(): String {
-        return sharedPreferencesModel.getString(SharedPrefFolder.USER, KEY_TOKEN, "")
+        return sharedPreferencesModel.getValue(SharedPrefFolder.USER, KEY_TOKEN, "")
     }
 
     fun setToken(token: String) {

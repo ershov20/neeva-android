@@ -3,7 +3,9 @@ package com.neeva.app.settings.sharedComposables
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -12,6 +14,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -19,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.settings.clearBrowsing.TimeClearingOption
 import com.neeva.app.ui.BooleanPreviewParameterProvider
@@ -27,29 +31,31 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun SettingsDialog(
     @StringRes textId: Int,
-    radioOptions: List<Int>? = null,
+    radioOptions: List<String>? = null,
+    selectedOptionIndex: MutableState<Int>,
+    saveSelectedOptionIndex: (Int) -> Unit = {},
     @StringRes confirmStringId: Int,
     confirmAction: (Int?) -> Unit,
     @StringRes dismissStringId: Int,
-    dismissAction: () -> Unit,
+    dismissAction: () -> Unit
 ) {
-    val selectedOption = rememberSaveable { mutableStateOf(radioOptions?.first()) }
     AlertDialog(
         onDismissRequest = dismissAction,
         text = {
             Column {
                 Text(text = stringResource(textId))
-                if (radioOptions != null && radioOptions.isNotEmpty()) {
-                    RadioButtonGroup(
-                        radioOptions,
-                        selectedOption.value,
-                        onSelect = { selectId -> { selectedOption.value = selectId } }
-                    )
-                }
+                RadioButtonGroup(
+                    radioOptions,
+                    selectedOptionIndex.value,
+                    onSelect = { index ->
+                        selectedOptionIndex.value = index
+                        saveSelectedOptionIndex(index)
+                    }
+                )
             }
         },
         confirmButton = {
-            TextButton(onClick = { confirmAction(selectedOption.value) }) {
+            TextButton(onClick = { confirmAction(selectedOptionIndex.value) }) {
                 Text(
                     text = stringResource(confirmStringId),
                     color = MaterialTheme.colorScheme.error
@@ -70,26 +76,29 @@ fun SettingsDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RadioButtonGroup(
-    radioOptions: List<Int>,
-    selectedOption: Int?,
-    onSelect: (Int) -> (() -> Unit)
+    radioOptions: List<String>?,
+    selectedOptionIndex: Int,
+    onSelect: (Int) -> Unit
 ) {
-    Column {
-        radioOptions.forEach { textId ->
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .selectable(
-                        selected = (textId == selectedOption),
-                        onClick = onSelect(textId)
+    if (radioOptions != null && radioOptions.isNotEmpty()) {
+        Column {
+            Spacer(Modifier.height(24.dp))
+            radioOptions.forEachIndexed { index, _ ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .selectable(
+                            selected = (index == selectedOptionIndex),
+                            onClick = { onSelect(index) }
+                        )
+                        .fillMaxWidth()
+                ) {
+                    RadioButton(
+                        selected = (index == selectedOptionIndex),
+                        onClick = { onSelect(index) }
                     )
-                    .fillMaxWidth()
-            ) {
-                RadioButton(
-                    selected = (textId == selectedOption),
-                    onClick = onSelect(textId)
-                )
-                Text(text = stringResource(id = textId))
+                    Text(text = radioOptions[index])
+                }
             }
         }
     }
@@ -116,14 +125,17 @@ class SettingsDialogPreviews :
         @PreviewParameter(SettingsDialogPreviews::class) params: Params
     ) {
         NeevaTheme(useDarkTheme = params.darkTheme) {
-            var radioOptions: List<Int>? = null
+            var radioOptions: List<String>? = null
             if (params.hasRadioOptions) {
-                radioOptions = TimeClearingOption.values().map { it.string_id }
+                radioOptions = TimeClearingOption.values().map { stringResource(it.string_id) }
             }
+
+            val selectedOption = rememberSaveable { mutableStateOf(0) }
 
             SettingsDialog(
                 textId = R.string.debug_long_string_primary,
                 radioOptions = radioOptions,
+                selectedOptionIndex = selectedOption,
                 confirmStringId = R.string.confirm,
                 confirmAction = { {} },
                 dismissStringId = R.string.cancel,

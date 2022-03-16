@@ -97,12 +97,12 @@
     <string name="settings_manage_neeva_memory">Manage Neeva Memory</string>
     <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
 
-    <string name="clear_browsing_dialog_text">This action will remove your private data in the given time frame. It cannot be undone.</string>
+    <string name="clear_browsing_dialog_text">The items you selected will be deleted. It cannot be undone.</string>
     <string name="clear_browsing_clear_data">Clear Data</string>
-    <string name="clear_browsing_last_hour">From the last hour</string>
-    <string name="clear_browsing_today">From the last 24 hours</string>
-    <string name="clear_browsing_today_and_yesterday">From the last 48 hours</string>
-    <string name="clear_browsing_everything">Clear all history</string>
+    <string name="clear_browsing_last_hour">Last hour</string>
+    <string name="clear_browsing_today">Last 24 hours</string>
+    <string name="clear_browsing_today_and_yesterday">Last 48 hours</string>
+    <string name="clear_browsing_everything">All time</string>
 
     <string name="space_contains_page">Space contains the current page</string>
     <string name="space_not_contain_page">Space doesn\'t contain the current page</string>

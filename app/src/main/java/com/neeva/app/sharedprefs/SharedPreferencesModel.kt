@@ -24,26 +24,28 @@ class SharedPreferencesModel(context: Context) {
             ),
         )
 
-    fun getString(folder: SharedPrefFolder, key: String, defaultValue: String): String {
-        return sharedPreferencesMap[folder]?.getString(key, defaultValue) ?: defaultValue
+    fun <T> getValue(folder: SharedPrefFolder, key: String, defaultValue: T): T {
+        val sharedPrefs = sharedPreferencesMap[folder]
+        val returnValue = when (defaultValue) {
+            is Boolean -> sharedPrefs?.getBoolean(key, defaultValue)
+            is String -> sharedPrefs?.getString(key, defaultValue)
+            is Int -> sharedPrefs?.getInt(key, defaultValue)
+            else -> defaultValue
+        }
+        return (returnValue as T) ?: defaultValue
     }
 
-    fun getBoolean(folder: SharedPrefFolder, key: String, defaultValue: Boolean): Boolean {
-        return sharedPreferencesMap[folder]?.getBoolean(key, defaultValue) ?: defaultValue
-    }
-
-    fun setValue(folder: SharedPrefFolder, key: String, value: Boolean) {
-        sharedPreferencesMap[folder]
-            ?.edit()
-            ?.putBoolean(key, value)
-            ?.commit()
-    }
-
-    fun setValue(folder: SharedPrefFolder, key: String, value: String) {
-        sharedPreferencesMap[folder]
-            ?.edit()
-            ?.putString(key, value)
-            ?.commit()
+    fun setValue(folder: SharedPrefFolder, key: String, value: Any) {
+        val editor = sharedPreferencesMap[folder]?.edit()
+        if (editor != null) {
+            val putLambda = when (value) {
+                is Boolean -> editor.putBoolean(key, value)
+                is String -> editor.putString(key, value)
+                is Int -> editor.putInt(key, value)
+                else -> null
+            }
+            putLambda?.commit()
+        }
     }
 
     fun removeValue(folder: SharedPrefFolder, key: String) {

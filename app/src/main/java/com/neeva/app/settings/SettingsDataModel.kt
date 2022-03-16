@@ -3,11 +3,12 @@ package com.neeva.app.settings
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.BuildConfig
+import com.neeva.app.settings.clearBrowsing.TimeClearingOptionsConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 
 /**
- * A data model for getting any SettingsToggle MutableState.
+ * A data model for getting any Settings-related state (SettingsToggle or SelectedTimeClearingOption).
  * Used to get toggle states in SettingsViewModel.
  * FEATURE FLAGGING: used in any @Composable or anywhere else to get if a Feature Flag is enabled.
  *
@@ -20,17 +21,22 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     private val toggleMap = mutableMapOf<String, MutableState<Boolean>>()
     val isDebugMode = BuildConfig.DEBUG
+    val selectedTimeClearingOption = mutableStateOf(
+        getSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, 0)
+    )
 
     init {
         SettingsToggle.values().forEach {
-            toggleMap[it.key] = mutableStateOf(getSharedPrefValue(it.key, it.defaultValue))
+            toggleMap[it.key] = mutableStateOf(getToggleSharedPrefValue(it.key, it.defaultValue))
         }
         LocalDebugFlags.values().forEach {
-            toggleMap[it.key] = mutableStateOf(getSharedPrefValue(it.key, it.defaultValue, true))
+            toggleMap[it.key] = mutableStateOf(
+                getToggleSharedPrefValue(it.key, it.defaultValue, true)
+            )
         }
     }
 
-    private fun getSharedPrefValue(
+    private fun getToggleSharedPrefValue(
         key: String,
         default: Boolean,
         isDebugFlag: Boolean = false
@@ -38,10 +44,14 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         if (isDebugFlag && !isDebugMode) {
             return false
         }
-        return sharedPreferencesModel.getBoolean(SharedPrefFolder.SETTINGS, key, default)
+        return sharedPreferencesModel.getValue(SharedPrefFolder.SETTINGS, key, default)
     }
 
-    private fun setSharedPrefValue(key: String, newValue: Boolean) {
+    private fun <T> getSharedPrefValue(key: String, defaultValue: T): T {
+        return sharedPreferencesModel.getValue(SharedPrefFolder.SETTINGS, key, defaultValue)
+    }
+
+    private fun setSharedPrefValue(key: String, newValue: Any) {
         sharedPreferencesModel.setValue(SharedPrefFolder.SETTINGS, key, newValue)
     }
 
@@ -55,5 +65,13 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
 
     fun getToggleState(toggleKeyName: String?): MutableState<Boolean>? {
         return toggleKeyName?.let { toggleMap[toggleKeyName] }
+    }
+
+    fun getTimeClearingOption(): MutableState<Int> {
+        return selectedTimeClearingOption
+    }
+
+    fun saveSelectedTimeClearingOption(index: Int) {
+        setSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, index)
     }
 }

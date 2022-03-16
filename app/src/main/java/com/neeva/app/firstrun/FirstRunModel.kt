@@ -58,7 +58,7 @@ class FirstRunModel @Inject constructor(
     fun shouldShowFirstRun(): Boolean {
         return neevaUserToken.getToken().isEmpty() &&
             !sharedPreferencesModel
-                .getBoolean(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, false)
+                .getValue(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, false)
     }
 
     fun firstRunDone() {
@@ -66,7 +66,7 @@ class FirstRunModel @Inject constructor(
     }
 
     fun shouldLogFirstLogin(): Boolean {
-        return sharedPreferencesModel.getBoolean(
+        return sharedPreferencesModel.getValue(
             SharedPrefFolder.FIRST_RUN, SHOULD_LOG_FIRST_LOGIN_KEY, false
         )
     }

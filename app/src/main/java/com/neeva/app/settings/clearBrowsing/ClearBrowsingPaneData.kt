@@ -74,3 +74,7 @@ enum class TimeClearingOption(@StringRes val string_id: Int) {
     TODAY_AND_YESTERDAY(R.string.clear_browsing_today_and_yesterday),
     EVERYTHING(R.string.clear_browsing_everything)
 }
+
+object TimeClearingOptionsConstants {
+    val sharedPrefKey = "CLEAR_BROWSING_TIME_CLEARING_OPTION"
+}

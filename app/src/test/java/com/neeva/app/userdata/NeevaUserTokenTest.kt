@@ -26,7 +26,7 @@ class NeevaUserTokenTest : BaseTest() {
     @Test
     fun getToken_resultIsEmpty_returnsEmpty() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
-            on { getString(any(), eq(NeevaUserToken.KEY_TOKEN), eq("")) } doReturn ""
+            on { getValue(any(), eq(NeevaUserToken.KEY_TOKEN), eq("")) } doReturn ""
         }
         val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
         val result = neevaUserToken.getToken()
@@ -36,7 +36,9 @@ class NeevaUserTokenTest : BaseTest() {
     @Test
     fun getToken_stringIsSet_returnsString() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
-            on { getString(any(), eq(NeevaUserToken.KEY_TOKEN), any()) } doReturn "whatever"
+            on {
+                getValue(any(), eq(NeevaUserToken.KEY_TOKEN), any() as String)
+            } doReturn "whatever"
         }
 
         val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
@@ -47,7 +49,9 @@ class NeevaUserTokenTest : BaseTest() {
     @Test
     fun loginCookieString() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
-            on { getString(any(), eq(NeevaUserToken.KEY_TOKEN), any()) } doReturn "whatever"
+            on {
+                getValue(any(), eq(NeevaUserToken.KEY_TOKEN), any() as String)
+            } doReturn "whatever"
         }
 
         val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
