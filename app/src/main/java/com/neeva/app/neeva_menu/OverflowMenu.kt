@@ -45,9 +45,7 @@ fun OverflowMenu(
     val browserWrapper = LocalBrowserWrapper.current
     val activeTabModelState by browserWrapper.activeTabModel.navigationInfoFlow.collectAsState()
 
-    val disabledMenuItems = mutableListOf(
-        NeevaMenuItemId.DOWNLOADS
-    )
+    val disabledMenuItems = mutableListOf<NeevaMenuItemId>()
 
     if (!activeTabModelState.canGoForward) {
         disabledMenuItems.add(NeevaMenuItemId.FORWARD)

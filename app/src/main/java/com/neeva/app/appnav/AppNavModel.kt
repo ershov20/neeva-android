@@ -1,5 +1,6 @@
 package com.neeva.app.appnav
 
+import android.app.DownloadManager
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
@@ -193,6 +194,10 @@ class AppNavModel(
 
             NeevaMenuItemId.UPDATE -> {
                 openUrlViaIntent(NeevaConstants.playStoreUri)
+            }
+
+            NeevaMenuItemId.DOWNLOADS -> {
+                safeStartActivityForIntent(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
             }
 
             else -> {
