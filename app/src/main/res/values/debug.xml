@@ -11,4 +11,5 @@
     <string name="settings_debug_flags" translatable="false">Flags</string>
 
     <string name="settings_debug_bottom_url_bar" translatable="false">Bottom URL Bar</string>
+    <string name="settings_debug_enable_incognito_screenshots" translatable="false">Enable screenshots while in Incognito</string>
 </resources>

@@ -16,7 +16,7 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
         SettingsRowData(
             type = SettingsRowType.TOGGLE,
             titleId = it.flagDisplayName_stringId,
-            togglePreferenceKey = LocalDebugFlags.DEBUG_BOTTOM_URL_BAR.key
+            togglePreferenceKey = it.key
         )
     }
     override val data = listOf(

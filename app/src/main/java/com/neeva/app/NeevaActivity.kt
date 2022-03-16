@@ -40,6 +40,8 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.neeva_menu.LocalMenuData
 import com.neeva.app.neeva_menu.LocalMenuDataState
+import com.neeva.app.settings.LocalDebugFlags
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
@@ -64,10 +66,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     @Inject lateinit var apolloWrapper: ApolloWrapper
-    @Inject lateinit var spaceStore: SpaceStore
-    @Inject lateinit var neevaUser: NeevaUser
-    @Inject lateinit var snackbarModel: SnackbarModel
     @Inject lateinit var dispatchers: Dispatchers
+    @Inject lateinit var neevaUser: NeevaUser
+    @Inject lateinit var settingsDataModel: SettingsDataModel
+    @Inject lateinit var snackbarModel: SnackbarModel
+    @Inject lateinit var spaceStore: SpaceStore
 
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var localEnvironmentState: LocalEnvironmentState
@@ -163,7 +166,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
 
         lifecycleScope.launchWhenResumed {
-            spaceStore.refresh()
+            withContext(dispatchers.io) {
+                spaceStore.refresh()
+            }
         }
 
         if (savedInstanceState != null && webLayerModel.currentBrowser.isFullscreen()) {
@@ -249,7 +254,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         // Hide the contents of the screen from Android Recents when the user switches to another
         // app while looking at an Incognito tab.
-        if (browserWrapper.isIncognito) {
+        val enableIncognitoScreenshots = settingsDataModel
+            .getToggleState(LocalDebugFlags.DEBUG_ENABLE_INCOGNITO_SCREENSHOTS.key)?.value ?: false
+        if (browserWrapper.isIncognito && !enableIncognitoScreenshots) {
             window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         } else {
             window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)

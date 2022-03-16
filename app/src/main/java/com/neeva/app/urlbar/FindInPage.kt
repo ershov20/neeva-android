@@ -2,12 +2,12 @@ package com.neeva.app.urlbar
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -16,10 +16,13 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -41,77 +44,84 @@ fun FindInPageToolbar(
     val dismissLambda = {
         onUpdateQuery(null)
     }
+    BackHandler(onBack = dismissLambda)
+
     val findInPageText = findInPageInfo.text ?: ""
 
-    TopAppBar(
-        backgroundColor = MaterialTheme.colorScheme.background
-    ) {
-        TextField(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .focusRequester(focusRequester),
-            value = findInPageText,
-            onValueChange = { onUpdateQuery(it) },
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge,
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Go
-            ),
-            keyboardActions = KeyboardActions(
-                onGo = { }
-            ),
-            colors = TextFieldDefaults.textFieldColors(
-                textColor = MaterialTheme.colorScheme.onBackground,
-                backgroundColor = Color.Transparent,
-                cursorColor = MaterialTheme.colorScheme.onBackground,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent
-            ),
-            leadingIcon = {
-                Icon(
-                    Icons.Default.Search,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground
+    SmallTopAppBar(
+        colors = TopAppBarDefaults.smallTopAppBarColors(MaterialTheme.colorScheme.background),
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                TextField(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .focusRequester(focusRequester),
+                    value = findInPageText,
+                    onValueChange = { onUpdateQuery(it) },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.bodyLarge,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Go
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onGo = { }
+                    ),
+                    colors = TextFieldDefaults.textFieldColors(
+                        textColor = MaterialTheme.colorScheme.onBackground,
+                        backgroundColor = Color.Transparent,
+                        cursorColor = MaterialTheme.colorScheme.onBackground,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    leadingIcon = {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                )
+                val currentIndex =
+                    if (findInPageText.isEmpty()) 0 else findInPageInfo.activeMatchIndex + 1
+                Text(
+                    text = stringResource(
+                        id = R.string.find_in_page_index,
+                        currentIndex,
+                        findInPageInfo.numberOfMatches
+                    ),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
-        )
-        val currentIndex = if (findInPageText.isEmpty()) 0 else findInPageInfo.activeMatchIndex + 1
-        Text(
-            text = stringResource(
-                id = R.string.find_in_page_index, currentIndex, findInPageInfo.numberOfMatches
-            ),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        IconButton(onClick = { onScrollToResult(false) }) {
-            Icon(
-                Icons.Default.KeyboardArrowUp,
-                contentDescription = stringResource(id = R.string.previous),
-                tint = MaterialTheme.colorScheme.onBackground
-            )
+        },
+        actions = {
+            IconButton(onClick = { onScrollToResult(false) }) {
+                Icon(
+                    Icons.Default.KeyboardArrowUp,
+                    contentDescription = stringResource(id = R.string.previous)
+                )
+            }
+            IconButton(onClick = { onScrollToResult(true) }) {
+                Icon(
+                    Icons.Default.KeyboardArrowDown,
+                    contentDescription = stringResource(id = R.string.next)
+                )
+            }
+            IconButton(onClick = dismissLambda) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = stringResource(id = R.string.close)
+                )
+            }
         }
-        IconButton(onClick = { onScrollToResult(true) }) {
-            Icon(
-                Icons.Default.KeyboardArrowDown,
-                contentDescription = stringResource(id = R.string.next),
-                tint = MaterialTheme.colorScheme.onBackground
-            )
-        }
-        IconButton(onClick = dismissLambda) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = stringResource(id = R.string.close),
-                tint = MaterialTheme.colorScheme.onBackground
-            )
-        }
+    )
 
-        BackHandler(onBack = dismissLambda)
-
-        // Focuses the TextField when the FindInPageUI appears
-        LaunchedEffect(true) {
-            focusRequester.requestFocus()
-        }
+    // Focuses the TextField when the FindInPageUI appears
+    LaunchedEffect(true) {
+        focusRequester.requestFocus()
     }
 }
 

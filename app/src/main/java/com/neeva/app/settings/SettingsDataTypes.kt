@@ -62,9 +62,11 @@ enum class SettingsToggle(
 }
 
 enum class LocalDebugFlags(
-    val key: String,
     @StringRes val flagDisplayName_stringId: Int,
     val defaultValue: Boolean
 ) {
-    DEBUG_BOTTOM_URL_BAR("DEBUG_BOTTOM_URL_BAR", R.string.settings_debug_bottom_url_bar, false)
+    DEBUG_BOTTOM_URL_BAR(R.string.settings_debug_bottom_url_bar, false),
+    DEBUG_ENABLE_INCOGNITO_SCREENSHOTS(R.string.settings_debug_enable_incognito_screenshots, false);
+
+    val key: String = name
 }

@@ -1,8 +1,11 @@
 package com.neeva.app.card
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.BottomAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
@@ -11,21 +14,23 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
 fun TabGridBottomBar(
@@ -53,57 +58,58 @@ fun TabGridBottomBar(
     onOpenLazyTab: () -> Unit,
     onDone: () -> Unit
 ) {
-    BottomAppBar(
-        backgroundColor = MaterialTheme.colorScheme.background,
-        contentColor = MaterialTheme.colorScheme.onBackground
+    Surface(
+        shadowElevation = 2.dp,
+        color = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(id = R.dimen.bottom_toolbar_height))
     ) {
-        Box(modifier = Modifier.weight(1f)) {
-            IconButton(
-                enabled = isDeleteEnabled,
-                onClick = onCloseAllTabs,
-                modifier = Modifier.align(Alignment.CenterStart)
-            ) {
-                val deleteButtonAlpha = getClickableAlpha(isDeleteEnabled)
-                Icon(
-                    Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.close_all_content_description),
-                    tint = LocalContentColor.current.copy(
-                        alpha = deleteButtonAlpha
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                IconButton(
+                    enabled = isDeleteEnabled,
+                    onClick = onCloseAllTabs,
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.close_all_content_description)
                     )
-                )
+                }
             }
-        }
 
-        Box(modifier = Modifier.weight(1f)) {
-            IconButton(
-                onClick = onOpenLazyTab,
-                modifier = Modifier.align(Alignment.Center)
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = stringResource(R.string.new_tab_content_description),
-                    tint = LocalContentColor.current
-                )
-            }
-        }
-
-        Box(modifier = Modifier.weight(1f)) {
-            val closeButtonAlpha = getClickableAlpha(isCloseButtonEnabled)
-            TextButton(
-                onClick = onDone,
-                enabled = isCloseButtonEnabled,
-                colors = ButtonDefaults.textButtonColors(
-                    contentColor = LocalContentColor.current.copy(
-                        alpha = closeButtonAlpha
+            Box(modifier = Modifier.weight(1f)) {
+                IconButton(
+                    onClick = onOpenLazyTab,
+                    modifier = Modifier.align(Alignment.Center)
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = stringResource(R.string.new_tab_content_description)
                     )
-                ),
-                modifier = Modifier.align(Alignment.CenterEnd)
-            ) {
-                Text(
-                    modifier = Modifier.padding(Dimensions.PADDING_SMALL),
-                    text = stringResource(id = R.string.done),
-                    style = MaterialTheme.typography.titleMedium
-                )
+                }
+            }
+
+            Box(modifier = Modifier.weight(1f)) {
+                TextButton(
+                    onClick = onDone,
+                    enabled = isCloseButtonEnabled,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = LocalContentColor.current
+                    ),
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Text(
+                        modifier = Modifier.padding(Dimensions.PADDING_SMALL),
+                        text = stringResource(id = R.string.done),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
         }
     }
