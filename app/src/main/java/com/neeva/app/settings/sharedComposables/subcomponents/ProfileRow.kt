@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -57,7 +59,13 @@ fun ProfileRow(
             )
             .then(modifier)
     ) {
-        ProfileImage(pictureURI = pictureURI, modifier = Modifier.size(32.dp).clip(CircleShape))
+        ProfileImage(
+            displayName = primaryLabel,
+            pictureURI = pictureURI,
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+        )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             if (primaryLabel != null) {
@@ -94,7 +102,7 @@ fun ProfileRow(
 }
 
 @Composable
-private fun ProfileImage(pictureURI: Uri?, modifier: Modifier) {
+private fun ProfileImage(displayName: String?, pictureURI: Uri?, modifier: Modifier) {
     if (pictureURI != null) {
         Image(
             painter = rememberImagePainter(
@@ -105,23 +113,38 @@ private fun ProfileImage(pictureURI: Uri?, modifier: Modifier) {
             modifier = modifier
         )
     } else {
-        Icon(
-            Icons.Rounded.AccountCircle,
-            contentDescription = null,
-            modifier = modifier,
-            tint = MaterialTheme.colorScheme.onSurface,
-        )
+        if (displayName == null || displayName.isEmpty()) {
+            Icon(
+                Icons.Rounded.AccountCircle,
+                contentDescription = null,
+                modifier = modifier,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+        } else {
+            Box(
+                modifier
+                    .background(MaterialTheme.colorScheme.primary)
+            ) {
+                Text(
+                    text = displayName[0].uppercase(),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
     }
 }
 
 class ProfileRowPreviews :
-    BooleanPreviewParameterProvider<ProfileRowPreviews.Params>(3) {
+    BooleanPreviewParameterProvider<ProfileRowPreviews.Params>(6) {
     data class Params(
         val darkTheme: Boolean,
         val isSignedIn: Boolean,
         val showSSOProviderAsPrimaryLabel: Boolean,
         val invalidProfileUrl: Boolean,
-        val navigatable: Boolean
+        val navigatable: Boolean,
+        val hasDisplayName: Boolean
     )
 
     override fun createParams(booleanArray: BooleanArray) = Params(
@@ -129,7 +152,8 @@ class ProfileRowPreviews :
         isSignedIn = booleanArray[1],
         showSSOProviderAsPrimaryLabel = booleanArray[2],
         invalidProfileUrl = booleanArray[3],
-        navigatable = booleanArray[4]
+        navigatable = booleanArray[4],
+        hasDisplayName = booleanArray[5]
     )
 
     @Preview("ProfileRowPreviews 1x", locale = "en")
@@ -140,13 +164,19 @@ class ProfileRowPreviews :
     fun DefaultPreview(
         @PreviewParameter(ProfileRowPreviews::class) params: Params
     ) {
-        var pictureURI: Uri? = if (!params.invalidProfileUrl) {
+        val pictureURI: Uri? = if (!params.invalidProfileUrl) {
             Uri.parse("")
         } else {
             null
         }
 
-        var onClick: (() -> Unit)? = if (params.navigatable) {
+        val displayName: String? = if (params.hasDisplayName) {
+            "Jehan Kobe Chang"
+        } else {
+            null
+        }
+
+        val onClick: (() -> Unit)? = if (params.navigatable) {
             {}
         } else {
             null
@@ -176,7 +206,7 @@ class ProfileRowPreviews :
                         )
                     } else {
                         ProfileRow(
-                            primaryLabel = "Jehan Kobe Chang",
+                            primaryLabel = displayName,
                             secondaryLabel = "kobec@neeva.co",
                             pictureURI = pictureURI,
                             onClick = onClick,
