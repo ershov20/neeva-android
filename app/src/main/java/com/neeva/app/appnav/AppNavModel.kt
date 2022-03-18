@@ -21,12 +21,14 @@ import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.ui.SnackbarModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 /** Triggers navigations to various screens in the app. */
 class AppNavModel(
@@ -106,7 +108,8 @@ class AppNavModel(
         webLayerModel.currentBrowser.loadUrl(
             uri = url,
             inNewTab = true,
-            onLoadStarted = this::showBrowser
+            onLoadStarted = this::showBrowser,
+            stayInApp = true
         )
     }
 
@@ -203,6 +206,58 @@ class AppNavModel(
             else -> {
                 // Unimplemented screens.
             }
+        }
+    }
+
+    fun debugOpenManyTabs(numTabs: Int = 50) {
+        coroutineScope.launch {
+            val possibleUrls = listOf(
+                "https://en.wikipedia.org",
+                "https://youtube.com",
+                "https://amazon.com",
+                "https://facebook.com",
+                "https://twitter.com",
+                "https://fandom.com",
+                "https://pinterest.com",
+                "https://imdb.com",
+                "https://reddit.com",
+                "https://yelp.com",
+                "https://instagram.com",
+                "https://ebay.com",
+                "https://walmart.com",
+                "https://craigslist.org",
+                "https://healthline.com",
+                "https://tripadvisor.com",
+                "https://linkedin.com",
+                "https://webmd.com",
+                "https://netflix.com",
+                "https://apple.com",
+                "https://homedepot.com",
+                "https://mail.yahoo.com",
+                "https://cnn.com",
+                "https://etsy.com",
+                "https://google.com",
+                "https://yahoo.com",
+                "https://indeed.com",
+                "https://target.com",
+                "https://microsoft.com",
+                "https://nytimes.com",
+                "https://mayoclinic.org",
+                "https://espn.com",
+                "https://usps.com",
+                "https://quizlet.com",
+                "https://gamepedia.com",
+                "https://lowes.com",
+                "https://irs.gov",
+                "https://nih.gov",
+                "https://merriam-webster.com",
+                "https://steampowered.com"
+            )
+            for (i in 0 until numTabs) {
+                openUrl(Uri.parse(possibleUrls[i % possibleUrls.size]))
+                delay(250)
+            }
+            snackbarModel.show("Opened $numTabs tabs")
         }
     }
 

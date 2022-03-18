@@ -2,11 +2,11 @@ package com.neeva.app.storage
 
 import android.content.Context
 import android.graphics.Bitmap
-import androidx.core.graphics.get
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import java.io.File
 import org.chromium.weblayer.CaptureScreenShotCallback
+import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,6 +17,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -27,12 +28,17 @@ import strikt.assertions.isTrue
 class RegularTabScreenshotManagerTest : BaseTest() {
     private lateinit var filesDir: File
     private lateinit var tabScreenshotManager: TabScreenshotManager
+    private lateinit var navigationController: NavigationController
 
     override fun setUp() {
         super.setUp()
 
         val context: Context = ApplicationProvider.getApplicationContext()
         filesDir = context.filesDir
+
+        navigationController = mock {
+            on { getNavigationListSize() } doReturn 1
+        }
 
         tabScreenshotManager = RegularTabScreenshotManager(filesDir)
     }
@@ -47,6 +53,7 @@ class RegularTabScreenshotManagerTest : BaseTest() {
         val tab: Tab = mock {
             on { isDestroyed } doReturn false
             on { guid } doReturn "uuid"
+            on { getNavigationController() } doReturn navigationController
         }
         val onCompleted: () -> Unit = mock()
         val captureCallbackCaptor = argumentCaptor<CaptureScreenShotCallback>()
@@ -78,6 +85,7 @@ class RegularTabScreenshotManagerTest : BaseTest() {
         val tab: Tab = mock {
             on { isDestroyed } doReturn false
             on { guid } doReturn "uuid"
+            on { getNavigationController() } doReturn navigationController
         }
         val onCompleted: () -> Unit = mock()
         val captureCallbackCaptor = argumentCaptor<CaptureScreenShotCallback>()
@@ -95,6 +103,7 @@ class RegularTabScreenshotManagerTest : BaseTest() {
         val tab: Tab = mock {
             on { isDestroyed } doReturn false
             on { guid } doReturn "uuid"
+            on { getNavigationController() } doReturn navigationController
         }
         val onCompleted: () -> Unit = mock()
         val captureCallbackCaptor = argumentCaptor<CaptureScreenShotCallback>()
@@ -108,10 +117,34 @@ class RegularTabScreenshotManagerTest : BaseTest() {
     }
 
     @Test
+    fun captureAndSaveScreenshot_withNoNavigations_stillFiresOnCompletedLambda() {
+        whenever(navigationController.getNavigationListSize()).thenReturn(0)
+        val tab: Tab = mock {
+            on { isDestroyed } doReturn false
+            on { guid } doReturn "uuid"
+            on { getNavigationController() } doReturn navigationController
+        }
+        val onCompleted: () -> Unit = mock()
+        val captureCallbackCaptor = argumentCaptor<CaptureScreenShotCallback>()
+
+        // Because the tab has no navigations, it shouldn't fire the capture callback.  It should,
+        // however, still try to fire the onCompleted callback.
+        tabScreenshotManager.captureAndSaveScreenshot(tab, onCompleted)
+        verify(tab, never()).captureScreenShot(any(), captureCallbackCaptor.capture())
+        verify(onCompleted, times(1)).invoke()
+
+        // Because we pass in null, it shouldn't fire the capture callback.
+        tabScreenshotManager.captureAndSaveScreenshot(null, onCompleted)
+        verify(tab, never()).captureScreenShot(any(), captureCallbackCaptor.capture())
+        verify(onCompleted, times(2)).invoke()
+    }
+
+    @Test
     fun captureAndSaveScreenshot_withUnusableTab_stillFiresOnCompletedLambda() {
         val tab: Tab = mock {
             on { isDestroyed } doReturn true
             on { guid } doReturn "uuid"
+            on { getNavigationController() } doReturn navigationController
         }
         val onCompleted: () -> Unit = mock()
         val captureCallbackCaptor = argumentCaptor<CaptureScreenShotCallback>()
@@ -134,14 +167,17 @@ class RegularTabScreenshotManagerTest : BaseTest() {
             mock {
                 on { isDestroyed } doReturn false
                 on { guid } doReturn "tab 1"
+                on { getNavigationController() } doReturn navigationController
             },
             mock {
                 on { isDestroyed } doReturn false
                 on { guid } doReturn "tab 2"
+                on { getNavigationController() } doReturn navigationController
             },
             mock {
                 on { isDestroyed } doReturn false
                 on { guid } doReturn "tab 3"
+                on { getNavigationController() } doReturn navigationController
             }
         )
         val onCompleted: () -> Unit = mock()
@@ -185,14 +221,17 @@ class RegularTabScreenshotManagerTest : BaseTest() {
             mock {
                 on { isDestroyed } doReturn false
                 on { guid } doReturn "tab 1"
+                on { getNavigationController() } doReturn navigationController
             },
             mock {
                 on { isDestroyed } doReturn false
                 on { guid } doReturn "tab 2"
+                on { getNavigationController() } doReturn navigationController
             },
             mock {
                 on { isDestroyed } doReturn false
                 on { guid } doReturn "tab 3"
+                on { getNavigationController() } doReturn navigationController
             }
         )
         val onCompleted: () -> Unit = mock()

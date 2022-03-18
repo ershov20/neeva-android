@@ -10,6 +10,7 @@ import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -33,7 +34,7 @@ abstract class TabScreenshotManager(filesDir: File) {
 
     /** Takes a screenshot of the given [tab]. */
     fun captureAndSaveScreenshot(tab: Tab?, onCompleted: () -> Unit = {}) {
-        if (tab == null || tab.isDestroyed) {
+        if (tab == null || tab.isDestroyed || tab.navigationController.navigationListSize == 0) {
             onCompleted()
             return
         }
@@ -42,7 +43,7 @@ abstract class TabScreenshotManager(filesDir: File) {
 
         tab.captureScreenShot(0.5f) { thumbnail, errorCode ->
             if (errorCode != 0) {
-                Log.e(TAG, "Failed to create tab thumbnail: Error=$errorCode")
+                Log.w(TAG, "Failed to create tab thumbnail: Error=$errorCode")
                 onCompleted()
                 return@captureScreenShot
             }
@@ -107,6 +108,9 @@ abstract class TabScreenshotManager(filesDir: File) {
             fileStream = getInputStream(file)
             bufferedStream = BufferedInputStream(fileStream)
             BitmapFactory.decodeStream(bufferedStream)
+        } catch (e: FileNotFoundException) {
+            Log.d(TAG, "Could not find file: ${e.message}")
+            null
         } catch (e: Exception) {
             Log.e(TAG, "Failed to restore bitmap", e)
             null

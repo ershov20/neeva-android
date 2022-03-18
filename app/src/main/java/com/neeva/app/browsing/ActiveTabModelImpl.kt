@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
-import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.Navigation
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.Tab
@@ -82,10 +81,8 @@ class ActiveTabModelImpl(
     }
 
     /** Don't call this directly.  Instead, use [BrowserWrapper.loadUrl]. */
-    internal fun loadUrlInActiveTab(uri: Uri) {
-        // Disable intent processing for urls typed in. Allows the user to navigate to app urls.
-        val navigateParamsBuilder = NavigateParams.Builder().disableIntentProcessing()
-        activeTab?.navigationController?.navigate(uri, navigateParamsBuilder.build())
+    internal fun loadUrlInActiveTab(uri: Uri, stayInApp: Boolean = true) {
+        activeTab?.navigate(uri, stayInApp)
     }
 
     private fun updateUrl(uri: Uri) {

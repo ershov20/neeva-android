@@ -18,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -26,6 +28,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.ui.ConfirmationAlertDialog
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -38,13 +41,31 @@ fun TabGridBottomBar(
     val currentBrowser = currentBrowserState.value
 
     val hasNoTabs = currentBrowser.hasNoTabsFlow().collectAsState(false)
+    val showCloseAllTabsDialog = remember { mutableStateOf(false) }
     TabGridBottomBar(
         isDeleteEnabled = !hasNoTabs.value,
         isCloseButtonEnabled = !hasNoTabs.value,
-        onCloseAllTabs = { cardGridModel.closeAllTabs(currentBrowser) },
+        onCloseAllTabs = { showCloseAllTabsDialog.value = true },
         onOpenLazyTab = { cardGridModel.openLazyTab(currentBrowser) },
         onDone = cardGridModel::showBrowser
     )
+
+    if (showCloseAllTabsDialog.value) {
+        val dismissLambda = { showCloseAllTabsDialog.value = false }
+        val titleId = if (currentBrowser.isIncognito) {
+            R.string.close_all_incognito_tabs
+        } else {
+            R.string.close_all_regular_tabs
+        }
+        ConfirmationAlertDialog(
+            title = stringResource(titleId),
+            onDismiss = dismissLambda,
+            onConfirm = {
+                cardGridModel.closeAllTabs(currentBrowser)
+                dismissLambda()
+            }
+        )
+    }
 }
 
 @Composable

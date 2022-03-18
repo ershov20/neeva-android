@@ -23,6 +23,15 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
         SettingsGroupData(
             R.string.settings_debug_flags,
             allFeatureFlags
+        ),
+        SettingsGroupData(
+            R.string.settings_debug_actions,
+            listOf(
+                SettingsRowData(
+                    type = SettingsRowType.BUTTON,
+                    titleId = R.string.settings_debug_open_50_tabs
+                )
+            )
         )
     )
 }

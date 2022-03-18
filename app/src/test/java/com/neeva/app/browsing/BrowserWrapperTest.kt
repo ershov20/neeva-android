@@ -27,6 +27,7 @@ import org.chromium.weblayer.BrowserFragment
 import org.chromium.weblayer.BrowserRestoreCallback
 import org.chromium.weblayer.CookieManager
 import org.chromium.weblayer.FaviconFetcher
+import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
@@ -199,8 +200,15 @@ class BrowserWrapperTest : BaseTest() {
         restoreCallbackCaptor.lastValue.onRestoreCompleted()
         coroutineScopeRule.scope.advanceUntilIdle()
 
+        val urlCaptor = argumentCaptor<Uri>()
+        val navigateParamsCaptor = argumentCaptor<NavigateParams>()
         verify(browser, times(1)).createTab()
-        verify(mockTabs.last().navigationController).navigate(eq(Uri.parse(NeevaConstants.appURL)))
+        verify(mockTabs.last().navigationController).navigate(
+            urlCaptor.capture(),
+            navigateParamsCaptor.capture()
+        )
+        expectThat(urlCaptor.lastValue).isEqualTo(Uri.parse(NeevaConstants.appURL))
+        expectThat(navigateParamsCaptor.lastValue.isIntentProcessingDisabled).isEqualTo(true)
     }
 
     @Test
@@ -227,8 +235,8 @@ class BrowserWrapperTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore)
-        verify(activeTabModel, never()).loadUrlInActiveTab(eq(expectedUri))
-        verify(activeTabModel).loadUrlInActiveTab(eq(redirectUri))
+        verify(activeTabModel, never()).loadUrlInActiveTab(eq(expectedUri), any())
+        verify(activeTabModel).loadUrlInActiveTab(eq(redirectUri), eq(true))
         verify(browser, times(1)).createTab()
     }
 
@@ -273,8 +281,9 @@ class BrowserWrapperTest : BaseTest() {
         )
         coroutineScopeRule.scope.advanceUntilIdle()
 
-        verify(activeTabModel, never()).loadUrlInActiveTab(eq(Uri.parse(NeevaConstants.appURL)))
-        verify(activeTabModel, never()).loadUrlInActiveTab(eq(expectedUri))
+        verify(activeTabModel, never())
+            .loadUrlInActiveTab(eq(Uri.parse(NeevaConstants.appURL)), any())
+        verify(activeTabModel, never()).loadUrlInActiveTab(eq(expectedUri), any())
 
         // Finish browser restoration.  It should have allowed the blocked URL to load and create
         // a new tab.
@@ -284,8 +293,9 @@ class BrowserWrapperTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         verify(browser, times(2)).createTab()
-        verify(mockTabs.first().navigationController).navigate(eq(Uri.parse(NeevaConstants.appURL)))
-        verify(mockTabs.last().navigationController).navigate(eq(expectedUri))
+        verify(mockTabs.first().navigationController)
+            .navigate(eq(Uri.parse(NeevaConstants.appURL)), any())
+        verify(mockTabs.last().navigationController).navigate(eq(expectedUri), any())
         expectThat(browserWrapper.orderedTabList.value).hasSize(2)
     }
 
@@ -317,7 +327,7 @@ class BrowserWrapperTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore)
-        verify(activeTabModel).loadUrlInActiveTab(eq(expectedUri))
+        verify(activeTabModel).loadUrlInActiveTab(eq(expectedUri), any())
         verify(browser, times(1)).createTab()
     }
 
@@ -349,12 +359,18 @@ class BrowserWrapperTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // The Browser should have been asked to create a new tab.
-        verify(activeTabModel, never()).loadUrlInActiveTab(any())
+        verify(activeTabModel, never()).loadUrlInActiveTab(any(), any())
         verify(browser, times(2)).createTab()
 
         val tab: Tab = mockTabs.last()
         expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore + 1)
-        verify(tab.navigationController).navigate(eq(expectedUri))
+        val urlCaptor = argumentCaptor<Uri>()
+        val navigateParamsCaptor = argumentCaptor<NavigateParams>()
+        verify(tab.navigationController).navigate(
+            urlCaptor.capture(),
+            navigateParamsCaptor.capture()
+        )
+        expectThat(urlCaptor.lastValue).isEqualTo(expectedUri)
 
         // Check that the tab's properties were saved.
         val tabInfoList = browserWrapper.orderedTabList.value.filter { it.id == tab.guid }
@@ -385,11 +401,18 @@ class BrowserWrapperTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // The Browser should have been asked to create a new tab and then navigate to the URL.
-        verify(activeTabModel, never()).loadUrlInActiveTab(any())
+        verify(activeTabModel, never()).loadUrlInActiveTab(any(), any())
         verify(browser, times(2)).createTab()
 
         val tab: Tab = mockTabs.last()
-        verify(tab.navigationController).navigate(eq(expectedUri))
+
+        val urlCaptor = argumentCaptor<Uri>()
+        val navigateParamsCaptor = argumentCaptor<NavigateParams>()
+        verify(tab.navigationController).navigate(
+            urlCaptor.capture(),
+            navigateParamsCaptor.capture()
+        )
+        expectThat(urlCaptor.lastValue).isEqualTo(expectedUri)
 
         // Fire the callback and say that the Browser finished adding a tab.  The BrowserWrapper
         // should see that a tab is pending and open the URL to it.
@@ -428,7 +451,7 @@ class BrowserWrapperTest : BaseTest() {
 
         // The Browser should have been asked to create a new tab.
         val tabListCallbackCaptor = argumentCaptor<TabListCallback>()
-        verify(activeTabModel, never()).loadUrlInActiveTab(any())
+        verify(activeTabModel, never()).loadUrlInActiveTab(any(), any())
         verify(browser, times(2)).createTab()
         verify(browser).registerTabListCallback(tabListCallbackCaptor.capture())
 
@@ -436,7 +459,13 @@ class BrowserWrapperTest : BaseTest() {
         // should see that a tab is pending and open the URL to it.
         val tab: Tab = mockTabs.last()
         tabListCallbackCaptor.lastValue.onTabAdded(tab)
-        verify(tab.navigationController).navigate(eq(expectedUri))
+        val urlCaptor = argumentCaptor<Uri>()
+        val navigateParamsCaptor = argumentCaptor<NavigateParams>()
+        verify(tab.navigationController).navigate(
+            urlCaptor.capture(),
+            navigateParamsCaptor.capture()
+        )
+        expectThat(urlCaptor.lastValue).isEqualTo(expectedUri)
 
         // Check that the tab's properties were saved.
         val tabInfoList = browserWrapper.orderedTabList.value.filter { it.id == tab.guid }
@@ -484,9 +513,16 @@ class BrowserWrapperTest : BaseTest() {
 
         // The Browser should have been asked to create a new tab and then navigate to the URL.
         val tab = mockTabs.last()
-        verify(activeTabModel, never()).loadUrlInActiveTab(any())
+        verify(activeTabModel, never()).loadUrlInActiveTab(any(), any())
         verify(browser, times(2)).createTab()
-        verify(tab.navigationController).navigate(eq(expectedUri))
+
+        val urlCaptor = argumentCaptor<Uri>()
+        val navigateParamsCaptor = argumentCaptor<NavigateParams>()
+        verify(tab.navigationController).navigate(
+            urlCaptor.capture(),
+            navigateParamsCaptor.capture()
+        )
+        expectThat(urlCaptor.lastValue).isEqualTo(expectedUri)
 
         // Fire the callback and say that the Browser finished adding a tab.  The BrowserWrapper
         // should see that a tab is pending and open the URL to it.
@@ -534,7 +570,7 @@ class BrowserWrapperTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore)
-        verify(activeTabModel).loadUrlInActiveTab(eq(expectedUri))
+        verify(activeTabModel).loadUrlInActiveTab(eq(expectedUri), any())
         verify(browser, times(1)).createTab()
     }
 }

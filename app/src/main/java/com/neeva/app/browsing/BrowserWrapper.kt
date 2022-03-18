@@ -310,7 +310,8 @@ abstract class BrowserWrapper internal constructor(
                 createTabWithUri(
                     uri = Uri.parse(NeevaConstants.appURL),
                     parentTabId = null,
-                    isViaIntent = false
+                    isViaIntent = false,
+                    stayInApp = true
                 )
             },
             afterRestoreCompleted = { isBrowserRestored.complete(true) }
@@ -425,7 +426,12 @@ abstract class BrowserWrapper internal constructor(
     }
 
     /** Creates a new tab and shows the given [uri]. */
-    private fun createTabWithUri(uri: Uri, parentTabId: String?, isViaIntent: Boolean) {
+    private fun createTabWithUri(
+        uri: Uri,
+        parentTabId: String?,
+        isViaIntent: Boolean,
+        stayInApp: Boolean
+    ) {
         browser?.let {
             val tabOpenType = when {
                 parentTabId != null -> TabInfo.TabOpenType.CHILD_TAB
@@ -434,7 +440,7 @@ abstract class BrowserWrapper internal constructor(
             }
 
             val newTab = it.createTab()
-            newTab.navigationController.navigate(uri)
+            newTab.navigate(uri, stayInApp)
 
             // onTabAdded should have been called by this point, allowing us to store the extra
             // information about the Tab.
@@ -559,6 +565,7 @@ abstract class BrowserWrapper internal constructor(
         inNewTab: Boolean = _isLazyTabFlow.value,
         isViaIntent: Boolean = false,
         parentTabId: String? = null,
+        stayInApp: Boolean = true,
         onLoadStarted: () -> Unit = {}
     ) = coroutineScope.launch {
         // Wait until the Browser finishes restoration.  If you try to load a URL in a new tab
@@ -576,10 +583,11 @@ abstract class BrowserWrapper internal constructor(
             createTabWithUri(
                 uri = urlToLoad,
                 parentTabId = parentTabId,
-                isViaIntent = isViaIntent
+                isViaIntent = isViaIntent,
+                stayInApp = stayInApp
             )
         } else {
-            _activeTabModel.loadUrlInActiveTab(urlToLoad)
+            _activeTabModel.loadUrlInActiveTab(urlToLoad, stayInApp)
         }
 
         onLoadStarted()

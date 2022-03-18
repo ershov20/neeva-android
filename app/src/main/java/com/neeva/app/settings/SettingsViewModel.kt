@@ -88,7 +88,8 @@ class SettingsViewModelImpl(
             R.string.settings_sign_in_to_join_neeva to appNavModel::showProfileSettings,
             R.string.settings_clear_browsing_data to appNavModel::showClearBrowsingSettings,
             R.string.settings_default_browser to appNavModel::showDefaultBrowserSettings,
-            R.string.settings_debug_local_feature_flags to appNavModel::showLocalFeatureFlagsPane
+            R.string.settings_debug_local_feature_flags to appNavModel::showLocalFeatureFlagsPane,
+            R.string.settings_debug_open_50_tabs to { appNavModel.debugOpenManyTabs() }
         )
         if (isSignedOut()) {
             navMap[R.string.settings_sign_in_to_join_neeva] = appNavModel::showFirstRun
