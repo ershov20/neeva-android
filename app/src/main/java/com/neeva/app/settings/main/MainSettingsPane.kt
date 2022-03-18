@@ -3,7 +3,7 @@ package com.neeva.app.settings.main
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.settings.SettingsViewModel
-import com.neeva.app.settings.getFakeSettingsViewModel
+import com.neeva.app.settings.mockSettingsViewModel
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -22,7 +22,7 @@ fun MainSettingsPane(
 fun SettingsMain_Preview() {
     NeevaTheme {
         MainSettingsPane(
-            getFakeSettingsViewModel()
+            mockSettingsViewModel
         )
     }
 }
@@ -35,7 +35,7 @@ fun SettingsMain_Preview() {
 fun SettingsMain_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         MainSettingsPane(
-            getFakeSettingsViewModel()
+            mockSettingsViewModel
         )
     }
 }

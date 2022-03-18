@@ -14,7 +14,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,30 +23,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
-import com.neeva.app.ui.BooleanPreviewParameterProvider
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.OneBooleanPreviewContainer
 
 // TODO(dan.alcantara): Don't like how I set this up; will redo this once Evan's PR lands and move
 //                      disabled item state into here.
 data class LocalMenuDataState(
     val isUpdateAvailableVisible: Boolean
 )
-val LocalMenuData = compositionLocalOf<LocalMenuDataState> { error("No value set") }
+val LocalMenuData = compositionLocalOf {
+    LocalMenuDataState(isUpdateAvailableVisible = false)
+}
 
 @Composable
 fun OverflowMenu(
-    onMenuItem: (NeevaMenuItemId) -> Unit
+    onMenuItem: (NeevaMenuItemId) -> Unit,
+    canGoForward: Boolean
 ) {
-    val browserWrapper = LocalBrowserWrapper.current
-    val activeTabModelState by browserWrapper.activeTabModel.navigationInfoFlow.collectAsState()
-
     val disabledMenuItems = mutableListOf<NeevaMenuItemId>()
 
-    if (!activeTabModelState.canGoForward) {
+    if (!canGoForward) {
         disabledMenuItems.add(NeevaMenuItemId.FORWARD)
     }
 
@@ -106,36 +102,22 @@ fun OverflowMenu(
     }
 }
 
-class OverflowMenuPreviews : BooleanPreviewParameterProvider<OverflowMenuPreviews.Params>(2) {
-    data class Params(
-        val darkTheme: Boolean,
-        val isUpdateAvailableVisible: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        darkTheme = booleanArray[0],
-        isUpdateAvailableVisible = booleanArray[1]
-    )
-
-    @Preview(name = "1x font size", locale = "en")
-    @Preview(name = "2x font size", locale = "en", fontScale = 2.0f)
-    @Preview(name = "RTL, 1x font size", locale = "he")
-    @Preview(name = "RTL, 2x font size", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun OverflowMenu_Preview(@PreviewParameter(OverflowMenuPreviews::class) params: Params) {
-        NeevaTheme(useDarkTheme = params.darkTheme) {
+@Preview(name = "LTR", locale = "en")
+@Preview(name = "RTL", locale = "he")
+@Composable
+private fun OverflowMenuPreview() {
+    OneBooleanPreviewContainer { isUpdateAvailableVisible ->
+        Surface {
             CompositionLocalProvider(
                 LocalMenuData provides LocalMenuDataState(
-                    isUpdateAvailableVisible = params.isUpdateAvailableVisible
+                    isUpdateAvailableVisible = isUpdateAvailableVisible
                 )
             ) {
-                Surface {
-                    OverflowMenu(
-                        onMenuItem = {},
-                        disabledMenuItems = emptyList(),
-                        isInitiallyExpanded = false
-                    )
-                }
+                OverflowMenu(
+                    onMenuItem = {},
+                    disabledMenuItems = emptyList(),
+                    isInitiallyExpanded = false
+                )
             }
         }
     }

@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.neeva.app.settings.SettingsGroupData
-import com.neeva.app.settings.SettingsRow
 import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.ui.SectionHeader
 

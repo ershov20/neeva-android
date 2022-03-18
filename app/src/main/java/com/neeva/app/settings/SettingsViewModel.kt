@@ -3,6 +3,7 @@ package com.neeva.app.settings
 import android.net.Uri
 import android.text.format.DateUtils
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.WebLayerModel
@@ -136,13 +137,17 @@ class SettingsViewModelImpl(
 }
 
 /** For Preview testing. */
-internal fun getFakeSettingsViewModel(): SettingsViewModel {
-    return object : SettingsViewModel {
+val mockSettingsViewModel by lazy {
+    object : SettingsViewModel {
         override fun onBackPressed() {}
 
-        override fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit)? { return null }
+        override fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit) {
+            return { }
+        }
 
-        override fun getToggleState(key: String?): MutableState<Boolean>? { return null }
+        override fun getToggleState(key: String?): MutableState<Boolean> {
+            return mutableStateOf(false)
+        }
 
         override fun openUrl(uri: Uri, openViaIntent: Boolean) {}
 

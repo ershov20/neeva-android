@@ -24,11 +24,9 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.ui.BooleanPreviewParameterProvider
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import kotlinx.coroutines.flow.StateFlow
 
 data class TabToolbarModel(
@@ -74,10 +72,13 @@ fun BottomToolbar(
     modifier: Modifier
 ) {
     val navigationInfo by activeTabModel.navigationInfoFlow.collectAsState()
+    val spaceStoreHasUrl by activeTabModel.isCurrentUrlInSpaceFlow.collectAsState()
+
     BottomToolbar(
         model = model,
         canGoBackward = navigationInfo.canGoBackward,
         isIncognito = isIncognito,
+        spaceStoreHasUrl = spaceStoreHasUrl,
         modifier = modifier
     )
 }
@@ -87,6 +88,7 @@ fun BottomToolbar(
     model: TabToolbarModel,
     canGoBackward: Boolean,
     isIncognito: Boolean,
+    spaceStoreHasUrl: Boolean,
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (isIncognito) {
@@ -141,8 +143,6 @@ fun BottomToolbar(
                 onClick = model.onAddToSpace,
                 modifier = Modifier.weight(1.0f)
             ) {
-                val activeTabModel = LocalBrowserWrapper.current.activeTabModel
-                val spaceStoreHasUrl by activeTabModel.isCurrentUrlInSpaceFlow.collectAsState()
                 Icon(
                     painter = painterResource(
                         if (spaceStoreHasUrl) {
@@ -169,31 +169,44 @@ fun BottomToolbar(
     }
 }
 
-class BottomToolbarPreviews : BooleanPreviewParameterProvider<BottomToolbarPreviews.Params>(3) {
-    data class Params(
-        val darkTheme: Boolean,
-        val backEnabled: Boolean,
-        val isIncognito: Boolean
-    )
+@Preview("Default, LTR", locale = "en")
+@Preview("Default, RTL", locale = "he")
+@Composable
+private fun BottomToolbarPreview_Regular() {
+    OneBooleanPreviewContainer { isIncognito ->
+        BottomToolbar(
+            model = TabToolbarModel(),
+            canGoBackward = false,
+            spaceStoreHasUrl = false,
+            isIncognito = isIncognito
+        )
+    }
+}
 
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        darkTheme = booleanArray[0],
-        backEnabled = booleanArray[1],
-        isIncognito = booleanArray[2]
-    )
+@Preview("Can go backward, LTR", locale = "en")
+@Preview("Can go backward, RTL", locale = "he")
+@Composable
+private fun BottomToolbarPreview_CanGoBackward() {
+    OneBooleanPreviewContainer { isIncognito ->
+        BottomToolbar(
+            model = TabToolbarModel(),
+            canGoBackward = true,
+            spaceStoreHasUrl = false,
+            isIncognito = isIncognito
+        )
+    }
+}
 
-    @Preview("1x scale", locale = "en")
-    @Preview("2x scale", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x scale", locale = "he")
-    @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun Default(@PreviewParameter(BottomToolbarPreviews::class) params: Params) {
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            BottomToolbar(
-                model = TabToolbarModel(),
-                canGoBackward = params.backEnabled,
-                isIncognito = params.isIncognito
-            )
-        }
+@Preview("Space store has URL, LTR", locale = "en")
+@Preview("Space store has URL, RTL", locale = "he")
+@Composable
+private fun BottomToolbarPreview_SpaceStoreHasUrl() {
+    OneBooleanPreviewContainer { isIncognito ->
+        BottomToolbar(
+            model = TabToolbarModel(),
+            canGoBackward = false,
+            spaceStoreHasUrl = true,
+            isIncognito = isIncognito
+        )
     }
 }

@@ -21,16 +21,15 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.toUserVisibleString
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
 @Composable
@@ -91,49 +90,50 @@ fun ZeroQuerySuggestedSite(
     }
 }
 
-class ZeroQuerySuggestedSitePreviewParameterProvider :
-    BooleanPreviewParameterProvider<ZeroQuerySuggestedSitePreviewParameterProvider.Params>(3) {
-    data class Params(
-        val useDarkTheme: Boolean,
-        val useLongTitle: Boolean,
-        val useLargeContainer: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        useDarkTheme = booleanArray[0],
-        useLongTitle = booleanArray[1],
-        useLargeContainer = booleanArray[2]
-    )
-
-    @Preview("1x font scale", locale = "en")
-    @Preview("2x font scale", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x font scale", locale = "he")
-    @Preview("RTL, 2x font scale", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun ZeroQuerySuggestedSitePreview_Default(
-        @PreviewParameter(ZeroQuerySuggestedSitePreviewParameterProvider::class) params: Params
-    ) {
-        val label = if (params.useLongTitle) {
+@Preview("Small container, LTR, 1x font scale", locale = "en")
+@Preview("Small container, LTR, 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("Small container, RTL, 1x font scale", locale = "he")
+@Composable
+private fun ZeroQuerySuggestedSitePreview_SmallContainer() {
+    OneBooleanPreviewContainer { useLongTitle ->
+        val label = if (useLongTitle) {
             stringResource(id = R.string.debug_long_string_primary)
         } else {
             "Short"
         }
 
-        val containerSize = if (params.useLargeContainer) {
-            300.dp
+        val containerSize = 96.dp
+        Box(modifier = Modifier.width(containerSize)) {
+            ZeroQuerySuggestedSite(
+                faviconBitmap = Uri.parse(NeevaConstants.appURL).toBitmap(),
+                iconOverride = null,
+                label = label,
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview("Large container, LTR, 1x font scale", locale = "en")
+@Preview("Large container, LTR, 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("Large container, RTL, 1x font scale", locale = "he")
+@Composable
+private fun ZeroQuerySuggestedSitePreview_LargeContainer() {
+    OneBooleanPreviewContainer { useLongTitle ->
+        val label = if (useLongTitle) {
+            stringResource(id = R.string.debug_long_string_primary)
         } else {
-            96.dp
+            "Short"
         }
 
-        NeevaTheme(useDarkTheme = params.useDarkTheme) {
-            Box(modifier = Modifier.width(containerSize)) {
-                ZeroQuerySuggestedSite(
-                    faviconBitmap = Uri.parse("http://neeva.com").toBitmap(),
-                    iconOverride = null,
-                    label = label,
-                    onClick = {}
-                )
-            }
+        val containerSize = 300.dp
+        Box(modifier = Modifier.width(containerSize)) {
+            ZeroQuerySuggestedSite(
+                faviconBitmap = Uri.parse(NeevaConstants.appURL).toBitmap(),
+                iconOverride = null,
+                label = label,
+                onClick = {}
+            )
         }
     }
 }

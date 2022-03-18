@@ -23,14 +23,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
 
 /**
  * Draws an icon representing a particular site.
@@ -97,40 +96,24 @@ fun FaviconView(
     }
 }
 
-class FaviconViewPreviews : BooleanPreviewParameterProvider<FaviconViewPreviews.Params>(3) {
-    data class Params(
-        val darkTheme: Boolean,
-        val bordered: Boolean,
-        val bitmap: Bitmap?
-    )
+@Preview
+@Composable
+private fun FaviconViewPreviews() {
+    TwoBooleanPreviewContainer { bordered, showBitmap ->
+        val bitmap = if (showBitmap) {
+            Uri.parse(NeevaConstants.appURL).toBitmap()
+        } else {
+            null
+        }
 
-    override fun createParams(booleanArray: BooleanArray): Params {
-        return Params(
-            darkTheme = booleanArray[0],
-            bordered = booleanArray[1],
-            bitmap = if (booleanArray[2]) {
-                Uri.parse("https://www.neeva.com").toBitmap()
-            } else {
-                null
-            }
-        )
-    }
-
-    @Preview
-    @Composable
-    fun DefaultPreview(
-        @PreviewParameter(provider = FaviconViewPreviews::class) params: Params
-    ) {
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            Surface(color = MaterialTheme.colorScheme.background) {
-                CompositionLocalProvider(
-                    LocalContentColor provides MaterialTheme.colorScheme.onBackground
-                ) {
-                    FaviconView(
-                        bitmap = params.bitmap,
-                        bordered = params.bordered
-                    )
-                }
+        Surface(color = MaterialTheme.colorScheme.background) {
+            CompositionLocalProvider(
+                LocalContentColor provides MaterialTheme.colorScheme.onBackground
+            ) {
+                FaviconView(
+                    bitmap = bitmap,
+                    bordered = bordered
+                )
             }
         }
     }

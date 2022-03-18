@@ -14,9 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
@@ -48,44 +47,38 @@ fun <T : Any> GridLayout(
     }
 }
 
-class GridLayoutPreviews : BooleanPreviewParameterProvider<GridLayoutPreviews.Params>(1) {
-    data class Params(
-        val showFullRows: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        showFullRows = booleanArray[0]
-    )
-
+class GridLayoutPreviews {
     @Preview("LTR", locale = "en")
     @Preview("RTL", locale = "he")
     @Composable
-    fun DefaultPreview(@PreviewParameter(GridLayoutPreviews::class) params: Params) {
-        val numItems = if (params.showFullRows) {
-            8
-        } else {
-            6
-        }
+    fun DefaultPreview() {
+        OneBooleanPreviewContainer { showFullRows ->
+            val numItems = if (showFullRows) {
+                8
+            } else {
+                6
+            }
 
-        val items = mutableListOf(
-            Color.Red,
-            Color.Yellow,
-            Color.Green,
-            Color.Blue,
-            Color.Magenta,
-            Color.DarkGray,
-            Color.Cyan,
-            Color.LightGray
-        )
+            val items = mutableListOf(
+                Color.Red,
+                Color.Yellow,
+                Color.Green,
+                Color.Blue,
+                Color.Magenta,
+                Color.DarkGray,
+                Color.Cyan,
+                Color.LightGray
+            )
 
-        Surface {
-            GridLayout(numColumns = 4, items = items.take(numItems)) {
-                Box(
-                    modifier = Modifier
-                        .background(color = it)
-                        .fillMaxWidth()
-                        .height(64.dp)
-                )
+            Surface {
+                GridLayout(numColumns = 4, items = items.take(numItems)) {
+                    Box(
+                        modifier = Modifier
+                            .background(color = it)
+                            .fillMaxWidth()
+                            .height(64.dp)
+                    )
+                }
             }
         }
     }

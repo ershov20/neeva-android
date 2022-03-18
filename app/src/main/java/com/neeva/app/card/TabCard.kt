@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,7 +38,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.Dispatchers
 import com.neeva.app.LocalEnvironment
@@ -46,8 +46,8 @@ import com.neeva.app.browsing.TabInfo
 import com.neeva.app.previewDispatchers
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
-import com.neeva.app.ui.BooleanPreviewParameterProvider
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.LightDarkPreviewContainer
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.widgets.FaviconView
 import kotlinx.coroutines.withContext
 
@@ -87,115 +87,119 @@ fun TabCard(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .padding(10.dp)
-            .clickable { onSelect() },
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier.then(
-                if (tabInfo.isSelected) {
-                    Modifier.border(
-                        3.dp,
-                        MaterialTheme.colorScheme.primary,
-                        RoundedCornerShape(12.dp)
-                    )
-                } else {
-                    Modifier
-                }
-            )
+    Surface {
+        Column(
+            modifier = Modifier
+                .padding(Dimensions.PADDING_SMALL)
+                .clickable { onSelect() },
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                bitmap = thumbnail?.asImageBitmap() ?: ImageBitmap(1, 1),
-                contentDescription = null,
-                contentScale = ContentScale.FillWidth,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .shadow(2.dp, shape = RoundedCornerShape(12.dp))
-            )
             Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clickable { onClose() }
-                    .padding(6.dp)
-                    .background(Color.LightGray, shape = CircleShape)
-                    .align(Alignment.TopEnd),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.then(
+                    if (tabInfo.isSelected) {
+                        Modifier.border(
+                            3.dp,
+                            MaterialTheme.colorScheme.primary,
+                            RoundedCornerShape(12.dp)
+                        )
+                    } else {
+                        Modifier
+                    }
+                )
             ) {
                 Image(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_baseline_close_24),
-                    contentDescription = stringResource(id = R.string.close),
-                    contentScale = ContentScale.Inside,
-                    colorFilter = ColorFilter.tint(Color.White)
+                    bitmap = thumbnail?.asImageBitmap() ?: ImageBitmap(1, 1),
+                    contentDescription = null,
+                    contentScale = ContentScale.FillWidth,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .shadow(2.dp, shape = RoundedCornerShape(12.dp))
+                )
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clickable { onClose() }
+                        .padding(Dimensions.PADDING_TINY)
+                        .background(Color.LightGray, shape = CircleShape)
+                        .align(Alignment.TopEnd),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Image(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_baseline_close_24),
+                        contentDescription = stringResource(R.string.close),
+                        contentScale = ContentScale.Inside,
+                        colorFilter = ColorFilter.tint(Color.White)
+                    )
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.padding(vertical = Dimensions.PADDING_SMALL)
+            ) {
+                Box(modifier = Modifier.padding(end = Dimensions.PADDING_SMALL)) {
+                    FaviconView(faviconBitmap)
+                }
+                Text(
+                    text = tabInfo.title ?: tabInfo.url?.toString() ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(start = Dimensions.PADDING_SMALL)
+                        .weight(1.0f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Box(modifier = Modifier.padding(end = 8.dp)) {
-                FaviconView(faviconBitmap)
-            }
-            Text(
-                text = tabInfo.title ?: tabInfo.url?.toString() ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .weight(1.0f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
         }
     }
 }
 
-class TabCardPreviews : BooleanPreviewParameterProvider<TabCardPreviews.Params>(3) {
-    data class Params(
-        val darkTheme: Boolean,
-        val isSelected: Boolean,
-        val useLongString: Boolean
-    )
+@Preview("Long title, LTR, 1x scale", locale = "en")
+@Preview("Long title, LTR, 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("Long title, RTL, 1x scale", locale = "he")
+@Composable
+private fun TabCardPreview_LongString() {
+    LightDarkPreviewContainer {
+        val title = stringResource(id = R.string.debug_long_string_primary)
 
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        darkTheme = booleanArray[0],
-        isSelected = booleanArray[1],
-        useLongString = booleanArray[2]
-    )
+        TabCard(
+            tabInfo = TabInfo(
+                id = "unimportant",
+                url = Uri.parse("https://www.reddit.com"),
+                title = title,
+                isSelected = false
+            ),
+            onSelect = {},
+            onClose = {},
+            faviconCache = mockFaviconCache,
+            screenshotProvider = { null },
+            dispatchers = previewDispatchers
+        )
+    }
+}
 
-    @Preview("1x scale", locale = "en")
-    @Preview("2x scale", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x scale", locale = "he")
-    @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun TabCard_Preview(@PreviewParameter(TabCardPreviews::class) params: Params) {
-        val title = if (params.useLongString) {
-            stringResource(id = R.string.debug_long_string_primary)
-        } else {
-            "short"
-        }
-
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
-                TabCard(
-                    tabInfo = TabInfo(
-                        id = "unimportant",
-                        url = Uri.parse("https://www.reddit.com"),
-                        title = title,
-                        isSelected = params.isSelected
-                    ),
-                    onSelect = {},
-                    onClose = {},
-                    faviconCache = mockFaviconCache,
-                    screenshotProvider = { null },
-                    dispatchers = previewDispatchers
-                )
-            }
-        }
+@Preview("Short title, LTR, 1x scale", locale = "en")
+@Preview("Short title, LTR, 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("Short title, RTL, 1x scale", locale = "he")
+@Composable
+private fun TabCardPreview_ShortTitleSelected() {
+    LightDarkPreviewContainer {
+        val title = "short"
+        TabCard(
+            tabInfo = TabInfo(
+                id = "unimportant",
+                url = Uri.parse("https://www.reddit.com"),
+                title = title,
+                isSelected = true
+            ),
+            onSelect = {},
+            onClose = {},
+            faviconCache = mockFaviconCache,
+            screenshotProvider = { null },
+            dispatchers = previewDispatchers
+        )
     }
 }

@@ -11,10 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.R
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
 import java.util.Locale
 
 @Composable
@@ -35,31 +33,18 @@ fun SectionHeader(stringId: Int) {
     }
 }
 
-class SectionHeaderPreviews : BooleanPreviewParameterProvider<SectionHeaderPreviews.Params>(2) {
-    data class Params(
-        val useDarkTheme: Boolean,
-        val useLongText: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        useDarkTheme = booleanArray[0],
-        useLongText = booleanArray[1]
-    )
-
-    @Preview("1x", locale = "en")
-    @Preview("2x", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x", locale = "he")
-    @Preview("RTL, 2x", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun DefaultPreview(@PreviewParameter(SectionHeaderPreviews::class) params: Params) {
-        val titleString = if (params.useLongText) {
+@Preview("SectionHeader, LTR, 1x", locale = "en")
+@Preview("SectionHeader, LTR, 2x", locale = "en", fontScale = 2.0f)
+@Preview("SectionHeader, RTL, 1x", locale = "he")
+@Composable
+private fun SectionHeaderPreview() {
+    OneBooleanPreviewContainer { useLongText ->
+        val titleString = if (useLongText) {
             R.string.debug_long_string_primary
         } else {
             R.string.debug_short_action
         }
 
-        NeevaTheme(useDarkTheme = params.useDarkTheme) {
-            SectionHeader(titleString)
-        }
+        SectionHeader(titleString)
     }
 }

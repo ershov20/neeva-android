@@ -15,12 +15,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
-import com.neeva.app.ui.BooleanPreviewParameterProvider
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
@@ -51,42 +49,29 @@ fun SettingsToggleRow(
                 disabledUncheckedTrackColor = MaterialTheme.colorScheme.onSurface,
             ),
             onCheckedChange = getTogglePreferenceSetter(togglePrefKey),
-            modifier = Modifier.size(48.dp).alpha(getClickableAlpha(enabled))
+            modifier = Modifier
+                .size(48.dp)
+                .alpha(getClickableAlpha(enabled))
         )
     }
 }
 
-class SettingsToggleRowPreviews :
-    BooleanPreviewParameterProvider<SettingsToggleRowPreviews.Params>(2) {
-    data class Params(
-        val darkTheme: Boolean,
-        val isEnabled: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        darkTheme = booleanArray[0],
-        isEnabled = booleanArray[1]
-    )
-
-    @Preview("1x scale", locale = "en")
-    @Preview("2x scale", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x scale", locale = "he")
-    @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun SettingsToggleRow_Preview(
-        @PreviewParameter(SettingsToggleRowPreviews::class) params: Params
-    ) {
-        var toggleState = remember { mutableStateOf(true) }
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            SettingsToggleRow(
-                title = stringResource(R.string.debug_long_string_primary),
-                enabled = params.isEnabled,
-                toggleState = toggleState,
-                togglePrefKey = "",
-                getTogglePreferenceSetter = { {} },
-                modifier = SettingsUIConstants
-                    .rowModifier.background(MaterialTheme.colorScheme.surface)
-            )
-        }
+@Preview("1x scale", locale = "en")
+@Preview("2x scale", locale = "en", fontScale = 2.0f)
+@Preview("RTL, 1x scale", locale = "he")
+@Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
+@Composable
+private fun SettingsToggleRowPreview() {
+    OneBooleanPreviewContainer { isEnabled ->
+        val toggleState = remember { mutableStateOf(true) }
+        SettingsToggleRow(
+            title = stringResource(R.string.debug_long_string_primary),
+            enabled = isEnabled,
+            toggleState = toggleState,
+            togglePrefKey = "",
+            getTogglePreferenceSetter = { {} },
+            modifier = SettingsUIConstants
+                .rowModifier.background(MaterialTheme.colorScheme.surface)
+        )
     }
 }

@@ -2,9 +2,8 @@ package com.neeva.app.card
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -24,13 +23,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun TabGridBottomBar(
@@ -64,11 +61,10 @@ fun TabGridBottomBar(
         contentColor = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier
             .fillMaxWidth()
-            .height(dimensionResource(id = R.dimen.bottom_toolbar_height))
+            .defaultMinSize(minHeight = dimensionResource(id = R.dimen.bottom_toolbar_height))
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxSize()
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Box(modifier = Modifier.weight(1f)) {
                 IconButton(
@@ -115,34 +111,18 @@ fun TabGridBottomBar(
     }
 }
 
-class TabGridBottomBarPreviews :
-    BooleanPreviewParameterProvider<TabGridBottomBarPreviews.Params>(3) {
-    data class Params(
-        val darkTheme: Boolean,
-        val isDeleteEnabled: Boolean,
-        val isCloseEnabled: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        darkTheme = booleanArray[0],
-        isDeleteEnabled = booleanArray[1],
-        isCloseEnabled = booleanArray[2]
-    )
-
-    @Preview("1x", locale = "en")
-    @Preview("2x", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x", locale = "he")
-    @Preview("RTL, 2x", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun DefaultPreview(@PreviewParameter(TabGridBottomBarPreviews::class) params: Params) {
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            TabGridBottomBar(
-                isDeleteEnabled = params.isDeleteEnabled,
-                isCloseButtonEnabled = params.isCloseEnabled,
-                onCloseAllTabs = {},
-                onOpenLazyTab = {},
-                onDone = {}
-            )
-        }
+@Preview("LTR, 1x", locale = "en")
+@Preview("LTR, 2x", locale = "en", fontScale = 2.0f)
+@Preview("RTL, 1x", locale = "he")
+@Composable
+fun DefaultPreview() {
+    TwoBooleanPreviewContainer { isDeleteEnabled, isCloseButonEnabled ->
+        TabGridBottomBar(
+            isDeleteEnabled = isDeleteEnabled,
+            isCloseButtonEnabled = isCloseButonEnabled,
+            onCloseAllTabs = {},
+            onOpenLazyTab = {},
+            onDone = {}
+        )
     }
 }

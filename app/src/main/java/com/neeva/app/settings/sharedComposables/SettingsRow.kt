@@ -1,4 +1,4 @@
-package com.neeva.app.settings
+package com.neeva.app.settings.sharedComposables
 
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -9,15 +9,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
 import com.neeva.app.R
+import com.neeva.app.settings.SettingsRowData
+import com.neeva.app.settings.SettingsRowType
+import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
+import com.neeva.app.settings.mockSettingsViewModel
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultBrowserRow
-import com.neeva.app.settings.sharedComposables.SettingsUIConstants
+import com.neeva.app.settings.sharedComposables.subcomponents.ProfileRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabelRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsNavigationRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsToggleRow
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
@@ -144,17 +148,20 @@ fun getFormattedSSOProviderName(ssoProvider: NeevaUser.SSOProvider): String {
     }
 }
 
-@Preview(name = "Toggle, 1x font size", locale = "en")
-@Preview(name = "Toggle, 2x font size", locale = "en", fontScale = 2.0f)
+@Preview(name = "Toggle, LTR, 1x font size", locale = "en")
+@Preview(name = "Toggle, LTR, 2x font size", locale = "en", fontScale = 2.0f)
+@Preview(name = "Toggle, RTL, 1x font size", locale = "he")
+@Preview(name = "Toggle, RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
 fun SettingsRow_PreviewToggle() {
-    NeevaTheme {
+    LightDarkPreviewContainer {
         SettingsRow(
             rowData = SettingsRowData(
                 SettingsRowType.TOGGLE,
-                R.string.debug_long_string_primary
+                R.string.debug_long_string_primary,
+                togglePreferenceKey = "toggle preference key"
             ),
-            settingsViewModel = getFakeSettingsViewModel(),
+            settingsViewModel = mockSettingsViewModel,
             modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
@@ -166,7 +173,7 @@ fun SettingsRow_PreviewToggle() {
 @Preview(name = "Link, RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
 fun SettingsRow_PreviewLink() {
-    NeevaTheme {
+    LightDarkPreviewContainer {
         SettingsRow(
             rowData = SettingsRowData(
                 SettingsRowType.LINK,
@@ -174,7 +181,7 @@ fun SettingsRow_PreviewLink() {
                 Uri.parse(""),
                 togglePreferenceKey = ""
             ),
-            settingsViewModel = getFakeSettingsViewModel(),
+            settingsViewModel = mockSettingsViewModel,
             modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
@@ -184,13 +191,13 @@ fun SettingsRow_PreviewLink() {
 @Preview(name = "Label, 2x font size", locale = "en", fontScale = 2.0f)
 @Composable
 fun SettingsRow_PreviewLabel() {
-    NeevaTheme {
+    LightDarkPreviewContainer {
         SettingsRow(
             rowData = SettingsRowData(
                 SettingsRowType.LABEL,
                 R.string.debug_long_string_primary
             ),
-            settingsViewModel = getFakeSettingsViewModel(),
+            settingsViewModel = mockSettingsViewModel,
             modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }

@@ -168,7 +168,6 @@ class CardGridPreviews : BooleanPreviewParameterProvider<CardGridPreviews.Params
     @Preview("1x", locale = "en")
     @Preview("2x", locale = "en", fontScale = 2.0f)
     @Preview("RTL, 1x", locale = "he")
-    @Preview("RTL, 2x", locale = "he", fontScale = 2.0f)
     @Composable
     fun CardGrid_Preview(@PreviewParameter(CardGridPreviews::class) params: Params) {
         val darkTheme = params.darkTheme

@@ -1,7 +1,5 @@
 package com.neeva.app.suggestions
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
@@ -12,10 +10,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.R
-import com.neeva.app.ui.BooleanPreviewParameterProvider
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.LightDarkPreviewContainer
 
 @Composable
 fun DictionarySuggestionRow(
@@ -84,92 +80,65 @@ fun DictionarySuggestionRow(
     }
 }
 
-class DictionarySuggestionRowPreviews :
-    BooleanPreviewParameterProvider<DictionarySuggestionRowPreviews.Params>(1) {
-    data class Params(
-        val useDarkTheme: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray): Params {
-        return Params(
-            useDarkTheme = booleanArray[0]
-        )
-    }
-
-    @Preview("Short word, 1x scale", locale = "en")
-    @Preview("Short word, 2x scale", locale = "en", fontScale = 2.0f)
+class DictionarySuggestionRowPreviews {
+    @Preview("Short word LTR, 1x scale", locale = "en")
+    @Preview("Short word LTR, 2x scale", locale = "en", fontScale = 2.0f)
     @Composable
-    fun PreviewShortWord(
-        @PreviewParameter(DictionarySuggestionRowPreviews::class) params: Params
-    ) {
-        NeevaTheme(useDarkTheme = params.useDarkTheme) {
-            Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
-                DictionarySuggestionRow(
-                    onTapRow = {},
-                    word = "short",
-                    shortDefinition = "measuring a small distance from end to end",
-                    phoneticSpelling = "ʃɔrt",
-                    lexicalCategory = "adjective"
-                )
-            }
+    fun PreviewShortWord() {
+        LightDarkPreviewContainer {
+            DictionarySuggestionRow(
+                onTapRow = {},
+                word = "short",
+                shortDefinition = "measuring a small distance from end to end",
+                phoneticSpelling = "ʃɔrt",
+                lexicalCategory = "adjective"
+            )
         }
     }
 
-    @Preview("Short word, 1x scale", locale = "he")
-    @Preview("Short word, 2x scale", locale = "he", fontScale = 2.0f)
+    @Preview("Short word RTL, 1x scale", locale = "he")
+    @Preview("Short word RTL, 2x scale", locale = "he", fontScale = 2.0f)
     @Composable
-    fun PreviewShortHebrewWord(
-        @PreviewParameter(DictionarySuggestionRowPreviews::class) params: Params
-    ) {
-        NeevaTheme(useDarkTheme = params.useDarkTheme) {
-            Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
-                DictionarySuggestionRow(
-                    onTapRow = {},
-                    word = "קצר",
-                    shortDefinition = "מדידת מרחק קטן מקצה לקצה",
-                    phoneticSpelling = "ʃɔrt",
-                    lexicalCategory = "תוֹאַר"
-                )
-            }
+    fun PreviewShortHebrewWord() {
+        LightDarkPreviewContainer {
+            DictionarySuggestionRow(
+                onTapRow = {},
+                word = "קצר",
+                shortDefinition = "מדידת מרחק קטן מקצה לקצה",
+                phoneticSpelling = "ʃɔrt",
+                lexicalCategory = "תוֹאַר"
+            )
         }
     }
 
     @Preview("Missing fields, 1x scale", locale = "en")
     @Preview("Missing fields, 2x scale", locale = "en", fontScale = 2.0f)
     @Composable
-    fun PreviewMissingFields(
-        @PreviewParameter(DictionarySuggestionRowPreviews::class) params: Params
-    ) {
-        NeevaTheme(useDarkTheme = params.useDarkTheme) {
-            Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
-                DictionarySuggestionRow(
-                    onTapRow = {},
-                    word = "short",
-                    shortDefinition = "measuring a small distance from end to end",
-                    phoneticSpelling = null,
-                    lexicalCategory = null
-                )
-            }
+    fun PreviewMissingFields() {
+        LightDarkPreviewContainer {
+            DictionarySuggestionRow(
+                onTapRow = {},
+                word = "short",
+                shortDefinition = "measuring a small distance from end to end",
+                phoneticSpelling = null,
+                lexicalCategory = null
+            )
         }
     }
 
     @Preview("Long word, 1x scale", locale = "en")
     @Preview("Long word, 2x scale", locale = "en", fontScale = 2.0f)
     @Composable
-    fun PreviewLongWord(
-        @PreviewParameter(DictionarySuggestionRowPreviews::class) params: Params
-    ) {
-        NeevaTheme(useDarkTheme = params.useDarkTheme) {
-            Box(modifier = Modifier.background(MaterialTheme.colorScheme.surface)) {
-                DictionarySuggestionRow(
-                    onTapRow = {},
-                    word = "antidisestablishmentarianism",
-                    shortDefinition = "opposition to the withdrawal of state support or " +
-                        "recognition from an established church",
-                    phoneticSpelling = "ˌæn tiˌdɪs əˌstæb lɪʃ mənˈtɛər i əˌnɪz əm",
-                    lexicalCategory = "noun"
-                )
-            }
+    fun PreviewLongWord() {
+        LightDarkPreviewContainer {
+            DictionarySuggestionRow(
+                onTapRow = {},
+                word = "antidisestablishmentarianism",
+                shortDefinition = "opposition to the withdrawal of state support or " +
+                    "recognition from an established church",
+                phoneticSpelling = "ˌæn tiˌdɪs əˌstæb lɪʃ mənˈtɛər i əˌnɪz əm",
+                lexicalCategory = "noun"
+            )
         }
     }
 }

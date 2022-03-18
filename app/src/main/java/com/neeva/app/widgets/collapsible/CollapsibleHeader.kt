@@ -22,14 +22,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.AnimationConstants
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
 
 enum class CollapsingSectionState {
     COLLAPSED, COMPACT, EXPANDED;
@@ -114,6 +113,7 @@ private fun CollapsingHeader(
                 .padding(horizontal = Dimensions.PADDING_LARGE),
             style = MaterialTheme.typography.titleMedium,
             maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             color = MaterialTheme.colorScheme.onBackground
         )
 
@@ -129,43 +129,40 @@ private fun CollapsingHeader(
     }
 }
 
-class CollapsingHeaderPreviews :
-    BooleanPreviewParameterProvider<CollapsingHeaderPreviews.Params>(3) {
-    data class Params(
-        val useDarkTheme: Boolean,
-        val useLongLabel: Boolean,
-        val useThreeStates: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        useDarkTheme = booleanArray[0],
-        useLongLabel = booleanArray[1],
-        useThreeStates = booleanArray[2]
-    )
-
-    @Preview("1x font scale", locale = "en")
-    @Preview("2x font scale", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x font scale", locale = "he")
-    @Preview("RTL, 2x font scale", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun DefaultPreviews(@PreviewParameter(CollapsingHeaderPreviews::class) params: Params) {
-        val label = if (params.useLongLabel) {
+@Preview("CollapsingHeaderPreviews, 1x font scale", locale = "en")
+@Preview("CollapsingHeaderPreviews, 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("CollapsingHeaderPreviews, RTL, 1x font scale", locale = "he")
+@Composable
+fun CollapsingHeaderPreviews_TwoStates() {
+    OneBooleanPreviewContainer { useLongLabel ->
+        val label = if (useLongLabel) {
             stringResource(id = R.string.debug_long_string_primary)
         } else {
             "Section header"
         }
 
         val state = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
-        NeevaTheme(useDarkTheme = params.useDarkTheme) {
-            if (params.useThreeStates) {
-                CollapsibleThreeStateHeader(label = label, state = state) {
-                    state.value = state.value.next(false)
-                }
-            } else {
-                CollapsibleTwoStateHeader(label = label, state = state) {
-                    state.value = state.value.next(false)
-                }
-            }
+        CollapsibleTwoStateHeader(label = label, state = state) {
+            state.value = state.value.next(false)
+        }
+    }
+}
+
+@Preview("CollapsingHeaderPreviews, 1x font scale", locale = "en")
+@Preview("CollapsingHeaderPreviews, 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("CollapsingHeaderPreviews, RTL, 1x font scale", locale = "he")
+@Composable
+fun CollapsingHeaderPreviews_ThreeStates() {
+    OneBooleanPreviewContainer { useLongLabel ->
+        val label = if (useLongLabel) {
+            stringResource(id = R.string.debug_long_string_primary)
+        } else {
+            "Section header"
+        }
+
+        val state = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
+        CollapsibleThreeStateHeader(label = label, state = state) {
+            state.value = state.value.next(false)
         }
     }
 }

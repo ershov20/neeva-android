@@ -119,7 +119,6 @@ class SettingsDialogPreviews :
     @Preview("Settings Dialog 1x", locale = "en")
     @Preview("Settings Dialog 2x", locale = "en", fontScale = 2.0f)
     @Preview("Settings Dialog RTL, 1x", locale = "he")
-    @Preview("Settings Dialog RTL, 2x", locale = "he", fontScale = 2.0f)
     @Composable
     fun DefaultPreview(
         @PreviewParameter(SettingsDialogPreviews::class) params: Params

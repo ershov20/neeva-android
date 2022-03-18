@@ -39,15 +39,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.suggestions.SuggestionsModel
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.widgets.FaviconView
 
 @Composable
@@ -117,7 +116,9 @@ fun AutocompleteTextField(
                     text = stringResource(R.string.url_bar_placeholder),
                     modifier = Modifier.fillMaxWidth(),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = placeholderColor
+                    color = placeholderColor,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
 
@@ -173,63 +174,81 @@ fun AutocompleteTextField(
     }
 }
 
-class AutocompleteTextFieldPreviews :
-    BooleanPreviewParameterProvider<AutocompleteTextFieldPreviews.Params>(3) {
-    data class Params(
-        val darkTheme: Boolean,
-        val useLongText: Boolean,
-        val showPlaceholder: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray): Params {
-        return Params(
-            darkTheme = booleanArray[0],
-            useLongText = booleanArray[1],
-            showPlaceholder = booleanArray[2]
+@Preview("Autocompleted text, LTR, 1x scale", locale = "en")
+@Preview("Autocompleted text, LTR, 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("Autocompleted text, RTL, 1x scale", locale = "he")
+@Preview("Autocompleted text, RTL, 2x scale", locale = "he", fontScale = 2.0f)
+@Composable
+private fun AutocompleteTextFieldPreview_AutocompletedText() {
+    LightDarkPreviewContainer {
+        val text = stringResource(id = R.string.debug_long_string_primary)
+        val textFieldValue = TextFieldValue(
+            text = text,
+            selection = TextRange(7, text.length)
         )
-    }
 
-    @Preview("1x scale", locale = "en")
-    @Preview("2x scale", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x scale", locale = "he")
-    @Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun Default(@PreviewParameter(AutocompleteTextFieldPreviews::class) params: Params) {
-        val textFieldValue = when {
-            params.showPlaceholder -> {
-                TextFieldValue()
-            }
-
-            params.useLongText -> {
-                val text = stringResource(id = R.string.debug_long_string_primary)
-                TextFieldValue(
-                    text = text,
-                    selection = TextRange(7, text.length)
-                )
-            }
-
-            else -> {
-                val text = "something else"
-                TextFieldValue(
-                    text = text,
-                    selection = TextRange(text.length)
-                )
-            }
+        Surface {
+            AutocompleteTextField(
+                textFieldValue = textFieldValue,
+                faviconBitmap = null,
+                focusRequester = FocusRequester(),
+                onLocationEdited = {},
+                onLocationReplaced = {},
+                onFocusChanged = {},
+                onLoadUrl = {},
+                placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
+    }
+}
 
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            Surface {
-                AutocompleteTextField(
-                    textFieldValue = textFieldValue,
-                    faviconBitmap = null,
-                    focusRequester = FocusRequester(),
-                    onLocationEdited = {},
-                    onLocationReplaced = {},
-                    onFocusChanged = {},
-                    onLoadUrl = {},
-                    placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+@Preview("Placeholder, LTR, 1x scale", locale = "en")
+@Preview("Placeholder, LTR, 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("Placeholder, RTL, 1x scale", locale = "he")
+@Preview("Placeholder, RTL, 2x scale", locale = "he", fontScale = 2.0f)
+@Composable
+private fun AutocompleteTextFieldPreview_Placeholder() {
+    LightDarkPreviewContainer {
+        val textFieldValue = TextFieldValue()
+        Surface {
+            AutocompleteTextField(
+                textFieldValue = textFieldValue,
+                faviconBitmap = null,
+                focusRequester = FocusRequester(),
+                onLocationEdited = {},
+                onLocationReplaced = {},
+                onFocusChanged = {},
+                onLoadUrl = {},
+                placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Preview("No autocomplete, LTR, 1x scale", locale = "en")
+@Preview("No autocomplete, LTR, 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("No autocomplete, RTL, 1x scale", locale = "he")
+@Preview("No autocomplete, RTL, 2x scale", locale = "he", fontScale = 2.0f)
+@Composable
+private fun AutocompleteTextFieldPreview_NoAutocomplete() {
+    LightDarkPreviewContainer {
+        val text = "something else"
+        val textFieldValue = TextFieldValue(
+            text = text,
+            selection = TextRange(text.length)
+        )
+
+        Surface {
+            AutocompleteTextField(
+                textFieldValue = textFieldValue,
+                faviconBitmap = null,
+                focusRequester = FocusRequester(),
+                onLocationEdited = {},
+                onLocationReplaced = {},
+                onFocusChanged = {},
+                onLoadUrl = {},
+                placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.neeva.app.settings
+package com.neeva.app.settings.sharedComposables.subcomponents
 
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -27,15 +27,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
-import com.neeva.app.ui.BooleanPreviewParameterProvider
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.settings.sharedComposables.getFormattedSSOProviderName
+import com.neeva.app.ui.LightDarkPreviewContainer
+import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.userdata.NeevaUser
 
 @OptIn(ExperimentalCoilApi::class)
@@ -90,7 +90,6 @@ fun ProfileRow(
             }
         }
         if (onClick != null) {
-            // TODO(dan.alcantara) Use Material Icons extended library when CircleCI issues are resolved
             Image(
                 painter = painterResource(R.drawable.ic_navigate_next),
                 contentDescription = stringResource(R.string.navigate_to_profile),
@@ -103,27 +102,31 @@ fun ProfileRow(
 
 @Composable
 private fun ProfileImage(displayName: String?, pictureURI: Uri?, modifier: Modifier) {
-    if (pictureURI != null) {
-        Image(
-            painter = rememberImagePainter(
-                data = pictureURI,
-                builder = { crossfade(true) }
-            ),
-            contentDescription = null,
-            modifier = modifier
-        )
-    } else {
-        if (displayName == null || displayName.isEmpty()) {
+    when {
+        pictureURI != null -> {
+            Image(
+                painter = rememberImagePainter(
+                    data = pictureURI,
+                    builder = { crossfade(true) }
+                ),
+                contentDescription = null,
+                modifier = modifier
+            )
+        }
+
+        displayName == null || displayName.isEmpty() -> {
             Icon(
                 Icons.Rounded.AccountCircle,
                 contentDescription = null,
-                modifier = modifier,
                 tint = MaterialTheme.colorScheme.primary,
+                modifier = modifier
             )
-        } else {
+        }
+
+        else -> {
             Box(
-                modifier
-                    .background(MaterialTheme.colorScheme.primary)
+                contentAlignment = Alignment.Center,
+                modifier = modifier.background(MaterialTheme.colorScheme.primary)
             ) {
                 Text(
                     text = displayName[0].uppercase(),
@@ -136,86 +139,102 @@ private fun ProfileImage(displayName: String?, pictureURI: Uri?, modifier: Modif
     }
 }
 
-class ProfileRowPreviews :
-    BooleanPreviewParameterProvider<ProfileRowPreviews.Params>(6) {
-    data class Params(
-        val darkTheme: Boolean,
-        val isSignedIn: Boolean,
-        val showSSOProviderAsPrimaryLabel: Boolean,
-        val invalidProfileUrl: Boolean,
-        val navigatable: Boolean,
-        val hasDisplayName: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        darkTheme = booleanArray[0],
-        isSignedIn = booleanArray[1],
-        showSSOProviderAsPrimaryLabel = booleanArray[2],
-        invalidProfileUrl = booleanArray[3],
-        navigatable = booleanArray[4],
-        hasDisplayName = booleanArray[5]
-    )
-
-    @Preview("ProfileRowPreviews 1x", locale = "en")
-    @Preview("ProfileRowPreviews 2x", locale = "en", fontScale = 2.0f)
+class ProfileRowPreviews {
+    @Preview("ProfileRowPreviews LTR, 1x", locale = "en")
+    @Preview("ProfileRowPreviews LTR, 2x", locale = "en", fontScale = 2.0f)
     @Preview("ProfileRowPreviews RTL, 1x", locale = "he")
-    @Preview("ProfileRowPreviews RTL, 2x", locale = "he", fontScale = 2.0f)
     @Composable
-    fun DefaultPreview(
-        @PreviewParameter(ProfileRowPreviews::class) params: Params
-    ) {
-        val pictureURI: Uri? = if (!params.invalidProfileUrl) {
-            Uri.parse("")
-        } else {
-            null
+    fun NotSignedIn() {
+        LightDarkPreviewContainer {
+            SettingsButtonRow(
+                title = stringResource(R.string.settings_sign_in_to_join_neeva),
+                onClick = { },
+                modifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+            )
         }
+    }
 
-        val displayName: String? = if (params.hasDisplayName) {
-            "Jehan Kobe Chang"
-        } else {
-            null
-        }
-
-        val onClick: (() -> Unit)? = if (params.navigatable) {
-            {}
-        } else {
-            null
-        }
-
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            when (params.isSignedIn) {
-                true -> {
-                    SettingsButtonRow(
-                        title = stringResource(R.string.settings_sign_in_to_join_neeva),
-                        onClick = { },
-                        modifier = SettingsUIConstants
-                            .rowModifier.background(MaterialTheme.colorScheme.surface)
-                    )
-                }
-                false -> {
-                    if (params.showSSOProviderAsPrimaryLabel) {
-                        ProfileRow(
-                            primaryLabel = getFormattedSSOProviderName(
-                                NeevaUser.SSOProvider.GOOGLE
-                            ),
-                            secondaryLabel = "kobec@neeva.co",
-                            pictureURI = pictureURI,
-                            onClick = null,
-                            modifier = SettingsUIConstants
-                                .rowModifier.background(MaterialTheme.colorScheme.surface)
-                        )
-                    } else {
-                        ProfileRow(
-                            primaryLabel = displayName,
-                            secondaryLabel = "kobec@neeva.co",
-                            pictureURI = pictureURI,
-                            onClick = onClick,
-                            modifier = SettingsUIConstants
-                                .rowModifier.background(MaterialTheme.colorScheme.surface)
-                        )
-                    }
-                }
+    @Preview("SSO provider LTR, 1x", locale = "en")
+    @Preview("SSO provider LTR, 2x", locale = "en", fontScale = 2.0f)
+    @Preview("SSO provider RTL, 1x", locale = "he")
+    @Composable
+    fun SSOProvider() {
+        OneBooleanPreviewContainer { invalidProfileUrl ->
+            val pictureURI: Uri? = if (!invalidProfileUrl) {
+                Uri.parse("")
+            } else {
+                null
             }
+
+            ProfileRow(
+                primaryLabel = getFormattedSSOProviderName(
+                    NeevaUser.SSOProvider.GOOGLE
+                ),
+                secondaryLabel = "kobec@neeva.co",
+                pictureURI = pictureURI,
+                onClick = null,
+                modifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+            )
+        }
+    }
+
+    @Preview("ProfileRowPreviews LTR, 1x", locale = "en")
+    @Preview("ProfileRowPreviews LTR, 2x", locale = "en", fontScale = 2.0f)
+    @Preview("ProfileRowPreviews RTL, 1x", locale = "he")
+    @Composable
+    fun Clickable() {
+        TwoBooleanPreviewContainer { invalidProfileUrl, hasDisplayName ->
+            val pictureURI: Uri? = if (!invalidProfileUrl) {
+                Uri.parse("")
+            } else {
+                null
+            }
+
+            val displayName: String? = if (hasDisplayName) {
+                "Jehan Kobe Chang"
+            } else {
+                null
+            }
+
+            ProfileRow(
+                primaryLabel = displayName,
+                secondaryLabel = "kobec@neeva.co",
+                pictureURI = pictureURI,
+                onClick = {},
+                modifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+            )
+        }
+    }
+
+    @Preview("ProfileRowPreviews LTR, 1x", locale = "en")
+    @Preview("ProfileRowPreviews LTR, 2x", locale = "en", fontScale = 2.0f)
+    @Preview("ProfileRowPreviews RTL, 1x", locale = "he")
+    @Composable
+    fun NotClickable() {
+        TwoBooleanPreviewContainer { invalidProfileUrl, hasDisplayName ->
+            val pictureURI: Uri? = if (!invalidProfileUrl) {
+                Uri.parse("")
+            } else {
+                null
+            }
+
+            val displayName: String? = if (hasDisplayName) {
+                "Jehan Kobe Chang"
+            } else {
+                null
+            }
+
+            ProfileRow(
+                primaryLabel = displayName,
+                secondaryLabel = "kobec@neeva.co",
+                pictureURI = pictureURI,
+                onClick = null,
+                modifier = SettingsUIConstants
+                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+            )
         }
     }
 }

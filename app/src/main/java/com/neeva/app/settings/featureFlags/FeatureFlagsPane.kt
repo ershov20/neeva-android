@@ -3,7 +3,7 @@ package com.neeva.app.settings.featureFlags
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.settings.SettingsViewModel
-import com.neeva.app.settings.getFakeSettingsViewModel
+import com.neeva.app.settings.mockSettingsViewModel
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -21,7 +21,7 @@ fun FeatureFlagsPane(
 @Composable
 fun ClearBrowsingSettings_Preview() {
     NeevaTheme {
-        FeatureFlagsPane(getFakeSettingsViewModel())
+        FeatureFlagsPane(mockSettingsViewModel)
     }
 }
 
@@ -32,6 +32,6 @@ fun ClearBrowsingSettings_Preview() {
 @Composable
 fun ClearBrowsingSettings_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        FeatureFlagsPane(getFakeSettingsViewModel())
+        FeatureFlagsPane(mockSettingsViewModel)
     }
 }

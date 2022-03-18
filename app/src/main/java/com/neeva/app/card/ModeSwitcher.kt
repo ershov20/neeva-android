@@ -32,15 +32,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.ui.AnimationConstants
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
 
 private val buttonHeight = 48.dp
 private val buttonWidth = 64.dp
@@ -204,35 +202,19 @@ fun ModeSwitcher(
     }
 }
 
-class ModeSwitcherPreviewParameterProvider :
-    BooleanPreviewParameterProvider<ModeSwitcherPreviewParameterProvider.Params>(2) {
-    data class Params(
-        val darkTheme: Boolean,
-        val selectedScreen: SelectedScreen
-    )
-
-    override fun createParams(booleanArray: BooleanArray): Params {
-        return Params(
-            darkTheme = booleanArray[0],
-            selectedScreen = when (booleanArray[1]) {
-                false -> SelectedScreen.REGULAR_TABS
-                else -> SelectedScreen.INCOGNITO_TABS
-            }
-        )
-    }
-}
-
-@Preview("1x", locale = "en")
-@Preview("2x", locale = "en", fontScale = 2.0f)
-@Preview("RTL, 1x", locale = "he")
-@Preview("RTL, 2x", locale = "he", fontScale = 2.0f)
+@Preview("LTR", locale = "en")
+@Preview("RTL", locale = "he")
 @Composable
-private fun ModeSwitcherPreview(
-    @PreviewParameter(ModeSwitcherPreviewParameterProvider::class)
-    params: ModeSwitcherPreviewParameterProvider.Params
-) {
-    NeevaTheme(useDarkTheme = params.darkTheme) {
-        val selectedScreen = remember { mutableStateOf(params.selectedScreen) }
+private fun ModeSwitcherPreview() {
+    OneBooleanPreviewContainer { isIncognito ->
+        val selectedScreen = remember {
+            mutableStateOf(
+                when (isIncognito) {
+                    false -> SelectedScreen.REGULAR_TABS
+                    else -> SelectedScreen.INCOGNITO_TABS
+                }
+            )
+        }
 
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             ModeSwitcher(

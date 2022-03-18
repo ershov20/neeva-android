@@ -12,11 +12,9 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
-import com.neeva.app.ui.BooleanPreviewParameterProvider
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
@@ -69,52 +67,23 @@ fun SettingsLabelText(
     }
 }
 
-class SettingsLabelRowPreviews :
-    BooleanPreviewParameterProvider<SettingsLabelRowPreviews.Params>(2) {
-    data class Params(
-        val darkTheme: Boolean,
-        val isEnabled: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        darkTheme = booleanArray[0],
-        isEnabled = booleanArray[1]
-    )
-
-    @Preview("single label 1x scale", locale = "en")
-    @Preview("single label 2x scale", locale = "en", fontScale = 2.0f)
-    @Preview("single label RTL, 1x scale", locale = "he")
-    @Preview("single label RTL, 2x scale", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun SettingsNavigationRow_SingleLabel_Preview(
-        @PreviewParameter(SettingsLabelRowPreviews::class) params: Params
-    ) {
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            SettingsLabelRow(
-                primaryLabel = stringResource(id = R.string.debug_long_string_primary),
-                enabled = params.isEnabled,
-                rowModifier = SettingsUIConstants
-                    .rowModifier.background(MaterialTheme.colorScheme.surface)
-            )
-        }
-    }
-
-    @Preview("double label 1x scale", locale = "en")
-    @Preview("double label 2x scale", locale = "en", fontScale = 2.0f)
-    @Preview("double label RTL, 1x scale", locale = "he")
-    @Preview("double label RTL, 2x scale", locale = "he", fontScale = 2.0f)
-    @Composable
-    fun SettingsNavigationRow_DoubleLabel_Preview(
-        @PreviewParameter(SettingsLabelRowPreviews::class) params: Params
-    ) {
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            SettingsLabelRow(
-                primaryLabel = stringResource(id = R.string.debug_long_string_primary),
-                secondaryLabel = stringResource(id = R.string.debug_long_string_primary),
-                enabled = params.isEnabled,
-                rowModifier = SettingsUIConstants
-                    .rowModifier.background(MaterialTheme.colorScheme.surface)
-            )
-        }
+@Preview("SettingsLabel, LTR, 1x scale", locale = "en")
+@Preview("SettingsLabel, LTR, 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("SettingsLabel, RTL, 1x scale", locale = "he")
+@Preview("SettingsLabel, RTL, 2x scale", locale = "he", fontScale = 2.0f)
+@Composable
+private fun SettingsLabelRowPreview() {
+    TwoBooleanPreviewContainer { isEnabled, showSecondaryLabel ->
+        SettingsLabelRow(
+            primaryLabel = stringResource(id = R.string.debug_long_string_primary),
+            secondaryLabel = if (showSecondaryLabel) {
+                stringResource(R.string.debug_long_string_primary)
+            } else {
+                null
+            },
+            enabled = isEnabled,
+            rowModifier = SettingsUIConstants
+                .rowModifier.background(MaterialTheme.colorScheme.surface)
+        )
     }
 }

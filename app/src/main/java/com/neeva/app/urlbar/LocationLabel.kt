@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
@@ -25,11 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.LocalBrowserWrapper
@@ -37,9 +38,9 @@ import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.OverflowMenu
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.mapComposeColorToResource
 import org.chromium.weblayer.UrlBarOptions
 
@@ -54,6 +55,7 @@ fun LocationLabel(
 
     val activeTabModel = browserWrapper.activeTabModel
     val displayedInfo by activeTabModel.displayedInfoFlow.collectAsState()
+    val navigationInfoFlow by browserWrapper.activeTabModel.navigationInfoFlow.collectAsState()
 
     // WebLayer requires that you pass it an old-school color resource from the XML files.
     val colorResource = mapComposeColorToResource(LocalContentColor.current)
@@ -78,6 +80,7 @@ fun LocationLabel(
         showIncognitoBadge = showIncognitoBadge,
         onMenuItem = onMenuItem,
         placeholderColor = placeholderColor,
+        canGoForward = navigationInfoFlow.canGoForward,
         modifier = modifier
     )
 }
@@ -90,6 +93,7 @@ fun LocationLabel(
     showIncognitoBadge: Boolean,
     onMenuItem: (id: NeevaMenuItemId) -> Unit,
     placeholderColor: Color,
+    canGoForward: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -134,7 +138,9 @@ fun LocationLabel(
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_search_24),
                         contentDescription = stringResource(R.string.search),
-                        modifier = Modifier.padding(end = 8.dp).size(16.dp)
+                        modifier = Modifier
+                            .padding(end = Dimensions.PADDING_SMALL)
+                            .size(16.dp)
                     )
                     Text(
                         text = displayedText,
@@ -170,36 +176,27 @@ fun LocationLabel(
             }
         }
 
-        OverflowMenu(onMenuItem = onMenuItem)
+        OverflowMenu(
+            onMenuItem = onMenuItem,
+            canGoForward = canGoForward
+        )
     }
 }
 
-class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPreviews.Params>(3) {
-    data class Params(
-        val darkTheme: Boolean,
-        val isIncognito: Boolean,
-        val useLongText: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        darkTheme = booleanArray[0],
-        isIncognito = booleanArray[1],
-        useLongText = booleanArray[2]
-    )
-
-    @Preview("1x font scale", locale = "en")
-    @Preview("2x font scale", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x font scale", locale = "he")
-    @Composable
-    fun URLPreview(@PreviewParameter(LocationLabelPreviews::class) params: Params) {
-        val urlBarText = if (params.useLongText) {
+@Preview("URL 1x font scale", locale = "en")
+@Preview("URL 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("URL RTL, 1x font scale", locale = "he")
+@Composable
+private fun URLPreview() {
+    TwoBooleanPreviewContainer { isIncognito, useLongText ->
+        val urlBarText = if (useLongText) {
             stringResource(id = R.string.debug_long_url)
         } else {
             stringResource(id = R.string.debug_short_url)
         }
 
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            // Create a proxy for the Weblayer URL bar.
+        Surface(modifier = Modifier.height(dimensionResource(R.dimen.top_toolbar_height))) {
+            // Create a proxy for the WebLayer URL bar.
             val weblayerUrlBar = TextView(LocalContext.current)
             weblayerUrlBar.text = urlBarText
             weblayerUrlBar.setTextColor(MaterialTheme.colorScheme.onSurface.toArgb())
@@ -210,56 +207,65 @@ class LocationLabelPreviews : BooleanPreviewParameterProvider<LocationLabelPrevi
                 urlBarView = weblayerUrlBar,
                 mode = ActiveTabModel.DisplayMode.URL,
                 displayedText = urlBarText,
-                showIncognitoBadge = params.isIncognito,
+                showIncognitoBadge = isIncognito,
                 onMenuItem = {},
                 placeholderColor = Color.Magenta,
+                canGoForward = false,
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
     }
+}
 
-    @Preview("1x font scale", locale = "en")
-    @Preview("2x font scale", locale = "en", fontScale = 2.0f)
-    @Preview("RTL, 1x font scale", locale = "he")
-    @Composable
-    fun QueryPreview(@PreviewParameter(LocationLabelPreviews::class) params: Params) {
-        val urlBarText = if (params.useLongText) {
+@Preview("Query 1x font scale", locale = "en")
+@Preview("Query 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("Query RTL, 1x font scale", locale = "he")
+@Composable
+private fun QueryPreview() {
+    TwoBooleanPreviewContainer { isIncognito, useLongText ->
+        val urlBarText = if (useLongText) {
             stringResource(id = R.string.debug_long_string_primary)
         } else {
             stringResource(id = R.string.debug_short_url)
         }
 
-        NeevaTheme(useDarkTheme = params.darkTheme) {
+        Surface(modifier = Modifier.height(dimensionResource(R.dimen.top_toolbar_height))) {
             LocationLabel(
                 urlBarView = TextView(LocalContext.current),
                 mode = ActiveTabModel.DisplayMode.QUERY,
                 displayedText = urlBarText,
-                showIncognitoBadge = params.isIncognito,
+                showIncognitoBadge = isIncognito,
                 onMenuItem = {},
                 placeholderColor = Color.Magenta,
+                canGoForward = false,
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
     }
+}
 
-    @Preview("1x font scale", locale = "en")
-    @Preview("2x font scale", locale = "en", fontScale = 2.0f)
-    @Composable
-    fun NeevaHomepagePreview(@PreviewParameter(LocationLabelPreviews::class) params: Params) {
-        val urlBarText = stringResource(id = R.string.url_bar_placeholder)
+@Preview("Placeholder 1x font scale", locale = "en")
+@Preview("Placeholder 2x font scale", locale = "en", fontScale = 2.0f)
+@Composable
+private fun NeevaHomepagePreview() {
+    OneBooleanPreviewContainer { isIncognito ->
+        val placeholderColor = if (isIncognito) {
+            MaterialTheme.colorScheme.inverseOnSurface
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
 
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            Surface {
-                LocationLabel(
-                    urlBarView = TextView(LocalContext.current),
-                    mode = ActiveTabModel.DisplayMode.PLACEHOLDER,
-                    displayedText = urlBarText,
-                    showIncognitoBadge = params.isIncognito,
-                    onMenuItem = {},
-                    placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.background(MaterialTheme.colorScheme.background)
-                )
-            }
+        Surface(modifier = Modifier.height(dimensionResource(R.dimen.top_toolbar_height))) {
+            LocationLabel(
+                urlBarView = TextView(LocalContext.current),
+                mode = ActiveTabModel.DisplayMode.PLACEHOLDER,
+                displayedText = stringResource(id = R.string.url_bar_placeholder),
+                showIncognitoBadge = isIncognito,
+                onMenuItem = {},
+                placeholderColor = placeholderColor,
+                canGoForward = false,
+                modifier = Modifier.background(MaterialTheme.colorScheme.background)
+            )
         }
     }
 }
