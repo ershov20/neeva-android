@@ -1,6 +1,7 @@
 package com.neeva.app.spaces
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase.createInMemory
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.AddToSpaceMutation
@@ -11,6 +12,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.TestApolloWrapper
+import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
@@ -50,6 +52,7 @@ class SpaceStoreTest : BaseTest() {
 
     private lateinit var context: Context
     private lateinit var neevaUser: NeevaUser
+    private lateinit var database: HistoryDatabase
     private lateinit var apolloWrapper: TestApolloWrapper
     private lateinit var spaceStore: SpaceStore
     private lateinit var file: File
@@ -59,6 +62,7 @@ class SpaceStoreTest : BaseTest() {
         super.setUp()
 
         context = ApplicationProvider.getApplicationContext()
+        database = HistoryDatabase.createInMemory(context)
         val neevaUserToken = NeevaUserToken(mock())
         neevaUserToken.setToken("NotAnEmptyToken")
 
@@ -71,7 +75,15 @@ class SpaceStoreTest : BaseTest() {
             main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
             io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
         )
-        spaceStore = SpaceStore(context, apolloWrapper, neevaUser, snackbarModel, testDispatcher)
+        spaceStore = SpaceStore(
+            context,
+            database,
+            coroutineScopeRule.scope,
+            apolloWrapper,
+            neevaUser,
+            snackbarModel,
+            testDispatcher
+        )
         file = context.cacheDir.resolve("space_store_test")
     }
 
@@ -220,17 +232,18 @@ class SpaceStoreTest : BaseTest() {
             apolloWrapper.addResponse(RESPONSE_LIST_SPACE_QUERY)
 
             spaceStore.refresh()
+            coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
 
             // The refresh will get data about the Spaces but not their contents.
-            val allSpaces = spaceStore.allSpacesFlow.value
+            val allSpaces = database.spaceDao().allSpaces()
             expectThat(allSpaces).hasSize(2)
             allSpaces[0].apply {
                 expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
-                expectThat(contentURLs).isNull()
+                expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
             }
             allSpaces[1].apply {
                 expectThat(id).isEqualTo(SPACE_2.pageMetadata!!.pageID)
-                expectThat(contentURLs).isNull()
+                expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
             }
 
             expectThat(apolloWrapper.performedQueries).hasSize(2)
@@ -246,27 +259,34 @@ class SpaceStoreTest : BaseTest() {
             apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY)
 
             spaceStore.refresh()
+            coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
 
-            spaceStore.allSpacesFlow.value.let { allSpaces ->
+            database.spaceDao().allSpaces().let { allSpaces ->
                 expectThat(allSpaces).hasSize(2)
                 allSpaces[0].apply {
                     expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
-                    expectThat(contentURLs!!).isEmpty()
+                    expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
                 }
                 allSpaces[1].apply {
                     expectThat(id).isEqualTo(SPACE_2.pageMetadata!!.pageID)
-                    expectThat(contentURLs!!).containsExactly(
+                    expectThat(
+                        database.spaceDao()
+                            .getItemsFromSpace(id)
+                            .map { it.url }
+                    ).containsExactly(
                         Uri.parse("https://developer.android.com/jetpack/compose/testing")
                     )
                 }
             }
-            spaceStore.editableSpacesFlow.value.let { editableSpaces ->
-                expectThat(editableSpaces).hasSize(1)
-                editableSpaces[0].apply {
-                    expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
-                    expectThat(contentURLs!!).isEmpty()
+            database.spaceDao().allSpaces()
+                .filterNot { it.userACL >= SpaceACLLevel.Edit }
+                .let { editableSpaces ->
+                    expectThat(editableSpaces).hasSize(1)
+                    editableSpaces[0].apply {
+                        expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
+                        expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
+                    }
                 }
-            }
             expectThat(
                 spaceStore.spaceStoreContainsUrl(
                     Uri.parse("https://developer.android.com/jetpack/compose/testing")
@@ -286,17 +306,22 @@ class SpaceStoreTest : BaseTest() {
             apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY)
 
             spaceStore.refresh()
+            coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
 
-            spaceStore.allSpacesFlow.value.let { allSpaces ->
+            database.spaceDao().allSpaces().let { allSpaces ->
                 expectThat(allSpaces).hasSize(2)
                 allSpaces[0].apply {
                     expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
-                    expectThat(contentURLs!!).isEmpty()
+                    expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
                 }
                 allSpaces[1].apply {
                     expectThat(id).isEqualTo(SPACE_2.pageMetadata!!.pageID)
                     expectThat(lastModifiedTs).isEqualTo("2022-02-10T02:10:38Z")
-                    expectThat(contentURLs!!).containsExactly(
+                    expectThat(
+                        database.spaceDao()
+                            .getItemsFromSpace(id)
+                            .map { it.url }
+                    ).containsExactly(
                         Uri.parse("https://developer.android.com/jetpack/compose/testing")
                     )
                 }
@@ -320,16 +345,19 @@ class SpaceStoreTest : BaseTest() {
 
             spaceStore.refresh()
 
-            spaceStore.allSpacesFlow.value.let { allSpaces ->
+            database.spaceDao().allSpaces().let { allSpaces ->
                 expectThat(allSpaces).hasSize(2)
                 allSpaces[0].apply {
                     expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
-                    expectThat(contentURLs!!).isEmpty()
+                    expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
                 }
                 allSpaces[1].apply {
                     expectThat(id).isEqualTo(SPACE_2.pageMetadata!!.pageID)
                     expectThat(lastModifiedTs).isEqualTo("2099-02-10T02:12:38Z")
-                    expectThat(contentURLs!!).containsExactly(
+                    expectThat(
+                        database.spaceDao().getItemsFromSpace(id)
+                            .map { it.url }
+                    ).containsExactly(
                         Uri.parse("https://reddit.com/r/android")
                     )
                 }
@@ -358,17 +386,21 @@ class SpaceStoreTest : BaseTest() {
             apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY)
 
             spaceStore.refresh()
+            coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
 
-            spaceStore.allSpacesFlow.value.let { allSpaces ->
+            database.spaceDao().allSpaces().let { allSpaces ->
                 expectThat(allSpaces).hasSize(2)
                 allSpaces[0].apply {
                     expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
-                    expectThat(contentURLs!!).isEmpty()
+                    expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
                 }
                 allSpaces[1].apply {
                     expectThat(id).isEqualTo(SPACE_2.pageMetadata!!.pageID)
                     expectThat(lastModifiedTs).isEqualTo("2022-02-10T02:10:38Z")
-                    expectThat(contentURLs!!).containsExactly(
+                    expectThat(
+                        database.spaceDao().getItemsFromSpace(id)
+                            .map { it.url }
+                    ).containsExactly(
                         Uri.parse("https://developer.android.com/jetpack/compose/testing")
                     )
                 }
@@ -418,19 +450,25 @@ class SpaceStoreTest : BaseTest() {
             apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY)
 
             spaceStore.refresh()
+            coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
 
-            spaceStore.allSpacesFlow.value.let { allSpaces ->
+            database.spaceDao().allSpaces().let { allSpaces ->
                 expectThat(allSpaces).hasSize(2)
                 allSpaces[0].apply {
                     expectThat(id).isEqualTo(SPACE_1.pageMetadata!!.pageID)
-                    expectThat(contentURLs!!).isEmpty()
+                    expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
                 }
                 allSpaces[1].apply {
                     expectThat(id).isEqualTo(SPACE_2.pageMetadata!!.pageID)
                     expectThat(lastModifiedTs).isEqualTo("2022-02-10T02:10:38Z")
-                    expectThat(contentURLs!!).containsExactly(
-                        Uri.parse("https://developer.android.com/jetpack/compose/testing")
+                    expectThat(
+                        database.spaceDao()
+                            .getItemsFromSpace(id)
+                            .map { it.url }
                     )
+                        .containsExactly(
+                            Uri.parse("https://developer.android.com/jetpack/compose/testing")
+                        )
                 }
             }
             expectThat(
@@ -452,7 +490,7 @@ class SpaceStoreTest : BaseTest() {
 
             val success = spaceStore.addOrRemoveFromSpace(
                 SPACE_2.pageMetadata?.pageID!!,
-                spaceStore.allSpacesFlow.value.last().contentURLs?.first()!!,
+                database.spaceDao().getItemsFromSpace(SPACE_2.pageMetadata?.pageID!!).first().url!!,
                 ""
             )
 

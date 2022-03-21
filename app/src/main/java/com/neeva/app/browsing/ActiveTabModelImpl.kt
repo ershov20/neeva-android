@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
@@ -35,6 +36,16 @@ class ActiveTabModelImpl(
             ?.flowOn(dispatchers.io)
             ?.stateIn(coroutineScope, SharingStarted.Lazily, false)
             ?: MutableStateFlow(false)
+
+    override val spacesContainingCurrentUrlFlow: StateFlow<List<String>> =
+        spaceStore
+            ?.stateFlow
+            ?.filter { it == SpaceStore.State.READY }
+            ?.combine(_urlFlow) { _, url -> spaceStore.spaceIDsContainingURL(url) }
+            ?.flowOn(dispatchers.io)
+            ?.distinctUntilChanged()
+            ?.stateIn(coroutineScope, SharingStarted.Lazily, emptyList())
+            ?: MutableStateFlow(emptyList())
 
     private val _titleFlow = MutableStateFlow("")
     override val titleFlow: StateFlow<String> = _titleFlow

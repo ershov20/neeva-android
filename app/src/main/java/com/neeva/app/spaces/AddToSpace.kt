@@ -20,9 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -77,7 +75,7 @@ fun AddToSpaceUI(
     spaceModifier: SpaceModifier,
     onDismiss: () -> Unit
 ) {
-    val spaces: List<Space> by spaceStore.editableSpacesFlow.collectAsState()
+    val spaces: List<Space> by spaceStore.editableSpacesFlow.collectAsState(emptyList())
 
     LazyColumn {
         stickyHeader {
@@ -201,25 +199,26 @@ fun SpaceRow(space: Space, activeTabModel: ActiveTabModel? = null, onClick: () -
             }
             Spacer(modifier = Modifier.weight(1f))
         }
-        val spaceHasUrl: Boolean by remember {
-            mutableStateOf(space.contentURLs?.contains(activeTabModel?.urlFlow?.value) == true)
-        }
-        Image(
-            painter = painterResource(
-                if (spaceHasUrl) {
-                    R.drawable.ic_baseline_bookmark_24
+        if (activeTabModel != null) {
+            val spacesWithURL: List<String>
+                by activeTabModel.spacesContainingCurrentUrlFlow.collectAsState()
+            Image(
+                painter = painterResource(
+                    if (spacesWithURL.contains(space.id)) {
+                        R.drawable.ic_baseline_bookmark_24
+                    } else {
+                        R.drawable.ic_baseline_bookmark_border_24
+                    }
+                ),
+                contentDescription = if (spacesWithURL.contains(space.id)) {
+                    stringResource(id = R.string.space_contains_page)
                 } else {
-                    R.drawable.ic_baseline_bookmark_border_24
-                }
-            ),
-            contentDescription = if (spaceHasUrl) {
-                stringResource(id = R.string.space_contains_page)
-            } else {
-                stringResource(id = R.string.space_not_contain_page)
-            },
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.size(24.dp, 24.dp),
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.outline)
-        )
+                    stringResource(id = R.string.space_not_contain_page)
+                },
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(24.dp, 24.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.outline)
+            )
+        }
     }
 }

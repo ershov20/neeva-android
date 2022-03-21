@@ -28,6 +28,9 @@ interface ActiveTabModel {
     /** Tracks whether current URL is in any of the user's Spaces. */
     val isCurrentUrlInSpaceFlow: StateFlow<Boolean>
 
+    /** Tracks the list of space IDs that contain the current URL */
+    val spacesContainingCurrentUrlFlow: StateFlow<List<String>>
+
     /** Tracks the title displayed for the active tab. */
     val titleFlow: StateFlow<String>
 

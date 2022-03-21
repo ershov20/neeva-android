@@ -14,20 +14,31 @@ import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.R
 import com.neeva.app.storage.BitmapIO
+import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.entities.Space
-import com.neeva.app.storage.entities.SpaceEntityData
+import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
 
 /** Manages interactions with the user's Spaces. */
 class SpaceStore(
     private val appContext: Context,
+    private val historyDatabase: HistoryDatabase,
+    private val coroutineScope: CoroutineScope,
     private val apolloWrapper: ApolloWrapper,
     private val neevaUser: NeevaUser,
     private val snackbarModel: SnackbarModel,
@@ -44,23 +55,28 @@ class SpaceStore(
         FAILED
     }
 
-    val allSpacesFlow = MutableStateFlow<List<Space>>(emptyList())
-    val editableSpacesFlow = MutableStateFlow<List<Space>>(emptyList())
+    private val dao = historyDatabase.spaceDao()
+
+    val allSpacesFlow = dao.allSpacesFlow()
+        .flowOn(dispatchers.io)
+        .distinctUntilChanged()
+        .stateIn(coroutineScope, SharingStarted.Lazily, emptyList())
+    val editableSpacesFlow = allSpacesFlow
+        .map { it.filterNot { space -> space.userACL >= SpaceACLLevel.Edit } }
     val stateFlow = MutableStateFlow(State.READY)
 
     @VisibleForTesting
     val thumbnailDirectory = File(appContext.cacheDir, DIRECTORY)
 
-    /** Mapping of URIs to [Space]s that contain them. */
-    private val urlToSpacesMap = mutableMapOf<Uri, MutableList<Space>>()
-
     private var isRefreshPending: Boolean = false
     private var cleanUpThumbnails: Boolean = true
+    private var lastFetchedSpaceIds = emptyList<String>()
 
-    fun spaceStoreContainsUrl(url: Uri): Boolean = urlToSpacesMap[url]?.isNotEmpty() ?: false
+    suspend fun spaceStoreContainsUrl(url: Uri): Boolean = spaceIDsContainingURL(url).isNotEmpty()
 
     suspend fun refresh(space: Space? = null) {
         if (neevaUser.neevaUserToken.getToken().isEmpty()) return
+        // TODO(yusuf) : Early return here if there is no connectivity
 
         if (stateFlow.value == State.REFRESHING) {
             isRefreshPending = true
@@ -80,6 +96,10 @@ class SpaceStore(
             State.FAILED
         }
 
+        withContext(dispatchers.io) {
+            cleanupDatabaseAfterRefresh()
+        }
+
         if (cleanUpThumbnails) {
             cleanUpThumbnails = false
             withContext(dispatchers.io) {
@@ -93,21 +113,19 @@ class SpaceStore(
         }
     }
 
-    private suspend fun performRefresh(): Boolean {
+    private suspend fun performRefresh(): Boolean = withContext(dispatchers.io) {
         val response =
-            apolloWrapper.performQuery(ListSpacesQuery(), userMustBeLoggedIn = true) ?: return false
+            apolloWrapper.performQuery(ListSpacesQuery(), userMustBeLoggedIn = true)
+                ?: return@withContext false
 
         // If there are no spaces to process, but the response was fine, just indicate success.
-        val listSpaces = response.data?.listSpaces ?: return true
-        val oldSpaceMap = allSpacesFlow.value.associateBy { it.id }
-
-        // Clear to avoid holding stale data. Will be rebuilt below.
-        urlToSpacesMap.clear()
+        val listSpaces = response.data?.listSpaces ?: return@withContext true
+        val oldSpaceMap = dao.allSpaces().associateBy { it.id }
 
         // Fetch all the of the user's Spaces.
         val spacesToFetch = mutableListOf<Space>()
 
-        val spaceList = listSpaces.space
+        lastFetchedSpaceIds = listSpaces.space
             .map { listSpacesQuery ->
                 val newSpace = listSpacesQuery.toSpace(
                     neevaUser.data.id
@@ -115,28 +133,16 @@ class SpaceStore(
 
                 val oldSpace = oldSpaceMap[newSpace.id]
                 newSpace.thumbnail = oldSpace?.thumbnail
-                if (oldSpace != null &&
-                    oldSpace.lastModifiedTs == newSpace.lastModifiedTs &&
-                    oldSpace.contentData != null &&
-                    oldSpace.contentURLs != null
-                ) {
-                    // The Space hasn't been updated since the last fetch.
-                    // At this point, newSpace doesn't contain thumbnail, any URLs or data so we
-                    // have to reuse the data that was previously fetched.
-                    onUpdateSpaceURLs(newSpace, oldSpace.contentURLs!!, oldSpace.contentData!!)
-                } else {
+                if (oldSpace == null || oldSpace.lastModifiedTs != newSpace.lastModifiedTs) {
                     spacesToFetch.add(newSpace)
                 }
+                dao.upsert(newSpace)
 
                 newSpace
             }
-            .filterNotNull()
+            .mapNotNull { it?.id }
 
-        allSpacesFlow.value = spaceList
-        editableSpacesFlow.value = spaceList
-            .filter { it.userACL == SpaceACLLevel.Owner || it.userACL == SpaceACLLevel.Edit }
-
-        return performFetch(spacesToFetch)
+        return@withContext performFetch(spacesToFetch)
     }
 
     private suspend fun performFetch(spacesToFetch: List<Space>): Boolean {
@@ -162,30 +168,48 @@ class SpaceStore(
                             it
                         )?.toUri()
                     }
-                    SpaceEntityData(
+                    SpaceItem(
                         id = entityQuery.metadata?.docID!!,
+                        spaceID = spaceID,
                         url = entityQuery.spaceEntity?.url?.let { Uri.parse(it) },
                         title = entityQuery.spaceEntity?.title,
                         snippet = entityQuery.spaceEntity?.snippet,
                         thumbnail = thumbnailUri
                     )
                 }
+            entities.forEach { dao.upsert(it) }
+            dao.getItemsFromSpace(spaceID)
+                .filterNot { entities.contains(it) }
+                .forEach { dao.deleteSpaceItem(it) }
 
-            val contentUrls = entities.mapNotNull { it.url }.toSet()
             spacesToFetch
-                .firstOrNull { space -> space.id == spaceQuery.pageMetadata.pageID }
+                .firstOrNull { space -> space.id == spaceID }
                 ?.let { space ->
-                    onUpdateSpaceURLs(space, contentUrls, entities)
                     space.thumbnail = BitmapIO.saveBitmap(
                         directory = thumbnailDirectory.resolve(space.id),
                         dispatchers = dispatchers,
-                        id = space.id,
+                        id = spaceID,
                         bitmapString = spaceQuery.space.thumbnail
                     )?.toUri()
+                    dao.upsert(space)
                 }
         }
 
         return true
+    }
+
+    private suspend fun contentURLsForSpace(spaceID: String) =
+        contentDataForSpace(spaceID = spaceID).mapNotNull { it.url }
+    private suspend fun contentDataForSpace(spaceID: String) =
+        dao.getItemsFromSpace(spaceID = spaceID)
+    suspend fun spaceIDsContainingURL(url: Uri?) = dao.getSpaceIDsWithURL(url = url)
+
+    /** Cleans up the [Space] and [SpaceItem] tables by taking [allSpacesFlow] as source of truth */
+    private suspend fun cleanupDatabaseAfterRefresh() {
+        dao.allSpaceIds()
+            .filterNot { lastFetchedSpaceIds.contains(it) }
+            .forEach { dao.deleteSpaceById(it) }
+        dao.deleteOrphanedSpaceItems()
     }
 
     suspend fun addOrRemoveFromSpace(
@@ -193,10 +217,10 @@ class SpaceStore(
         url: Uri,
         title: String,
         description: String? = null
-    ): Boolean {
-        val space = allSpacesFlow.value.find { it.id == spaceID } ?: return false
+    ): Boolean = withContext(dispatchers.io) {
+        val space = dao.getSpaceById(spaceID) ?: return@withContext false
 
-        return if (space.contentURLs?.contains(url) == true) {
+        return@withContext if (contentURLsForSpace(space.id).contains(url)) {
             removeFromSpace(space, url)
         } else {
             addToSpace(space, url, title, description)
@@ -204,7 +228,7 @@ class SpaceStore(
     }
 
     private suspend fun cleanupSpacesThumbnails() {
-        val idList = allSpacesFlow.value.map { it.id }
+        val idList = dao.allSpaceIds()
         thumbnailDirectory
             .list { file, _ -> file.isDirectory }
             ?.filterNot { folderName -> idList.contains(folderName) }
@@ -262,28 +286,12 @@ class SpaceStore(
             val successString = appContext.getString(R.string.space_remove_url, space.name)
             Log.i(TAG, successString)
             snackbarModel.show(successString)
-            urlToSpacesMap[uri]?.let {
-                it.remove(space)
-                if (it.isEmpty()) {
-                    urlToSpacesMap.remove(uri)
-                }
-            }
             refresh(space = space)
             true
         } ?: run {
             val errorString = appContext.getString(R.string.generic_error)
             snackbarModel.show(errorString)
             false
-        }
-    }
-
-    private fun onUpdateSpaceURLs(space: Space, urls: Set<Uri>, data: List<SpaceEntityData>) {
-        space.contentURLs = urls
-        space.contentData = data
-        urls.forEach {
-            val spaces = urlToSpacesMap[it] ?: mutableListOf()
-            spaces.add(space)
-            urlToSpacesMap[it] = spaces
         }
     }
 }

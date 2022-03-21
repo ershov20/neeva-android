@@ -158,7 +158,7 @@ fun ZeroQuery(
             ) {
                 items(spaces.subList(0, minOf(3, spaces.size))) { space ->
                     SpaceRow(space = space) {
-                        browserWrapper.loadUrl(space.url)
+                        browserWrapper.loadUrl(space.url())
                     }
                 }
             }

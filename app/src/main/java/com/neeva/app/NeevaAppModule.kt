@@ -85,12 +85,22 @@ object NeevaAppModule {
     @Singleton
     fun providesSpaceStore(
         @ApplicationContext context: Context,
+        historyDatabase: HistoryDatabase,
+        coroutineScope: CoroutineScope,
         apolloWrapper: ApolloWrapper,
         neevaUser: NeevaUser,
         snackbarModel: SnackbarModel,
         dispatchers: Dispatchers
     ): SpaceStore {
-        return SpaceStore(context, apolloWrapper, neevaUser, snackbarModel, dispatchers)
+        return SpaceStore(
+            context,
+            historyDatabase,
+            coroutineScope,
+            apolloWrapper,
+            neevaUser,
+            snackbarModel,
+            dispatchers
+        )
     }
 
     @Provides

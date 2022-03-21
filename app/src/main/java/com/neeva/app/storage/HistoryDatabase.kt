@@ -10,21 +10,26 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
 import com.neeva.app.storage.daos.HistoryDao
+import com.neeva.app.storage.daos.SpaceDao
 import com.neeva.app.storage.entities.Site
+import com.neeva.app.storage.entities.Space
+import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.storage.entities.Visit
 
 @Database(
-    entities = [Site::class, Visit::class],
-    version = 9,
+    entities = [Site::class, Visit::class, SpaceItem::class, Space::class],
+    version = 10,
     autoMigrations = [
         AutoMigration(from = 6, to = 7, spec = HistoryDatabase.MigrationFrom6To7::class),
         AutoMigration(from = 7, to = 8, spec = HistoryDatabase.MigrationFrom7To8::class),
-        AutoMigration(from = 8, to = 9, spec = HistoryDatabase.MigrationFrom8To9::class)
+        AutoMigration(from = 8, to = 9, spec = HistoryDatabase.MigrationFrom8To9::class),
+        AutoMigration(from = 9, to = 10, spec = HistoryDatabase.MigrationFrom9To10::class)
     ]
 )
 @TypeConverters(com.neeva.app.storage.TypeConverters::class)
 abstract class HistoryDatabase : RoomDatabase() {
     abstract fun dao(): HistoryDao
+    abstract fun spaceDao(): SpaceDao
 
     companion object {
         fun create(context: Context): HistoryDatabase {
@@ -63,4 +68,6 @@ abstract class HistoryDatabase : RoomDatabase() {
         DeleteColumn(tableName = "Visit", columnName = "visitType")
     )
     class MigrationFrom8To9 : AutoMigrationSpec
+
+    class MigrationFrom9To10 : AutoMigrationSpec
 }
