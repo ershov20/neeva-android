@@ -73,8 +73,7 @@ fun ZeroQuerySuggestedSite(
             FaviconView(
                 bitmap = faviconBitmap,
                 imageOverride = iconOverride,
-                bordered = false,
-                size = 48.dp
+                iconSize = 48.dp
             )
 
             Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))

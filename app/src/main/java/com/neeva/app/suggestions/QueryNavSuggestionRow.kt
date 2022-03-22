@@ -12,7 +12,7 @@ fun QueryNavSuggestionRow(
     description: String? = null,
     imageURL: String? = null,
     drawableID: Int = R.drawable.ic_baseline_search_24,
-    drawableTint: Color? = null,
+    drawableTint: Color = Color.Unspecified,
     onTapRow: () -> Unit,
     onEditUrl: (() -> Unit)? = null
 ) {
@@ -20,11 +20,18 @@ fun QueryNavSuggestionRow(
         primaryLabel = query,
         onTapRow = { onTapRow.invoke() },
         secondaryLabel = description,
-        onTapEdit = onEditUrl,
-        faviconBitmap = null,
-        imageURL = imageURL,
-        drawableID = drawableID,
-        drawableTint = drawableTint
+        actionParams = onEditUrl?.let {
+            SuggestionRowActionParams(
+                onTapAction = onEditUrl,
+                actionType = SuggestionRowActionParams.ActionType.REFINE
+            )
+        },
+        iconParams = SuggestionRowIconParams(
+            faviconBitmap = null,
+            imageURL = imageURL,
+            drawableID = drawableID,
+            drawableTint = drawableTint
+        )
     )
 }
 

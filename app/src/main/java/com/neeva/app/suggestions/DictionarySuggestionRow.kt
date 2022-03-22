@@ -1,6 +1,5 @@
 package com.neeva.app.suggestions
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,58 +24,57 @@ fun DictionarySuggestionRow(
     BaseSuggestionRow(
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
-        drawableID = R.drawable.ic_dictionary,
-        drawableTint = null
-    ) { baseModifier ->
-        Column(modifier = baseModifier) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        MaterialTheme.typography.bodyLarge
-                            .copy(color = MaterialTheme.colorScheme.onSurface)
-                            .toSpanStyle()
-                    ) {
-                        append(word)
+        iconParams = SuggestionRowIconParams(
+            drawableID = R.drawable.ic_dictionary
+        )
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    MaterialTheme.typography.bodyLarge
+                        .copy(color = MaterialTheme.colorScheme.onSurface)
+                        .toSpanStyle()
+                ) {
+                    append(word)
+                }
+
+                withStyle(
+                    MaterialTheme.typography.bodyMedium
+                        .copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        .toSpanStyle()
+                ) {
+                    phoneticSpelling?.let {
+                        append(" | ")
+                        append(it)
                     }
 
-                    withStyle(
-                        MaterialTheme.typography.bodyMedium
-                            .copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            .toSpanStyle()
-                    ) {
-                        phoneticSpelling?.let {
-                            append(" | ")
-                            append(it)
-                        }
-
-                        lexicalCategory?.let {
-                            append(" | ")
-                            append(it)
-                        }
-
-                        Unit
+                    lexicalCategory?.let {
+                        append(" | ")
+                        append(it)
                     }
-                },
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                softWrap = false,
-                modifier = Modifier.fillMaxWidth()
-            )
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(
-                        MaterialTheme.typography.bodyMedium
-                            .copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            .toSpanStyle()
-                    ) {
-                        append(shortDefinition)
-                    }
-                },
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
+
+                    Unit
+                }
+            },
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    MaterialTheme.typography.bodyMedium
+                        .copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        .toSpanStyle()
+                ) {
+                    append(shortDefinition)
+                }
+            },
+            maxLines = 3,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

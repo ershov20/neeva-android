@@ -10,7 +10,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.LightDarkPreviewContainer
 
 @Composable
 fun CurrentPageRow(browserWrapper: BrowserWrapper) {
@@ -55,6 +55,10 @@ fun CurrentPageRow(
     onEditPressed: () -> Unit
 ) {
     NavSuggestionRow(
+        iconParams = SuggestionRowIconParams(
+            faviconBitmap = faviconBitmap
+        ),
+
         primaryLabel = label,
         onTapRow = { onEditPressed.invoke() },
         secondaryLabel = stringResource(
@@ -64,34 +68,22 @@ fun CurrentPageRow(
                 R.string.edit_current_url
             }
         ),
-        onTapEdit = onEditPressed,
-        faviconBitmap = faviconBitmap
+        actionParams = SuggestionRowActionParams(
+            onTapAction = onEditPressed,
+            actionType = SuggestionRowActionParams.ActionType.REFINE
+        )
     )
 }
 
-@Preview("Light, 1x font scale", locale = "en")
-@Preview("Light, 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("Light, RTL, 1x font scale", locale = "he")
-@Preview("Light, RTL, 2x font scale", locale = "he", fontScale = 2.0f)
+@Preview("CurrentPageRow, 1x font scale", locale = "en")
+@Preview("CurrentPageRow, 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("CurrentPageRow, RTL", locale = "he")
 @Composable
-fun CurrentPageRow_PreviewLight() {
-    NeevaTheme(useDarkTheme = false) {
+fun CurrentPageRowPreview() {
+    LightDarkPreviewContainer {
         CurrentPageRow(
             faviconBitmap = null,
-            label = "https://www.reddit.com",
-            isShowingQuery = false
-        ) {}
-    }
-}
-
-@Preview("Dark, 1x font scale", locale = "en")
-@Preview("Dark, 2x font scale", locale = "en", fontScale = 2.0f)
-@Composable
-fun CurrentPageRow_PreviewDark() {
-    NeevaTheme(useDarkTheme = true) {
-        CurrentPageRow(
-            faviconBitmap = null,
-            label = "https://www.reddit.com",
+            label = "https://www.example.com",
             isShowingQuery = false
         ) {}
     }

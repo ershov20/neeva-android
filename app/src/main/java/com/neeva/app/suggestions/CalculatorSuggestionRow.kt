@@ -2,9 +2,10 @@ package com.neeva.app.suggestions
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.LightDarkPreviewContainer
 
 @Composable
 fun CalculatorSuggestionRow(
@@ -15,18 +16,17 @@ fun CalculatorSuggestionRow(
         query = suggestion.query,
         description = suggestion.description,
         drawableID = R.drawable.ic_calculator,
-        drawableTint = null, // The calculator is already colored.
+        drawableTint = Color.Unspecified, // The calculator is already colored.
         onTapRow = onTapRow
     )
 }
 
-@Preview("1x scale")
-@Preview("2x scale", fontScale = 2.0f)
+@Preview("LTR, 1x scale", locale = "en")
+@Preview("LTR, 2x scale", locale = "en", fontScale = 2.0f)
 @Preview("RTL, 1x scale", locale = "he")
-@Preview("RTL, 2x scale", locale = "he", fontScale = 2.0f)
 @Composable
 fun CalculatorSuggestionRow_Preview() {
-    NeevaTheme {
+    LightDarkPreviewContainer {
         CalculatorSuggestionRow(
             suggestion = QueryRowSuggestion(
                 url = Uri.parse(""),

@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -132,11 +131,13 @@ fun TabCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(vertical = Dimensions.PADDING_SMALL)
+                modifier = Modifier.padding(top = Dimensions.PADDING_SMALL)
             ) {
-                Box(modifier = Modifier.padding(end = Dimensions.PADDING_SMALL)) {
-                    FaviconView(faviconBitmap)
-                }
+                FaviconView(
+                    bitmap = faviconBitmap,
+                    drawContainer = false
+                )
+
                 Text(
                     text = tabInfo.title ?: tabInfo.url?.toString() ?: "",
                     style = MaterialTheme.typography.bodyMedium,

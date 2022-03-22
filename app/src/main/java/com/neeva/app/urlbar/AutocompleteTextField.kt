@@ -99,7 +99,7 @@ fun AutocompleteTextField(
     ) {
         FaviconView(
             bitmap = faviconBitmap,
-            bordered = false
+            drawContainer = false
         )
 
         Spacer(Modifier.width(Dimensions.PADDING_SMALL))

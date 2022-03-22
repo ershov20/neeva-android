@@ -35,13 +35,15 @@ fun NavSuggestion(
     navSuggestion: NavSuggestion
 ) {
     NavSuggestionRow(
+        iconParams = SuggestionRowIconParams(
+            faviconBitmap = faviconBitmap
+        ),
         primaryLabel = navSuggestion.label,
         onTapRow = {
             onOpenUrl.invoke(navSuggestion.url)
             onTapSuggestion?.invoke(navSuggestion.type, navSuggestion.position)
         },
-        secondaryLabel = navSuggestion.secondaryLabel,
-        faviconBitmap = faviconBitmap
+        secondaryLabel = navSuggestion.secondaryLabel
     )
 }
 

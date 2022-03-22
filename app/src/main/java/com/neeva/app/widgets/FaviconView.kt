@@ -2,25 +2,19 @@ package com.neeva.app.widgets
 
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -40,57 +34,53 @@ import com.neeva.app.ui.theme.Dimensions
 @Composable
 fun FaviconView(
     bitmap: Bitmap?,
-    modifier: Modifier = Modifier,
+    drawContainer: Boolean = true,
     imageOverride: ImageVector? = null,
-    bordered: Boolean = true,
-    size: Dp = 20.dp
+    iconSize: Dp = Dimensions.SIZE_ICON
 ) {
-    Box(
-        modifier = modifier
-            .size(size)
-            .then(
-                if (bordered) {
-                    Modifier
-                        .clip(RoundedCornerShape(Dimensions.RADIUS_TINY))
-                        .border(
-                            1.dp, MaterialTheme.colorScheme.surfaceVariant,
-                            RoundedCornerShape(Dimensions.RADIUS_TINY)
-                        )
-                        .padding(1.dp)
-                } else {
-                    Modifier.clip(RoundedCornerShape(Dimensions.RADIUS_SMALL))
-                }
-            ),
-        Alignment.Center
+    Surface(
+        color = if (drawContainer) {
+            MaterialTheme.colorScheme.surface
+        } else {
+            Color.Transparent
+        },
+        tonalElevation = 1.dp,
+        shape = RoundedCornerShape(Dimensions.RADIUS_SMALL)
     ) {
-        when {
-            imageOverride != null -> {
-                Image(
-                    imageVector = imageOverride,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.FillBounds,
-                    colorFilter = ColorFilter.tint(LocalContentColor.current)
-                )
+        val sizeModifier = Modifier.size(iconSize)
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = if (drawContainer) {
+                Modifier.padding(Dimensions.PADDING_SMALL)
+            } else {
+                Modifier
             }
+        ) {
+            when {
+                imageOverride != null -> {
+                    Icon(
+                        imageVector = imageOverride,
+                        contentDescription = null,
+                        modifier = sizeModifier
+                    )
+                }
 
-            bitmap != null -> {
-                Image(
-                    bitmap = bitmap.asImageBitmap(),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.FillBounds,
-                )
-            }
+                bitmap != null -> {
+                    Icon(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = null,
+                        tint = Color.Unspecified,
+                        modifier = sizeModifier
+                    )
+                }
 
-            else -> {
-                Image(
-                    painter = painterResource(R.drawable.globe),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.FillBounds,
-                    colorFilter = ColorFilter.tint(LocalContentColor.current)
-                )
+                else -> {
+                    Icon(
+                        painter = painterResource(R.drawable.globe),
+                        contentDescription = null,
+                        modifier = sizeModifier
+                    )
+                }
             }
         }
     }
@@ -99,22 +89,16 @@ fun FaviconView(
 @Preview
 @Composable
 private fun FaviconViewPreviews() {
-    TwoBooleanPreviewContainer { bordered, showBitmap ->
+    TwoBooleanPreviewContainer { showBackground, showBitmap ->
         val bitmap = if (showBitmap) {
             Uri.parse(NeevaConstants.appURL).toBitmap()
         } else {
             null
         }
 
-        Surface(color = MaterialTheme.colorScheme.background) {
-            CompositionLocalProvider(
-                LocalContentColor provides MaterialTheme.colorScheme.onBackground
-            ) {
-                FaviconView(
-                    bitmap = bitmap,
-                    bordered = bordered
-                )
-            }
-        }
+        FaviconView(
+            bitmap = bitmap,
+            drawContainer = showBackground
+        )
     }
 }

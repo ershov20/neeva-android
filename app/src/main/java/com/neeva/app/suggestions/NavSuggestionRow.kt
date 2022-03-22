@@ -1,6 +1,5 @@
 package com.neeva.app.suggestions
 
-import android.graphics.Bitmap
 import android.net.Uri
 import android.webkit.URLUtil
 import androidx.compose.foundation.layout.Column
@@ -9,7 +8,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,26 +16,20 @@ import com.neeva.app.ui.OneBooleanPreviewContainer
 
 @Composable
 fun NavSuggestionRow(
+    iconParams: SuggestionRowIconParams,
     primaryLabel: String,
     onTapRow: () -> Unit,
     onTapRowContentDescription: String? = null,
     secondaryLabel: String? = null,
-    onTapEdit: (() -> Unit)? = null,
-    faviconBitmap: Bitmap? = null,
-    imageURL: String? = null,
-    drawableID: Int? = null,
-    drawableTint: Color? = null
+    actionParams: SuggestionRowActionParams? = null
 ) {
     BaseSuggestionRow(
+        iconParams = iconParams,
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
-        onTapEdit = onTapEdit,
-        faviconBitmap = faviconBitmap,
-        imageURL = imageURL,
-        drawableID = drawableID,
-        drawableTint = drawableTint
+        actionParams = actionParams
     ) {
-        Column(modifier = it) {
+        Column {
             Text(
                 text = primaryLabel,
                 style = MaterialTheme.typography.bodyLarge,
@@ -74,11 +66,16 @@ private fun NavSuggestionRowPreview_LongLabels() {
         val secondaryLabel = stringResource(R.string.debug_long_string_primary)
         val onTapEdit = {}.takeIf { allowEditing }
         NavSuggestionRow(
+            iconParams = SuggestionRowIconParams(),
             primaryLabel = primaryLabel,
             onTapRow = {},
             secondaryLabel = secondaryLabel,
-            onTapEdit = onTapEdit,
-            faviconBitmap = null
+            actionParams = onTapEdit?.let {
+                SuggestionRowActionParams(
+                    onTapAction = it,
+                    actionType = SuggestionRowActionParams.ActionType.REFINE
+                )
+            }
         )
     }
 }
@@ -94,11 +91,16 @@ private fun NavSuggestionRowPreview_ShortLabels() {
         val secondaryLabel = "Secondary label"
         val onTapEdit = {}.takeIf { allowEditing }
         NavSuggestionRow(
+            iconParams = SuggestionRowIconParams(),
             primaryLabel = primaryLabel,
             onTapRow = {},
             secondaryLabel = secondaryLabel,
-            onTapEdit = onTapEdit,
-            faviconBitmap = null
+            actionParams = onTapEdit?.let {
+                SuggestionRowActionParams(
+                    onTapAction = it,
+                    actionType = SuggestionRowActionParams.ActionType.REFINE
+                )
+            }
         )
     }
 }

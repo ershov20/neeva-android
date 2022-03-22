@@ -6,9 +6,11 @@
     <string name="edit_current_url">Edit current URL</string>
     <string name="edit_current_search">Edit current search</string>
     <string name="edit_content_description">Edit</string>
+    <string name="refine_content_description">Refine</string>
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
     <string name="done">Done</string>
+    <string name="remove">Remove</string>
     <string name="new_tab_content_description">Create new tab</string>
     <string name="close_all_content_description">Close all tabs</string>
     <string name="update_available">Update available</string>

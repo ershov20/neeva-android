@@ -15,7 +15,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import kotlin.math.absoluteValue
 
 @Composable
@@ -43,10 +43,12 @@ fun StockSuggestionRow(
     BaseSuggestionRow(
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
-        drawableID = drawableId,
-        drawableTint = null
-    ) { baseModifier ->
-        Column(modifier = baseModifier) {
+        iconParams = SuggestionRowIconParams(
+            drawableID = drawableId,
+            drawableTint = Color.Unspecified
+        )
+    ) {
+        Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -100,7 +102,9 @@ fun StockSuggestionRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1.0f).padding(start = elementSpacing),
+                        modifier = Modifier
+                            .weight(1.0f)
+                            .padding(start = elementSpacing),
                         textAlign = TextAlign.End
                     )
                 }
@@ -126,7 +130,9 @@ fun StockSuggestionRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.fillMaxWidth().padding(start = elementSpacing)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = elementSpacing)
                     )
                 }
             }
@@ -136,39 +142,30 @@ fun StockSuggestionRow(
 
 private fun formatCurrency(currencyValue: Double) = String.format("%.2f", currencyValue)
 
-@Preview("Stock down, 1x scale", locale = "en")
-@Preview("Stock down, 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("Stock down, RTL, 1x scale", locale = "he")
-@Preview("Stock down, RTL, 2x scale", locale = "he", fontScale = 2.0f)
+@Preview("StockSuggestionRow, LTR, 1x scale", locale = "en")
+@Preview("StockSuggestionRow, LTR, 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("StockSuggestionRow, RTL, 1x scale", locale = "he")
 @Composable
 fun StockSuggestionRow_PreviewStockDown() {
-    NeevaTheme {
-        StockSuggestionRow(
-            onTapRow = {},
-            companyName = "Tesla Inc",
-            ticker = "TSLA",
-            currentPrice = 643.38,
-            changeFromPreviousClose = -5.88,
-            percentChangeFromPreviousClose = -0.91,
-            fetchedAtTime = "Aug 5, 3:31 PM EDT"
-        )
-    }
-}
+    OneBooleanPreviewContainer { isStockUp ->
+        val changeFromPreviousClose = if (isStockUp) {
+            0.60
+        } else {
+            -5.88
+        }
+        val percentChangeFromPreviousClose = if (isStockUp) {
+            0.09
+        } else {
+            0.60
+        }
 
-@Preview("Stock up, 1x scale", locale = "en")
-@Preview("Stock up, 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("Stock up, RTL, 1x scale", locale = "he")
-@Preview("Stock up, RTL, 2x scale", locale = "he", fontScale = 2.0f)
-@Composable
-fun StockSuggestionRow_PreviewStockUp() {
-    NeevaTheme {
         StockSuggestionRow(
             onTapRow = {},
             companyName = "Tesla Inc",
             ticker = "TSLA",
             currentPrice = 643.38,
-            changeFromPreviousClose = 0.60,
-            percentChangeFromPreviousClose = 0.09,
+            changeFromPreviousClose = changeFromPreviousClose,
+            percentChangeFromPreviousClose = percentChangeFromPreviousClose,
             fetchedAtTime = "Aug 5, 3:31 PM EDT"
         )
     }
