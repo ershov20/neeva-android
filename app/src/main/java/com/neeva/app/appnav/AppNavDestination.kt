@@ -23,8 +23,7 @@ enum class AppNavDestination(
     SET_DEFAULT_BROWSER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     LOCAL_FEATURE_FLAGS_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
 
-    FEEDBACK(parent = BROWSER, slidesOutToward = SlideDirection.End),
-    FEEDBACK_PREVIEW_IMAGE(parent = FEEDBACK, slidesOutToward = SlideDirection.End);
+    FEEDBACK(parent = BROWSER, slidesOutToward = SlideDirection.End);
 
     val route: String = this.name
 

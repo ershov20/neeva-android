@@ -34,6 +34,7 @@ import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.isSelected
 import com.neeva.app.browsing.toSearchUri
+import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.logging.ClientLogger
@@ -81,6 +82,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         NeevaActivityViewModel.Factory(intent)
     }
 
+    private val feedbackViewModel: FeedbackViewModel by viewModels()
     internal val webLayerModel: WebLayerModel by viewModels()
 
     internal var appNavModel: AppNavModel? = null
@@ -108,7 +110,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers,
                         snackbarModel = snackbarModel,
-                        clientLogger = clientLogger
+                        clientLogger = clientLogger,
+                        onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback
                     )
                 }
 
@@ -116,6 +119,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     CompositionLocalProvider(
                         LocalEnvironment provides localEnvironmentState,
                         LocalAppNavModel provides appNavModel!!,
+                        LocalFeedbackViewModel provides feedbackViewModel,
                         LocalFirstRunModel provides firstRunModel,
                         LocalMenuData provides LocalMenuDataState(
                             isUpdateAvailableVisible = isUpdateAvailable
@@ -276,6 +280,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         // Check if there are any Intents that have URLs that need to be loaded.
         activityViewModel.getPendingLaunchIntent()?.let { processIntent(it) }
+    }
+
+    private fun takeScreenshotForFeedback(callback: () -> Unit) {
+        feedbackViewModel.takeScreenshot(window, webLayerModel.currentBrowser, callback)
     }
 
     /**

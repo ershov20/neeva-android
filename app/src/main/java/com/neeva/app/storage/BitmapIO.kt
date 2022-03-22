@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.WorkerThread
+import androidx.core.graphics.scale
 import androidx.core.net.toFile
 import com.neeva.app.Dispatchers
 import java.io.BufferedInputStream
@@ -118,6 +119,42 @@ object BitmapIO {
             bufferedStream?.closeQuietly()
             inputStream?.closeQuietly()
         }
+    }
+}
+
+/** Converts the bitmap into a Base64-encoded string. */
+fun Bitmap.toBase64String(): String {
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+
+    val byteArray = byteArrayOutputStream.toByteArray()
+    return Base64.encodeToString(byteArray, Base64.DEFAULT)
+}
+
+/**
+ * Scales a bitmap down while maintaining its aspect ratio.
+ *
+ * Returns the original bitmap if the bitmap was already smaller than the passed in size.
+ */
+fun Bitmap.scaleDownMaintainingAspectRatio(maxSize: Int): Bitmap {
+    val newWidth: Int
+    val newHeight: Int
+    return if (this.height > maxSize || this.width > maxSize) {
+        // Scale the image down.
+        if (this.height > this.width) {
+            // oldWidth / oldHeight = newWidth / MAX_SCREENSHOT_SIZE
+            newHeight = maxSize
+            newWidth = (this.width.toFloat() / this.height * maxSize).toInt()
+        } else {
+            // oldHeight / oldWidth = newHeight / MAX_SCREENSHOT_SIZE
+            newWidth = maxSize
+            newHeight = (this.height.toFloat() / this.width * maxSize).toInt()
+        }
+
+        scale(newWidth, newHeight)
+    } else {
+        // The image is already small enough.
+        this
     }
 }
 

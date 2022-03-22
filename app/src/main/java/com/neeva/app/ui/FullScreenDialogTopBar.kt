@@ -22,7 +22,7 @@ fun FullScreenDialogTopBar(
     title: String,
     onBackPressed: () -> Unit,
     buttonTitle: String? = null,
-    buttonPressed: (() -> Unit)? = null
+    onButtonPressed: (() -> Unit)? = null
 ) {
     SmallTopAppBar(
         title = {
@@ -47,8 +47,8 @@ fun FullScreenDialogTopBar(
             }
         },
         actions = {
-            if (buttonTitle != null && buttonPressed != null) {
-                TextButton(onClick = { buttonPressed() }) {
+            if (buttonTitle != null && onButtonPressed != null) {
+                TextButton(onClick = { onButtonPressed() }) {
                     Text(
                         text = buttonTitle,
                         color = MaterialTheme.colorScheme.primary,
@@ -73,7 +73,7 @@ private fun FullScreenDialogTopBarPreview() {
             title = stringResource(R.string.debug_long_string_primary),
             onBackPressed = {},
             buttonTitle = stringResource(R.string.debug_short_action).takeIf { addButton },
-            buttonPressed = {}.takeIf { addButton }
+            onButtonPressed = {}.takeIf { addButton }
         )
     }
 }

@@ -16,6 +16,8 @@ import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.urlbar.URLBarModel
 import com.neeva.app.urlbar.URLBarModelImpl
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -29,6 +31,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
+import org.chromium.weblayer.BrowserEmbeddabilityMode
 import org.chromium.weblayer.BrowserRestoreCallback
 import org.chromium.weblayer.NewTabType
 import org.chromium.weblayer.OpenUrlCallback
@@ -633,6 +636,26 @@ abstract class BrowserWrapper internal constructor(
         _findInPageModel.scrollToFindInPageResult(_activeTabModel.activeTab, forward)
     }
     // endregion
+
+    suspend fun allowScreenshots(allowScreenshots: Boolean) {
+        val mode = if (allowScreenshots) {
+            BrowserEmbeddabilityMode.SUPPORTED
+        } else {
+            BrowserEmbeddabilityMode.UNSUPPORTED
+        }
+
+        val result = suspendCoroutine<Boolean?> { continuation ->
+            browser?.setEmbeddabilityMode(mode) {
+                continuation.resume(it)
+            } ?: run {
+                continuation.resume(null)
+            }
+        }
+
+        if (result != true) {
+            Log.e(TAG, "Failed to update mode (allowScreenshots = $allowScreenshots)")
+        }
+    }
 
     companion object {
         val TAG = BrowserWrapper::class.simpleName

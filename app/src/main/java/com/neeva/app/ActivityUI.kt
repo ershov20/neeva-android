@@ -8,6 +8,7 @@ import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
@@ -35,6 +36,7 @@ data class LocalEnvironmentState(
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value set") }
 val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("No value set") }
+val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("No value set") }
 val LocalSetDefaultAndroidBrowserManager = compositionLocalOf<SetDefaultAndroidBrowserManager> {
     error("No value set")
 }

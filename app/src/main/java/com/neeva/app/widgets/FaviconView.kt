@@ -51,14 +51,14 @@ fun FaviconView(
             .then(
                 if (bordered) {
                     Modifier
-                        .clip(RoundedCornerShape(Dimensions.RADIUS_SMALL))
+                        .clip(RoundedCornerShape(Dimensions.RADIUS_TINY))
                         .border(
                             1.dp, MaterialTheme.colorScheme.surfaceVariant,
-                            RoundedCornerShape(Dimensions.RADIUS_SMALL)
+                            RoundedCornerShape(Dimensions.RADIUS_TINY)
                         )
                         .padding(1.dp)
                 } else {
-                    Modifier.clip(RoundedCornerShape(Dimensions.RADIUS_LARGE))
+                    Modifier.clip(RoundedCornerShape(Dimensions.RADIUS_SMALL))
                 }
             ),
         Alignment.Center

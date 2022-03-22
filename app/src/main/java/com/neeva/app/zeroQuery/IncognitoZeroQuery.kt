@@ -63,7 +63,7 @@ fun IncognitoZeroQueryDisclaimer(
     ) {
         Surface(
             color = backgroundColor,
-            shape = RoundedCornerShape(Dimensions.RADIUS_LARGE)
+            shape = RoundedCornerShape(Dimensions.RADIUS_SMALL)
         ) {
             val spacingDp = with(LocalDensity.current) {
                 MaterialTheme.typography.bodyMedium.lineHeight.toDp()

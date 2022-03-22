@@ -18,7 +18,7 @@
 
     <string name="share">Share</string>
     <string name="downloads">Downloads</string>
-    <string name="feedback">Feedback</string>
+    <string name="feedback">Support</string>
     <string name="history">History</string>
     <string name="home">Home</string>
     <string name="incognito">Incognito</string>
@@ -116,8 +116,8 @@
     <string name="submit_feedback">Send</string>
     <string name="submit_feedback_help_center_title">Need help or want instant answers to FAQs?</string>
     <string name="submit_feedback_help_center_link">Visit our help center!</string>
-    <string name="submit_feedback_share_screenshot">Share Screenshot</string>
-    <string name="submit_feedback_share_screenshot_preview">Feedback Screenshot</string>
+    <string name="submit_feedback_share_screenshot">Share screenshot</string>
+    <string name="submit_feedback_share_screenshot_preview">Screenshot that will be shared with Neeva</string>
     <string name="submit_feedback_remove_screenshot">Remove</string>
     <string name="submit_feedback_upload_screenshot">Upload</string>
     <string name="submit_feedback_view_share_url">Share URL</string>

@@ -1,22 +1,17 @@
 package com.neeva.app.appnav
 
-import android.net.Uri
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.LocalSetDefaultAndroidBrowserManager
-import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.card.CardsContainer
-import com.neeva.app.feedback.FeedbackPreviewImageView
 import com.neeva.app.feedback.FeedbackView
-import com.neeva.app.feedback.FeedbackViewModelImpl
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.settings.SettingsViewModelImpl
@@ -39,7 +34,6 @@ fun AppNav(
     val settingsDataModel = LocalEnvironment.current.settingsDataModel
     val neevaUser = LocalEnvironment.current.neevaUser
     val setDefaultAndroidBrowserManager = LocalSetDefaultAndroidBrowserManager.current
-    val coroutineScope = rememberCoroutineScope()
 
     val settingsViewModel = remember(
         appNavModel,
@@ -55,16 +49,6 @@ fun AppNav(
             webLayerModel,
             setDefaultAndroidBrowserManager
         )
-    }
-
-    val feedbackViewModel = remember(appNavModel, neevaUser, coroutineScope, webLayerModel) {
-        FeedbackViewModelImpl(
-            appNavModel,
-            user = neevaUser,
-            coroutineScope = coroutineScope
-        ) {
-            appNavModel.openUrl(Uri.parse(NeevaConstants.appHelpCenterURL))
-        }
     }
 
     AnimatedNavHost(
@@ -137,15 +121,7 @@ fun AppNav(
 
         composable(AppNavDestination.FEEDBACK.route) {
             FeedbackView(
-                feedbackViewModel = feedbackViewModel,
-                currentURL = webLayerModel.currentBrowser.activeTabModel.urlFlow
-            )
-        }
-
-        composable(AppNavDestination.FEEDBACK_PREVIEW_IMAGE.route) {
-            FeedbackPreviewImageView(
-                appNavModel = appNavModel,
-                imageUri = feedbackViewModel.imageUri
+                currentURLFlow = webLayerModel.currentBrowser.activeTabModel.urlFlow
             )
         }
     }

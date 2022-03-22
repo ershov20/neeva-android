@@ -38,7 +38,8 @@ class AppNavModel(
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
     private val snackbarModel: SnackbarModel,
-    private val clientLogger: ClientLogger
+    private val clientLogger: ClientLogger,
+    private val onTakeScreenshot: (callback: () -> Unit) -> Unit
 ) {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     val currentDestination: StateFlow<NavDestination?> = _currentDestination
@@ -144,8 +145,16 @@ class AppNavModel(
         clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION, null)
     }
     fun showHistory() = show(AppNavDestination.HISTORY)
-    fun showFeedback() = show(AppNavDestination.FEEDBACK)
-    fun showFeedbackPreviewImage() = show(AppNavDestination.FEEDBACK_PREVIEW_IMAGE)
+
+    fun showFeedback() {
+        onTakeScreenshot {
+            show(AppNavDestination.FEEDBACK)
+        }
+    }
+
+    fun showHelp() {
+        openUrl(Uri.parse(NeevaConstants.appHelpCenterURL))
+    }
 
     /** Fires a Share Intent for the currently displayed page. */
     fun shareCurrentPage() {
