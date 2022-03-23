@@ -46,7 +46,7 @@ import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.widgets.FaviconView
+import com.neeva.app.ui.widgets.FaviconView
 import kotlinx.coroutines.withContext
 
 @Composable

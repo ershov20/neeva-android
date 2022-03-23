@@ -4,7 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -13,6 +12,8 @@ import coil.annotation.ExperimentalCoilApi
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.RowActionIcon
+import com.neeva.app.ui.widgets.RowActionIconParams
 
 /**
  * Base skeleton for everything that can be displayed as a suggestion in UI.  Callers must provide
@@ -25,18 +26,16 @@ fun BaseSuggestionRow(
     iconParams: SuggestionRowIconParams,
     onTapRow: () -> Unit,
     onTapRowContentDescription: String? = null,
-    actionParams: SuggestionRowActionParams? = null,
+    actionIconParams: RowActionIconParams? = null,
     mainContent: @Composable () -> Unit
 ) {
     BaseRowLayout(
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
         startComposable = {
-            Box(modifier = Modifier.padding(start = Dimensions.PADDING_SMALL)) {
-                SuggestionRowIcon(iconParams)
-            }
+            SuggestionRowIcon(iconParams)
         },
-        endComposable = actionParams?.let { { SuggestionRowAction(it) } },
+        endComposable = actionIconParams?.let { { RowActionIcon(it) } },
         mainContent = mainContent
     )
 }
@@ -49,9 +48,9 @@ fun BaseSuggestionRow_Preview() {
     OneBooleanPreviewContainer { showAction ->
         BaseSuggestionRow(
             onTapRow = {},
-            actionParams = SuggestionRowActionParams(
+            actionIconParams = RowActionIconParams(
                 onTapAction = {},
-                actionType = SuggestionRowActionParams.ActionType.REFINE
+                actionType = RowActionIconParams.ActionType.REFINE
             ).takeIf { showAction },
             iconParams = SuggestionRowIconParams()
         ) {

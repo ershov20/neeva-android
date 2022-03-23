@@ -43,8 +43,8 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.ui.theme.ColorPalette
-import com.neeva.app.widgets.overlay.OverlaySheet
-import com.neeva.app.widgets.overlay.OverlaySheetConfig
+import com.neeva.app.ui.widgets.overlay.OverlaySheet
+import com.neeva.app.ui.widgets.overlay.OverlaySheetConfig
 
 @Composable
 fun AddToSpaceSheet(

@@ -2,6 +2,7 @@ package com.neeva.app.suggestions
 
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,6 +12,7 @@ import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.ui.LightDarkPreviewContainer
+import com.neeva.app.ui.widgets.RowActionIconParams
 
 @Composable
 fun CurrentPageRow(browserWrapper: BrowserWrapper) {
@@ -35,14 +37,18 @@ fun CurrentPageRow(browserWrapper: BrowserWrapper) {
             currentURL.toString()
         }
 
-        CurrentPageRow(
-            faviconBitmap = faviconBitmap,
-            label = label,
-            isShowingQuery = isShowingQuery
-        ) {
-            urlBarModel.replaceLocationBarText(
-                if (isShowingQuery) displayedText else currentURL.toString()
-            )
+        Column {
+            CurrentPageRow(
+                faviconBitmap = faviconBitmap,
+                label = label,
+                isShowingQuery = isShowingQuery
+            ) {
+                urlBarModel.replaceLocationBarText(
+                    if (isShowingQuery) displayedText else currentURL.toString()
+                )
+            }
+
+            SuggestionDivider()
         }
     }
 }
@@ -68,9 +74,9 @@ fun CurrentPageRow(
                 R.string.edit_current_url
             }
         ),
-        actionParams = SuggestionRowActionParams(
+        actionIconParams = RowActionIconParams(
             onTapAction = onEditPressed,
-            actionType = SuggestionRowActionParams.ActionType.REFINE
+            actionType = RowActionIconParams.ActionType.REFINE
         )
     )
 }

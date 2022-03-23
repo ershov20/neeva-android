@@ -1,5 +1,6 @@
 package com.neeva.app.history
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -23,15 +25,16 @@ import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
-import com.neeva.app.suggestions.NavSuggestion
-import com.neeva.app.suggestions.SuggestionType
+import com.neeva.app.suggestions.NavSuggestionRow
+import com.neeva.app.suggestions.SuggestionRowIconParams
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.widgets.BrandedTextButton
-import com.neeva.app.widgets.collapsible.CollapsingSectionState
-import com.neeva.app.widgets.collapsible.collapsibleSection
-import com.neeva.app.widgets.collapsible.setNextState
+import com.neeva.app.ui.widgets.ClickableRow
+import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.collapsible.CollapsingSectionState
+import com.neeva.app.ui.widgets.collapsible.collapsibleSection
+import com.neeva.app.ui.widgets.collapsible.setNextState
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Date
@@ -42,7 +45,6 @@ fun HistoryUI(
     onClose: () -> Unit,
     onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
-    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null,
     faviconCache: FaviconCache,
     now: LocalDate = LocalDate.now()
 ) {
@@ -81,7 +83,6 @@ fun HistoryUI(
         onClearHistory = onClearHistory,
         onClose = onClose,
         onOpenUrl = onOpenUrl,
-        onTapSuggestion = onTapSuggestion,
         faviconCache = faviconCache,
         domainProvider = domainProvider
     )
@@ -96,7 +97,6 @@ fun HistoryUI(
     onClose: () -> Unit,
     onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
-    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null,
     faviconCache: FaviconCache,
     domainProvider: DomainProvider
 ) {
@@ -121,10 +121,12 @@ fun HistoryUI(
                 .fillMaxWidth()
         ) {
             item {
-                BrandedTextButton(
-                    enabled = true,
-                    stringResID = R.string.settings_clear_browsing_data,
-                    onClick = onClearHistory
+                ClickableRow(
+                    label = stringResource(R.string.settings_clear_browsing_data),
+                    actionIconParams = RowActionIconParams(
+                        onTapAction = onClearHistory,
+                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN
+                    )
                 )
             }
 
@@ -135,11 +137,11 @@ fun HistoryUI(
             ) {
                 items(historyToday) { site ->
                     site?.let {
-                        NavSuggestion(
+                        HistoryEntry(
+                            site,
                             faviconCache,
-                            onOpenUrl,
-                            onTapSuggestion,
-                            site.toNavSuggestion(domainProvider)
+                            domainProvider,
+                            onOpenUrl
                         )
                     }
                 }
@@ -152,11 +154,11 @@ fun HistoryUI(
             ) {
                 items(historyYesterday) { site ->
                     site?.let {
-                        NavSuggestion(
+                        HistoryEntry(
+                            site,
                             faviconCache,
-                            onOpenUrl,
-                            onTapSuggestion,
-                            site.toNavSuggestion(domainProvider)
+                            domainProvider,
+                            onOpenUrl
                         )
                     }
                 }
@@ -169,11 +171,11 @@ fun HistoryUI(
             ) {
                 items(historyThisWeek) { site ->
                     site?.let {
-                        NavSuggestion(
+                        HistoryEntry(
+                            site,
                             faviconCache,
-                            onOpenUrl,
-                            onTapSuggestion,
-                            site.toNavSuggestion(domainProvider)
+                            domainProvider,
+                            onOpenUrl
                         )
                     }
                 }
@@ -186,17 +188,42 @@ fun HistoryUI(
             ) {
                 items(historyBeforeThisWeek) { site ->
                     site?.let {
-                        NavSuggestion(
+                        HistoryEntry(
+                            site,
                             faviconCache,
-                            onOpenUrl,
-                            onTapSuggestion,
-                            site.toNavSuggestion(domainProvider)
+                            domainProvider,
+                            onOpenUrl
                         )
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun HistoryEntry(
+    site: Site,
+    faviconCache: FaviconCache,
+    domainProvider: DomainProvider,
+    onOpenUrl: (Uri) -> Unit
+) {
+    val navSuggestion = site.toNavSuggestion(domainProvider)
+    val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
+
+    NavSuggestionRow(
+        iconParams = SuggestionRowIconParams(faviconBitmap = faviconBitmap),
+        primaryLabel = navSuggestion.label,
+        secondaryLabel = navSuggestion.secondaryLabel,
+        onTapRow = { onOpenUrl(navSuggestion.url) },
+        /*
+        // TODO(dan.alcantara): Follow-up PR will add item deletion.
+        actionIconParams = RowActionIconParams(
+            onTapAction = {},
+            actionType = RowActionIconParams.ActionType.DELETE
+        )
+        */
+    )
 }
 
 @Preview

@@ -3,11 +3,16 @@ package com.neeva.app.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -37,22 +42,19 @@ fun PreviewContainer(
     Column(
         modifier = Modifier.wrapContentHeight(unbounded = true)
     ) {
-        values.forEachIndexed { index, params ->
-            // Alternate the backgrounds to make it easier to see how things are grouped together.
-            val backgroundColor = if (index % 2 == 0) {
-                Color(red = 255, green = 0, blue = 255)
-            } else {
-                Color(red = 225, green = 0, blue = 225)
-            }
-
-            Column(
-                modifier = Modifier
-                    .background(backgroundColor)
-                    .wrapContentHeight(unbounded = true)
-            ) {
+        values.forEach { params ->
+            Column(modifier = Modifier.wrapContentHeight(unbounded = true)) {
                 NeevaThemePreviewContainer(useDarkTheme = false) { content(params) }
                 NeevaThemePreviewContainer(useDarkTheme = true) { content(params) }
             }
+
+            // Separate out the different Preview groups.
+            Spacer(
+                modifier = Modifier
+                    .height(1.dp)
+                    .fillMaxWidth()
+                    .background(Color.White)
+            )
         }
     }
 }
@@ -82,7 +84,12 @@ fun LightDarkPreviewContainer(content: @Composable () -> Unit) {
 @Composable
 fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () -> Unit) {
     NeevaTheme(useDarkTheme = useDarkTheme) {
-        Box(modifier = Modifier.padding(Dimensions.PADDING_SMALL)) {
+        Box(
+            modifier = Modifier
+                .background(Color.Magenta)
+                .padding(Dimensions.PADDING_SMALL)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
             content()
         }
     }

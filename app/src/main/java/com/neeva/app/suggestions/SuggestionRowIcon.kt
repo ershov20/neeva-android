@@ -1,6 +1,7 @@
 package com.neeva.app.suggestions
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -10,7 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
-import com.neeva.app.widgets.FaviconView
+import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.FaviconView
 
 data class SuggestionRowIconParams(
     val imageURL: String? = null,
@@ -30,7 +32,7 @@ fun SuggestionRowIcon(params: SuggestionRowIconParams) {
                     builder = { crossfade(true) }
                 ),
                 contentDescription = null,
-                modifier = Modifier.clip(RoundedCornerShape(4.dp))
+                modifier = Modifier.padding(Dimensions.PADDING_SMALL).clip(RoundedCornerShape(4.dp))
             )
         }
 
@@ -38,7 +40,8 @@ fun SuggestionRowIcon(params: SuggestionRowIconParams) {
             Icon(
                 painter = painterResource(params.drawableID),
                 contentDescription = null,
-                tint = params.drawableTint
+                tint = params.drawableTint,
+                modifier = Modifier.padding(Dimensions.PADDING_SMALL)
             )
         }
 

@@ -57,7 +57,7 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
                     onEditUrl = {
                         urlBarModel.replaceLocationBarText(it)
                     },
-                    onTapSuggestion = suggestionsModel?.let { it::logSuggestionTap }
+                    onLogSuggestionTap = suggestionsModel?.let { it::logSuggestionTap }
                 )
             }
 
@@ -68,7 +68,10 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
             }
 
             else -> {
-                ZeroQuery(urlBarModel = urlBarModel, faviconCache = faviconCache) {
+                ZeroQuery(
+                    urlBarModel = urlBarModel,
+                    faviconCache = faviconCache
+                ) {
                     CurrentPageRow(browserWrapper)
                 }
             }

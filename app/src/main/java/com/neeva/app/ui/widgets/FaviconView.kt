@@ -1,4 +1,4 @@
-package com.neeva.app.widgets
+package com.neeva.app.ui.widgets
 
 import android.graphics.Bitmap
 import android.net.Uri

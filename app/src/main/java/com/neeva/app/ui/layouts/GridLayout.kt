@@ -1,4 +1,4 @@
-package com.neeva.app.widgets
+package com.neeva.app.ui.layouts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.neeva.app.widgets.collapsible
+package com.neeva.app.ui.widgets.collapsible
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.lazy.LazyListScope

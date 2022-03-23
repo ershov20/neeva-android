@@ -9,20 +9,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import com.neeva.app.storage.favicons.FaviconCache
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.LightDarkPreviewContainer
 
 @Composable
 fun NavSuggestion(
     faviconCache: FaviconCache,
     onOpenUrl: (Uri) -> Unit,
-    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null,
+    onLogSuggestionTap: ((SuggestionType, Int?) -> Unit)? = null,
     navSuggestion: NavSuggestion
 ) {
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
     NavSuggestion(
         faviconBitmap = faviconBitmap,
         onOpenUrl = onOpenUrl,
-        onTapSuggestion = onTapSuggestion,
+        onLogSuggestionTap = onLogSuggestionTap,
         navSuggestion = navSuggestion
     )
 }
@@ -31,7 +31,7 @@ fun NavSuggestion(
 fun NavSuggestion(
     faviconBitmap: Bitmap?,
     onOpenUrl: (Uri) -> Unit,
-    onTapSuggestion: ((SuggestionType, Int?) -> Unit)? = null,
+    onLogSuggestionTap: ((SuggestionType, Int?) -> Unit)? = null,
     navSuggestion: NavSuggestion
 ) {
     NavSuggestionRow(
@@ -40,20 +40,19 @@ fun NavSuggestion(
         ),
         primaryLabel = navSuggestion.label,
         onTapRow = {
-            onOpenUrl.invoke(navSuggestion.url)
-            onTapSuggestion?.invoke(navSuggestion.type, navSuggestion.position)
+            onOpenUrl(navSuggestion.url)
+            onLogSuggestionTap?.invoke(navSuggestion.type, navSuggestion.position)
         },
         secondaryLabel = navSuggestion.secondaryLabel
     )
 }
 
-@Preview(name = "1x font size", locale = "en")
-@Preview(name = "2x font size", locale = "en", fontScale = 2.0f)
+@Preview(name = "LTR, 1x font size", locale = "en")
+@Preview(name = "LTR, 2x font size", locale = "en", fontScale = 2.0f)
 @Preview(name = "RTL, 1x font size", locale = "he")
-@Preview(name = "RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
 fun NavSuggestion_Preview() {
-    NeevaTheme {
+    LightDarkPreviewContainer {
         NavSuggestion(
             faviconBitmap = null,
             onOpenUrl = {},
@@ -72,7 +71,7 @@ fun NavSuggestion_Preview() {
 @Composable
 fun NavSuggestion_PreviewWithSolidFavicon() {
     val uri = Uri.parse("https://www.neeva.com")
-    NeevaTheme {
+    LightDarkPreviewContainer {
         NavSuggestion(
             faviconBitmap = uri.toBitmap(),
             onOpenUrl = {},

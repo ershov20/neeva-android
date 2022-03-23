@@ -11,6 +11,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.LightDarkPreviewContainer
+import com.neeva.app.ui.widgets.SplitStringRow
 
 @Composable
 fun DictionarySuggestionRow(
@@ -28,37 +29,15 @@ fun DictionarySuggestionRow(
             drawableID = R.drawable.ic_dictionary
         )
     ) {
-        Text(
-            text = buildAnnotatedString {
-                withStyle(
-                    MaterialTheme.typography.bodyLarge
-                        .copy(color = MaterialTheme.colorScheme.onSurface)
-                        .toSpanStyle()
-                ) {
-                    append(word)
-                }
-
-                withStyle(
-                    MaterialTheme.typography.bodyMedium
-                        .copy(color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        .toSpanStyle()
-                ) {
-                    phoneticSpelling?.let {
-                        append(" | ")
-                        append(it)
-                    }
-
-                    lexicalCategory?.let {
-                        append(" | ")
-                        append(it)
-                    }
-
-                    Unit
-                }
+        SplitStringRow(
+            primary = word,
+            secondaryPieces = mutableListOf<String>().apply {
+                phoneticSpelling?.let { add(it) }
+                lexicalCategory?.let { add(it) }
             },
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            softWrap = false,
+            separator = "|",
+            primaryStyle = MaterialTheme.typography.bodyLarge,
+            secondaryStyle = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.fillMaxWidth()
         )
         Text(

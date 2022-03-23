@@ -30,7 +30,7 @@ import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.toUserVisibleString
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.widgets.FaviconView
+import com.neeva.app.ui.widgets.FaviconView
 
 @Composable
 fun ZeroQuerySuggestedSite(
@@ -72,8 +72,7 @@ fun ZeroQuerySuggestedSite(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FaviconView(
                 bitmap = faviconBitmap,
-                imageOverride = iconOverride,
-                iconSize = 48.dp
+                imageOverride = iconOverride
             )
 
             Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))

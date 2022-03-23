@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.widgets.RowActionIconParams
 
 @Composable
 fun QueryNavSuggestionRow(
@@ -20,10 +21,10 @@ fun QueryNavSuggestionRow(
         primaryLabel = query,
         onTapRow = { onTapRow.invoke() },
         secondaryLabel = description,
-        actionParams = onEditUrl?.let {
-            SuggestionRowActionParams(
+        actionIconParams = onEditUrl?.let {
+            RowActionIconParams(
                 onTapAction = onEditUrl,
-                actionType = SuggestionRowActionParams.ActionType.REFINE
+                actionType = RowActionIconParams.ActionType.REFINE
             )
         },
         iconParams = SuggestionRowIconParams(

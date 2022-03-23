@@ -47,7 +47,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.widgets.FaviconView
+import com.neeva.app.ui.widgets.FaviconView
 
 @Composable
 fun AutocompleteTextField(

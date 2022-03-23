@@ -1,4 +1,4 @@
-package com.neeva.app.widgets
+package com.neeva.app.ui.widgets
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

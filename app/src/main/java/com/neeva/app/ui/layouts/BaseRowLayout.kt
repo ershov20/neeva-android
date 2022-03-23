@@ -29,19 +29,27 @@ import com.neeva.app.ui.theme.Dimensions
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun BaseRowLayout(
-    onTapRow: () -> Unit,
     modifier: Modifier = Modifier,
+    onTapRow: (() -> Unit)? = null,
     onTapRowContentDescription: String? = null,
     startComposable: @Composable (() -> Unit)? = null,
     endComposable: @Composable (() -> Unit)? = null,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    applyVerticalPadding: Boolean = true,
     mainContent: @Composable () -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surface,
+        color = backgroundColor,
         modifier = modifier
-            .clickable(onClickLabel = onTapRowContentDescription) {
-                onTapRow.invoke()
-            }
+            .then(
+                if (onTapRow != null) {
+                    Modifier.clickable(onClickLabel = onTapRowContentDescription) {
+                        onTapRow.invoke()
+                    }
+                } else {
+                    Modifier
+                }
+            )
             .defaultMinSize(minHeight = Dimensions.SIZE_TOUCH_TARGET)
             .fillMaxWidth()
     ) {
@@ -49,11 +57,13 @@ fun BaseRowLayout(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = Dimensions.PADDING_SMALL)
+                .padding(vertical = if (applyVerticalPadding) Dimensions.PADDING_SMALL else 0.dp)
         ) {
             startComposable?.let {
                 Box(
-                    modifier = Modifier.defaultMinSize(Dimensions.SIZE_TOUCH_TARGET),
+                    modifier = Modifier
+                        .defaultMinSize(Dimensions.SIZE_TOUCH_TARGET)
+                        .padding(start = Dimensions.PADDING_LARGE),
                     contentAlignment = Alignment.Center
                 ) {
                     it()
@@ -63,7 +73,7 @@ fun BaseRowLayout(
             Column(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
-                    .padding(horizontal = Dimensions.PADDING_SMALL)
+                    .padding(horizontal = Dimensions.PADDING_LARGE)
                     .weight(1.0f)
                     .defaultMinSize(minHeight = Dimensions.SIZE_TOUCH_TARGET)
             ) {
@@ -71,10 +81,13 @@ fun BaseRowLayout(
             }
 
             endComposable?.let {
-                Box(modifier = Modifier.defaultMinSize(Dimensions.SIZE_TOUCH_TARGET)) {
-                    Box(modifier = Modifier.align(Alignment.Center)) {
-                        it()
-                    }
+                Box(
+                    modifier = Modifier
+                        .defaultMinSize(Dimensions.SIZE_TOUCH_TARGET)
+                        .padding(end = Dimensions.PADDING_SMALL),
+                    contentAlignment = Alignment.Center
+                ) {
+                    it()
                 }
             }
         }

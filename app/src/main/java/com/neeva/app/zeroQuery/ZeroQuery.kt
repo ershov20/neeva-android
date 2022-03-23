@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
@@ -33,13 +32,13 @@ import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
+import com.neeva.app.ui.layouts.GridLayout
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.collapsible.CollapsingSectionState
+import com.neeva.app.ui.widgets.collapsible.collapsibleSection
+import com.neeva.app.ui.widgets.collapsible.collapsibleThreeStateSection
+import com.neeva.app.ui.widgets.collapsible.setNextState
 import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.widgets.GridLayout
-import com.neeva.app.widgets.collapsible.CollapsingSectionState
-import com.neeva.app.widgets.collapsible.collapsibleSection
-import com.neeva.app.widgets.collapsible.collapsibleThreeStateSection
-import com.neeva.app.widgets.collapsible.setNextState
 
 data class SuggestedSite(
     val site: Site,
@@ -50,7 +49,7 @@ data class SuggestedSite(
 fun ZeroQuery(
     urlBarModel: URLBarModel,
     faviconCache: FaviconCache,
-    topContent: @Composable (LazyItemScope.(modifier: Modifier) -> Unit) = {},
+    topContent: @Composable () -> Unit = {},
 ) {
     val browserWrapper = LocalBrowserWrapper.current
     val domainProvider = LocalEnvironment.current.domainProvider
@@ -91,7 +90,7 @@ fun ZeroQuery(
 
     LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         item {
-            topContent(Modifier)
+            topContent()
         }
 
         collapsibleThreeStateSection(

@@ -1,18 +1,12 @@
 package com.neeva.app.suggestions
 
-import android.net.Uri
-import android.webkit.URLUtil
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.StackedText
 
 @Composable
 fun NavSuggestionRow(
@@ -21,37 +15,15 @@ fun NavSuggestionRow(
     onTapRow: () -> Unit,
     onTapRowContentDescription: String? = null,
     secondaryLabel: String? = null,
-    actionParams: SuggestionRowActionParams? = null
+    actionIconParams: RowActionIconParams? = null
 ) {
     BaseSuggestionRow(
         iconParams = iconParams,
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
-        actionParams = actionParams
+        actionIconParams = actionIconParams
     ) {
-        Column {
-            Text(
-                text = primaryLabel,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.fillMaxWidth()
-            )
-            secondaryLabel?.let {
-                if (URLUtil.isValidUrl(secondaryLabel)) {
-                    UriDisplayView(Uri.parse(secondaryLabel))
-                } else {
-                    Text(
-                        text = secondaryLabel,
-                        overflow = TextOverflow.Ellipsis,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1
-                    )
-                }
-            }
-        }
+        StackedText(primaryLabel, secondaryLabel)
     }
 }
 
@@ -70,10 +42,10 @@ private fun NavSuggestionRowPreview_LongLabels() {
             primaryLabel = primaryLabel,
             onTapRow = {},
             secondaryLabel = secondaryLabel,
-            actionParams = onTapEdit?.let {
-                SuggestionRowActionParams(
+            actionIconParams = onTapEdit?.let {
+                RowActionIconParams(
                     onTapAction = it,
-                    actionType = SuggestionRowActionParams.ActionType.REFINE
+                    actionType = RowActionIconParams.ActionType.REFINE
                 )
             }
         )
@@ -95,10 +67,10 @@ private fun NavSuggestionRowPreview_ShortLabels() {
             primaryLabel = primaryLabel,
             onTapRow = {},
             secondaryLabel = secondaryLabel,
-            actionParams = onTapEdit?.let {
-                SuggestionRowActionParams(
+            actionIconParams = onTapEdit?.let {
+                RowActionIconParams(
                     onTapAction = it,
-                    actionType = SuggestionRowActionParams.ActionType.REFINE
+                    actionType = RowActionIconParams.ActionType.REFINE
                 )
             }
         )

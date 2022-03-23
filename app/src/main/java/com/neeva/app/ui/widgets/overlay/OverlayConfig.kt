@@ -1,4 +1,4 @@
-package com.neeva.app.widgets.overlay
+package com.neeva.app.ui.widgets.overlay
 
 enum class OverlaySheetHeightConfig {
     HALF_SCREEN, WRAP_CONTENT

@@ -1,4 +1,4 @@
-package com.neeva.app.widgets.overlay
+package com.neeva.app.ui.widgets.overlay
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
