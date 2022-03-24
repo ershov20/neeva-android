@@ -5,11 +5,11 @@ import com.neeva.app.storage.daos.VisitDao
 import com.neeva.app.storage.entities.Visit
 import java.util.Date
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.plus
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import strikt.api.expectThat
+import strikt.assertions.contains
 import strikt.assertions.doesNotContain
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
@@ -35,7 +35,7 @@ class VisitDaoTest : HistoryDatabaseBaseTest() {
 
         // The time ranges include the start time but not the end time.  Results are returned in
         // backwards order.
-        val results = visitDao.getVisitsWithinTimeframe(Date(2000L), Date(4000L))
+        val results = visitDao.getVisitsWithinTimeframeForTest(Date(2000L), Date(4000L))
         expectThat(results).hasSize(2)
         expectThat(results[0].timestamp).isEqualTo(Date(3000L))
         expectThat(results[1].timestamp).isEqualTo(Date(2000L))
@@ -54,7 +54,7 @@ class VisitDaoTest : HistoryDatabaseBaseTest() {
         expectThat(numDeleted).isEqualTo(2)
 
         // Get all possible visits and confirm that the items were deleted.
-        val visits = visitDao.getVisitsWithinTimeframe(Date(0L), Date(10000L))
+        val visits = visitDao.getVisitsWithinTimeframeForTest(Date(0L), Date(10000L))
         expectThat(visits).hasSize(3)
         expectThat(visits[0].timestamp).isEqualTo(Date(5000L))
         expectThat(visits[1].timestamp).isEqualTo(Date(2000L))
@@ -62,7 +62,7 @@ class VisitDaoTest : HistoryDatabaseBaseTest() {
     }
 
     @Test
-    fun deleteVisit() = runTest {
+    fun setMarkedForDeletion() = runTest {
         // Add a couple of visits to the database.
         visitDao.addVisit(Visit(timestamp = Date(1000L)))
         visitDao.addVisit(Visit(timestamp = Date(2000L)))
@@ -71,17 +71,24 @@ class VisitDaoTest : HistoryDatabaseBaseTest() {
         visitDao.addVisit(Visit(timestamp = Date(5000L)))
 
         // Get all possible visits and pick one to delete.
-        val visitsBefore = visitDao.getVisitsWithinTimeframe(Date(0L), Date(10000L))
+        val visitsBefore = visitDao.getVisitsWithinTimeframeForTest(Date(0L), Date(10000L))
         expectThat(visitsBefore).hasSize(5)
 
-        // Delete one of them.
+        // Mark one of them for deletion.
         val visitToDelete = visitsBefore[3]
-        visitDao.deleteVisit(visitToDelete.visitUID)
+        visitDao.setMarkedForDeletion(visitToDelete.visitUID, true)
 
-        // Confirm that the visit is now gone.
-        val visitsAfter = visitDao.getVisitsWithinTimeframe(Date(0L), Date(10000L))
-        expectThat(visitsAfter).hasSize(4)
-        expectThat(visitsAfter.map { it.visitUID }).doesNotContain(visitToDelete.visitUID)
-        expectThat(visitsAfter.map { it.timestamp }).doesNotContain(visitToDelete.timestamp)
+        // Confirm that the visit is still there.
+        val visitsWithoutPurge = visitDao.getVisitsWithinTimeframeForTest(Date(0L), Date(10000L))
+        expectThat(visitsWithoutPurge).hasSize(5)
+        expectThat(visitsWithoutPurge.map { it.visitUID }).contains(visitToDelete.visitUID)
+        expectThat(visitsWithoutPurge.map { it.timestamp }).contains(visitToDelete.timestamp)
+
+        // Purge the table and confirm the entry is now gone.
+        visitDao.purgeVisitsMarkedForDeletion()
+        val visitsAfterPurge = visitDao.getVisitsWithinTimeframeForTest(Date(0L), Date(10000L))
+        expectThat(visitsAfterPurge).hasSize(4)
+        expectThat(visitsAfterPurge.map { it.visitUID }).doesNotContain(visitToDelete.visitUID)
+        expectThat(visitsAfterPurge.map { it.timestamp }).doesNotContain(visitToDelete.timestamp)
     }
 }

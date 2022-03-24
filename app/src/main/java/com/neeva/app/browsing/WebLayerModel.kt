@@ -132,6 +132,7 @@ class WebLayerModel @Inject constructor(
     init {
         viewModelScope.launch(dispatchers.io) {
             domainProviderImpl.initialize()
+            historyManager.pruneDatabase()
             CacheCleaner(application.cacheDir).run()
             internalInitializationState.value = LoadingState.READY
         }

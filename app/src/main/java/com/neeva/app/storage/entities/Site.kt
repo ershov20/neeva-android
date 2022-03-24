@@ -12,6 +12,7 @@ import androidx.room.PrimaryKey
 )
 data class Site(
     @PrimaryKey(autoGenerate = true) val siteUID: Int = 0,
+
     val siteURL: String,
 
     val title: String? = null,

@@ -1,8 +1,11 @@
 package com.neeva.app
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
@@ -48,16 +51,24 @@ fun ActivityUI(
     webLayerModel: WebLayerModel
 ) {
     val appNavModel = LocalAppNavModel.current
+    val snackbarModel = LocalEnvironment.current.snackbarModel
 
-    BrowserScaffold(bottomControlOffset, topControlOffset, webLayerModel)
+    Box {
+        BrowserScaffold(bottomControlOffset, topControlOffset, webLayerModel)
 
-    // All the other screens in the app.
-    AppNav(
-        webLayerModel = webLayerModel,
-        appNavModel = appNavModel,
-        modifier = Modifier.fillMaxSize()
-    ) { space ->
-        appNavModel.showBrowser()
-        webLayerModel.currentBrowser.modifySpace(space.id)
+        // All the other screens in the app.
+        AppNav(
+            webLayerModel = webLayerModel,
+            appNavModel = appNavModel,
+            modifier = Modifier.fillMaxSize()
+        ) { space ->
+            appNavModel.showBrowser()
+            webLayerModel.currentBrowser.modifySpace(space.id)
+        }
+
+        SnackbarHost(
+            hostState = snackbarModel.snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }

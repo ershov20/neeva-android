@@ -24,30 +24,20 @@ interface HistoryDao : SiteDao, VisitDao {
         """
         SELECT *
         FROM site INNER JOIN visit ON site.siteUID = visit.visitedSiteUID
-        WHERE visit.timestamp >= :startTime AND visit.timestamp < :endTime 
+        WHERE visit.timestamp >= :startTime
+              AND visit.timestamp < :endTime
+              AND NOT visit.isMarkedForDeletion
         ORDER BY visit.timestamp DESC
         """
     )
-    fun getPagedSitesVisitedBetween(startTime: Date, endTime: Date): PagingSource<Int, Site>
+    fun getPagedSitesVisitedBetween(
+        startTime: Date,
+        endTime: Date
+    ): PagingSource<Int, SitePlusVisit>
 
-    @Query(
-        """
-        SELECT *
-        FROM site INNER JOIN visit ON site.siteUID = visit.visitedSiteUID
-        WHERE visit.timestamp >= :thresholdTime
-        ORDER BY visit.timestamp DESC
-        """
-    )
-    fun getPagedSitesVisitedAfter(thresholdTime: Date): PagingSource<Int, Site>
-
-    @Query(
-        """
-        SELECT *
-        FROM site INNER JOIN visit ON site.siteUID = visit.visitedSiteUID
-        ORDER BY visit.timestamp DESC
-        """
-    )
-    fun getAllSitesVisited(): List<Site>
+    fun getPagedSitesVisitedAfter(thresholdTime: Date): PagingSource<Int, SitePlusVisit> {
+        return getPagedSitesVisitedBetween(thresholdTime, Date(Long.MAX_VALUE))
+    }
 
     /** Deletes any entries in the [Site] table that have no corresponding [Visit] information. */
     @Query(
@@ -69,6 +59,7 @@ interface HistoryDao : SiteDao, VisitDao {
         SELECT *
         FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
         WHERE visit.timestamp >= :thresholdTime
+              AND NOT Visit.isMarkedForDeletion
         GROUP BY site.siteUID
         ORDER BY COUNT(*) DESC
         LIMIT :limit
@@ -81,6 +72,7 @@ interface HistoryDao : SiteDao, VisitDao {
         SELECT *
         FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
         WHERE visit.timestamp >= :thresholdTime
+              AND NOT Visit.isMarkedForDeletion
         GROUP BY site.siteUID
         ORDER BY COUNT(*) DESC
         LIMIT :limit
@@ -93,6 +85,7 @@ interface HistoryDao : SiteDao, VisitDao {
         SELECT *
         FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
         WHERE Site.siteURL LIKE '%'||:query||'%'
+              AND NOT Visit.isMarkedForDeletion
         GROUP BY Site.siteUID
         ORDER BY COUNT(*) DESC
         LIMIT :limit

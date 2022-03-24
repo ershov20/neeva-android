@@ -10,8 +10,10 @@
 
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
+    <string name="undo">Undo</string>
     <string name="done">Done</string>
     <string name="remove">Remove</string>
+
     <string name="new_tab_content_description">Create new tab</string>
     <string name="close_all_content_description">Close all tabs</string>
     <string name="update_available">Update available</string>
@@ -54,6 +56,7 @@
     <string name="history_yesterday">Yesterday</string>
     <string name="history_this_week">This week</string>
     <string name="history_earlier">Earlier</string>
+    <string name="history_removed_visit">Removed \"%1$s\" from history</string>
 
     <string name="email_label">EMAIL</string>
     <string name="dont_have_account">Don\'t have an account?</string>

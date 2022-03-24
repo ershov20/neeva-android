@@ -64,7 +64,7 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
             expectThat(sites[2].siteURL).isEqualTo("https://www.c.com")
             expectThat(sites[2].title).isEqualTo("Title C")
 
-            val visits = database.dao().getVisitsWithinTimeframe(Date(0L), Date(50000L))
+            val visits = database.dao().getVisitsWithinTimeframeForTest(Date(0L), Date(50000L))
             expectThat(visits).hasSize(6)
         }
     }

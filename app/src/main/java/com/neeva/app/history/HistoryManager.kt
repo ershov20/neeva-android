@@ -1,6 +1,7 @@
 package com.neeva.app.history
 
 import android.net.Uri
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -8,6 +9,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.HistoryDatabase
+import com.neeva.app.storage.daos.SitePlusVisit
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
@@ -38,17 +40,19 @@ class HistoryManager(
 
         private val HISTORY_WINDOW = TimeUnit.DAYS.toMillis(7)
         private val HISTORY_START_DATE = Date(System.currentTimeMillis() - HISTORY_WINDOW)
+
+        private val TAG = HistoryManager::class.simpleName
     }
 
     private val dao = historyDatabase.dao()
 
-    fun getHistoryBetween(startTime: Date, endTime: Date): Flow<PagingData<Site>> {
+    fun getHistoryBetween(startTime: Date, endTime: Date): Flow<PagingData<SitePlusVisit>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
             dao.getPagedSitesVisitedBetween(startTime, endTime)
         }.flow
     }
 
-    fun getHistoryAfter(startTime: Date): Flow<PagingData<Site>> {
+    fun getHistoryAfter(startTime: Date): Flow<PagingData<SitePlusVisit>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
             dao.getPagedSitesVisitedAfter(startTime)
         }.flow
@@ -103,6 +107,22 @@ class HistoryManager(
         withContext(dispatchers.io) {
             dao.upsert(url, title, favicon, visit)
         }
+    }
+
+    /** Marks a visit for deletion when the database is next pruned. */
+    fun markVisitForDeletion(visitUID: Int, isMarkedForDeletion: Boolean) {
+        coroutineScope.launch(dispatchers.io) {
+            dao.setMarkedForDeletion(visitUID, isMarkedForDeletion = isMarkedForDeletion)
+        }
+    }
+
+    /** Cleans out entries from the database that are no longer necessary. */
+    fun pruneDatabase() {
+        val numVisitsPurged = dao.purgeVisitsMarkedForDeletion()
+        Log.d(TAG, "Purged $numVisitsPurged visits from the database")
+
+        val numSitesPurged = dao.deleteOrphanedSiteEntities()
+        Log.d(TAG, "Purged $numSitesPurged orphaned sites from the database")
     }
 
     fun clearHistory(fromMillis: Long) {

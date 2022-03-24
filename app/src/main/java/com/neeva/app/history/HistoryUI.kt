@@ -13,6 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.paging.PagingData
@@ -22,7 +23,9 @@ import androidx.paging.compose.items
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.storage.daos.SitePlusVisit
 import com.neeva.app.storage.entities.Site
+import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestionRow
@@ -50,6 +53,8 @@ fun HistoryUI(
 ) {
     val domainProvider = LocalEnvironment.current.domainProvider
     val historyManager = LocalEnvironment.current.historyManager
+    val snackbarModel = LocalEnvironment.current.snackbarModel
+    val context = LocalContext.current
 
     val startOfTime = Date(0L)
     val startOf7DaysAgo = Date.from(now.minusDays(7).atStartOfDay().toInstant(ZoneOffset.UTC))
@@ -83,6 +88,16 @@ fun HistoryUI(
         onClearHistory = onClearHistory,
         onClose = onClose,
         onOpenUrl = onOpenUrl,
+        onDeleteVisit = { visitUID, siteLabel ->
+            historyManager.markVisitForDeletion(visitUID, isMarkedForDeletion = true)
+            snackbarModel.show(
+                message = context.getString(R.string.history_removed_visit, siteLabel),
+                actionLabel = context.getString(R.string.undo),
+                onActionPerformed = {
+                    historyManager.markVisitForDeletion(visitUID, isMarkedForDeletion = false)
+                }
+            )
+        },
         faviconCache = faviconCache,
         domainProvider = domainProvider
     )
@@ -90,13 +105,14 @@ fun HistoryUI(
 
 @Composable
 fun HistoryUI(
-    historyToday: LazyPagingItems<Site>,
-    historyYesterday: LazyPagingItems<Site>,
-    historyThisWeek: LazyPagingItems<Site>,
-    historyBeforeThisWeek: LazyPagingItems<Site>,
+    historyToday: LazyPagingItems<SitePlusVisit>,
+    historyYesterday: LazyPagingItems<SitePlusVisit>,
+    historyThisWeek: LazyPagingItems<SitePlusVisit>,
+    historyBeforeThisWeek: LazyPagingItems<SitePlusVisit>,
     onClose: () -> Unit,
     onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
+    onDeleteVisit: (visitUID: Int, siteLabel: String) -> Unit,
     faviconCache: FaviconCache,
     domainProvider: DomainProvider
 ) {
@@ -137,12 +153,7 @@ fun HistoryUI(
             ) {
                 items(historyToday) { site ->
                     site?.let {
-                        HistoryEntry(
-                            site,
-                            faviconCache,
-                            domainProvider,
-                            onOpenUrl
-                        )
+                        HistoryEntry(site, faviconCache, domainProvider, onOpenUrl, onDeleteVisit)
                     }
                 }
             }
@@ -154,12 +165,7 @@ fun HistoryUI(
             ) {
                 items(historyYesterday) { site ->
                     site?.let {
-                        HistoryEntry(
-                            site,
-                            faviconCache,
-                            domainProvider,
-                            onOpenUrl
-                        )
+                        HistoryEntry(site, faviconCache, domainProvider, onOpenUrl, onDeleteVisit)
                     }
                 }
             }
@@ -171,12 +177,7 @@ fun HistoryUI(
             ) {
                 items(historyThisWeek) { site ->
                     site?.let {
-                        HistoryEntry(
-                            site,
-                            faviconCache,
-                            domainProvider,
-                            onOpenUrl
-                        )
+                        HistoryEntry(site, faviconCache, domainProvider, onOpenUrl, onDeleteVisit)
                     }
                 }
             }
@@ -188,12 +189,7 @@ fun HistoryUI(
             ) {
                 items(historyBeforeThisWeek) { site ->
                     site?.let {
-                        HistoryEntry(
-                            site,
-                            faviconCache,
-                            domainProvider,
-                            onOpenUrl
-                        )
+                        HistoryEntry(site, faviconCache, domainProvider, onOpenUrl, onDeleteVisit)
                     }
                 }
             }
@@ -203,11 +199,13 @@ fun HistoryUI(
 
 @Composable
 fun HistoryEntry(
-    site: Site,
+    sitePlusVisit: SitePlusVisit,
     faviconCache: FaviconCache,
     domainProvider: DomainProvider,
-    onOpenUrl: (Uri) -> Unit
+    onOpenUrl: (Uri) -> Unit,
+    onDeleteVisit: (visitUID: Int, siteLabel: String) -> Unit
 ) {
+    val site = sitePlusVisit.site
     val navSuggestion = site.toNavSuggestion(domainProvider)
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
 
@@ -216,13 +214,12 @@ fun HistoryEntry(
         primaryLabel = navSuggestion.label,
         secondaryLabel = navSuggestion.secondaryLabel,
         onTapRow = { onOpenUrl(navSuggestion.url) },
-        /*
-        // TODO(dan.alcantara): Follow-up PR will add item deletion.
         actionIconParams = RowActionIconParams(
-            onTapAction = {},
+            onTapAction = {
+                onDeleteVisit(sitePlusVisit.visit.visitUID, navSuggestion.label)
+            },
             actionType = RowActionIconParams.ActionType.DELETE
         )
-        */
     )
 }
 
@@ -231,56 +228,46 @@ fun HistoryEntry(
 fun HistoryUI_Preview() {
     var ids = 0
 
-    // Add items for today.
-    val historyToday = mutableListOf<Site>()
-    for (i in 0 until 2) {
-        historyToday.add(
-            Site(
-                siteUID = ids++,
-                siteURL = "https://www.site$ids.com/$i",
-                title = null,
-                largestFavicon = null
-            )
+    fun createSitePlusVisit(): SitePlusVisit {
+        val site = Site(
+            siteUID = ids++,
+            siteURL = "https://www.site$ids.com/",
+            title = null,
+            largestFavicon = null
         )
+
+        // The only useful value here is the ID.
+        val visit = Visit(
+            visitUID = ids++,
+            timestamp = Date(),
+            visitedSiteUID = site.siteUID
+        )
+
+        return SitePlusVisit(site, visit)
+    }
+
+    // Add items for today.
+    val historyToday = mutableListOf<SitePlusVisit>()
+    for (i in 0 until 2) {
+        historyToday.add(createSitePlusVisit())
     }
 
     // Add items for yesterday.
-    val historyYesterday = mutableListOf<Site>()
+    val historyYesterday = mutableListOf<SitePlusVisit>()
     for (i in 0 until 2) {
-        historyYesterday.add(
-            Site(
-                siteUID = ids++,
-                siteURL = "https://www.site$ids.com/$i",
-                title = null,
-                largestFavicon = null
-            )
-        )
+        historyYesterday.add(createSitePlusVisit())
     }
 
     // Add one item for each day before that.  Items that are too old should not be displayed.
-    val historyThisWeek = mutableListOf<Site>()
+    val historyThisWeek = mutableListOf<SitePlusVisit>()
     for (daysAgo in 2 until 10) {
-        historyThisWeek.add(
-            Site(
-                siteUID = ids++,
-                siteURL = "https://www.site$ids.com/${daysAgo}_days_ago",
-                title = null,
-                largestFavicon = null
-            )
-        )
+        historyThisWeek.add(createSitePlusVisit())
     }
 
     // Add one item for each day before this week.
-    val historyBeforeThisWeek = mutableListOf<Site>()
+    val historyBeforeThisWeek = mutableListOf<SitePlusVisit>()
     for (daysAgo in 10 until 25) {
-        historyBeforeThisWeek.add(
-            Site(
-                siteUID = ids++,
-                siteURL = "https://www.site$ids.com/${daysAgo}_days_ago",
-                title = null,
-                largestFavicon = null
-            )
-        )
+        historyBeforeThisWeek.add(createSitePlusVisit())
     }
 
     val itemsToday = flowOf(PagingData.from(historyToday))
@@ -297,6 +284,7 @@ fun HistoryUI_Preview() {
             onClearHistory = {},
             onClose = {},
             onOpenUrl = {},
+            onDeleteVisit = { _, _ -> },
             faviconCache = mockFaviconCache,
             domainProvider = mockFaviconCache.domainProvider
         )
