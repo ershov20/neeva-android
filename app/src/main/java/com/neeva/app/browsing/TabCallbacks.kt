@@ -3,6 +3,7 @@ package com.neeva.app.browsing
 import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.Dispatchers
+import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.entities.Visit
@@ -73,7 +74,7 @@ class TabCallbacks(
             tabList.updateParentInfo(
                 tab = newTab,
                 parentTabId = tab.guid,
-                tabOpenType = TabInfo.TabOpenType.CHILD_TAB
+                tabOpenType = TabOpenType.CHILD_TAB
             )
             registerNewTab(newTab, type)
         }
@@ -98,7 +99,37 @@ class TabCallbacks(
         }
 
         override fun onNavigationCompleted(navigation: Navigation) = commitVisit(navigation)
-        override fun onNavigationFailed(navigation: Navigation) = commitVisit(navigation)
+
+        override fun onNavigationFailed(navigation: Navigation) {
+            when {
+                navigation.isKnownProtocol -> {
+                    // If protocol is known (e.g. https://, http://) and the navigation failed,
+                    // treat it like a normal navigation failure.
+                    commitVisit(navigation)
+                }
+
+                !navigation.wasIntentLaunched() -> {
+                    // Workaround for https://github.com/neevaco/neeva-android/issues/232
+                    // WebLayer doesn't seem to know how to handle external Intent firing when we
+                    // use it.  Until we have a better idea of why it can't fire an Intent out, fire
+                    // the Intent out ourselves in case Android can handle it.
+                    val navigationListSize = tab.navigationController.navigationListSize
+                    val tabOpenType = tabList.getTabInfo(tab.guid)?.data?.openType
+                    val shouldCloseTab = when {
+                        navigationListSize == 0 -> true
+                        navigationListSize == 1 && tabOpenType == TabOpenType.VIA_INTENT -> true
+                        else -> false
+                    }
+                    if (shouldCloseTab) {
+                        // It's likely that a new tab was created just for the navigation.  Close it
+                        // by simulating a back button press to avoid keeping a useless tab open.
+                        activityCallbackProvider()?.onBackPressed()
+                    }
+
+                    activityCallbackProvider()?.fireExternalViewIntent(navigation.uri)
+                }
+            }
+        }
 
         private fun commitVisit(navigation: Navigation) {
             if (tab.getBrowserIfAlive()?.activeTab == tab) {

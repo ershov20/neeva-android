@@ -1,5 +1,6 @@
 package com.neeva.app.browsing
 
+import android.net.Uri
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 
@@ -37,4 +38,10 @@ interface ActivityCallbacks {
 
     /** Triggers the logic for the OS-level back button/gesture. */
     fun onBackPressed()
+
+    /**
+     * Fires an Intent out to Android to open the given [uri].  If the Uri cannot be opened,
+     * an error will be displayed to the user.
+     */
+    fun fireExternalViewIntent(uri: Uri)
 }

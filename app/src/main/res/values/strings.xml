@@ -136,7 +136,9 @@
     <string name="space_add_url">Added site to \"%1s\"</string>
     <string name="space_remove_url">Removed site from \"%1s\"</string>
 
-    <string name="generic_error">Something went wrong</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_url_failure">Could not open \"%1$s\"</string>
+
     <string name="navigate_to_profile">Navigate to Profile</string>
     <string name="switch_default_browser">Switch Your Default Browser</string>
     <string name="switch_default_browser_instructions">Open links in Neeva automatically by making it your Default Browser App.\n\n

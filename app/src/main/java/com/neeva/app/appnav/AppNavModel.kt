@@ -128,7 +128,7 @@ class AppNavModel(
         try {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            snackbarModel.show(context.getString(R.string.generic_error))
+            snackbarModel.show(context.getString(R.string.error_generic))
             Log.e(TAG, "Failed to start Activity for $intent")
         }
     }

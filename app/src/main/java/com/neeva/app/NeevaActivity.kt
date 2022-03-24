@@ -1,6 +1,7 @@
 package com.neeva.app
 
 import android.app.SearchManager
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -433,6 +434,17 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     .remove(fragment)
                     .commitNow()
             }
+        }
+    }
+
+    override fun fireExternalViewIntent(uri: Uri) {
+        try {
+            val viewIntent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(viewIntent)
+        } catch (e: ActivityNotFoundException) {
+            snackbarModel.show(
+                message = getString(R.string.error_url_failure, uri.toString())
+            )
         }
     }
 }

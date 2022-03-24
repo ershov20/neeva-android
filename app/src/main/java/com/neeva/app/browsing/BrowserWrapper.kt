@@ -141,7 +141,7 @@ abstract class BrowserWrapper internal constructor(
     private val isBrowserRestored = CompletableDeferred<Boolean>()
 
     init {
-        faviconCache.profileProvider = this
+        faviconCache.profileProvider = FaviconCache.ProfileProvider { getProfile() }
 
         userMustStayInCardGridFlow = orderedTabList
             .combine(_isLazyTabFlow) { tabs, isLazyTab -> tabs.isEmpty() && !isLazyTab }

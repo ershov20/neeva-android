@@ -32,6 +32,7 @@ fun SuggestionRowIcon(params: SuggestionRowIconParams) {
                     builder = { crossfade(true) }
                 ),
                 contentDescription = null,
+                tint = Color.Unspecified,
                 modifier = Modifier.padding(Dimensions.PADDING_SMALL).clip(RoundedCornerShape(4.dp))
             )
         }

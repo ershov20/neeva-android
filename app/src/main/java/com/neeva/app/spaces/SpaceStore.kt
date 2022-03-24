@@ -24,11 +24,9 @@ import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -264,7 +262,7 @@ class SpaceStore(
             refresh(space = space)
             true
         } ?: run {
-            val errorString = appContext.getString(R.string.generic_error)
+            val errorString = appContext.getString(R.string.error_generic)
             snackbarModel.show(errorString)
             false
         }
@@ -289,7 +287,7 @@ class SpaceStore(
             refresh(space = space)
             true
         } ?: run {
-            val errorString = appContext.getString(R.string.generic_error)
+            val errorString = appContext.getString(R.string.error_generic)
             snackbarModel.show(errorString)
             false
         }
