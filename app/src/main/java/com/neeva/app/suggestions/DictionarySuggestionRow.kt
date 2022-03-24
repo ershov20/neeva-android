@@ -11,6 +11,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.LightDarkPreviewContainer
+import com.neeva.app.ui.widgets.RowActionStartIconParams
 import com.neeva.app.ui.widgets.SplitStringRow
 
 @Composable
@@ -25,7 +26,7 @@ fun DictionarySuggestionRow(
     BaseSuggestionRow(
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
-        iconParams = SuggestionRowIconParams(
+        iconParams = RowActionStartIconParams(
             drawableID = R.drawable.ic_dictionary
         )
     ) {
@@ -50,7 +51,7 @@ fun DictionarySuggestionRow(
                     append(shortDefinition)
                 }
             },
-            maxLines = 3,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth()
         )

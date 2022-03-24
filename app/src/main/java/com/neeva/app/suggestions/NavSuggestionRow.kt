@@ -6,16 +6,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.RowActionStartIconParams
 import com.neeva.app.ui.widgets.StackedText
 
 @Composable
 fun NavSuggestionRow(
-    iconParams: SuggestionRowIconParams,
+    iconParams: RowActionStartIconParams,
     primaryLabel: String,
     onTapRow: () -> Unit,
     onTapRowContentDescription: String? = null,
     secondaryLabel: String? = null,
-    actionIconParams: RowActionIconParams? = null
+    actionIconParams: RowActionIconParams? = null,
+    showActualUrlInSecondaryLabel: Boolean = false
 ) {
     BaseSuggestionRow(
         iconParams = iconParams,
@@ -23,7 +25,7 @@ fun NavSuggestionRow(
         onTapRowContentDescription = onTapRowContentDescription,
         actionIconParams = actionIconParams
     ) {
-        StackedText(primaryLabel, secondaryLabel)
+        StackedText(primaryLabel, secondaryLabel, showActualUrl = showActualUrlInSecondaryLabel)
     }
 }
 
@@ -38,7 +40,7 @@ private fun NavSuggestionRowPreview_LongLabels() {
         val secondaryLabel = stringResource(R.string.debug_long_string_primary)
         val onTapEdit = {}.takeIf { allowEditing }
         NavSuggestionRow(
-            iconParams = SuggestionRowIconParams(),
+            iconParams = RowActionStartIconParams(),
             primaryLabel = primaryLabel,
             onTapRow = {},
             secondaryLabel = secondaryLabel,
@@ -63,7 +65,7 @@ private fun NavSuggestionRowPreview_ShortLabels() {
         val secondaryLabel = "Secondary label"
         val onTapEdit = {}.takeIf { allowEditing }
         NavSuggestionRow(
-            iconParams = SuggestionRowIconParams(),
+            iconParams = RowActionStartIconParams(),
             primaryLabel = primaryLabel,
             onTapRow = {},
             secondaryLabel = secondaryLabel,

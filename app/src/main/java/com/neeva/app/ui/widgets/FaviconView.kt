@@ -14,10 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
@@ -28,15 +26,14 @@ import com.neeva.app.ui.theme.Dimensions
 /**
  * Draws an icon representing a particular site.
  *
- * When determining what image to display, the [imageOverride] is prioritized over the [bitmap].  If
- * both are null, then a generic icon is displayed.
+ * When determining what image to display, the [overrideDrawableId] is prioritized over the
+ * [bitmap].  If both are null, then a generic icon is displayed.
  */
 @Composable
 fun FaviconView(
     bitmap: Bitmap?,
     drawContainer: Boolean = true,
-    imageOverride: ImageVector? = null,
-    iconSize: Dp = Dimensions.SIZE_ICON
+    overrideDrawableId: Int? = null
 ) {
     Surface(
         color = if (drawContainer) {
@@ -47,7 +44,7 @@ fun FaviconView(
         tonalElevation = 1.dp,
         shape = RoundedCornerShape(Dimensions.RADIUS_SMALL)
     ) {
-        val sizeModifier = Modifier.size(iconSize)
+        val sizeModifier = Modifier.size(Dimensions.SIZE_ICON)
         Box(
             contentAlignment = Alignment.Center,
             modifier = if (drawContainer) {
@@ -57,15 +54,20 @@ fun FaviconView(
             }
         ) {
             when {
-                imageOverride != null -> {
+                overrideDrawableId != null -> {
+                    // Tint is set to Color.unspecified because the current use case is to show a
+                    // pre-colored drawable.
                     Icon(
-                        imageVector = imageOverride,
+                        painter = painterResource(overrideDrawableId),
                         contentDescription = null,
-                        modifier = sizeModifier
+                        modifier = sizeModifier,
+                        tint = Color.Unspecified
                     )
                 }
 
                 bitmap != null -> {
+                    // Tint is set to Color.unspecified because the current use case is to show a
+                    // pre-colored bitmap.
                     Icon(
                         bitmap = bitmap.asImageBitmap(),
                         contentDescription = null,
@@ -75,6 +77,8 @@ fun FaviconView(
                 }
 
                 else -> {
+                    // Tint is set to the default so that it is tinted according to the current
+                    // content color.
                     Icon(
                         painter = painterResource(R.drawable.globe),
                         contentDescription = null,

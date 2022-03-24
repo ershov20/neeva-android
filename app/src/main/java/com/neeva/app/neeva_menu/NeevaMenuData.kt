@@ -4,10 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.neeva.app.R
@@ -16,7 +13,7 @@ enum class NeevaMenuItemId {
     HOME,
     SPACES,
     SETTINGS,
-    FEEDBACK,
+    SUPPORT,
     HISTORY,
     DOWNLOADS,
     FORWARD,
@@ -24,12 +21,13 @@ enum class NeevaMenuItemId {
     SHARE,
     SHOW_PAGE_INFO,
     FIND_IN_PAGE,
-    UPDATE
+    UPDATE,
+    SEPARATOR
 }
 
 data class NeevaMenuItemData(
     val id: NeevaMenuItemId,
-    @StringRes val labelId: Int,
+    @StringRes val labelId: Int? = null,
     @DrawableRes val imageResourceID: Int? = null,
     val icon: ImageVector? = null
 )
@@ -49,7 +47,7 @@ object NeevaMenuData {
         NeevaMenuItemData(
             id = NeevaMenuItemId.SHOW_PAGE_INFO,
             labelId = R.string.page_info,
-            icon = Icons.Default.Info
+            imageResourceID = R.drawable.ic_info_black_24
         )
     )
 
@@ -62,22 +60,23 @@ object NeevaMenuData {
         NeevaMenuItemData(
             id = NeevaMenuItemId.FIND_IN_PAGE,
             labelId = R.string.find_in_page,
-            icon = Icons.Default.Search
+            imageResourceID = R.drawable.ic_find_in_page_black_24
         ),
+        NeevaMenuItemData(id = NeevaMenuItemId.SEPARATOR),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SPACES,
             labelId = R.string.spaces,
-            imageResourceID = R.drawable.ic_baseline_bookmarks_24
+            imageResourceID = R.drawable.ic_bookmarks_black_24
         ),
         NeevaMenuItemData(
-            id = NeevaMenuItemId.FEEDBACK,
+            id = NeevaMenuItemId.SUPPORT,
             labelId = R.string.feedback,
-            imageResourceID = R.drawable.ic_baseline_feedback_24
+            imageResourceID = R.drawable.ic_help_outline_black_24
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SETTINGS,
             labelId = R.string.settings,
-            icon = Icons.Default.Settings
+            imageResourceID = R.drawable.ic_settings_black_24
         ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.HISTORY,
@@ -87,7 +86,7 @@ object NeevaMenuData {
         NeevaMenuItemData(
             id = NeevaMenuItemId.DOWNLOADS,
             labelId = R.string.downloads,
-            imageResourceID = R.drawable.ic_baseline_download_24
+            imageResourceID = R.drawable.ic_download_done_black_24
         )
     )
 }

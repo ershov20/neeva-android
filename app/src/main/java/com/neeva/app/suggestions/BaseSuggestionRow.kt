@@ -14,6 +14,8 @@ import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.RowActionIcon
 import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.RowActionStartIcon
+import com.neeva.app.ui.widgets.RowActionStartIconParams
 
 /**
  * Base skeleton for everything that can be displayed as a suggestion in UI.  Callers must provide
@@ -23,7 +25,7 @@ import com.neeva.app.ui.widgets.RowActionIconParams
 @OptIn(ExperimentalCoilApi::class)
 @Composable
 fun BaseSuggestionRow(
-    iconParams: SuggestionRowIconParams,
+    iconParams: RowActionStartIconParams,
     onTapRow: () -> Unit,
     onTapRowContentDescription: String? = null,
     actionIconParams: RowActionIconParams? = null,
@@ -33,7 +35,7 @@ fun BaseSuggestionRow(
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
         startComposable = {
-            SuggestionRowIcon(iconParams)
+            RowActionStartIcon(iconParams)
         },
         endComposable = actionIconParams?.let { { RowActionIcon(it) } },
         mainContent = mainContent
@@ -52,7 +54,7 @@ fun BaseSuggestionRow_Preview() {
                 onTapAction = {},
                 actionType = RowActionIconParams.ActionType.REFINE
             ).takeIf { showAction },
-            iconParams = SuggestionRowIconParams()
+            iconParams = RowActionStartIconParams()
         ) {
             Box(
                 modifier = Modifier

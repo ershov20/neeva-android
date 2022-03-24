@@ -17,7 +17,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,7 +44,7 @@ fun ZeroQuerySuggestedSite(
 
     ZeroQuerySuggestedSite(
         faviconBitmap = faviconBitmap,
-        iconOverride = suggestedSite.iconOverride,
+        overrideDrawableId = suggestedSite.overrideDrawableId,
         label = label,
         onClick = { onClick(siteUri) }
     )
@@ -54,7 +53,7 @@ fun ZeroQuerySuggestedSite(
 @Composable
 fun ZeroQuerySuggestedSite(
     faviconBitmap: Bitmap?,
-    iconOverride: ImageVector?,
+    overrideDrawableId: Int?,
     label: String,
     onClick: () -> Unit
 ) {
@@ -72,7 +71,7 @@ fun ZeroQuerySuggestedSite(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             FaviconView(
                 bitmap = faviconBitmap,
-                imageOverride = iconOverride
+                overrideDrawableId = overrideDrawableId
             )
 
             Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
@@ -104,7 +103,7 @@ private fun ZeroQuerySuggestedSitePreview_SmallContainer() {
         Box(modifier = Modifier.width(containerSize)) {
             ZeroQuerySuggestedSite(
                 faviconBitmap = Uri.parse(NeevaConstants.appURL).toBitmap(),
-                iconOverride = null,
+                overrideDrawableId = null,
                 label = label,
                 onClick = {}
             )
@@ -128,7 +127,7 @@ private fun ZeroQuerySuggestedSitePreview_LargeContainer() {
         Box(modifier = Modifier.width(containerSize)) {
             ZeroQuerySuggestedSite(
                 faviconBitmap = Uri.parse(NeevaConstants.appURL).toBitmap(),
-                iconOverride = null,
+                overrideDrawableId = null,
                 label = label,
                 onClick = {}
             )

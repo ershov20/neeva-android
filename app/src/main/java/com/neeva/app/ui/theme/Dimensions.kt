@@ -18,4 +18,10 @@ object Dimensions {
 
     /** Default size of a Material icon. */
     val SIZE_ICON = 24.dp
+
+    /**
+     * Pre-calculated value for full-bleed Composables that need to match the size of an icon
+     * wrapped inside of a container with PADDING_SMALL on all sides.
+     */
+    val SIZE_ICON_INCLUDING_PADDING = SIZE_ICON + (PADDING_SMALL * 2)
 }

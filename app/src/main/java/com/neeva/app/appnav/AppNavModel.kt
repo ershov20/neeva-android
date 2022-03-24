@@ -200,7 +200,7 @@ class AppNavModel(
                 webLayerModel.currentBrowser.showFindInPage()
             }
 
-            NeevaMenuItemId.FEEDBACK -> {
+            NeevaMenuItemId.SUPPORT -> {
                 showFeedback()
             }
 

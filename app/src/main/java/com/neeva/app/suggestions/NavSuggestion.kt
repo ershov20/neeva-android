@@ -10,6 +10,7 @@ import com.neeva.app.R
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.ui.LightDarkPreviewContainer
+import com.neeva.app.ui.widgets.RowActionStartIconParams
 
 @Composable
 fun NavSuggestion(
@@ -35,7 +36,7 @@ fun NavSuggestion(
     navSuggestion: NavSuggestion
 ) {
     NavSuggestionRow(
-        iconParams = SuggestionRowIconParams(
+        iconParams = RowActionStartIconParams(
             faviconBitmap = faviconBitmap
         ),
         primaryLabel = navSuggestion.label,

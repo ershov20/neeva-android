@@ -13,6 +13,7 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.RowActionStartIconParams
 
 @Composable
 fun CurrentPageRow(browserWrapper: BrowserWrapper) {
@@ -61,23 +62,23 @@ fun CurrentPageRow(
     onEditPressed: () -> Unit
 ) {
     NavSuggestionRow(
-        iconParams = SuggestionRowIconParams(
+        iconParams = RowActionStartIconParams(
             faviconBitmap = faviconBitmap
         ),
-
-        primaryLabel = label,
-        onTapRow = { onEditPressed.invoke() },
-        secondaryLabel = stringResource(
+        primaryLabel = stringResource(
             id = if (isShowingQuery) {
                 R.string.edit_current_search
             } else {
                 R.string.edit_current_url
             }
         ),
+        onTapRow = { onEditPressed.invoke() },
+        secondaryLabel = label,
         actionIconParams = RowActionIconParams(
             onTapAction = onEditPressed,
             actionType = RowActionIconParams.ActionType.REFINE
-        )
+        ),
+        showActualUrlInSecondaryLabel = true
     )
 }
 

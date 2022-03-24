@@ -13,7 +13,8 @@ import androidx.compose.ui.text.style.TextOverflow
 @Composable
 fun StackedText(
     primaryLabel: String,
-    secondaryLabel: String? = null
+    secondaryLabel: String? = null,
+    showActualUrl: Boolean = false
 ) {
     Column {
         Text(
@@ -26,7 +27,7 @@ fun StackedText(
         )
 
         secondaryLabel?.let {
-            if (URLUtil.isValidUrl(secondaryLabel)) {
+            if (!showActualUrl && URLUtil.isValidUrl(secondaryLabel)) {
                 UriDisplayView(Uri.parse(secondaryLabel))
             } else {
                 Text(

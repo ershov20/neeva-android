@@ -1,25 +1,24 @@
 package com.neeva.app.neeva_menu
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -29,7 +28,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
-fun ColumnScope.OverflowMenuContents(
+fun OverflowMenuContents(
     onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
     expandedMutator: (Boolean) -> Unit
@@ -37,32 +36,20 @@ fun ColumnScope.OverflowMenuContents(
     val menuItemState = LocalMenuData.current
 
     Row(
-        modifier = Modifier.padding(12.dp).fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         NeevaMenuData.iconMenuRowItems.forEach { data ->
             val isEnabled = !disabledMenuItems.contains(data.id)
 
-            Column(
-                modifier = Modifier
-                    .clickable(enabled = isEnabled) {
-                        expandedMutator(false)
-                        onMenuItem(data.id)
-                    }
-                    .padding(horizontal = Dimensions.PADDING_SMALL)
-                    .widthIn(min = 48.dp)
-                    .alpha(getClickableAlpha(isEnabled)),
-                horizontalAlignment = Alignment.CenterHorizontally
+            IconButton(
+                onClick = {
+                    expandedMutator(false)
+                    onMenuItem(data.id)
+                },
+                enabled = isEnabled
             ) {
                 NeevaMenuIcon(itemData = data)
-                Text(
-                    modifier = Modifier.padding(top = Dimensions.PADDING_TINY),
-                    text = stringResource(id = data.labelId),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
             }
         }
     }
@@ -72,28 +59,43 @@ fun ColumnScope.OverflowMenuContents(
             return@forEach
         }
 
-        val isEnabled = !disabledMenuItems.contains(data.id)
-        val alpha = getClickableAlpha(isEnabled)
-
-        DropdownMenuItem(
-            leadingIcon = {
-                NeevaMenuIcon(itemData = data)
-            },
-            text = {
-                Text(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                    text = stringResource(id = data.labelId),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            enabled = isEnabled,
-            modifier = Modifier.alpha(alpha),
-            onClick = {
-                expandedMutator(false)
-                onMenuItem(data.id)
+        when (data.id) {
+            NeevaMenuItemId.SEPARATOR -> {
+                Box(modifier = Modifier.padding(Dimensions.PADDING_TINY)) {
+                    Spacer(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .height(1.dp)
+                            .fillMaxWidth()
+                    )
+                }
             }
-        )
+
+            else -> {
+                val isEnabled = !disabledMenuItems.contains(data.id)
+                val alpha = getClickableAlpha(isEnabled)
+
+                DropdownMenuItem(
+                    leadingIcon = {
+                        NeevaMenuIcon(itemData = data)
+                    },
+                    text = {
+                        Text(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            text = data.labelId?.let { stringResource(id = it) } ?: "",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    enabled = isEnabled,
+                    modifier = Modifier.alpha(alpha),
+                    onClick = {
+                        expandedMutator(false)
+                        onMenuItem(data.id)
+                    }
+                )
+            }
+        }
     }
 }
 

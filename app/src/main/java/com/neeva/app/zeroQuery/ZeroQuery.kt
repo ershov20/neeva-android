@@ -5,13 +5,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -19,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserWrapper
@@ -42,7 +41,7 @@ import com.neeva.app.urlbar.URLBarModel
 
 data class SuggestedSite(
     val site: Site,
-    val iconOverride: ImageVector? = null
+    val overrideDrawableId: Int? = null
 )
 
 @Composable
@@ -81,7 +80,7 @@ fun ZeroQuery(
                             title = homeLabel,
                             largestFavicon = null
                         ),
-                        iconOverride = Icons.Default.Home
+                        overrideDrawableId = R.drawable.ic_house
                     )
                 )
             }
@@ -134,6 +133,10 @@ fun ZeroQuery(
         )
 
         if (suggestedQueries.isNotEmpty()) {
+            item {
+                Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
+            }
+
             collapsibleSection(
                 label = R.string.searches,
                 collapsingSectionState = isSuggestedQueriesExpanded,
@@ -156,7 +159,7 @@ fun ZeroQuery(
                 updateCollapsingHeaderState = isSpacesExpanded::setNextState
             ) {
                 items(spaces.subList(0, minOf(3, spaces.size))) { space ->
-                    SpaceRow(space = space) {
+                    SpaceRow(space = space, isCurrentUrlInSpace = null) {
                         browserWrapper.loadUrl(space.url())
                     }
                 }

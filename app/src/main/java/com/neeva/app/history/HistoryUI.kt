@@ -29,12 +29,12 @@ import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestionRow
-import com.neeva.app.suggestions.SuggestionRowIconParams
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.RowActionStartIconParams
 import com.neeva.app.ui.widgets.collapsible.CollapsingSectionState
 import com.neeva.app.ui.widgets.collapsible.collapsibleSection
 import com.neeva.app.ui.widgets.collapsible.setNextState
@@ -210,7 +210,7 @@ fun HistoryEntry(
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
 
     NavSuggestionRow(
-        iconParams = SuggestionRowIconParams(faviconBitmap = faviconBitmap),
+        iconParams = RowActionStartIconParams(faviconBitmap = faviconBitmap),
         primaryLabel = navSuggestion.label,
         secondaryLabel = navSuggestion.secondaryLabel,
         onTapRow = { onOpenUrl(navSuggestion.url) },

@@ -89,9 +89,7 @@ fun OverflowMenu(
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .defaultMinSize(minWidth = 250.dp)
+            modifier = Modifier.defaultMinSize(minWidth = 250.dp)
         ) {
             OverflowMenuContents(
                 onMenuItem = onMenuItem,

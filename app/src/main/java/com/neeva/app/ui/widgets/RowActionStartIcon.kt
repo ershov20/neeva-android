@@ -1,7 +1,9 @@
-package com.neeva.app.suggestions
+package com.neeva.app.ui.widgets
 
 import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
@@ -9,12 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.widgets.FaviconView
 
-data class SuggestionRowIconParams(
+data class RowActionStartIconParams(
     val imageURL: String? = null,
 
     val drawableID: Int? = null,
@@ -23,17 +23,18 @@ data class SuggestionRowIconParams(
     val faviconBitmap: Bitmap? = null
 )
 @Composable
-fun SuggestionRowIcon(params: SuggestionRowIconParams) {
+fun RowActionStartIcon(params: RowActionStartIconParams) {
     when {
         !params.imageURL.isNullOrBlank() -> {
-            Icon(
+            Image(
                 painter = rememberImagePainter(
                     data = params.imageURL,
                     builder = { crossfade(true) }
                 ),
                 contentDescription = null,
-                tint = Color.Unspecified,
-                modifier = Modifier.padding(Dimensions.PADDING_SMALL).clip(RoundedCornerShape(4.dp))
+                modifier = Modifier
+                    .size(Dimensions.SIZE_ICON_INCLUDING_PADDING)
+                    .clip(RoundedCornerShape(Dimensions.RADIUS_TINY))
             )
         }
 

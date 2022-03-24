@@ -4,7 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
@@ -23,19 +23,19 @@ fun NeevaMenuIcon(
     itemData: NeevaMenuItemData,
     modifier: Modifier = Modifier
 ) {
+    val label = itemData.labelId?.let { stringResource(it) } ?: ""
+
     if (itemData.icon != null) {
         Icon(
             modifier = modifier,
             imageVector = itemData.icon,
-            contentDescription = stringResource(id = itemData.labelId),
-            tint = MaterialTheme.colorScheme.onSurface
+            contentDescription = label
         )
     } else if (itemData.imageResourceID != null) {
         Icon(
             modifier = modifier,
             painter = painterResource(id = itemData.imageResourceID),
-            contentDescription = stringResource(id = itemData.labelId),
-            tint = MaterialTheme.colorScheme.onSurface
+            contentDescription = label
         )
     }
 }
@@ -45,27 +45,29 @@ fun NeevaMenuRow(
     itemData: NeevaMenuItemData,
     onMenuItem: (NeevaMenuItemId) -> Unit
 ) {
+    val label = itemData.labelId?.let { stringResource(it) } ?: ""
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClickLabel = stringResource(itemData.labelId)) {
+            .clickable(onClickLabel = label) {
                 onMenuItem(itemData.id)
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(itemData.labelId),
+            text = label,
             modifier = Modifier
                 .weight(1.0f)
-                .padding(16.dp),
-            style = MaterialTheme.typography.bodyLarge,
+                .padding(Dimensions.PADDING_LARGE),
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
         )
 
         NeevaMenuIcon(
             itemData = itemData,
-            modifier = Modifier.width(48.dp)
+            modifier = Modifier.size(Dimensions.SIZE_TOUCH_TARGET)
         )
     }
 }

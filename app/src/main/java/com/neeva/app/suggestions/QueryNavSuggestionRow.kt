@@ -6,6 +6,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.RowActionStartIconParams
 
 @Composable
 fun QueryNavSuggestionRow(
@@ -27,7 +28,7 @@ fun QueryNavSuggestionRow(
                 actionType = RowActionIconParams.ActionType.REFINE
             )
         },
-        iconParams = SuggestionRowIconParams(
+        iconParams = RowActionStartIconParams(
             faviconBitmap = null,
             imageURL = imageURL,
             drawableID = drawableID,

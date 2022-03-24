@@ -100,6 +100,7 @@ fun BottomToolbar(
     Surface(
         color = backgroundColor,
         tonalElevation = 2.dp,
+        shadowElevation = 2.dp,
         modifier = modifier
             .fillMaxWidth()
             .height(dimensionResource(id = R.dimen.bottom_toolbar_height))

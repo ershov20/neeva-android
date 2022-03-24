@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.widgets.RowActionStartIconParams
 import kotlin.math.absoluteValue
 
 @Composable
@@ -43,7 +44,7 @@ fun StockSuggestionRow(
     BaseSuggestionRow(
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
-        iconParams = SuggestionRowIconParams(
+        iconParams = RowActionStartIconParams(
             drawableID = drawableId,
             drawableTint = Color.Unspecified
         )
