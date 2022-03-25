@@ -29,7 +29,7 @@ fun SettingsToggleRow(
         },
         isEnabled = enabled,
         isChecked = toggleState.value,
-        onCheckedChange = { getTogglePreferenceSetter(togglePrefKey) },
+        onCheckedChange = { getTogglePreferenceSetter(togglePrefKey)?.invoke(it) },
         modifier = modifier
     )
 }

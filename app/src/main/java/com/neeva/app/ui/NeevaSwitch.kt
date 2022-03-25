@@ -52,7 +52,7 @@ fun NeevaSwitch(
                     disabledCheckedTrackColor = MaterialTheme.colorScheme.onSurface,
                     disabledUncheckedTrackColor = MaterialTheme.colorScheme.onSurface,
                 ),
-                onCheckedChange = null
+                onCheckedChange = onCheckedChange
             )
         }
     }

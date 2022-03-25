@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,6 +35,7 @@ import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.theme.Dimensions.PADDING_SMALL
 
 /** Returns a [State] that can be used in a Composable for obtaining a Bitmap. */
 @Composable
@@ -98,7 +100,7 @@ fun SpaceRow(
                 Icon(
                     painter = painterResource(id = R.drawable.spaces),
                     contentDescription = null,
-                    modifier = Modifier.size(Dimensions.SIZE_ICON_INCLUDING_PADDING)
+                    modifier = Modifier.padding(PADDING_SMALL)
                 )
             } else {
                 Image(
