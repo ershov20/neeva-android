@@ -14,8 +14,8 @@ import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
 import com.neeva.app.settings.mockSettingsViewModel
+import com.neeva.app.settings.profile.ProfileRowContainer
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultBrowserRow
-import com.neeva.app.settings.sharedComposables.subcomponents.ProfileRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabelRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
@@ -97,34 +97,13 @@ fun SettingsRow(
         }
 
         SettingsRowType.PROFILE -> {
-            if (settingsViewModel.isSignedOut()) {
-                if (onClick != null) {
-                    SettingsButtonRow(
-                        title = stringResource(R.string.settings_sign_in_to_join_neeva),
-                        onClick = onClick,
-                        modifier = modifier
-                    )
-                }
-            } else {
-                val userData = settingsViewModel.getNeevaUserData()
-                if (rowData.showSSOProviderAsPrimaryLabel) {
-                    ProfileRow(
-                        primaryLabel = getFormattedSSOProviderName(userData.ssoProvider),
-                        secondaryLabel = userData.email,
-                        pictureURI = userData.pictureURI,
-                        onClick = null,
-                        modifier = modifier
-                    )
-                } else {
-                    ProfileRow(
-                        primaryLabel = userData.displayName,
-                        secondaryLabel = userData.email,
-                        pictureURI = userData.pictureURI,
-                        onClick = onClick,
-                        modifier = modifier
-                    )
-                }
-            }
+            ProfileRowContainer(
+                isSignedOut = settingsViewModel.isSignedOut(),
+                showSSOProviderAsPrimaryLabel = rowData.showSSOProviderAsPrimaryLabel,
+                userData = settingsViewModel.getNeevaUserData(),
+                onClick = onClick,
+                modifier = modifier
+            )
         }
 
         SettingsRowType.CLEAR_DATA_BUTTON -> {

@@ -155,4 +155,7 @@
     <string name="menu_open_in_new_incognito_tab">Open in new incognito tab</string>
     <string name="menu_copy_link_address">Copy link address</string>
     <string name="menu_copy_link_text">Copy link text</string>
+    <string name="subscription_basic">Free Basic</string>
+    <string name="subscription_premium">Premium</string>
+    <string name="subscription_unknown">Unknown</string>
 </resources>

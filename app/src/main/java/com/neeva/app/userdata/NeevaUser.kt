@@ -4,6 +4,7 @@ import android.net.Uri
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.type.SubscriptionType
 
 data class NeevaUserData(
     val id: String? = null,
@@ -11,13 +12,13 @@ data class NeevaUserData(
     val email: String? = null,
     val pictureURI: Uri? = null,
     val ssoProvider: NeevaUser.SSOProvider = NeevaUser.SSOProvider.UNKNOWN,
+    val subscriptionType: SubscriptionType = SubscriptionType.Unknown
 )
 
 class NeevaUser(
     var data: NeevaUserData = NeevaUserData(),
     val neevaUserToken: NeevaUserToken
 ) {
-    private val TAG = "NeevaUser"
     private var isLoading: Boolean = false
 
     fun clearUser() {
@@ -47,7 +48,10 @@ class NeevaUser(
                     pictureURI = Uri.parse(userQuery.profile.pictureURL),
                     ssoProvider = SSOProvider.values()
                         .firstOrNull { it.url == userQuery.authProvider }
-                        ?: SSOProvider.UNKNOWN
+                        ?: SSOProvider.UNKNOWN,
+                    subscriptionType = SubscriptionType.values()
+                        .firstOrNull { it == userQuery.subscriptionType }
+                        ?: SubscriptionType.Unknown
                 )
             }
         } else {
