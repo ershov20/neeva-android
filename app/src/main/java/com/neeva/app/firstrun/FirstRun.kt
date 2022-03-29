@@ -337,8 +337,8 @@ fun FirstRun_Preview() {
     }
 }
 
-@Preview("Landscape, 1x scale", widthDp = 512, heightDp = 384, locale = "he")
-@Preview("Landscape, RTL, 1x scale", locale = "he")
+@Preview("Landscape, 1x scale", widthDp = 512, heightDp = 384, locale = "en")
+@Preview("Landscape, RTL, 1x scale", widthDp = 512, heightDp = 384, locale = "he")
 @Composable
 fun FirstRun_Preview_Landscape() {
     NeevaTheme {

@@ -6,6 +6,18 @@ import android.graphics.Color
 import android.graphics.Paint
 
 /** Creates a bitmap that looks like a checkerboard. */
+fun createSingleColorBitmap(isPortrait: Boolean, color: Int): Bitmap {
+    val bitmap = if (isPortrait) {
+        Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888)
+    } else {
+        Bitmap.createBitmap(1920, 1080, Bitmap.Config.ARGB_8888)
+    }
+
+    val canvas = Canvas(bitmap)
+    canvas.drawColor(color)
+    return bitmap
+}
+
 fun createCheckerboardBitmap(isPortrait: Boolean): Bitmap {
     val bitmap = if (isPortrait) {
         Bitmap.createBitmap(1080, 1920, Bitmap.Config.ARGB_8888)
@@ -36,4 +48,16 @@ fun createCheckerboardBitmap(isPortrait: Boolean): Bitmap {
     }
 
     return bitmap
+}
+
+val previewCardGridTitles by lazy {
+    listOf(
+        "Really long title that should cause the title to ellipsize probably",
+        "short",
+        "Amazon.com",
+        "Ad-free, private search",
+        "Some other amazing site",
+        "Yep, another site",
+        "Drink more Ovaltine"
+    )
 }

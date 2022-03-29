@@ -10,7 +10,7 @@ import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.LocalSetDefaultAndroidBrowserManager
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.card.CardsContainer
+import com.neeva.app.cardgrid.CardsPane
 import com.neeva.app.feedback.FeedbackView
 import com.neeva.app.firstrun.FirstRunContainer
 import com.neeva.app.history.HistoryContainer
@@ -110,7 +110,7 @@ fun AppNav(
         }
 
         composable(AppNavDestination.CARD_GRID.route) {
-            CardsContainer(
+            CardsPane(
                 webLayerModel = webLayerModel
             )
         }

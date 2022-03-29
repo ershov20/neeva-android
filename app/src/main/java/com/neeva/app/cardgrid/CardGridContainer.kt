@@ -1,4 +1,4 @@
-package com.neeva.app.card
+package com.neeva.app.cardgrid
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -10,20 +10,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.cardgrid.spaces.SpaceGrid
+import com.neeva.app.cardgrid.tabs.TabGrid
 import com.neeva.app.ui.AnimationConstants
 
 @Composable
 fun CardGridContainer(
     webLayerModel: WebLayerModel,
-    cardGridModel: CardGridModel,
+    cardsPaneModel: CardsPaneModel,
+    previousScreen: SelectedScreen?,
+    selectedScreen: SelectedScreen,
     modifier: Modifier = Modifier
 ) {
     val browsersFlow = webLayerModel.browsersFlow.collectAsState()
-    val isCurrentlyIncognito = browsersFlow.value.isCurrentlyIncognito
 
     Box(modifier = modifier) {
         AnimatedVisibility(
-            visible = isCurrentlyIncognito,
+            visible = selectedScreen == SelectedScreen.INCOGNITO_TABS,
             enter = slideInHorizontally(
                 animationSpec = tween(AnimationConstants.ANIMATION_DURATION_MS),
                 initialOffsetX = { fullWidth -> -fullWidth }
@@ -34,16 +37,46 @@ fun CardGridContainer(
             )
         ) {
             browsersFlow.value.incognitoBrowserWrapper?.let {
-                CardGrid(
+                TabGrid(
                     browserWrapper = it,
-                    cardGridModel = cardGridModel,
+                    cardsPaneModel = cardsPaneModel,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
         }
 
         AnimatedVisibility(
-            visible = !isCurrentlyIncognito,
+            visible = selectedScreen == SelectedScreen.REGULAR_TABS,
+            enter = slideInHorizontally(
+                animationSpec = tween(AnimationConstants.ANIMATION_DURATION_MS),
+                initialOffsetX = { fullWidth ->
+                    if (previousScreen == SelectedScreen.INCOGNITO_TABS) {
+                        fullWidth
+                    } else {
+                        -fullWidth
+                    }
+                }
+            ),
+            exit = slideOutHorizontally(
+                animationSpec = tween(AnimationConstants.ANIMATION_DURATION_MS),
+                targetOffsetX = { fullWidth ->
+                    if (selectedScreen == SelectedScreen.INCOGNITO_TABS) {
+                        fullWidth
+                    } else {
+                        -fullWidth
+                    }
+                }
+            )
+        ) {
+            TabGrid(
+                browserWrapper = browsersFlow.value.regularBrowser,
+                cardsPaneModel = cardsPaneModel,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        AnimatedVisibility(
+            visible = selectedScreen == SelectedScreen.SPACES,
             enter = slideInHorizontally(
                 animationSpec = tween(AnimationConstants.ANIMATION_DURATION_MS),
                 initialOffsetX = { fullWidth -> fullWidth }
@@ -53,9 +86,9 @@ fun CardGridContainer(
                 targetOffsetX = { fullWidth -> fullWidth }
             )
         ) {
-            CardGrid(
+            SpaceGrid(
                 browserWrapper = browsersFlow.value.regularBrowser,
-                cardGridModel = cardGridModel,
+                cardsPaneModel = cardsPaneModel,
                 modifier = Modifier.fillMaxWidth()
             )
         }

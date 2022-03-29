@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -106,6 +107,7 @@ fun SpaceRow(
                 Image(
                     bitmap = thumbnail,
                     contentDescription = null,
+                    contentScale = ContentScale.Crop,
                     modifier = Modifier.size(Dimensions.SIZE_ICON_INCLUDING_PADDING)
                 )
             }

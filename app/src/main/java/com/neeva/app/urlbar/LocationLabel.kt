@@ -140,7 +140,7 @@ fun LocationLabel(
                         contentDescription = stringResource(R.string.search),
                         modifier = Modifier
                             .padding(end = Dimensions.PADDING_SMALL)
-                            .size(16.dp)
+                            .size(Dimensions.SIZE_ICON_SMALL)
                     )
                     Text(
                         text = displayedText,

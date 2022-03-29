@@ -1,4 +1,4 @@
-package com.neeva.app.card
+package com.neeva.app.cardgrid
 
 import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.animateDp
@@ -19,10 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -35,38 +32,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.ui.AnimationConstants
-import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
 private val buttonHeight = 48.dp
-private val buttonWidth = 64.dp
+private val buttonWidth = 80.dp
 private val buttonRadius = buttonHeight / 2
-
-@Composable
-fun ModeSwitcher(
-    webLayerModel: WebLayerModel,
-    onSwitchScreen: (SelectedScreen) -> Unit
-) {
-    val currentBrowser by webLayerModel.currentBrowserFlow.collectAsState()
-
-    // Keep track of what screen is currently being viewed by the user.
-    val selectedScreen: MutableState<SelectedScreen> = remember(currentBrowser) {
-        mutableStateOf(
-            if (currentBrowser.isIncognito) {
-                SelectedScreen.INCOGNITO_TABS
-            } else {
-                SelectedScreen.REGULAR_TABS
-            }
-        )
-    }
-
-    ModeSwitcher(
-        selectedScreen = selectedScreen,
-        onSwitchScreen = onSwitchScreen
-    )
-}
 
 @Composable
 fun ModeSwitcher(
@@ -105,10 +77,21 @@ fun ModeSwitcher(
         transitionSpec = { tween(AnimationConstants.ANIMATION_DURATION_MS) },
         label = "regular icon color"
     ) {
-        if (it == SelectedScreen.INCOGNITO_TABS) {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        } else {
+        if (it == SelectedScreen.REGULAR_TABS) {
             MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    }
+
+    val spacesIconColor = transition.animateColor(
+        transitionSpec = { tween(AnimationConstants.ANIMATION_DURATION_MS) },
+        label = "spaces icon color"
+    ) {
+        if (it == SelectedScreen.SPACES) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
         }
     }
 
@@ -125,7 +108,8 @@ fun ModeSwitcher(
         bubblePosition = bubblePosition.value,
         bubbleColor = bubbleColor.value,
         incognitoIconColor = incognitoIconColor.value,
-        regularIconColor = regularIconColor.value
+        regularIconColor = regularIconColor.value,
+        spacesIconColor = spacesIconColor.value
     )
 }
 
@@ -136,7 +120,8 @@ fun ModeSwitcher(
     bubblePosition: Dp,
     bubbleColor: Color,
     incognitoIconColor: Color,
-    regularIconColor: Color
+    regularIconColor: Color,
+    spacesIconColor: Color
 ) {
     Box(
         modifier = Modifier
@@ -198,6 +183,20 @@ fun ModeSwitcher(
                     .fillMaxHeight()
                     .padding(Dimensions.PADDING_MEDIUM)
             )
+
+            Icon(
+                painter = painterResource(R.drawable.ic_bookmarks_black_24),
+                contentDescription = stringResource(R.string.spaces),
+                tint = spacesIconColor,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(buttonRadius))
+                    .clickable(enabled = selectedScreen != SelectedScreen.SPACES) {
+                        onSwitchScreen(SelectedScreen.SPACES)
+                    }
+                    .width(buttonWidth)
+                    .fillMaxHeight()
+                    .padding(Dimensions.PADDING_MEDIUM)
+            )
         }
     }
 }
@@ -205,17 +204,39 @@ fun ModeSwitcher(
 @Preview("LTR", locale = "en")
 @Preview("RTL", locale = "he")
 @Composable
-private fun ModeSwitcherPreview() {
-    OneBooleanPreviewContainer { isIncognito ->
-        val selectedScreen = remember {
-            mutableStateOf(
-                when (isIncognito) {
-                    false -> SelectedScreen.REGULAR_TABS
-                    else -> SelectedScreen.INCOGNITO_TABS
-                }
+private fun ModeSwitcherPreview_Incognito() {
+    LightDarkPreviewContainer {
+        val selectedScreen = remember { mutableStateOf(SelectedScreen.INCOGNITO_TABS) }
+        Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+            ModeSwitcher(
+                selectedScreen = selectedScreen,
+                onSwitchScreen = { selectedScreen.value = it }
             )
         }
+    }
+}
 
+@Preview("LTR", locale = "en")
+@Preview("RTL", locale = "he")
+@Composable
+private fun ModeSwitcherPreview_Regular() {
+    LightDarkPreviewContainer {
+        val selectedScreen = remember { mutableStateOf(SelectedScreen.REGULAR_TABS) }
+        Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+            ModeSwitcher(
+                selectedScreen = selectedScreen,
+                onSwitchScreen = { selectedScreen.value = it }
+            )
+        }
+    }
+}
+
+@Preview("LTR", locale = "en")
+@Preview("RTL", locale = "he")
+@Composable
+private fun ModeSwitcherPreview_Spaces() {
+    LightDarkPreviewContainer {
+        val selectedScreen = remember { mutableStateOf(SelectedScreen.SPACES) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             ModeSwitcher(
                 selectedScreen = selectedScreen,

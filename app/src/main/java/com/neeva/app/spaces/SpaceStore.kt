@@ -198,8 +198,11 @@ class SpaceStore(
 
     private suspend fun contentURLsForSpace(spaceID: String) =
         contentDataForSpace(spaceID = spaceID).mapNotNull { it.url }
-    private suspend fun contentDataForSpace(spaceID: String) =
+
+    /** Returns all the items within a given Space. */
+    suspend fun contentDataForSpace(spaceID: String) =
         dao.getItemsFromSpace(spaceID = spaceID)
+
     suspend fun spaceIDsContainingURL(url: Uri?) = dao.getSpaceIDsWithURL(url = url)
 
     /** Cleans up the [Space] and [SpaceItem] tables by taking [allSpacesFlow] as source of truth */

@@ -112,9 +112,6 @@
     <string name="clear_browsing_today_and_yesterday">Last 48 hours</string>
     <string name="clear_browsing_everything">All time</string>
 
-    <string name="space_contains_page">Space contains the current page</string>
-    <string name="space_not_contain_page">Space doesn\'t contain the current page</string>
-
     <string name="incognito_zero_query_title">You are incognito</string>
     <string name="incognito_zero_query_body">Neeva <b>won\'t save</b> any of your personal activity like searches, clicks, or browsing.\n\nSearch privately, knowing that other people who use this device won\'t see your activity if you close your incognito tabs.</string>
     <string name="incognito_zero_query_footer">Your activity <b>might still be visible</b> to your internet service provider, school, or employer.</string>
@@ -133,8 +130,11 @@
     <string name="tab_crashed_title">Uh oh!</string>
     <string name="tab_crashed_body">Something went wrong while displaying this web page</string>
 
+    <string name="space_contains_page">Space contains the current page</string>
+    <string name="space_not_contain_page">Space doesn\'t contain the current page</string>
     <string name="space_add_url">Added site to \"%1s\"</string>
-    <string name="space_remove_url">Removed site from \"%1s\"</string>
+    <string name="space_remove_url">Removed site from \"%1s\"</string>'
+    <string name="space_additional_count">+%1d</string>
 
     <string name="error_generic">Something went wrong</string>
     <string name="error_url_failure">Could not open \"%1$s\"</string>
