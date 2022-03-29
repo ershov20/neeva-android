@@ -20,7 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
-import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
+import com.neeva.app.storage.toBitmap
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
@@ -42,7 +42,7 @@ fun ProfileImage(displayName: String?, painter: Painter?, circlePicture: Boolean
         }
 
         else -> {
-            AccountCirclePicture(modifier)
+            DefaultAccountPicture(modifier)
         }
     }
 }
@@ -60,7 +60,7 @@ private fun SingleLetterPicture(displayName: String, modifier: Modifier) {
 }
 
 @Composable
-private fun AccountCirclePicture(modifier: Modifier) {
+private fun DefaultAccountPicture(modifier: Modifier) {
     Icon(
         Icons.Rounded.AccountCircle,
         contentDescription = null,

@@ -2,6 +2,9 @@ package com.neeva.app.storage
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
 import android.net.Uri
 import android.util.Base64
 import android.util.Log
@@ -170,4 +173,24 @@ fun String.toBitmap(): Bitmap? {
     } catch (e: IllegalArgumentException) {
         null
     }
+}
+
+/** Returns an image of a single letter. */
+fun String.toBitmap(textSizeRatio: Float, backgroundColor: Int): Bitmap {
+    val size = 128
+
+    val firstElement = (this.firstOrNull() ?: "").toString()
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    canvas.drawColor(backgroundColor)
+
+    val textPaint = Paint()
+    textPaint.textAlign = Paint.Align.CENTER
+    textPaint.color = Color.WHITE
+    textPaint.textSize = size * textSizeRatio
+
+    val xPos = canvas.width / 2.0f
+    val yPos = (canvas.height - textPaint.descent() - textPaint.ascent()) / 2.0f
+    canvas.drawText(firstElement.uppercase(), xPos, yPos, textPaint)
+    return bitmap
 }
