@@ -19,11 +19,11 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SettingsButtonRow(
     title: String,
     onClick: () -> Unit,
-    modifier: Modifier
+    rowModifier: Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { onClick() }.then(modifier)
+        modifier = Modifier.clickable { onClick() }.then(rowModifier)
     ) {
         Text(
             text = title,

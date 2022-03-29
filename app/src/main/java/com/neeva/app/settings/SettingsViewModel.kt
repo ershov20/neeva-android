@@ -28,7 +28,7 @@ interface SettingsViewModel {
     //endregion
 
     //region Main Settings
-    fun getMainSettingsNavigation(): Map<Int, (() -> Unit)?>
+    fun getOnClickMap(): Map<Int, (() -> Unit)?>
     //endregion
 
     //region Profile Settings
@@ -83,18 +83,33 @@ class SettingsViewModelImpl(
         }
     }
 
-    override fun getMainSettingsNavigation(): Map<Int, (() -> Unit)?> {
+    override fun getOnClickMap(): Map<Int, (() -> Unit)?> {
+        val resultMap = mutableMapOf<Int, (() -> Unit)?>()
+        resultMap.putAll(getNavOnClickMap())
+        resultMap.putAll(getButtonClicks())
+        return resultMap
+    }
+
+    private fun getNavOnClickMap(): Map<Int, (() -> Unit)?> {
         val navMap = mutableMapOf<Int, (() -> Unit)?>(
-            R.string.settings_sign_in_to_join_neeva to appNavModel::showProfileSettings,
-            R.string.settings_clear_browsing_data to appNavModel::showClearBrowsingSettings,
-            R.string.settings_default_browser to appNavModel::showDefaultBrowserSettings,
-            R.string.settings_debug_local_feature_flags to appNavModel::showLocalFeatureFlagsPane,
-            R.string.settings_debug_open_50_tabs to { appNavModel.debugOpenManyTabs() }
+            R.string.settings_sign_in_to_join_neeva to { appNavModel.showProfileSettings() },
+            R.string.settings_clear_browsing_data to { appNavModel.showClearBrowsingSettings() },
+            R.string.settings_default_browser to { appNavModel.showDefaultBrowserSettings() },
+            R.string.settings_debug_local_feature_flags to {
+                appNavModel.showLocalFeatureFlagsPane()
+            }
         )
         if (isSignedOut()) {
-            navMap[R.string.settings_sign_in_to_join_neeva] = appNavModel::showFirstRun
+            navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showFirstRun() }
         }
         return navMap
+    }
+
+    private fun getButtonClicks(): Map<Int, (() -> Unit)?> {
+        return mutableMapOf(
+            R.string.settings_sign_out to { signOut() },
+            R.string.settings_debug_open_50_tabs to { appNavModel.debugOpenManyTabs() }
+        )
     }
 
     override fun isSignedOut(): Boolean {
@@ -152,7 +167,14 @@ val mockSettingsViewModel by lazy {
 
         override fun openUrl(uri: Uri, openViaIntent: Boolean) {}
 
-        override fun getMainSettingsNavigation(): Map<Int, (() -> Unit)?> { return mapOf() }
+        override fun getOnClickMap(): Map<Int, (() -> Unit)?> {
+            return mapOf(
+                R.string.settings_sign_in_to_join_neeva to { },
+                R.string.settings_clear_browsing_data to { },
+                R.string.settings_default_browser to { },
+                R.string.settings_debug_local_feature_flags to { }
+            )
+        }
 
         override fun isSignedOut(): Boolean { return false }
 

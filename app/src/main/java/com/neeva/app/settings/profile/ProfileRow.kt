@@ -41,14 +41,14 @@ fun ProfileRowContainer(
     showSSOProviderAsPrimaryLabel: Boolean,
     userData: NeevaUserData,
     onClick: (() -> Unit)?,
-    modifier: Modifier
+    rowModifier: Modifier
 ) {
     when {
         isSignedOut && onClick != null -> {
             SettingsButtonRow(
                 title = stringResource(R.string.settings_sign_in_to_join_neeva),
                 onClick = onClick,
-                modifier = modifier
+                rowModifier = rowModifier
             )
         }
 
@@ -59,7 +59,7 @@ fun ProfileRowContainer(
                 painter = SSOImagePainter(userData.ssoProvider),
                 circlePicture = false,
                 onClick = null,
-                modifier = modifier
+                rowModifier = rowModifier
             )
         }
 
@@ -70,7 +70,7 @@ fun ProfileRowContainer(
                 painter = PictureUrlPainter(pictureURI = userData.pictureURI),
                 subscriptionType = userData.subscriptionType,
                 onClick = onClick,
-                modifier = modifier
+                rowModifier = rowModifier
             )
         }
     }
@@ -85,7 +85,7 @@ fun ProfileRow(
     circlePicture: Boolean = true,
     subscriptionType: SubscriptionType? = null,
     onClick: (() -> Unit)? = null,
-    modifier: Modifier,
+    rowModifier: Modifier,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -97,7 +97,7 @@ fun ProfileRow(
                     Modifier
                 }
             )
-            .then(modifier)
+            .then(rowModifier)
     ) {
         ProfileImage(
             displayName = primaryLabel,
@@ -182,7 +182,7 @@ class ProfileRowPreviews {
                 showSSOProviderAsPrimaryLabel = false,
                 userData = getMockUserData(),
                 onClick = { },
-                modifier = SettingsUIConstants
+                rowModifier = SettingsUIConstants
                     .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }
@@ -201,7 +201,7 @@ class ProfileRowPreviews {
                         showSSOProviderAsPrimaryLabel = true,
                         userData = getMockUserData(ssoProvider = it),
                         onClick = { },
-                        modifier = SettingsUIConstants
+                        rowModifier = SettingsUIConstants
                             .rowModifier.background(MaterialTheme.colorScheme.surface)
                     )
                 }
@@ -220,7 +220,7 @@ class ProfileRowPreviews {
                 showSSOProviderAsPrimaryLabel = false,
                 userData = getMockUserData(hasDisplayName, invalidProfileUrl),
                 onClick = { },
-                modifier = SettingsUIConstants
+                rowModifier = SettingsUIConstants
                     .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }
@@ -237,7 +237,7 @@ class ProfileRowPreviews {
                 showSSOProviderAsPrimaryLabel = false,
                 userData = getMockUserData(hasDisplayName, invalidProfileUrl),
                 onClick = null,
-                modifier = SettingsUIConstants
+                rowModifier = SettingsUIConstants
                     .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }
@@ -256,7 +256,7 @@ class ProfileRowPreviews {
                         showSSOProviderAsPrimaryLabel = false,
                         userData = getMockUserData(invalidProfileUrl = true, subscriptionType = it),
                         onClick = { },
-                        modifier = SettingsUIConstants
+                        rowModifier = SettingsUIConstants
                             .rowModifier.background(MaterialTheme.colorScheme.surface)
                     )
                 }
@@ -275,7 +275,7 @@ class ProfileRowPreviews {
                 showSSOProviderAsPrimaryLabel = false,
                 userData = getMockUserData(hasDisplayName = false, invalidProfileUrl = true),
                 onClick = null,
-                modifier = SettingsUIConstants
+                rowModifier = SettingsUIConstants
                     .rowModifier.background(MaterialTheme.colorScheme.surface)
             )
         }

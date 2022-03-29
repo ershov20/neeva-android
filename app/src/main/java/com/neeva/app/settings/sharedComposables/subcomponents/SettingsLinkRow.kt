@@ -20,11 +20,11 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SettingsLinkRow(
     title: String,
     openUrl: () -> Unit,
-    modifier: Modifier
+    rowModifier: Modifier
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { openUrl() }.then(modifier)
+        modifier = Modifier.clickable { openUrl() }.then(rowModifier)
     ) {
         SettingsLabelText(primaryLabel = title, columnModifier = Modifier.weight(1f))
         Image(

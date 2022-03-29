@@ -44,12 +44,11 @@ fun SettingRowsView(
         )
     ) {
         groupData.rows.forEach { rowData ->
-            var onClick = settingsViewModel.getMainSettingsNavigation()[rowData.titleId]
             SettingsRow(
                 rowData = rowData,
                 settingsViewModel = settingsViewModel,
-                onClick = onClick,
-                modifier = Modifier
+                onClick = settingsViewModel.getOnClickMap()[rowData.titleId],
+                rowModifier = Modifier
                     .then(
                         if (groupData.isForDebugOnly) {
                             Modifier.background(MaterialTheme.colorScheme.errorContainer)

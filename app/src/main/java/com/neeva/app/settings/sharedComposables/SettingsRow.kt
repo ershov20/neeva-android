@@ -29,7 +29,7 @@ fun SettingsRow(
     rowData: SettingsRowData,
     settingsViewModel: SettingsViewModel,
     onClick: (() -> Unit)? = null,
-    modifier: Modifier
+    rowModifier: Modifier
 ) {
     var title = stringResource(rowData.titleId)
     val versionString = BuildConfig.VERSION_NAME
@@ -41,23 +41,21 @@ fun SettingsRow(
 
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
-            if (rowData.titleId == R.string.settings_sign_out) {
-                SettingsButtonRow(title, settingsViewModel::signOut, modifier)
-            } else {
-                onClick?.let { SettingsButtonRow(title, it, modifier) }
+            onClick?.let {
+                SettingsButtonRow(title = title, onClick = it, rowModifier = rowModifier)
             }
         }
 
         SettingsRowType.LABEL -> {
-            SettingsLabelRow(primaryLabel = title, rowModifier = modifier)
+            SettingsLabelRow(primaryLabel = title, rowModifier = rowModifier)
         }
 
         SettingsRowType.LINK -> {
             if (rowData.url != null) {
                 SettingsLinkRow(
-                    title,
-                    { settingsViewModel.openUrl(rowData.url, rowData.openUrlViaIntent) },
-                    modifier
+                    title = title,
+                    openUrl = { settingsViewModel.openUrl(rowData.url, rowData.openUrlViaIntent) },
+                    rowModifier = rowModifier
                 )
             }
         }
@@ -70,7 +68,7 @@ fun SettingsRow(
                     togglePrefKey = rowData.togglePreferenceKey,
                     getTogglePreferenceSetter = settingsViewModel::getTogglePreferenceSetter,
                     enabled = rowData.enabled,
-                    modifier = modifier
+                    modifier = rowModifier
                 )
             }
         }
@@ -83,14 +81,14 @@ fun SettingsRow(
                     SetDefaultBrowserRow(
                         settingsViewModel.getSetDefaultAndroidBrowserManager(),
                         navigateToPane = onClick,
-                        rowModifier = modifier
+                        rowModifier = rowModifier
                     )
                 } else {
                     SettingsNavigationRow(
                         primaryLabel = title,
                         enabled = rowData.enabled,
                         onClick = onClick,
-                        modifier = modifier
+                        modifier = rowModifier
                     )
                 }
             }
@@ -102,7 +100,7 @@ fun SettingsRow(
                 showSSOProviderAsPrimaryLabel = rowData.showSSOProviderAsPrimaryLabel,
                 userData = settingsViewModel.getNeevaUserData(),
                 onClick = onClick,
-                modifier = modifier
+                rowModifier = rowModifier
             )
         }
 
@@ -111,7 +109,7 @@ fun SettingsRow(
                 getToggleState = settingsViewModel::getToggleState,
                 rowData = rowData,
                 onClearBrowsingData = settingsViewModel::clearBrowsingData,
-                rowModifier = modifier
+                rowModifier = rowModifier
             )
         }
     }
@@ -141,7 +139,8 @@ fun SettingsRow_PreviewToggle() {
                 togglePreferenceKey = "toggle preference key"
             ),
             settingsViewModel = mockSettingsViewModel,
-            modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
+            rowModifier = SettingsUIConstants
+                .rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }
@@ -161,7 +160,8 @@ fun SettingsRow_PreviewLink() {
                 togglePreferenceKey = ""
             ),
             settingsViewModel = mockSettingsViewModel,
-            modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
+            rowModifier = SettingsUIConstants
+                .rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }
@@ -177,7 +177,8 @@ fun SettingsRow_PreviewLabel() {
                 R.string.debug_long_string_primary
             ),
             settingsViewModel = mockSettingsViewModel,
-            modifier = SettingsUIConstants.rowModifier.background(MaterialTheme.colorScheme.surface)
+            rowModifier = SettingsUIConstants
+                .rowModifier.background(MaterialTheme.colorScheme.surface)
         )
     }
 }
