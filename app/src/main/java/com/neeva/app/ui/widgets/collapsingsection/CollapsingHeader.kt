@@ -1,4 +1,4 @@
-package com.neeva.app.ui.widgets.collapsible
+package com.neeva.app.ui.widgets.collapsingsection
 
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -33,6 +32,10 @@ enum class CollapsingSectionState {
             EXPANDED -> COLLAPSED
         }
     }
+
+    companion object {
+        fun String.toCollapsingSectionState() = valueOf(this)
+    }
 }
 
 fun MutableState<CollapsingSectionState>.setNextState() {
@@ -40,12 +43,12 @@ fun MutableState<CollapsingSectionState>.setNextState() {
 }
 
 @Composable
-fun CollapsibleThreeStateHeader(
+fun CollapsingThreeStateHeader(
     label: String,
-    state: State<CollapsingSectionState>,
+    state: CollapsingSectionState,
     onClick: () -> Unit
 ) {
-    val chevronResourceId = when (state.value) {
+    val chevronResourceId = when (state) {
         CollapsingSectionState.COLLAPSED -> R.drawable.ic_baseline_keyboard_arrow_up_24
         CollapsingSectionState.COMPACT -> R.drawable.ic_keyboard_double_arrow_up_black_24
         CollapsingSectionState.EXPANDED -> R.drawable.ic_baseline_keyboard_arrow_up_24
@@ -60,9 +63,9 @@ fun CollapsibleThreeStateHeader(
 }
 
 @Composable
-fun CollapsibleTwoStateHeader(
+fun CollapsingTwoStateHeader(
     label: String,
-    state: State<CollapsingSectionState>,
+    state: CollapsingSectionState,
     onClick: () -> Unit
 ) {
     CollapsingHeader(
@@ -75,12 +78,12 @@ fun CollapsibleTwoStateHeader(
 
 @Composable
 private fun CollapsingHeader(
-    state: State<CollapsingSectionState>,
+    state: CollapsingSectionState,
     label: String,
     chevronResourceId: Int,
     onClick: () -> Unit
 ) {
-    val transition = updateTransition(targetState = state.value, "mode switch")
+    val transition = updateTransition(targetState = state, "mode switch")
     val rotation = transition.animateFloat(
         transitionSpec = { tween(AnimationConstants.ANIMATION_DURATION_MS) },
         label = "mode switch rotation"
@@ -128,7 +131,7 @@ fun CollapsingHeaderPreviews_TwoStates() {
         }
 
         val state = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
-        CollapsibleTwoStateHeader(label = label, state = state) {
+        CollapsingTwoStateHeader(label = label, state = state.value) {
             state.value = state.value.next(false)
         }
     }
@@ -147,7 +150,7 @@ fun CollapsingHeaderPreviews_ThreeStates() {
         }
 
         val state = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
-        CollapsibleThreeStateHeader(label = label, state = state) {
+        CollapsingThreeStateHeader(label = label, state = state.value) {
             state.value = state.value.next(true)
         }
     }

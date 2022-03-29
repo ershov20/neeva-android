@@ -10,7 +10,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -23,6 +22,7 @@ import androidx.paging.compose.items
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.daos.SitePlusVisit
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
@@ -35,9 +35,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
-import com.neeva.app.ui.widgets.collapsible.CollapsingSectionState
-import com.neeva.app.ui.widgets.collapsible.collapsibleSection
-import com.neeva.app.ui.widgets.collapsible.setNextState
+import com.neeva.app.ui.widgets.collapsingsection.collapsingSection
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.Date
@@ -54,7 +52,10 @@ fun HistoryUI(
     val domainProvider = LocalEnvironment.current.domainProvider
     val historyManager = LocalEnvironment.current.historyManager
     val snackbarModel = LocalEnvironment.current.snackbarModel
+    val sharedPrefsModel = LocalEnvironment.current.sharedPreferencesModel
     val context = LocalContext.current
+
+    val historyUIModel = remember { HistoryUIModel(sharedPrefsModel) }
 
     val startOfTime = Date(0L)
     val startOf7DaysAgo = Date.from(now.minusDays(7).atStartOfDay().toInstant(ZoneOffset.UTC))
@@ -81,6 +82,7 @@ fun HistoryUI(
     }.collectAsLazyPagingItems()
 
     HistoryUI(
+        historyUIModel = historyUIModel,
         historyToday = historyToday,
         historyYesterday = historyYesterday,
         historyThisWeek = historyThisWeek,
@@ -104,7 +106,8 @@ fun HistoryUI(
 }
 
 @Composable
-fun HistoryUI(
+private fun HistoryUI(
+    historyUIModel: HistoryUIModel,
     historyToday: LazyPagingItems<SitePlusVisit>,
     historyYesterday: LazyPagingItems<SitePlusVisit>,
     historyThisWeek: LazyPagingItems<SitePlusVisit>,
@@ -116,10 +119,10 @@ fun HistoryUI(
     faviconCache: FaviconCache,
     domainProvider: DomainProvider
 ) {
-    val isTodayDisplayed = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
-    val isYesterdayDisplayed = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
-    val isThisWeekDisplayed = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
-    val isBeforeThisWeekDisplayed = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
+    val isTodayDisplayed = historyUIModel.getState(HistoryUIPrefs.TodayState)
+    val isYesterdayDisplayed = historyUIModel.getState(HistoryUIPrefs.YesterdayState)
+    val isThisWeekDisplayed = historyUIModel.getState(HistoryUIPrefs.ThisWeekState)
+    val isBeforeThisWeekDisplayed = historyUIModel.getState(HistoryUIPrefs.BeforeThisWeekState)
 
     Column(
         modifier = Modifier
@@ -146,10 +149,12 @@ fun HistoryUI(
                 )
             }
 
-            collapsibleSection(
+            collapsingSection(
                 label = R.string.history_today,
-                collapsingSectionState = isTodayDisplayed,
-                updateCollapsingHeaderState = isTodayDisplayed::setNextState,
+                collapsingSectionState = isTodayDisplayed.value,
+                onUpdateCollapsingSectionState = {
+                    historyUIModel.advanceState(HistoryUIPrefs.TodayState)
+                }
             ) {
                 items(historyToday) { site ->
                     site?.let {
@@ -158,10 +163,12 @@ fun HistoryUI(
                 }
             }
 
-            collapsibleSection(
+            collapsingSection(
                 label = R.string.history_yesterday,
-                collapsingSectionState = isYesterdayDisplayed,
-                updateCollapsingHeaderState = isYesterdayDisplayed::setNextState
+                collapsingSectionState = isYesterdayDisplayed.value,
+                onUpdateCollapsingSectionState = {
+                    historyUIModel.advanceState(HistoryUIPrefs.YesterdayState)
+                }
             ) {
                 items(historyYesterday) { site ->
                     site?.let {
@@ -170,10 +177,12 @@ fun HistoryUI(
                 }
             }
 
-            collapsibleSection(
+            collapsingSection(
                 label = R.string.history_this_week,
-                collapsingSectionState = isThisWeekDisplayed,
-                updateCollapsingHeaderState = isThisWeekDisplayed::setNextState
+                collapsingSectionState = isThisWeekDisplayed.value,
+                onUpdateCollapsingSectionState = {
+                    historyUIModel.advanceState(HistoryUIPrefs.ThisWeekState)
+                }
             ) {
                 items(historyThisWeek) { site ->
                     site?.let {
@@ -182,10 +191,12 @@ fun HistoryUI(
                 }
             }
 
-            collapsibleSection(
+            collapsingSection(
                 label = R.string.history_earlier,
-                collapsingSectionState = isBeforeThisWeekDisplayed,
-                updateCollapsingHeaderState = isBeforeThisWeekDisplayed::setNextState
+                collapsingSectionState = isBeforeThisWeekDisplayed.value,
+                onUpdateCollapsingSectionState = {
+                    historyUIModel.advanceState(HistoryUIPrefs.BeforeThisWeekState)
+                }
             ) {
                 items(historyBeforeThisWeek) { site ->
                     site?.let {
@@ -275,8 +286,11 @@ fun HistoryUI_Preview() {
     val itemsThisWeek = flowOf(PagingData.from(historyThisWeek))
     val itemsBeforeThisWeek = flowOf(PagingData.from(historyBeforeThisWeek))
 
+    val historyUIModel = HistoryUIModel(SharedPreferencesModel(LocalContext.current))
+
     NeevaTheme {
         HistoryUI(
+            historyUIModel = historyUIModel,
             historyToday = itemsToday.collectAsLazyPagingItems(),
             historyYesterday = itemsYesterday.collectAsLazyPagingItems(),
             historyThisWeek = itemsThisWeek.collectAsLazyPagingItems(),

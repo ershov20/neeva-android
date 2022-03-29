@@ -19,9 +19,10 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
  *    - Holding DEBUG-mode-only flags as MutableStates
  */
 class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
+    internal val isDebugMode = BuildConfig.DEBUG
+
     private val toggleMap = mutableMapOf<String, MutableState<Boolean>>()
-    val isDebugMode = BuildConfig.DEBUG
-    val selectedTimeClearingOption = mutableStateOf(
+    private val selectedTimeClearingOption = mutableStateOf(
         getSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, 0)
     )
 

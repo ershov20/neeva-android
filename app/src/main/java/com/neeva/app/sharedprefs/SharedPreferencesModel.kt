@@ -11,28 +11,21 @@ import android.content.SharedPreferences
  *      2) SharedPref functions don't need to be rewritten.
  */
 class SharedPreferencesModel(context: Context) {
-    val sharedPreferencesMap: Map<SharedPrefFolder, SharedPreferences> =
-        mapOf(
-            SharedPrefFolder.SETTINGS to context.getSharedPreferences(
-                SharedPrefFolder.SETTINGS.name, Context.MODE_PRIVATE
-            ),
-            SharedPrefFolder.USER to context.getSharedPreferences(
-                SharedPrefFolder.USER.name, Context.MODE_PRIVATE
-            ),
-            SharedPrefFolder.FIRST_RUN to context.getSharedPreferences(
-                SharedPrefFolder.FIRST_RUN.name, Context.MODE_PRIVATE
-            ),
-        )
+    private val sharedPreferencesMap = mutableMapOf<SharedPrefFolder, SharedPreferences>().apply {
+        SharedPrefFolder.values().forEach {
+            put(it, context.getSharedPreferences(it.name, Context.MODE_PRIVATE))
+        }
+    }
 
     fun <T> getValue(folder: SharedPrefFolder, key: String, defaultValue: T): T {
         val sharedPrefs = sharedPreferencesMap[folder]
-        val returnValue = when (defaultValue) {
+        val returnValue: Any? = when (defaultValue) {
             is Boolean -> sharedPrefs?.getBoolean(key, defaultValue)
             is String -> sharedPrefs?.getString(key, defaultValue)
             is Int -> sharedPrefs?.getInt(key, defaultValue)
             else -> defaultValue
         }
-        return (returnValue as T) ?: defaultValue
+        return (returnValue as? T) ?: defaultValue
     }
 
     fun setValue(folder: SharedPrefFolder, key: String, value: Any) {
@@ -56,8 +49,10 @@ class SharedPreferencesModel(context: Context) {
     }
 }
 
-enum class SharedPrefFolder(name: String) {
-    SETTINGS("SETTINGS_PREFERENCES"),
-    USER("UserLoginInfo"),
-    FIRST_RUN("FIRST_RUN_PREFERENCES")
+enum class SharedPrefFolder {
+    SETTINGS,
+    USER,
+    FIRST_RUN,
+    ZERO_QUERY,
+    HISTORY_UI
 }

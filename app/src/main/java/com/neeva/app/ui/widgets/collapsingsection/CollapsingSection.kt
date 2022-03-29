@@ -1,29 +1,28 @@
-package com.neeva.app.ui.widgets.collapsible
+package com.neeva.app.ui.widgets.collapsingsection
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.ui.res.stringResource
 
 /** Collapsible section of a [LazyList] that allows callers to display the items in three states. */
-fun LazyListScope.collapsibleThreeStateSection(
+fun LazyListScope.collapsingThreeStateSection(
     @StringRes label: Int,
-    collapsingSectionState: State<CollapsingSectionState>,
-    updateCollapsingHeaderState: () -> Unit,
+    collapsingSectionState: CollapsingSectionState,
+    onUpdateCollapsingSectionState: () -> Unit,
     expandedContent: @Composable () -> Unit,
     compactContent: @Composable () -> Unit
 ) {
     item {
-        CollapsibleThreeStateHeader(
+        CollapsingThreeStateHeader(
             label = stringResource(label),
             state = collapsingSectionState,
-            onClick = updateCollapsingHeaderState
+            onClick = onUpdateCollapsingSectionState
         )
     }
 
     item {
-        when (collapsingSectionState.value) {
+        when (collapsingSectionState) {
             CollapsingSectionState.EXPANDED -> expandedContent()
             CollapsingSectionState.COMPACT -> compactContent()
             CollapsingSectionState.COLLAPSED -> {}
@@ -32,21 +31,21 @@ fun LazyListScope.collapsibleThreeStateSection(
 }
 
 /** Collapsible section of a [LazyList] that only shows items when the section is Expanded. */
-fun LazyListScope.collapsibleSection(
+fun LazyListScope.collapsingSection(
     @StringRes label: Int,
-    collapsingSectionState: State<CollapsingSectionState>,
-    updateCollapsingHeaderState: () -> Unit,
+    collapsingSectionState: CollapsingSectionState,
+    onUpdateCollapsingSectionState: () -> Unit,
     expandedContent: (LazyListScope.() -> Unit)
 ) {
     item {
-        CollapsibleTwoStateHeader(
+        CollapsingTwoStateHeader(
             label = stringResource(label),
             state = collapsingSectionState,
-            onClick = updateCollapsingHeaderState
+            onClick = onUpdateCollapsingSectionState
         )
     }
 
-    if (collapsingSectionState.value == CollapsingSectionState.EXPANDED) {
+    if (collapsingSectionState == CollapsingSectionState.EXPANDED) {
         expandedContent()
     }
 }

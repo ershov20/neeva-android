@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,10 +32,8 @@ import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.ui.layouts.GridLayout
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.widgets.collapsible.CollapsingSectionState
-import com.neeva.app.ui.widgets.collapsible.collapsibleSection
-import com.neeva.app.ui.widgets.collapsible.collapsibleThreeStateSection
-import com.neeva.app.ui.widgets.collapsible.setNextState
+import com.neeva.app.ui.widgets.collapsingsection.collapsingSection
+import com.neeva.app.ui.widgets.collapsingsection.collapsingThreeStateSection
 import com.neeva.app.urlbar.URLBarModel
 
 data class SuggestedSite(
@@ -54,6 +51,7 @@ fun ZeroQuery(
     val domainProvider = LocalEnvironment.current.domainProvider
     val historyManager = LocalEnvironment.current.historyManager
     val spaceStore = LocalEnvironment.current.spaceStore
+    val sharedPreferencesModel = LocalEnvironment.current.sharedPreferencesModel
 
     val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
@@ -62,9 +60,10 @@ fun ZeroQuery(
 
     val homeLabel = stringResource(id = R.string.home)
 
-    val isSuggestedSitesExpanded = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
-    val isSuggestedQueriesExpanded = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
-    val isSpacesExpanded = remember { mutableStateOf(CollapsingSectionState.EXPANDED) }
+    val zeroQueryModel = remember { ZeroQueryModel(sharedPreferencesModel) }
+    val isSuggestedSitesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedSitesState)
+    val isSuggestedQueriesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedQueriesState)
+    val isSpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SpacesState)
 
     val suggestedSitesPlusHome: List<SuggestedSite> = remember(suggestedSites) {
         suggestedSites
@@ -92,12 +91,11 @@ fun ZeroQuery(
             topContent()
         }
 
-        collapsibleThreeStateSection(
+        collapsingThreeStateSection(
             label = R.string.suggested_sites,
-            collapsingSectionState = isSuggestedSitesExpanded,
-            updateCollapsingHeaderState = {
-                isSuggestedSitesExpanded.value =
-                    isSuggestedSitesExpanded.value.next(allowCompactState = true)
+            collapsingSectionState = isSuggestedSitesExpanded.value,
+            onUpdateCollapsingSectionState = {
+                zeroQueryModel.advanceState(ZeroQueryPrefs.SuggestedSitesState)
             },
             expandedContent = {
                 // Draw everything as a 4x2 grid with the width evenly divided.
@@ -137,10 +135,12 @@ fun ZeroQuery(
                 Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
             }
 
-            collapsibleSection(
+            collapsingSection(
                 label = R.string.searches,
-                collapsingSectionState = isSuggestedQueriesExpanded,
-                updateCollapsingHeaderState = isSuggestedQueriesExpanded::setNextState
+                collapsingSectionState = isSuggestedQueriesExpanded.value,
+                onUpdateCollapsingSectionState = {
+                    zeroQueryModel.advanceState(ZeroQueryPrefs.SuggestedQueriesState)
+                }
             ) {
                 items(suggestedQueries) { search ->
                     QuerySuggestionRow(
@@ -153,10 +153,12 @@ fun ZeroQuery(
         }
 
         if (spaces.isNotEmpty()) {
-            collapsibleSection(
+            collapsingSection(
                 label = R.string.spaces,
-                collapsingSectionState = isSpacesExpanded,
-                updateCollapsingHeaderState = isSpacesExpanded::setNextState
+                collapsingSectionState = isSpacesExpanded.value,
+                onUpdateCollapsingSectionState = {
+                    zeroQueryModel.advanceState(ZeroQueryPrefs.SpacesState)
+                }
             ) {
                 items(spaces.subList(0, minOf(3, spaces.size))) { space ->
                     SpaceRow(space = space, isCurrentUrlInSpace = null) {
