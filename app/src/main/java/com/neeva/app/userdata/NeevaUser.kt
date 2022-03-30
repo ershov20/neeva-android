@@ -3,7 +3,6 @@ package com.neeva.app.userdata
 import android.net.Uri
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.UserInfoQuery
-import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.type.SubscriptionType
 
 data class NeevaUserData(
@@ -23,11 +22,6 @@ class NeevaUser(
 
     fun clearUser() {
         data = NeevaUserData()
-    }
-
-    fun signOut(webLayerModel: WebLayerModel? = null) {
-        clearUser()
-        webLayerModel?.clearNeevaCookies()
     }
 
     fun isSignedOut(): Boolean {

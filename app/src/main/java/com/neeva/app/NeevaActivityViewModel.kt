@@ -5,14 +5,23 @@ import android.content.Intent
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
+import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 
 class NeevaActivityViewModel(
     /** Intent that must be processed once WebLayer has finished initializing. */
-    private var pendingLaunchIntent: Intent?
+    private var pendingLaunchIntent: Intent?,
+    private val neevaUser: NeevaUser,
+    private val spaceStore: SpaceStore,
+    private val webLayerModel: WebLayerModel,
+    private val dispatchers: Dispatchers
 ) : ViewModel() {
     private val _isUpdateAvailableFlow = MutableStateFlow(false)
     val isUpdateAvailableFlow: StateFlow<Boolean> = _isUpdateAvailableFlow
@@ -45,12 +54,21 @@ class NeevaActivityViewModel(
     fun onBottomBarOffsetChanged(offset: Int) { bottomControlOffset.value = offset.toFloat() }
     fun onTopBarOffsetChanged(offset: Int) { topControlOffset.value = offset.toFloat() }
 
-    class Factory(private val pendingLaunchIntent: Intent?) : ViewModelProvider.Factory {
+    class Factory(
+        private val pendingLaunchIntent: Intent?,
+        private val neevaUser: NeevaUser,
+        private val spaceStore: SpaceStore,
+        private val webLayerModel: WebLayerModel,
+        private val dispatchers: Dispatchers
+    ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(NeevaActivityViewModel::class.java)) {
-                return NeevaActivityViewModel(pendingLaunchIntent) as T
-            }
-            throw IllegalArgumentException("Unexpected ViewModel class: $modelClass")
+            return NeevaActivityViewModel(
+                pendingLaunchIntent,
+                neevaUser,
+                spaceStore,
+                webLayerModel,
+                dispatchers
+            ) as? T ?: throw IllegalArgumentException("Unexpected ViewModel class: $modelClass")
         }
     }
 
@@ -69,6 +87,12 @@ class NeevaActivityViewModel(
             .addOnFailureListener {
                 Log.w(TAG, "Failed to check for update", it)
             }
+    }
+
+    fun signOut() {
+        viewModelScope.launch(dispatchers.io) { spaceStore.deleteAllData() }
+        neevaUser.clearUser()
+        webLayerModel.clearNeevaCookies()
     }
 
     companion object {

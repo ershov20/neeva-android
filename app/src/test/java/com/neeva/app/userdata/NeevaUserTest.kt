@@ -18,8 +18,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -87,27 +85,8 @@ class NeevaUserTest : BaseTest() {
     }
 
     @Test
-    fun signOut_nullWeblayerModel_clearsUserData() {
-        neevaUser.signOut(null)
-        expectThat(neevaUser.data).isEqualTo(NeevaUserData())
-        verify(mockWebLayerModel, times(0)).clearNeevaCookies()
-    }
-
-    @Test
-    fun signOut_withWeblayerModel_clearsUser() {
-        neevaUser.signOut(mockWebLayerModel)
-        verify(mockWebLayerModel).clearNeevaCookies()
-    }
-
-    @Test
     fun isSignedOut_whenSignedIn_returnsFalse() {
         expectThat(neevaUser.isSignedOut()).isEqualTo(false)
-    }
-
-    @Test
-    fun isSignedOut_whenSignedOut_returnsTrue() {
-        neevaUser.signOut(mockWebLayerModel)
-        expectThat(neevaUser.isSignedOut()).isEqualTo(true)
     }
 
     @Test

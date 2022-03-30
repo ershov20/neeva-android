@@ -101,7 +101,8 @@ fun SpaceRow(
                 Icon(
                     painter = painterResource(id = R.drawable.ic_bookmarks_black_24),
                     contentDescription = null,
-                    modifier = Modifier.padding(PADDING_SMALL)
+                    modifier = Modifier.padding(PADDING_SMALL),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
                 Image(
@@ -126,7 +127,8 @@ fun SpaceRow(
                 ) {
                     Icon(
                         Icons.Default.Lock,
-                        contentDescription = null
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -147,7 +149,8 @@ fun SpaceRow(
                             stringResource(id = R.string.space_contains_page)
                         } else {
                             stringResource(id = R.string.space_not_contain_page)
-                        }
+                        },
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

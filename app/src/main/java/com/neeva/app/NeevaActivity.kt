@@ -88,12 +88,18 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     @Inject lateinit var clientLogger: ClientLogger
 
-    private val activityViewModel: NeevaActivityViewModel by viewModels {
-        NeevaActivityViewModel.Factory(intent)
-    }
-
     private val feedbackViewModel: FeedbackViewModel by viewModels()
     internal val webLayerModel: WebLayerModel by viewModels()
+
+    internal val activityViewModel: NeevaActivityViewModel by viewModels {
+        NeevaActivityViewModel.Factory(
+            intent,
+            neevaUser,
+            spaceStore,
+            webLayerModel,
+            dispatchers
+        )
+    }
 
     internal var appNavModel: AppNavModel? = null
     private var cardsPaneModel: CardsPaneModel? = null
@@ -149,7 +155,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         ActivityUI(
                             bottomControlOffset = activityViewModel.bottomControlOffset,
                             topControlOffset = activityViewModel.topControlOffset,
-                            webLayerModel = webLayerModel
+                            webLayerModel = webLayerModel,
+                            onSignOut = activityViewModel::signOut
                         )
                     }
                 }

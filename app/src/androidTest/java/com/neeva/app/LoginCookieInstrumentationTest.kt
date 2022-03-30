@@ -82,7 +82,8 @@ class LoginCookieInstrumentationTest {
         setUpLoggedInUser(context)
 
         onActivityStartedTest(context) { activity ->
-            activity.neevaUser.signOut(activity.webLayerModel)
+            activity.activityViewModel.signOut()
+
             // ^^ sign out should have cleared NeevaUser.data and NeevaUserToken!
             expectThat(activity.neevaUser.neevaUserToken.cachedToken).isEmpty()
             expectThat(activity.neevaUser.neevaUserToken.getTokenFromSharedPref()).isEmpty()

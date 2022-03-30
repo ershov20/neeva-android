@@ -61,6 +61,7 @@ class SettingsViewModelImpl(
     private val settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
     private val webLayerModel: WebLayerModel,
+    private val onSignOut: () -> Unit,
     private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
 ) : SettingsViewModel {
     override fun onBackPressed() {
@@ -121,7 +122,7 @@ class SettingsViewModelImpl(
     }
 
     override fun signOut() {
-        neevaUser.signOut(webLayerModel)
+        onSignOut()
         onBackPressed()
     }
 

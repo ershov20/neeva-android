@@ -50,7 +50,8 @@ val LocalSetDefaultAndroidBrowserManager = compositionLocalOf<SetDefaultAndroidB
 fun ActivityUI(
     bottomControlOffset: StateFlow<Float>,
     topControlOffset: StateFlow<Float>,
-    webLayerModel: WebLayerModel
+    webLayerModel: WebLayerModel,
+    onSignOut: () -> Unit
 ) {
     val appNavModel = LocalAppNavModel.current
     val snackbarModel = LocalEnvironment.current.snackbarModel
@@ -62,6 +63,7 @@ fun ActivityUI(
         AppNav(
             webLayerModel = webLayerModel,
             appNavModel = appNavModel,
+            onSignOut = onSignOut,
             modifier = Modifier.fillMaxSize()
         ) { space ->
             appNavModel.showBrowser()

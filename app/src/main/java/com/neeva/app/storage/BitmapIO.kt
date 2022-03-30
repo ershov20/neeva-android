@@ -36,7 +36,8 @@ object BitmapIO {
         dispatchers: Dispatchers,
         id: String?,
         bitmapString: String?,
-        getOutputStream: (File) -> OutputStream = ::FileOutputStream
+        getOutputStream: (File) -> OutputStream = ::FileOutputStream,
+        maxSize: Int? = null
     ) = withContext(dispatchers.io) {
         val file = File(directory, id)
         // Don't bother converting string to bitmap if the file already exists.
@@ -52,7 +53,8 @@ object BitmapIO {
             dispatchers = dispatchers,
             id = id,
             bitmap = bitmapString?.toBitmap(),
-            getOutputStream = getOutputStream
+            getOutputStream = getOutputStream,
+            maxSize = maxSize
         )
     }
 
@@ -62,13 +64,20 @@ object BitmapIO {
         dispatchers: Dispatchers,
         id: String? = null,
         bitmap: Bitmap?,
-        getOutputStream: (File) -> OutputStream = ::FileOutputStream
+        getOutputStream: (File) -> OutputStream = ::FileOutputStream,
+        maxSize: Int? = null
     ) = withContext(dispatchers.io) {
         bitmap ?: return@withContext null
 
+        val scaledBitmap = if (maxSize != null) {
+            bitmap.scaleDownMaintainingAspectRatio(maxSize)
+        } else {
+            bitmap
+        }
+
         // Create an MD5 hash of the Bitmap that we can use to find it later.
         val stream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
+        scaledBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream)
         val bitmapBytes = stream.toByteArray()
         val filename = id ?: run {
             val hashBytes = MessageDigest.getInstance("MD5").digest(bitmapBytes)

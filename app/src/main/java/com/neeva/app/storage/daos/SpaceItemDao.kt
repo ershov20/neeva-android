@@ -15,6 +15,9 @@ interface SpaceItemDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun addSpaceItem(vararg spaceItem: SpaceItem)
 
+    @Query("DELETE FROM spaceItem")
+    suspend fun deleteAllSpaceItems()
+
     @Update
     suspend fun updateSpaceItem(vararg spaceItem: SpaceItem)
 

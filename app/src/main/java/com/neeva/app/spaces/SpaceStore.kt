@@ -35,8 +35,8 @@ import kotlinx.coroutines.withContext
 /** Manages interactions with the user's Spaces. */
 class SpaceStore(
     private val appContext: Context,
-    private val historyDatabase: HistoryDatabase,
-    private val coroutineScope: CoroutineScope,
+    historyDatabase: HistoryDatabase,
+    coroutineScope: CoroutineScope,
     private val apolloWrapper: ApolloWrapper,
     private val neevaUser: NeevaUser,
     private val snackbarModel: SnackbarModel,
@@ -45,6 +45,7 @@ class SpaceStore(
     companion object {
         private val TAG = SpaceStore::class.simpleName
         private const val DIRECTORY = "spaces"
+        private const val MAX_THUMBNAIL_SIZE = 300
     }
 
     enum class State {
@@ -71,6 +72,13 @@ class SpaceStore(
     private var lastFetchedSpaceIds = emptyList<String>()
 
     suspend fun spaceStoreContainsUrl(url: Uri): Boolean = spaceIDsContainingURL(url).isNotEmpty()
+
+    suspend fun deleteAllData() {
+        dao.deleteAllSpaces()
+        dao.deleteAllSpaceItems()
+        cleanupSpacesThumbnails()
+        lastFetchedSpaceIds = emptyList()
+    }
 
     suspend fun refresh(space: Space? = null) {
         if (neevaUser.neevaUserToken.getToken().isEmpty()) return
@@ -160,10 +168,11 @@ class SpaceStore(
                 entityQueries.filter { it.metadata?.docID != null }.map { entityQuery ->
                     val thumbnailUri = entityQuery.spaceEntity?.thumbnail?.let {
                         BitmapIO.saveBitmap(
-                            thumbnailDirectory.resolve(spaceID),
-                            dispatchers,
-                            entityQuery.metadata?.docID,
-                            it
+                            directory = thumbnailDirectory.resolve(spaceID),
+                            dispatchers = dispatchers,
+                            id = entityQuery.metadata?.docID,
+                            bitmapString = it,
+                            maxSize = MAX_THUMBNAIL_SIZE
                         )?.toUri()
                     }
                     SpaceItem(
@@ -187,7 +196,8 @@ class SpaceStore(
                         directory = thumbnailDirectory.resolve(space.id),
                         dispatchers = dispatchers,
                         id = spaceID,
-                        bitmapString = spaceQuery.space.thumbnail
+                        bitmapString = spaceQuery.space.thumbnail,
+                        maxSize = MAX_THUMBNAIL_SIZE
                     )?.toUri()
                     dao.upsert(space)
                 }

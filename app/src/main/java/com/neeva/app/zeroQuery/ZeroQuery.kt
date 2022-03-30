@@ -153,6 +153,10 @@ fun ZeroQuery(
         }
 
         if (spaces.isNotEmpty()) {
+            item {
+                Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
+            }
+
             collapsingSection(
                 label = R.string.spaces,
                 collapsingSectionState = isSpacesExpanded.value,

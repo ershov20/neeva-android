@@ -28,6 +28,7 @@ import com.neeva.app.spaces.SpaceModifier
 fun AppNav(
     webLayerModel: WebLayerModel,
     appNavModel: AppNavModel,
+    onSignOut: () -> Unit,
     modifier: Modifier,
     spaceModifier: SpaceModifier
 ) {
@@ -40,6 +41,7 @@ fun AppNav(
         settingsDataModel,
         neevaUser,
         webLayerModel,
+        onSignOut,
         setDefaultAndroidBrowserManager
     ) {
         SettingsViewModelImpl(
@@ -47,6 +49,7 @@ fun AppNav(
             settingsDataModel,
             neevaUser,
             webLayerModel,
+            onSignOut,
             setDefaultAndroidBrowserManager
         )
     }
