@@ -55,13 +55,11 @@ fun FaviconView(
         ) {
             when {
                 overrideDrawableId != null -> {
-                    // Tint is set to Color.unspecified because the current use case is to show a
-                    // pre-colored drawable.
                     Icon(
                         painter = painterResource(overrideDrawableId),
                         contentDescription = null,
                         modifier = sizeModifier,
-                        tint = Color.Unspecified
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
 
@@ -77,12 +75,11 @@ fun FaviconView(
                 }
 
                 else -> {
-                    // Tint is set to the default so that it is tinted according to the current
-                    // content color.
                     Icon(
-                        painter = painterResource(R.drawable.globe),
+                        painter = painterResource(R.drawable.ic_public_black_24),
                         contentDescription = null,
-                        modifier = sizeModifier
+                        modifier = sizeModifier,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

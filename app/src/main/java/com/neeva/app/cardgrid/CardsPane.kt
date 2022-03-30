@@ -6,13 +6,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.neeva.app.LocalAppNavModel
+import com.neeva.app.LocalCardsPaneModel
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.spaces.SpacesGridBottomBar
 import com.neeva.app.cardgrid.tabs.TabGridBottomBar
@@ -23,29 +20,10 @@ enum class SelectedScreen {
 
 @Composable
 fun CardsPane(webLayerModel: WebLayerModel) {
-    val appNavModel = LocalAppNavModel.current
-
-    val cardsPaneModel = remember(webLayerModel, appNavModel) {
-        CardsPaneModelImpl(webLayerModel, appNavModel)
-    }
+    val cardsPaneModel = LocalCardsPaneModel.current
 
     val currentBrowser by webLayerModel.currentBrowserFlow.collectAsState()
     val hasNoTabs = currentBrowser.hasNoTabsFlow().collectAsState(false)
-
-    // Keep track of what screen is currently being viewed by the user.
-    val selectedScreen: MutableState<SelectedScreen> = remember {
-        mutableStateOf(
-            if (currentBrowser.isIncognito) {
-                SelectedScreen.INCOGNITO_TABS
-            } else {
-                SelectedScreen.REGULAR_TABS
-            }
-        )
-    }
-
-    val previousScreen: MutableState<SelectedScreen?> = remember {
-        mutableStateOf(null)
-    }
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -53,27 +31,24 @@ fun CardsPane(webLayerModel: WebLayerModel) {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             ModeSwitcher(
-                selectedScreen = selectedScreen,
-                onSwitchScreen = {
-                    cardsPaneModel.switchScreen(it)
-                    previousScreen.value = selectedScreen.value
-                    selectedScreen.value = it
-                }
+                selectedScreen = cardsPaneModel.selectedScreen,
+                onSwitchScreen = cardsPaneModel::switchScreen
             )
 
             CardGridContainer(
                 webLayerModel = webLayerModel,
                 cardsPaneModel = cardsPaneModel,
-                previousScreen = previousScreen.value,
-                selectedScreen = selectedScreen.value,
+                previousScreen = cardsPaneModel.previousScreen.value,
+                selectedScreen = cardsPaneModel.selectedScreen.value,
                 modifier = Modifier
                     .weight(1.0f)
                     .fillMaxWidth()
             )
 
-            when (selectedScreen.value) {
+            when (cardsPaneModel.selectedScreen.value) {
                 SelectedScreen.SPACES -> SpacesGridBottomBar(
                     isDoneEnabled = !hasNoTabs.value,
+                    onNavigateToSpacesWebsite = cardsPaneModel::showSpacesWebsite,
                     onDone = cardsPaneModel::showBrowser
                 )
 

@@ -138,7 +138,7 @@ abstract class BrowserWrapper internal constructor(
     val isLazyTabFlow: StateFlow<Boolean> = _isLazyTabFlow
 
     /** Tracks when the WebLayer [Browser] has finished restoration and the [tabList] is ready. */
-    private val isBrowserRestored = CompletableDeferred<Boolean>()
+    private val isBrowserReady = CompletableDeferred<Boolean>()
 
     init {
         faviconCache.profileProvider = FaviconCache.ProfileProvider { getProfile() }
@@ -317,7 +317,7 @@ abstract class BrowserWrapper internal constructor(
                     stayInApp = true
                 )
             },
-            afterRestoreCompleted = { isBrowserRestored.complete(true) }
+            afterRestoreCompleted = { isBrowserReady.complete(true) }
         ).also {
             tabListRestorer = it
         }
@@ -571,9 +571,9 @@ abstract class BrowserWrapper internal constructor(
         stayInApp: Boolean = true,
         onLoadStarted: () -> Unit = {}
     ) = coroutineScope.launch {
-        // Wait until the Browser finishes restoration.  If you try to load a URL in a new tab
-        // before restoration has completed, the Browser may drop the request on the floor.
-        isBrowserRestored.await()
+        // If you try to load a URL in a new tab before restoration has completed, the Browser may
+        // drop the request on the floor.
+        waitUntilBrowserIsReady()
 
         // Check if the user needs to be redirected somewhere else.
         val urlToLoad = if (shouldInterceptLoad(uri)) {
@@ -656,6 +656,9 @@ abstract class BrowserWrapper internal constructor(
             Log.e(TAG, "Failed to update mode (allowScreenshots = $allowScreenshots)")
         }
     }
+
+    /** Suspends the coroutine until the browser has finished initialization and restoration. */
+    suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
 
     companion object {
         val TAG = BrowserWrapper::class.simpleName

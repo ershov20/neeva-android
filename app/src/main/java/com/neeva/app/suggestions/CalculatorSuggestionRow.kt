@@ -32,7 +32,7 @@ fun CalculatorSuggestionRow_Preview() {
                 url = Uri.parse(""),
                 query = "3 + 3",
                 description = "6",
-                drawableID = R.drawable.globe,
+                drawableID = R.drawable.ic_public_black_24,
             ),
             onTapRow = {}
         )

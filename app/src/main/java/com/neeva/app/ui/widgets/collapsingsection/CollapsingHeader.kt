@@ -98,6 +98,7 @@ private fun CollapsingHeader(
     BaseRowLayout(
         onTapRow = onClick,
         backgroundColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         applyVerticalPadding = false,
         endComposable = {
             IconButton(onClick = onClick) {

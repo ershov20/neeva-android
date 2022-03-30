@@ -11,14 +11,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import com.neeva.app.urlbar.FindInPageToolbar
 import com.neeva.app.urlbar.URLBar
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun TopToolbar(
-    topControlOffset: StateFlow<Float>
-) {
+fun TopToolbar(topOffset: Float) {
     // Top controls: URL bar, Suggestions, Zero Query, ...
-    val topOffset by topControlOffset.collectAsState()
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
     TopToolbar(
         modifier = Modifier

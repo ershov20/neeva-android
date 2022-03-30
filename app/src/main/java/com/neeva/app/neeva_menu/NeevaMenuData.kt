@@ -11,7 +11,6 @@ import com.neeva.app.R
 
 enum class NeevaMenuItemId {
     HOME,
-    SPACES,
     SETTINGS,
     SUPPORT,
     HISTORY,
@@ -63,11 +62,6 @@ object NeevaMenuData {
             imageResourceID = R.drawable.ic_find_in_page_black_24
         ),
         NeevaMenuItemData(id = NeevaMenuItemId.SEPARATOR),
-        NeevaMenuItemData(
-            id = NeevaMenuItemId.SPACES,
-            labelId = R.string.spaces,
-            imageResourceID = R.drawable.ic_bookmarks_black_24
-        ),
         NeevaMenuItemData(
             id = NeevaMenuItemId.SUPPORT,
             labelId = R.string.feedback,

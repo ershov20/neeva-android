@@ -172,10 +172,6 @@ class AppNavModel(
 
     fun onMenuItem(id: NeevaMenuItemId) {
         when (id) {
-            NeevaMenuItemId.SPACES -> {
-                openUrl(Uri.parse(NeevaConstants.appSpacesURL))
-            }
-
             NeevaMenuItemId.SETTINGS -> {
                 showSettings()
             }

@@ -11,10 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.neeva.app.BottomToolbar
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalEnvironment
 import com.neeva.app.TopToolbar
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.settings.LocalDebugFlags
 import com.neeva.app.suggestions.SuggestionPane
 import kotlinx.coroutines.flow.StateFlow
 
@@ -24,21 +22,18 @@ fun BrowserScaffold(
     topControlOffset: StateFlow<Float>,
     webLayerModel: WebLayerModel
 ) {
-    //region DEBUG BOTTOM_URL_BAR
-    val DEBUG_bottomURLBarEnabled = LocalEnvironment.current.settingsDataModel
-        .getToggleState(LocalDebugFlags.DEBUG_BOTTOM_URL_BAR.key)?.value ?: false
-    //endregion
-
     val browserWrapper by webLayerModel.currentBrowserFlow.collectAsState()
     val urlBarModel = browserWrapper.urlBarModel
+
+    val topOffset by topControlOffset.collectAsState()
+    val bottomOffset by bottomControlOffset.collectAsState()
 
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
     CompositionLocalProvider(LocalBrowserWrapper provides browserWrapper) {
         Column(modifier = Modifier.fillMaxSize()) {
-            if (!DEBUG_bottomURLBarEnabled) {
-                TopToolbar(topControlOffset)
-            }
+            // Make sure that the top toolbar is visible if the user is editing the URL.
+            TopToolbar(if (isEditing) 0f else topOffset)
 
             // We have to use a Box with no background because the WebLayer Fragments are displayed in
             // regular Android Views underneath this View in the hierarchy.
@@ -72,12 +67,8 @@ fun BrowserScaffold(
                 }
             }
 
-            if (DEBUG_bottomURLBarEnabled) {
-                TopToolbar(bottomControlOffset)
-            }
-
             if (!isEditing) {
-                BottomToolbar(bottomControlOffset)
+                BottomToolbar(bottomOffset)
             }
         }
     }

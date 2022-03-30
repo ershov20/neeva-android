@@ -1,7 +1,9 @@
 package com.neeva.app
 
 import android.app.SearchManager
+import android.appwidget.AppWidgetManager
 import android.content.ActivityNotFoundException
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -35,6 +37,9 @@ import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.isSelected
 import com.neeva.app.browsing.toSearchUri
+import com.neeva.app.cardgrid.CardsPaneModel
+import com.neeva.app.cardgrid.CardsPaneModelImpl
+import com.neeva.app.cardgrid.SelectedScreen
 import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
@@ -50,6 +55,7 @@ import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.widget.NeevaWidgetProvider
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
@@ -65,6 +71,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         // Tags for the WebLayer Fragments.  Lets us retrieve them via the FragmentManager.
         private const val TAG_REGULAR_PROFILE = "FRAGMENT_TAG_REGULAR_PROFILE"
         private const val TAG_INCOGNITO_PROFILE = "FRAGMENT_TAG_INCOGNITO_PROFILE"
+
+        const val ACTION_NEW_TAB = "ACTION_NEW_TAB"
+        const val ACTION_SHOW_SPACES = "ACTION_SHOW_SPACES"
     }
 
     @Inject lateinit var apolloWrapper: ApolloWrapper
@@ -87,6 +96,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     internal val webLayerModel: WebLayerModel by viewModels()
 
     internal var appNavModel: AppNavModel? = null
+    private var cardsPaneModel: CardsPaneModel? = null
 
     private lateinit var setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
 
@@ -115,11 +125,19 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback
                     )
                 }
+                cardsPaneModel = remember(appNavModel) {
+                    CardsPaneModelImpl(
+                        webLayerModel = webLayerModel,
+                        appNavModel = appNavModel!!,
+                        coroutineScope = lifecycleScope
+                    )
+                }
 
                 NeevaTheme {
                     CompositionLocalProvider(
-                        LocalEnvironment provides localEnvironmentState,
                         LocalAppNavModel provides appNavModel!!,
+                        LocalCardsPaneModel provides cardsPaneModel!!,
+                        LocalEnvironment provides localEnvironmentState,
                         LocalFeedbackViewModel provides feedbackViewModel,
                         LocalFirstRunModel provides firstRunModel,
                         LocalMenuData provides LocalMenuDataState(
@@ -200,11 +218,42 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         super.onStart()
         activityViewModel.checkForUpdates(this)
         clientLogger.logCounter(LogConfig.Interaction.APP_ENTER_FOREGROUND, null)
+        updateWidgets()
+    }
+
+    private fun updateWidgets() {
+        val componentName = ComponentName(this, NeevaWidgetProvider::class.java)
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val ids = appWidgetManager.getAppWidgetIds(componentName)
+        ids.forEach { id ->
+            NeevaWidgetProvider.updateWidget(this, appWidgetManager, id)
+        }
     }
 
     private fun processIntent(intent: Intent?) {
         when (intent?.action) {
+            ACTION_NEW_TAB -> {
+                lifecycleScope.launch {
+                    webLayerModel.switchToProfile(useIncognito = false)
+                    webLayerModel.currentBrowser.waitUntilBrowserIsReady()
+                    webLayerModel.currentBrowser.openLazyTab()
+                    showBrowser()
+                }
+            }
+
+            ACTION_SHOW_SPACES -> {
+                lifecycleScope.launch {
+                    webLayerModel.currentBrowser.waitUntilBrowserIsReady()
+
+                    // Switching to spaces will automatically kick the user out of Incognito.
+                    cardsPaneModel?.switchScreen(SelectedScreen.SPACES)
+                    appNavModel?.showCardGrid()
+                }
+            }
+
             Intent.ACTION_VIEW -> {
+                webLayerModel.switchToProfile(useIncognito = false)
+
                 if (Uri.parse(intent.dataString).scheme == "neeva") {
                     NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
                         neevaUser.neevaUserToken.setToken(it)
@@ -231,6 +280,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             }
 
             Intent.ACTION_WEB_SEARCH -> {
+                webLayerModel.switchToProfile(useIncognito = false)
+
                 intent.extras?.getString(SearchManager.QUERY)?.let {
                     val searchUri = it.toSearchUri()
 
@@ -247,8 +298,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 return
             }
         }
-
-        showBrowser()
     }
 
     private fun prepareBrowser(browserWrapper: BrowserWrapper) {

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+    <color name="widget_search_text">@color/md_theme_light_onSurfaceVariant</color>
+    <color name="widget_icon_tint">@color/md_theme_light_onSurface</color>
+    <color name="widget_control_background">@color/md_theme_light_primaryContainer</color>
+    <color name="widget_background">@color/md_theme_light_surface</color>
+</resources>

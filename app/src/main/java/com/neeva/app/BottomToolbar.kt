@@ -27,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.OneBooleanPreviewContainer
-import kotlinx.coroutines.flow.StateFlow
 
 data class TabToolbarModel(
     val onAddToSpace: () -> Unit = {},
@@ -39,13 +38,12 @@ data class TabToolbarModel(
 /**  Contains all the controls available to the user in the bottom toolbar. */
 @Composable
 fun BottomToolbar(
-    bottomControlOffset: StateFlow<Float>,
+    bottomOffset: Float,
     modifier: Modifier = Modifier
 ) {
     val appNavModel = LocalAppNavModel.current
     val browserWrapper = LocalBrowserWrapper.current
 
-    val bottomOffset by bottomControlOffset.collectAsState()
     val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
     BottomToolbar(
         model = TabToolbarModel(

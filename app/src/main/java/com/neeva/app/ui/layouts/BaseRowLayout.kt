@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,11 +36,13 @@ fun BaseRowLayout(
     startComposable: @Composable (() -> Unit)? = null,
     endComposable: @Composable (() -> Unit)? = null,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = contentColorFor(backgroundColor),
     applyVerticalPadding: Boolean = true,
     mainContent: @Composable () -> Unit
 ) {
     Surface(
         color = backgroundColor,
+        contentColor = contentColor,
         modifier = modifier
             .then(
                 if (onTapRow != null) {

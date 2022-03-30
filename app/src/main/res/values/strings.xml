@@ -158,4 +158,7 @@
     <string name="subscription_basic">Free Basic</string>
     <string name="subscription_premium">Premium</string>
     <string name="subscription_unknown">Unknown</string>
+
+    <string name="widget_description">Quick actions</string>
+    <string name="widget_search_neeva">Search Neeva</string>
 </resources>

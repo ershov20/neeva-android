@@ -99,7 +99,7 @@ fun SpaceRow(
         ) {
             if (thumbnail == null) {
                 Icon(
-                    painter = painterResource(id = R.drawable.spaces),
+                    painter = painterResource(id = R.drawable.ic_bookmarks_black_24),
                     contentDescription = null,
                     modifier = Modifier.padding(PADDING_SMALL)
                 )
