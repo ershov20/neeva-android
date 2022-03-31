@@ -56,8 +56,8 @@ fun ProfileRowContainer(
             ProfileRow(
                 primaryLabel = getFormattedSSOProviderName(userData.ssoProvider),
                 secondaryLabel = userData.email,
-                painter = SSOImagePainter(userData.ssoProvider),
-                circlePicture = false,
+                painter = SSOImagePainter(userData.ssoProvider), circlePicture = false,
+                showSingleLetterPictureIfAvailable = false,
                 onClick = null,
                 rowModifier = rowModifier
             )
@@ -68,9 +68,11 @@ fun ProfileRowContainer(
                 primaryLabel = userData.displayName,
                 secondaryLabel = userData.email,
                 painter = PictureUrlPainter(pictureURI = userData.pictureURI),
+                showSingleLetterPictureIfAvailable = true,
                 subscriptionType = userData.subscriptionType,
                 onClick = onClick,
-                rowModifier = rowModifier
+                rowModifier = rowModifier,
+
             )
         }
     }
@@ -83,6 +85,7 @@ fun ProfileRow(
     secondaryLabel: String?,
     painter: Painter?,
     circlePicture: Boolean = true,
+    showSingleLetterPictureIfAvailable: Boolean,
     subscriptionType: SubscriptionType? = null,
     onClick: (() -> Unit)? = null,
     rowModifier: Modifier,
@@ -101,8 +104,8 @@ fun ProfileRow(
     ) {
         ProfileImage(
             displayName = primaryLabel,
-            painter = painter,
-            circlePicture = circlePicture
+            painter = painter, circlePicture = circlePicture,
+            showSingleLetterPictureIfAvailable = showSingleLetterPictureIfAvailable
         )
         Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
         Column(modifier = Modifier.weight(1f)) {

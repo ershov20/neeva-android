@@ -2,16 +2,18 @@ package com.neeva.app.settings.sharedComposables.subcomponents
 
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.AccountCircle
+import androidx.compose.material.Surface
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
@@ -24,25 +26,29 @@ import com.neeva.app.storage.toBitmap
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
-fun ProfileImage(displayName: String?, painter: Painter?, circlePicture: Boolean) {
-    val modifier = Modifier.size(32.dp).then(
-        if (circlePicture) {
-            Modifier.clip(CircleShape)
-        } else {
-            Modifier
-        }
-    )
+fun ProfileImage(
+    displayName: String?,
+    painter: Painter?,
+    circlePicture: Boolean,
+    showSingleLetterPictureIfAvailable: Boolean
+) {
+    val regularModifier = Modifier.size(32.dp)
+    val circleClippedModifier = regularModifier.clip(CircleShape)
     when {
         painter != null -> {
-            Image(painter = painter, contentDescription = null, modifier = modifier)
+            Image(
+                painter = painter,
+                contentDescription = null,
+                modifier = if (circlePicture) circleClippedModifier else regularModifier
+            )
         }
 
-        displayName != null && displayName.isNotEmpty() -> {
-            SingleLetterPicture(displayName, modifier)
+        displayName != null && displayName.isNotEmpty() && showSingleLetterPictureIfAvailable -> {
+            SingleLetterPicture(displayName, circleClippedModifier)
         }
 
         else -> {
-            DefaultAccountPicture(modifier)
+            DefaultAccountImage(circleClippedModifier)
         }
     }
 }
@@ -54,19 +60,26 @@ private fun SingleLetterPicture(displayName: String, modifier: Modifier) {
     Image(
         bitmap = bitmap,
         contentDescription = null,
-        modifier = modifier.fillMaxSize().clip(CircleShape),
+        modifier = modifier.fillMaxSize(),
         contentScale = ContentScale.FillBounds,
     )
 }
 
 @Composable
-private fun DefaultAccountPicture(modifier: Modifier) {
-    Icon(
-        Icons.Rounded.AccountCircle,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary,
+private fun DefaultAccountImage(modifier: Modifier) {
+    Surface(
+        color = MaterialTheme.colorScheme.primary,
         modifier = modifier
-    )
+    ) {
+        Box {
+            Icon(
+                painterResource(id = R.drawable.ic_default_avatar),
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(16.dp).align(Alignment.Center)
+            )
+        }
+    }
 }
 
 @Composable
