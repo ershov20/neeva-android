@@ -3,7 +3,6 @@ package com.neeva.app.ui.widgets.overlay
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -11,23 +10,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.neeva.app.LocalAppNavModel
+import com.neeva.app.R
+import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.theme.Dimensions
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun OverlaySheet(
+    onDismiss: () -> Unit,
+    titleResId: Int? = null,
     config: OverlaySheetConfig = OverlaySheetConfig.default,
     content: @Composable () -> Unit
 ) {
-    val appNavModel = LocalAppNavModel.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -35,7 +40,7 @@ fun OverlaySheet(
     ) {
         Spacer(
             modifier = Modifier
-                .clickable { appNavModel.showBrowser() }
+                .clickable { onDismiss() }
                 .fillMaxWidth()
                 .then(
                     when (config.height) {
@@ -46,9 +51,14 @@ fun OverlaySheet(
                 .background(Color.Transparent)
         )
 
-        Box(
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            shadowElevation = 4.dp,
+            shape = RoundedCornerShape(
+                topStart = Dimensions.RADIUS_LARGE,
+                topEnd = Dimensions.RADIUS_LARGE
+            ),
             modifier = Modifier
-                .shadow(4.dp, RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                 .fillMaxWidth()
                 .then(
                     when (config.height) {
@@ -56,10 +66,29 @@ fun OverlaySheet(
                         OverlaySheetHeightConfig.WRAP_CONTENT -> Modifier.wrapContentHeight()
                     }
                 )
-                .pointerInput(Unit) {}
-                .background(MaterialTheme.colorScheme.background)
         ) {
-            content()
+            Column(modifier = Modifier.fillMaxWidth()) {
+                titleResId?.let { titleResId ->
+                    BaseRowLayout(
+                        endComposable = {
+                            IconButton(onClick = onDismiss) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_baseline_close_24),
+                                    contentDescription = stringResource(R.string.close),
+                                )
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(titleResId),
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 1
+                        )
+                    }
+                }
+
+                content()
+            }
         }
     }
 }

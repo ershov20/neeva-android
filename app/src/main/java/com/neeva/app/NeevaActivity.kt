@@ -29,7 +29,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
-import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.BrowserWrapper
@@ -53,6 +52,7 @@ import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserM
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.widget.NeevaWidgetProvider
@@ -79,6 +79,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var apolloWrapper: ApolloWrapper
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var neevaUser: NeevaUser
+    @Inject lateinit var overlaySheetModel: OverlaySheetModel
     @Inject lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var snackbarModel: SnackbarModel
     @Inject lateinit var spaceStore: SpaceStore
@@ -126,6 +127,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         webLayerModel = webLayerModel,
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers,
+                        overlaySheetModel = overlaySheetModel,
                         snackbarModel = snackbarModel,
                         clientLogger = clientLogger,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback
@@ -135,6 +137,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     CardsPaneModelImpl(
                         webLayerModel = webLayerModel,
                         appNavModel = appNavModel!!,
+                        overlaySheetModel = overlaySheetModel,
                         coroutineScope = lifecycleScope
                     )
                 }
@@ -158,15 +161,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                             webLayerModel = webLayerModel,
                             onSignOut = activityViewModel::signOut
                         )
-                    }
-                }
-
-                LaunchedEffect(appNavModel) {
-                    // Refresh the user's Spaces whenever they try to add something to one.
-                    appNavModel?.currentDestination?.collect {
-                        if (it?.route == AppNavDestination.ADD_TO_SPACE.name) {
-                            spaceStore.refresh()
-                        }
                     }
                 }
 

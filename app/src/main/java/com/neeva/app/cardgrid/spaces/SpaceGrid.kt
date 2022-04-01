@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyGridState
 import androidx.compose.foundation.lazy.rememberLazyGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -34,6 +35,11 @@ fun SpaceGrid(
     val spaceStore = LocalEnvironment.current.spaceStore
     val spaces by spaceStore.allSpacesFlow.collectAsState()
     val gridState = LazyGridState()
+
+    // TODO(dan.alcantara): Find a better place to trigger these refreshes.
+    LaunchedEffect(true) {
+        spaceStore.refresh()
+    }
 
     SpaceGrid(
         gridState = gridState,

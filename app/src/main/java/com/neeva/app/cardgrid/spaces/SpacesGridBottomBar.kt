@@ -1,5 +1,7 @@
 package com.neeva.app.cardgrid.spaces
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
@@ -13,6 +15,7 @@ import com.neeva.app.ui.OneBooleanPreviewContainer
 @Composable
 fun SpacesGridBottomBar(
     isDoneEnabled: Boolean,
+    onCreateSpace: () -> Unit,
     onNavigateToSpacesWebsite: () -> Unit,
     onDone: () -> Unit
 ) {
@@ -22,6 +25,14 @@ fun SpacesGridBottomBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_public_black_24),
                     contentDescription = stringResource(R.string.spaces)
+                )
+            }
+        },
+        centerComposable = {
+            IconButton(onClick = onCreateSpace) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.space_create)
                 )
             }
         },
@@ -38,6 +49,7 @@ fun SpacesGridBottomBarPreview() {
     OneBooleanPreviewContainer { isDoneEnabled ->
         SpacesGridBottomBar(
             isDoneEnabled = isDoneEnabled,
+            onCreateSpace = {},
             onNavigateToSpacesWebsite = {},
             onDone = {}
         )

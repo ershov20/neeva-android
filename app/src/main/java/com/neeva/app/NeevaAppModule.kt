@@ -10,6 +10,7 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import dagger.Module
@@ -123,6 +124,12 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
+    fun providesOverlaySheetModel(): OverlaySheetModel {
+        return OverlaySheetModel()
+    }
+
+    @Provides
+    @Singleton
     fun providesSettingsDataModel(
         sharedPreferencesModel: SharedPreferencesModel
     ): SettingsDataModel {
@@ -136,6 +143,7 @@ object NeevaAppModule {
         domainProvider: DomainProvider,
         historyManager: HistoryManager,
         neevaUser: NeevaUser,
+        overlaySheetModel: OverlaySheetModel,
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
         snackbarModel: SnackbarModel,
@@ -147,6 +155,7 @@ object NeevaAppModule {
             domainProvider = domainProvider,
             historyManager = historyManager,
             neevaUser = neevaUser,
+            overlaySheetModel = overlaySheetModel,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
             snackbarModel = snackbarModel,

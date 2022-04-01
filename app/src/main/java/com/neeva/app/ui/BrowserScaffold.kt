@@ -35,8 +35,8 @@ fun BrowserScaffold(
             // Make sure that the top toolbar is visible if the user is editing the URL.
             TopToolbar(if (isEditing) 0f else topOffset)
 
-            // We have to use a Box with no background because the WebLayer Fragments are displayed in
-            // regular Android Views underneath this View in the hierarchy.
+            // We have to use a Box with no background because the WebLayer Fragments are displayed
+            // in regular Android Views underneath this View in the hierarchy.
             Box(
                 modifier = Modifier
                     .weight(1.0f)

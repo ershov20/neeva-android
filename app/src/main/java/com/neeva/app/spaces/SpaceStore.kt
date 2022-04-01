@@ -8,6 +8,7 @@ import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.AddToSpaceMutation
 import com.neeva.app.ApolloWrapper
+import com.neeva.app.CreateSpaceMutation
 import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
@@ -30,13 +31,14 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 /** Manages interactions with the user's Spaces. */
 class SpaceStore(
     private val appContext: Context,
     historyDatabase: HistoryDatabase,
-    coroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
     private val apolloWrapper: ApolloWrapper,
     private val neevaUser: NeevaUser,
     private val snackbarModel: SnackbarModel,
@@ -303,6 +305,23 @@ class SpaceStore(
             val errorString = appContext.getString(R.string.error_generic)
             snackbarModel.show(errorString)
             false
+        }
+    }
+
+    fun createSpace(spaceName: String) {
+        coroutineScope.launch(dispatchers.io) {
+            val response = apolloWrapper.performMutation(
+                CreateSpaceMutation(name = spaceName),
+                userMustBeLoggedIn = true
+            )
+
+            response?.data?.createSpace?.let {
+                snackbarModel.show(appContext.getString(R.string.space_create_success, spaceName))
+                performRefresh()
+            } ?: run {
+                val errorString = appContext.getString(R.string.error_generic)
+                snackbarModel.show(errorString)
+            }
         }
     }
 }

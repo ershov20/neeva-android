@@ -48,6 +48,7 @@ fun CardsPane(webLayerModel: WebLayerModel) {
             when (cardsPaneModel.selectedScreen.value) {
                 SelectedScreen.SPACES -> SpacesGridBottomBar(
                     isDoneEnabled = !hasNoTabs.value,
+                    onCreateSpace = cardsPaneModel::createSpace,
                     onNavigateToSpacesWebsite = cardsPaneModel::showSpacesWebsite,
                     onDone = cardsPaneModel::showBrowser
                 )

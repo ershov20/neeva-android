@@ -8,9 +8,11 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.MainThread
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import com.neeva.app.Dispatchers
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
@@ -18,7 +20,9 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.neeva_menu.NeevaMenuItemId
+import com.neeva.app.spaces.AddToSpaceUI
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -37,6 +41,7 @@ class AppNavModel(
     private val webLayerModel: WebLayerModel,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
+    private val overlaySheetModel: OverlaySheetModel,
     private val snackbarModel: SnackbarModel,
     private val clientLogger: ClientLogger,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit
@@ -143,16 +148,17 @@ class AppNavModel(
     }
 
     fun showCardGrid() = show(AppNavDestination.CARD_GRID)
-    fun showAddToSpace() = show(AppNavDestination.ADD_TO_SPACE)
     fun showSettings() = show(AppNavDestination.SETTINGS)
     fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
     fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
+
     fun showFirstRun() {
         show(AppNavDestination.FIRST_RUN)
         clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION, null)
     }
+
     fun showHistory() = show(AppNavDestination.HISTORY)
 
     fun showFeedback() {
@@ -177,6 +183,23 @@ class AppNavModel(
         }
 
         safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
+    }
+
+    fun showAddToSpace() {
+        overlaySheetModel.showOverlaySheet(titleResId = R.string.toolbar_save_to_space) {
+            val spaceStore = LocalEnvironment.current.spaceStore
+            val browserWrapper = webLayerModel.currentBrowser
+            val activeTabModel = browserWrapper.activeTabModel
+
+            LaunchedEffect(true) {
+                spaceStore.refresh()
+            }
+
+            AddToSpaceUI(activeTabModel, spaceStore) { space ->
+                browserWrapper.modifySpace(space.id)
+                overlaySheetModel.hideOverlaySheet()
+            }
+        }
     }
 
     fun onMenuItem(id: NeevaMenuItemId) {

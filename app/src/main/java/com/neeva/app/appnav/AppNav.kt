@@ -20,8 +20,6 @@ import com.neeva.app.settings.featureFlags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.settings.profile.ProfileSettingsPane
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
-import com.neeva.app.spaces.AddToSpaceSheet
-import com.neeva.app.spaces.SpaceModifier
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -29,8 +27,7 @@ fun AppNav(
     webLayerModel: WebLayerModel,
     appNavModel: AppNavModel,
     onSignOut: () -> Unit,
-    modifier: Modifier,
-    spaceModifier: SpaceModifier
+    modifier: Modifier
 ) {
     val settingsDataModel = LocalEnvironment.current.settingsDataModel
     val neevaUser = LocalEnvironment.current.neevaUser
@@ -65,13 +62,6 @@ fun AppNav(
     ) {
         composable(AppNavDestination.BROWSER.route) {
             Box {}
-        }
-
-        composable(AppNavDestination.ADD_TO_SPACE.route) {
-            AddToSpaceSheet(
-                webLayerModel = webLayerModel,
-                spaceModifier = spaceModifier
-            )
         }
 
         composable(AppNavDestination.SETTINGS.route) {

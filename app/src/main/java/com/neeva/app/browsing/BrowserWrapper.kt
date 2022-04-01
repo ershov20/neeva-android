@@ -453,7 +453,7 @@ abstract class BrowserWrapper internal constructor(
                 tabOpenType = tabOpenType
             )
 
-            selectTab(newTab)
+            selectTab(newTab, takeScreenshotBeforeSelecting = false)
         }
     }
 
@@ -468,9 +468,15 @@ abstract class BrowserWrapper internal constructor(
 
     fun selectTab(primitive: TabInfo) = tabList.findTab(primitive.id)?.let { selectTab(it) }
 
-    private fun selectTab(tab: Tab) {
-        // Screenshot the previous tab right before it is replaced to keep it as fresh as possible.
-        takeScreenshotOfActiveTab()
+    private fun selectTab(tab: Tab, takeScreenshotBeforeSelecting: Boolean = true) {
+        if (takeScreenshotBeforeSelecting) {
+            // Screenshot the previous tab right before replacement to keep it as fresh as possible.
+            // You may not want to do this in cases where the WebLayer's View is the wrong height,
+            // which can happen if the keyboard is up.
+            // TODO(dan.alcantara): Find a better way of handling
+            //                      https://github.com/neevaco/neeva-android/issues/218
+            takeScreenshotOfActiveTab()
+        }
 
         browser?.setActiveTab(tab)
     }

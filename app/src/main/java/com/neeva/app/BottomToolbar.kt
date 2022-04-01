@@ -35,7 +35,7 @@ data class TabToolbarModel(
     val share: () -> Unit = {}
 )
 
-/**  Contains all the controls available to the user in the bottom toolbar. */
+/** Contains all the controls available to the user in the bottom toolbar. */
 @Composable
 fun BottomToolbar(
     bottomOffset: Float,

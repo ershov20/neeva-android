@@ -21,6 +21,8 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.BrowserScaffold
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.widgets.overlay.OverlaySheetHost
+import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,6 +32,7 @@ data class LocalEnvironmentState(
     val domainProvider: DomainProvider,
     val historyManager: HistoryManager,
     val neevaUser: NeevaUser,
+    val overlaySheetModel: OverlaySheetModel,
     val settingsDataModel: SettingsDataModel,
     val sharedPreferencesModel: SharedPreferencesModel,
     val snackbarModel: SnackbarModel,
@@ -54,6 +57,7 @@ fun ActivityUI(
     onSignOut: () -> Unit
 ) {
     val appNavModel = LocalAppNavModel.current
+    val overlaySheetModel = LocalEnvironment.current.overlaySheetModel
     val snackbarModel = LocalEnvironment.current.snackbarModel
 
     Box {
@@ -65,10 +69,12 @@ fun ActivityUI(
             appNavModel = appNavModel,
             onSignOut = onSignOut,
             modifier = Modifier.fillMaxSize()
-        ) { space ->
-            appNavModel.showBrowser()
-            webLayerModel.currentBrowser.modifySpace(space.id)
-        }
+        )
+
+        OverlaySheetHost(
+            hostState = overlaySheetModel.hostState,
+            onDismiss = overlaySheetModel::hideOverlaySheet
+        )
 
         SnackbarHost(
             hostState = snackbarModel.snackbarHostState,

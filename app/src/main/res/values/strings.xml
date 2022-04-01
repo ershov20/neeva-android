@@ -48,7 +48,7 @@
 
     <string name="toolbar_go_back">Back</string>
     <string name="toolbar_go_forward">Forward</string>
-    <string name="toolbar_save_to_space">Save to space</string>
+    <string name="toolbar_save_to_space">Save to Space</string>
     <string name="toolbar_tab_switcher">Manage your tabs</string>
     <string name="toolbar_neeva_menu">Open main menu</string>
 
@@ -135,6 +135,9 @@
     <string name="space_add_url">Added site to \"%1s\"</string>
     <string name="space_remove_url">Removed site from \"%1s\"</string>'
     <string name="space_additional_count">+%1d</string>
+    <string name="space_create">Create a Space</string>
+    <string name="space_create_placeholder">Space name</string>
+    <string name="space_create_success">Created \"%1s\"</string>
 
     <string name="error_generic">Something went wrong</string>
     <string name="error_url_failure">Could not open \"%1$s\"</string>
