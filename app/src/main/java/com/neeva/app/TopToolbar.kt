@@ -1,14 +1,17 @@
 package com.neeva.app
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.dimensionResource
 import com.neeva.app.urlbar.FindInPageToolbar
 import com.neeva.app.urlbar.URLBar
 
@@ -29,7 +32,12 @@ fun TopToolbar(modifier: Modifier) {
     val findInPageModel = browserWrapper.findInPageModel
     val findInPageInfo by findInPageModel.findInPageInfo.collectAsState()
 
-    Box(modifier = modifier) {
+    Surface(
+        color = MaterialTheme.colorScheme.background,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(dimensionResource(id = R.dimen.top_toolbar_height))
+    ) {
         if (findInPageInfo.text != null) {
             FindInPageToolbar(
                 findInPageInfo = findInPageInfo,

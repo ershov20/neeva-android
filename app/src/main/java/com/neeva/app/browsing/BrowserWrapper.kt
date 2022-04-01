@@ -517,7 +517,7 @@ abstract class BrowserWrapper internal constructor(
      */
     fun openLazyTab() {
         _isLazyTabFlow.value = true
-        urlBarModel.onRequestFocus()
+        urlBarModel.requestFocus()
     }
 
     /** Returns true if the [Browser] is maintaining no tabs. */
@@ -593,6 +593,7 @@ abstract class BrowserWrapper internal constructor(
             _activeTabModel.loadUrlInActiveTab(urlToLoad, stayInApp)
         }
 
+        urlBarModel.clearFocus()
         onLoadStarted()
     }
 

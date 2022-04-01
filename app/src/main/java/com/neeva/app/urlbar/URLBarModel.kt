@@ -1,6 +1,5 @@
 package com.neeva.app.urlbar
 
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,8 +16,6 @@ import kotlinx.coroutines.flow.map
  * active tab.
  */
 interface URLBarModel {
-    var focusRequester: FocusRequester?
-
     /**
      * Flow of _all_ things that can change in the URL bar.  If you want to watch just one thing,
      * use one of the other Flows (or add a new one tailored to your use case).
@@ -40,9 +37,9 @@ interface URLBarModel {
     /** Called when the contents of the URL bar have been edited. */
     fun onLocationBarTextChanged(newValue: TextFieldValue)
 
-    /** Called when the URL bar's focus has changed. */
-    fun onFocusChanged(isFocused: Boolean)
-
     /** Requests focus on the URL bar for editing. */
-    fun onRequestFocus() = focusRequester?.requestFocus()
+    fun requestFocus()
+
+    /** Clears focus on the URL bar. */
+    fun clearFocus()
 }

@@ -243,8 +243,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 lifecycleScope.launch {
                     webLayerModel.switchToProfile(useIncognito = false)
                     webLayerModel.currentBrowser.waitUntilBrowserIsReady()
-                    webLayerModel.currentBrowser.openLazyTab()
-                    showBrowser()
+                    appNavModel?.openLazyTab()
                 }
             }
 

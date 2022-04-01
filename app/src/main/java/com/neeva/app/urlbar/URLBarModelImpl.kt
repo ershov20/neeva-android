@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import android.util.Patterns
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.graphics.drawable.toBitmap
@@ -33,8 +32,6 @@ class URLBarModelImpl(
 
     private val _state = MutableStateFlow(URLBarModelState())
     override val state: StateFlow<URLBarModelState> = _state
-
-    override var focusRequester: FocusRequester? = null
 
     init {
         // Update what is displayed in the URL bar as the user types.
@@ -103,7 +100,7 @@ class URLBarModelImpl(
 
     /** Completely replaces what is displayed in the URL bar for user editing. */
     override fun replaceLocationBarText(newValue: String) {
-        onRequestFocus()
+        requestFocus()
         onLocationBarTextChanged(
             TextFieldValue(
                 text = newValue,
@@ -130,7 +127,10 @@ class URLBarModelImpl(
         }
     }
 
-    override fun onFocusChanged(isFocused: Boolean) {
+    override fun requestFocus() = onFocusChanged(isFocused = true)
+    override fun clearFocus() = onFocusChanged(isFocused = false)
+
+    internal fun onFocusChanged(isFocused: Boolean) {
         // The user has either started editing a query or stopped trying.  Clear out the text.
         _state.value = _state.value.copy(
             isEditing = isFocused,

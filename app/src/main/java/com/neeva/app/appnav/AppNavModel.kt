@@ -95,6 +95,8 @@ class AppNavModel(
 
     @MainThread
     fun showBrowser() {
+        webLayerModel.currentBrowser.urlBarModel.clearFocus()
+
         navController.popBackStack(
             route = AppNavDestination.BROWSER.route,
             inclusive = false
@@ -103,6 +105,13 @@ class AppNavModel(
         if (webLayerModel.currentBrowser.userMustBeShownCardGrid()) {
             showCardGrid()
         }
+    }
+
+    fun openLazyTab() {
+        // Ordering is important here because showing the browser clears the focus of the URL bar
+        // while opening a lazy tab requests the focus on the URL bar.
+        showBrowser()
+        webLayerModel.currentBrowser.openLazyTab()
     }
 
     fun openUrl(url: Uri) {

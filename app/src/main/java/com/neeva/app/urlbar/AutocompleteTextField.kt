@@ -22,17 +22,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -41,58 +39,23 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
-import com.neeva.app.browsing.BrowserWrapper
-import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.FaviconView
 
 @Composable
 fun AutocompleteTextField(
-    urlBarModel: URLBarModel,
-    suggestionsModel: SuggestionsModel?,
-    urlBarModelState: URLBarModelState,
-    placeholderColor: Color,
-    modifier: Modifier
-) {
-    val browserWrapper: BrowserWrapper = LocalBrowserWrapper.current
-
-    val focusRequester = remember { FocusRequester() }
-    urlBarModel.focusRequester = focusRequester
-
-    val focusManager = LocalFocusManager.current
-
-    AutocompleteTextField(
-        textFieldValue = urlBarModelState.textFieldValue,
-        faviconBitmap = urlBarModelState.faviconBitmap,
-        focusRequester = focusRequester,
-        onLocationEdited = { urlBarModel.onLocationBarTextChanged(it) },
-        onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
-        onFocusChanged = { urlBarModel.onFocusChanged(it.isFocused) },
-        onLoadUrl = {
-            browserWrapper.loadUrl(urlBarModelState.uriToLoad)
-            focusManager.clearFocus()
-            suggestionsModel?.logSuggestionTap(urlBarModelState.getSuggestionType(), null)
-        },
-        placeholderColor = placeholderColor,
-        modifier = modifier
-    )
-}
-
-@Composable
-fun AutocompleteTextField(
     textFieldValue: TextFieldValue,
     faviconBitmap: Bitmap?,
-    focusRequester: FocusRequester,
     onLocationEdited: (TextFieldValue) -> Unit,
     onLocationReplaced: (String) -> Unit,
-    onFocusChanged: (FocusState) -> Unit,
     onLoadUrl: () -> Unit,
     placeholderColor: Color,
     modifier: Modifier = Modifier
 ) {
+    val focusRequester = remember { FocusRequester() }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.padding(start = Dimensions.PADDING_MEDIUM)
@@ -127,7 +90,6 @@ fun AutocompleteTextField(
                 onValueChange = onLocationEdited,
                 modifier = Modifier
                     .focusRequester(focusRequester)
-                    .onFocusChanged(onFocusChanged)
                     .onPreviewKeyEvent {
                         if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
                             // If we're seeing a hardware enter key, intercept it to prevent
@@ -145,7 +107,7 @@ fun AutocompleteTextField(
                     fontSize = MaterialTheme.typography.bodyLarge.fontSize
                 ),
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Uri,
+                    keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Go,
                     autoCorrect = false
                 ),
@@ -172,6 +134,10 @@ fun AutocompleteTextField(
             }
         }
     }
+
+    LaunchedEffect(true) {
+        focusRequester.requestFocus()
+    }
 }
 
 @Preview("Autocompleted text, LTR, 1x scale", locale = "en")
@@ -191,10 +157,8 @@ private fun AutocompleteTextFieldPreview_AutocompletedText() {
             AutocompleteTextField(
                 textFieldValue = textFieldValue,
                 faviconBitmap = null,
-                focusRequester = FocusRequester(),
                 onLocationEdited = {},
                 onLocationReplaced = {},
-                onFocusChanged = {},
                 onLoadUrl = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -214,10 +178,8 @@ private fun AutocompleteTextFieldPreview_Placeholder() {
             AutocompleteTextField(
                 textFieldValue = textFieldValue,
                 faviconBitmap = null,
-                focusRequester = FocusRequester(),
                 onLocationEdited = {},
                 onLocationReplaced = {},
-                onFocusChanged = {},
                 onLoadUrl = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -242,10 +204,8 @@ private fun AutocompleteTextFieldPreview_NoAutocomplete() {
             AutocompleteTextField(
                 textFieldValue = textFieldValue,
                 faviconBitmap = null,
-                focusRequester = FocusRequester(),
                 onLocationEdited = {},
                 onLocationReplaced = {},
-                onFocusChanged = {},
                 onLoadUrl = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )

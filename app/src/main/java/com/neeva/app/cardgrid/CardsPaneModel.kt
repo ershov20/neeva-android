@@ -115,8 +115,7 @@ class CardsPaneModelImpl(
     }
 
     override fun openLazyTab(browserWrapper: BrowserWrapper) {
-        browserWrapper.openLazyTab()
-        showBrowser()
+        appNavModel.openLazyTab()
     }
 
     override fun closeAllTabs(browserWrapper: BrowserWrapper) {

@@ -52,7 +52,6 @@ import com.neeva.app.R
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.Roobert
-import com.neeva.app.ui.widgets.BrandedTextButton
 import com.neeva.app.userdata.NeevaUser
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -198,7 +197,7 @@ fun FirstRunScreen() {
                     )
                 }
             )
-            BrandedTextButton(
+            FirstRunButton(
                 enabled = emailProvided.contains("@"),
                 stringResID = R.string.sign_in_with_okta
             ) {
@@ -227,7 +226,7 @@ fun FirstRunScreen() {
             }
         }
         if (!emailProvided.contains("@")) {
-            BrandedTextButton(
+            FirstRunButton(
                 enabled = true,
                 stringResID = if (signup) {
                     R.string.sign_up_with_google
@@ -243,7 +242,7 @@ fun FirstRunScreen() {
                 )
                 firstRunModel.logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_GOOGLE)
             }
-            BrandedTextButton(
+            FirstRunButton(
                 enabled = true,
                 stringResID = if (signup) {
                     R.string.sign_up_with_microsoft

@@ -18,13 +18,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.R
 import com.neeva.app.ui.theme.Dimensions
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -60,60 +57,56 @@ fun URLBar() {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    Surface(
-        color = MaterialTheme.colorScheme.background,
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(dimensionResource(id = R.dimen.top_toolbar_height))
-    ) {
-        Box {
-            Surface(
-                color = backgroundColor,
-                contentColor = foregroundColor,
-                shape = RoundedCornerShape(24.dp),
-                tonalElevation = 2.dp,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(Dimensions.PADDING_SMALL)
-            ) {
-                val childModifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(minHeight = 40.dp)
+    Box {
+        Surface(
+            color = backgroundColor,
+            contentColor = foregroundColor,
+            shape = RoundedCornerShape(24.dp),
+            tonalElevation = 2.dp,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(Dimensions.PADDING_SMALL)
+        ) {
+            val childModifier = Modifier
+                .fillMaxWidth()
+                .defaultMinSize(minHeight = 40.dp)
 
-                // We need to have both the AutocompleteTextField and the LocationLabel in the
-                // URLBar at the same time because the AutocompleteTextField is the thing that must
-                // be focused when the LocationLabel is clicked.
-                // TODO(dan.alcantara): Fix this by making the UrlBarModel keep track of what needs
-                //                      to be focused and at what time.
+            if (isEditing) {
                 AutocompleteTextField(
-                    urlBarModel = urlBarModel,
-                    suggestionsModel = suggestionsModel,
-                    urlBarModelState = urlBarModelState.value,
+                    textFieldValue = urlBarModelState.value.textFieldValue,
+                    faviconBitmap = urlBarModelState.value.faviconBitmap,
                     placeholderColor = placeholderColor,
-                    modifier = childModifier.alpha(if (isEditing) 1.0f else 0.0f)
+                    onLocationEdited = { urlBarModel.onLocationBarTextChanged(it) },
+                    onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
+                    onLoadUrl = {
+                        browserWrapper.loadUrl(urlBarModelState.value.uriToLoad)
+                        suggestionsModel?.logSuggestionTap(
+                            urlBarModelState.value.getSuggestionType(),
+                            null
+                        )
+                    },
+                    modifier = childModifier
                 )
-
-                if (!isEditing) {
-                    LocationLabel(
-                        showIncognitoBadge = isIncognito,
-                        onMenuItem = appNavModel::onMenuItem,
-                        placeholderColor = placeholderColor,
-                        modifier = childModifier.clickable { urlBarModel.onRequestFocus() }
-                    )
-                }
-            }
-
-            if (progress != 100) {
-                LinearProgressIndicator(
-                    progress = progress / 100.0f,
-                    modifier = Modifier
-                        .height(2.dp)
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.primaryContainer
+            } else {
+                LocationLabel(
+                    showIncognitoBadge = isIncognito,
+                    onMenuItem = appNavModel::onMenuItem,
+                    placeholderColor = placeholderColor,
+                    modifier = childModifier.clickable { urlBarModel.requestFocus() }
                 )
             }
+        }
+
+        if (progress != 100) {
+            LinearProgressIndicator(
+                progress = progress / 100.0f,
+                modifier = Modifier
+                    .height(2.dp)
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primaryContainer
+            )
         }
     }
 
