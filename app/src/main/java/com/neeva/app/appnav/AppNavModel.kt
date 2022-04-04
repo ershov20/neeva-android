@@ -98,8 +98,14 @@ class AppNavModel(
         navController.popBackStack()
     }
 
+    /**
+     * Show the browser view of the app.
+     *
+     * If the user has no tabs open, they are instead sent to the tab switcher unless
+     * [forceUserToStayInCardGrid] is set to false.
+     */
     @MainThread
-    fun showBrowser() {
+    fun showBrowser(forceUserToStayInCardGrid: Boolean = true) {
         webLayerModel.currentBrowser.urlBarModel.clearFocus()
 
         navController.popBackStack(
@@ -107,7 +113,7 @@ class AppNavModel(
             inclusive = false
         )
 
-        if (webLayerModel.currentBrowser.userMustBeShownCardGrid()) {
+        if (webLayerModel.currentBrowser.userMustBeShownCardGrid() && forceUserToStayInCardGrid) {
             showCardGrid()
         }
     }
@@ -115,7 +121,7 @@ class AppNavModel(
     fun openLazyTab() {
         // Ordering is important here because showing the browser clears the focus of the URL bar
         // while opening a lazy tab requests the focus on the URL bar.
-        showBrowser()
+        showBrowser(forceUserToStayInCardGrid = false)
         webLayerModel.currentBrowser.openLazyTab()
     }
 

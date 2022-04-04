@@ -34,7 +34,7 @@ fun TopToolbar(modifier: Modifier) {
 
     Surface(
         color = MaterialTheme.colorScheme.background,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(dimensionResource(id = R.dimen.top_toolbar_height))
     ) {
