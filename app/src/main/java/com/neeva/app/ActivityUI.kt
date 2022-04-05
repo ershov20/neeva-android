@@ -19,7 +19,6 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
-import com.neeva.app.ui.BrowserScaffold
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetHost
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
@@ -61,10 +60,9 @@ fun ActivityUI(
     val snackbarModel = LocalEnvironment.current.snackbarModel
 
     Box {
-        BrowserScaffold(bottomControlOffset, topControlOffset, webLayerModel)
-
-        // All the other screens in the app.
         AppNav(
+            bottomControlOffset,
+            topControlOffset,
             webLayerModel = webLayerModel,
             appNavModel = appNavModel,
             onSignOut = onSignOut,

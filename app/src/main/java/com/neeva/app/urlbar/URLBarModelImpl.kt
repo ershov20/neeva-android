@@ -67,26 +67,15 @@ class URLBarModelImpl(
                 val isSearchUri = userInputStateValue.uriToLoad.isNeevaSearchUri()
                 return newState.copy(
                     faviconBitmap = if (isSearchUri) neevaFavicon else null,
-                    hasAutocompleteSuggestion = false
+                    autocompleteSuggestion = null
                 )
             }
 
-        newState = newState.copy(hasAutocompleteSuggestion = suggestion != null)
-
         // Display the user's text with the autocomplete suggestion tacked on.
-        val newTextFieldValue = TextFieldValue(
-            text = autocompletedText,
-            selection = TextRange(userInput.length, autocompletedText.length)
-        )
-        if (newTextFieldValue.text != userInputStateValue.textFieldValue.text) {
-            // We explicitly check only for text equality because:
-            // * The selection can change if the user long presses on the text field
-            // * The composition can change whenever IME decides the user is typing out something
-            newState = newState.copy(textFieldValue = newTextFieldValue)
-        }
+        newState = newState.copy(autocompleteSuggestion = autocompletedText)
 
         // Load the favicon from the cache, if it's available.
-        val uriToLoad = suggestion?.url ?: getUrlToLoad(newTextFieldValue.text)
+        val uriToLoad = suggestion?.url ?: getUrlToLoad(autocompletedText)
         if (uriToLoad != userInputStateValue.uriToLoad) {
             val favicon = faviconCache.getFavicon(uriToLoad, false)
             newState = newState.copy(
@@ -101,29 +90,76 @@ class URLBarModelImpl(
     /** Completely replaces what is displayed in the URL bar for user editing. */
     override fun replaceLocationBarText(newValue: String) {
         requestFocus()
-        onLocationBarTextChanged(
-            TextFieldValue(
+
+        val currentState = _state.value
+        if (!currentState.isEditing) return
+
+        _state.value = currentState.withUpdatedTextFieldValue(
+            newTextFieldValue = TextFieldValue(
                 text = newValue,
                 selection = TextRange(newValue.length)
-            )
+            ),
+
+            // Disable autocomplete suggestions so that the user can keep refining queries that are
+            // pasted directly into the URL bar from a query navigation suggestion.
+            isAutocompleteAllowed = false
         )
     }
 
     /** Updates what is displayed in the URL bar as the user edits it. */
     override fun onLocationBarTextChanged(newValue: TextFieldValue) {
         val currentState = _state.value
-        if (currentState.isEditing) {
-            val oldText = currentState.userTypedInput
-            val newText = newValue.text
-            val userTypedSomething =
-                newText.startsWith(oldText) && ((oldText.length + 1) == newText.length)
+        if (!currentState.isEditing) return
 
-            _state.value = currentState.copy(
-                allowAutocomplete = userTypedSomething,
-                userTypedInput = newValue.text,
-                textFieldValue = newValue,
-                uriToLoad = getUrlToLoad(newValue.text)
-            )
+        val oldText = currentState.userTypedInput
+        val didUserDeleteText =
+            oldText.startsWith(newValue.text) && (oldText.length > newValue.text.length)
+        val didUserAddText =
+            newValue.text.startsWith(oldText) && oldText.length < newValue.text.length
+
+        _state.value = when {
+            didUserDeleteText -> {
+                val isShowingSuggestion = !currentState.autocompleteSuggestionText.isNullOrEmpty()
+
+                currentState.withUpdatedTextFieldValue(
+                    newTextFieldValue = if (isShowingSuggestion) {
+                        // If the user deleted a character and an autocomplete suggestion was being
+                        // displayed, remove the suggestion and keep the user's old input.
+                        currentState.textFieldValue
+                    } else {
+                        newValue
+                    },
+
+                    // The user deleted text from an existing string, so we should disable
+                    // autocomplete suggestions to avoid trapping the user in a state where they are
+                    // given the same suggestion over and over again.
+                    isAutocompleteAllowed = false
+                )
+            }
+
+            didUserAddText -> {
+                // The user appended more text to an existing string, so we should refresh the
+                // autocomplete suggestions.
+                currentState.withUpdatedTextFieldValue(
+                    newTextFieldValue = newValue,
+                    isAutocompleteAllowed = true
+                )
+            }
+
+            else -> {
+                // The composition can change without changing the actual text string because the
+                // keyboard service asynchronously determines what suggestions to show to the user.
+                // When this happens, we should retain the previous autocompletion state.
+                val onlyCompositionChanged =
+                    currentState.textFieldValue.composition != newValue.composition &&
+                        oldText == newValue.text
+                val isAutocompleteAllowed = currentState.allowAutocomplete && onlyCompositionChanged
+
+                currentState.withUpdatedTextFieldValue(
+                    newTextFieldValue = newValue,
+                    isAutocompleteAllowed = isAutocompleteAllowed
+                )
+            }
         }
     }
 
@@ -131,12 +167,12 @@ class URLBarModelImpl(
     override fun clearFocus() = onFocusChanged(isFocused = false)
 
     internal fun onFocusChanged(isFocused: Boolean) {
-        // The user has either started editing a query or stopped trying.  Clear out the text.
-        _state.value = _state.value.copy(
+        // The user has either started editing a query or stopped trying.  Reset everything.
+        _state.value = URLBarModelState(
             isEditing = isFocused,
             allowAutocomplete = true,
-            userTypedInput = "",
             textFieldValue = TextFieldValue(),
+            autocompleteSuggestion = null,
             uriToLoad = Uri.EMPTY,
             faviconBitmap = null
         )

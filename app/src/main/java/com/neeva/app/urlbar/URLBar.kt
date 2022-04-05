@@ -74,6 +74,7 @@ fun URLBar() {
             if (isEditing) {
                 AutocompleteTextField(
                     textFieldValue = urlBarModelState.value.textFieldValue,
+                    suggestionText = urlBarModelState.value.autocompleteSuggestionText,
                     faviconBitmap = urlBarModelState.value.faviconBitmap,
                     placeholderColor = placeholderColor,
                     onLocationEdited = { urlBarModel.onLocationBarTextChanged(it) },

@@ -1,7 +1,6 @@
 package com.neeva.app.urlbar
 
 import android.net.Uri
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
@@ -22,7 +21,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.robolectric.RobolectricTestRunner
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -108,15 +106,14 @@ class URLBarModelImplTest : BaseTest() {
         val inputState = URLBarModelState(
             isEditing = true,
             allowAutocomplete = true,
-            userTypedInput = "redd"
+            textFieldValue = TextFieldValue("redd")
         )
 
         val actualValue = runBlocking {
             model.determineDisplayState(autocompleteSuggestion, inputState)
         }
-        expectThat(actualValue.textFieldValue.text).isEqualTo("reddit.com/r/android")
-        expectThat(actualValue.textFieldValue.selection)
-            .isEqualTo(TextRange(4, "reddit.com/r/android".length))
+        expectThat(actualValue.userTypedInput).isEqualTo("redd")
+        expectThat(actualValue.autocompleteSuggestion).isEqualTo("reddit.com/r/android")
     }
 
     @Test
@@ -131,7 +128,6 @@ class URLBarModelImplTest : BaseTest() {
         val inputState = URLBarModelState(
             isEditing = true,
             allowAutocomplete = true,
-            userTypedInput = "not a match",
             textFieldValue = TextFieldValue("not a match")
         )
 

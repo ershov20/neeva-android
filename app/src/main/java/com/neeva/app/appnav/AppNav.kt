@@ -1,7 +1,6 @@
 package com.neeva.app.appnav
 
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,10 +19,14 @@ import com.neeva.app.settings.featureFlags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.settings.profile.ProfileSettingsPane
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
+import com.neeva.app.ui.BrowserScaffold
+import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNav(
+    bottomControlOffset: StateFlow<Float>,
+    topControlOffset: StateFlow<Float>,
     webLayerModel: WebLayerModel,
     appNavModel: AppNavModel,
     onSignOut: () -> Unit,
@@ -61,7 +64,7 @@ fun AppNav(
         modifier = modifier
     ) {
         composable(AppNavDestination.BROWSER.route) {
-            Box {}
+            BrowserScaffold(bottomControlOffset, topControlOffset, webLayerModel)
         }
 
         composable(AppNavDestination.SETTINGS.route) {

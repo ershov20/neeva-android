@@ -1,18 +1,24 @@
 package com.neeva.app.urlbar
 
 import android.graphics.Bitmap
+import android.view.KeyEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Icon
@@ -20,7 +26,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -32,21 +37,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.FaviconView
 
+private class AutocompleteOffsetMapping(private val originalText: AnnotatedString) : OffsetMapping {
+    override fun originalToTransformed(offset: Int): Int {
+        return offset
+    }
+
+    override fun transformedToOriginal(offset: Int): Int {
+        // The AutocompleteTextField only adds suffixes.  Make it so that any offset after the
+        // length of the user's text points back at the end of the user's text.
+        return offset.coerceAtMost(originalText.length)
+    }
+}
+
 @Composable
 fun AutocompleteTextField(
     textFieldValue: TextFieldValue,
+    suggestionText: String?,
     faviconBitmap: Bitmap?,
     onLocationEdited: (TextFieldValue) -> Unit,
     onLocationReplaced: (String) -> Unit,
@@ -67,31 +88,56 @@ fun AutocompleteTextField(
 
         Spacer(Modifier.width(Dimensions.PADDING_SMALL))
 
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.weight(1.0f)
-        ) {
-            // [BasicTextField]s don't have support for Placeholders, and [TextField] isn't
-            // styled in a way we can use.  Instead, just add a Text that disappears as soon as
-            // the user starts typing something.
-            if (textFieldValue.text.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.url_bar_placeholder),
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = placeholderColor,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+        val selectionBackground = LocalTextSelectionColors.current.backgroundColor
+        val placeholderText = stringResource(R.string.url_bar_placeholder)
+
+        // Append additional text after what the user _actually_ typed in.
+        val visualTransformation = VisualTransformation { text ->
+            val builder = AnnotatedString.Builder(text)
+
+            when {
+                text.isEmpty() -> {
+                    // Show placeholder text if the user hasn't typed anything in.
+                    builder.append(
+                        AnnotatedString(
+                            text = placeholderText,
+                            spanStyle = SpanStyle(color = placeholderColor)
+                        )
+                    )
+                }
+
+                suggestionText != null -> {
+                    // Add the autocomplete suggestion as a highlighted suffix to the user's text.
+                    builder.append(
+                        AnnotatedString(
+                            text = suggestionText,
+                            spanStyle = SpanStyle(background = selectionBackground)
+                        )
+                    )
+                }
             }
 
+            TransformedText(
+                text = builder.toAnnotatedString(),
+                offsetMapping = AutocompleteOffsetMapping(text)
+            )
+        }
+
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .weight(1f)
+                .height(IntrinsicSize.Min)
+        ) {
+            // [BasicTextField]s don't have support for Material 3 colors, so we have to manually
+            // provide them.
             BasicTextField(
                 value = textFieldValue,
                 onValueChange = onLocationEdited,
                 modifier = Modifier
                     .focusRequester(focusRequester)
                     .onPreviewKeyEvent {
-                        if (it.nativeKeyEvent.keyCode == android.view.KeyEvent.KEYCODE_ENTER) {
+                        if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
                             // If we're seeing a hardware enter key, intercept it to prevent
                             // adding a newline to the URL.
                             onLoadUrl()
@@ -102,9 +148,9 @@ fun AutocompleteTextField(
                     }
                     .fillMaxWidth(),
                 singleLine = true,
-                textStyle = TextStyle(
-                    color = LocalContentColor.current,
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize
+                visualTransformation = visualTransformation,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = LocalContentColor.current
                 ),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -116,6 +162,16 @@ fun AutocompleteTextField(
                 ),
                 cursorBrush = SolidColor(LocalContentColor.current)
             )
+
+            // Add an invisible tap target across the whole box that allows the user to accept the
+            // autocomplete suggestion.
+            if (!suggestionText.isNullOrEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .clickable { onLocationReplaced(textFieldValue.text + suggestionText) }
+                        .fillMaxSize()
+                )
+            }
         }
 
         AnimatedVisibility(
@@ -148,14 +204,14 @@ fun AutocompleteTextField(
 private fun AutocompleteTextFieldPreview_AutocompletedText() {
     LightDarkPreviewContainer {
         val text = stringResource(id = R.string.debug_long_string_primary)
-        val textFieldValue = TextFieldValue(
-            text = text,
-            selection = TextRange(7, text.length)
-        )
-
+        val userTypedLength = 7
         Surface {
             AutocompleteTextField(
-                textFieldValue = textFieldValue,
+                textFieldValue = TextFieldValue(
+                    text.take(userTypedLength),
+                    selection = TextRange(userTypedLength)
+                ),
+                suggestionText = text.drop(userTypedLength),
                 faviconBitmap = null,
                 onLocationEdited = {},
                 onLocationReplaced = {},
@@ -173,10 +229,10 @@ private fun AutocompleteTextFieldPreview_AutocompletedText() {
 @Composable
 private fun AutocompleteTextFieldPreview_Placeholder() {
     LightDarkPreviewContainer {
-        val textFieldValue = TextFieldValue()
         Surface {
             AutocompleteTextField(
-                textFieldValue = textFieldValue,
+                textFieldValue = TextFieldValue(),
+                suggestionText = null,
                 faviconBitmap = null,
                 onLocationEdited = {},
                 onLocationReplaced = {},
@@ -195,14 +251,11 @@ private fun AutocompleteTextFieldPreview_Placeholder() {
 private fun AutocompleteTextFieldPreview_NoAutocomplete() {
     LightDarkPreviewContainer {
         val text = "something else"
-        val textFieldValue = TextFieldValue(
-            text = text,
-            selection = TextRange(text.length)
-        )
 
         Surface {
             AutocompleteTextField(
-                textFieldValue = textFieldValue,
+                textFieldValue = TextFieldValue(text),
+                suggestionText = null,
                 faviconBitmap = null,
                 onLocationEdited = {},
                 onLocationReplaced = {},
