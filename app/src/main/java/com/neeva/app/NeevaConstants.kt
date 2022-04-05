@@ -13,6 +13,7 @@ object NeevaConstants {
     val appSettingsURL: String = "${appURL}settings"
     val appReferralURL: String = "${appURL}settings/referrals"
     val appManageMemory: String = "${appURL}settings#memory-mode"
+    val appMembershipURL: String = "${appURL}settings/membership"
 
     val appPrivacyURL: String = "${appURL}privacy"
     val appTermsURL: String = "${appURL}terms"

@@ -1,5 +1,6 @@
 package com.neeva.app.ui.widgets
 
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
@@ -13,6 +14,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 
 data class RowActionIconParams(
@@ -58,15 +60,14 @@ fun RowActionIcon(iconParams: RowActionIconParams) {
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_open_in_new_24),
                         contentDescription = iconParams.contentDescription,
-                        modifier = modifier
+                        modifier = modifier.size(18.dp)
                     )
                 }
 
                 RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN -> {
                     Icon(
                         painter = painterResource(R.drawable.ic_navigate_next),
-                        contentDescription = iconParams.contentDescription,
-                        modifier = modifier
+                        contentDescription = iconParams.contentDescription
                     )
                 }
             }

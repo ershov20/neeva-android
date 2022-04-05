@@ -18,7 +18,8 @@ data class SettingsGroupData(
 
 data class SettingsRowData(
     val type: SettingsRowType,
-    val titleId: Int,
+    val primaryLabelId: Int,
+    val secondaryLabelId: Int? = null,
     val url: Uri? = null,
 
     /** If the setting is stored in SharedPreferences: this indicates its key. */
@@ -35,13 +36,13 @@ data class SettingsRowData(
 )
 
 enum class SettingsRowType {
-    LABEL,
     LINK,
     TOGGLE,
     NAVIGATION,
     PROFILE,
     BUTTON,
-    CLEAR_DATA_BUTTON
+    CLEAR_DATA_BUTTON,
+    SUBSCRIPTION
 }
 
 enum class SettingsToggle(
@@ -50,7 +51,7 @@ enum class SettingsToggle(
 ) {
     SHOW_SEARCH_SUGGESTIONS("SHOW_SEARCH_SUGGESTIONS", false),
     BLOCK_POP_UP_WINDOWS("BLOCK_POP_UP_WINDOWS", false),
-    OFFER_TO_OPEN_COPIED_LINKS("OFFER_TO_OPEN_COPIED_LINKS", false),
+    REQUIRE_CONFIRMATION_ON_TAB_CLOSE("REQUIRE_CONFIRMATION_ON_TAB_CLOSE", false),
     SHOW_LINK_PREVIEWS("SHOW_LINK_PREVIEWS", false),
     CLOSE_INCOGNITO_TABS("CLOSE_INCOGNITO_TABS", false),
     TRACKING_PROTECTION("TRACKING_PROTECTION", false),

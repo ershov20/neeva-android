@@ -1,5 +1,6 @@
 package com.neeva.app.ui.widgets
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -9,15 +10,24 @@ import com.neeva.app.ui.layouts.BaseRowLayout
 
 @Composable
 fun ClickableRow(
-    label: String,
-    actionIconParams: RowActionIconParams
+    primaryLabel: String,
+    secondaryLabel: String? = null,
+    actionIconParams: RowActionIconParams,
+    enabled: Boolean = true,
+    isForDebugOnly: Boolean = false
 ) {
+    val backgroundColor = if (isForDebugOnly) {
+        MaterialTheme.colorScheme.errorContainer
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
     BaseRowLayout(
-        onTapRow = actionIconParams.onTapAction,
+        onTapRow = actionIconParams.onTapAction.takeIf { enabled },
         onTapRowContentDescription = actionIconParams.contentDescription,
-        endComposable = { RowActionIcon(actionIconParams) }
+        endComposable = { RowActionIcon(actionIconParams) },
+        backgroundColor = backgroundColor
     ) {
-        StackedText(primaryLabel = label)
+        StackedText(primaryLabel = primaryLabel, secondaryLabel = secondaryLabel, enabled = enabled)
     }
 }
 
@@ -28,7 +38,7 @@ fun ClickableRow(
 fun ClickableRowPreviewNavigate() {
     LightDarkPreviewContainer {
         ClickableRow(
-            label = stringResource(id = R.string.debug_long_string_primary),
+            primaryLabel = stringResource(id = R.string.debug_long_string_primary),
             actionIconParams = RowActionIconParams(
                 onTapAction = {},
                 RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN
@@ -44,7 +54,7 @@ fun ClickableRowPreviewNavigate() {
 fun ClickableRowPreviewOpenUrl() {
     LightDarkPreviewContainer {
         ClickableRow(
-            label = stringResource(id = R.string.debug_long_string_primary),
+            primaryLabel = stringResource(id = R.string.debug_long_string_primary),
             actionIconParams = RowActionIconParams(
                 onTapAction = {},
                 RowActionIconParams.ActionType.OPEN_URL
@@ -60,7 +70,7 @@ fun ClickableRowPreviewOpenUrl() {
 fun ClickableRowPreviewRefine() {
     LightDarkPreviewContainer {
         ClickableRow(
-            label = stringResource(id = R.string.debug_long_string_primary),
+            primaryLabel = stringResource(id = R.string.debug_long_string_primary),
             actionIconParams = RowActionIconParams(
                 onTapAction = {},
                 RowActionIconParams.ActionType.REFINE

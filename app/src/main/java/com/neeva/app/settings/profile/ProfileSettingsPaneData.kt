@@ -16,12 +16,26 @@ object ProfileSettingsPaneData : SettingsPaneDataInterface {
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.PROFILE,
-                    titleId = R.string.settings_sign_in_to_join_neeva,
+                    primaryLabelId = R.string.settings_sign_in_to_join_neeva,
                     showSSOProviderAsPrimaryLabel = true
-                ),
+                )
+            )
+        ),
+        SettingsGroupData(
+            R.string.settings_membership_status,
+            listOf(
+                SettingsRowData(
+                    type = SettingsRowType.SUBSCRIPTION,
+                    primaryLabelId = R.string.settings_membership_status
+                )
+            )
+        ),
+        SettingsGroupData(
+            R.string.settings_sign_out,
+            listOf(
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
-                    titleId = R.string.settings_sign_out
+                    primaryLabelId = R.string.settings_sign_out
                 )
             )
         )

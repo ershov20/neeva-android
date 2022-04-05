@@ -19,9 +19,9 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
+import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.storage.toBitmap
 import com.neeva.app.userdata.NeevaUser
 
@@ -32,7 +32,7 @@ fun ProfileImage(
     circlePicture: Boolean,
     showSingleLetterPictureIfAvailable: Boolean
 ) {
-    val regularModifier = Modifier.size(32.dp)
+    val regularModifier = Modifier.size(SettingsUIConstants.profilePictureSize)
     val circleClippedModifier = regularModifier.clip(CircleShape)
     when {
         painter != null -> {
@@ -76,7 +76,9 @@ private fun DefaultAccountImage(modifier: Modifier) {
                 painterResource(id = R.drawable.ic_default_avatar),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(16.dp).align(Alignment.Center)
+                modifier = Modifier
+                    .size(SettingsUIConstants.profilePictureSize / 2)
+                    .align(Alignment.Center)
             )
         }
     }

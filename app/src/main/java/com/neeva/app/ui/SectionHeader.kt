@@ -26,7 +26,10 @@ fun SectionHeader(stringId: Int) {
             text = stringResource(stringId),
             style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
-            modifier = Modifier.padding(Dimensions.PADDING_SMALL),
+            modifier = Modifier.padding(
+                horizontal = Dimensions.PADDING_LARGE,
+                vertical = Dimensions.PADDING_SMALL
+            ),
             overflow = TextOverflow.Ellipsis
         )
     }

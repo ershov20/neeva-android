@@ -57,10 +57,10 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     }
 
     fun getTogglePreferenceSetter(togglePreferenceKey: String?): (Boolean) -> Unit {
-        return { newValue ->
+        return { newToggleValue ->
             val toggleState = toggleMap[togglePreferenceKey]
-            toggleState?.value = newValue
-            togglePreferenceKey?.let { setSharedPrefValue(it, newValue) }
+            toggleState?.value = newToggleValue
+            togglePreferenceKey?.let { setSharedPrefValue(it, newToggleValue) }
         }
     }
 

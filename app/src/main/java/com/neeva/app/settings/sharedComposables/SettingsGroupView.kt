@@ -46,17 +46,9 @@ fun SettingRowsView(
         groupData.rows.forEach { rowData ->
             SettingsRow(
                 rowData = rowData,
+                isForDebugOnly = groupData.isForDebugOnly,
                 settingsViewModel = settingsViewModel,
-                onClick = settingsViewModel.getOnClickMap()[rowData.titleId],
-                rowModifier = Modifier
-                    .then(
-                        if (groupData.isForDebugOnly) {
-                            Modifier.background(MaterialTheme.colorScheme.errorContainer)
-                        } else {
-                            Modifier.background(MaterialTheme.colorScheme.surface)
-                        }
-                    )
-                    .then(SettingsUIConstants.rowModifier)
+                onClick = settingsViewModel.getOnClickMap()[rowData.primaryLabelId]
             )
         }
     }

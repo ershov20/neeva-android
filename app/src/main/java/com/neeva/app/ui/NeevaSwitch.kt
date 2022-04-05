@@ -1,44 +1,29 @@
 package com.neeva.app.ui
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.getClickableAlpha
+import com.neeva.app.ui.widgets.StackedText
 
 @Composable
 fun NeevaSwitch(
-    switchLabelContent: @Composable (Modifier) -> Unit,
+    switchLabelContent: @Composable () -> Unit,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
     isEnabled: Boolean = true
 ) {
-    Surface(
-        modifier = Modifier
-            .clickable(isEnabled) { onCheckedChange(!isChecked) }
-            .alpha(getClickableAlpha(isEnabled))
-            .defaultMinSize(minHeight = 48.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier
-        ) {
-            switchLabelContent(Modifier.weight(1f))
-
+    BaseRowLayout(
+        onTapRow = { if (isEnabled) onCheckedChange(!isChecked) },
+        endComposable = {
             Switch(
                 enabled = isEnabled,
                 checked = isChecked,
@@ -54,31 +39,33 @@ fun NeevaSwitch(
                 ),
                 onCheckedChange = onCheckedChange
             )
-        }
+        },
+        endComposablePadding = Dimensions.PADDING_LARGE,
+        modifier = Modifier.alpha(getClickableAlpha(isEnabled))
+    ) {
+        switchLabelContent()
     }
 }
 
 @Composable
 fun NeevaSwitch(
-    title: String,
+    primaryLabel: String,
+    secondaryLabel: String? = null,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-    isEnabled: Boolean = true
+    enabled: Boolean = true
 ) {
     NeevaSwitch(
         switchLabelContent = {
-            Text(
-                text = title,
+            StackedText(
+                primaryLabel = primaryLabel, secondaryLabel = secondaryLabel,
                 maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = it
+                enabled = enabled
             )
         },
-        isEnabled = isEnabled,
+        isEnabled = enabled,
         isChecked = isChecked,
-        onCheckedChange = onCheckedChange,
-        modifier = modifier
+        onCheckedChange = onCheckedChange
     )
 }
 
@@ -90,10 +77,11 @@ fun NeevaSwitchPreview() {
     TwoBooleanPreviewContainer { isChecked, isEnabled ->
         val isCheckedState = remember { mutableStateOf(isChecked) }
         NeevaSwitch(
-            title = "Some random setting that the user can toggle",
+            primaryLabel = "Some random setting that the user can toggle",
             isChecked = isCheckedState.value,
             onCheckedChange = { isCheckedState.value = it },
-            isEnabled = isEnabled
+            enabled = isEnabled,
+            secondaryLabel = "Some secondary label of the setting toggle."
         )
     }
 }

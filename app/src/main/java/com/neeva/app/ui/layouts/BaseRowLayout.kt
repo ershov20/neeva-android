@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
 import com.neeva.app.ui.TwoBooleanPreviewContainer
@@ -35,6 +36,7 @@ fun BaseRowLayout(
     onTapRowContentDescription: String? = null,
     startComposable: @Composable (() -> Unit)? = null,
     endComposable: @Composable (() -> Unit)? = null,
+    endComposablePadding: Dp = Dimensions.PADDING_SMALL,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(backgroundColor),
     applyVerticalPadding: Boolean = true,
@@ -87,7 +89,7 @@ fun BaseRowLayout(
                 Box(
                     modifier = Modifier
                         .defaultMinSize(Dimensions.SIZE_TOUCH_TARGET)
-                        .padding(end = Dimensions.PADDING_SMALL),
+                        .padding(end = endComposablePadding),
                     contentAlignment = Alignment.Center
                 ) {
                     it()

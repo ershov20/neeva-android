@@ -142,7 +142,7 @@ fun FeedbackView(
 
                 // Share URL text box
                 NeevaSwitch(
-                    title = stringResource(R.string.submit_feedback_view_share_url),
+                    primaryLabel = stringResource(R.string.submit_feedback_view_share_url),
                     isChecked = shareUrl.value,
                     onCheckedChange = { shareUrl.value = it }
                 )
@@ -160,7 +160,7 @@ fun FeedbackView(
                     Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
                     NeevaSwitch(
-                        title = stringResource(R.string.submit_feedback_share_screenshot),
+                        primaryLabel = stringResource(R.string.submit_feedback_share_screenshot),
                         isChecked = shareScreenshot.value,
                         onCheckedChange = { shareScreenshot.value = it }
                     )

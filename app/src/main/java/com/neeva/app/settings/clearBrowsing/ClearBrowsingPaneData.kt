@@ -20,38 +20,33 @@ object ClearBrowsingPaneData : SettingsPaneDataInterface {
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    titleId = R.string.settings_browsing_history,
+                    primaryLabelId = R.string.settings_browsing_history,
                     togglePreferenceKey = SettingsToggle.CLEAR_BROWSING_HISTORY.key
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    titleId = R.string.settings_cache,
+                    primaryLabelId = R.string.settings_cache,
                     togglePreferenceKey = SettingsToggle.CLEAR_CACHE.key
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    titleId = R.string.settings_cookies_primary,
+                    primaryLabelId = R.string.settings_cookies_primary,
+                    secondaryLabelId = R.string.settings_cookies_secondary,
                     togglePreferenceKey = SettingsToggle.CLEAR_COOKIES.key
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    titleId = R.string.settings_tracking_protection,
+                    primaryLabelId = R.string.settings_tracking_protection,
                     togglePreferenceKey = SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION.key,
                     enabled = false
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    titleId = R.string.settings_downloaded_files,
-                    togglePreferenceKey = SettingsToggle.CLEAR_DOWNLOADED_FILES.key,
-                    enabled = false
-                ),
+                )
             )
         ),
         SettingsGroupData(
             rows = listOf(
                 SettingsRowData(
                     type = SettingsRowType.CLEAR_DATA_BUTTON,
-                    titleId = R.string.settings_clear_selected_data_on_device
+                    primaryLabelId = R.string.settings_clear_selected_data_on_device
                 ),
             )
         ),
@@ -60,7 +55,7 @@ object ClearBrowsingPaneData : SettingsPaneDataInterface {
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.LINK,
-                    titleId = R.string.settings_manage_neeva_memory,
+                    primaryLabelId = R.string.settings_manage_neeva_memory,
                     url = Uri.parse(appManageMemory)
                 )
             )

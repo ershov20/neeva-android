@@ -141,7 +141,7 @@ private fun HistoryUI(
         ) {
             item {
                 ClickableRow(
-                    label = stringResource(R.string.settings_clear_browsing_data),
+                    primaryLabel = stringResource(R.string.settings_clear_browsing_data),
                     actionIconParams = RowActionIconParams(
                         onTapAction = onClearHistory,
                         actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN

@@ -70,43 +70,47 @@
     <string name="sign_in_with_okta">Continue</string>
     <string name="first_run_intro">Welcome to Neeva, the only ad-free, private search engine</string>
 
-    <string name="settings_account_settings">Account Settings</string>
-    <string name="settings_connected_apps">Connected Apps</string>
-    <string name="settings_invite_friends">Invite your friends!</string>
+    <string name="settings_account_settings">Account settings</string>
+    <string name="settings_connected_apps">Connected apps</string>
+    <string name="settings_invite_friends">Invite friends</string>
     <string name="settings_general">General</string>
+    <string name="set_neeva_as_default_browser">Set Neeva as your default browser</string>
     <string name="settings_default_browser">Default Browser</string>
-    <string name="settings_show_search_search_suggestions">Show Search Suggestions</string>
-    <string name="settings_block_pop_up_windows">Block Pop-up Windows</string>
-    <string name="settings_open_copied_links">Offer to Open Copied Links</string>
-    <string name="settings_show_link_previews">Show Link Previews</string>
+    <string name="settings_show_search_search_suggestions">Show search suggestions</string>
+    <string name="settings_block_pop_up_windows">Block pop-up windows</string>
+    <string name="settings_require_confirmation">Require confirmation</string>
+    <string name="settings_when_closing_all_tabs">When closing all tabs</string>
     <string name="settings_privacy">Privacy</string>
-    <string name="settings_clear_browsing_data">Clear Browsing Data</string>
-    <string name="settings_close_incognito_tabs">Close Incognito Tabs</string>
-    <string name="settings_tracking_protection">Tracking Protection</string>
-    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_clear_browsing_data">Clear browsing data</string>
+    <string name="settings_close_incognito_tabs">Close incognito tabs</string>
+    <string name="settings_when_leaving_incognito_mode">When leaving incognito mode</string>
+    <string name="settings_tracking_protection">Tracking protection</string>
+    <string name="settings_privacy_policy">Privacy policy</string>
     <string name="settings_support">Support</string>
-    <string name="settings_welcome_tours">Welcome Tours</string>
-    <string name="settings_help_center">Help Center</string>
+    <string name="settings_welcome_tours">Welcome tours</string>
+    <string name="settings_help_center">Help center</string>
     <string name="settings_about">About</string>
     <string name="settings_neeva_browser_version">Neeva Browser %s</string>
     <string name="settings_licenses">Licenses</string>
     <string name="settings_terms">Terms</string>
     <string name="settings_account_email_placeholder">Account-email (placeholder for now)</string>
     <string name="settings_sign_in_to_join_neeva">Sign In or Join Neeva</string>
-    <string name="settings_signed_into_neeva_with">Signed In To Neeva With</string>
-    <string name="settings_sign_out">Sign Out</string>
-    <string name="settings_data_on_this_device">Data On This Device</string>
-    <string name="settings_clear_selected_data_on_device">Clear Selected Data on This Device</string>
-    <string name="settings_browsing_history">Browsing History</string>
+    <string name="settings_signed_into_neeva_with">Signed in to Neeva with</string>
+    <string name="settings_sign_out">Sign out</string>
+    <string name="settings_data_on_this_device">Data on this device</string>
+    <string name="settings_clear_selected_data_on_device">Clear selected data on this device</string>
+    <string name="settings_browsing_history">Browsing history</string>
     <string name="settings_cache">Cache</string>
     <string name="settings_cookies_primary">Cookies</string>
     <string name="settings_downloaded_files">Downloaded Files</string>
-    <string name="settings_data_in_neeva_memory">Data In Neeva Memory</string>
-    <string name="settings_manage_neeva_memory">Manage Neeva Memory</string>
+    <string name="settings_data_in_neeva_memory">Data In Neeva memory</string>
+    <string name="settings_manage_neeva_memory">Manage Neeva memory</string>
     <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
+    <string name="settings_cookies_secondary">Clearing it will sign you out of most sites</string>
+    <string name="settings_membership_status">Membership status</string>
 
     <string name="clear_browsing_dialog_text">The items you selected will be deleted. It cannot be undone.</string>
-    <string name="clear_browsing_clear_data">Clear Data</string>
+    <string name="clear_browsing_clear_data">Clear data</string>
     <string name="clear_browsing_last_hour">Last hour</string>
     <string name="clear_browsing_today">Last 24 hours</string>
     <string name="clear_browsing_today_and_yesterday">Last 48 hours</string>
@@ -149,7 +153,6 @@
         2. Tap Browser App\n\n
         3. Select Neeva Search &amp; Browser</string>
     <string name="go_to_settings">Go to Settings</string>
-    <string name="set_neeva_as_default_browser">Set Neeva as your default browser</string>
 
     <string name="menu_download_image">Download image</string>
     <string name="menu_download_video">Download video</string>
@@ -161,7 +164,6 @@
     <string name="subscription_basic">Free Basic</string>
     <string name="subscription_premium">Premium</string>
     <string name="subscription_unknown">Unknown</string>
-
     <string name="widget_description">Quick actions</string>
     <string name="widget_search_neeva">Search Neeva</string>
 </resources>

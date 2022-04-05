@@ -8,20 +8,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.style.TextOverflow
+import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
 fun StackedText(
     primaryLabel: String,
     secondaryLabel: String? = null,
-    showActualUrl: Boolean = false
+    maxLines: Int = 1,
+    showActualUrl: Boolean = false,
+    enabled: Boolean = true
 ) {
-    Column {
+    Column(modifier = Modifier.alpha(getClickableAlpha(enabled))) {
         Text(
             text = primaryLabel,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
+            maxLines = maxLines,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth()
         )
@@ -35,7 +39,8 @@ fun StackedText(
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
+                    maxLines = 1,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }

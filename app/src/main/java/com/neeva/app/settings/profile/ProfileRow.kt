@@ -1,29 +1,13 @@
 package com.neeva.app.settings.profile
 
 import android.net.Uri
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import coil.annotation.ExperimentalCoilApi
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.SettingsUIConstants
-import com.neeva.app.settings.sharedComposables.getFormattedSSOProviderName
 import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
 import com.neeva.app.settings.sharedComposables.subcomponents.ProfileImage
 import com.neeva.app.settings.sharedComposables.subcomponents.SSOImagePainter
@@ -31,7 +15,10 @@ import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.TwoBooleanPreviewContainer
-import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.widgets.RowActionIcon
+import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.StackedText
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 
@@ -40,15 +27,13 @@ fun ProfileRowContainer(
     isSignedOut: Boolean,
     showSSOProviderAsPrimaryLabel: Boolean,
     userData: NeevaUserData,
-    onClick: (() -> Unit)?,
-    rowModifier: Modifier
+    onClick: (() -> Unit)?
 ) {
     when {
         isSignedOut && onClick != null -> {
             SettingsButtonRow(
-                title = stringResource(R.string.settings_sign_in_to_join_neeva),
-                onClick = onClick,
-                rowModifier = rowModifier
+                label = stringResource(R.string.settings_sign_in_to_join_neeva),
+                onClick = onClick
             )
         }
 
@@ -58,8 +43,7 @@ fun ProfileRowContainer(
                 secondaryLabel = userData.email,
                 painter = SSOImagePainter(userData.ssoProvider), circlePicture = false,
                 showSingleLetterPictureIfAvailable = false,
-                onClick = null,
-                rowModifier = rowModifier
+                onClick = null
             )
         }
 
@@ -69,12 +53,19 @@ fun ProfileRowContainer(
                 secondaryLabel = userData.email,
                 painter = PictureUrlPainter(pictureURI = userData.pictureURI),
                 showSingleLetterPictureIfAvailable = true,
-                subscriptionType = userData.subscriptionType,
-                onClick = onClick,
-                rowModifier = rowModifier,
-
+                onClick = onClick
             )
         }
+    }
+}
+
+fun getFormattedSSOProviderName(ssoProvider: NeevaUser.SSOProvider): String {
+    return when (ssoProvider) {
+        NeevaUser.SSOProvider.GOOGLE -> "Google"
+        NeevaUser.SSOProvider.MICROSOFT -> "Microsoft"
+        NeevaUser.SSOProvider.OKTA -> "Okta"
+        NeevaUser.SSOProvider.APPLE -> "Apple"
+        NeevaUser.SSOProvider.UNKNOWN -> "Unknown"
     }
 }
 
@@ -86,62 +77,31 @@ fun ProfileRow(
     painter: Painter?,
     circlePicture: Boolean = true,
     showSingleLetterPictureIfAvailable: Boolean,
-    subscriptionType: SubscriptionType? = null,
-    onClick: (() -> Unit)? = null,
-    rowModifier: Modifier,
+    onClick: (() -> Unit)? = null
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .then(
-                if (onClick != null) {
-                    Modifier.clickable { onClick() }
-                } else {
-                    Modifier
-                }
+    BaseRowLayout(
+        onTapRow = onClick,
+        startComposable = {
+            ProfileImage(
+                displayName = primaryLabel,
+                painter = painter, circlePicture = circlePicture,
+                showSingleLetterPictureIfAvailable = showSingleLetterPictureIfAvailable
             )
-            .then(rowModifier)
-    ) {
-        ProfileImage(
-            displayName = primaryLabel,
-            painter = painter, circlePicture = circlePicture,
-            showSingleLetterPictureIfAvailable = showSingleLetterPictureIfAvailable
-        )
-        Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
-        Column(modifier = Modifier.weight(1f)) {
-            if (primaryLabel != null) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = primaryLabel,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        softWrap = false,
-                        overflow = TextOverflow.Ellipsis
+        },
+        endComposable = if (onClick != null) {
+            {
+                RowActionIcon(
+                    RowActionIconParams(
+                        onTapAction = onClick,
+                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN
                     )
-                    Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
-                    SubscriptionView(subscriptionType)
-                }
-            }
-            if (secondaryLabel != null) {
-                Text(
-                    text = secondaryLabel,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.outline,
-                    maxLines = 1,
-                    softWrap = false,
-                    overflow = TextOverflow.Ellipsis
                 )
             }
+        } else {
+            null
         }
-        if (onClick != null) {
-            Image(
-                painter = painterResource(R.drawable.ic_navigate_next),
-                contentDescription = stringResource(R.string.navigate_to_profile),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
-            )
-        }
+    ) {
+        StackedText(primaryLabel = primaryLabel ?: "", secondaryLabel = secondaryLabel)
     }
 }
 
@@ -184,9 +144,7 @@ class ProfileRowPreviews {
                 isSignedOut = true,
                 showSSOProviderAsPrimaryLabel = false,
                 userData = getMockUserData(),
-                onClick = { },
-                rowModifier = SettingsUIConstants
-                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+                onClick = { }
             )
         }
     }
@@ -203,9 +161,7 @@ class ProfileRowPreviews {
                         isSignedOut = false,
                         showSSOProviderAsPrimaryLabel = true,
                         userData = getMockUserData(ssoProvider = it),
-                        onClick = { },
-                        rowModifier = SettingsUIConstants
-                            .rowModifier.background(MaterialTheme.colorScheme.surface)
+                        onClick = { }
                     )
                 }
             }
@@ -222,9 +178,7 @@ class ProfileRowPreviews {
                 isSignedOut = false,
                 showSSOProviderAsPrimaryLabel = false,
                 userData = getMockUserData(hasDisplayName, invalidProfileUrl),
-                onClick = { },
-                rowModifier = SettingsUIConstants
-                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+                onClick = { }
             )
         }
     }
@@ -239,9 +193,7 @@ class ProfileRowPreviews {
                 isSignedOut = false,
                 showSSOProviderAsPrimaryLabel = false,
                 userData = getMockUserData(hasDisplayName, invalidProfileUrl),
-                onClick = null,
-                rowModifier = SettingsUIConstants
-                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+                onClick = null
             )
         }
     }
@@ -258,9 +210,7 @@ class ProfileRowPreviews {
                         isSignedOut = false,
                         showSSOProviderAsPrimaryLabel = false,
                         userData = getMockUserData(invalidProfileUrl = true, subscriptionType = it),
-                        onClick = { },
-                        rowModifier = SettingsUIConstants
-                            .rowModifier.background(MaterialTheme.colorScheme.surface)
+                        onClick = { }
                     )
                 }
             }
@@ -277,9 +227,7 @@ class ProfileRowPreviews {
                 isSignedOut = false,
                 showSSOProviderAsPrimaryLabel = false,
                 userData = getMockUserData(hasDisplayName = false, invalidProfileUrl = true),
-                onClick = null,
-                rowModifier = SettingsUIConstants
-                    .rowModifier.background(MaterialTheme.colorScheme.surface)
+                onClick = null
             )
         }
     }

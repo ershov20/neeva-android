@@ -15,7 +15,7 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
     private val allFeatureFlags = LocalDebugFlags.values().map {
         SettingsRowData(
             type = SettingsRowType.TOGGLE,
-            titleId = it.flagDisplayName_stringId,
+            primaryLabelId = it.flagDisplayName_stringId,
             togglePreferenceKey = it.key
         )
     }
@@ -29,7 +29,7 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
-                    titleId = R.string.settings_debug_open_50_tabs
+                    primaryLabelId = R.string.settings_debug_open_50_tabs
                 )
             )
         )
