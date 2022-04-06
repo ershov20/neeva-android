@@ -11,6 +11,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager

@@ -9,6 +9,8 @@ import androidx.annotation.CallSuper
 import androidx.fragment.app.Fragment
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.browsing.findinpage.FindInPageModel
+import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
@@ -632,15 +634,7 @@ abstract class BrowserWrapper internal constructor(
 
     // region: Find In Page
     fun showFindInPage() {
-        _findInPageModel.showFindInPage(_activeTabModel.activeTab)
-    }
-
-    fun updateFindInPageQuery(text: String?) {
-        _findInPageModel.updateFindInPageQuery(_activeTabModel.activeTab, text)
-    }
-
-    fun scrollToFindInPageResult(forward: Boolean) {
-        _findInPageModel.scrollToFindInPageResult(_activeTabModel.activeTab, forward)
+        _activeTabModel.activeTab?.let { _findInPageModel.showFindInPage(it) }
     }
     // endregion
 

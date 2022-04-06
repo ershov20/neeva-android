@@ -1,4 +1,4 @@
-package com.neeva.app.browsing
+package com.neeva.app.browsing.findinpage
 
 import com.neeva.app.BaseTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,7 +45,7 @@ class FindInPageModelImplTest : BaseTest() {
     @Test
     fun findInPage_whenNotShown_textIsNullWithNonNullInput() {
         // Skip calling model.showFindInPage(tab).
-        model.updateFindInPageQuery(tab, "test")
+        model.updateFindInPageQuery("test")
         expectThat(model.findInPageInfo.value).isEqualTo(FindInPageInfo())
     }
 
@@ -67,7 +67,7 @@ class FindInPageModelImplTest : BaseTest() {
 
         val query = "test"
         model.showFindInPage(tab)
-        model.updateFindInPageQuery(tab, query)
+        model.updateFindInPageQuery(query)
         verify(tab.findInPageController, times(1)).find(query, true)
         expectThat(model.findInPageInfo.value.text).isEqualTo(query)
     }

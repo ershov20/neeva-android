@@ -1,4 +1,4 @@
-package com.neeva.app.browsing
+package com.neeva.app.browsing.findinpage
 
 import kotlinx.coroutines.flow.StateFlow
 
@@ -12,4 +12,8 @@ data class FindInPageInfo(
 /** Tracks the current Find In Page status. */
 interface FindInPageModel {
     val findInPageInfo: StateFlow<FindInPageInfo>
+
+    fun updateFindInPageQuery(text: String?)
+
+    fun scrollToFindInPageResult(goForward: Boolean)
 }

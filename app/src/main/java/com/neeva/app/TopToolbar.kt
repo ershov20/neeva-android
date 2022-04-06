@@ -41,8 +41,8 @@ fun TopToolbar(modifier: Modifier) {
         if (findInPageInfo.text != null) {
             FindInPageToolbar(
                 findInPageInfo = findInPageInfo,
-                onUpdateQuery = { browserWrapper.updateFindInPageQuery(it) },
-                onScrollToResult = { forward -> browserWrapper.scrollToFindInPageResult(forward) }
+                onUpdateQuery = { findInPageModel.updateFindInPageQuery(it) },
+                onScrollToResult = { forward -> findInPageModel.scrollToFindInPageResult(forward) }
             )
         } else {
             URLBar()
