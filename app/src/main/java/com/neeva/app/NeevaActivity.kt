@@ -166,7 +166,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
                 LaunchedEffect(true) {
                     if (firstRunModel.shouldShowFirstRun()) {
-                        appNavModel?.showFirstRun()
+                        appNavModel?.showSignUpLanding()
                         firstRunModel.firstRunDone()
                     }
                 }

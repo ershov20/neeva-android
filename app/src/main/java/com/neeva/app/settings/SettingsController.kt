@@ -19,7 +19,7 @@ import java.util.Date
  *
  * Uses SettingsDataModel to provide UI State.
  */
-interface SettingsViewModel {
+interface SettingsController {
     //region For General Settings Pane UI behavior
     fun onBackPressed()
     fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit)?
@@ -56,14 +56,14 @@ interface SettingsViewModel {
     //
 }
 
-class SettingsViewModelImpl(
+class SettingsControllerImpl(
     private val appNavModel: AppNavModel,
     private val settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
     private val webLayerModel: WebLayerModel,
     private val onSignOut: () -> Unit,
     private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
-) : SettingsViewModel {
+) : SettingsController {
     override fun onBackPressed() {
         appNavModel.popBackStack()
     }
@@ -101,7 +101,7 @@ class SettingsViewModelImpl(
             }
         )
         if (isSignedOut()) {
-            navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showFirstRun() }
+            navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showSignUpLanding() }
         }
         return navMap
     }
@@ -155,7 +155,7 @@ class SettingsViewModelImpl(
 
 /** For Preview testing. */
 val mockSettingsViewModel by lazy {
-    object : SettingsViewModel {
+    object : SettingsController {
         override fun onBackPressed() {}
 
         override fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit) {

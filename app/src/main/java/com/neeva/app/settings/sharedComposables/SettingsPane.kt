@@ -9,13 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.R
+import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsPaneDataInterface
-import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.ui.FullScreenDialogTopBar
 
 @Composable
 fun SettingsPane(
-    settingsViewModel: SettingsViewModel,
+    settingsController: SettingsController,
     paneData: SettingsPaneDataInterface
 ) {
     /** Surface used to block touch propagation behind the surface. */
@@ -24,8 +24,8 @@ fun SettingsPane(
             modifier = Modifier.background(MaterialTheme.colorScheme.surfaceVariant)
         ) {
             FullScreenDialogTopBar(
-                title = getTopAppBarTitle(settingsViewModel, paneData),
-                onBackPressed = settingsViewModel::onBackPressed
+                title = getTopAppBarTitle(settingsController, paneData),
+                onBackPressed = settingsController::onBackPressed
             )
 
             LazyColumn(
@@ -33,7 +33,7 @@ fun SettingsPane(
             ) {
                 paneData.data.forEach { groupData ->
                     item {
-                        SettingsGroupView(settingsViewModel, groupData)
+                        SettingsGroupView(settingsController, groupData)
                     }
                 }
             }
@@ -43,12 +43,12 @@ fun SettingsPane(
 
 @Composable
 fun getTopAppBarTitle(
-    settingsViewModel: SettingsViewModel,
+    settingsController: SettingsController,
     paneData: SettingsPaneDataInterface
 ): String {
     return when {
         paneData.topAppBarTitleResId != -1 -> stringResource(paneData.topAppBarTitleResId)
-        paneData.shouldShowUserName -> settingsViewModel.getNeevaUserData().displayName ?: ""
+        paneData.shouldShowUserName -> settingsController.getNeevaUserData().displayName ?: ""
         else -> stringResource(R.string.settings)
     }
 }

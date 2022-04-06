@@ -14,7 +14,9 @@ enum class AppNavDestination(
 
     HISTORY(parent = BROWSER, slidesOutToward = SlideDirection.End),
     CARD_GRID(parent = BROWSER, fadesOut = true),
-    FIRST_RUN(parent = BROWSER, fadesOut = true),
+    SIGN_UP_LANDING_PAGE(parent = BROWSER, fadesOut = true),
+    SIGN_UP_OTHER(parent = SIGN_UP_LANDING_PAGE, fadesOut = true),
+    SIGN_IN(parent = SIGN_UP_LANDING_PAGE, fadesOut = true),
 
     SETTINGS(parent = BROWSER, slidesOutToward = SlideDirection.End),
     PROFILE_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),

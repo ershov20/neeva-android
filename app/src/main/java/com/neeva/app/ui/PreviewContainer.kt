@@ -25,6 +25,7 @@ import com.neeva.app.ui.theme.NeevaTheme
  */
 @Composable
 fun PreviewContainer(
+    useDarkTheme: Boolean? = null,
     numBools: Int,
     content: @Composable (BooleanArray) -> Unit
 ) {
@@ -44,8 +45,12 @@ fun PreviewContainer(
     ) {
         values.forEach { params ->
             Column(modifier = Modifier.wrapContentHeight(unbounded = true)) {
-                NeevaThemePreviewContainer(useDarkTheme = false) { content(params) }
-                NeevaThemePreviewContainer(useDarkTheme = true) { content(params) }
+                if (useDarkTheme == null) {
+                    NeevaThemePreviewContainer(useDarkTheme = false) { content(params) }
+                    NeevaThemePreviewContainer(useDarkTheme = true) { content(params) }
+                } else {
+                    NeevaThemePreviewContainer(useDarkTheme = useDarkTheme) { content(params) }
+                }
             }
 
             // Separate out the different Preview groups.
@@ -60,13 +65,19 @@ fun PreviewContainer(
 }
 
 @Composable
-fun OneBooleanPreviewContainer(content: @Composable (Boolean) -> Unit) {
-    PreviewContainer(numBools = 1) { content(it[0]) }
+fun OneBooleanPreviewContainer(
+    useDarkTheme: Boolean? = null,
+    content: @Composable (Boolean) -> Unit
+) {
+    PreviewContainer(useDarkTheme = useDarkTheme, numBools = 1) { content(it[0]) }
 }
 
 @Composable
-fun TwoBooleanPreviewContainer(content: @Composable (Boolean, Boolean) -> Unit) {
-    PreviewContainer(numBools = 2) { content(it[0], it[1]) }
+fun TwoBooleanPreviewContainer(
+    useDarkTheme: Boolean? = null,
+    content: @Composable (Boolean, Boolean) -> Unit
+) {
+    PreviewContainer(useDarkTheme = useDarkTheme, numBools = 2) { content(it[0], it[1]) }
 }
 
 @Composable

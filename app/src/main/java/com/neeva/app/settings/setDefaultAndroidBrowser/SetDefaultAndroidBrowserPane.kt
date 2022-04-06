@@ -18,7 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.settings.SettingsViewModel
+import com.neeva.app.settings.SettingsController
 import com.neeva.app.ui.FullScreenDialogTopBar
 
 /**
@@ -27,17 +27,18 @@ import com.neeva.app.ui.FullScreenDialogTopBar
  */
 @Composable
 fun SetDefaultAndroidBrowserPane(
-    settingsViewModel: SettingsViewModel
+    settingsController: SettingsController
 ) {
     Surface {
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.surface)
-                .fillMaxSize()
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             FullScreenDialogTopBar(
                 title = stringResource(R.string.settings_default_browser),
-                onBackPressed = settingsViewModel::onBackPressed
+                onBackPressed = settingsController::onBackPressed
             )
             Spacer(Modifier.height(28.dp))
 
@@ -46,24 +47,20 @@ fun SetDefaultAndroidBrowserPane(
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
             Text(
                 text = stringResource(id = R.string.switch_default_browser_instructions),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(24.dp)
+                modifier = Modifier.padding(24.dp)
             )
 
             Button(
                 onClick = {
-                    settingsViewModel.openAndroidDefaultBrowserSettings()
+                    settingsController.openAndroidDefaultBrowserSettings()
                 },
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()
                     .padding(24.dp)
             ) {

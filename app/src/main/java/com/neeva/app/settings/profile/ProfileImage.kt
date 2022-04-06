@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Surface
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +23,6 @@ import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.storage.toBitmap
-import com.neeva.app.userdata.NeevaUser
 
 @Composable
 fun ProfileImage(
@@ -71,28 +70,15 @@ private fun DefaultAccountImage(modifier: Modifier) {
         color = MaterialTheme.colorScheme.primary,
         modifier = modifier
     ) {
-        Box {
+        Box(contentAlignment = Alignment.Center) {
             Icon(
                 painterResource(id = R.drawable.ic_default_avatar),
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier
-                    .size(SettingsUIConstants.profilePictureSize / 2)
-                    .align(Alignment.Center)
+                modifier = Modifier.size(SettingsUIConstants.profilePictureSize / 2)
             )
         }
     }
-}
-
-@Composable
-fun SSOImagePainter(ssoProvider: NeevaUser.SSOProvider): Painter? {
-    val painter = when (ssoProvider) {
-        NeevaUser.SSOProvider.GOOGLE -> painterResource(id = R.drawable.ic_google)
-        NeevaUser.SSOProvider.MICROSOFT -> painterResource(id = R.drawable.ic_microsoft)
-        NeevaUser.SSOProvider.OKTA -> painterResource(id = R.drawable.ic_neeva_logo)
-        else -> null
-    }
-    return painter
 }
 
 @Composable

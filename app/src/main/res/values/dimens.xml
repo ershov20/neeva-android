@@ -2,4 +2,7 @@
 <resources>
     <dimen name="bottom_toolbar_height">56dp</dimen>
     <dimen name="top_toolbar_height">56dp</dimen>
+    <dimen name="first_run_padding">24dp</dimen>
+    <dimen name="sign_up_landing_padding_top">148dp</dimen>
+    <dimen name="sign_up_with_other_padding_top">86dp</dimen>
 </resources>

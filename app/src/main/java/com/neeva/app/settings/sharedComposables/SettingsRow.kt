@@ -7,9 +7,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
+import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
-import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
 import com.neeva.app.settings.mockSettingsViewModel
 import com.neeva.app.settings.profile.ProfileRowContainer
@@ -43,12 +43,12 @@ private fun getSettingsRowDataValues(
 fun SettingsRow(
     rowData: SettingsRowData,
     isForDebugOnly: Boolean = false,
-    settingsViewModel: SettingsViewModel,
+    settingsController: SettingsController,
     onClick: (() -> Unit)? = null
 ) {
     val rowDataValues = getSettingsRowDataValues(rowData)
 
-    val toggleState = settingsViewModel.getToggleState(rowData.togglePreferenceKey)
+    val toggleState = settingsController.getToggleState(rowData.togglePreferenceKey)
 
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
@@ -64,7 +64,7 @@ fun SettingsRow(
             if (rowData.url != null) {
                 SettingsLinkRow(
                     label = rowDataValues.primaryLabel,
-                    openUrl = { settingsViewModel.openUrl(rowData.url, rowData.openUrlViaIntent) }
+                    openUrl = { settingsController.openUrl(rowData.url, rowData.openUrlViaIntent) }
                 )
             }
         }
@@ -77,7 +77,7 @@ fun SettingsRow(
                     enabled = rowData.enabled,
                     isChecked = toggleState.value,
                     onCheckedChange = { newToggleValue ->
-                        settingsViewModel.getTogglePreferenceSetter(rowData.togglePreferenceKey)
+                        settingsController.getTogglePreferenceSetter(rowData.togglePreferenceKey)
                             ?.invoke(newToggleValue)
                     }
                 )
@@ -90,7 +90,7 @@ fun SettingsRow(
                 // https://github.com/neevaco/neeva-android/pull/376#discussion_r816329896
                 if (rowData.primaryLabelId == R.string.settings_default_browser) {
                     SetDefaultBrowserRow(
-                        settingsViewModel.getSetDefaultAndroidBrowserManager(),
+                        settingsController.getSetDefaultAndroidBrowserManager(),
                         navigateToPane = onClick
                     )
                 } else {
@@ -106,26 +106,26 @@ fun SettingsRow(
 
         SettingsRowType.PROFILE -> {
             ProfileRowContainer(
-                isSignedOut = settingsViewModel.isSignedOut(),
+                isSignedOut = settingsController.isSignedOut(),
                 showSSOProviderAsPrimaryLabel = rowData.showSSOProviderAsPrimaryLabel,
-                userData = settingsViewModel.getNeevaUserData(),
+                userData = settingsController.getNeevaUserData(),
                 onClick = onClick
             )
         }
 
         SettingsRowType.CLEAR_DATA_BUTTON -> {
             ClearDataButtonView(
-                getToggleState = settingsViewModel::getToggleState,
+                getToggleState = settingsController::getToggleState,
                 rowData = rowData,
-                onClearBrowsingData = settingsViewModel::clearBrowsingData
+                onClearBrowsingData = settingsController::clearBrowsingData
             )
         }
 
         SettingsRowType.SUBSCRIPTION -> {
             val appMembershipURL = Uri.parse(NeevaConstants.appMembershipURL)
             SubscriptionRow(
-                subscriptionType = settingsViewModel.getNeevaUserData().subscriptionType,
-                openUrl = { settingsViewModel.openUrl(appMembershipURL, rowData.openUrlViaIntent) }
+                subscriptionType = settingsController.getNeevaUserData().subscriptionType,
+                openUrl = { settingsController.openUrl(appMembershipURL, rowData.openUrlViaIntent) }
             )
         }
     }
@@ -144,7 +144,7 @@ fun SettingsRow_PreviewToggle() {
                 R.string.debug_long_string_primary,
                 togglePreferenceKey = "toggle preference key"
             ),
-            settingsViewModel = mockSettingsViewModel
+            settingsController = mockSettingsViewModel
         )
     }
 }
@@ -163,7 +163,7 @@ fun SettingsRow_PreviewLink() {
                 url = Uri.parse(""),
                 togglePreferenceKey = ""
             ),
-            settingsViewModel = mockSettingsViewModel
+            settingsController = mockSettingsViewModel
         )
     }
 }

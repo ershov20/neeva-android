@@ -2,16 +2,16 @@ package com.neeva.app.settings.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.neeva.app.settings.SettingsViewModel
+import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsViewModel
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun MainSettingsPane(
-    settingsViewModel: SettingsViewModel
+    settingsController: SettingsController
 ) {
-    SettingsPane(settingsViewModel, MainSettingsData)
+    SettingsPane(settingsController, MainSettingsData)
 }
 
 @Preview(name = "Main settings, 1x font size", locale = "en")

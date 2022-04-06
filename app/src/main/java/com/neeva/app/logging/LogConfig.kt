@@ -22,9 +22,9 @@ class LogConfig {
         APP_ENTER_FOREGROUND("AppEnterForeground"),
 
         // Auth
-        AUTH_IMPRESSION("AuthImpression"),
-        AUTH_SIGN_IN("AuthSignin"),
-        AUTH_SIGN_UP("AuthSignup"),
+        AUTH_IMPRESSION_LANDING("AuthLandingImpression"),
+        AUTH_IMPRESSION_OTHER("AuthOthersSignUpImpression"),
+        AUTH_IMPRESSION_SIGN_IN("AuthSignInImpression"),
         AUTH_SIGN_UP_WITH_GOOGLE("AuthOptionsSignupWithGoogle"),
         AUTH_SIGN_UP_WITH_MICROSOFT("AuthOptionsSignupWithMicrosoft"),
         AUTH_CLOSE("AuthClose"),

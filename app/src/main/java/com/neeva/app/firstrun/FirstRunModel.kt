@@ -81,11 +81,32 @@ class FirstRunModel @Inject constructor(
         clientLogger.logCounter(interaction, null)
     }
 
-    fun launchLoginIntent(
-        activityContext: Context,
+    fun getOnCloseOnboarding(showBrowser: () -> Unit): () -> Unit {
+        return {
+            showBrowser()
+            logEvent(LogConfig.Interaction.AUTH_CLOSE)
+        }
+    }
+
+    fun openInCustomTabs(context: Context): (Uri) -> Unit {
+        return { uri ->
+            val intent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .build()
+                .intent
+            intent.setPackage(
+                CustomTabsClient.getPackageName(context, listOf("com.android.chrome"))
+            )
+            intent.data = uri
+            context.startActivity(intent)
+        }
+    }
+
+    private fun launchCustomTabsLoginIntent(
+        context: Context,
         provider: NeevaUser.SSOProvider,
         signup: Boolean,
-        emailProvided: String
+        emailProvided: String?
     ) {
         val intent = CustomTabsIntent.Builder()
             .setShowTitle(true)
@@ -93,16 +114,62 @@ class FirstRunModel @Inject constructor(
             .intent
         intent.setPackage(
             CustomTabsClient.getPackageName(
-                activityContext, listOf("com.android.chrome")
+                context, listOf("com.android.chrome")
             )
         )
         intent.data = authUri(
             signup,
             provider,
-            emailProvided
+            emailProvided ?: ""
         )
-        activityContext.startActivity(intent)
+        context.startActivity(intent)
+    }
+
+    fun getLaunchLoginIntent(
+        context: Context,
+    ): (LaunchLoginIntentParams) -> Unit {
+        return { launchLoginIntentParams ->
+            when (launchLoginIntentParams.provider) {
+                NeevaUser.SSOProvider.MICROSOFT -> {
+                    launchCustomTabsLoginIntent(
+                        context = context,
+                        provider = NeevaUser.SSOProvider.MICROSOFT,
+                        signup = launchLoginIntentParams.signup,
+                        emailProvided = launchLoginIntentParams.emailProvided
+                    )
+                    logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_MICROSOFT)
+                }
+
+                NeevaUser.SSOProvider.GOOGLE -> {
+                    launchCustomTabsLoginIntent(
+                        context = context,
+                        provider = NeevaUser.SSOProvider.GOOGLE,
+                        signup = launchLoginIntentParams.signup,
+                        emailProvided = launchLoginIntentParams.emailProvided
+                    )
+                    logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_GOOGLE)
+                }
+
+                NeevaUser.SSOProvider.OKTA -> {
+                    launchCustomTabsLoginIntent(
+                        context = context,
+                        provider = NeevaUser.SSOProvider.OKTA,
+                        signup = launchLoginIntentParams.signup,
+                        emailProvided = launchLoginIntentParams.emailProvided
+                    )
+                }
+
+                else -> { }
+            }
+        }
     }
 }
+
+data class LaunchLoginIntentParams(
+    val provider: NeevaUser.SSOProvider,
+    val signup: Boolean,
+    val emailProvided: String? = null,
+    val passwordProvided: String? = null
+)
 
 val LocalFirstRunModel = compositionLocalOf<FirstRunModel> { error("No value set") }

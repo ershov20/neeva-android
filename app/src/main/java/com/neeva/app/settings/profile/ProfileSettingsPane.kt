@@ -2,16 +2,16 @@ package com.neeva.app.settings.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.neeva.app.settings.SettingsViewModel
+import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsViewModel
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun ProfileSettingsPane(
-    settingsViewModel: SettingsViewModel
+    settingsController: SettingsController
 ) {
-    SettingsPane(settingsViewModel, ProfileSettingsPaneData)
+    SettingsPane(settingsController, ProfileSettingsPaneData)
 }
 
 @Preview(name = "Settings Profile, 1x font size", locale = "en")
@@ -22,7 +22,7 @@ fun ProfileSettingsPane(
 fun SettingsProfile_Preview() {
     NeevaTheme {
         ProfileSettingsPane(
-            settingsViewModel = mockSettingsViewModel
+            settingsController = mockSettingsViewModel
         )
     }
 }
@@ -35,7 +35,7 @@ fun SettingsProfile_Preview() {
 fun SettingsProfile_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         ProfileSettingsPane(
-            settingsViewModel = mockSettingsViewModel
+            settingsController = mockSettingsViewModel
         )
     }
 }

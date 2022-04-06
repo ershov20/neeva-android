@@ -160,9 +160,19 @@ class AppNavModel(
     fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
     fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
 
-    fun showFirstRun() {
-        show(AppNavDestination.FIRST_RUN)
-        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION, null)
+    fun showSignUpLanding() {
+        show(AppNavDestination.SIGN_UP_LANDING_PAGE)
+        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_LANDING, null)
+    }
+
+    fun showSignUpWithOther() {
+        show(AppNavDestination.SIGN_UP_OTHER)
+        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_OTHER, null)
+    }
+
+    fun showSignIn() {
+        show(AppNavDestination.SIGN_IN)
+        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_SIGN_IN, null)
     }
 
     fun showHistory() = show(AppNavDestination.HISTORY)

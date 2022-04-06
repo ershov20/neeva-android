@@ -10,7 +10,6 @@ import coil.annotation.ExperimentalCoilApi
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
 import com.neeva.app.settings.sharedComposables.subcomponents.ProfileImage
-import com.neeva.app.settings.sharedComposables.subcomponents.SSOImagePainter
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.LightDarkPreviewContainer
@@ -19,6 +18,8 @@ import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.widgets.RowActionIcon
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.StackedText
+import com.neeva.app.ui.widgets.icons.SSOImagePainter
+import com.neeva.app.ui.widgets.icons.getFormattedSSOProviderName
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 
@@ -56,16 +57,6 @@ fun ProfileRowContainer(
                 onClick = onClick
             )
         }
-    }
-}
-
-fun getFormattedSSOProviderName(ssoProvider: NeevaUser.SSOProvider): String {
-    return when (ssoProvider) {
-        NeevaUser.SSOProvider.GOOGLE -> "Google"
-        NeevaUser.SSOProvider.MICROSOFT -> "Microsoft"
-        NeevaUser.SSOProvider.OKTA -> "Okta"
-        NeevaUser.SSOProvider.APPLE -> "Apple"
-        NeevaUser.SSOProvider.UNKNOWN -> "Unknown"
     }
 }
 

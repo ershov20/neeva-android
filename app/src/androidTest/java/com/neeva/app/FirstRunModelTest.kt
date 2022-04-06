@@ -71,7 +71,7 @@ class FirstRunModelTest {
 
             scenario.onActivity { activity: NeevaActivity ->
                 expectThat(activity.appNavModel?.currentDestination?.value?.route)
-                    .isEqualTo(AppNavDestination.FIRST_RUN.route)
+                    .isEqualTo(AppNavDestination.SIGN_UP_LANDING_PAGE.route)
             }
 
             scenario.close()

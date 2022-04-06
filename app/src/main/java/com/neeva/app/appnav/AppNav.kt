@@ -4,6 +4,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
@@ -11,9 +12,12 @@ import com.neeva.app.LocalSetDefaultAndroidBrowserManager
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.CardsPane
 import com.neeva.app.feedback.FeedbackView
-import com.neeva.app.firstrun.FirstRunContainer
+import com.neeva.app.firstrun.LocalFirstRunModel
+import com.neeva.app.firstrun.SignInScreenContainer
+import com.neeva.app.firstrun.signup.SignUpLandingContainer
+import com.neeva.app.firstrun.signup.SignUpWithOtherContainer
 import com.neeva.app.history.HistoryContainer
-import com.neeva.app.settings.SettingsViewModelImpl
+import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.featureFlags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
@@ -44,7 +48,7 @@ fun AppNav(
         onSignOut,
         setDefaultAndroidBrowserManager
     ) {
-        SettingsViewModelImpl(
+        SettingsControllerImpl(
             appNavModel,
             settingsDataModel,
             neevaUser,
@@ -69,31 +73,31 @@ fun AppNav(
 
         composable(AppNavDestination.SETTINGS.route) {
             MainSettingsPane(
-                settingsViewModel = settingsViewModel
+                settingsController = settingsViewModel
             )
         }
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {
             ProfileSettingsPane(
-                settingsViewModel = settingsViewModel
+                settingsController = settingsViewModel
             )
         }
 
         composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {
             ClearBrowsingPane(
-                settingsViewModel = settingsViewModel
+                settingsController = settingsViewModel
             )
         }
 
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {
             SetDefaultAndroidBrowserPane(
-                settingsViewModel = settingsViewModel
+                settingsController = settingsViewModel
             )
         }
 
         composable(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS.route) {
             FeatureFlagsPane(
-                settingsViewModel = settingsViewModel
+                settingsController = settingsViewModel
             )
         }
 
@@ -111,8 +115,33 @@ fun AppNav(
             )
         }
 
-        composable(AppNavDestination.FIRST_RUN.route) {
-            FirstRunContainer()
+        composable(AppNavDestination.SIGN_UP_LANDING_PAGE.route) {
+            val firstRunModel = LocalFirstRunModel.current
+            SignUpLandingContainer(
+                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
+                openInCustomTabs = firstRunModel.openInCustomTabs(LocalContext.current),
+                onClose = firstRunModel.getOnCloseOnboarding(appNavModel::showBrowser),
+                navigateToSignIn = appNavModel::showSignIn,
+                showSignUpWithOther = appNavModel::showSignUpWithOther
+            )
+        }
+
+        composable(AppNavDestination.SIGN_UP_OTHER.route) {
+            val firstRunModel = LocalFirstRunModel.current
+            SignUpWithOtherContainer(
+                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
+                onClose = firstRunModel.getOnCloseOnboarding(appNavModel::showBrowser),
+                navigateToSignIn = appNavModel::showSignIn
+            )
+        }
+
+        composable(AppNavDestination.SIGN_IN.route) {
+            val firstRunModel = LocalFirstRunModel.current
+            SignInScreenContainer(
+                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
+                onClose = firstRunModel.getOnCloseOnboarding(appNavModel::showBrowser),
+                navigateToSignUp = appNavModel::showSignUpLanding
+            )
         }
 
         composable(AppNavDestination.FEEDBACK.route) {

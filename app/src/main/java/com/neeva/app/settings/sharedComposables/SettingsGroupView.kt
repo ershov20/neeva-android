@@ -8,13 +8,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsGroupData
-import com.neeva.app.settings.SettingsViewModel
 import com.neeva.app.ui.SectionHeader
 
 @Composable
 fun SettingsGroupView(
-    settingsViewModel: SettingsViewModel,
+    settingsController: SettingsController,
     groupData: SettingsGroupData
 ) {
     Column(
@@ -22,11 +22,11 @@ fun SettingsGroupView(
             .fillMaxWidth()
             .wrapContentHeight(align = Alignment.Bottom)
     ) {
-        if (settingsViewModel.isDebugMode() || !groupData.isForDebugOnly) {
+        if (settingsController.isDebugMode() || !groupData.isForDebugOnly) {
             groupData.titleId?.let { SectionHeader(it) }
 
             SettingRowsView(
-                settingsViewModel,
+                settingsController,
                 groupData
             )
         }
@@ -35,7 +35,7 @@ fun SettingsGroupView(
 
 @Composable
 fun SettingRowsView(
-    settingsViewModel: SettingsViewModel,
+    settingsController: SettingsController,
     groupData: SettingsGroupData
 ) {
     Column(
@@ -47,8 +47,8 @@ fun SettingRowsView(
             SettingsRow(
                 rowData = rowData,
                 isForDebugOnly = groupData.isForDebugOnly,
-                settingsViewModel = settingsViewModel,
-                onClick = settingsViewModel.getOnClickMap()[rowData.primaryLabelId]
+                settingsController = settingsController,
+                onClick = settingsController.getOnClickMap()[rowData.primaryLabelId]
             )
         }
     }

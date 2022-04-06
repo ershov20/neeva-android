@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="first_run_padding">56dp</dimen>
+    <dimen name="sign_up_landing_padding_top">56dp</dimen>
+    <dimen name="sign_up_with_other_padding_top">40dp</dimen>
+</resources>

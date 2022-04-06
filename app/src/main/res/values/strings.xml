@@ -58,17 +58,25 @@
     <string name="history_earlier">Earlier</string>
     <string name="history_removed_visit">Removed \"%1$s\" from history</string>
 
-    <string name="email_label">EMAIL</string>
+    <string name="email_label">Email</string>
+    <string name="password_label">Password</string>
     <string name="dont_have_account">Don\'t have an account?</string>
     <string name="sign_up">Sign up</string>
     <string name="already_have_account">Already have an account?</string>
-    <string name="sign_in">Sign In</string>
+    <string name="sign_in">Sign in</string>
     <string name="sign_up_with_google">Sign up with Google</string>
     <string name="sign_up_with_microsoft">Sign up with Microsoft</string>
+    <string name="sign_up_with_okta">Create Neeva account</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_in_with_microsoft">Sign in with Microsoft</string>
     <string name="sign_in_with_okta">Continue</string>
-    <string name="first_run_intro">Welcome to Neeva, the only ad-free, private search engine</string>
+    <string name="other_sign_up_options">Other sign-up options</string>
+    <string name="first_run_intro">Welcome to Neeva</string>
+    <string name="first_run_create_your_free_account">Create your free Neeva account</string>
+    <string name="send_me_product_and_privacy_tips">Send me product &amp; privacy tips</string>
+    <string name="acknowledge">By creating your Neeva account you acknowledge Neeva\'s</string>
+    <string name="and">and</string>
+    <string name="or">or</string>
 
     <string name="settings_account_settings">Account settings</string>
     <string name="settings_connected_apps">Connected apps</string>
@@ -93,6 +101,8 @@
     <string name="settings_neeva_browser_version">Neeva Browser %s</string>
     <string name="settings_licenses">Licenses</string>
     <string name="settings_terms">Terms</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="privacy_policy">Privacy Policy</string>
     <string name="settings_account_email_placeholder">Account-email (placeholder for now)</string>
     <string name="settings_sign_in_to_join_neeva">Sign In or Join Neeva</string>
     <string name="settings_signed_into_neeva_with">Signed in to Neeva with</string>
