@@ -11,7 +11,7 @@ data class URLBarModelState(
     val isEditing: Boolean = false,
 
     /** Whether or not autocomplete suggestions should be allowed. */
-    val allowAutocomplete: Boolean = false,
+    internal val isAutocompleteAllowed: Boolean = true,
 
     /** Backing field for the [AutocompleteTextField]. */
     val textFieldValue: TextFieldValue = TextFieldValue(),
@@ -23,7 +23,7 @@ data class URLBarModelState(
     val faviconBitmap: Bitmap? = null,
 
     /** The full string of the autocomplete suggestion, if one is available. */
-    val autocompleteSuggestion: String? = null
+    internal val autocompleteSuggestion: String? = null
 
 ) {
     /** Exactly what the user has typed in, without any autocompleted text tacked on. */
@@ -31,13 +31,13 @@ data class URLBarModelState(
         get() = textFieldValue.text
 
     /** Alerts observers to what the user is currently typing. */
-    val queryText: String?
+    internal val queryText: String?
         get() = userTypedInput.takeIf { isEditing }
 
     /** String that should be appended to the user's text to match the [autocompleteSuggestion]. */
     val autocompleteSuggestionText: String?
         get() = autocompleteSuggestion
-            ?.takeIf { allowAutocomplete }
+            ?.takeIf { isAutocompleteAllowed }
             ?.drop(userTypedInput.length)
 
     fun getSuggestionType(): SuggestionType {
@@ -46,28 +46,5 @@ data class URLBarModelState(
             uriToLoad.isNeevaSearchUri() -> SuggestionType.NO_SUGGESTION_QUERY
             else -> SuggestionType.NO_SUGGESTION_URL
         }
-    }
-
-    /** Creates a new [URLBarModelState] accounting for a change in the text. */
-    fun withUpdatedTextFieldValue(
-        newTextFieldValue: TextFieldValue,
-        isAutocompleteAllowed: Boolean
-    ): URLBarModelState {
-        var newState = copy(
-            allowAutocomplete = isAutocompleteAllowed,
-            textFieldValue = newTextFieldValue
-        )
-
-        val isAutocompleteStillValid =
-            autocompleteSuggestion?.startsWith(newTextFieldValue.text) == true
-        if (!isAutocompleteAllowed || !isAutocompleteStillValid) {
-            // Toss out the existing autocomplete suggestion.
-            newState = newState.copy(
-                autocompleteSuggestion = null,
-                uriToLoad = URLBarModelImpl.getUrlToLoad(newState.textFieldValue.text)
-            )
-        }
-
-        return newState
     }
 }

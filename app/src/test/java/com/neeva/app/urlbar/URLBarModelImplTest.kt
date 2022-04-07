@@ -1,6 +1,8 @@
 package com.neeva.app.urlbar
 
+import android.graphics.Bitmap
 import android.net.Uri
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
@@ -15,12 +17,18 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -68,15 +76,371 @@ class URLBarModelImplTest : BaseTest() {
     }
 
     @Test
+    fun onLocationBarTextChanged_withoutFocus_doesNothing() {
+        expectThat(model.state.value.isEditing).isFalse()
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+
+        model.onLocationBarTextChanged(TextFieldValue("no effect"))
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+    }
+
+    @Test
+    fun onLocationBarTextChanged_withFocus_setsText() {
+        model.requestFocus()
+        expectThat(model.state.value.isEditing).isTrue()
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+
+        model.onLocationBarTextChanged(TextFieldValue("new text"))
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("new text")
+    }
+
+    @Test
+    fun onLocationBarTextChanged_whenRemovingCharacterAndValidSuggestion_deletesSuggestion() {
+        model.requestFocus()
+        expectThat(model.state.value.isEditing).isTrue()
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+
+        model.onLocationBarTextChanged(TextFieldValue("exam"))
+
+        // Indicate that a new suggestion has come down the pipeline that matches the user query.
+        val mockBitmap = mock<Bitmap>()
+        runBlocking {
+            Mockito.`when`(
+                faviconCache.getFavicon(
+                    eq(Uri.parse("https://www.example.com")),
+                    eq(false)
+                )
+            ).thenReturn(mockBitmap)
+        }
+        suggestionFlow.value = NavSuggestion(
+            url = Uri.parse("https://www.example.com"),
+            label = "",
+            secondaryLabel = "",
+            queryIndex = null,
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
+        )
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        // Confirm that everything looks good.
+        model.state.value.let {
+            expectThat(it.textFieldValue.text).isEqualTo("exam")
+            expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
+            expectThat(it.autocompleteSuggestionText).isEqualTo("ple.com")
+            expectThat(it.uriToLoad).isEqualTo(Uri.parse("https://www.example.com"))
+            expectThat(it.faviconBitmap).isEqualTo(mockBitmap)
+        }
+        runBlocking {
+            verify(faviconCache, times(1)).getFavicon(
+                eq(Uri.parse("https://www.example.com")),
+                eq(false)
+            )
+        }
+
+        // Delete a character from the current query.  Because there is an autocomplete suggestion,
+        // the text change should be rejected and the existing suggestion should be removed.
+        model.onLocationBarTextChanged(TextFieldValue("exa"))
+        model.state.value.let {
+            expectThat(it.textFieldValue.text).isEqualTo("exam")
+            expectThat(it.autocompleteSuggestion).isNull()
+            expectThat(it.autocompleteSuggestionText).isNull()
+            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri())
+            expectThat(it.faviconBitmap).isEqualTo(null)
+        }
+
+        // We shouldn't have tried to get the favicon again.
+        runBlocking {
+            verify(faviconCache, times(1)).getFavicon(
+                eq(Uri.parse("https://www.example.com")),
+                eq(false)
+            )
+        }
+    }
+
+    @Test
+    fun onLocationBarTextChanged_whenRemovingCharacterAndNoSuggestion_acceptsTextChange() {
+        model.requestFocus()
+        expectThat(model.state.value.isEditing).isTrue()
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+
+        model.onLocationBarTextChanged(TextFieldValue("exam"))
+
+        // Confirm that everything looks good.
+        model.state.value.let {
+            expectThat(it.textFieldValue.text).isEqualTo("exam")
+            expectThat(it.autocompleteSuggestion).isNull()
+            expectThat(it.autocompleteSuggestionText).isNull()
+            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri())
+            expectThat(it.faviconBitmap).isEqualTo(null)
+        }
+
+        // Delete a character from the current query.  Because there is no autocomplete suggestion,
+        // the text change should be accepted
+        model.onLocationBarTextChanged(TextFieldValue("exa"))
+        model.state.value.let {
+            expectThat(it.textFieldValue.text).isEqualTo("exa")
+            expectThat(it.autocompleteSuggestion).isNull()
+            expectThat(it.autocompleteSuggestionText).isNull()
+            expectThat(it.uriToLoad).isEqualTo("exa".toSearchUri())
+            expectThat(it.faviconBitmap).isEqualTo(null)
+        }
+    }
+
+    @Test
+    fun onLocationBarTextChanged_whenAddingCharacterAndValidSuggestion_keepsSameSuggestion() {
+        model.requestFocus()
+        expectThat(model.state.value.isEditing).isTrue()
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+
+        model.onLocationBarTextChanged(TextFieldValue("exam"))
+
+        // Indicate that a new suggestion has come down the pipeline that matches the user query.
+        val mockBitmap = mock<Bitmap>()
+        runBlocking {
+            Mockito.`when`(
+                faviconCache.getFavicon(
+                    eq(Uri.parse("https://www.example.com")),
+                    eq(false)
+                )
+            ).thenReturn(mockBitmap)
+        }
+        suggestionFlow.value = NavSuggestion(
+            url = Uri.parse("https://www.example.com"),
+            label = "",
+            secondaryLabel = "",
+            queryIndex = null,
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
+        )
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        // Confirm that everything looks good.
+        model.state.value.let {
+            expectThat(it.textFieldValue.text).isEqualTo("exam")
+            expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
+            expectThat(it.autocompleteSuggestionText).isEqualTo("ple.com")
+            expectThat(it.uriToLoad).isEqualTo(Uri.parse("https://www.example.com"))
+            expectThat(it.faviconBitmap).isEqualTo(mockBitmap)
+        }
+        runBlocking {
+            verify(faviconCache, times(1)).getFavicon(
+                eq(Uri.parse("https://www.example.com")),
+                eq(false)
+            )
+        }
+
+        // Add a character that matches the same autocomplete suggestion.
+        model.onLocationBarTextChanged(TextFieldValue("examp"))
+        model.state.value.let {
+            expectThat(it.textFieldValue.text).isEqualTo("examp")
+            expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
+            expectThat(it.autocompleteSuggestionText).isEqualTo("le.com")
+            expectThat(it.uriToLoad).isEqualTo(Uri.parse("https://www.example.com"))
+            expectThat(it.faviconBitmap).isEqualTo(mockBitmap)
+        }
+
+        // We shouldn't have tried to get the favicon again.
+        runBlocking {
+            verify(faviconCache, times(1)).getFavicon(
+                eq(Uri.parse("https://www.example.com")),
+                eq(false)
+            )
+        }
+    }
+
+    @Test
+    fun onLocationBarTextChanged_whenAddingCharacterAndInvalidSuggestion_removesSuggestion() {
+        model.requestFocus()
+        expectThat(model.state.value.isEditing).isTrue()
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+
+        model.onLocationBarTextChanged(TextFieldValue("exam"))
+
+        // Indicate that a new suggestion has come down the pipeline that matches the user query.
+        val mockBitmap = mock<Bitmap>()
+        runBlocking {
+            Mockito.`when`(
+                faviconCache.getFavicon(
+                    eq(Uri.parse("https://www.example.com")),
+                    eq(false)
+                )
+            ).thenReturn(mockBitmap)
+        }
+        suggestionFlow.value = NavSuggestion(
+            url = Uri.parse("https://www.example.com"),
+            label = "",
+            secondaryLabel = "",
+            queryIndex = null,
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
+        )
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        // Confirm that everything looks good.
+        model.state.value.let {
+            expectThat(it.textFieldValue.text).isEqualTo("exam")
+            expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
+            expectThat(it.autocompleteSuggestionText).isEqualTo("ple.com")
+            expectThat(it.uriToLoad).isEqualTo(Uri.parse("https://www.example.com"))
+            expectThat(it.faviconBitmap).isEqualTo(mockBitmap)
+        }
+        runBlocking {
+            verify(faviconCache, times(1)).getFavicon(
+                eq(Uri.parse("https://www.example.com")),
+                eq(false)
+            )
+        }
+
+        // Add a character that no longer matches the suggestion.
+        model.onLocationBarTextChanged(TextFieldValue("exam_"))
+        model.state.value.let {
+            expectThat(it.textFieldValue.text).isEqualTo("exam_")
+            expectThat(it.autocompleteSuggestion).isNull()
+            expectThat(it.autocompleteSuggestionText).isNull()
+            expectThat(it.uriToLoad).isEqualTo("exam_".toSearchUri())
+            expectThat(it.faviconBitmap).isEqualTo(null)
+        }
+
+        // We shouldn't have tried to get the favicon because the suggestion flow hasn't updated.
+        runBlocking {
+            verify(faviconCache, times(1)).getFavicon(
+                eq(Uri.parse("https://www.example.com")),
+                eq(false)
+            )
+        }
+    }
+
+    @Test
+    fun onLocationBarTextChanged_whenOnlyCompositionChanges_stillAllowsAutocomplete() {
+        model.requestFocus()
+        expectThat(model.state.value.isEditing).isTrue()
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+
+        val initialTextFieldValue = TextFieldValue("new text")
+        model.onLocationBarTextChanged(initialTextFieldValue)
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("new text")
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+
+        val newTextFieldValue = initialTextFieldValue.copy(
+            composition = TextRange(0, initialTextFieldValue.text.length)
+        )
+        model.onLocationBarTextChanged(newTextFieldValue)
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("new text")
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+    }
+
+    @Test
     fun replaceLocationBarText() {
-        // Focus the URL bar so that it can be edited.  This should normally be called when the
-        // Composable representing the URL bar triggers it.
-        model.onFocusChanged(true)
         model.replaceLocationBarText("random query")
-        expectThat(urlBarModelText).isEqualTo("random query")
+        val firstValue = model.state.value.textFieldValue
+        expectThat(firstValue.text).isEqualTo("random query")
+        expectThat(firstValue.selection.collapsed).isTrue()
+        expectThat(firstValue.selection.start).isEqualTo("random query".length)
+        expectThat(model.state.value.isAutocompleteAllowed).isFalse()
 
         model.replaceLocationBarText("query text")
-        expectThat(urlBarModelText).isEqualTo("query text")
+        val secondValue = model.state.value.textFieldValue
+        expectThat(secondValue.text).isEqualTo("query text")
+        expectThat(secondValue.selection.collapsed).isTrue()
+        expectThat(secondValue.selection.start).isEqualTo("query text".length)
+        expectThat(model.state.value.isAutocompleteAllowed).isFalse()
+    }
+
+    @Test
+    fun autocompleteSuggestionFlow_detectsMatch() {
+        // Make the FaviconCache return a fake bitmap for https://www.example.com
+        val mockBitmap = mock<Bitmap>()
+        runBlocking {
+            Mockito.`when`(
+                faviconCache.getFavicon(
+                    eq(Uri.parse("https://www.example.com")),
+                    eq(false)
+                )
+            ).thenReturn(mockBitmap)
+        }
+
+        model.requestFocus()
+        model.onLocationBarTextChanged(TextFieldValue("exam"))
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("exam")
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+
+        // Indicate that a new suggestion has come down the pipeline that matches the user query.
+        suggestionFlow.value = NavSuggestion(
+            url = Uri.parse("https://www.example.com"),
+            label = "",
+            secondaryLabel = "",
+            queryIndex = null,
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
+        )
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        model.state.value.let {
+            expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
+            expectThat(it.autocompleteSuggestionText).isEqualTo("ple.com")
+            expectThat(it.uriToLoad).isEqualTo(Uri.parse("https://www.example.com"))
+            expectThat(it.faviconBitmap).isEqualTo(mockBitmap)
+        }
+    }
+
+    @Test
+    fun autocompleteSuggestionFlow_forSearchButGivenWrongSuggestion_removesAutocomplete() {
+        model.requestFocus()
+        model.onLocationBarTextChanged(TextFieldValue("exam"))
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("exam")
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+
+        // Indicate that a new suggestion has come down the pipeline that matches the user query.
+        suggestionFlow.value = NavSuggestion(
+            url = Uri.parse("https://www.reddit.com"),
+            label = "",
+            secondaryLabel = "",
+            queryIndex = null,
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
+        )
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        model.state.value.let {
+            expectThat(it.autocompleteSuggestion).isNull()
+            expectThat(it.autocompleteSuggestionText).isNull()
+            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri())
+            expectThat(it.faviconBitmap).isEqualTo(model.neevaFavicon)
+        }
+
+        runBlocking {
+            verify(faviconCache, never()).getFavicon(any(), any())
+        }
+    }
+
+    @Test
+    fun autocompleteSuggestionFlow_forSiteButGivenWrongSuggestion_removesAutocomplete() {
+        model.requestFocus()
+        model.onLocationBarTextChanged(TextFieldValue("example.com"))
+        expectThat(model.state.value.textFieldValue.text).isEqualTo("example.com")
+        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+
+        // Indicate that a new suggestion has come down the pipeline that matches the user query.
+        suggestionFlow.value = NavSuggestion(
+            url = Uri.parse("https://www.reddit.com"),
+            label = "",
+            secondaryLabel = "",
+            queryIndex = null,
+            type = SuggestionType.AUTOCOMPLETE_SUGGESTION
+        )
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        model.state.value.let {
+            expectThat(it.autocompleteSuggestion).isNull()
+            expectThat(it.autocompleteSuggestionText).isNull()
+            expectThat(it.uriToLoad).isEqualTo(Uri.parse("http://example.com"))
+            expectThat(it.faviconBitmap).isEqualTo(null)
+        }
+
+        runBlocking {
+            verify(faviconCache, never()).getFavicon(any(), any())
+        }
     }
 
     @Test
@@ -92,6 +456,7 @@ class URLBarModelImplTest : BaseTest() {
         // When the bar is unfocused, it should return to showing the webpage domain.
         model.onFocusChanged(false)
         expectThat(model.state.value.isEditing).isFalse()
+        expectThat(urlBarModelText).isEqualTo("")
     }
 
     @Test
@@ -105,7 +470,7 @@ class URLBarModelImplTest : BaseTest() {
 
         val inputState = URLBarModelState(
             isEditing = true,
-            allowAutocomplete = true,
+            isAutocompleteAllowed = true,
             textFieldValue = TextFieldValue("redd")
         )
 
@@ -127,7 +492,7 @@ class URLBarModelImplTest : BaseTest() {
 
         val inputState = URLBarModelState(
             isEditing = true,
-            allowAutocomplete = true,
+            isAutocompleteAllowed = true,
             textFieldValue = TextFieldValue("not a match")
         )
 

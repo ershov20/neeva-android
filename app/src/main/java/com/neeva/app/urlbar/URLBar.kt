@@ -86,6 +86,7 @@ fun URLBar() {
                             null
                         )
                     },
+                    onAcceptAutocompleteSuggestion = urlBarModel::acceptAutocompleteSuggestion,
                     modifier = childModifier
                 )
             } else {

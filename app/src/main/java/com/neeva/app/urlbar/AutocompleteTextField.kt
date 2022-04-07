@@ -5,7 +5,6 @@ import android.view.KeyEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -21,16 +20,19 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -72,6 +74,7 @@ fun AutocompleteTextField(
     onLocationEdited: (TextFieldValue) -> Unit,
     onLocationReplaced: (String) -> Unit,
     onLoadUrl: () -> Unit,
+    onAcceptAutocompleteSuggestion: () -> Unit,
     placeholderColor: Color,
     modifier: Modifier = Modifier
 ) {
@@ -166,11 +169,18 @@ fun AutocompleteTextField(
             // Add an invisible tap target across the whole box that allows the user to accept the
             // autocomplete suggestion.
             if (!suggestionText.isNullOrEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .clickable { onLocationReplaced(textFieldValue.text + suggestionText) }
-                        .fillMaxSize()
-                )
+                val completedSuggestion = textFieldValue.text + suggestionText
+                Button(
+                    onClick = onAcceptAutocompleteSuggestion,
+                    modifier = Modifier.fillMaxSize().alpha(0f)
+                ) {
+                    Text(
+                        stringResource(
+                            R.string.url_bar_accept_autocomplete,
+                            completedSuggestion
+                        )
+                    )
+                }
             }
         }
 
@@ -216,6 +226,7 @@ private fun AutocompleteTextFieldPreview_AutocompletedText() {
                 onLocationEdited = {},
                 onLocationReplaced = {},
                 onLoadUrl = {},
+                onAcceptAutocompleteSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -237,6 +248,7 @@ private fun AutocompleteTextFieldPreview_Placeholder() {
                 onLocationEdited = {},
                 onLocationReplaced = {},
                 onLoadUrl = {},
+                onAcceptAutocompleteSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -260,6 +272,7 @@ private fun AutocompleteTextFieldPreview_NoAutocomplete() {
                 onLocationEdited = {},
                 onLocationReplaced = {},
                 onLoadUrl = {},
+                onAcceptAutocompleteSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

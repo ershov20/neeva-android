@@ -170,6 +170,10 @@ dependencies {
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     androidTestUtil 'androidx.test:orchestrator:1.4.1'
 
+    // Compose instrumentation testing requires we add the dependency to debugImplementation so that
+    // the tests can start a ComponentActivity without crashing.
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
+
     // Hilt
     kapt "com.google.dagger:hilt-compiler:$dagger_version"
     implementation "com.google.dagger:hilt-android:$dagger_version"

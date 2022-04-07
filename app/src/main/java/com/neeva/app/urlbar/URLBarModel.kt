@@ -37,6 +37,9 @@ interface URLBarModel {
     /** Called when the contents of the URL bar have been edited. */
     fun onLocationBarTextChanged(newValue: TextFieldValue)
 
+    /** Accepts the autocomplete suggestion that is currently being displayed. */
+    fun acceptAutocompleteSuggestion()
+
     /** Requests focus on the URL bar for editing. */
     fun requestFocus()
 

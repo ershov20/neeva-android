@@ -27,7 +27,7 @@ class URLBarModelImpl(
     dispatchers: Dispatchers,
     private val faviconCache: FaviconCache
 ) : URLBarModel {
-    private val neevaFavicon =
+    internal val neevaFavicon =
         AppCompatResources.getDrawable(appContext, R.mipmap.ic_neeva_logo)?.toBitmap()
 
     private val _state = MutableStateFlow(URLBarModelState())
@@ -56,7 +56,7 @@ class URLBarModelImpl(
         var newState = userInputStateValue.copy()
         val userInput = userInputStateValue.userTypedInput
         val suggestion = suggestionValue.takeIf {
-            userInputStateValue.allowAutocomplete || isExactMatch(suggestionValue, userInput)
+            userInputStateValue.isAutocompleteAllowed || isExactMatch(suggestionValue, userInput)
         }
 
         // Check for an autocomplete match.
@@ -102,7 +102,7 @@ class URLBarModelImpl(
 
             // Disable autocomplete suggestions so that the user can keep refining queries that are
             // pasted directly into the URL bar from a query navigation suggestion.
-            isAutocompleteAllowed = false
+            newIsAutocompleteAllowed = false
         )
     }
 
@@ -133,7 +133,7 @@ class URLBarModelImpl(
                     // The user deleted text from an existing string, so we should disable
                     // autocomplete suggestions to avoid trapping the user in a state where they are
                     // given the same suggestion over and over again.
-                    isAutocompleteAllowed = false
+                    newIsAutocompleteAllowed = false
                 )
             }
 
@@ -142,7 +142,7 @@ class URLBarModelImpl(
                 // autocomplete suggestions.
                 currentState.withUpdatedTextFieldValue(
                     newTextFieldValue = newValue,
-                    isAutocompleteAllowed = true
+                    newIsAutocompleteAllowed = true
                 )
             }
 
@@ -153,14 +153,19 @@ class URLBarModelImpl(
                 val onlyCompositionChanged =
                     currentState.textFieldValue.composition != newValue.composition &&
                         oldText == newValue.text
-                val isAutocompleteAllowed = currentState.allowAutocomplete && onlyCompositionChanged
+                val isAutocompleteAllowed =
+                    currentState.isAutocompleteAllowed && onlyCompositionChanged
 
                 currentState.withUpdatedTextFieldValue(
                     newTextFieldValue = newValue,
-                    isAutocompleteAllowed = isAutocompleteAllowed
+                    newIsAutocompleteAllowed = isAutocompleteAllowed
                 )
             }
         }
+    }
+
+    override fun acceptAutocompleteSuggestion() {
+        _state.value.autocompleteSuggestion?.let { replaceLocationBarText(it) }
     }
 
     override fun requestFocus() = onFocusChanged(isFocused = true)
@@ -168,14 +173,7 @@ class URLBarModelImpl(
 
     internal fun onFocusChanged(isFocused: Boolean) {
         // The user has either started editing a query or stopped trying.  Reset everything.
-        _state.value = URLBarModelState(
-            isEditing = isFocused,
-            allowAutocomplete = true,
-            textFieldValue = TextFieldValue(),
-            autocompleteSuggestion = null,
-            uriToLoad = Uri.EMPTY,
-            faviconBitmap = null
-        )
+        _state.value = URLBarModelState(isEditing = isFocused)
     }
 
     companion object {
@@ -245,6 +243,30 @@ class URLBarModelImpl(
                     urlBarContents.toSearchUri()
                 }
             }
+        }
+
+        /** Creates a new [URLBarModelState] accounting for a change in the text. */
+        internal fun URLBarModelState.withUpdatedTextFieldValue(
+            newTextFieldValue: TextFieldValue,
+            newIsAutocompleteAllowed: Boolean
+        ): URLBarModelState {
+            var newState = copy(
+                isAutocompleteAllowed = newIsAutocompleteAllowed,
+                textFieldValue = newTextFieldValue
+            )
+
+            val isAutocompleteStillValid =
+                autocompleteSuggestion?.startsWith(newTextFieldValue.text) == true
+            if (!newIsAutocompleteAllowed || !isAutocompleteStillValid) {
+                // Toss out the existing autocomplete suggestion.
+                newState = newState.copy(
+                    autocompleteSuggestion = null,
+                    uriToLoad = getUrlToLoad(newState.textFieldValue.text),
+                    faviconBitmap = null
+                )
+            }
+
+            return newState
         }
     }
 }
