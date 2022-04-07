@@ -13,14 +13,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.ui.theme.Dimensions
 
 data class RowActionIconParams(
     val onTapAction: () -> Unit,
     val actionType: ActionType,
-    val contentDescription: String? = null
+    val contentDescription: String? = null,
+    val size: Dp = Dimensions.PADDING_MEDIUM
 ) {
     enum class ActionType {
         REFINE, DELETE, OPEN_URL, NAVIGATE_TO_SCREEN
@@ -30,11 +32,13 @@ data class RowActionIconParams(
 @Composable
 fun RowActionIcon(iconParams: RowActionIconParams) {
     // We need to manually flip directional icons around in case the user is using an RTL layout.
-    val modifier = if (LocalLayoutDirection.current == LayoutDirection.Rtl) {
-        Modifier.scale(scaleX = -1f, scaleY = 1f)
-    } else {
-        Modifier
-    }
+    val modifier = Modifier.size(iconParams.size).then(
+        if (LocalLayoutDirection.current == LayoutDirection.Rtl) {
+            Modifier.scale(scaleX = -1f, scaleY = 1f)
+        } else {
+            Modifier
+        }
+    )
 
     CompositionLocalProvider(
         LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
@@ -53,6 +57,7 @@ fun RowActionIcon(iconParams: RowActionIconParams) {
                     Icon(
                         imageVector = Icons.Outlined.Delete,
                         contentDescription = iconParams.contentDescription,
+                        modifier = modifier
                     )
                 }
 
@@ -60,14 +65,15 @@ fun RowActionIcon(iconParams: RowActionIconParams) {
                     Icon(
                         painter = painterResource(R.drawable.ic_baseline_open_in_new_24),
                         contentDescription = iconParams.contentDescription,
-                        modifier = modifier.size(18.dp)
+                        modifier = modifier
                     )
                 }
 
                 RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN -> {
                     Icon(
                         painter = painterResource(R.drawable.ic_navigate_next),
-                        contentDescription = iconParams.contentDescription
+                        contentDescription = iconParams.contentDescription,
+                        modifier = modifier
                     )
                 }
             }
