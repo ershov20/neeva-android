@@ -7,7 +7,6 @@ import com.apollographql.apollo3.api.Optional
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.StartIncognitoMutation
-import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.IncognitoTabScreenshotManager
 import com.neeva.app.storage.favicons.IncognitoFaviconCache
@@ -28,9 +27,9 @@ class IncognitoBrowserWrapper private constructor(
     activityCallbackProvider: () -> ActivityCallbacks?,
     private val apolloWrapper: ApolloWrapper,
     private val onDestroyed: (IncognitoBrowserWrapper) -> Unit,
-    private val tempDirectory: File,
-    private val incognitoFaviconCache: IncognitoFaviconCache
-) : BrowserWrapper(
+    private val incognitoFaviconCache: IncognitoFaviconCache,
+    tabScreenshotManager: IncognitoTabScreenshotManager
+) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
     coroutineScope = coroutineScope,
@@ -38,7 +37,9 @@ class IncognitoBrowserWrapper private constructor(
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = null,
     faviconCache = incognitoFaviconCache,
-    spaceStore = null
+    spaceStore = null,
+    historyManager = null,
+    tabScreenshotManager = tabScreenshotManager
 ) {
     constructor(
         appContext: Context,
@@ -56,13 +57,13 @@ class IncognitoBrowserWrapper private constructor(
         activityCallbackProvider = activityCallbackProvider,
         apolloWrapper = apolloWrapper,
         onDestroyed = onDestroyed,
-        tempDirectory = tempDirectory,
         incognitoFaviconCache = IncognitoFaviconCache(
             appContext,
             tempDirectory,
             domainProvider,
             dispatchers
-        )
+        ),
+        tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory)
     )
 
     companion object {
@@ -73,13 +74,8 @@ class IncognitoBrowserWrapper private constructor(
     /** Whether or not the mutation required to start an Incognito session has succeeded. */
     private var isIncognitoMutationPerformed: Boolean = false
 
-    override val historyManager: HistoryManager? = null
-
     override fun createBrowserFragment() =
         WebLayer.createBrowserFragmentWithIncognitoProfile(null, null)
-
-    override fun createTabScreenshotManager() =
-        IncognitoTabScreenshotManager(appContext, tempDirectory)
 
     override fun unregisterBrowserAndTabCallbacks() {
         // Tell WebLayer that it should destroy the incognito profile when it can.  This deletes any

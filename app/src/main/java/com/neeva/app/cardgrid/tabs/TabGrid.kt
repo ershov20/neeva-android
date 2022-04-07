@@ -41,7 +41,7 @@ fun TabGrid(
         onCloseTabs = { tabInfo -> cardsPaneModel.closeTab(browserWrapper, tabInfo) },
         tabs = tabs,
         faviconCache = browserWrapper.faviconCache,
-        screenshotProvider = browserWrapper.tabScreenshotManager::restoreScreenshot,
+        screenshotProvider = browserWrapper::restoreScreenshotOfTab,
         modifier = modifier
     )
 }

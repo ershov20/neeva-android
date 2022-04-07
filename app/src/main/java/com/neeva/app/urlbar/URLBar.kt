@@ -91,7 +91,6 @@ fun URLBar() {
                 )
             } else {
                 LocationLabel(
-                    showIncognitoBadge = isIncognito,
                     onMenuItem = appNavModel::onMenuItem,
                     placeholderColor = placeholderColor,
                     modifier = childModifier.clickable { urlBarModel.requestFocus() }

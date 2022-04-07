@@ -30,6 +30,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.appnav.AppNavModel
+import com.neeva.app.appnav.AppNavModelImpl
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.ContextMenuCreator
@@ -121,7 +122,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 val context = LocalContext.current
 
                 appNavModel = remember(navController) {
-                    AppNavModel(
+                    AppNavModelImpl(
                         context = context,
                         navController = navController,
                         webLayerModel = webLayerModel,

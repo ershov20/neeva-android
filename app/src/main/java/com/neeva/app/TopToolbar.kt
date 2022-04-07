@@ -12,7 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
-import com.neeva.app.urlbar.FindInPageToolbar
+import com.neeva.app.browsing.findinpage.FindInPageToolbar
 import com.neeva.app.urlbar.URLBar
 
 @Composable

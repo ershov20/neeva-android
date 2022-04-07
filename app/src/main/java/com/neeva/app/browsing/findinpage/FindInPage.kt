@@ -1,4 +1,4 @@
-package com.neeva.app.urlbar
+package com.neeva.app.browsing.findinpage
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Row
@@ -32,7 +32,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.browsing.findinpage.FindInPageInfo
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 

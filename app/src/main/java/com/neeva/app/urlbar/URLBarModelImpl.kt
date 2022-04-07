@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
+import org.chromium.weblayer.Browser
+import org.chromium.weblayer.UrlBarController
 
 class URLBarModelImpl(
     suggestionFlow: StateFlow<NavSuggestion?>,
@@ -33,6 +35,9 @@ class URLBarModelImpl(
     private val _state = MutableStateFlow(URLBarModelState())
     override val state: StateFlow<URLBarModelState> = _state
 
+    private val _urlBarControllerFlow = MutableStateFlow<UrlBarController?>(null)
+    override val urlBarControllerFlow: StateFlow<UrlBarController?> = _urlBarControllerFlow
+
     init {
         // Update what is displayed in the URL bar as the user types.
         suggestionFlow
@@ -46,6 +51,10 @@ class URLBarModelImpl(
             }
             .flowOn(dispatchers.io)
             .launchIn(coroutineScope)
+    }
+
+    internal fun onBrowserChanged(browser: Browser?) {
+        _urlBarControllerFlow.value = browser?.urlBarController
     }
 
     /** Determines what should be displayed in the URL bar as the user types something. */

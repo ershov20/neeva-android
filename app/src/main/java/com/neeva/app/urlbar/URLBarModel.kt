@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import org.chromium.weblayer.UrlBarController
 
 /**
  * Maintains logic required to provide a URL bar to the user.  There is a single URL bar that is
@@ -21,6 +22,9 @@ interface URLBarModel {
      * use one of the other Flows (or add a new one tailored to your use case).
      */
     val state: StateFlow<URLBarModelState>
+
+    /** Tracks the UrlBarController used to display information about the current page. */
+    val urlBarControllerFlow: Flow<UrlBarController?>
 
     val queryTextFlow: Flow<String?>
         get() = state.map { it.queryText }.distinctUntilChanged()

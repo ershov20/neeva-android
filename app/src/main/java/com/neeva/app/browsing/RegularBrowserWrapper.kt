@@ -32,11 +32,11 @@ class RegularBrowserWrapper(
     activityCallbackProvider: () -> ActivityCallbacks?,
     domainProvider: DomainProvider,
     private val apolloWrapper: ApolloWrapper,
-    override val historyManager: HistoryManager,
+    historyManager: HistoryManager,
     spaceStore: SpaceStore,
     private val neevaUser: NeevaUser,
     val clientLogger: ClientLogger
-) : BrowserWrapper(
+) : BaseBrowserWrapper(
     isIncognito = false,
     appContext = appContext,
     coroutineScope = coroutineScope,
@@ -55,7 +55,9 @@ class RegularBrowserWrapper(
         historyManager = historyManager,
         dispatchers = dispatchers
     ),
-    spaceStore = spaceStore
+    spaceStore = spaceStore,
+    historyManager = historyManager,
+    tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir)
 ) {
     companion object {
         private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
@@ -79,8 +81,6 @@ class RegularBrowserWrapper(
 
     override fun createBrowserFragment() =
         WebLayer.createBrowserFragment(NON_INCOGNITO_PROFILE_NAME, PERSISTENCE_ID)
-
-    override fun createTabScreenshotManager() = RegularTabScreenshotManager(appContext.cacheDir)
 
     override fun registerBrowserCallbacks(browser: Browser): Boolean {
         val wasRegistered = super.registerBrowserCallbacks(browser)

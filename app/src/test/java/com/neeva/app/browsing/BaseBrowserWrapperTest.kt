@@ -58,7 +58,7 @@ import strikt.assertions.isNull
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
-class BrowserWrapperTest : BaseTest() {
+class BaseBrowserWrapperTest : BaseTest() {
     @Rule
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
@@ -132,7 +132,7 @@ class BrowserWrapperTest : BaseTest() {
             on { isEditing } doReturn urlBarModelIsEditing
         }
 
-        browserWrapper = object : BrowserWrapper(
+        browserWrapper = object : BaseBrowserWrapper(
             isIncognito = false,
             appContext = context,
             coroutineScope = coroutineScopeRule.scope,
@@ -143,16 +143,15 @@ class BrowserWrapperTest : BaseTest() {
             spaceStore = spaceStore,
             _activeTabModel = activeTabModel,
             _urlBarModel = urlBarModel,
-            _findInPageModel = findInPageModel
+            _findInPageModel = findInPageModel,
+            historyManager = this@BaseBrowserWrapperTest.historyManager,
+            tabScreenshotManager = this@BaseBrowserWrapperTest.tabScreenshotManager
         ) {
-            override val historyManager = this@BrowserWrapperTest.historyManager
-
-            override fun createTabScreenshotManager() = this@BrowserWrapperTest.tabScreenshotManager
-
-            override fun createBrowserFragment(): Fragment = this@BrowserWrapperTest.browserFragment
+            override fun createBrowserFragment(): Fragment =
+                this@BaseBrowserWrapperTest.browserFragment
 
             override fun getBrowserFromFragment(fragment: Fragment): Browser {
-                return this@BrowserWrapperTest.browser
+                return this@BaseBrowserWrapperTest.browser
             }
 
             override fun shouldInterceptLoad(uri: Uri) = shouldInterceptLoad

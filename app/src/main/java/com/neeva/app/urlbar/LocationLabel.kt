@@ -46,13 +46,13 @@ import org.chromium.weblayer.UrlBarOptions
 
 @Composable
 fun LocationLabel(
-    showIncognitoBadge: Boolean,
     onMenuItem: (id: NeevaMenuItemId) -> Unit,
     placeholderColor: Color,
     modifier: Modifier = Modifier
 ) {
     val browserWrapper = LocalBrowserWrapper.current
 
+    val showIncognitoBadge = browserWrapper.isIncognito
     val activeTabModel = browserWrapper.activeTabModel
     val displayedInfo by activeTabModel.displayedInfoFlow.collectAsState()
     val navigationInfoFlow by browserWrapper.activeTabModel.navigationInfoFlow.collectAsState()
@@ -62,7 +62,7 @@ fun LocationLabel(
     val textSize = MaterialTheme.typography.bodyLarge.fontSize.value
 
     // Whenever the UrlBarController changes, ask it for the View we need to display and recompose.
-    val urlBarController by browserWrapper.urlBarControllerFlow.collectAsState(null)
+    val urlBarController by browserWrapper.urlBarModel.urlBarControllerFlow.collectAsState(null)
     val urlBarView: View? = remember(urlBarController) {
         urlBarController?.createUrlBarView(
             UrlBarOptions.builder()
