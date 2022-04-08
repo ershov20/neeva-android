@@ -5,6 +5,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.RowActionIconParams
 
@@ -20,7 +21,8 @@ fun SettingsNavigationRow(
         primaryLabel = primaryLabel, secondaryLabel = secondaryLabel,
         actionIconParams = RowActionIconParams(
             onTapAction = onClick,
-            actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN
+            actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
+            size = Dimensions.SIZE_ICON_SMALL
         ),
         enabled = enabled,
         isForDebugOnly = isForDebugOnly

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.RowActionIconParams
@@ -17,7 +18,8 @@ fun SettingsLinkRow(
         primaryLabel = label,
         actionIconParams = RowActionIconParams(
             onTapAction = openUrl,
-            actionType = RowActionIconParams.ActionType.OPEN_URL
+            actionType = RowActionIconParams.ActionType.OPEN_URL,
+            size = Dimensions.SIZE_ICON_SMALL
         )
     )
 }

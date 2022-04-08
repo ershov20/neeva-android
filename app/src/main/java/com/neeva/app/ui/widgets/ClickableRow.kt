@@ -7,6 +7,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun ClickableRow(
@@ -41,7 +42,8 @@ fun ClickableRowPreviewNavigate() {
             primaryLabel = stringResource(id = R.string.debug_long_string_primary),
             actionIconParams = RowActionIconParams(
                 onTapAction = {},
-                RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN
+                RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
+                size = Dimensions.SIZE_ICON_SMALL
             )
         )
     }
@@ -57,7 +59,8 @@ fun ClickableRowPreviewOpenUrl() {
             primaryLabel = stringResource(id = R.string.debug_long_string_primary),
             actionIconParams = RowActionIconParams(
                 onTapAction = {},
-                RowActionIconParams.ActionType.OPEN_URL
+                RowActionIconParams.ActionType.OPEN_URL,
+                size = Dimensions.SIZE_ICON_SMALL
             )
         )
     }

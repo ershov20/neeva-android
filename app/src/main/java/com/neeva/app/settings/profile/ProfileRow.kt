@@ -15,6 +15,7 @@ import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.StackedText
@@ -84,7 +85,8 @@ fun ProfileRow(
                 RowActionIconButton(
                     RowActionIconParams(
                         onTapAction = onClick,
-                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN
+                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
+                        size = Dimensions.SIZE_ICON_SMALL
                     )
                 )
             }

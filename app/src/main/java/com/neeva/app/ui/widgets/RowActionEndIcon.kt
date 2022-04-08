@@ -24,7 +24,7 @@ data class RowActionIconParams(
     val onTapAction: () -> Unit,
     val actionType: ActionType,
     val contentDescription: String? = null,
-    val size: Dp = Dimensions.PADDING_MEDIUM
+    val size: Dp = Dimensions.SIZE_ICON_MEDIUM
 ) {
     enum class ActionType {
         REFINE, DELETE, OPEN_URL, NAVIGATE_TO_SCREEN, BACK, FORWARD
@@ -50,7 +50,7 @@ fun RowActionIconButton(iconParams: RowActionIconParams) {
 fun RowActionIcon(
     actionType: RowActionIconParams.ActionType,
     contentDescription: String? = null,
-    size: Dp = Dimensions.PADDING_MEDIUM
+    size: Dp = Dimensions.SIZE_ICON_MEDIUM
 ) {
     // We need to manually flip directional icons around in case the user is using an RTL layout.
     val modifier = Modifier.size(size).then(

@@ -197,8 +197,7 @@ fun NeevaOnboardingButton(
             if (!signup) {
                 Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
                 RowActionIcon(
-                    actionType = RowActionIconParams.ActionType.FORWARD,
-                    size = 20.dp
+                    actionType = RowActionIconParams.ActionType.FORWARD
                 )
             }
         }

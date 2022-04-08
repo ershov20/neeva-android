@@ -12,7 +12,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.zIndex
 import com.neeva.app.R
-import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
 
@@ -39,8 +38,7 @@ fun FullScreenDialogTopBar(
                 iconParams = RowActionIconParams(
                     onTapAction = { onBackPressed() },
                     contentDescription = stringResource(R.string.close),
-                    actionType = RowActionIconParams.ActionType.BACK,
-                    size = Dimensions.PADDING_LARGE
+                    actionType = RowActionIconParams.ActionType.BACK
                 )
             )
         },

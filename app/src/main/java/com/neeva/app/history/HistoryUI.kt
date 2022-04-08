@@ -31,6 +31,7 @@ import com.neeva.app.storage.favicons.mockFaviconCache
 import com.neeva.app.suggestions.NavSuggestionRow
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.FullScreenDialogTopBar
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.RowActionIconParams
@@ -144,7 +145,8 @@ private fun HistoryUI(
                     primaryLabel = stringResource(R.string.settings_clear_browsing_data),
                     actionIconParams = RowActionIconParams(
                         onTapAction = onClearHistory,
-                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN
+                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
+                        size = Dimensions.SIZE_ICON_SMALL
                     )
                 )
             }
