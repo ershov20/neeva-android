@@ -6,22 +6,29 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.TwoBooleanPreviewContainer
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.getClickableAlpha
+import com.neeva.app.ui.widgets.RowActionIcon
+import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.icons.SSOProviderImage
 import com.neeva.app.userdata.NeevaUser
 
@@ -35,12 +42,7 @@ fun OnboardingButton(
     enabled: Boolean = true,
     useDarkTheme: Boolean
 ) {
-    OnboardingButton(
-        text = GetSSOProviderOnboardingText(provider, signup),
-        enabled = enabled,
-        useDarkTheme = useDarkTheme,
-        startComposable = { SSOProviderImage(ssoProvider = provider) }
-    ) {
+    val onClick = {
         launchLoginIntent(
             LaunchLoginIntentParams(
                 provider = provider,
@@ -48,6 +50,20 @@ fun OnboardingButton(
                 emailProvided = emailProvided
             )
         )
+    }
+    when (provider) {
+        NeevaUser.SSOProvider.OKTA -> {
+            NeevaOnboardingButton(signup = signup, onClick = onClick)
+        }
+        else -> {
+            OnboardingButton(
+                text = GetSSOProviderOnboardingText(provider, signup),
+                enabled = enabled,
+                useDarkTheme = useDarkTheme,
+                startComposable = { SSOProviderImage(ssoProvider = provider) },
+                onClick = onClick
+            )
+        }
     }
 }
 
@@ -86,9 +102,9 @@ fun OnboardingButton(
     enabled: Boolean = true,
     useDarkTheme: Boolean,
     startComposable: @Composable (() -> Unit)? = null,
+    endComposable: @Composable (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
-
     val backgroundColor = if (useDarkTheme) {
         MaterialTheme.colorScheme.background
     } else {
@@ -109,9 +125,7 @@ fun OnboardingButton(
         onClick = onClick,
         enabled = enabled,
         border = border,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = backgroundColor
-        ),
+        colors = ButtonDefaults.buttonColors(containerColor = backgroundColor),
         shape = RoundedCornerShape(36.dp),
         contentPadding = PaddingValues(0.dp),
         modifier = Modifier
@@ -124,7 +138,7 @@ fun OnboardingButton(
         ) {
             startComposable?.let {
                 it()
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
             }
 
             Text(
@@ -132,6 +146,59 @@ fun OnboardingButton(
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
+
+            endComposable?.let {
+                Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
+                it()
+            }
+        }
+    }
+}
+
+@Composable
+fun NeevaOnboardingButton(
+    enabled: Boolean = true,
+    signup: Boolean,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.surface
+        ),
+        shape = RoundedCornerShape(36.dp),
+        contentPadding = PaddingValues(0.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .alpha(getClickableAlpha(enabled))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 28.dp, vertical = 20.dp)
+        ) {
+            if (signup) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_neeva_logo),
+                    contentDescription = null,
+                    modifier = Modifier.size(Dimensions.SIZE_ICON_MEDIUM)
+                )
+                Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
+            }
+
+            Text(
+                text = GetSSOProviderOnboardingText(NeevaUser.SSOProvider.OKTA, signup),
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            if (!signup) {
+                Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
+                RowActionIcon(
+                    actionType = RowActionIconParams.ActionType.FORWARD,
+                    size = 20.dp
+                )
+            }
         }
     }
 }
@@ -169,5 +236,21 @@ fun OnboardingButtonPreview_Dark() {
             startComposable = startComposable.takeIf { hasStartComposable },
             useDarkTheme = true
         ) {}
+    }
+}
+
+@Preview("NeevaOnboardingButton LTR 1x scale", locale = "en")
+@Preview("NeevaOnboardingButton 2x scale", locale = "en", fontScale = 2.0f)
+@Preview("NeevaOnboardingButton 1x scale", locale = "he")
+@Composable
+fun NeevaOnboardingButtonPreview_Light() {
+    TwoBooleanPreviewContainer { signup, isEnabled ->
+        OnboardingButton(
+            signup = signup,
+            enabled = isEnabled,
+            provider = NeevaUser.SSOProvider.OKTA,
+            launchLoginIntent = {},
+            useDarkTheme = false
+        )
     }
 }

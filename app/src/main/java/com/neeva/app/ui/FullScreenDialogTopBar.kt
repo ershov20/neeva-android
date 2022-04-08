@@ -1,9 +1,5 @@
 package com.neeva.app.ui
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
@@ -16,6 +12,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.zIndex
 import com.neeva.app.R
+import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.RowActionIconButton
+import com.neeva.app.ui.widgets.RowActionIconParams
 
 @Composable
 fun FullScreenDialogTopBar(
@@ -36,15 +35,14 @@ fun FullScreenDialogTopBar(
         },
         colors = TopAppBarDefaults.mediumTopAppBarColors(MaterialTheme.colorScheme.surface),
         navigationIcon = {
-            IconButton(
-                onClick = { onBackPressed() }
-            ) {
-                Icon(
-                    Icons.Default.ArrowBack,
-                    contentDescription = stringResource(id = R.string.close),
-                    tint = MaterialTheme.colorScheme.onSurface
+            RowActionIconButton(
+                iconParams = RowActionIconParams(
+                    onTapAction = { onBackPressed() },
+                    contentDescription = stringResource(R.string.close),
+                    actionType = RowActionIconParams.ActionType.BACK,
+                    size = Dimensions.PADDING_LARGE
                 )
-            }
+            )
         },
         actions = {
             if (buttonTitle != null && onButtonPressed != null) {

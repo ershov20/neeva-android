@@ -24,7 +24,7 @@ fun ClickableRow(
     BaseRowLayout(
         onTapRow = actionIconParams.onTapAction.takeIf { enabled },
         onTapRowContentDescription = actionIconParams.contentDescription,
-        endComposable = { RowActionIcon(actionIconParams) },
+        endComposable = { RowActionIconButton(actionIconParams) },
         backgroundColor = backgroundColor
     ) {
         StackedText(primaryLabel = primaryLabel, secondaryLabel = secondaryLabel, enabled = enabled)

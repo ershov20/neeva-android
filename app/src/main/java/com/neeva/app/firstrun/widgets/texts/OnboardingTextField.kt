@@ -22,6 +22,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
+import com.neeva.app.firstrun.FirstRunConstants.getSubtextStyle
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -48,7 +49,7 @@ fun OnboardingTextField(
             // the focus label color correctly. https://stackoverflow.com/questions/69780322/applying-material3-colors-to-outlinedtextfield-in-jetpack-compose
             Text(
                 text = label,
-                style = MaterialTheme.typography.bodyMedium.copy(color = Color.Unspecified)
+                style = getSubtextStyle(color = Color.Unspecified)
             )
         },
         singleLine = true,

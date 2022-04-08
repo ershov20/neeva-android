@@ -17,6 +17,7 @@ object Dimensions {
     val SIZE_TOUCH_TARGET = 48.dp
 
     val SIZE_ICON_SMALL = 16.dp
+    val SIZE_ICON_MEDIUM = 18.dp
 
     /** Default size of a Material icon. */
     val SIZE_ICON = 24.dp

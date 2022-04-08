@@ -15,7 +15,7 @@ import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
-import com.neeva.app.ui.widgets.RowActionIcon
+import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.StackedText
 import com.neeva.app.ui.widgets.icons.SSOImagePainter
@@ -81,7 +81,7 @@ fun ProfileRow(
         },
         endComposable = if (onClick != null) {
             {
-                RowActionIcon(
+                RowActionIconButton(
                     RowActionIconParams(
                         onTapAction = onClick,
                         actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN

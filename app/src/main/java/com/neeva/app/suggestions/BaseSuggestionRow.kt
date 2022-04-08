@@ -12,7 +12,7 @@ import coil.annotation.ExperimentalCoilApi
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.widgets.RowActionIcon
+import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIcon
 import com.neeva.app.ui.widgets.RowActionStartIconParams
@@ -37,7 +37,7 @@ fun BaseSuggestionRow(
         startComposable = {
             RowActionStartIcon(iconParams)
         },
-        endComposable = actionIconParams?.let { { RowActionIcon(it) } },
+        endComposable = actionIconParams?.let { { RowActionIconButton(it) } },
         mainContent = mainContent
     )
 }

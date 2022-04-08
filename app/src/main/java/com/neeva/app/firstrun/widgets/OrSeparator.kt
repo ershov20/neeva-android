@@ -25,7 +25,7 @@ fun OrSeparator() {
 
         Text(
             text = stringResource(R.string.or).uppercase(),
-            style = FirstRunConstants.getSubtextStyle(),
+            style = FirstRunConstants.getSubtextStyle(MaterialTheme.colorScheme.outline),
             modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
         )
 

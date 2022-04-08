@@ -6,8 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
@@ -15,7 +15,7 @@ fun SSOProviderImage(ssoProvider: NeevaUser.SSOProvider) {
     Image(
         painter = SSOImagePainter(ssoProvider) ?: painterResource(R.drawable.ic_default_avatar),
         contentDescription = null,
-        modifier = Modifier.size(18.dp)
+        modifier = Modifier.size(Dimensions.SIZE_ICON_MEDIUM)
     )
 }
 
