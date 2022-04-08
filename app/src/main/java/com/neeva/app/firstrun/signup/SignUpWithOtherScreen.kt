@@ -86,6 +86,7 @@ fun SignUpWithOtherScreen(
 
         OnboardingButton(
             emailProvided = email.value,
+            passwordProvided = password.value,
             signup = true,
             provider = NeevaUser.SSOProvider.OKTA,
             launchLoginIntent = launchLoginIntent,

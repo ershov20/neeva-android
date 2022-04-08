@@ -79,6 +79,11 @@
     <string name="acknowledge">By creating your Neeva account you acknowledge Neeva\'s</string>
     <string name="and">and</string>
     <string name="or">or</string>
+    <string name="used_email_error">This email is associated with an existing Neeva account</string>
+    <string name="invalid_email_error">Invalid email used to register</string>
+    <string name="invalid_request_error">Invalid name and/or password</string>
+    <string name="invalid_token_error">Token has already been used</string>
+    <string name="generic_signup_error">Account creation unsuccessful</string>
 
     <string name="settings_account_settings">Account settings</string>
     <string name="settings_connected_apps">Connected apps</string>

@@ -5,18 +5,25 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.compositionLocalOf
+import com.neeva.app.Dispatchers
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 class FirstRunModel @Inject constructor(
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val neevaUserToken: NeevaUserToken,
-    private var clientLogger: ClientLogger
+    private var clientLogger: ClientLogger,
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers,
+    private val snackbarModel: SnackbarModel
 ) {
     companion object {
         private const val FIRST_RUN_DONE_KEY = "HAS_FINISHED_FIRST_RUN"
@@ -106,8 +113,24 @@ class FirstRunModel @Inject constructor(
         context: Context,
         provider: NeevaUser.SSOProvider,
         signup: Boolean,
-        emailProvided: String?
+        emailProvided: String?,
+        passwordProvided: String? = null
     ) {
+        if (signup && provider == NeevaUser.SSOProvider.OKTA &&
+            emailProvided != null &&
+            passwordProvided != null
+        ) {
+            coroutineScope.launch(dispatchers.io) {
+                OktaSignUp.createOktaAccount(
+                    activityContext = context,
+                    snackbarModel = snackbarModel,
+                    neevaUserToken = neevaUserToken,
+                    emailProvided = emailProvided,
+                    passwordProvided = passwordProvided
+                )
+            }
+            return
+        }
         val intent = CustomTabsIntent.Builder()
             .setShowTitle(true)
             .build()
@@ -155,7 +178,8 @@ class FirstRunModel @Inject constructor(
                         context = context,
                         provider = NeevaUser.SSOProvider.OKTA,
                         signup = launchLoginIntentParams.signup,
-                        emailProvided = launchLoginIntentParams.emailProvided
+                        emailProvided = launchLoginIntentParams.emailProvided,
+                        passwordProvided = launchLoginIntentParams.passwordProvided
                     )
                 }
 

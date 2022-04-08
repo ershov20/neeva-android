@@ -36,6 +36,7 @@ import com.neeva.app.userdata.NeevaUser
 @Composable
 fun OnboardingButton(
     emailProvided: String? = null,
+    passwordProvided: String? = null,
     signup: Boolean,
     provider: NeevaUser.SSOProvider,
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
@@ -47,7 +48,8 @@ fun OnboardingButton(
             LaunchLoginIntentParams(
                 provider = provider,
                 signup = signup,
-                emailProvided = emailProvided
+                emailProvided = emailProvided,
+                passwordProvided = passwordProvided
             )
         )
     }

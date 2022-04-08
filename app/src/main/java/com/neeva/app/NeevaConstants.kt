@@ -22,6 +22,7 @@ object NeevaConstants {
     val appHelpCenterURL: String = "https://help.$appHost/"
 
     val apolloURL: String = "${appURL}graphql"
+    val createOktaAccountURL: String = "${appURL}login/create"
 
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
 
