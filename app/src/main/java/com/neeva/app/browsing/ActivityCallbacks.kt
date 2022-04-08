@@ -43,5 +43,5 @@ interface ActivityCallbacks {
      * Fires an Intent out to Android to open the given [uri].  If the Uri cannot be opened,
      * an error will be displayed to the user.
      */
-    fun fireExternalViewIntent(uri: Uri)
+    fun fireExternalIntentForUri(uri: Uri, shouldCloseTab: Boolean)
 }

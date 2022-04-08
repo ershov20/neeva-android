@@ -115,18 +115,18 @@ class TabCallbacks(
                     // the Intent out ourselves in case Android can handle it.
                     val navigationListSize = tab.navigationController.navigationListSize
                     val tabOpenType = tabList.getTabInfo(tab.guid)?.data?.openType
-                    val shouldCloseTab = when {
+
+                    // Check if a new tab was created just for the navigation.
+                    val newTabWasCreatedForFailedNavigation = when {
                         navigationListSize == 0 -> true
                         navigationListSize == 1 && tabOpenType == TabOpenType.VIA_INTENT -> true
                         else -> false
                     }
-                    if (shouldCloseTab) {
-                        // It's likely that a new tab was created just for the navigation.  Close it
-                        // by simulating a back button press to avoid keeping a useless tab open.
-                        activityCallbackProvider()?.onBackPressed()
-                    }
 
-                    activityCallbackProvider()?.fireExternalViewIntent(navigation.uri)
+                    activityCallbackProvider()?.fireExternalIntentForUri(
+                        navigation.uri,
+                        newTabWasCreatedForFailedNavigation
+                    )
                 }
             }
         }

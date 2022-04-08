@@ -1,7 +1,9 @@
 package com.neeva.app
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,7 +12,9 @@ import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
+import java.net.URISyntaxException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -21,6 +25,7 @@ class NeevaActivityViewModel(
     private val neevaUser: NeevaUser,
     private val spaceStore: SpaceStore,
     private val webLayerModel: WebLayerModel,
+    private val snackbarModel: SnackbarModel,
     private val dispatchers: Dispatchers
 ) : ViewModel() {
     private val _isUpdateAvailableFlow = MutableStateFlow(false)
@@ -59,6 +64,7 @@ class NeevaActivityViewModel(
         private val neevaUser: NeevaUser,
         private val spaceStore: SpaceStore,
         private val webLayerModel: WebLayerModel,
+        private val snackbarModel: SnackbarModel,
         private val dispatchers: Dispatchers
     ) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
@@ -67,6 +73,7 @@ class NeevaActivityViewModel(
                 neevaUser,
                 spaceStore,
                 webLayerModel,
+                snackbarModel,
                 dispatchers
             ) as? T ?: throw IllegalArgumentException("Unexpected ViewModel class: $modelClass")
         }
@@ -93,6 +100,39 @@ class NeevaActivityViewModel(
         viewModelScope.launch(dispatchers.io) { spaceStore.deleteAllData() }
         neevaUser.clearUser()
         webLayerModel.clearNeevaCookies()
+    }
+
+    fun fireExternalIntentForUri(activity: NeevaActivity, uri: Uri, shouldCloseTab: Boolean) {
+        var showError = false
+        var parsedIntent: Intent? = null
+        try {
+            parsedIntent = when (uri.scheme) {
+                "intent" -> Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
+                "android-app" -> Intent.parseUri(uri.toString(), Intent.URI_ANDROID_APP_SCHEME)
+                else -> Intent(Intent.ACTION_VIEW, uri)
+            }
+
+            activity.startActivity(parsedIntent)
+            if (shouldCloseTab) activity.onBackPressed()
+        } catch (e: ActivityNotFoundException) {
+            val fallbackUrl = parsedIntent?.getStringExtra("browser_fallback_url")
+            if (fallbackUrl != null) {
+                webLayerModel.currentBrowser.loadUrl(
+                    uri = Uri.parse(fallbackUrl),
+                    inNewTab = false,
+                    stayInApp = true
+                )
+            } else {
+                showError = true
+            }
+        } catch (e: URISyntaxException) {
+            showError = true
+        }
+
+        if (showError) {
+            snackbarModel.show(activity.getString(R.string.error_url_failure, uri.toString()))
+            if (shouldCloseTab) activity.onBackPressed()
+        }
     }
 
     companion object {
