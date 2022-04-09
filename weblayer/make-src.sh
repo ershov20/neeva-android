@@ -30,4 +30,5 @@ unzip "$release_dir/client-java.zip" -d "$src_dir/main/java"
 unzip "$release_dir/client-aidl.zip" -d "$src_dir/main/aidl"
 unzip "$release_dir/client-res.zip" -d "$src_dir/main"
 
+rm -f src
 ln -s "$src_dir" src
