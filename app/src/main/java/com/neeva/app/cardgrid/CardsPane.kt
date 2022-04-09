@@ -30,7 +30,7 @@ fun CardsPane(webLayerModel: WebLayerModel) {
         modifier = Modifier.fillMaxSize()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            ModeSwitcher(
+            SegmentedPicker(
                 selectedScreen = cardsPaneModel.selectedScreen,
                 onSwitchScreen = cardsPaneModel::switchScreen
             )
