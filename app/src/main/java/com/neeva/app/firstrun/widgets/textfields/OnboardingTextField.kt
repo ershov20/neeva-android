@@ -18,7 +18,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
@@ -31,15 +30,10 @@ fun OnboardingTextField(
     text: String,
     onTextChanged: (String) -> Unit,
     label: String,
-    isPassword: Boolean = false,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
+    trailingIcon: @Composable (() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
-    val visualTransformation = if (isPassword) {
-        PasswordVisualTransformation()
-    } else {
-        VisualTransformation.None
-    }
-
     OutlinedTextField(
         modifier = Modifier.fillMaxWidth().then(modifier),
         value = text,
@@ -52,6 +46,7 @@ fun OnboardingTextField(
                 style = getSubtextStyle(color = Color.Unspecified)
             )
         },
+        trailingIcon = trailingIcon,
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyLarge,
         visualTransformation = visualTransformation,
@@ -100,43 +95,6 @@ fun OnboardingTextField_Email_Preview() {
             text = email.value,
             onTextChanged = {},
             label = "Email",
-            modifier = modifier
-        )
-
-        if (isFocused) {
-            LaunchedEffect(Unit) {
-                focusRequester.requestFocus()
-            }
-        }
-    }
-}
-
-@Preview("Password Preview LTR 1x scale", locale = "en")
-@Preview("Password Preview LTR 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("Password Preview RTL 1x scale", locale = "he")
-@Composable
-fun OnboardingTextField_Password_Preview() {
-    TwoBooleanPreviewContainer { hasText, isFocused ->
-        val startingString = if (hasText) {
-            stringResource(id = R.string.debug_long_string_primary)
-        } else {
-            ""
-        }
-
-        val password = remember { mutableStateOf(startingString) }
-        val focusRequester = remember { FocusRequester() }
-
-        val modifier = if (isFocused) {
-            Modifier.focusRequester(focusRequester)
-        } else {
-            Modifier
-        }
-
-        OnboardingTextField(
-            text = password.value,
-            onTextChanged = {},
-            label = "Password",
-            isPassword = true,
             modifier = modifier
         )
 

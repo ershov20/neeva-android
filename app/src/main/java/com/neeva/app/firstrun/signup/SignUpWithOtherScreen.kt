@@ -22,6 +22,8 @@ import com.neeva.app.firstrun.OnboardingContainer
 import com.neeva.app.firstrun.ToggleSignUpText
 import com.neeva.app.firstrun.widgets.OrSeparator
 import com.neeva.app.firstrun.widgets.buttons.ToggleOnboardingButtons
+import com.neeva.app.firstrun.widgets.textfields.PasswordTextField
+import com.neeva.app.firstrun.widgets.texts.BadPasswordText
 import com.neeva.app.firstrun.widgets.texts.OnboardingTextField
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
 import com.neeva.app.ui.theme.NeevaTheme
@@ -75,14 +77,13 @@ fun SignUpWithOtherScreen(
         Spacer(modifier = Modifier.height(32.dp))
 
         // TODO(kobec): implement bad password text
-        OnboardingTextField(
+        PasswordTextField(
             text = password.value,
             onTextChanged = { password.value = it },
-            label = stringResource(id = R.string.password_label),
-            isPassword = true
+            label = stringResource(id = R.string.password_label)
         )
 
-        Spacer(modifier = Modifier.height(28.dp))
+        BadPasswordText(password = password.value)
 
         OnboardingButton(
             emailProvided = email.value,

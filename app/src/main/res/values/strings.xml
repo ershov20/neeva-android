@@ -183,4 +183,5 @@
     <string name="subscription_unknown">Unknown</string>
     <string name="widget_description">Quick actions</string>
     <string name="widget_search_neeva">Search Neeva</string>
+    <string name="weak_password">Weak password</string>
 </resources>
