@@ -15,17 +15,16 @@ import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.firstrun.FirstRunConstants
 import com.neeva.app.firstrun.LaunchLoginIntentParams
 import com.neeva.app.firstrun.OnboardingButton
 import com.neeva.app.firstrun.OnboardingContainer
-import com.neeva.app.firstrun.ToggleSignUpText
 import com.neeva.app.firstrun.widgets.OrSeparator
 import com.neeva.app.firstrun.widgets.buttons.ToggleOnboardingButtons
 import com.neeva.app.firstrun.widgets.textfields.PasswordTextField
 import com.neeva.app.firstrun.widgets.texts.BadPasswordText
 import com.neeva.app.firstrun.widgets.texts.OnboardingTextField
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 
@@ -39,12 +38,13 @@ fun SignUpWithOtherContainer(
     val useDarkTheme = useDarkThemeForPreviews ?: isSystemInDarkTheme()
     OnboardingContainer(
         showBrowser = onClose,
+        stickyFooterOnClick = navigateToSignIn,
         useDarkThemeForPreviews = useDarkTheme
-    ) {
+    ) { modifier ->
         SignUpWithOtherScreen(
             launchLoginIntent = launchLoginIntent,
-            navigateToSignIn = navigateToSignIn,
-            useDarkThemeForPreviews = useDarkTheme
+            useDarkThemeForPreviews = useDarkTheme,
+            modifier = modifier
         )
     }
 }
@@ -52,13 +52,13 @@ fun SignUpWithOtherContainer(
 @Composable
 fun SignUpWithOtherScreen(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    navigateToSignIn: () -> Unit,
-    useDarkThemeForPreviews: Boolean
+    useDarkThemeForPreviews: Boolean,
+    modifier: Modifier
 ) {
     val email = rememberSaveable { mutableStateOf("") }
     val password = rememberSaveable { mutableStateOf("") }
 
-    Column(modifier = FirstRunConstants.getScreenModifier()) {
+    Column(modifier = modifier) {
         WelcomeHeader(
             primaryLabel = stringResource(id = R.string.first_run_intro),
             secondaryLabel = stringResource(id = R.string.first_run_create_your_free_account),
@@ -71,7 +71,7 @@ fun SignUpWithOtherScreen(
         OnboardingTextField(
             text = email.value,
             onTextChanged = { email.value = it },
-            label = stringResource(id = R.string.email_label),
+            label = stringResource(id = R.string.email_label)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -107,13 +107,7 @@ fun SignUpWithOtherScreen(
             useDarkThemeForPreviews = useDarkThemeForPreviews
         )
 
-        Spacer(modifier = Modifier.weight(1.0f))
-
-        ToggleSignUpText(true) {
-            navigateToSignIn()
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
     }
 }
 

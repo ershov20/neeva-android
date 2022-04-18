@@ -1,6 +1,5 @@
 package com.neeva.app.firstrun.widgets
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
@@ -18,9 +17,8 @@ import com.neeva.app.ui.theme.Dimensions
 fun OrSeparator() {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Divider(
-            modifier = Modifier
-                .weight(1f)
-                .background(color = MaterialTheme.colorScheme.outline)
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.weight(1f)
         )
 
         Text(
@@ -30,9 +28,8 @@ fun OrSeparator() {
         )
 
         Divider(
-            modifier = Modifier
-                .weight(1f)
-                .background(color = MaterialTheme.colorScheme.outline)
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.weight(1f)
         )
     }
 }

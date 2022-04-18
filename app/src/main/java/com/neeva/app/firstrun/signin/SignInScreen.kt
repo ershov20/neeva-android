@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -19,6 +19,7 @@ import com.neeva.app.firstrun.widgets.OrSeparator
 import com.neeva.app.firstrun.widgets.buttons.ToggleOnboardingButtons
 import com.neeva.app.firstrun.widgets.texts.OnboardingTextField
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 
@@ -33,12 +34,13 @@ fun SignInScreenContainer(
 
     OnboardingContainer(
         showBrowser = onClose,
+        stickyFooterOnClick = navigateToSignUp,
         useDarkThemeForPreviews = useDarkTheme
-    ) {
+    ) { modifier ->
         SignInScreen(
             launchLoginIntent = launchLoginIntent,
-            navigateToSignUp = navigateToSignUp,
-            useDarkThemeForPreviews = useDarkTheme
+            useDarkThemeForPreviews = useDarkTheme,
+            modifier = modifier
         )
     }
 }
@@ -46,12 +48,12 @@ fun SignInScreenContainer(
 @Composable
 fun SignInScreen(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    navigateToSignUp: () -> Unit,
-    useDarkThemeForPreviews: Boolean
+    useDarkThemeForPreviews: Boolean,
+    modifier: Modifier
 ) {
-    val email = remember { mutableStateOf("") }
+    val email = rememberSaveable { mutableStateOf("") }
 
-    Column(modifier = FirstRunConstants.getScreenModifier()) {
+    Column(modifier = modifier) {
         WelcomeHeader(
             primaryLabel = stringResource(id = R.string.sign_in),
             modifier = Modifier
@@ -89,13 +91,7 @@ fun SignInScreen(
             useDarkThemeForPreviews = useDarkThemeForPreviews
         )
 
-        Spacer(modifier = Modifier.weight(1.0f))
-
-        ToggleSignUpText(false) {
-            navigateToSignUp()
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
     }
 }
 

@@ -14,14 +14,13 @@ import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.firstrun.FirstRunConstants.getScreenModifier
 import com.neeva.app.firstrun.LaunchLoginIntentParams
 import com.neeva.app.firstrun.OnboardingButton
 import com.neeva.app.firstrun.OnboardingContainer
-import com.neeva.app.firstrun.ToggleSignUpText
 import com.neeva.app.firstrun.widgets.texts.AcknowledgementText
 import com.neeva.app.firstrun.widgets.texts.EmailPromoCheckbox
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 
@@ -37,14 +36,15 @@ fun SignUpLandingContainer(
     val useDarkTheme = useDarkThemeForPreviews ?: isSystemInDarkTheme()
     OnboardingContainer(
         showBrowser = onClose,
+        stickyFooterOnClick = navigateToSignIn,
         useDarkThemeForPreviews = useDarkTheme
-    ) {
+    ) { modifier ->
         SignUpLandingScreen(
             launchLoginIntent = launchLoginIntent,
             openInCustomTabs = openInCustomTabs,
-            navigateToSignIn = navigateToSignIn,
             showSignUpWithOther = showSignUpWithOther,
-            useDarkThemeForPreviews = useDarkTheme
+            useDarkThemeForPreviews = useDarkTheme,
+            modifier = modifier
         )
     }
 }
@@ -53,11 +53,11 @@ fun SignUpLandingContainer(
 fun SignUpLandingScreen(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     openInCustomTabs: (Uri) -> Unit,
-    navigateToSignIn: () -> Unit,
     showSignUpWithOther: () -> Unit,
-    useDarkThemeForPreviews: Boolean
+    useDarkThemeForPreviews: Boolean,
+    modifier: Modifier
 ) {
-    Column(modifier = getScreenModifier()) {
+    Column(modifier = modifier) {
         WelcomeHeader(
             primaryLabel = stringResource(id = R.string.first_run_intro),
             secondaryLabel = stringResource(id = R.string.first_run_create_your_free_account),
@@ -89,16 +89,9 @@ fun SignUpLandingScreen(
 
         Spacer(modifier = Modifier.height(38.dp))
 
-        // TODO(kobec): i feel like these should be opened with Custom Tabs...
         AcknowledgementText(openInCustomTabs = openInCustomTabs)
 
-        Spacer(modifier = Modifier.weight(1.0f))
-
-        ToggleSignUpText(true) {
-            navigateToSignIn()
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
     }
 }
 
