@@ -8,6 +8,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.favicons.RegularFaviconCache
@@ -34,6 +35,7 @@ class RegularBrowserWrapper(
     private val apolloWrapper: ApolloWrapper,
     historyManager: HistoryManager,
     spaceStore: SpaceStore,
+    settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
     val clientLogger: ClientLogger
 ) : BaseBrowserWrapper(
@@ -45,6 +47,7 @@ class RegularBrowserWrapper(
     suggestionsModel = SuggestionsModel(
         coroutineScope,
         historyManager,
+        settingsDataModel,
         apolloWrapper,
         dispatchers,
         clientLogger

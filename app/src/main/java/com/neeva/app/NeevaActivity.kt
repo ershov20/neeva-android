@@ -310,7 +310,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         // Hide the contents of the screen from Android Recents when the user switches to another
         // app while looking at an Incognito tab.
         val enableIncognitoScreenshots = settingsDataModel
-            .getToggleState(LocalDebugFlags.DEBUG_ENABLE_INCOGNITO_SCREENSHOTS.key)?.value ?: false
+            .getDebugFlagValue(LocalDebugFlags.DEBUG_ENABLE_INCOGNITO_SCREENSHOTS)
         if (browserWrapper.isIncognito && !enableIncognitoScreenshots) {
             window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         } else {

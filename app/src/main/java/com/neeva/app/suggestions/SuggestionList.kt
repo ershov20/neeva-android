@@ -101,12 +101,12 @@ fun SuggestionList(
     }
 }
 
-@Preview(name = "1x font size", locale = "en")
-@Preview(name = "2x font size", locale = "en", fontScale = 2.0f)
-@Preview(name = "RTL, 1x font size", locale = "he")
-@Preview(name = "RTL, 2x font size", locale = "he", fontScale = 2.0f)
+@Preview(name = "Suggestion List 1x font size", locale = "en")
+@Preview(name = "Suggestion List 2x font size", locale = "en", fontScale = 2.0f)
+@Preview(name = "Suggestion List RTL, 1x font size", locale = "he")
+@Preview(name = "Suggestion List RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
-fun SuggestionList_PreviewFullyLoaded() {
+fun SuggestionList_PreviewFullyLoaded_ShowSearchSuggestions() {
     NeevaTheme {
         SuggestionList(
             topSuggestion = NavSuggestion(

@@ -3,7 +3,7 @@ package com.neeva.app.settings.clearBrowsing
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.settings.SettingsController
-import com.neeva.app.settings.mockSettingsViewModel
+import com.neeva.app.settings.mockSettingsController
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -21,7 +21,7 @@ fun ClearBrowsingPane(
 @Composable
 fun ClearBrowsingSettings_Preview() {
     NeevaTheme {
-        ClearBrowsingPane(mockSettingsViewModel)
+        ClearBrowsingPane(mockSettingsController)
     }
 }
 
@@ -32,6 +32,6 @@ fun ClearBrowsingSettings_Preview() {
 @Composable
 fun ClearBrowsingSettings_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        ClearBrowsingPane(mockSettingsViewModel)
+        ClearBrowsingPane(mockSettingsController)
     }
 }

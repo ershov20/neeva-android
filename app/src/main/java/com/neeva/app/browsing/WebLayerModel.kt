@@ -12,6 +12,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.favicons.FaviconCache
@@ -66,6 +67,7 @@ class WebLayerModel @Inject constructor(
     spaceStore: SpaceStore,
     private val dispatchers: Dispatchers,
     private val neevaUser: NeevaUser,
+    settingsDataModel: SettingsDataModel,
     private val clientLogger: ClientLogger
 ) : AndroidViewModel(application) {
     companion object {
@@ -102,6 +104,7 @@ class WebLayerModel @Inject constructor(
         historyManager = historyManager,
         spaceStore = spaceStore,
         neevaUser = neevaUser,
+        settingsDataModel = settingsDataModel,
         clientLogger = clientLogger
     )
     private var incognitoBrowser: IncognitoBrowserWrapper? = null

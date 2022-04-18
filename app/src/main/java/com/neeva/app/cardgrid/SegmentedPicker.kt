@@ -47,7 +47,8 @@ private val buttonRadius = buttonHeight / 2
 @Composable
 fun SegmentedPicker(
     selectedScreen: State<SelectedScreen>,
-    onSwitchScreen: (SelectedScreen) -> Unit
+    onSwitchScreen: (SelectedScreen) -> Unit,
+    onLeaveIncognito: () -> Unit = { }
 ) {
     // Set up the animation between the different states.
     val transition = updateTransition(
@@ -113,6 +114,7 @@ fun SegmentedPicker(
         SegmentedPicker(
             selectedScreen = selectedScreen.value,
             onSwitchScreen = onSwitchScreen,
+            onLeaveIncognito = onLeaveIncognito,
             bubblePosition = bubblePosition.value,
             bubbleColor = bubbleColor.value,
             incognitoIconColor = incognitoIconColor.value,
@@ -126,6 +128,7 @@ fun SegmentedPicker(
 fun SegmentedPicker(
     selectedScreen: SelectedScreen,
     onSwitchScreen: (SelectedScreen) -> Unit,
+    onLeaveIncognito: () -> Unit,
     bubblePosition: Dp,
     bubbleColor: Color,
     incognitoIconColor: Color,
@@ -192,6 +195,7 @@ fun SegmentedPicker(
                             .fillMaxSize()
                             .clickable(enabled = selectedScreen != SelectedScreen.REGULAR_TABS) {
                                 onSwitchScreen(SelectedScreen.REGULAR_TABS)
+                                onLeaveIncognito()
                             }
                     ) {
                         Icon(
@@ -216,6 +220,7 @@ fun SegmentedPicker(
                             .fillMaxSize()
                             .clickable(enabled = selectedScreen != SelectedScreen.SPACES) {
                                 onSwitchScreen(SelectedScreen.SPACES)
+                                onLeaveIncognito()
                             }
                     ) {
                         Icon(

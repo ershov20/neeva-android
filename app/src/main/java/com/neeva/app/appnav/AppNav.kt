@@ -40,7 +40,7 @@ fun AppNav(
     val neevaUser = LocalEnvironment.current.neevaUser
     val setDefaultAndroidBrowserManager = LocalSetDefaultAndroidBrowserManager.current
 
-    val settingsViewModel = remember(
+    val settingsController = remember(
         appNavModel,
         settingsDataModel,
         neevaUser,
@@ -73,31 +73,31 @@ fun AppNav(
 
         composable(AppNavDestination.SETTINGS.route) {
             MainSettingsPane(
-                settingsController = settingsViewModel
+                settingsController = settingsController
             )
         }
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {
             ProfileSettingsPane(
-                settingsController = settingsViewModel
+                settingsController = settingsController
             )
         }
 
         composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {
             ClearBrowsingPane(
-                settingsController = settingsViewModel
+                settingsController = settingsController
             )
         }
 
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {
             SetDefaultAndroidBrowserPane(
-                settingsController = settingsViewModel
+                settingsController = settingsController
             )
         }
 
         composable(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS.route) {
             FeatureFlagsPane(
-                settingsController = settingsViewModel
+                settingsController = settingsController
             )
         }
 

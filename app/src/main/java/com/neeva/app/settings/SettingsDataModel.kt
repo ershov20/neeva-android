@@ -9,7 +9,7 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 
 /**
  * A data model for getting any Settings-related state (SettingsToggle or SelectedTimeClearingOption).
- * Used to get toggle states in SettingsViewModel.
+ * Used to get toggle states in SettingsController.
  * FEATURE FLAGGING: used in any @Composable or anywhere else to get if a Feature Flag is enabled.
  *
  * This includes:
@@ -62,6 +62,18 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
             toggleState?.value = newToggleValue
             togglePreferenceKey?.let { setSharedPrefValue(it, newToggleValue) }
         }
+    }
+
+    fun getSettingsToggleValue(settingsToggle: SettingsToggle): Boolean {
+        return getToggleValue(settingsToggle.key, settingsToggle.defaultValue)
+    }
+
+    fun getDebugFlagValue(settingsToggle: LocalDebugFlags): Boolean {
+        return getToggleValue(settingsToggle.key, settingsToggle.defaultValue)
+    }
+
+    private fun getToggleValue(toggleKeyName: String?, defaultValue: Boolean): Boolean {
+        return getToggleState(toggleKeyName)?.value ?: defaultValue
     }
 
     fun getToggleState(toggleKeyName: String?): MutableState<Boolean>? {

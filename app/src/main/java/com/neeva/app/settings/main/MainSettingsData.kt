@@ -56,8 +56,7 @@ object MainSettingsData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     primaryLabelId = R.string.settings_show_search_search_suggestions,
-                    togglePreferenceKey = SettingsToggle.SHOW_SEARCH_SUGGESTIONS.key,
-                    enabled = false
+                    togglePreferenceKey = SettingsToggle.SHOW_SEARCH_SUGGESTIONS.key
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
@@ -70,7 +69,6 @@ object MainSettingsData : SettingsPaneDataInterface {
                     primaryLabelId = R.string.settings_require_confirmation,
                     secondaryLabelId = R.string.settings_when_closing_all_tabs,
                     togglePreferenceKey = SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE.key,
-                    enabled = false
                 )
             )
         ),
@@ -85,8 +83,7 @@ object MainSettingsData : SettingsPaneDataInterface {
                     type = SettingsRowType.TOGGLE,
                     primaryLabelId = R.string.settings_close_incognito_tabs,
                     secondaryLabelId = R.string.settings_when_leaving_incognito_mode,
-                    togglePreferenceKey = SettingsToggle.CLOSE_INCOGNITO_TABS.key,
-                    enabled = false
+                    togglePreferenceKey = SettingsToggle.CLOSE_INCOGNITO_TABS.key
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,

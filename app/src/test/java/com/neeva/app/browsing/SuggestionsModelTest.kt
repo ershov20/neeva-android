@@ -9,6 +9,7 @@ import com.neeva.app.TestApolloWrapper
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.Suggestions
@@ -28,6 +29,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -62,6 +65,7 @@ class SuggestionsModelTest : BaseTest() {
     private lateinit var apolloWrapper: TestApolloWrapper
 
     private lateinit var model: SuggestionsModel
+    private lateinit var settingsDataModel: SettingsDataModel
 
     private lateinit var clientLogger: ClientLogger
 
@@ -80,11 +84,18 @@ class SuggestionsModelTest : BaseTest() {
 
         apolloWrapper = TestApolloWrapper()
 
+        val settingsDataModel = mock<SettingsDataModel> {
+            on {
+                getSettingsToggleValue(any())
+            } doReturn true
+        }
+
         clientLogger = mock()
 
         model = SuggestionsModel(
             coroutineScopeRule.scope,
             historyManager,
+            settingsDataModel,
             apolloWrapper,
             testDispatcher,
             clientLogger

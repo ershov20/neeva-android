@@ -19,6 +19,7 @@ import com.neeva.app.ui.TwoBooleanPreviewContainer
 fun TabGridBottomBar(
     isIncognito: Boolean,
     hasNoTabs: Boolean,
+    requireConfirmationWhenCloseAllTabs: Boolean = true,
     onCloseAllTabs: () -> Unit,
     onOpenLazyTab: () -> Unit,
     onDone: () -> Unit
@@ -29,7 +30,13 @@ fun TabGridBottomBar(
         startComposable = {
             IconButton(
                 enabled = !hasNoTabs,
-                onClick = { showCloseAllTabsDialog.value = true },
+                onClick = {
+                    if (requireConfirmationWhenCloseAllTabs) {
+                        showCloseAllTabsDialog.value = true
+                    } else {
+                        onCloseAllTabs()
+                    }
+                },
             ) {
                 Icon(
                     Icons.Outlined.Delete,

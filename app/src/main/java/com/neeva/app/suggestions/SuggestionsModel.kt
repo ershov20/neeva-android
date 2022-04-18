@@ -11,6 +11,8 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.type.QuerySuggestionType
 import kotlinx.coroutines.CancellationException
@@ -63,6 +65,7 @@ enum class SuggestionType {
 class SuggestionsModel(
     coroutineScope: CoroutineScope,
     historyManager: HistoryManager,
+    val settingsDataModel: SettingsDataModel,
     private val apolloWrapper: ApolloWrapper,
     dispatchers: Dispatchers,
     val clientLogger: ClientLogger
@@ -81,10 +84,15 @@ class SuggestionsModel(
     init {
         coroutineScope.launch(dispatchers.io) {
             historyManager.historySuggestions.collectLatest { suggestions ->
-                val newSuggestion = suggestions.firstOrNull()
-                _suggestionFlow.value = _suggestionFlow.value.copy(
-                    autocompleteSuggestion = newSuggestion
-                )
+                // Add an autocomplete suggestion based on the top history result
+                val showSearchSuggestions = settingsDataModel
+                    .getSettingsToggleValue(SettingsToggle.SHOW_SEARCH_SUGGESTIONS)
+                if (showSearchSuggestions) {
+                    val newSuggestion = suggestions.firstOrNull()
+                    _suggestionFlow.value = _suggestionFlow.value.copy(
+                        autocompleteSuggestion = newSuggestion
+                    )
+                }
             }
         }
     }
@@ -95,9 +103,12 @@ class SuggestionsModel(
             return
         }
 
-        // If the query is blank, don't bother firing the query.
+        // If the query is blank or SHOW_SEARCH_SUGGESTIONS is off, don't bother firing the query.
         var result: SuggestionsQuery.Data? = null
-        if (newValue.isNotBlank()) {
+        val showSearchSuggestions = settingsDataModel
+            .getSettingsToggleValue(SettingsToggle.SHOW_SEARCH_SUGGESTIONS)
+
+        if (newValue.isNotBlank() && showSearchSuggestions) {
             try {
                 result = apolloWrapper.performQuery(
                     SuggestionsQuery(query = newValue),
