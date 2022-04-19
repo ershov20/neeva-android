@@ -40,8 +40,10 @@ interface ActivityCallbacks {
     fun onBackPressed()
 
     /**
-     * Fires an Intent out to Android to open the given [uri].  If the Uri cannot be opened,
-     * an error will be displayed to the user.
+     * Fires an Intent out to Android to open the given [uri].
+     *
+     * @param uri URI to open.
+     * @param closeTabIfSuccessful If the intent was successfully handled, close the tab.
      */
-    fun fireExternalIntentForUri(uri: Uri, shouldCloseTab: Boolean)
+    fun fireExternalIntentForUri(uri: Uri, closeTabIfSuccessful: Boolean)
 }

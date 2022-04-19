@@ -102,36 +102,25 @@ class NeevaActivityViewModel(
         webLayerModel.clearNeevaCookies()
     }
 
-    fun fireExternalIntentForUri(activity: NeevaActivity, uri: Uri, shouldCloseTab: Boolean) {
-        var showError = false
-        var parsedIntent: Intent? = null
+    fun fireExternalIntentForUri(activity: NeevaActivity, uri: Uri, closeTabIfSuccessful: Boolean) {
         try {
-            parsedIntent = when (uri.scheme) {
+            val parsedIntent = when (uri.scheme) {
                 "intent" -> Intent.parseUri(uri.toString(), Intent.URI_INTENT_SCHEME)
                 "android-app" -> Intent.parseUri(uri.toString(), Intent.URI_ANDROID_APP_SCHEME)
                 else -> Intent(Intent.ACTION_VIEW, uri)
             }
 
             activity.startActivity(parsedIntent)
-            if (shouldCloseTab) activity.onBackPressed()
+            if (closeTabIfSuccessful) activity.onBackPressed()
         } catch (e: ActivityNotFoundException) {
-            val fallbackUrl = parsedIntent?.getStringExtra("browser_fallback_url")
-            if (fallbackUrl != null) {
-                webLayerModel.currentBrowser.loadUrl(
-                    uri = Uri.parse(fallbackUrl),
-                    inNewTab = false,
-                    stayInApp = true
-                )
-            } else {
-                showError = true
-            }
+            // This is a no-op because we expect WebLayer to do something in the case where it fails
+            // to fire out an Intent.  See onNavigationFailed inside of [TabCallbacks] for details.
         } catch (e: URISyntaxException) {
-            showError = true
-        }
-
-        if (showError) {
-            snackbarModel.show(activity.getString(R.string.error_url_failure, uri.toString()))
-            if (shouldCloseTab) activity.onBackPressed()
+            var urlString = uri.toString()
+            if (urlString.length > 100) {
+                urlString = "${urlString.take(100)}..."
+            }
+            snackbarModel.show(activity.getString(R.string.error_url_failure, urlString))
         }
     }
 

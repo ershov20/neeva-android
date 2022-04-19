@@ -109,10 +109,19 @@ class TabCallbacks(
                 }
 
                 !navigation.wasIntentLaunched() -> {
-                    // Workaround for https://github.com/neevaco/neeva-android/issues/232
+                    // Workaround for:
+                    // * https://github.com/neevaco/neeva-android/issues/232
+                    // * https://github.com/neevaco/neeva-android/issues/526
+                    //
                     // WebLayer doesn't seem to know how to handle external Intent firing when we
                     // use it.  Until we have a better idea of why it can't fire an Intent out, fire
                     // the Intent out ourselves in case Android can handle it.
+                    //
+                    // If firing an Intent out fails, WebLayer will sometimes run through a list of
+                    // other URIs until one works, or use a fallback URL that is sent as part of the
+                    // URI.  Clicking on a link via a TikTok webpage, for example, will sometimes
+                    // fire out three Intent URIs in succession to try to load their app.  If those
+                    // fail, then an Intent to the Play Store page for the TikTok app is fired.
                     val navigationListSize = tab.navigationController.navigationListSize
                     val tabOpenType = tabList.getTabInfo(tab.guid)?.data?.openType
 

@@ -487,6 +487,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
-    override fun fireExternalIntentForUri(uri: Uri, shouldCloseTab: Boolean) =
-        activityViewModel.fireExternalIntentForUri(this, uri, shouldCloseTab)
+    override fun fireExternalIntentForUri(uri: Uri, closeTabIfSuccessful: Boolean) =
+        activityViewModel.fireExternalIntentForUri(this, uri, closeTabIfSuccessful)
 }

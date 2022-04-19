@@ -97,6 +97,7 @@ class NeevaActivityViewModelTest : BaseTest() {
         expectThat(actualIntent.action).isEqualTo(expectedIntent.action)
         expectThat(actualIntent.data).isEqualTo(expectedIntent.data)
 
+        verify(snackbarModel, never()).show(any(), eq(null), any(), any(), any())
         verify(neevaActivity).onBackPressed()
     }
 
@@ -117,42 +118,12 @@ class NeevaActivityViewModelTest : BaseTest() {
         expectThat(actualIntent.action).isEqualTo(expectedIntent.action)
         expectThat(actualIntent.data).isEqualTo(expectedIntent.data)
 
+        verify(snackbarModel, never()).show(any(), eq(null), any(), any(), any())
         verify(neevaActivity).onBackPressed()
     }
 
     @Test
-    fun fireExternalIntentForUri_givenIntentSchemeWithoutMatch_loadsFallbackUrl() {
-        val uri = "intent://www.netflix.com/title/81333845" +
-            "#Intent;scheme=https;package=com.netflix.mediaclient;" +
-            "S.browser_fallback_url=" +
-            "https%3A%2F%2Fwww.netflix.com%2Ftitle%2F81333845%3FpreventIntent%3Dtrue;end"
-
-        // Indicate that there's no Activity to handle the Intent.
-        Mockito.`when`(neevaActivity.startActivity(any())).doThrow(ActivityNotFoundException())
-
-        neevaActivityViewModel.fireExternalIntentForUri(neevaActivity, Uri.parse(uri), true)
-
-        val intentCaptor = argumentCaptor<Intent>()
-        verify(neevaActivity).startActivity(intentCaptor.capture())
-
-        val actualIntent = intentCaptor.lastValue
-        val expectedIntent = Intent.parseUri(uri, Intent.URI_INTENT_SCHEME)
-        expectThat(actualIntent.action).isEqualTo(expectedIntent.action)
-        expectThat(actualIntent.data).isEqualTo(expectedIntent.data)
-
-        verify(neevaActivity, never()).onBackPressed()
-        verify(browserWrapper).loadUrl(
-            uri = eq(Uri.parse("https://www.netflix.com/title/81333845?preventIntent=true")),
-            inNewTab = eq(false),
-            isViaIntent = eq(false),
-            parentTabId = eq(null),
-            stayInApp = eq(true),
-            onLoadStarted = any()
-        )
-    }
-
-    @Test
-    fun fireExternalIntentForUri_givenIntentSchemeWithoutActivityOrFallback_showsError() {
+    fun fireExternalIntentForUri_givenIntentSchemeWithoutActivity_doesNothing() {
         val uri = "intent://www.netflix.com/title/81333845" +
             "#Intent;scheme=https;package=com.netflix.mediaclient;end"
 
@@ -170,7 +141,22 @@ class NeevaActivityViewModelTest : BaseTest() {
         expectThat(actualIntent.action).isEqualTo(expectedIntent.action)
         expectThat(actualIntent.data).isEqualTo(expectedIntent.data)
 
+        verify(snackbarModel, never()).show(any(), eq(null), any(), any(), any())
+        verify(neevaActivity, never()).onBackPressed()
+    }
+
+    @Test
+    fun fireExternalIntentForUri_givenInvalidURI_showsError() {
+        val uri = "intent://www.netflix.com/title/81333845" +
+            "#Intent;scheme=https;package=com.netflix.mediaclient"
+
+        // Indicate that there's no Activity to handle the Intent.
+        Mockito.`when`(neevaActivity.startActivity(any())).doThrow(ActivityNotFoundException())
+        Mockito.`when`(neevaActivity.getString(any(), any())).doReturn("error string")
+
+        neevaActivityViewModel.fireExternalIntentForUri(neevaActivity, Uri.parse(uri), true)
+
+        verify(neevaActivity, never()).startActivity(any())
         verify(snackbarModel).show(any(), eq(null), any(), any(), any())
-        verify(neevaActivity).onBackPressed()
     }
 }
