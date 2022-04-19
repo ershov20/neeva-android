@@ -124,7 +124,7 @@ fun FindInPageToolbar(
 @Preview("RTL, 1x font scale", locale = "he")
 @Preview("RTL, 2x font scale", locale = "he", fontScale = 2.0f)
 @Composable
-fun FindInPagePreview() {
+fun FindInPageToolbarPreview() {
     LightDarkPreviewContainer {
         Surface(color = MaterialTheme.colorScheme.background) {
             FindInPageToolbar(

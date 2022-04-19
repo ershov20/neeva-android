@@ -284,7 +284,7 @@ fun SpaceSubItem(
 @Preview("Long title, LTR, 2x scale", locale = "en", fontScale = 2.0f)
 @Preview("Long title, RTL, 1x scale", locale = "he")
 @Composable
-private fun SpaceCardPreview_LongString() {
+internal fun SpaceCardPreview_LongString() {
     LightDarkPreviewContainer {
         SpaceCard(
             spaceName = stringResource(R.string.debug_long_string_primary),
@@ -305,7 +305,7 @@ private fun SpaceCardPreview_LongString() {
 @Preview("Short title, LTR, 2x scale", locale = "en", fontScale = 2.0f)
 @Preview("Short title, RTL, 1x scale", locale = "he")
 @Composable
-private fun TabCardPreview_ShortTitleSelected() {
+internal fun TabCardPreview_ShortTitleSelected() {
     LightDarkPreviewContainer {
         SpaceCard(
             spaceName = stringResource(id = R.string.debug_short_action),

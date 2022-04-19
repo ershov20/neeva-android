@@ -1,39 +1,27 @@
 package com.neeva.app.cardgrid
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import com.neeva.app.BaseScreenshotTest
 import org.junit.Test
 
 class SegmentedPickerScreenshotTest : BaseScreenshotTest() {
-    @Test fun lightMode() = runTest(false)
-    @Test fun darkMode() = runTest(true)
+    @Test
+    fun runIncognitoTest() {
+        runScreenshotTest {
+            SegmentedPickerPreview_Incognito()
+        }
+    }
 
-    private fun runTest(useDarkTheme: Boolean) {
-        runScreenshotTest(
-            useDarkTheme = useDarkTheme,
-            testClass = SegmentedPickerScreenshotTest::class
-        ) {
-            Column {
-                val incognitoScreen = remember { mutableStateOf(SelectedScreen.INCOGNITO_TABS) }
-                SegmentedPicker(
-                    selectedScreen = incognitoScreen,
-                    onSwitchScreen = { incognitoScreen.value = it }
-                )
+    @Test
+    fun runRegularTest() {
+        runScreenshotTest {
+            SegmentedPickerPreview_Regular()
+        }
+    }
 
-                val regularScreen = remember { mutableStateOf(SelectedScreen.REGULAR_TABS) }
-                SegmentedPicker(
-                    selectedScreen = regularScreen,
-                    onSwitchScreen = { regularScreen.value = it }
-                )
-
-                val spacesScreen = remember { mutableStateOf(SelectedScreen.SPACES) }
-                SegmentedPicker(
-                    selectedScreen = spacesScreen,
-                    onSwitchScreen = { spacesScreen.value = it }
-                )
-            }
+    @Test
+    fun runSpacesTest() {
+        runScreenshotTest {
+            SegmentedPickerPreview_Spaces()
         }
     }
 }

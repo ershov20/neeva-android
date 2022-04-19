@@ -36,13 +36,10 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.AnimationConstants
 import com.neeva.app.ui.LightDarkPreviewContainer
-import com.neeva.app.ui.theme.Dimensions
 
-private val containerHeight = 48.dp + 2.dp + 2.dp
-private val containerRadius = containerHeight / 2
 private val buttonHeight = 48.dp
-private val buttonWidth = 72.dp
 private val buttonRadius = buttonHeight / 2
+private val buttonWidth = 64.dp
 
 @Composable
 fun SegmentedPicker(
@@ -137,98 +134,95 @@ fun SegmentedPicker(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(containerRadius),
+        shape = RoundedCornerShape(buttonRadius),
         tonalElevation = 2.dp,
-        modifier = Modifier.height(containerHeight)
+        modifier = Modifier.height(buttonHeight)
     ) {
-        Box(modifier = Modifier.padding(2.dp)) {
-            // Selected-button indicator.  Offset according to which button is pressed.
+        // Selected-button indicator.  Offset according to which button is pressed.
+        Surface(
+            color = bubbleColor,
+            shape = RoundedCornerShape(buttonRadius),
+            shadowElevation = 8.dp,
+            modifier = Modifier
+                .width(buttonWidth)
+                .height(buttonHeight)
+                .offset(x = bubblePosition)
+        ) {}
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.height(buttonHeight)
+        ) {
             Surface(
-                color = bubbleColor,
+                color = Color.Transparent,
+                contentColor = incognitoIconColor,
                 shape = RoundedCornerShape(buttonRadius),
-                shadowElevation = 16.dp,
                 modifier = Modifier
                     .width(buttonWidth)
                     .height(buttonHeight)
-                    .offset(x = bubblePosition)
-            ) {}
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(buttonHeight)
             ) {
-                Surface(
-                    color = Color.Transparent,
-                    contentColor = incognitoIconColor,
-                    shape = RoundedCornerShape(buttonRadius),
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .width(buttonWidth)
-                        .height(buttonHeight)
+                        .fillMaxSize()
+                        .clickable(enabled = selectedScreen != SelectedScreen.INCOGNITO_TABS) {
+                            onSwitchScreen(SelectedScreen.INCOGNITO_TABS)
+                        }
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(enabled = selectedScreen != SelectedScreen.INCOGNITO_TABS) {
-                                onSwitchScreen(SelectedScreen.INCOGNITO_TABS)
-                            }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_incognito),
-                            contentDescription = stringResource(R.string.incognito),
-                            modifier = Modifier.size(Dimensions.SIZE_ICON)
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_incognito),
+                        contentDescription = stringResource(R.string.incognito)
+                    )
                 }
+            }
 
-                Surface(
-                    color = Color.Transparent,
-                    contentColor = regularIconColor,
-                    shape = RoundedCornerShape(buttonRadius),
+            Surface(
+                color = Color.Transparent,
+                contentColor = regularIconColor,
+                shape = RoundedCornerShape(buttonRadius),
+                modifier = Modifier
+                    .width(buttonWidth)
+                    .fillMaxHeight()
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .width(buttonWidth)
-                        .fillMaxHeight()
+                        .fillMaxSize()
+                        .clickable(enabled = selectedScreen != SelectedScreen.REGULAR_TABS) {
+                            onSwitchScreen(SelectedScreen.REGULAR_TABS)
+                            onLeaveIncognito()
+                        }
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(enabled = selectedScreen != SelectedScreen.REGULAR_TABS) {
-                                onSwitchScreen(SelectedScreen.REGULAR_TABS)
-                                onLeaveIncognito()
-                            }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_baseline_filter_none_24),
-                            contentDescription = stringResource(R.string.tabs),
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_baseline_filter_none_24),
+                        contentDescription = stringResource(R.string.tabs),
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
+            }
 
-                Surface(
-                    color = Color.Transparent,
-                    contentColor = spacesIconColor,
-                    shape = RoundedCornerShape(buttonRadius),
+            Surface(
+                color = Color.Transparent,
+                contentColor = spacesIconColor,
+                shape = RoundedCornerShape(buttonRadius),
+                modifier = Modifier
+                    .width(buttonWidth)
+                    .fillMaxHeight()
+            ) {
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .width(buttonWidth)
-                        .fillMaxHeight()
+                        .fillMaxSize()
+                        .clickable(enabled = selectedScreen != SelectedScreen.SPACES) {
+                            onSwitchScreen(SelectedScreen.SPACES)
+                            onLeaveIncognito()
+                        }
                 ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clickable(enabled = selectedScreen != SelectedScreen.SPACES) {
-                                onSwitchScreen(SelectedScreen.SPACES)
-                                onLeaveIncognito()
-                            }
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_bookmarks_black_24),
-                            contentDescription = stringResource(R.string.spaces),
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(R.drawable.ic_bookmarks_black_24),
+                        contentDescription = stringResource(R.string.spaces),
+                        modifier = Modifier.size(22.dp)
+                    )
                 }
             }
         }
@@ -238,7 +232,7 @@ fun SegmentedPicker(
 @Preview("Incognito tabs selected LTR", locale = "en")
 @Preview("Incognito tabs selected RTL", locale = "he")
 @Composable
-private fun SegmentedPickerPreview_Incognito() {
+internal fun SegmentedPickerPreview_Incognito() {
     LightDarkPreviewContainer {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.INCOGNITO_TABS) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
@@ -253,7 +247,7 @@ private fun SegmentedPickerPreview_Incognito() {
 @Preview("Regular tabs selected LTR", locale = "en")
 @Preview("Regular tabs selected RTL", locale = "he")
 @Composable
-private fun SegmentedPickerPreview_Regular() {
+internal fun SegmentedPickerPreview_Regular() {
     LightDarkPreviewContainer {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.REGULAR_TABS) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
@@ -268,7 +262,7 @@ private fun SegmentedPickerPreview_Regular() {
 @Preview("Spaces selected LTR", locale = "en")
 @Preview("Spaces selected RTL", locale = "he")
 @Composable
-private fun SegmentedPickerPreview_Spaces() {
+internal fun SegmentedPickerPreview_Spaces() {
     LightDarkPreviewContainer {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.SPACES) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {

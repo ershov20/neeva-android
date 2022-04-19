@@ -34,7 +34,7 @@ fun NavSuggestionRow(
 @Preview("Long labels, RTL, 1x", locale = "he")
 @Preview("Long labels, RTL, 2x", locale = "he", fontScale = 2.0f)
 @Composable
-private fun NavSuggestionRowPreview_LongLabels() {
+internal fun NavSuggestionRowPreview_LongLabels() {
     OneBooleanPreviewContainer { allowEditing ->
         val primaryLabel = stringResource(R.string.debug_long_string_primary)
         val secondaryLabel = stringResource(R.string.debug_long_string_primary)
@@ -59,7 +59,7 @@ private fun NavSuggestionRowPreview_LongLabels() {
 @Preview("Short labels, RTL, 1x", locale = "he")
 @Preview("Short labels, RTL, 2x", locale = "he", fontScale = 2.0f)
 @Composable
-private fun NavSuggestionRowPreview_ShortLabels() {
+internal fun NavSuggestionRowPreview_ShortLabels() {
     OneBooleanPreviewContainer { allowEditing ->
         val primaryLabel = "Primary label"
         val secondaryLabel = "Secondary label"
