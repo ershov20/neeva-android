@@ -165,6 +165,7 @@ class ActiveTabModelImpl(
 
     private fun updateNavigationInfo() {
         _navigationInfoFlow.value = ActiveTabModel.NavigationInfo(
+            activeTab?.navigationController?.navigationListSize ?: 0,
             activeTab?.navigationController?.canGoBack() ?: false,
             activeTab?.navigationController?.canGoForward() ?: false
         )

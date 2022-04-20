@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 /** Monitors changes to the [BrowserWrapper]'s active tab and emits values related to it. */
 interface ActiveTabModel {
     data class NavigationInfo(
+        val navigationListSize: Int = 0,
         val canGoBackward: Boolean = false,
         val canGoForward: Boolean = false
     )

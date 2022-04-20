@@ -319,12 +319,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         val displaySize =
             WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(this).bounds
-        val topControlPlaceholder = View(this)
-        val bottomControlPlaceholder = View(this)
 
         browserWrapper.createAndAttachBrowser(
-            topControlPlaceholder,
-            bottomControlPlaceholder,
             displaySize,
             this::attachWebLayerFragment
         )

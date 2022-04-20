@@ -35,7 +35,6 @@ class NeevaActivityViewModel(
      * WebLayer provides information about when the bottom and top toolbars need to be scrolled off.
      * We provide a placeholder instead of the real view because WebLayer has a bug that prevents it
      * from rendering Composables properly.
-     * TODO(dan.alcantara): Revisit this once we move past WebLayer/Chromium v98.
      */
     internal val topControlOffset = MutableStateFlow(0.0f)
     internal val bottomControlOffset = MutableStateFlow(0.0f)

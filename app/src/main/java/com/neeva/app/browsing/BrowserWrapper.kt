@@ -3,7 +3,6 @@ package com.neeva.app.browsing
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.net.Uri
-import android.view.View
 import androidx.fragment.app.Fragment
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.storage.favicons.FaviconCache
@@ -53,8 +52,6 @@ interface BrowserWrapper {
 
     /** Prepares the WebLayer Browser to interface with our app. */
     fun createAndAttachBrowser(
-        topControlsPlaceholder: View,
-        bottomControlsPlaceholder: View,
         displaySize: Rect,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     )

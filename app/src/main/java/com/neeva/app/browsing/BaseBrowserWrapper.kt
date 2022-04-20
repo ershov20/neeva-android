@@ -10,6 +10,7 @@ import androidx.annotation.CallSuper
 import androidx.fragment.app.Fragment
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.R
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.history.HistoryManager
@@ -23,13 +24,17 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNot
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
@@ -240,8 +245,6 @@ abstract class BaseBrowserWrapper internal constructor(
 
     /** Prepares the WebLayer Browser to interface with our app. */
     override fun createAndAttachBrowser(
-        topControlsPlaceholder: View,
-        bottomControlsPlaceholder: View,
         displaySize: Rect,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
@@ -263,24 +266,58 @@ abstract class BaseBrowserWrapper internal constructor(
 
         val browser = browserFlow.value ?: throw IllegalStateException()
         registerBrowserCallbacks(browser)
-
         browser.setMinimumSurfaceSize(displaySize.width(), displaySize.height())
 
-        // There appears to be a bug in WebLayer that prevents the bottom bar from being rendered,
-        // and also prevents Composables from being re-rendered when their state changes.  To get
-        // around this, we pass in a fake view that is the same height as the real bottom toolbar
-        // and listen for the scrolling offsets, which we then apply to the real bottom toolbar.
-        // This is a valid use case according to the BrowserControlsOffsetCallback.
-        val resources = appContext.resources
-        browser.setBottomView(bottomControlsPlaceholder)
-        bottomControlsPlaceholder.layoutParams.height =
-            resources?.getDimensionPixelSize(com.neeva.app.R.dimen.bottom_toolbar_height) ?: 0
-        bottomControlsPlaceholder.requestLayout()
+        // Set the Views that WebLayer will use as placeholders for our toolbar.
+        //
+        // The [Job] usage is a workaround for https://github.com/neevaco/neeva-android/issues/452:
+        // If we try to set the Browser's toolbar placeholders during initialization, we will
+        // occasionally trigger an odd race condition that cause a Null Pointer Exception somewhere
+        // deep in native WebLayer code.
+        //
+        // To work around this, we start a one-off Job that waits until we see that WebLayer has
+        // registered a navigation, which we take as a signal that the [Browser] and its
+        // [ContentViewRenderView] have been initialized.
+        var toolbarJob: Job? = null
+        toolbarJob = activeTabModel.navigationInfoFlow
+            .filterNot { it.navigationListSize == 0 }
+            .onEach {
+                setToolbarPlaceholders()
+                toolbarJob?.cancel()
+                toolbarJob = null
+            }
+            .launchIn(coroutineScope)
+    }
+
+    /**
+     * Sets the top and bottom toolbar placeholders that WebLayer will use to perform its toolbar
+     * auto-hiding logic.
+     *
+     * We need to use placeholders because WebLayer does not work well with Jetpack Compose: they
+     * don't get rendered at all, meaning that our toolbars are replaced with white boxes when the
+     * toolbars aren't fully visible.
+     *
+     * Instead, [org.chromium.weblayer.BrowserControlsOffsetCallback] suggests that we pass in
+     * placeholders that are the same height as the real toolbars and offset the toolbars whenever
+     * the callback fires.
+     */
+    private fun setToolbarPlaceholders() {
+        val browser = browserFlow.value ?: return
+        val topControlsPlaceholder = View(appContext)
+        val bottomControlsPlaceholder = View(appContext)
 
         browser.setTopView(topControlsPlaceholder)
+        browser.setBottomView(bottomControlsPlaceholder)
+
+        // The placeholders are now in the View hierarchy, so they now have LayoutParams that we can
+        // set to our desired toolbar heights.
         topControlsPlaceholder.layoutParams.height =
-            resources?.getDimensionPixelSize(com.neeva.app.R.dimen.top_toolbar_height) ?: 0
+            appContext.resources.getDimensionPixelSize(R.dimen.top_toolbar_height)
+        bottomControlsPlaceholder.layoutParams.height =
+            appContext.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height)
+
         topControlsPlaceholder.requestLayout()
+        bottomControlsPlaceholder.requestLayout()
     }
 
     /**
@@ -339,8 +376,8 @@ abstract class BaseBrowserWrapper internal constructor(
         if (!browser.isRestoringPreviousState) {
             // WebLayer's Browser initialization can be finicky: If the [Browser] was already fully
             // restored when we added the callback, then our callback doesn't fire.  This can happen
-            // if the app dies in the background, with WebLayer's Fragments automatically being
-            // creating the Browser before we have a chance to hook into it.
+            // if the app dies in the background, with WebLayer's Fragments automatically creating
+            // the Browser before we have a chance to hook into it.
             // We work around this by manually calling onRestoreCompleted() if it's already done.
             restorer.onRestoreCompleted()
             _activeTabModel.onActiveTabChanged(browser.activeTab)
@@ -660,7 +697,9 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
-    override suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
+    override suspend fun waitUntilBrowserIsReady(): Boolean {
+        return isBrowserReady.await()
+    }
 
     companion object {
         val TAG = BrowserWrapper::class.simpleName

@@ -4,13 +4,14 @@ import android.content.Context
 import android.graphics.Rect
 import android.net.Uri
 import android.view.View
-import android.view.ViewGroup.LayoutParams
+import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.R
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.spaces.SpaceStore
@@ -52,7 +53,6 @@ import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
-import strikt.assertions.isNotEqualTo
 import strikt.assertions.isNull
 
 @RunWith(RobolectricTestRunner::class)
@@ -63,6 +63,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
+    private lateinit var activeTabModel: ActiveTabModelImpl
     private lateinit var browser: Browser
     private lateinit var browserWrapper: BrowserWrapper
     private lateinit var context: Context
@@ -71,7 +72,6 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var urlBarModel: URLBarModelImpl
 
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
-    @Mock private lateinit var activeTabModel: ActiveTabModelImpl
     @Mock private lateinit var activityCallbacks: ActivityCallbacks
     @Mock private lateinit var browserFragment: BrowserFragment
     @Mock private lateinit var findInPageModel: FindInPageModelImpl
@@ -83,8 +83,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var suggestionsModel: SuggestionsModel
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
 
-    private lateinit var topPlaceholder: View
-    private lateinit var bottomPlaceholder: View
+    private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
     private lateinit var mockTabs: MutableList<Tab>
 
@@ -97,10 +96,13 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         context = ApplicationProvider.getApplicationContext()
 
-        topPlaceholder = createViewPlaceholder()
-        bottomPlaceholder = createViewPlaceholder()
+        navigationInfoFlow = MutableStateFlow(ActiveTabModel.NavigationInfo())
         urlBarModelIsEditing = MutableStateFlow(false)
         mockTabs = mutableListOf()
+
+        activeTabModel = mock {
+            on { navigationInfoFlow } doReturn navigationInfoFlow
+        }
 
         dispatchers = Dispatchers(
             main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
@@ -126,6 +128,9 @@ class BaseBrowserWrapperTest : BaseTest() {
             on { getTabs() } doReturn mockTabs.toSet()
             on { isDestroyed() } doReturn false
             on { isRestoringPreviousState() } doReturn true
+
+            on { setTopView(any()) } doAnswer { attachViewToParent(it.arguments[0] as View) }
+            on { setBottomView(any()) } doAnswer { attachViewToParent(it.arguments[0] as View) }
         }
 
         urlBarModel = mock {
@@ -170,10 +175,8 @@ class BaseBrowserWrapperTest : BaseTest() {
         }
     }
 
-    /** Creates a View with LayoutParams that can be edited. */
-    private fun createViewPlaceholder(): View = mock {
-        val layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-        on { getLayoutParams() } doReturn layoutParams
+    private fun attachViewToParent(view: View) {
+        FrameLayout(context).apply { addView(view) }
     }
 
     private fun createMockTab(): Tab {
@@ -217,8 +220,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         val redirectUri = Uri.parse("https://www.example.com/incognito_redirect")
 
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
@@ -243,20 +244,27 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Test
     fun createAndAttachBrowser_hooksIntoAndroidViewHierarchy() {
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
         coroutineScopeRule.scope.advanceUntilIdle()
 
-        verify(browser).setTopView(topPlaceholder)
-        verify(browser).setBottomView(bottomPlaceholder)
+        verify(browser, never()).setTopView(any())
+        verify(browser, never()).setBottomView(any())
         verify(browser).setMinimumSurfaceSize(100, 200)
         verify(fragmentAttacher).invoke(eq(browserFragment), eq(false))
 
-        expectThat(topPlaceholder.layoutParams.height).isNotEqualTo(LayoutParams.MATCH_PARENT)
-        expectThat(bottomPlaceholder.layoutParams.height).isNotEqualTo(LayoutParams.MATCH_PARENT)
+        navigationInfoFlow.value = ActiveTabModel.NavigationInfo(navigationListSize = 1)
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        val topViewCaptor = argumentCaptor<View>()
+        val bottomViewCaptor = argumentCaptor<View>()
+        verify(browser).setTopView(topViewCaptor.capture())
+        verify(browser).setBottomView(bottomViewCaptor.capture())
+        expectThat(topViewCaptor.lastValue.layoutParams.height)
+            .isEqualTo(context.resources.getDimensionPixelSize(R.dimen.top_toolbar_height))
+        expectThat(bottomViewCaptor.lastValue.layoutParams.height)
+            .isEqualTo(context.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height))
     }
 
     @Test
@@ -265,8 +273,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         shouldInterceptLoad = false
 
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
@@ -305,8 +311,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         shouldInterceptLoad = false
 
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
@@ -337,8 +341,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         shouldInterceptLoad = false
 
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
@@ -385,8 +387,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         shouldInterceptLoad = false
 
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
@@ -433,8 +433,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         shouldInterceptLoad = false
 
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
@@ -477,8 +475,6 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Test
     fun browserRestoreCallback_withNoTabs_createsNeevaTab() {
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
@@ -494,8 +490,6 @@ class BaseBrowserWrapperTest : BaseTest() {
     fun loadUrl_withLazyTab() {
         val expectedUri = Uri.parse("https://www.example.com")
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
@@ -541,8 +535,6 @@ class BaseBrowserWrapperTest : BaseTest() {
     fun lazyTab_tracksEditingState() {
         val expectedUri = Uri.parse("https://www.example.com")
         browserWrapper.createAndAttachBrowser(
-            topPlaceholder,
-            bottomPlaceholder,
             Rect(0, 0, 100, 200),
             fragmentAttacher
         )
