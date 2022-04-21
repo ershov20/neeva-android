@@ -29,7 +29,6 @@ class CoroutineScopeRule : TestRule {
         return object : Statement() {
             override fun evaluate() {
                 try {
-                    scope.coroutineContext
                     base?.evaluate()
                 } finally {
                     scope.cancel()
