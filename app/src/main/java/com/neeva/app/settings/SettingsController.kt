@@ -154,7 +154,7 @@ class SettingsControllerImpl(
 }
 
 /** For Preview testing. */
-val mockSettingsController by lazy {
+val mockSettingsControllerImpl by lazy {
     object : SettingsController {
         override fun onBackPressed() {}
 

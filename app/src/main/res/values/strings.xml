@@ -164,7 +164,11 @@
 
     <string name="navigate_to_profile">Navigate to Profile</string>
     <string name="switch_default_browser">Switch Your Default Browser</string>
-    <string name="switch_default_browser_instructions">Open links in Neeva automatically by making it your Default Browser App.\n\n
+    <string name="switch_default_browser_promo">
+        Block invasive trackers across the Web.\nOpen links safely with blazing fast browsing and peace of mind.</string>
+
+    <string name="switch_default_browser_follow_3_steps">Follow these 3 easy steps:</string>
+    <string name="switch_default_browser_instructions">
         1. Go to Settings\n\n
         2. Tap Browser App\n\n
         3. Select Neeva Search &amp; Browser</string>

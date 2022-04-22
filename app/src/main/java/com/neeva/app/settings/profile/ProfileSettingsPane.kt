@@ -3,7 +3,7 @@ package com.neeva.app.settings.profile
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.settings.SettingsController
-import com.neeva.app.settings.mockSettingsController
+import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -22,7 +22,7 @@ fun ProfileSettingsPane(
 fun SettingsProfile_Preview() {
     NeevaTheme {
         ProfileSettingsPane(
-            settingsController = mockSettingsController
+            settingsController = mockSettingsControllerImpl
         )
     }
 }
@@ -35,7 +35,7 @@ fun SettingsProfile_Preview() {
 fun SettingsProfile_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         ProfileSettingsPane(
-            settingsController = mockSettingsController
+            settingsController = mockSettingsControllerImpl
         )
     }
 }

@@ -11,7 +11,7 @@ import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonView
-import com.neeva.app.settings.mockSettingsController
+import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.profile.ProfileRowContainer
 import com.neeva.app.settings.profile.SubscriptionRow
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultBrowserRow
@@ -144,7 +144,7 @@ fun SettingsRow_PreviewToggle() {
                 R.string.debug_long_string_primary,
                 togglePreferenceKey = "toggle preference key"
             ),
-            settingsController = mockSettingsController
+            settingsController = mockSettingsControllerImpl
         )
     }
 }
@@ -163,7 +163,7 @@ fun SettingsRow_PreviewLink() {
                 url = Uri.parse(""),
                 togglePreferenceKey = ""
             ),
-            settingsController = mockSettingsController
+            settingsController = mockSettingsControllerImpl
         )
     }
 }
