@@ -76,8 +76,7 @@
     <string name="first_run_intro">Welcome to Neeva</string>
     <string name="first_run_create_your_free_account">Create your free Neeva account</string>
     <string name="send_me_product_and_privacy_tips">Send me product &amp; privacy tips</string>
-    <string name="acknowledge">By creating your Neeva account you acknowledge Neeva\'s</string>
-    <string name="and">and</string>
+    <string name="acknowledge_agreement"><![CDATA[By creating your Neeva account you acknowledge Neeva\'s <a href="%1$s">Terms of Service</a> and <a href="%2$s">Privacy Policy</a>]]></string>
     <string name="or">or</string>
     <string name="used_email_error">This email is associated with an existing Neeva account</string>
     <string name="invalid_email_error">Invalid email used to register</string>
@@ -134,8 +133,8 @@
     <string name="clear_browsing_everything">All time</string>
 
     <string name="incognito_zero_query_title">You are incognito</string>
-    <string name="incognito_zero_query_body">Neeva <b>won\'t save</b> any of your personal activity like searches, clicks, or browsing.\n\nSearch privately, knowing that other people who use this device won\'t see your activity if you close your incognito tabs.</string>
-    <string name="incognito_zero_query_footer">Your activity <b>might still be visible</b> to your internet service provider, school, or employer.</string>
+    <string name="incognito_zero_query_body"><![CDATA[Neeva <b>won\'t save</b> any of your personal activity like searches, clicks, or browsing.\n\nSearch privately, knowing that other people who use this device won\'t see your activity if you close your incognito tabs.]]></string>
+    <string name="incognito_zero_query_footer"><![CDATA[Your activity <b>might still be visible</b> to your internet service provider, school, or employer.]]></string>
 
     <string name="submit_feedback">Send</string>
     <string name="submit_feedback_help_center_title">Need help or want instant answers to FAQs?</string>

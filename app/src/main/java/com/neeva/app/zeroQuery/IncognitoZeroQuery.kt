@@ -27,12 +27,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.ui.BooleanPreviewParameterProvider
+import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.widgets.AnnotatedSpannable
 
 @Composable
 fun IncognitoZeroQuery(topContent: @Composable () -> Unit = {}) {
@@ -95,40 +94,39 @@ fun IncognitoZeroQueryDisclaimer(
 
                 Spacer(modifier = Modifier.height(spacingDp))
 
-                Text(
-                    text = stringResource(id = R.string.incognito_zero_query_body),
-                    style = MaterialTheme.typography.bodyMedium
+                AnnotatedSpannable(
+                    rawHtml = stringResource(id = R.string.incognito_zero_query_body),
+                    textStyle = MaterialTheme.typography.bodyMedium.copy(
+                        color = LocalContentColor.current
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(spacingDp))
 
-                Text(
-                    text = stringResource(id = R.string.incognito_zero_query_footer),
-                    style = MaterialTheme.typography.bodySmall
+                AnnotatedSpannable(
+                    rawHtml = stringResource(id = R.string.incognito_zero_query_footer),
+                    textStyle = MaterialTheme.typography.bodySmall.copy(
+                        color = LocalContentColor.current
+                    )
                 )
             }
         }
     }
 }
 
-class IncognitoZeroQueryPreviews :
-    BooleanPreviewParameterProvider<IncognitoZeroQueryPreviews.Params>(1) {
-    data class Params(
-        val darkTheme: Boolean
-    )
-
-    override fun createParams(booleanArray: BooleanArray): Params {
-        return Params(darkTheme = booleanArray[0])
+@Preview(fontScale = 1.0f, locale = "en")
+@Preview(fontScale = 2.0f, locale = "en")
+@Composable
+internal fun IncognitoZeroQueryPreview_Light() {
+    NeevaThemePreviewContainer(useDarkTheme = false) {
+        IncognitoZeroQuery()
     }
+}
 
-    @Preview(fontScale = 1.0f, locale = "en")
-    @Preview(fontScale = 2.0f, locale = "en")
-    @Composable
-    fun DefaultPreview(
-        @PreviewParameter(IncognitoZeroQueryPreviews::class) params: Params
-    ) {
-        NeevaTheme(useDarkTheme = params.darkTheme) {
-            IncognitoZeroQuery()
-        }
+@Preview(fontScale = 1.0f, locale = "en")
+@Composable
+internal fun IncognitoZeroQueryPreview_Dark() {
+    NeevaThemePreviewContainer(useDarkTheme = true) {
+        IncognitoZeroQuery()
     }
 }
