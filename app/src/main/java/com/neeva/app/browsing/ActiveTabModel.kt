@@ -8,7 +8,8 @@ interface ActiveTabModel {
     data class NavigationInfo(
         val navigationListSize: Int = 0,
         val canGoBackward: Boolean = false,
-        val canGoForward: Boolean = false
+        val canGoForward: Boolean = false,
+        val desktopUserAgentEnabled: Boolean = false
     )
 
     /** Tracks if is being shown a query, a URL, or the placeholder text in the URL bar. */

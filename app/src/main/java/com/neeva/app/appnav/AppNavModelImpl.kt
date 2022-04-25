@@ -240,6 +240,10 @@ class AppNavModelImpl(
                 webLayerModel.currentBrowser.showFindInPage()
             }
 
+            NeevaMenuItemId.TOGGLE_DESKTOP_SITE -> {
+                webLayerModel.currentBrowser.toggleViewDesktopSite()
+            }
+
             NeevaMenuItemId.SUPPORT -> {
                 showFeedback()
             }

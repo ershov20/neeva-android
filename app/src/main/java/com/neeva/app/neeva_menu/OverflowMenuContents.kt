@@ -11,9 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -26,16 +25,19 @@ import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.theme.getClickableAlpha
+import com.neeva.app.ui.widgets.RowActionIconButton
+import com.neeva.app.ui.widgets.RowActionIconParams
 
 @Composable
 fun OverflowMenuContents(
     hideButtons: Boolean,
     onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
-    expandedMutator: (Boolean) -> Unit
+    desktopUserAgentEnabled: Boolean,
+    enableShowDesktopSite: Boolean = true,
+    expandedMutator: (Boolean) -> Unit,
 ) {
     val menuItemState = LocalMenuData.current
-
     if (!hideButtons) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -43,16 +45,17 @@ fun OverflowMenuContents(
         ) {
             NeevaMenuData.iconMenuRowItems.forEach { data ->
                 val isEnabled = !disabledMenuItems.contains(data.id)
-
-                IconButton(
-                    onClick = {
-                        expandedMutator(false)
-                        onMenuItem(data.id)
-                    },
-                    enabled = isEnabled
-                ) {
-                    NeevaMenuIcon(itemData = data)
-                }
+                RowActionIconButton(
+                    RowActionIconParams(
+                        onTapAction = {
+                            expandedMutator(false)
+                            onMenuItem(data.id)
+                        },
+                        actionType = data.action,
+                        contentDescription = stringResource(id = data.labelId),
+                        enabled = isEnabled
+                    )
+                )
             }
         }
     }
@@ -74,6 +77,15 @@ fun OverflowMenuContents(
                 }
             }
 
+            NeevaMenuItemId.TOGGLE_DESKTOP_SITE -> {
+                if (enableShowDesktopSite) {
+                    ToggleDesktopSiteRow(desktopUserAgentEnabled) {
+                        expandedMutator(false)
+                        onMenuItem(NeevaMenuItemId.TOGGLE_DESKTOP_SITE)
+                    }
+                }
+            }
+
             else -> {
                 val isEnabled = !disabledMenuItems.contains(data.id)
                 val alpha = getClickableAlpha(isEnabled)
@@ -83,12 +95,7 @@ fun OverflowMenuContents(
                         NeevaMenuIcon(itemData = data)
                     },
                     text = {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            text = data.labelId?.let { stringResource(id = it) } ?: "",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        OverflowMenuText(data.labelId?.let { stringResource(id = it) } ?: "")
                     },
                     enabled = isEnabled,
                     modifier = Modifier.alpha(alpha),
@@ -103,19 +110,21 @@ fun OverflowMenuContents(
 }
 
 class OverflowMenuContentsPreviews :
-    BooleanPreviewParameterProvider<OverflowMenuContentsPreviews.Params>(4) {
+    BooleanPreviewParameterProvider<OverflowMenuContentsPreviews.Params>(5) {
     data class Params(
         val darkTheme: Boolean,
         val isForwardEnabled: Boolean,
         val isUpdateAvailableVisible: Boolean,
-        val hideButtons: Boolean
+        val hideButtons: Boolean,
+        val desktopUserAgentEnabled: Boolean
     )
 
     override fun createParams(booleanArray: BooleanArray) = Params(
         darkTheme = booleanArray[0],
         isForwardEnabled = booleanArray[1],
         isUpdateAvailableVisible = booleanArray[2],
-        hideButtons = booleanArray[3]
+        hideButtons = booleanArray[3],
+        desktopUserAgentEnabled = booleanArray[4]
     )
 
     @Preview(name = "1x font size", locale = "en")
@@ -131,22 +140,24 @@ class OverflowMenuContentsPreviews :
         }
 
         NeevaTheme(useDarkTheme = params.darkTheme) {
-            CompositionLocalProvider(
-                LocalMenuData provides LocalMenuDataState(
-                    isUpdateAvailableVisible = params.isUpdateAvailableVisible
-                )
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surface)
-                ) {
-                    OverflowMenuContents(
-                        hideButtons = params.hideButtons,
-                        onMenuItem = {},
-                        disabledMenuItems = disabledMenuItems,
-                        expandedMutator = {}
+            Surface(tonalElevation = 2.dp) {
+                CompositionLocalProvider(
+                    LocalMenuData provides LocalMenuDataState(
+                        isUpdateAvailableVisible = params.isUpdateAvailableVisible
                     )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                    ) {
+                        OverflowMenuContents(
+                            onMenuItem = {},
+                            disabledMenuItems = disabledMenuItems,
+                            desktopUserAgentEnabled = params.desktopUserAgentEnabled,
+                            expandedMutator = {},
+                            hideButtons = params.hideButtons
+                        )
+                    }
                 }
             }
         }

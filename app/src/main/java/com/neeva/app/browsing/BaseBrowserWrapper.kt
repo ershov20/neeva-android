@@ -57,7 +57,7 @@ abstract class BaseBrowserWrapper internal constructor(
     override val suggestionsModel: SuggestionsModel?,
     final override val faviconCache: FaviconCache,
     protected val spaceStore: SpaceStore?,
-    private val _activeTabModel: ActiveTabModelImpl,
+    private val _activeTabModelImpl: ActiveTabModelImpl,
     private val _urlBarModel: URLBarModelImpl,
     private val _findInPageModel: FindInPageModelImpl,
     private val historyManager: HistoryManager?,
@@ -83,7 +83,7 @@ abstract class BaseBrowserWrapper internal constructor(
         suggestionsModel = suggestionsModel,
         faviconCache = faviconCache,
         spaceStore = spaceStore,
-        _activeTabModel = ActiveTabModelImpl(
+        _activeTabModelImpl = ActiveTabModelImpl(
             spaceStore = spaceStore,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers
@@ -124,7 +124,7 @@ abstract class BaseBrowserWrapper internal constructor(
     protected val browser: Browser?
         get() = browserFlow.value?.takeUnless { it.isDestroyed }
 
-    override val activeTabModel: ActiveTabModel get() = _activeTabModel
+    override val activeTabModel: ActiveTabModel get() = _activeTabModelImpl
     override val findInPageModel: FindInPageModel get() = _findInPageModel
     override val urlBarModel: URLBarModel get() = _urlBarModel
 
@@ -165,7 +165,7 @@ abstract class BaseBrowserWrapper internal constructor(
     private val tabListCallback = object : TabListCallback() {
         override fun onActiveTabChanged(activeTab: Tab?) {
             fullscreenCallback.exitFullscreen()
-            _activeTabModel.onActiveTabChanged(activeTab)
+            _activeTabModelImpl.onActiveTabChanged(activeTab)
             tabList.updatedSelectedTab(activeTab?.guid)
         }
 
@@ -384,7 +384,7 @@ abstract class BaseBrowserWrapper internal constructor(
             // the Browser before we have a chance to hook into it.
             // We work around this by manually calling onRestoreCompleted() if it's already done.
             restorer.onRestoreCompleted()
-            _activeTabModel.onActiveTabChanged(browser.activeTab)
+            _activeTabModelImpl.onActiveTabChanged(browser.activeTab)
         }
 
         return true
@@ -457,7 +457,7 @@ abstract class BaseBrowserWrapper internal constructor(
             }
             tabCallbackMap.clear()
             tabList.clear()
-            _activeTabModel.onActiveTabChanged(null)
+            _activeTabModelImpl.onActiveTabChanged(null)
 
             browserFlow.value = null
             tabListRestorer = null
@@ -605,9 +605,10 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     // region: Active tab operations
-    override fun goBack() = _activeTabModel.goBack()
-    override fun goForward() = _activeTabModel.goForward()
-    override fun reload() = _activeTabModel.reload()
+    override fun goBack() = _activeTabModelImpl.goBack()
+    override fun goForward() = _activeTabModelImpl.goForward()
+    override fun reload() = _activeTabModelImpl.reload()
+    override fun toggleViewDesktopSite() = _activeTabModelImpl.toggleViewDesktopSite()
 
     /**
      * Start a load of the given [uri].
@@ -638,7 +639,7 @@ abstract class BaseBrowserWrapper internal constructor(
             uri
         }
 
-        if (inNewTab || _activeTabModel.activeTab == null) {
+        if (inNewTab || _activeTabModelImpl.activeTab == null) {
             createTabWithUri(
                 uri = urlToLoad,
                 parentTabId = parentTabId,
@@ -646,7 +647,7 @@ abstract class BaseBrowserWrapper internal constructor(
                 stayInApp = stayInApp
             )
         } else {
-            _activeTabModel.loadUrlInActiveTab(urlToLoad, stayInApp)
+            _activeTabModelImpl.loadUrlInActiveTab(urlToLoad, stayInApp)
         }
 
         urlBarModel.clearFocus()
@@ -666,17 +667,17 @@ abstract class BaseBrowserWrapper internal constructor(
 
     /** Dismisses any transient dialogs or popups that are covering the page. */
     override fun dismissTransientUi(): Boolean {
-        return _activeTabModel.activeTab?.dismissTransientUi() ?: false
+        return _activeTabModelImpl.activeTab?.dismissTransientUi() ?: false
     }
 
     override fun canGoBackward(): Boolean {
-        return _activeTabModel.navigationInfoFlow.value.canGoBackward
+        return _activeTabModelImpl.navigationInfoFlow.value.canGoBackward
     }
     // endregion
 
     // region: Find In Page
     override fun showFindInPage() {
-        _activeTabModel.activeTab?.let { _findInPageModel.showFindInPage(it) }
+        _activeTabModelImpl.activeTab?.let { _findInPageModel.showFindInPage(it) }
     }
     // endregion
 

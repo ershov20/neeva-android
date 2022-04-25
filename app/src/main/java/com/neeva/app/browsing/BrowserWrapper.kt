@@ -24,7 +24,12 @@ import org.chromium.weblayer.Browser
 interface BrowserWrapper {
     val isIncognito: Boolean
 
+    /**
+     * Meant for getting Read-only State Flows.
+     * Modify these StateFlows using methods in the "Active tab operations" region below.
+     */
     val activeTabModel: ActiveTabModel
+
     val faviconCache: FaviconCache
     val findInPageModel: FindInPageModel
     val suggestionsModel: SuggestionsModel?
@@ -85,6 +90,8 @@ interface BrowserWrapper {
     fun goForward()
     fun reload()
     fun canGoBackward(): Boolean
+
+    fun toggleViewDesktopSite()
 
     fun showFindInPage()
     fun showPageInfo()

@@ -26,7 +26,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
+import com.neeva.app.settings.LocalDebugFlags
 import com.neeva.app.ui.OneBooleanPreviewContainer
 
 // TODO(dan.alcantara): Don't like how I set this up; will redo this once Evan's PR lands and move
@@ -44,11 +46,15 @@ fun OverflowMenu(
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
     val navigationInfoFlow by browserToolbarModel.navigationInfoFlow.collectAsState()
+    val enableShowDesktopSite = LocalEnvironment.current.settingsDataModel
+        .getDebugFlagValue(LocalDebugFlags.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
 
     OverflowMenu(
         hideButtons = hideButtons,
         onMenuItem = browserToolbarModel::onMenuItem,
-        canGoForward = navigationInfoFlow.canGoForward
+        canGoForward = navigationInfoFlow.canGoForward,
+        desktopUserAgentEnabled = navigationInfoFlow.desktopUserAgentEnabled,
+        enableShowDesktopSite = enableShowDesktopSite
     )
 }
 
@@ -56,7 +62,9 @@ fun OverflowMenu(
 fun OverflowMenu(
     hideButtons: Boolean = false,
     onMenuItem: (NeevaMenuItemId) -> Unit,
-    canGoForward: Boolean
+    canGoForward: Boolean = false,
+    desktopUserAgentEnabled: Boolean = false,
+    enableShowDesktopSite: Boolean = true
 ) {
     val disabledMenuItems = mutableListOf<NeevaMenuItemId>()
 
@@ -67,7 +75,9 @@ fun OverflowMenu(
     OverflowMenu(
         hideButtons = hideButtons,
         onMenuItem = onMenuItem,
-        disabledMenuItems = disabledMenuItems
+        disabledMenuItems = disabledMenuItems,
+        desktopUserAgentEnabled = desktopUserAgentEnabled,
+        enableShowDesktopSite = enableShowDesktopSite
     )
 }
 
@@ -76,6 +86,8 @@ fun OverflowMenu(
     hideButtons: Boolean,
     onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
+    desktopUserAgentEnabled: Boolean,
+    enableShowDesktopSite: Boolean,
     isInitiallyExpanded: Boolean = false
 ) {
     val menuItemState = LocalMenuData.current
@@ -114,13 +126,15 @@ fun OverflowMenu(
                 hideButtons = hideButtons,
                 onMenuItem = onMenuItem,
                 disabledMenuItems = disabledMenuItems,
+                desktopUserAgentEnabled = desktopUserAgentEnabled,
+                enableShowDesktopSite = enableShowDesktopSite,
                 expandedMutator = { newState: Boolean -> expanded = newState }
             )
         }
     }
 }
 
-@Preview(name = "LTR", locale = "en")
+@Preview(name = "Not expanded LTR", locale = "en")
 @Preview(name = "RTL", locale = "he")
 @Composable
 private fun OverflowMenuPreview() {
@@ -135,7 +149,33 @@ private fun OverflowMenuPreview() {
                     hideButtons = false,
                     onMenuItem = {},
                     disabledMenuItems = emptyList(),
+                    desktopUserAgentEnabled = true,
+                    enableShowDesktopSite = true,
                     isInitiallyExpanded = false
+                )
+            }
+        }
+    }
+}
+
+@Preview(name = "LTR", locale = "en")
+@Preview(name = "RTL", locale = "he")
+@Composable
+private fun OverflowMenu_Expanded_Preview() {
+    OneBooleanPreviewContainer { isUpdateAvailableVisible ->
+        Surface {
+            CompositionLocalProvider(
+                LocalMenuData provides LocalMenuDataState(
+                    isUpdateAvailableVisible = isUpdateAvailableVisible
+                )
+            ) {
+                OverflowMenu(
+                    hideButtons = false,
+                    onMenuItem = {},
+                    disabledMenuItems = emptyList(),
+                    desktopUserAgentEnabled = true,
+                    enableShowDesktopSite = true,
+                    isInitiallyExpanded = true
                 )
             }
         }

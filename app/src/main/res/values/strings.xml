@@ -187,4 +187,6 @@
     <string name="widget_description">Quick actions</string>
     <string name="widget_search_neeva">Search Neeva</string>
     <string name="weak_password">Weak password</string>
+    <string name="desktop_site">Desktop site</string>
+    <string name="mobile_site">Mobile site</string>
 </resources>

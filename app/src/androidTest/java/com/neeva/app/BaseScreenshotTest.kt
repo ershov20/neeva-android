@@ -109,10 +109,13 @@ abstract class BaseScreenshotTest {
         $failureMessage
 
         If you need to add or update an existing golden image:
-        1. Start an emulator using the exact same commands CircleCI uses.  The first command
-           only has to be run once, while the second command starts the emulator.
-
+        1. Start an emulator using the exact same commands CircleCI uses. 
+         
+         Only run these commands once to setup:
+           sdkmanager "system-images;android-28;default;x86_64"
            echo "no" | avdmanager --verbose create avd -n "test" -k "system-images;android-28;default;x86_64" -d "pixel_2"
+        
+         This command will actually start the emulator:
            emulator -avd test -no-audio -no-boot-anim -verbose -no-snapshot -gpu swiftshader_indirect -partition-size 2048
 
         2. Run the test by itself by right clicking on the test function in Android Studio.

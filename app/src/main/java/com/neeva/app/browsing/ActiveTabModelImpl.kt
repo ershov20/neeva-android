@@ -19,7 +19,10 @@ import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
 
-/** Monitors changes to the [Browser]'s active tab and emits values related to it. */
+/**
+ * Implements [ActiveTabModel] which exposes read-only Stateflows that monitor activeTab [Tab] changes.
+ * Provides an API to use activeTab [Tab] and update respective Stateflow values.
+ */
 class ActiveTabModelImpl(
     private val spaceStore: SpaceStore? = null,
     val coroutineScope: CoroutineScope,
@@ -163,11 +166,19 @@ class ActiveTabModelImpl(
         }
     }
 
+    fun toggleViewDesktopSite() {
+        activeTab?.let {
+            it.isDesktopUserAgentEnabled = !it.isDesktopUserAgentEnabled
+            updateNavigationInfo()
+        }
+    }
+
     private fun updateNavigationInfo() {
         _navigationInfoFlow.value = ActiveTabModel.NavigationInfo(
             activeTab?.navigationController?.navigationListSize ?: 0,
             activeTab?.navigationController?.canGoBack() ?: false,
-            activeTab?.navigationController?.canGoForward() ?: false
+            activeTab?.navigationController?.canGoForward() ?: false,
+            activeTab?.isDesktopUserAgentEnabled ?: false
         )
     }
 }

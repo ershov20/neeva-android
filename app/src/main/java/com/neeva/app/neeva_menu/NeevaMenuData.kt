@@ -3,11 +3,10 @@ package com.neeva.app.neeva_menu
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.neeva.app.R
+import com.neeva.app.ui.widgets.RowActionIconParams
 
 enum class NeevaMenuItemId {
     HOME,
@@ -21,8 +20,15 @@ enum class NeevaMenuItemId {
     SHOW_PAGE_INFO,
     FIND_IN_PAGE,
     UPDATE,
+    TOGGLE_DESKTOP_SITE,
     SEPARATOR
 }
+
+data class NeevaMenuTopBarItemData(
+    val id: NeevaMenuItemId,
+    @StringRes val labelId: Int,
+    val action: RowActionIconParams.ActionType
+)
 
 data class NeevaMenuItemData(
     val id: NeevaMenuItemId,
@@ -32,21 +38,21 @@ data class NeevaMenuItemData(
 )
 
 object NeevaMenuData {
-    val iconMenuRowItems: List<NeevaMenuItemData> = listOf(
-        NeevaMenuItemData(
+    val iconMenuRowItems: List<NeevaMenuTopBarItemData> = listOf(
+        NeevaMenuTopBarItemData(
             id = NeevaMenuItemId.FORWARD,
             labelId = R.string.toolbar_go_forward,
-            icon = Icons.Default.ArrowForward
+            action = RowActionIconParams.ActionType.FORWARD
         ),
-        NeevaMenuItemData(
+        NeevaMenuTopBarItemData(
             id = NeevaMenuItemId.RELOAD,
             labelId = R.string.reload,
-            icon = Icons.Default.Refresh
+            action = RowActionIconParams.ActionType.REFRESH
         ),
-        NeevaMenuItemData(
+        NeevaMenuTopBarItemData(
             id = NeevaMenuItemId.SHOW_PAGE_INFO,
             labelId = R.string.page_info,
-            imageResourceID = R.drawable.ic_info_black_24
+            action = RowActionIconParams.ActionType.SHOW_PAGE_INFO
         )
     )
 
@@ -60,6 +66,9 @@ object NeevaMenuData {
             id = NeevaMenuItemId.FIND_IN_PAGE,
             labelId = R.string.find_in_page,
             imageResourceID = R.drawable.ic_find_in_page_black_24
+        ),
+        NeevaMenuItemData(
+            id = NeevaMenuItemId.TOGGLE_DESKTOP_SITE
         ),
         NeevaMenuItemData(id = NeevaMenuItemId.SEPARATOR),
         NeevaMenuItemData(

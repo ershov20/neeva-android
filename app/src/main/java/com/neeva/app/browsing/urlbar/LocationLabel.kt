@@ -201,12 +201,7 @@ private fun URLPreview() {
                 displayedText = urlBarText,
                 showIncognitoBadge = isIncognito,
                 placeholderColor = Color.Magenta,
-                endComposable = {
-                    OverflowMenu(
-                        onMenuItem = { _ -> },
-                        canGoForward = false
-                    )
-                },
+                endComposable = { OverflowMenu(onMenuItem = { }) },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
@@ -233,10 +228,7 @@ private fun QueryPreview() {
                 showIncognitoBadge = isIncognito,
                 placeholderColor = Color.Magenta,
                 endComposable = {
-                    OverflowMenu(
-                        onMenuItem = { _ -> },
-                        canGoForward = false
-                    )
+                    OverflowMenu(onMenuItem = { })
                 },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
@@ -263,10 +255,7 @@ private fun NeevaHomepagePreview() {
                 showIncognitoBadge = isIncognito,
                 placeholderColor = placeholderColor,
                 endComposable = {
-                    OverflowMenu(
-                        onMenuItem = { _ -> },
-                        canGoForward = false
-                    )
+                    OverflowMenu(onMenuItem = { })
                 },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )

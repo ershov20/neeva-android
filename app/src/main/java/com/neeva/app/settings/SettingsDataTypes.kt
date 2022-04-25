@@ -65,7 +65,8 @@ enum class LocalDebugFlags(
     @StringRes val flagDisplayName_stringId: Int,
     val defaultValue: Boolean
 ) {
-    DEBUG_ENABLE_INCOGNITO_SCREENSHOTS(R.string.settings_debug_enable_incognito_screenshots, false);
+    DEBUG_ENABLE_INCOGNITO_SCREENSHOTS(R.string.settings_debug_enable_incognito_screenshots, false),
+    DEBUG_ENABLE_SHOW_DESKTOP_SITE(R.string.settings_debug_enable_show_desktop_site, false);
 
     val key: String = name
 }
