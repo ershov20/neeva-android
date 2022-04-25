@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.browsing.toolbar.TabSwitcherIcon
 import com.neeva.app.ui.AnimationConstants
 import com.neeva.app.ui.LightDarkPreviewContainer
 
@@ -193,11 +194,7 @@ fun SegmentedPicker(
                             onLeaveIncognito()
                         }
                 ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_filter_none_24),
-                        contentDescription = stringResource(R.string.tabs),
-                        modifier = Modifier.size(20.dp)
-                    )
+                    TabSwitcherIcon(contentDescription = stringResource(R.string.tabs))
                 }
             }
 

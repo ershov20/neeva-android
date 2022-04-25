@@ -1,4 +1,4 @@
-package com.neeva.app.urlbar
+package com.neeva.app.browsing.urlbar
 
 import androidx.compose.ui.text.input.TextFieldValue
 import kotlinx.coroutines.flow.Flow

@@ -111,8 +111,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         webLayerModel.activityCallbacks = WeakReference(this)
+
+        activityViewModel.determineScreenConfiguration(this)
         setContentView(R.layout.main)
 
         findViewById<ComposeView>(R.id.browser_ui).apply {
@@ -157,8 +158,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                             provides setDefaultAndroidBrowserManager
                     ) {
                         ActivityUI(
-                            bottomControlOffset = activityViewModel.bottomControlOffset,
-                            topControlOffset = activityViewModel.topControlOffset,
+                            toolbarConfiguration = activityViewModel.toolbarConfiguration,
                             webLayerModel = webLayerModel,
                             onSignOut = activityViewModel::signOut
                         )
@@ -322,6 +322,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         browserWrapper.createAndAttachBrowser(
             displaySize,
+            activityViewModel.toolbarConfiguration.value.useSingleBrowserToolbar,
             this::attachWebLayerFragment
         )
 

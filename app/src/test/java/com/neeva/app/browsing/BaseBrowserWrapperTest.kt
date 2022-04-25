@@ -13,12 +13,12 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
+import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
-import com.neeva.app.urlbar.URLBarModelImpl
 import java.lang.IllegalStateException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -193,6 +193,14 @@ class BaseBrowserWrapperTest : BaseTest() {
         return mockTab
     }
 
+    private fun createAndAttachBrowser() {
+        browserWrapper.createAndAttachBrowser(
+            displaySize = Rect(0, 0, 100, 200),
+            useSingleBrowserToolbar = false,
+            fragmentAttacher = fragmentAttacher
+        )
+    }
+
     /**
      * Say that restoration has completed, allowing URL loading to continue.  Because the
      * Browser has 0 tabs, the BrowserRestoreCallbackImpl will create one for https://neeva.com.
@@ -219,10 +227,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         val redirectUri = Uri.parse("https://www.example.com/incognito_redirect")
 
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         completeBrowserRestoration()
         coroutineScopeRule.scope.advanceUntilIdle()
 
@@ -243,10 +248,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
     @Test
     fun createAndAttachBrowser_hooksIntoAndroidViewHierarchy() {
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         coroutineScopeRule.scope.advanceUntilIdle()
 
         verify(browser, never()).setTopView(any())
@@ -272,10 +274,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Load a URL should open it in a new tab, but restoration hasn't completed yet.
@@ -310,10 +309,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         completeBrowserRestoration()
         coroutineScopeRule.scope.advanceUntilIdle()
 
@@ -340,10 +336,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         completeBrowserRestoration()
         coroutineScopeRule.scope.advanceUntilIdle()
 
@@ -386,10 +379,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         completeBrowserRestoration()
 
         browserWrapper.loadUrl(
@@ -432,10 +422,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         val expectedUri = Uri.parse("https://www.example.com")
         shouldInterceptLoad = false
 
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         completeBrowserRestoration()
         coroutineScopeRule.scope.advanceUntilIdle()
 
@@ -474,10 +461,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
     @Test
     fun browserRestoreCallback_withNoTabs_createsNeevaTab() {
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         coroutineScopeRule.scope.advanceUntilIdle()
 
         val restoreCallbackCaptor = argumentCaptor<BrowserRestoreCallback>()
@@ -489,10 +473,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Test
     fun loadUrl_withLazyTab() {
         val expectedUri = Uri.parse("https://www.example.com")
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         completeBrowserRestoration()
         coroutineScopeRule.scope.advanceUntilIdle()
 
@@ -534,10 +515,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Test
     fun lazyTab_tracksEditingState() {
         val expectedUri = Uri.parse("https://www.example.com")
-        browserWrapper.createAndAttachBrowser(
-            Rect(0, 0, 100, 200),
-            fragmentAttacher
-        )
+        createAndAttachBrowser()
         completeBrowserRestoration()
         coroutineScopeRule.scope.advanceUntilIdle()
 

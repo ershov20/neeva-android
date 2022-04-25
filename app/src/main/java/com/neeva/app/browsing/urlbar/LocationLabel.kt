@@ -1,4 +1,4 @@
-package com.neeva.app.urlbar
+package com.neeva.app.browsing.urlbar
 
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +35,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.neeva_menu.NeevaMenuItemId
 import com.neeva.app.neeva_menu.OverflowMenu
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.TwoBooleanPreviewContainer
@@ -45,7 +44,7 @@ import org.chromium.weblayer.UrlBarOptions
 
 @Composable
 fun LocationLabel(
-    onMenuItem: (id: NeevaMenuItemId) -> Unit,
+    endComposable: @Composable () -> Unit,
     placeholderColor: Color,
     modifier: Modifier = Modifier
 ) {
@@ -54,7 +53,6 @@ fun LocationLabel(
     val showIncognitoBadge = browserWrapper.isIncognito
     val activeTabModel = browserWrapper.activeTabModel
     val displayedInfo by activeTabModel.displayedInfoFlow.collectAsState()
-    val navigationInfoFlow by browserWrapper.activeTabModel.navigationInfoFlow.collectAsState()
 
     // WebLayer requires that you pass it an old-school color resource from the XML files.
     val colorResource = mapComposeColorToResource(LocalContentColor.current)
@@ -77,9 +75,8 @@ fun LocationLabel(
         mode = displayedInfo.mode,
         displayedText = displayedInfo.displayedText,
         showIncognitoBadge = showIncognitoBadge,
-        onMenuItem = onMenuItem,
         placeholderColor = placeholderColor,
-        canGoForward = navigationInfoFlow.canGoForward,
+        endComposable = endComposable,
         modifier = modifier
     )
 }
@@ -90,9 +87,8 @@ fun LocationLabel(
     mode: ActiveTabModel.DisplayMode,
     displayedText: String,
     showIncognitoBadge: Boolean,
-    onMenuItem: (id: NeevaMenuItemId) -> Unit,
     placeholderColor: Color,
-    canGoForward: Boolean,
+    endComposable: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -175,10 +171,7 @@ fun LocationLabel(
             }
         }
 
-        OverflowMenu(
-            onMenuItem = onMenuItem,
-            canGoForward = canGoForward
-        )
+        endComposable()
     }
 }
 
@@ -207,9 +200,13 @@ private fun URLPreview() {
                 mode = ActiveTabModel.DisplayMode.URL,
                 displayedText = urlBarText,
                 showIncognitoBadge = isIncognito,
-                onMenuItem = {},
                 placeholderColor = Color.Magenta,
-                canGoForward = false,
+                endComposable = {
+                    OverflowMenu(
+                        onMenuItem = { _ -> },
+                        canGoForward = false
+                    )
+                },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
@@ -234,9 +231,13 @@ private fun QueryPreview() {
                 mode = ActiveTabModel.DisplayMode.QUERY,
                 displayedText = urlBarText,
                 showIncognitoBadge = isIncognito,
-                onMenuItem = {},
                 placeholderColor = Color.Magenta,
-                canGoForward = false,
+                endComposable = {
+                    OverflowMenu(
+                        onMenuItem = { _ -> },
+                        canGoForward = false
+                    )
+                },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
@@ -260,9 +261,13 @@ private fun NeevaHomepagePreview() {
                 mode = ActiveTabModel.DisplayMode.PLACEHOLDER,
                 displayedText = stringResource(id = R.string.url_bar_placeholder),
                 showIncognitoBadge = isIncognito,
-                onMenuItem = {},
                 placeholderColor = placeholderColor,
-                canGoForward = false,
+                endComposable = {
+                    OverflowMenu(
+                        onMenuItem = { _ -> },
+                        canGoForward = false
+                    )
+                },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }

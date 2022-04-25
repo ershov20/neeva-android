@@ -1,4 +1,4 @@
-package com.neeva.app.urlbar
+package com.neeva.app.browsing.urlbar
 
 import android.content.Context
 import android.net.Uri

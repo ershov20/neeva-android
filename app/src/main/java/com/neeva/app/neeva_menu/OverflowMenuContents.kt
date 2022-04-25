@@ -29,27 +29,30 @@ import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
 fun OverflowMenuContents(
+    hideButtons: Boolean,
     onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
     expandedMutator: (Boolean) -> Unit
 ) {
     val menuItemState = LocalMenuData.current
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        NeevaMenuData.iconMenuRowItems.forEach { data ->
-            val isEnabled = !disabledMenuItems.contains(data.id)
+    if (!hideButtons) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            NeevaMenuData.iconMenuRowItems.forEach { data ->
+                val isEnabled = !disabledMenuItems.contains(data.id)
 
-            IconButton(
-                onClick = {
-                    expandedMutator(false)
-                    onMenuItem(data.id)
-                },
-                enabled = isEnabled
-            ) {
-                NeevaMenuIcon(itemData = data)
+                IconButton(
+                    onClick = {
+                        expandedMutator(false)
+                        onMenuItem(data.id)
+                    },
+                    enabled = isEnabled
+                ) {
+                    NeevaMenuIcon(itemData = data)
+                }
             }
         }
     }
@@ -100,17 +103,19 @@ fun OverflowMenuContents(
 }
 
 class OverflowMenuContentsPreviews :
-    BooleanPreviewParameterProvider<OverflowMenuContentsPreviews.Params>(3) {
+    BooleanPreviewParameterProvider<OverflowMenuContentsPreviews.Params>(4) {
     data class Params(
         val darkTheme: Boolean,
         val isForwardEnabled: Boolean,
-        val isUpdateAvailableVisible: Boolean
+        val isUpdateAvailableVisible: Boolean,
+        val hideButtons: Boolean
     )
 
     override fun createParams(booleanArray: BooleanArray) = Params(
         darkTheme = booleanArray[0],
         isForwardEnabled = booleanArray[1],
-        isUpdateAvailableVisible = booleanArray[2]
+        isUpdateAvailableVisible = booleanArray[2],
+        hideButtons = booleanArray[3]
     )
 
     @Preview(name = "1x font size", locale = "en")
@@ -137,6 +142,7 @@ class OverflowMenuContentsPreviews :
                         .background(MaterialTheme.colorScheme.surface)
                 ) {
                     OverflowMenuContents(
+                        hideButtons = params.hideButtons,
                         onMenuItem = {},
                         disabledMenuItems = disabledMenuItems,
                         expandedMutator = {}

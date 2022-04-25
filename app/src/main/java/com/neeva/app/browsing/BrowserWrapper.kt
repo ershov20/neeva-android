@@ -5,9 +5,9 @@ import android.graphics.Rect
 import android.net.Uri
 import androidx.fragment.app.Fragment
 import com.neeva.app.browsing.findinpage.FindInPageModel
+import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
-import com.neeva.app.urlbar.URLBarModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,6 +53,7 @@ interface BrowserWrapper {
     /** Prepares the WebLayer Browser to interface with our app. */
     fun createAndAttachBrowser(
         displaySize: Rect,
+        useSingleBrowserToolbar: Boolean,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     )
 

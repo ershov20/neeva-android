@@ -1,4 +1,4 @@
-package com.neeva.app.urlbar
+package com.neeva.app.browsing.urlbar
 
 import android.graphics.Bitmap
 import android.net.Uri

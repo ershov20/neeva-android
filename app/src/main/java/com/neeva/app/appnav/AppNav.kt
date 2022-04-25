@@ -9,6 +9,7 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.LocalSetDefaultAndroidBrowserManager
+import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.CardsPane
 import com.neeva.app.feedback.FeedbackView
@@ -29,8 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun AppNav(
-    bottomControlOffset: StateFlow<Float>,
-    topControlOffset: StateFlow<Float>,
+    toolbarConfiguration: StateFlow<ToolbarConfiguration>,
     webLayerModel: WebLayerModel,
     appNavModel: AppNavModel,
     onSignOut: () -> Unit,
@@ -68,7 +68,7 @@ fun AppNav(
         modifier = modifier
     ) {
         composable(AppNavDestination.BROWSER.route) {
-            BrowserScaffold(bottomControlOffset, topControlOffset, webLayerModel)
+            BrowserScaffold(toolbarConfiguration, webLayerModel)
         }
 
         composable(AppNavDestination.SETTINGS.route) {

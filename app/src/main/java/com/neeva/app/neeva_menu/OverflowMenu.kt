@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
 
@@ -38,6 +40,21 @@ val LocalMenuData = compositionLocalOf {
 
 @Composable
 fun OverflowMenu(
+    hideButtons: Boolean = false
+) {
+    val browserToolbarModel = LocalBrowserToolbarModel.current
+    val navigationInfoFlow by browserToolbarModel.navigationInfoFlow.collectAsState()
+
+    OverflowMenu(
+        hideButtons = hideButtons,
+        onMenuItem = browserToolbarModel::onMenuItem,
+        canGoForward = navigationInfoFlow.canGoForward
+    )
+}
+
+@Composable
+fun OverflowMenu(
+    hideButtons: Boolean = false,
     onMenuItem: (NeevaMenuItemId) -> Unit,
     canGoForward: Boolean
 ) {
@@ -48,6 +65,7 @@ fun OverflowMenu(
     }
 
     OverflowMenu(
+        hideButtons = hideButtons,
         onMenuItem = onMenuItem,
         disabledMenuItems = disabledMenuItems
     )
@@ -55,6 +73,7 @@ fun OverflowMenu(
 
 @Composable
 fun OverflowMenu(
+    hideButtons: Boolean,
     onMenuItem: (NeevaMenuItemId) -> Unit,
     disabledMenuItems: List<NeevaMenuItemId>,
     isInitiallyExpanded: Boolean = false
@@ -92,6 +111,7 @@ fun OverflowMenu(
             modifier = Modifier.defaultMinSize(minWidth = 250.dp)
         ) {
             OverflowMenuContents(
+                hideButtons = hideButtons,
                 onMenuItem = onMenuItem,
                 disabledMenuItems = disabledMenuItems,
                 expandedMutator = { newState: Boolean -> expanded = newState }
@@ -112,6 +132,7 @@ private fun OverflowMenuPreview() {
                 )
             ) {
                 OverflowMenu(
+                    hideButtons = false,
                     onMenuItem = {},
                     disabledMenuItems = emptyList(),
                     isInitiallyExpanded = false

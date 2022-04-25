@@ -1,4 +1,4 @@
-package com.neeva.app.urlbar
+package com.neeva.app.browsing.urlbar
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface

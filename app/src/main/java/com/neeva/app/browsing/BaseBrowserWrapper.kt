@@ -13,13 +13,13 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
+import com.neeva.app.browsing.urlbar.URLBarModel
+import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
-import com.neeva.app.urlbar.URLBarModel
-import com.neeva.app.urlbar.URLBarModelImpl
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableDeferred
@@ -246,6 +246,7 @@ abstract class BaseBrowserWrapper internal constructor(
     /** Prepares the WebLayer Browser to interface with our app. */
     override fun createAndAttachBrowser(
         displaySize: Rect,
+        useSingleBrowserToolbar: Boolean,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
         if (!::fragment.isInitialized) {
@@ -282,7 +283,7 @@ abstract class BaseBrowserWrapper internal constructor(
         toolbarJob = activeTabModel.navigationInfoFlow
             .filterNot { it.navigationListSize == 0 }
             .onEach {
-                setToolbarPlaceholders()
+                setToolbarPlaceholders(useSingleBrowserToolbar)
                 toolbarJob?.cancel()
                 toolbarJob = null
             }
@@ -301,23 +302,26 @@ abstract class BaseBrowserWrapper internal constructor(
      * placeholders that are the same height as the real toolbars and offset the toolbars whenever
      * the callback fires.
      */
-    private fun setToolbarPlaceholders() {
+    private fun setToolbarPlaceholders(useSingleBrowserToolbar: Boolean) {
         val browser = browserFlow.value ?: return
+
         val topControlsPlaceholder = View(appContext)
-        val bottomControlsPlaceholder = View(appContext)
-
         browser.setTopView(topControlsPlaceholder)
-        browser.setBottomView(bottomControlsPlaceholder)
 
-        // The placeholders are now in the View hierarchy, so they now have LayoutParams that we can
+        // The placeholder is now in the View hierarchy, so they now have LayoutParams that we can
         // set to our desired toolbar heights.
         topControlsPlaceholder.layoutParams.height =
             appContext.resources.getDimensionPixelSize(R.dimen.top_toolbar_height)
-        bottomControlsPlaceholder.layoutParams.height =
-            appContext.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height)
-
         topControlsPlaceholder.requestLayout()
-        bottomControlsPlaceholder.requestLayout()
+
+        // Do the same for the bottom controls, if the screen is too narrow to use a single bar.
+        if (!useSingleBrowserToolbar) {
+            val bottomControlsPlaceholder = View(appContext)
+            browser.setBottomView(bottomControlsPlaceholder)
+            bottomControlsPlaceholder.layoutParams.height =
+                appContext.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height)
+            bottomControlsPlaceholder.requestLayout()
+        }
     }
 
     /**

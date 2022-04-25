@@ -8,32 +8,53 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.neeva.app.BottomToolbar
+import com.neeva.app.LocalAppNavModel
+import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.TopToolbar
+import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.browsing.toolbar.BrowserBottomToolbar
+import com.neeva.app.browsing.toolbar.BrowserToolbar
+import com.neeva.app.browsing.toolbar.BrowserToolbarModelImpl
 import com.neeva.app.suggestions.SuggestionPane
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun BrowserScaffold(
-    bottomControlOffset: StateFlow<Float>,
-    topControlOffset: StateFlow<Float>,
+    toolbarConfigurationFlow: StateFlow<ToolbarConfiguration>,
     webLayerModel: WebLayerModel
 ) {
+    val appNavModel = LocalAppNavModel.current
+
     val browserWrapper by webLayerModel.currentBrowserFlow.collectAsState()
     val urlBarModel = browserWrapper.urlBarModel
 
-    val topOffset by topControlOffset.collectAsState()
-    val bottomOffset by bottomControlOffset.collectAsState()
+    val toolbarConfiguration by toolbarConfigurationFlow.collectAsState()
+    val useSingleBrowserToolbar = toolbarConfiguration.useSingleBrowserToolbar
+    val topOffset = toolbarConfiguration.topControlOffset
+    val bottomOffset = toolbarConfiguration.bottomControlOffset
 
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
-    CompositionLocalProvider(LocalBrowserWrapper provides browserWrapper) {
+    val browserToolbarModel = remember(appNavModel, browserWrapper) {
+        BrowserToolbarModelImpl(
+            appNavModel,
+            browserWrapper
+        )
+    }
+
+    CompositionLocalProvider(
+        LocalBrowserToolbarModel provides browserToolbarModel,
+        LocalBrowserWrapper provides browserWrapper
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Make sure that the top toolbar is visible if the user is editing the URL.
-            TopToolbar(if (isEditing) 0f else topOffset)
+            BrowserToolbar(
+                useSingleBrowserToolbar = useSingleBrowserToolbar,
+                topOffset = if (isEditing) 0f else topOffset
+            )
 
             // We have to use a Box with no background because the WebLayer Fragments are displayed
             // in regular Android Views underneath this View in the hierarchy.
@@ -67,8 +88,10 @@ fun BrowserScaffold(
                 }
             }
 
-            if (!isEditing) {
-                BottomToolbar(bottomOffset)
+            if (!isEditing && !useSingleBrowserToolbar) {
+                BrowserBottomToolbar(
+                    bottomOffset = bottomOffset
+                )
             }
         }
     }

@@ -24,6 +24,7 @@ import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
+import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Space
@@ -34,7 +35,6 @@ import com.neeva.app.ui.layouts.GridLayout
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.collapsingsection.collapsingSection
 import com.neeva.app.ui.widgets.collapsingsection.collapsingThreeStateSection
-import com.neeva.app.urlbar.URLBarModel
 
 data class SuggestedSite(
     val site: Site,

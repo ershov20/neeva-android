@@ -3,6 +3,7 @@ package com.neeva.app
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
+data class ToolbarConfiguration(
+    /** Whether the browser is showing a single toolbar or both a top and bottom toolbar. */
+    val useSingleBrowserToolbar: Boolean = false,
+
+    /** Offsets the top toolbar so that it can smoothly leave and return. */
+    val topControlOffset: Float = 0.0f,
+
+    /** Offsets the bottom toolbar so that it can smoothly leave and return. */
+    val bottomControlOffset: Float = 0.0f
+)
+
 class NeevaActivityViewModel(
     /** Intent that must be processed once WebLayer has finished initializing. */
     private var pendingLaunchIntent: Intent?,
@@ -31,13 +43,7 @@ class NeevaActivityViewModel(
     private val _isUpdateAvailableFlow = MutableStateFlow(false)
     val isUpdateAvailableFlow: StateFlow<Boolean> = _isUpdateAvailableFlow
 
-    /**
-     * WebLayer provides information about when the bottom and top toolbars need to be scrolled off.
-     * We provide a placeholder instead of the real view because WebLayer has a bug that prevents it
-     * from rendering Composables properly.
-     */
-    internal val topControlOffset = MutableStateFlow(0.0f)
-    internal val bottomControlOffset = MutableStateFlow(0.0f)
+    internal val toolbarConfiguration = MutableStateFlow(ToolbarConfiguration())
 
     /**
      * Returns an Intent that needs to be processed when everything has been initialized.
@@ -55,8 +61,28 @@ class NeevaActivityViewModel(
         return intentToReturn
     }
 
-    fun onBottomBarOffsetChanged(offset: Int) { bottomControlOffset.value = offset.toFloat() }
-    fun onTopBarOffsetChanged(offset: Int) { topControlOffset.value = offset.toFloat() }
+    fun determineScreenConfiguration(context: Context) {
+        context.resources.apply {
+            val minScreenWidth = getDimensionPixelSize(R.dimen.min_screen_width_for_one_toolbar)
+            val currentScreenWidth = displayMetrics.widthPixels
+            val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+            toolbarConfiguration.value = toolbarConfiguration.value.copy(
+                useSingleBrowserToolbar = isLandscape && currentScreenWidth >= minScreenWidth
+            )
+        }
+    }
+
+    fun onBottomBarOffsetChanged(offset: Int) {
+        toolbarConfiguration.value = toolbarConfiguration.value.copy(
+            bottomControlOffset = offset.toFloat()
+        )
+    }
+
+    fun onTopBarOffsetChanged(offset: Int) {
+        toolbarConfiguration.value = toolbarConfiguration.value.copy(
+            topControlOffset = offset.toFloat()
+        )
+    }
 
     class Factory(
         private val pendingLaunchIntent: Intent?,

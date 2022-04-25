@@ -11,6 +11,7 @@ import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.browsing.toolbar.BrowserToolbarModel
 import com.neeva.app.cardgrid.CardsPaneModel
 import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.history.HistoryManager
@@ -40,6 +41,7 @@ data class LocalEnvironmentState(
 )
 
 val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("No value set") }
+val LocalBrowserToolbarModel = compositionLocalOf<BrowserToolbarModel> { error("No value set") }
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value set") }
 val LocalCardsPaneModel = compositionLocalOf<CardsPaneModel> { error("No value set") }
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
@@ -50,8 +52,7 @@ val LocalSetDefaultAndroidBrowserManager = compositionLocalOf<SetDefaultAndroidB
 
 @Composable
 fun ActivityUI(
-    bottomControlOffset: StateFlow<Float>,
-    topControlOffset: StateFlow<Float>,
+    toolbarConfiguration: StateFlow<ToolbarConfiguration>,
     webLayerModel: WebLayerModel,
     onSignOut: () -> Unit
 ) {
@@ -61,8 +62,7 @@ fun ActivityUI(
 
     Box {
         AppNav(
-            bottomControlOffset,
-            topControlOffset,
+            toolbarConfiguration = toolbarConfiguration,
             webLayerModel = webLayerModel,
             appNavModel = appNavModel,
             onSignOut = onSignOut,
