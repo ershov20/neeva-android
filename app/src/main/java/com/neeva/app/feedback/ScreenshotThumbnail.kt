@@ -23,6 +23,7 @@ import com.neeva.app.ui.theme.Dimensions
 @Composable
 fun ScreenshotThumbnail(
     bitmap: Bitmap,
+    modifier: Modifier = Modifier,
     tonalElevation: Dp = 1.dp
 ) {
     val it = bitmap.asImageBitmap()
@@ -30,7 +31,7 @@ fun ScreenshotThumbnail(
     Surface(
         shape = RoundedCornerShape(Dimensions.RADIUS_LARGE),
         tonalElevation = tonalElevation,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth()
     ) {
         Row(
             horizontalArrangement = Arrangement.Center

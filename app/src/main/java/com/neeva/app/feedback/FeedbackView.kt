@@ -106,13 +106,15 @@ fun FeedbackView(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = Dimensions.PADDING_LARGE)
                 .verticalScroll(rememberScrollState())
         ) {
             Column {
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
-                Text(text = stringResource(R.string.submit_feedback_help_center_title))
+                Text(
+                    text = stringResource(R.string.submit_feedback_help_center_title),
+                    modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
+                )
 
                 Text(
                     text = stringResource(R.string.submit_feedback_help_center_link),
@@ -120,9 +122,9 @@ fun FeedbackView(
                         color = MaterialTheme.colorScheme.primary,
                         textDecoration = TextDecoration.Underline
                     ),
-                    modifier = Modifier.clickable {
-                        onShowHelp()
-                    }
+                    modifier = Modifier
+                        .clickable { onShowHelp() }
+                        .padding(horizontal = Dimensions.PADDING_LARGE)
                 )
 
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
@@ -135,7 +137,9 @@ fun FeedbackView(
                         R.string.submit_feedback_textfield_placeholder
                     ),
                     minLines = 4,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Dimensions.PADDING_LARGE)
                 )
 
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
@@ -152,7 +156,9 @@ fun FeedbackView(
                         text = urlToSend.value,
                         onTextChanged = { urlToSend.value = it },
                         singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = Dimensions.PADDING_LARGE)
                     )
                 }
 
@@ -166,7 +172,10 @@ fun FeedbackView(
                     )
 
                     AnimatedExpandShrink(isVisible = shareScreenshot.value) {
-                        ScreenshotThumbnail(bitmap = screenshot)
+                        ScreenshotThumbnail(
+                            bitmap = screenshot,
+                            modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
+                        )
                     }
                 }
 
