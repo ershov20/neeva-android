@@ -1,5 +1,6 @@
 package com.neeva.app.storage.favicons
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
@@ -8,14 +9,18 @@ import androidx.annotation.WorkerThread
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.produceState
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import coil.ImageLoader
+import coil.request.ImageRequest
 import com.neeva.app.Dispatchers
 import com.neeva.app.previewDispatchers
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
+import com.neeva.app.storage.entities.Site
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -132,6 +137,27 @@ abstract class FaviconCache(
         // infinite loops of recompositions that can be triggered via [Flow.collectAsState()].
         return produceState<Bitmap?>(initialValue = null, uri) {
             value = getFavicon(uri, generateFavicon)
+        }
+    }
+
+    /**
+     * Returns a [State] that can be used in a Composable based on what can be read from the given
+     * site. If the site contains a valid favicon url with https:// scheme, loads that, if not falls
+     * back to using the FaviconCache. */
+    @Composable
+    fun getFaviconAsync(context: Context, site: Site): State<Bitmap?> {
+        val faviconUri = Uri.parse(site.largestFavicon?.faviconURL ?: "")
+        return when (faviconUri?.scheme) {
+            "https" -> produceState<Bitmap?>(initialValue = null, faviconUri) {
+                value = withContext(dispatchers.io) {
+                    val loader = ImageLoader(context)
+                    val request = ImageRequest.Builder(context).data(faviconUri.toString()).build()
+                    loader.execute(request).drawable?.toBitmap()
+                }
+            }
+            else -> produceState<Bitmap?>(initialValue = null, Uri.parse(site.siteURL)) {
+                value = getFavicon(Uri.parse(site.siteURL), true)
+            }
         }
     }
 

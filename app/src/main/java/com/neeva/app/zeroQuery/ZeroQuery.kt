@@ -24,7 +24,9 @@ import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
+import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.browsing.urlbar.URLBarModel
+import com.neeva.app.history.DefaultSuggestions
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Space
@@ -65,8 +67,27 @@ fun ZeroQuery(
     val isSuggestedQueriesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedQueriesState)
     val isSpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SpacesState)
 
+    val suggestedSearchesWithDefaults: List<QueryRowSuggestion> = remember(suggestedQueries) {
+        val updatedList = suggestedQueries.toMutableList()
+        DefaultSuggestions.DEFAULT_SEARCH_SUGGESTIONS.forEach { suggestion ->
+            if (updatedList.size < 3 && updatedList.none { it.query == suggestion.query }) {
+                updatedList.add(suggestion)
+            }
+        }
+        return@remember updatedList
+    }
+
     val suggestedSitesPlusHome: List<SuggestedSite> = remember(suggestedSites) {
-        suggestedSites
+        val updatedList: MutableList<Site> = suggestedSites.toMutableList()
+        val domainList = updatedList
+            .map { domainProvider.getRegisteredDomain(Uri.parse(it.siteURL)) }
+        DefaultSuggestions.DEFAULT_SITE_SUGGESTIONS.forEach { site ->
+            val siteDomain = domainProvider.getRegisteredDomain(Uri.parse(site.siteURL))
+            if (updatedList.size < 7 && !domainList.contains(siteDomain)) {
+                updatedList.add(site)
+            }
+        }
+        updatedList
             .map { SuggestedSite(it) }
             .toMutableList()
             .apply {
@@ -130,7 +151,7 @@ fun ZeroQuery(
             }
         )
 
-        if (suggestedQueries.isNotEmpty()) {
+        if (suggestedSearchesWithDefaults.isNotEmpty()) {
             item {
                 Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
             }
@@ -142,7 +163,7 @@ fun ZeroQuery(
                     zeroQueryModel.advanceState(ZeroQueryPrefs.SuggestedQueriesState)
                 }
             ) {
-                items(suggestedQueries) { search ->
+                items(suggestedSearchesWithDefaults) { search ->
                     QuerySuggestionRow(
                         suggestion = search,
                         onLoadUrl = browserWrapper::loadUrl,
@@ -184,3 +205,9 @@ fun Site.toSearchSuggest(): QueryRowSuggestion? {
         drawableID = R.drawable.ic_baseline_history_24
     )
 }
+
+fun String.toSearchSuggest(): QueryRowSuggestion = QueryRowSuggestion(
+    url = this.toSearchUri(),
+    query = this,
+    drawableID = R.drawable.ic_baseline_history_24
+)
