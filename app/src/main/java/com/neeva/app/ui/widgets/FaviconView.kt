@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,7 +43,11 @@ fun FaviconView(
             Color.Transparent
         },
         tonalElevation = 1.dp,
-        shape = RoundedCornerShape(Dimensions.RADIUS_SMALL)
+        shape = if (drawContainer) {
+            RoundedCornerShape(Dimensions.RADIUS_SMALL)
+        } else {
+            RectangleShape
+        }
     ) {
         val sizeModifier = Modifier.size(Dimensions.SIZE_ICON)
         Box(

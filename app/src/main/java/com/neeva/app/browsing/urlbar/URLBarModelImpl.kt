@@ -30,7 +30,7 @@ class URLBarModelImpl(
     private val faviconCache: FaviconCache
 ) : URLBarModel {
     internal val neevaFavicon =
-        AppCompatResources.getDrawable(appContext, R.mipmap.ic_neeva_logo)?.toBitmap()
+        AppCompatResources.getDrawable(appContext, R.drawable.ic_neeva_logo)?.toBitmap()
 
     private val _state = MutableStateFlow(URLBarModelState())
     override val state: StateFlow<URLBarModelState> = _state
