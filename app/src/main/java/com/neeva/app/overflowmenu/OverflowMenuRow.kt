@@ -1,4 +1,4 @@
-package com.neeva.app.neeva_menu
+package com.neeva.app.overflowmenu
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
@@ -19,8 +19,8 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun NeevaMenuIcon(
-    itemData: NeevaMenuItemData,
+fun OverflowMenuIcon(
+    itemData: OverflowMenuItem,
     modifier: Modifier = Modifier
 ) {
     val label = itemData.labelId?.let { stringResource(it) } ?: ""
@@ -41,9 +41,9 @@ fun NeevaMenuIcon(
 }
 
 @Composable
-fun NeevaMenuRow(
-    itemData: NeevaMenuItemData,
-    onMenuItem: (NeevaMenuItemId) -> Unit
+fun OverflowMenuRow(
+    itemData: OverflowMenuItem,
+    onMenuItem: (OverflowMenuItemId) -> Unit
 ) {
     val label = itemData.labelId?.let { stringResource(it) } ?: ""
 
@@ -65,7 +65,7 @@ fun NeevaMenuRow(
             maxLines = 1,
         )
 
-        NeevaMenuIcon(
+        OverflowMenuIcon(
             itemData = itemData,
             modifier = Modifier.size(Dimensions.SIZE_TOUCH_TARGET)
         )
@@ -77,9 +77,9 @@ fun NeevaMenuRow(
 @Composable
 fun NeevaMenuRow_Preview() {
     NeevaTheme {
-        NeevaMenuRow(
-            itemData = NeevaMenuItemData(
-                id = NeevaMenuItemId.HISTORY,
+        OverflowMenuRow(
+            itemData = OverflowMenuItem(
+                id = OverflowMenuItemId.HISTORY,
                 labelId = R.string.history,
                 imageResourceID = R.drawable.ic_baseline_history_24
             ),
@@ -95,9 +95,9 @@ fun NeevaMenuRow_Preview() {
 @Composable
 fun NeevaMenuRow_PreviewLongText() {
     NeevaTheme {
-        NeevaMenuRow(
-            itemData = NeevaMenuItemData(
-                id = NeevaMenuItemId.HISTORY,
+        OverflowMenuRow(
+            itemData = OverflowMenuItem(
+                id = OverflowMenuItemId.HISTORY,
                 labelId = R.string.debug_long_string_primary,
                 imageResourceID = R.drawable.ic_baseline_history_24
             ),

@@ -17,7 +17,6 @@ import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import java.net.URISyntaxException
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 data class ToolbarConfiguration(
@@ -28,7 +27,10 @@ data class ToolbarConfiguration(
     val topControlOffset: Float = 0.0f,
 
     /** Offsets the bottom toolbar so that it can smoothly leave and return. */
-    val bottomControlOffset: Float = 0.0f
+    val bottomControlOffset: Float = 0.0f,
+
+    /** Whether or not an app update is available to the user.  Used to badge the overflow menu. */
+    val isUpdateAvailable: Boolean = false
 )
 
 class NeevaActivityViewModel(
@@ -40,9 +42,6 @@ class NeevaActivityViewModel(
     private val snackbarModel: SnackbarModel,
     private val dispatchers: Dispatchers
 ) : ViewModel() {
-    private val _isUpdateAvailableFlow = MutableStateFlow(false)
-    val isUpdateAvailableFlow: StateFlow<Boolean> = _isUpdateAvailableFlow
-
     internal val toolbarConfiguration = MutableStateFlow(ToolbarConfiguration())
 
     /**
@@ -113,8 +112,10 @@ class NeevaActivityViewModel(
         val appUpdateManager = AppUpdateManagerFactory.create(context)
         appUpdateManager.appUpdateInfo
             .addOnSuccessListener { info ->
-                _isUpdateAvailableFlow.value = info.updateAvailability() == UPDATE_AVAILABLE
-                Log.i(TAG, "Update check result: ${_isUpdateAvailableFlow.value}")
+                toolbarConfiguration.value = toolbarConfiguration.value.copy(
+                    isUpdateAvailable = info.updateAvailability() == UPDATE_AVAILABLE
+                )
+                Log.i(TAG, "Update check result: ${toolbarConfiguration.value.isUpdateAvailable}")
             }
             .addOnFailureListener {
                 Log.w(TAG, "Failed to check for update", it)

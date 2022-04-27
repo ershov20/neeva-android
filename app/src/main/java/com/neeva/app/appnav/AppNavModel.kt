@@ -4,7 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
-import com.neeva.app.neeva_menu.NeevaMenuItemId
+import com.neeva.app.overflowmenu.OverflowMenuItemId
 import kotlinx.coroutines.flow.StateFlow
 
 /** Handles navigation between different screens, both internally and to external destinations. */
@@ -50,7 +50,7 @@ interface AppNavModel {
     /** Fires a Share Intent for the currently displayed page. */
     fun shareCurrentPage()
 
-    fun onMenuItem(id: NeevaMenuItemId)
+    fun onMenuItem(id: OverflowMenuItemId)
 
     fun debugOpenManyTabs(numTabs: Int = 50)
 }

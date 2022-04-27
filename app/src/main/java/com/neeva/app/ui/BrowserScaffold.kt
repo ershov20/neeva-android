@@ -33,8 +33,6 @@ fun BrowserScaffold(
 
     val toolbarConfiguration by toolbarConfigurationFlow.collectAsState()
     val useSingleBrowserToolbar = toolbarConfiguration.useSingleBrowserToolbar
-    val topOffset = toolbarConfiguration.topControlOffset
-    val bottomOffset = toolbarConfiguration.bottomControlOffset
 
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
@@ -53,7 +51,8 @@ fun BrowserScaffold(
             // Make sure that the top toolbar is visible if the user is editing the URL.
             BrowserToolbar(
                 useSingleBrowserToolbar = useSingleBrowserToolbar,
-                topOffset = if (isEditing) 0f else topOffset
+                isUpdateAvailable = toolbarConfiguration.isUpdateAvailable,
+                topOffset = if (isEditing) 0f else toolbarConfiguration.topControlOffset
             )
 
             // We have to use a Box with no background because the WebLayer Fragments are displayed
@@ -90,7 +89,7 @@ fun BrowserScaffold(
 
             if (!isEditing && !useSingleBrowserToolbar) {
                 BrowserBottomToolbar(
-                    bottomOffset = bottomOffset
+                    bottomOffset = toolbarConfiguration.bottomControlOffset
                 )
             }
         }

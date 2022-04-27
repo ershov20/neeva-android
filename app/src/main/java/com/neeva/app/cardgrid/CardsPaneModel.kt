@@ -14,7 +14,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalEnvironment
-import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
@@ -33,7 +32,6 @@ interface CardsPaneModel {
 
     fun switchScreen(newSelectedScreen: SelectedScreen)
     fun showBrowser()
-    fun showSpacesWebsite()
 
     fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo)
     fun closeTab(browserWrapper: BrowserWrapper, tab: TabInfo)
@@ -115,11 +113,6 @@ class CardsPaneModelImpl(
     override fun showBrowser() {
         appNavModel.showBrowser()
         webLayerModel.deleteIncognitoProfileIfUnused()
-    }
-
-    override fun showSpacesWebsite() {
-        appNavModel.showBrowser()
-        webLayerModel.currentBrowser.loadUrl(Uri.parse(NeevaConstants.appSpacesURL))
     }
 
     override fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo) {

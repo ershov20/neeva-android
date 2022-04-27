@@ -15,8 +15,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -44,8 +42,6 @@ import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
-import com.neeva.app.neeva_menu.LocalMenuData
-import com.neeva.app.neeva_menu.LocalMenuDataState
 import com.neeva.app.settings.LocalDebugFlags
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
@@ -119,7 +115,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         findViewById<ComposeView>(R.id.browser_ui).apply {
             setContent {
                 val navController = rememberAnimatedNavController()
-                val isUpdateAvailable by activityViewModel.isUpdateAvailableFlow.collectAsState()
                 val context = LocalContext.current
 
                 appNavModel = remember(navController) {
@@ -151,9 +146,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         LocalEnvironment provides localEnvironmentState,
                         LocalFeedbackViewModel provides feedbackViewModel,
                         LocalFirstRunModel provides firstRunModel,
-                        LocalMenuData provides LocalMenuDataState(
-                            isUpdateAvailableVisible = isUpdateAvailable
-                        ),
                         LocalSetDefaultAndroidBrowserManager
                             provides setDefaultAndroidBrowserManager
                     ) {

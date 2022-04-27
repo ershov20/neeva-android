@@ -18,7 +18,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
-import com.neeva.app.neeva_menu.NeevaMenuItemId
+import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
@@ -214,50 +214,58 @@ class AppNavModelImpl(
         }
     }
 
-    override fun onMenuItem(id: NeevaMenuItemId) {
+    override fun onMenuItem(id: OverflowMenuItemId) {
         when (id) {
-            NeevaMenuItemId.SETTINGS -> {
+            OverflowMenuItemId.SETTINGS -> {
                 showSettings()
             }
 
-            NeevaMenuItemId.HISTORY -> {
+            OverflowMenuItemId.HISTORY -> {
                 showHistory()
             }
 
-            NeevaMenuItemId.FORWARD -> {
+            OverflowMenuItemId.FORWARD -> {
                 webLayerModel.currentBrowser.goForward()
             }
 
-            NeevaMenuItemId.RELOAD -> {
+            OverflowMenuItemId.RELOAD -> {
                 webLayerModel.currentBrowser.reload()
             }
 
-            NeevaMenuItemId.SHOW_PAGE_INFO -> {
+            OverflowMenuItemId.SHOW_PAGE_INFO -> {
                 webLayerModel.currentBrowser.showPageInfo()
             }
 
-            NeevaMenuItemId.FIND_IN_PAGE -> {
+            OverflowMenuItemId.FIND_IN_PAGE -> {
                 webLayerModel.currentBrowser.showFindInPage()
             }
 
-            NeevaMenuItemId.TOGGLE_DESKTOP_SITE -> {
+            OverflowMenuItemId.TOGGLE_DESKTOP_SITE -> {
                 webLayerModel.currentBrowser.toggleViewDesktopSite()
             }
 
-            NeevaMenuItemId.SUPPORT -> {
+            OverflowMenuItemId.SUPPORT -> {
                 showFeedback()
             }
 
-            NeevaMenuItemId.UPDATE -> {
+            OverflowMenuItemId.UPDATE -> {
                 openUrlViaIntent(NeevaConstants.playStoreUri)
             }
 
-            NeevaMenuItemId.DOWNLOADS -> {
+            OverflowMenuItemId.DOWNLOADS -> {
                 safeStartActivityForIntent(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
             }
 
-            else -> {
-                // Unimplemented screens.
+            OverflowMenuItemId.SPACES_WEBSITE -> {
+                openUrl(Uri.parse(NeevaConstants.appSpacesURL))
+            }
+
+            OverflowMenuItemId.CLOSE_ALL_TABS -> {
+                // Handled elsewhere
+            }
+
+            OverflowMenuItemId.SEPARATOR -> {
+                // Non-actionable.
             }
         }
     }

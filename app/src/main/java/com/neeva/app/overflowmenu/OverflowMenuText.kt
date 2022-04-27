@@ -1,4 +1,4 @@
-package com.neeva.app.neeva_menu
+package com.neeva.app.overflowmenu
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme

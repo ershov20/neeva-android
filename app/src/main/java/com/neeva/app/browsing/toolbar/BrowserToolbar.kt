@@ -15,25 +15,31 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
+import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.findinpage.FindInPageToolbar
 import com.neeva.app.browsing.urlbar.URLBar
-import com.neeva.app.neeva_menu.OverflowMenu
+import com.neeva.app.overflowmenu.OverflowMenu
+import com.neeva.app.settings.LocalDebugFlags
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun BrowserToolbar(
     useSingleBrowserToolbar: Boolean,
+    isUpdateAvailable: Boolean,
     topOffset: Float
 ) {
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
     BrowserToolbar(
         useSingleBrowserToolbar = useSingleBrowserToolbar,
+        isUpdateAvailable = isUpdateAvailable,
         modifier = Modifier
             .offset(y = topOffsetDp)
             .background(MaterialTheme.colorScheme.background)
@@ -43,8 +49,10 @@ fun BrowserToolbar(
 @Composable
 fun BrowserToolbar(
     useSingleBrowserToolbar: Boolean,
+    isUpdateAvailable: Boolean,
     modifier: Modifier
 ) {
+    val browserToolbarModel = LocalBrowserToolbarModel.current
     val browserWrapper = LocalBrowserWrapper.current
 
     val urlBarModel = browserWrapper.urlBarModel
@@ -55,6 +63,7 @@ fun BrowserToolbar(
 
     val activeTabModel = browserWrapper.activeTabModel
     val progress: Int by activeTabModel.progressFlow.collectAsState()
+    val navigationInfoFlow = activeTabModel.navigationInfoFlow.collectAsState()
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -69,6 +78,27 @@ fun BrowserToolbar(
                 onScrollToResult = { forward -> findInPageModel.scrollToFindInPageResult(forward) }
             )
         } else {
+            val isDesktopUserAgentEnabled = navigationInfoFlow.value.desktopUserAgentEnabled
+            val isForwardEnabled = navigationInfoFlow.value.canGoForward
+            val enableShowDesktopSite = LocalEnvironment.current.settingsDataModel
+                .getDebugFlagValue(LocalDebugFlags.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
+
+            val overflowMenuData = remember(
+                useSingleBrowserToolbar,
+                isForwardEnabled,
+                isUpdateAvailable,
+                isDesktopUserAgentEnabled,
+                enableShowDesktopSite
+            ) {
+                createBrowserOverflowMenuData(
+                    isIconRowVisible = !useSingleBrowserToolbar,
+                    isForwardEnabled = isForwardEnabled,
+                    isUpdateAvailableVisible = isUpdateAvailable,
+                    isDesktopUserAgentEnabled = isDesktopUserAgentEnabled,
+                    enableShowDesktopSite = enableShowDesktopSite
+                )
+            }
+
             Box {
                 if (useSingleBrowserToolbar) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -102,7 +132,10 @@ fun BrowserToolbar(
 
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
 
-                                OverflowMenu(hideButtons = useSingleBrowserToolbar)
+                                OverflowMenu(
+                                    overflowMenuData = overflowMenuData,
+                                    onMenuItem = browserToolbarModel::onMenuItem
+                                )
 
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                             }
@@ -110,7 +143,10 @@ fun BrowserToolbar(
                     }
                 } else {
                     URLBar {
-                        OverflowMenu(hideButtons = useSingleBrowserToolbar)
+                        OverflowMenu(
+                            overflowMenuData = overflowMenuData,
+                            onMenuItem = browserToolbarModel::onMenuItem
+                        )
                     }
                 }
 

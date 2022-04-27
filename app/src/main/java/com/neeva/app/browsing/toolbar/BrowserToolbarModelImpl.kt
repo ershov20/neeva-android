@@ -2,7 +2,7 @@ package com.neeva.app.browsing.toolbar
 
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
-import com.neeva.app.neeva_menu.NeevaMenuItemId
+import com.neeva.app.overflowmenu.OverflowMenuItemId
 
 class BrowserToolbarModelImpl(
     private val appNavModel: AppNavModel,
@@ -14,7 +14,7 @@ class BrowserToolbarModelImpl(
 
     override fun share() = appNavModel.shareCurrentPage()
     override fun onAddToSpace() = appNavModel.showAddToSpace()
-    override fun onMenuItem(id: NeevaMenuItemId) = appNavModel.onMenuItem(id)
+    override fun onMenuItem(id: OverflowMenuItemId) = appNavModel.onMenuItem(id)
 
     override fun onTabSwitcher() {
         browserWrapper.takeScreenshotOfActiveTab {

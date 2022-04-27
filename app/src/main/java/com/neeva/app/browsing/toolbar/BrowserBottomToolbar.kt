@@ -20,7 +20,7 @@ import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.neeva_menu.NeevaMenuItemId
+import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -138,7 +138,7 @@ private class PreviewBrowserToolbarModel(
     override fun reload() {}
     override fun share() {}
     override fun onAddToSpace() {}
-    override fun onMenuItem(id: NeevaMenuItemId) {}
+    override fun onMenuItem(id: OverflowMenuItemId) {}
     override fun onTabSwitcher() {}
 
     override val navigationInfoFlow = MutableStateFlow(navigationInfo)

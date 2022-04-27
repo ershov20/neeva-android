@@ -35,7 +35,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.neeva_menu.OverflowMenu
+import com.neeva.app.overflowmenu.OverflowMenu
+import com.neeva.app.overflowmenu.OverflowMenuData
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
@@ -201,7 +202,12 @@ private fun URLPreview() {
                 displayedText = urlBarText,
                 showIncognitoBadge = isIncognito,
                 placeholderColor = Color.Magenta,
-                endComposable = { OverflowMenu(onMenuItem = { }) },
+                endComposable = {
+                    OverflowMenu(
+                        overflowMenuData = OverflowMenuData(),
+                        onMenuItem = { }
+                    )
+                },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
@@ -228,7 +234,10 @@ private fun QueryPreview() {
                 showIncognitoBadge = isIncognito,
                 placeholderColor = Color.Magenta,
                 endComposable = {
-                    OverflowMenu(onMenuItem = { })
+                    OverflowMenu(
+                        overflowMenuData = OverflowMenuData(),
+                        onMenuItem = {}
+                    )
                 },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
@@ -255,7 +264,10 @@ private fun NeevaHomepagePreview() {
                 showIncognitoBadge = isIncognito,
                 placeholderColor = placeholderColor,
                 endComposable = {
-                    OverflowMenu(onMenuItem = { })
+                    OverflowMenu(
+                        overflowMenuData = OverflowMenuData(),
+                        onMenuItem = {}
+                    )
                 },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
