@@ -68,7 +68,7 @@ fun CardsPaneToolbar(browserWrapper: BrowserWrapper) {
                     onSwitchScreen = cardsPaneModel::switchScreen,
                     onLeaveIncognito = {
                         if (closeIncognitoTabsOnScreenSwitch) {
-                            cardsPaneModel.closeAllTabs(browserWrapper)
+                            cardsPaneModel.closeAllIncognitoTabs()
                         }
                     }
                 )

@@ -38,6 +38,8 @@ interface CardsPaneModel {
     fun openLazyTab(browserWrapper: BrowserWrapper)
     fun closeAllTabs(browserWrapper: BrowserWrapper)
 
+    fun closeAllIncognitoTabs()
+
     fun selectSpace(browserWrapper: BrowserWrapper, spaceUrl: Uri)
     fun createSpace()
 }
@@ -130,6 +132,10 @@ class CardsPaneModelImpl(
 
     override fun closeAllTabs(browserWrapper: BrowserWrapper) {
         browserWrapper.closeAllTabs()
+    }
+
+    override fun closeAllIncognitoTabs() {
+        webLayerModel.browsersFlow.value.incognitoBrowserWrapper?.closeAllTabs()
     }
 
     override fun selectSpace(browserWrapper: BrowserWrapper, spaceUrl: Uri) {
