@@ -54,5 +54,6 @@ enum class SharedPrefFolder {
     USER,
     FIRST_RUN,
     ZERO_QUERY,
-    HISTORY_UI
+    HISTORY_UI,
+    APP,
 }

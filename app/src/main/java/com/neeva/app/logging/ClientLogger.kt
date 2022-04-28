@@ -5,6 +5,7 @@ import com.neeva.app.ApolloWrapper
 import com.neeva.app.BuildConfig
 import com.neeva.app.LogMutation
 import com.neeva.app.NeevaConstants
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.ClientLog
 import com.neeva.app.type.ClientLogBase
 import com.neeva.app.type.ClientLogCounter
@@ -19,6 +20,7 @@ enum class ClientLoggerStatus {
 
 class ClientLogger(
     private val apolloWrapper: ApolloWrapper,
+    private val sharedPreferencesModel: SharedPreferencesModel
 ) {
     private val env: ClientLogEnvironment =
         if (BuildConfig.DEBUG) ClientLogEnvironment.Dev else ClientLogEnvironment.Prod
@@ -38,12 +40,23 @@ class ClientLogger(
             return
         }
 
+        val mutableAttributes = attributes?.toMutableList() ?: ArrayList()
+        if (path.category == LogConfig.Category.FIRST_RUN ||
+            path.category == LogConfig.Category.STABILITY
+        ) {
+            val sessionIdAttribute = ClientLogCounterAttribute(
+                Optional.presentIfNotNull(LogConfig.Attributes.SESSION_UUID_V2.attributeName),
+                Optional.presentIfNotNull(LogConfig.sessionID(sharedPreferencesModel))
+            )
+            mutableAttributes?.add(sessionIdAttribute)
+        }
+
         // Check feature flag when we start supporting it
         val clientLogBase =
             ClientLogBase(NeevaConstants.browserIdentifier, BuildConfig.VERSION_NAME, env)
         val clientLogCounter = ClientLogCounter(
             path.interactionName,
-            Optional.presentIfNotNull(attributes)
+            Optional.presentIfNotNull(mutableAttributes)
         )
         val clientLog = ClientLog(Optional.presentIfNotNull(clientLogCounter))
         val logMutation = LogMutation(

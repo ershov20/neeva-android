@@ -52,8 +52,11 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesClientLogger(apolloWrapper: ApolloWrapper): ClientLogger {
-        return ClientLogger(apolloWrapper)
+    fun providesClientLogger(
+        apolloWrapper: ApolloWrapper,
+        sharedPreferencesModel: SharedPreferencesModel,
+    ): ClientLogger {
+        return ClientLogger(apolloWrapper, sharedPreferencesModel)
     }
 
     @Provides
