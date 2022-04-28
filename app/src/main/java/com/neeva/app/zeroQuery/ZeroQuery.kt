@@ -18,8 +18,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
@@ -28,6 +30,8 @@ import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.history.DefaultSuggestions
 import com.neeva.app.spaces.SpaceRow
+import com.neeva.app.spaces.SpaceRowData
+import com.neeva.app.spaces.getThumbnailAsync
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.favicons.FaviconCache
@@ -52,6 +56,7 @@ fun ZeroQuery(
     val browserWrapper = LocalBrowserWrapper.current
     val domainProvider = LocalEnvironment.current.domainProvider
     val historyManager = LocalEnvironment.current.historyManager
+    val appNavModel = LocalAppNavModel.current
     val spaceStore = LocalEnvironment.current.spaceStore
     val sharedPreferencesModel = LocalEnvironment.current.sharedPreferencesModel
 
@@ -65,6 +70,7 @@ fun ZeroQuery(
     val zeroQueryModel = remember { ZeroQueryModel(sharedPreferencesModel) }
     val isSuggestedSitesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedSitesState)
     val isSuggestedQueriesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedQueriesState)
+    val isCommunitySpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.CommunitySpacesState)
     val isSpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SpacesState)
 
     val suggestedSearchesWithDefaults: List<QueryRowSuggestion> = remember(suggestedQueries) {
@@ -106,6 +112,9 @@ fun ZeroQuery(
             }
             .take(8)
     }
+
+    val communitySpaces: List<SpaceRowData>
+        by spaceStore.spacesFromCommunityFlow.collectAsState(emptyList())
 
     LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         item {
@@ -169,6 +178,31 @@ fun ZeroQuery(
                         onLoadUrl = browserWrapper::loadUrl,
                         onEditUrl = { urlBarModel.replaceLocationBarText(search.query) }
                     )
+                }
+            }
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
+        }
+
+        collapsingSection(
+            label = R.string.community_spaces,
+            collapsingSectionState = isCommunitySpacesExpanded.value,
+            onUpdateCollapsingSectionState = {
+                zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
+            }
+        ) {
+            items(communitySpaces.take(5), key = { it.id }) {
+                val thumbnail: ImageBitmap? by getThumbnailAsync(uri = it.thumbnail)
+                SpaceRow(
+                    spaceName = it.name,
+                    isSpacePublic = it.isPublic,
+                    thumbnail = thumbnail,
+                    isCurrentUrlInSpace = null
+                ) {
+                    appNavModel.openUrl(it.url())
+                    appNavModel.showBrowser()
                 }
             }
         }

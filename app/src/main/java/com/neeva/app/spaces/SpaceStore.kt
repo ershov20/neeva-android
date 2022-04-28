@@ -7,13 +7,15 @@ import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.AddToSpaceMutation
-import com.neeva.app.ApolloWrapper
+import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.CreateSpaceMutation
 import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
+import com.neeva.app.NeevaConstants.appSpacesURL
 import com.neeva.app.R
+import com.neeva.app.UnauthenticatedApolloWrapper
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.entities.Space
@@ -39,7 +41,8 @@ class SpaceStore(
     private val appContext: Context,
     historyDatabase: HistoryDatabase,
     private val coroutineScope: CoroutineScope,
-    private val apolloWrapper: ApolloWrapper,
+    private val unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
+    private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
     private val neevaUser: NeevaUser,
     private val snackbarModel: SnackbarModel,
     private val dispatchers: Dispatchers
@@ -48,6 +51,7 @@ class SpaceStore(
         private val TAG = SpaceStore::class.simpleName
         private const val DIRECTORY = "spaces"
         private const val MAX_THUMBNAIL_SIZE = 300
+        private const val MAKER_COMMUNITY_SPACE_ID = "xlvaUJmdPRSrcqRHPEzVPuWf4RP74EyHvz5QvxLN"
     }
 
     enum class State {
@@ -66,6 +70,9 @@ class SpaceStore(
         .map { it.filterNot { space -> space.userACL >= SpaceACLLevel.Edit } }
     val stateFlow = MutableStateFlow(State.READY)
 
+    val spacesFromCommunityFlow: MutableStateFlow<List<SpaceRowData>> =
+        MutableStateFlow(emptyList())
+
     @VisibleForTesting
     val thumbnailDirectory = File(appContext.cacheDir, DIRECTORY)
 
@@ -83,7 +90,12 @@ class SpaceStore(
     }
 
     suspend fun refresh(space: Space? = null) {
-        if (neevaUser.neevaUserToken.getToken().isEmpty()) return
+        if (neevaUser.neevaUserToken.getToken().isEmpty()) {
+            if (space == null) {
+                fetchCommunitySpaces()
+            }
+            return
+        }
         // TODO(yusuf) : Early return here if there is no connectivity
 
         if (stateFlow.value == State.REFRESHING) {
@@ -93,6 +105,7 @@ class SpaceStore(
 
         stateFlow.value = State.REFRESHING
         val succeeded = if (space == null) {
+            fetchCommunitySpaces()
             performRefresh()
         } else {
             performFetch(listOf(space))
@@ -121,9 +134,43 @@ class SpaceStore(
         }
     }
 
+    private suspend fun fetchCommunitySpaces() = withContext(dispatchers.io) {
+        val response =
+            unauthenticatedApolloWrapper.performQuery(
+                GetSpacesDataQuery(Optional.presentIfNotNull(listOf(MAKER_COMMUNITY_SPACE_ID))),
+                userMustBeLoggedIn = false
+            )
+
+        val entities = response?.data?.getSpace?.space?.first()?.space?.entities
+            ?.filter {
+                it.spaceEntity?.url?.startsWith(appSpacesURL) == true &&
+                    it.spaceEntity.title?.isNotEmpty() == true &&
+                    Uri.parse(it.spaceEntity.url).pathSegments.size == 2
+            }
+            ?: return@withContext
+        spacesFromCommunityFlow.emit(
+            entities.map {
+                val spaceData = SpaceRowData(
+                    id = Uri.parse(it.spaceEntity?.url!!).pathSegments[1],
+                    name = it.spaceEntity.title!!,
+                    thumbnail = null,
+                    isPublic = true
+                )
+                spaceData.thumbnail = BitmapIO.saveBitmap(
+                    directory = thumbnailDirectory.resolve(MAKER_COMMUNITY_SPACE_ID),
+                    dispatchers = dispatchers,
+                    id = spaceData.id,
+                    bitmapString = it.spaceEntity.thumbnail,
+                    maxSize = MAX_THUMBNAIL_SIZE
+                )?.toUri()
+                return@map spaceData
+            }
+        )
+    }
+
     private suspend fun performRefresh(): Boolean = withContext(dispatchers.io) {
         val response =
-            apolloWrapper.performQuery(ListSpacesQuery(), userMustBeLoggedIn = true)
+            authenticatedApolloWrapper.performQuery(ListSpacesQuery(), userMustBeLoggedIn = true)
                 ?: return@withContext false
 
         // If there are no spaces to process, but the response was fine, just indicate success.
@@ -157,7 +204,7 @@ class SpaceStore(
         if (spacesToFetch.isEmpty()) return true
 
         // Get updated data for any Spaces that have changed since the last fetch.
-        val spacesDataResponse = apolloWrapper.performQuery(
+        val spacesDataResponse = authenticatedApolloWrapper.performQuery(
             GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id })),
             userMustBeLoggedIn = true
         ) ?: return false
@@ -243,9 +290,11 @@ class SpaceStore(
     private suspend fun cleanupSpacesThumbnails() {
         val idList = dao.allSpaceIds()
         thumbnailDirectory
-            .list { file, _ -> file.isDirectory }
-            ?.filterNot { folderName -> idList.contains(folderName) }
-            ?.forEach {
+            .list { file, _ ->
+                file.isDirectory
+            }?.filterNot { folderName ->
+                folderName == MAKER_COMMUNITY_SPACE_ID || idList.contains(folderName)
+            }?.forEach {
                 thumbnailDirectory.resolve(it).deleteRecursively()
             }
     }
@@ -257,7 +306,7 @@ class SpaceStore(
         description: String? = null
     ): Boolean {
         val spaceID = space.id
-        val response = apolloWrapper.performMutation(
+        val response = authenticatedApolloWrapper.performMutation(
             AddToSpaceMutation(
                 input = AddSpaceResultByURLInput(
                     spaceID = spaceID,
@@ -285,7 +334,7 @@ class SpaceStore(
 
     suspend fun removeFromSpace(space: Space, uri: Uri): Boolean {
         val spaceID = space.id
-        val response = apolloWrapper.performMutation(
+        val response = authenticatedApolloWrapper.performMutation(
             DeleteSpaceResultByURLMutation(
                 input = DeleteSpaceResultByURLInput(
                     spaceID = spaceID,
@@ -310,7 +359,7 @@ class SpaceStore(
 
     fun createSpace(spaceName: String) {
         coroutineScope.launch(dispatchers.io) {
-            val response = apolloWrapper.performMutation(
+            val response = authenticatedApolloWrapper.performMutation(
                 CreateSpaceMutation(name = spaceName),
                 userMustBeLoggedIn = true
             )

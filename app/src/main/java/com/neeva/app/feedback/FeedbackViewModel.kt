@@ -8,7 +8,7 @@ import android.view.Window
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
-import com.neeva.app.ApolloWrapper
+import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.SendFeedbackMutation
 import com.neeva.app.browsing.BrowserWrapper
@@ -27,7 +27,7 @@ import kotlinx.coroutines.withContext
 @HiltViewModel
 class FeedbackViewModel @Inject constructor(
     private val user: NeevaUser,
-    private val apolloWrapper: ApolloWrapper,
+    private val apolloWrapper: AuthenticatedApolloWrapper,
     private val dispatchers: Dispatchers
 ) : ViewModel() {
     companion object {

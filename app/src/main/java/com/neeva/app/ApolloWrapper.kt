@@ -1,6 +1,7 @@
 package com.neeva.app
 
 import android.util.Log
+import androidx.annotation.CallSuper
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Mutation
@@ -21,9 +22,86 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 
-/** Manages an Apollo client that can be used to fire queries and mutations at the Neeva backend. */
-open class ApolloWrapper(
+/** Authenticated version of [ApolloWrapper] that sends the user token */
+open class AuthenticatedApolloWrapper(
     private val neevaUserToken: NeevaUserToken,
+    _apolloClient: ApolloClient? = null,
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers
+) : ApolloWrapper(
+    _apolloClient = _apolloClient,
+    coroutineScope = coroutineScope,
+    dispatchers = dispatchers
+) {
+    override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
+        val cookies = super.loadForRequest(url)
+        val token = neevaUserToken.getToken() ?: return cookies
+        if (token.isNotEmpty()) {
+            val authCookie = Cookie.Builder().name(loginCookie).secure()
+                .domain(appHost).expiresAt(Long.MAX_VALUE).value(token).build()
+            cookies.add(authCookie)
+        }
+        return cookies
+    }
+
+    override suspend fun <D : Mutation.Data> performMutation(
+        mutation: Mutation<D>,
+        userMustBeLoggedIn: Boolean
+    ): ApolloResponse<D>? {
+        if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
+            Log.i(TAG, "Could not perform mutation because user was not logged in: $mutation")
+            return null
+        }
+        return super.performMutation(mutation, userMustBeLoggedIn)
+    }
+
+    override suspend fun <D : Query.Data> performQuery(
+        query: Query<D>,
+        userMustBeLoggedIn: Boolean
+    ): ApolloResponse<D>? {
+        if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
+            Log.i(TAG, "Could not perform query because user was not logged in: $query")
+            return null
+        }
+        return super.performQuery(query, userMustBeLoggedIn)
+    }
+}
+
+/** Unauthenticated version of [ApolloWrapper] that only send browser cookies and no user token */
+open class UnauthenticatedApolloWrapper(
+    _apolloClient: ApolloClient? = null,
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers
+) : ApolloWrapper(
+    _apolloClient = _apolloClient,
+    coroutineScope = coroutineScope,
+    dispatchers = dispatchers
+) {
+    override suspend fun <D : Mutation.Data> performMutation(
+        mutation: Mutation<D>,
+        userMustBeLoggedIn: Boolean
+    ): ApolloResponse<D>? {
+        if (userMustBeLoggedIn) {
+            Log.i(TAG, "Could not perform mutation, it requires logged in user: $mutation")
+            return null
+        }
+        return super.performMutation(mutation, userMustBeLoggedIn)
+    }
+
+    override suspend fun <D : Query.Data> performQuery(
+        query: Query<D>,
+        userMustBeLoggedIn: Boolean
+    ): ApolloResponse<D>? {
+        if (userMustBeLoggedIn) {
+            Log.i(TAG, "Could not perform query, it requires logged in user: $query")
+            return null
+        }
+        return super.performQuery(query, userMustBeLoggedIn)
+    }
+}
+
+/** Manages an Apollo client that can be used to fire queries and mutations at the Neeva backend. */
+abstract class ApolloWrapper(
     _apolloClient: ApolloClient? = null,
     val coroutineScope: CoroutineScope,
     val dispatchers: Dispatchers
@@ -51,28 +129,17 @@ open class ApolloWrapper(
         return chain.proceed(request)
     }
 
-    override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
-        val cookies = mutableListOf(browserTypeCookie, browserVersionCookie)
-        val token = neevaUserToken.getToken()
-        if (token.isNotEmpty()) {
-            val authCookie = Cookie.Builder().name(loginCookie).secure()
-                .domain(appHost).expiresAt(Long.MAX_VALUE).value(token).build()
-            cookies.add(authCookie)
-        }
-        return cookies
-    }
-
     override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
 
+    @CallSuper
+    override fun loadForRequest(url: HttpUrl) =
+        mutableListOf(browserTypeCookie, browserVersionCookie)
+
+    @CallSuper
     open suspend fun <D : Query.Data> performQuery(
         query: Query<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
-        if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
-            Log.i(TAG, "Could not perform query because user was not logged in: $query")
-            return null
-        }
-
         return try {
             val response = apolloClient.query(query).execute()
             if (response.hasErrors()) {
@@ -99,15 +166,11 @@ open class ApolloWrapper(
         }
     }
 
+    @CallSuper
     open suspend fun <D : Mutation.Data> performMutation(
         mutation: Mutation<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
-        if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
-            Log.i(TAG, "Could not perform mutation because user was not logged in: $mutation")
-            return null
-        }
-
         return try {
             val response = apolloClient.mutation(mutation).execute()
             if (response.hasErrors()) {
@@ -124,6 +187,6 @@ open class ApolloWrapper(
     }
 
     companion object {
-        private val TAG = ApolloWrapper::class.simpleName
+        val TAG = ApolloWrapper::class.simpleName
     }
 }

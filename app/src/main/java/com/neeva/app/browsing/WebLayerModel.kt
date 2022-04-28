@@ -5,7 +5,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.neeva.app.ApolloWrapper
+import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
 import com.neeva.app.NeevaConstants
@@ -63,7 +63,7 @@ class WebLayerModel @Inject constructor(
     application: Application,
     private val domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
-    private val apolloWrapper: ApolloWrapper,
+    private val apolloWrapper: AuthenticatedApolloWrapper,
     spaceStore: SpaceStore,
     private val dispatchers: Dispatchers,
     private val neevaUser: NeevaUser,

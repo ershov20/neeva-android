@@ -72,7 +72,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         const val ACTION_SHOW_SPACES = "ACTION_SHOW_SPACES"
     }
 
-    @Inject lateinit var apolloWrapper: ApolloWrapper
+    @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var overlaySheetModel: OverlaySheetModel

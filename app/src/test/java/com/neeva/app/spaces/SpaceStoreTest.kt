@@ -79,6 +79,7 @@ class SpaceStoreTest : BaseTest() {
             context,
             database,
             coroutineScopeRule.scope,
+            mock(),
             apolloWrapper,
             neevaUser,
             snackbarModel,

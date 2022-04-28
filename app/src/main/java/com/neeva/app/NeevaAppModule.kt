@@ -42,18 +42,29 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesApolloWrapper(
+    fun providesAuthenticatedApolloWrapper(
         neevaUserToken: NeevaUserToken,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers
-    ): ApolloWrapper {
-        return ApolloWrapper(neevaUserToken, null, coroutineScope, dispatchers)
+    ): AuthenticatedApolloWrapper {
+        return AuthenticatedApolloWrapper(
+            neevaUserToken, null, coroutineScope, dispatchers
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun providesUnauthenticatedApolloWrapper(
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers
+    ): UnauthenticatedApolloWrapper {
+        return UnauthenticatedApolloWrapper(null, coroutineScope, dispatchers)
     }
 
     @Provides
     @Singleton
     fun providesClientLogger(
-        apolloWrapper: ApolloWrapper,
+        apolloWrapper: AuthenticatedApolloWrapper,
         sharedPreferencesModel: SharedPreferencesModel,
     ): ClientLogger {
         return ClientLogger(apolloWrapper, sharedPreferencesModel)
@@ -91,7 +102,8 @@ object NeevaAppModule {
         @ApplicationContext context: Context,
         historyDatabase: HistoryDatabase,
         coroutineScope: CoroutineScope,
-        apolloWrapper: ApolloWrapper,
+        unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
+        authenticatedApolloWrapper: AuthenticatedApolloWrapper,
         neevaUser: NeevaUser,
         snackbarModel: SnackbarModel,
         dispatchers: Dispatchers
@@ -100,7 +112,8 @@ object NeevaAppModule {
             context,
             historyDatabase,
             coroutineScope,
-            apolloWrapper,
+            unauthenticatedApolloWrapper,
+            authenticatedApolloWrapper,
             neevaUser,
             snackbarModel,
             dispatchers
@@ -151,7 +164,7 @@ object NeevaAppModule {
         sharedPreferencesModel: SharedPreferencesModel,
         snackbarModel: SnackbarModel,
         spaceStore: SpaceStore,
-        apolloWrapper: ApolloWrapper
+        apolloWrapper: AuthenticatedApolloWrapper
     ): LocalEnvironmentState {
         return LocalEnvironmentState(
             dispatchers = dispatchers,

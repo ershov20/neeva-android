@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.BitmapIO
@@ -46,6 +47,15 @@ fun getThumbnailAsync(uri: Uri?): State<ImageBitmap?> {
     return produceState<ImageBitmap?>(initialValue = null, uri) {
         value = BitmapIO.loadBitmap(uri)?.asImageBitmap()
     }
+}
+
+data class SpaceRowData(
+    val id: String,
+    val name: String,
+    var thumbnail: Uri?,
+    val isPublic: Boolean,
+) {
+    fun url(): Uri = Uri.parse("${NeevaConstants.appSpacesURL}/$id")
 }
 
 @Composable

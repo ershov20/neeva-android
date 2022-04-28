@@ -10,7 +10,8 @@ enum class ZeroQueryPrefs(
     override val allowCompactState: Boolean,
     override val defaultValue: CollapsingSectionState
 ) : CollapsingSectionStateKey {
-    SuggestedSitesState(true, CollapsingSectionState.EXPANDED),
+    SuggestedSitesState(true, CollapsingSectionState.COMPACT),
+    CommunitySpacesState(false, CollapsingSectionState.EXPANDED),
     SuggestedQueriesState(false, CollapsingSectionState.EXPANDED),
     SpacesState(false, CollapsingSectionState.EXPANDED);
 }

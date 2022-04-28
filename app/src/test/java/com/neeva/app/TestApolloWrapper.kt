@@ -21,7 +21,7 @@ class TestApolloWrapper(
     serverUrl: String = "https://fake.url",
     private val testInterceptor: TestInterceptor = TestInterceptor(),
     neevaUserToken: NeevaUserToken = mock()
-) : ApolloWrapper(
+) : AuthenticatedApolloWrapper(
     neevaUserToken = neevaUserToken,
     _apolloClient = ApolloClient.Builder()
         .serverUrl(serverUrl)

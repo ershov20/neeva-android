@@ -19,7 +19,7 @@ fun AddToSpaceUI(
     val spaces: List<Space> by spaceStore.editableSpacesFlow.collectAsState(emptyList())
 
     LazyColumn {
-        items(spaces) {
+        items(spaces, key = { it.id }) {
             SpaceRow(space = it, activeTabModel) {
                 spaceModifier.addOrRemoveCurrentTabToSpace(it)
             }
