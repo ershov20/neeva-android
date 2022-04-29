@@ -28,6 +28,7 @@ import androidx.window.layout.WindowMetricsCalculator
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.appnav.AppNavModelImpl
+import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.ContextMenuCreator
@@ -72,6 +73,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         const val ACTION_SHOW_SPACES = "ACTION_SHOW_SPACES"
     }
 
+    @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var neevaUser: NeevaUser
@@ -107,7 +109,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        webLayerModel.activityCallbacks = WeakReference(this)
+        activityCallbackProvider.activityCallbacks = WeakReference(this)
 
         activityViewModel.determineScreenConfiguration(this)
         setContentView(R.layout.main)

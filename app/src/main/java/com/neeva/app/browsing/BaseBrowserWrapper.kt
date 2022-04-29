@@ -53,7 +53,7 @@ abstract class BaseBrowserWrapper internal constructor(
     protected val appContext: Context,
     protected val coroutineScope: CoroutineScope,
     protected val dispatchers: Dispatchers,
-    protected val activityCallbackProvider: () -> ActivityCallbacks?,
+    protected val activityCallbackProvider: ActivityCallbackProvider,
     override val suggestionsModel: SuggestionsModel?,
     final override val faviconCache: FaviconCache,
     protected val spaceStore: SpaceStore?,
@@ -68,7 +68,7 @@ abstract class BaseBrowserWrapper internal constructor(
         appContext: Context,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
-        activityCallbackProvider: () -> ActivityCallbacks?,
+        activityCallbackProvider: ActivityCallbackProvider,
         suggestionsModel: SuggestionsModel?,
         faviconCache: FaviconCache,
         spaceStore: SpaceStore?,
@@ -158,8 +158,8 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     private var fullscreenCallback = FullscreenCallbackImpl(
-        activityEnterFullscreen = { activityCallbackProvider()?.onEnterFullscreen() },
-        activityExitFullscreen = { activityCallbackProvider()?.onExitFullscreen() }
+        activityEnterFullscreen = { activityCallbackProvider.get()?.onEnterFullscreen() },
+        activityExitFullscreen = { activityCallbackProvider.get()?.onExitFullscreen() }
     )
 
     private val tabListCallback = object : TabListCallback() {
@@ -201,7 +201,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
         override fun onTabAdded(tab: Tab) {
             onNewTabAdded(tab)
-            activityCallbackProvider()?.resetToolbarOffset()
+            activityCallbackProvider.get()?.resetToolbarOffset()
         }
 
         override fun onWillDestroyBrowserAndAllTabs() {
@@ -222,11 +222,11 @@ abstract class BaseBrowserWrapper internal constructor(
 
     private val browserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
         override fun onBottomViewOffsetChanged(offset: Int) {
-            activityCallbackProvider()?.onBottomBarOffsetChanged(offset)
+            activityCallbackProvider.get()?.onBottomBarOffsetChanged(offset)
         }
 
         override fun onTopViewOffsetChanged(offset: Int) {
-            activityCallbackProvider()?.onTopBarOffsetChanged(offset)
+            activityCallbackProvider.get()?.onTopBarOffsetChanged(offset)
         }
     }
 

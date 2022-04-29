@@ -65,7 +65,6 @@ class SuggestionsModelTest : BaseTest() {
     private lateinit var apolloWrapper: TestApolloWrapper
 
     private lateinit var model: SuggestionsModel
-    private lateinit var settingsDataModel: SettingsDataModel
 
     private lateinit var clientLogger: ClientLogger
 

@@ -19,7 +19,6 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
-import java.lang.IllegalStateException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -72,7 +71,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var urlBarModel: URLBarModelImpl
 
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
-    @Mock private lateinit var activityCallbacks: ActivityCallbacks
+    @Mock private lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Mock private lateinit var browserFragment: BrowserFragment
     @Mock private lateinit var findInPageModel: FindInPageModelImpl
     @Mock private lateinit var cookieManager: CookieManager
@@ -142,7 +141,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             appContext = context,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = dispatchers,
-            activityCallbackProvider = { activityCallbacks },
+            activityCallbackProvider = activityCallbackProvider,
             suggestionsModel = suggestionsModel,
             faviconCache = faviconCache,
             spaceStore = spaceStore,

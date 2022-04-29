@@ -5,10 +5,10 @@ import org.chromium.weblayer.ErrorPageCallback
 import org.chromium.weblayer.Navigation
 
 class ErrorCallbackImpl(
-    private val activityCallbackProvider: () -> ActivityCallbacks?
+    private val activityCallbackProvider: ActivityCallbackProvider
 ) : ErrorPageCallback() {
     override fun onBackToSafety(): Boolean {
-        activityCallbackProvider()?.onBackPressed()
+        activityCallbackProvider.get()?.onBackPressed()
         return true
     }
 

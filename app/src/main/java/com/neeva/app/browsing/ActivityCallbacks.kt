@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import java.lang.ref.WeakReference
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 
@@ -46,4 +47,11 @@ interface ActivityCallbacks {
      * @param closeTabIfSuccessful If the intent was successfully handled, close the tab.
      */
     fun fireExternalIntentForUri(uri: Uri, closeTabIfSuccessful: Boolean)
+}
+
+/** Tracks which Activity the WebLayer is interacting with. */
+class ActivityCallbackProvider {
+    var activityCallbacks: WeakReference<ActivityCallbacks> = WeakReference(null)
+
+    fun get(): ActivityCallbacks? = activityCallbacks.get()
 }

@@ -36,8 +36,6 @@ fun CardsPaneToolbar(browserWrapper: BrowserWrapper) {
     val cardsPaneModel = LocalCardsPaneModel.current
     val settingsDataModel = LocalEnvironment.current.settingsDataModel
 
-    val closeIncognitoTabsOnScreenSwitch =
-        settingsDataModel.getSettingsToggleValue(SettingsToggle.CLOSE_INCOGNITO_TABS)
     val requireConfirmationWhenCloseAllTabs =
         settingsDataModel.getSettingsToggleValue(SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE)
 
@@ -65,12 +63,7 @@ fun CardsPaneToolbar(browserWrapper: BrowserWrapper) {
             ) {
                 SegmentedPicker(
                     selectedScreen = cardsPaneModel.selectedScreen,
-                    onSwitchScreen = cardsPaneModel::switchScreen,
-                    onLeaveIncognito = {
-                        if (closeIncognitoTabsOnScreenSwitch) {
-                            cardsPaneModel.closeAllIncognitoTabs()
-                        }
-                    }
+                    onSwitchScreen = cardsPaneModel::switchScreen
                 )
             }
 

@@ -35,7 +35,7 @@ class TabCallbacks(
     private val historyManager: HistoryManager?,
     private val faviconCache: FaviconCache?,
     private val tabList: TabList,
-    private val activityCallbackProvider: () -> ActivityCallbacks?,
+    private val activityCallbackProvider: ActivityCallbackProvider,
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
     private val tabScreenshotManager: TabScreenshotManager
@@ -132,7 +132,7 @@ class TabCallbacks(
                         else -> false
                     }
 
-                    activityCallbackProvider()?.fireExternalIntentForUri(
+                    activityCallbackProvider.get()?.fireExternalIntentForUri(
                         navigation.uri,
                         newTabWasCreatedForFailedNavigation
                     )
@@ -178,7 +178,7 @@ class TabCallbacks(
     private val tabCallback = object : TabCallback() {
         override fun bringTabToFront() {
             tab.getBrowserIfAlive()?.setActiveTab(tab)
-            activityCallbackProvider()?.bringToForeground()
+            activityCallbackProvider.get()?.bringToForeground()
         }
 
         override fun onTitleUpdated(title: String) {
@@ -197,7 +197,7 @@ class TabCallbacks(
 
         override fun showContextMenu(params: ContextMenuParams) {
             if (tab != tab.getBrowserIfAlive()?.activeTab) return
-            activityCallbackProvider()?.showContextMenuForTab(params, tab)
+            activityCallbackProvider.get()?.showContextMenuForTab(params, tab)
         }
 
         override fun onRenderProcessGone() {

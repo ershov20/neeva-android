@@ -45,8 +45,7 @@ private val buttonWidth = 64.dp
 @Composable
 fun SegmentedPicker(
     selectedScreen: State<SelectedScreen>,
-    onSwitchScreen: (SelectedScreen) -> Unit,
-    onLeaveIncognito: () -> Unit = { }
+    onSwitchScreen: (SelectedScreen) -> Unit
 ) {
     // Set up the animation between the different states.
     val transition = updateTransition(
@@ -112,7 +111,6 @@ fun SegmentedPicker(
         SegmentedPicker(
             selectedScreen = selectedScreen.value,
             onSwitchScreen = onSwitchScreen,
-            onLeaveIncognito = onLeaveIncognito,
             bubblePosition = bubblePosition.value,
             bubbleColor = bubbleColor.value,
             incognitoIconColor = incognitoIconColor.value,
@@ -126,7 +124,6 @@ fun SegmentedPicker(
 fun SegmentedPicker(
     selectedScreen: SelectedScreen,
     onSwitchScreen: (SelectedScreen) -> Unit,
-    onLeaveIncognito: () -> Unit,
     bubblePosition: Dp,
     bubbleColor: Color,
     incognitoIconColor: Color,
@@ -191,7 +188,6 @@ fun SegmentedPicker(
                         .fillMaxSize()
                         .clickable(enabled = selectedScreen != SelectedScreen.REGULAR_TABS) {
                             onSwitchScreen(SelectedScreen.REGULAR_TABS)
-                            onLeaveIncognito()
                         }
                 ) {
                     TabSwitcherIcon(contentDescription = stringResource(R.string.tabs))
@@ -212,7 +208,6 @@ fun SegmentedPicker(
                         .fillMaxSize()
                         .clickable(enabled = selectedScreen != SelectedScreen.SPACES) {
                             onSwitchScreen(SelectedScreen.SPACES)
-                            onLeaveIncognito()
                         }
                 ) {
                     Icon(
@@ -234,9 +229,8 @@ internal fun SegmentedPickerPreview_Incognito() {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.INCOGNITO_TABS) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             SegmentedPicker(
-                selectedScreen = selectedScreen,
-                onSwitchScreen = { selectedScreen.value = it }
-            )
+                selectedScreen = selectedScreen
+            ) { selectedScreen.value = it }
         }
     }
 }
@@ -249,9 +243,8 @@ internal fun SegmentedPickerPreview_Regular() {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.REGULAR_TABS) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             SegmentedPicker(
-                selectedScreen = selectedScreen,
-                onSwitchScreen = { selectedScreen.value = it }
-            )
+                selectedScreen = selectedScreen
+            ) { selectedScreen.value = it }
         }
     }
 }
@@ -264,9 +257,8 @@ internal fun SegmentedPickerPreview_Spaces() {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.SPACES) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
             SegmentedPicker(
-                selectedScreen = selectedScreen,
-                onSwitchScreen = { selectedScreen.value = it }
-            )
+                selectedScreen = selectedScreen
+            ) { selectedScreen.value = it }
         }
     }
 }

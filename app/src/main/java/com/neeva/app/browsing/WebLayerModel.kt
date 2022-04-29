@@ -5,7 +5,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
 import com.neeva.app.NeevaConstants
@@ -14,12 +13,11 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
-import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.userdata.NeevaUser
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -59,23 +57,52 @@ data class BrowsersState(
  * whenever the current tab changes (e.g.).
  */
 @HiltViewModel
-class WebLayerModel @Inject constructor(
+class WebLayerModel internal constructor(
+    private val activityCallbackProvider: ActivityCallbackProvider,
+    private val browserWrapperFactory: BrowserWrapperFactory,
+    webLayerFactory: WebLayerFactory,
     application: Application,
+    cacheCleaner: CacheCleaner,
     private val domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
-    private val apolloWrapper: AuthenticatedApolloWrapper,
-    spaceStore: SpaceStore,
-    private val dispatchers: Dispatchers,
+    dispatchers: Dispatchers,
     private val neevaUser: NeevaUser,
-    settingsDataModel: SettingsDataModel,
-    private val clientLogger: ClientLogger
+    private val settingsDataModel: SettingsDataModel,
+    private val clientLogger: ClientLogger,
+    overrideCoroutineScope: CoroutineScope?
 ) : AndroidViewModel(application) {
+    @Inject constructor(
+        activityCallbackProvider: ActivityCallbackProvider,
+        browserWrapperFactory: BrowserWrapperFactory,
+        webLayerFactory: WebLayerFactory,
+        application: Application,
+        cacheCleaner: CacheCleaner,
+        domainProviderImpl: DomainProviderImpl,
+        historyManager: HistoryManager,
+        dispatchers: Dispatchers,
+        neevaUser: NeevaUser,
+        settingsDataModel: SettingsDataModel,
+        clientLogger: ClientLogger
+    ) : this(
+        activityCallbackProvider = activityCallbackProvider,
+        browserWrapperFactory = browserWrapperFactory,
+        webLayerFactory = webLayerFactory,
+        application = application,
+        cacheCleaner = cacheCleaner,
+        domainProviderImpl = domainProviderImpl,
+        historyManager = historyManager,
+        dispatchers = dispatchers,
+        neevaUser = neevaUser,
+        settingsDataModel = settingsDataModel,
+        clientLogger = clientLogger,
+        overrideCoroutineScope = null
+    )
+
     companion object {
         val TAG = WebLayerModel::class.simpleName
     }
 
-    var activityCallbacks: WeakReference<ActivityCallbacks> = WeakReference(null)
-
+    private val coroutineScope = overrideCoroutineScope ?: viewModelScope
     private val webLayer = MutableStateFlow<WebLayer?>(null)
 
     /** Keeps track of the non-WebLayer initialization pipeline. */
@@ -90,23 +117,13 @@ class WebLayerModel @Inject constructor(
                     if (webLayer == null) LoadingState.LOADING else LoadingState.READY
                 )
             }
-            .stateIn(viewModelScope, SharingStarted.Lazily, LoadingState.LOADING)
+            .stateIn(coroutineScope, SharingStarted.Eagerly, LoadingState.LOADING)
 
     private lateinit var regularProfile: Profile
 
-    private val regularBrowser = RegularBrowserWrapper(
-        appContext = application,
-        coroutineScope = viewModelScope,
-        dispatchers = dispatchers,
-        activityCallbackProvider = { activityCallbacks.get() },
-        domainProvider = domainProviderImpl,
-        apolloWrapper = apolloWrapper,
-        historyManager = historyManager,
-        spaceStore = spaceStore,
-        neevaUser = neevaUser,
-        settingsDataModel = settingsDataModel,
-        clientLogger = clientLogger
-    )
+    private val regularBrowser: RegularBrowserWrapper =
+        browserWrapperFactory.createRegularBrowser(coroutineScope = coroutineScope)
+
     private var incognitoBrowser: IncognitoBrowserWrapper? = null
         set(value) {
             field = value
@@ -121,7 +138,7 @@ class WebLayerModel @Inject constructor(
     val currentBrowserFlow: StateFlow<BrowserWrapper> = _browsersFlow
         .map { it.getCurrentBrowser() }
         .distinctUntilChanged()
-        .stateIn(viewModelScope, SharingStarted.Lazily, regularBrowser)
+        .stateIn(coroutineScope, SharingStarted.Eagerly, regularBrowser)
 
     /** Returns the currently active BrowserWrapper. */
     val currentBrowser get() = currentBrowserFlow.value
@@ -133,15 +150,15 @@ class WebLayerModel @Inject constructor(
             .combine(currentBrowserFlow) { _, browserWrapper -> browserWrapper }
 
     init {
-        viewModelScope.launch(dispatchers.io) {
+        coroutineScope.launch(dispatchers.io) {
             domainProviderImpl.initialize()
             historyManager.pruneDatabase()
-            CacheCleaner(application.cacheDir).run()
+            cacheCleaner.run()
             internalInitializationState.value = LoadingState.READY
         }
 
         try {
-            WebLayer.loadAsync(application) { webLayer ->
+            webLayerFactory.load { webLayer ->
                 webLayer.isRemoteDebuggingEnabled = true
                 regularProfile = RegularBrowserWrapper.getProfile(webLayer)
                 this.webLayer.value = webLayer
@@ -164,24 +181,27 @@ class WebLayerModel @Inject constructor(
 
         if (_browsersFlow.value.isCurrentlyIncognito == useIncognito) return
 
-        if (useIncognito && incognitoBrowser == null) {
-            incognitoBrowser = createIncognitoBrowserWrapper()
+        if (useIncognito) {
+            if (incognitoBrowser == null) {
+                incognitoBrowser = createIncognitoBrowserWrapper()
+            }
+        } else {
+            val closeIncognitoTabsOnScreenSwitch =
+                settingsDataModel.getSettingsToggleValue(SettingsToggle.CLOSE_INCOGNITO_TABS)
+            if (closeIncognitoTabsOnScreenSwitch) {
+                incognitoBrowser?.closeAllTabs()
+            }
         }
 
         _browsersFlow.value = _browsersFlow.value.copy(isCurrentlyIncognito = useIncognito)
     }
 
-    private fun createIncognitoBrowserWrapper() = IncognitoBrowserWrapper(
-        appContext = getApplication(),
-        coroutineScope = viewModelScope,
-        dispatchers = dispatchers,
-        activityCallbackProvider = activityCallbacks::get,
-        apolloWrapper = apolloWrapper,
-        domainProvider = domainProviderImpl,
+    private fun createIncognitoBrowserWrapper() = browserWrapperFactory.createIncognitoBrowser(
+        coroutineScope = coroutineScope,
         onDestroyed = {
             // Because this is asynchronous, make sure that the destroyed one is the one we are
             // currently tracking.
-            if (it != incognitoBrowser) return@IncognitoBrowserWrapper
+            if (it != incognitoBrowser) return@createIncognitoBrowser
 
             incognitoBrowser = null
             switchToProfile(useIncognito = false)
@@ -192,7 +212,7 @@ class WebLayerModel @Inject constructor(
     fun deleteIncognitoProfileIfUnused() {
         if (!currentBrowser.isIncognito && incognitoBrowser?.hasNoTabs() == true) {
             Log.d(TAG, "Culling unnecessary incognito profile")
-            activityCallbacks.get()?.removeIncognitoFragment()
+            activityCallbackProvider.get()?.removeIncognitoFragment()
             incognitoBrowser = null
         }
     }

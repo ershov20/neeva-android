@@ -30,14 +30,14 @@ class RegularBrowserWrapper(
     appContext: Context,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
-    activityCallbackProvider: () -> ActivityCallbacks?,
+    activityCallbackProvider: ActivityCallbackProvider,
     domainProvider: DomainProvider,
     private val apolloWrapper: ApolloWrapper,
     historyManager: HistoryManager,
     spaceStore: SpaceStore,
     settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
-    val clientLogger: ClientLogger
+    clientLogger: ClientLogger
 ) : BaseBrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -63,7 +63,7 @@ class RegularBrowserWrapper(
     tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir)
 ) {
     companion object {
-        private const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
+        internal const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
         private const val PERSISTENCE_ID = "Neeva_Browser"
 
         /** Asks WebLayer to get the regular user profile. The Browser does not need to be alive. */

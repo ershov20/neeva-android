@@ -1,6 +1,11 @@
 package com.neeva.app
 
+import android.app.Application
 import android.content.Context
+import com.neeva.app.browsing.ActivityCallbackProvider
+import com.neeva.app.browsing.BrowserWrapperFactory
+import com.neeva.app.browsing.CacheCleaner
+import com.neeva.app.browsing.WebLayerFactory
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -28,6 +33,18 @@ import kotlinx.coroutines.CoroutineScope
 )
 @InstallIn(SingletonComponent::class)
 object NeevaAppModule {
+    @Provides
+    @Singleton
+    fun provideActivityCallbackProvider(): ActivityCallbackProvider {
+        return ActivityCallbackProvider()
+    }
+
+    @Provides
+    @Singleton
+    fun provideCacheCleaner(@ApplicationContext context: Context): CacheCleaner {
+        return CacheCleaner(context.cacheDir)
+    }
+
     @Provides
     @Singleton
     fun provideDomainProvider(domainProviderImpl: DomainProviderImpl): DomainProvider {
@@ -140,6 +157,34 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
+    fun providesBrowserWrapperFactory(
+        activityCallbackProvider: ActivityCallbackProvider,
+        application: Application,
+        domainProviderImpl: DomainProviderImpl,
+        historyManager: HistoryManager,
+        apolloWrapper: AuthenticatedApolloWrapper,
+        spaceStore: SpaceStore,
+        dispatchers: Dispatchers,
+        neevaUser: NeevaUser,
+        settingsDataModel: SettingsDataModel,
+        clientLogger: ClientLogger
+    ): BrowserWrapperFactory {
+        return BrowserWrapperFactory(
+            activityCallbackProvider = activityCallbackProvider,
+            application = application,
+            domainProviderImpl = domainProviderImpl,
+            historyManager = historyManager,
+            apolloWrapper = apolloWrapper,
+            spaceStore = spaceStore,
+            dispatchers = dispatchers,
+            neevaUser = neevaUser,
+            settingsDataModel = settingsDataModel,
+            clientLogger = clientLogger
+        )
+    }
+
+    @Provides
+    @Singleton
     fun providesOverlaySheetModel(): OverlaySheetModel {
         return OverlaySheetModel()
     }
@@ -150,6 +195,12 @@ object NeevaAppModule {
         sharedPreferencesModel: SharedPreferencesModel
     ): SettingsDataModel {
         return SettingsDataModel(sharedPreferencesModel = sharedPreferencesModel)
+    }
+
+    @Provides
+    @Singleton
+    fun providesWebLayerFactory(@ApplicationContext appContext: Context): WebLayerFactory {
+        return WebLayerFactory(appContext)
     }
 
     @Provides
