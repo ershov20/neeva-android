@@ -65,8 +65,9 @@ class HistoryManager(
     val historySuggestions: StateFlow<List<NavSuggestion>> = _historySuggestions
 
     /** Provides the top 3 suggestions based on how often a user visited a site. */
-    val suggestedQueries: Flow<List<QueryRowSuggestion>> =
-        frequentSites.map { siteList -> siteList.mapNotNull { it.toSearchSuggest() }.take(3) }
+    val suggestedQueries: Flow<List<QueryRowSuggestion>> = dao
+        .getQuerySuggestionsFlow()
+        .map { siteList -> siteList.mapNotNull { it.toSearchSuggest() }.take(3) }
 
     /** Provides non-Neeva sites from history as suggestions. */
     val suggestedSites: Flow<List<Site>> =

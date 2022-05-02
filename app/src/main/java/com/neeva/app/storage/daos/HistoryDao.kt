@@ -7,6 +7,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
+import com.neeva.app.NeevaConstants
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
@@ -92,6 +93,23 @@ interface HistoryDao : SiteDao, VisitDao {
     """
     )
     suspend fun getQuerySuggestions(query: String, limit: Int): List<Site>
+
+    @Query(
+        """
+        SELECT *
+        FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
+        WHERE Site.siteURL LIKE '%'||:query||'%'
+              AND NOT Visit.isMarkedForDeletion
+        GROUP BY Site.siteUID
+        ORDER BY timestamp DESC
+        LIMIT :limit
+    """
+    )
+    /** Get query suggestions as a flow. By default, it gives 3 most recent search suggestions. */
+    fun getQuerySuggestionsFlow(
+        query: String = NeevaConstants.appSearchURL,
+        limit: Int = 3
+    ): Flow<List<Site>>
 
     @Transaction
     suspend fun upsert(
