@@ -67,6 +67,11 @@ class ActiveTabModelImpl(
     private val activeTabFlow = MutableStateFlow<Tab?>(null)
     internal val activeTab: Tab? get() = activeTabFlow.value
 
+    /** Emits the number of cookie trackers from the active tab's webpage. */
+    private val _trackersFlow = MutableStateFlow(0)
+    override val trackersFlow: StateFlow<Int>
+        get() = _trackersFlow
+
     internal fun onActiveTabChanged(newActiveTab: Tab?) {
         val previousTab = activeTab
         previousTab?.apply {

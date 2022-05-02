@@ -7,8 +7,7 @@ import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,23 +34,18 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.overflowmenu.OverflowMenu
-import com.neeva.app.overflowmenu.OverflowMenuData
 import com.neeva.app.ui.OneBooleanPreviewContainer
-import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.mapComposeColorToResource
 import org.chromium.weblayer.UrlBarOptions
 
 @Composable
 fun LocationLabel(
-    endComposable: @Composable () -> Unit,
     placeholderColor: Color,
     modifier: Modifier = Modifier
 ) {
     val browserWrapper = LocalBrowserWrapper.current
 
-    val showIncognitoBadge = browserWrapper.isIncognito
     val activeTabModel = browserWrapper.activeTabModel
     val displayedInfo by activeTabModel.displayedInfoFlow.collectAsState()
 
@@ -71,108 +65,79 @@ fun LocationLabel(
         )
     }
 
-    LocationLabel(
+    LocationLabelContent(
         urlBarView = urlBarView,
         mode = displayedInfo.mode,
         displayedText = displayedInfo.displayedText,
-        showIncognitoBadge = showIncognitoBadge,
         placeholderColor = placeholderColor,
-        endComposable = endComposable,
         modifier = modifier
     )
 }
 
 @Composable
-fun LocationLabel(
+fun LocationLabelContent(
     urlBarView: View?,
     mode: ActiveTabModel.DisplayMode,
     displayedText: String,
-    showIncognitoBadge: Boolean,
     placeholderColor: Color,
-    endComposable: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.padding(start = Dimensions.PADDING_MEDIUM)
+        modifier = modifier.fillMaxSize(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        val iconSize = Dimensions.SIZE_ICON_MEDIUM
-        val iconModifier = Modifier
-            .padding(end = Dimensions.PADDING_LARGE)
-            .size(iconSize)
-        if (showIncognitoBadge) {
-            Icon(
-                painter = painterResource(R.drawable.ic_incognito),
-                contentDescription = stringResource(R.string.incognito),
-                modifier = iconModifier
-            )
-        } else {
-            // Add a spacer that has the same size as the optional icon so that the URL and query
-            // text are properly centered.
-            Spacer(modifier = iconModifier)
-        }
+        when (mode) {
+            ActiveTabModel.DisplayMode.PLACEHOLDER -> {
+                Text(
+                    text = stringResource(R.string.url_bar_placeholder),
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    color = placeholderColor,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
-        Row(
-            modifier = Modifier
-                .weight(1.0f)
-                .fillMaxHeight(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            when (mode) {
-                ActiveTabModel.DisplayMode.PLACEHOLDER -> {
-                    Text(
-                        text = stringResource(R.string.url_bar_placeholder),
-                        style = MaterialTheme.typography.bodyLarge,
-                        maxLines = 1,
-                        color = placeholderColor,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+            ActiveTabModel.DisplayMode.QUERY -> {
+                Icon(
+                    painter = painterResource(R.drawable.ic_baseline_search_24),
+                    contentDescription = stringResource(R.string.search),
+                    modifier = Modifier
+                        .padding(end = Dimensions.PADDING_SMALL)
+                        .size(Dimensions.SIZE_ICON_SMALL)
+                )
+                Text(
+                    text = displayedText,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
-                ActiveTabModel.DisplayMode.QUERY -> {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_baseline_search_24),
-                        contentDescription = stringResource(R.string.search),
-                        modifier = Modifier
-                            .padding(end = Dimensions.PADDING_SMALL)
-                            .size(Dimensions.SIZE_ICON_SMALL)
-                    )
-                    Text(
-                        text = displayedText,
-                        style = MaterialTheme.typography.bodyLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-
-                ActiveTabModel.DisplayMode.URL -> {
-                    AndroidView(
-                        factory = { FrameLayout(it) },
-                        update = { rootView: FrameLayout ->
-                            if (urlBarView == null || urlBarView.parent == rootView) {
-                                return@AndroidView
-                            }
-
-                            // Attach the URL Bar provided by WebLayer to our hierarchy.
-                            rootView.removeAllViews()
-                            urlBarView.run {
-                                (parent as? ViewGroup)?.removeView(this)
-                                rootView.addView(
-                                    this,
-                                    FrameLayout.LayoutParams(
-                                        ViewGroup.LayoutParams.MATCH_PARENT,
-                                        ViewGroup.LayoutParams.WRAP_CONTENT
-                                    )
-                                )
-                            }
+            ActiveTabModel.DisplayMode.URL -> {
+                AndroidView(
+                    factory = { FrameLayout(it) },
+                    update = { rootView: FrameLayout ->
+                        if (urlBarView == null || urlBarView.parent == rootView) {
+                            return@AndroidView
                         }
-                    )
-                }
+
+                        // Attach the URL Bar provided by WebLayer to our hierarchy.
+                        rootView.removeAllViews()
+                        urlBarView.run {
+                            (parent as? ViewGroup)?.removeView(this)
+                            rootView.addView(
+                                this,
+                                FrameLayout.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.WRAP_CONTENT
+                                )
+                            )
+                        }
+                    }
+                )
             }
         }
-
-        endComposable()
     }
 }
 
@@ -181,7 +146,7 @@ fun LocationLabel(
 @Preview("URL RTL, 1x font scale", locale = "he")
 @Composable
 private fun URLPreview() {
-    TwoBooleanPreviewContainer { isIncognito, useLongText ->
+    OneBooleanPreviewContainer { useLongText ->
         val urlBarText = if (useLongText) {
             stringResource(id = R.string.debug_long_url)
         } else {
@@ -196,18 +161,11 @@ private fun URLPreview() {
             weblayerUrlBar.maxLines = 1
             weblayerUrlBar.textAlignment = TextView.TEXT_ALIGNMENT_CENTER
 
-            LocationLabel(
+            LocationLabelContent(
                 urlBarView = weblayerUrlBar,
                 mode = ActiveTabModel.DisplayMode.URL,
                 displayedText = urlBarText,
-                showIncognitoBadge = isIncognito,
                 placeholderColor = Color.Magenta,
-                endComposable = {
-                    OverflowMenu(
-                        overflowMenuData = OverflowMenuData(),
-                        onMenuItem = { }
-                    )
-                },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
@@ -219,7 +177,7 @@ private fun URLPreview() {
 @Preview("Query RTL, 1x font scale", locale = "he")
 @Composable
 private fun QueryPreview() {
-    TwoBooleanPreviewContainer { isIncognito, useLongText ->
+    OneBooleanPreviewContainer { useLongText ->
         val urlBarText = if (useLongText) {
             stringResource(id = R.string.debug_long_string_primary)
         } else {
@@ -227,18 +185,11 @@ private fun QueryPreview() {
         }
 
         Surface(modifier = Modifier.height(dimensionResource(R.dimen.top_toolbar_height))) {
-            LocationLabel(
+            LocationLabelContent(
                 urlBarView = TextView(LocalContext.current),
                 mode = ActiveTabModel.DisplayMode.QUERY,
                 displayedText = urlBarText,
-                showIncognitoBadge = isIncognito,
                 placeholderColor = Color.Magenta,
-                endComposable = {
-                    OverflowMenu(
-                        overflowMenuData = OverflowMenuData(),
-                        onMenuItem = {}
-                    )
-                },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }
@@ -257,18 +208,11 @@ private fun NeevaHomepagePreview() {
         }
 
         Surface(modifier = Modifier.height(dimensionResource(R.dimen.top_toolbar_height))) {
-            LocationLabel(
+            LocationLabelContent(
                 urlBarView = TextView(LocalContext.current),
                 mode = ActiveTabModel.DisplayMode.PLACEHOLDER,
                 displayedText = stringResource(id = R.string.url_bar_placeholder),
-                showIncognitoBadge = isIncognito,
                 placeholderColor = placeholderColor,
-                endComposable = {
-                    OverflowMenu(
-                        overflowMenuData = OverflowMenuData(),
-                        onMenuItem = {}
-                    )
-                },
                 modifier = Modifier.background(MaterialTheme.colorScheme.background)
             )
         }

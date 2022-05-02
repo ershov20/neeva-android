@@ -101,7 +101,7 @@
     <string name="settings_clear_browsing_data">Clear browsing data</string>
     <string name="settings_close_incognito_tabs">Close incognito tabs</string>
     <string name="settings_when_leaving_incognito_mode">When leaving incognito mode</string>
-    <string name="settings_tracking_protection">Tracking protection</string>
+    <string name="tracking_protection">Tracking protection</string>
     <string name="settings_privacy_policy">Privacy policy</string>
     <string name="settings_support">Support</string>
     <string name="settings_welcome_tours">Welcome tours</string>
@@ -192,4 +192,6 @@
     <string name="weak_password">Weak password</string>
     <string name="desktop_site">Desktop site</string>
     <string name="mobile_site">Mobile site</string>
+
+    <string name="badge_image_text">%1$s+</string>
 </resources>

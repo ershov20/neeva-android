@@ -1,31 +1,40 @@
 package com.neeva.app.browsing.urlbar
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
+import com.neeva.app.R
+import com.neeva.app.browsing.urlbar.trackingprotection.ShieldIconButton
 import com.neeva.app.ui.theme.Dimensions
+import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun URLBar(
     modifier: Modifier = Modifier,
-    endComposable: @Composable () -> Unit
+    endComposable: @Composable (modifier: Modifier) -> Unit
 ) {
     val appNavModel = LocalAppNavModel.current
 
@@ -37,17 +46,6 @@ fun URLBar(
     val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
 
     val isIncognito: Boolean = browserWrapper.isIncognito
-    val backgroundColor = if (isIncognito) {
-        MaterialTheme.colorScheme.inverseSurface
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
-
-    val foregroundColor = if (isIncognito) {
-        MaterialTheme.colorScheme.inverseOnSurface
-    } else {
-        MaterialTheme.colorScheme.onSurface
-    }
 
     val placeholderColor = if (isIncognito) {
         MaterialTheme.colorScheme.inverseOnSurface
@@ -55,20 +53,30 @@ fun URLBar(
         MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    Box(modifier = modifier) {
-        Surface(
-            color = backgroundColor,
-            contentColor = foregroundColor,
-            shape = RoundedCornerShape(24.dp),
-            tonalElevation = 2.dp,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(Dimensions.PADDING_SMALL)
-        ) {
-            val childModifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 40.dp)
+    val childModifier = Modifier
+        .fillMaxWidth()
+        .defaultMinSize(minHeight = 40.dp)
 
+    val iconModifier = Modifier
+        .padding(horizontal = Dimensions.PADDING_SMALL, vertical = Dimensions.PADDING_TINY)
+        .size(Dimensions.SIZE_TOUCH_TARGET)
+
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        AnimatedVisibility(visible = !isEditing) {
+            val showIncognitoBadge = browserWrapper.isIncognito
+
+            UrlBarStartComposable(
+                showIncognitoBadge = showIncognitoBadge,
+                trackersBlocked = browserWrapper.activeTabModel.trackersFlow,
+                modifier = iconModifier
+            )
+        }
+
+        UrlBarContainer(
+            isIncognito = isIncognito,
+            isEditing = isEditing,
+            modifier = Modifier.weight(1f)
+        ) {
             if (isEditing) {
                 AutocompleteTextField(
                     textFieldValue = urlBarModelState.value.textFieldValue,
@@ -89,11 +97,13 @@ fun URLBar(
                 )
             } else {
                 LocationLabel(
-                    endComposable = endComposable,
                     placeholderColor = placeholderColor,
                     modifier = childModifier.clickable { urlBarModel.requestFocus() }
                 )
             }
+        }
+        AnimatedVisibility(visible = !isEditing) {
+            endComposable(modifier = iconModifier)
         }
     }
 
@@ -101,5 +111,75 @@ fun URLBar(
     BackHandler(enabled = isEditing) {
         localFocusManager.clearFocus()
         appNavModel.showBrowser()
+    }
+}
+
+@Composable
+private fun UrlBarStartComposable(
+    showIncognitoBadge: Boolean,
+    trackersBlocked: StateFlow<Int>,
+    modifier: Modifier
+) {
+    when {
+        // TODO(kobec): add onClick functionality so that both open up Tracking Protection UI.
+        showIncognitoBadge -> {
+            IconButton(
+                onClick = { /*TODO*/ },
+                modifier = modifier
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_incognito),
+                    contentDescription = stringResource(R.string.incognito),
+                )
+            }
+        }
+        else -> {
+            ShieldIconButton(
+                trackersBlocked = trackersBlocked.collectAsState().value,
+                modifier = modifier
+            )
+        }
+    }
+}
+
+@Composable
+fun UrlBarContainer(
+    isIncognito: Boolean,
+    isEditing: Boolean,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
+    val backgroundColor = if (isIncognito) {
+        MaterialTheme.colorScheme.inverseSurface
+    } else {
+        MaterialTheme.colorScheme.surface
+    }
+
+    val foregroundColor = if (isIncognito) {
+        MaterialTheme.colorScheme.inverseOnSurface
+    } else {
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    val urlBarSurfaceModifier = Modifier
+        .then(
+            if (isEditing) {
+                Modifier.padding(
+                    vertical = Dimensions.PADDING_SMALL,
+                    horizontal = Dimensions.PADDING_LARGE
+                )
+            } else {
+                Modifier.padding(vertical = Dimensions.PADDING_SMALL)
+            }
+        )
+
+    Surface(
+        color = backgroundColor,
+        contentColor = foregroundColor,
+        shape = RoundedCornerShape(24.dp),
+        tonalElevation = 2.dp,
+        modifier = urlBarSurfaceModifier.then(modifier)
+    ) {
+        content()
     }
 }

@@ -65,6 +65,7 @@ fun BrowserToolbar(
     val progress: Int by activeTabModel.progressFlow.collectAsState()
     val navigationInfoFlow = activeTabModel.navigationInfoFlow.collectAsState()
 
+    // TODO(kobec): use a ViewModel interface pattern to encapsulate the params and wiring + see previews closer to the design.
     Surface(
         color = MaterialTheme.colorScheme.background,
         modifier = modifier
@@ -118,8 +119,8 @@ fun BrowserToolbar(
                             }
                         }
 
-                        URLBar(modifier = Modifier.weight(1.0f)) {
-                            ShareButton()
+                        URLBar(modifier = Modifier.weight(1.0f)) { modifier ->
+                            ShareButton(modifier = modifier)
                         }
 
                         AnimatedVisibility(visible = !isEditing) {
@@ -142,10 +143,11 @@ fun BrowserToolbar(
                         }
                     }
                 } else {
-                    URLBar {
+                    URLBar { modifier ->
                         OverflowMenu(
                             overflowMenuData = overflowMenuData,
-                            onMenuItem = browserToolbarModel::onMenuItem
+                            onMenuItem = browserToolbarModel::onMenuItem,
+                            modifier = modifier
                         )
                     }
                 }

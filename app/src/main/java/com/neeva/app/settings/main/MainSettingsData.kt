@@ -87,7 +87,7 @@ object MainSettingsData : SettingsPaneDataInterface {
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_tracking_protection,
+                    primaryLabelId = R.string.tracking_protection,
                     togglePreferenceKey = SettingsToggle.TRACKING_PROTECTION.key,
                     enabled = false
                 ),

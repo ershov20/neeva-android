@@ -36,7 +36,7 @@ object ClearBrowsingPaneData : SettingsPaneDataInterface {
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_tracking_protection,
+                    primaryLabelId = R.string.tracking_protection,
                     togglePreferenceKey = SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION.key,
                     enabled = false
                 )

@@ -30,13 +30,17 @@ import com.neeva.app.ui.OneBooleanPreviewContainer
 fun OverflowMenu(
     overflowMenuData: OverflowMenuData,
     onMenuItem: (menuItemId: OverflowMenuItemId) -> Unit,
-    isInitiallyExpanded: Boolean = false
+    isInitiallyExpanded: Boolean = false,
+    modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(isInitiallyExpanded) }
     val showBadge = overflowMenuData.isBadgeVisible
 
     Box {
-        IconButton(onClick = { expanded = true }) {
+        IconButton(
+            onClick = { expanded = true },
+            modifier = modifier
+        ) {
             Box {
                 Icon(
                     Icons.Default.MoreVert,

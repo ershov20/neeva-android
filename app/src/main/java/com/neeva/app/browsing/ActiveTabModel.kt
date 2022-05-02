@@ -44,4 +44,6 @@ interface ActiveTabModel {
 
     /** Tracks what should be displayed to the user in the URL bar. */
     val displayedInfoFlow: StateFlow<DisplayedInfo>
+
+    val trackersFlow: StateFlow<Int>
 }
