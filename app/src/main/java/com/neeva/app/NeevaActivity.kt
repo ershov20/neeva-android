@@ -78,7 +78,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var overlaySheetModel: OverlaySheetModel
-    @Inject lateinit var settingsDataModel: SettingsDataModel
+    @Inject internal lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var snackbarModel: SnackbarModel
     @Inject lateinit var spaceStore: SpaceStore
 

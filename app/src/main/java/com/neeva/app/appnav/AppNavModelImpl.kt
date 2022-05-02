@@ -85,11 +85,6 @@ class AppNavModelImpl(
         if (navController.currentDestination?.route == destination.route) return
         navController.navigate(destination.route) {
             launchSingleTop = true
-
-            // If the destination has an explicit parent, pop the stack all the way up to there.
-            // This isn't strictly necessary for most screens, but avoids confusion about the
-            // correct way to navigate somewhere using the NavController.
-            destination.parent?.let { popUpTo(it.route) }
         }
     }
 
@@ -106,10 +101,13 @@ class AppNavModelImpl(
     override fun showBrowser(forceUserToStayInCardGrid: Boolean) {
         webLayerModel.currentBrowser.urlBarModel.clearFocus()
 
-        navController.popBackStack(
-            route = AppNavDestination.BROWSER.route,
-            inclusive = false
-        )
+        navController.navigate(route = AppNavDestination.BROWSER.route) {
+            launchSingleTop = true
+
+            popUpTo(AppNavDestination.BROWSER.route) {
+                inclusive = true
+            }
+        }
 
         if (webLayerModel.currentBrowser.userMustBeShownCardGrid() && forceUserToStayInCardGrid) {
             showCardGrid()

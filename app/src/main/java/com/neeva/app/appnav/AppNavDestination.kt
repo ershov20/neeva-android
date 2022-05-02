@@ -42,6 +42,8 @@ enum class AppNavDestination(
         }
 
     companion object {
-        fun fromRouteName(route: String?): AppNavDestination? = route?.let { valueOf(it) }
+        fun fromRouteName(route: String?): AppNavDestination? {
+            return values().firstOrNull { it.route == route }
+        }
     }
 }
