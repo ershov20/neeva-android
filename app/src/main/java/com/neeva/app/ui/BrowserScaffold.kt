@@ -1,6 +1,5 @@
 package com.neeva.app.ui
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -70,7 +69,7 @@ fun BrowserScaffold(
 
                 // Full sized views, drawn below the two toolbars.
                 when {
-                    urlBarModelState.isEditing -> {
+                    isEditing -> {
                         SuggestionPane(modifier = Modifier.fillMaxSize())
                     }
 
@@ -89,7 +88,6 @@ fun BrowserScaffold(
                     }
                 }
             }
-            Log.e("KOBE", "BrowserScaffold: Recomposing with isEditing = $isEditing")
 
             if (!isEditing && !browserToolbarModel.useSingleBrowserToolbar) {
                 BrowserBottomToolbar(
