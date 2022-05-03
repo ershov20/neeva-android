@@ -27,7 +27,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun ShieldIconButton(trackersBlocked: Int, modifier: Modifier) {
     IconButton(
         onClick = { /*TODO*/ },
-        modifier = modifier
+        modifier = modifier.size(Dimensions.SIZE_TOUCH_TARGET)
     ) {
         ConstraintLayout {
             val (shieldIcon, numberBadge) = createRefs()
@@ -58,8 +58,8 @@ fun ShieldIconButton(trackersBlocked: Int, modifier: Modifier) {
 @Composable
 private fun ShieldIconPreview() {
     val iconModifier = Modifier
-        .padding(Dimensions.PADDING_SMALL)
-        .size(Dimensions.SIZE_TOUCH_TARGET)
+        .padding(vertical = Dimensions.PADDING_TINY)
+        .padding(start = Dimensions.PADDING_SMALL)
 
     LightDarkPreviewContainer {
         val testNumbers = listOf(0, 9, 99, 100)

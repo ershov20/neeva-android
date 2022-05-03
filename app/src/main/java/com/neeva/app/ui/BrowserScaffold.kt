@@ -16,7 +16,7 @@ import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.toolbar.BrowserBottomToolbar
-import com.neeva.app.browsing.toolbar.BrowserToolbar
+import com.neeva.app.browsing.toolbar.BrowserToolbarContainer
 import com.neeva.app.browsing.toolbar.BrowserToolbarModelImpl
 import com.neeva.app.suggestions.SuggestionPane
 import kotlinx.coroutines.flow.StateFlow
@@ -49,7 +49,7 @@ fun BrowserScaffold(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Make sure that the top toolbar is visible if the user is editing the URL.
-            BrowserToolbar(
+            BrowserToolbarContainer(
                 useSingleBrowserToolbar = useSingleBrowserToolbar,
                 isUpdateAvailable = toolbarConfiguration.isUpdateAvailable,
                 topOffset = if (isEditing) 0f else toolbarConfiguration.topControlOffset

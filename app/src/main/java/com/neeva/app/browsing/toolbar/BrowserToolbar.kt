@@ -31,7 +31,7 @@ import com.neeva.app.settings.LocalDebugFlags
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
-fun BrowserToolbar(
+fun BrowserToolbarContainer(
     useSingleBrowserToolbar: Boolean,
     isUpdateAvailable: Boolean,
     topOffset: Float

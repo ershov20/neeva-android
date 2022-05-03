@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -57,9 +56,7 @@ fun URLBar(
         .fillMaxWidth()
         .defaultMinSize(minHeight = 40.dp)
 
-    val iconModifier = Modifier
-        .padding(horizontal = Dimensions.PADDING_SMALL, vertical = Dimensions.PADDING_TINY)
-        .size(Dimensions.SIZE_TOUCH_TARGET)
+    val iconModifier = Modifier.padding(vertical = Dimensions.PADDING_TINY)
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         AnimatedVisibility(visible = !isEditing) {
@@ -68,13 +65,12 @@ fun URLBar(
             UrlBarStartComposable(
                 showIncognitoBadge = showIncognitoBadge,
                 trackersBlocked = browserWrapper.activeTabModel.trackersFlow,
-                modifier = iconModifier
+                modifier = iconModifier.padding(start = Dimensions.PADDING_SMALL)
             )
         }
 
         UrlBarContainer(
             isIncognito = isIncognito,
-            isEditing = isEditing,
             modifier = Modifier.weight(1f)
         ) {
             if (isEditing) {
@@ -103,7 +99,7 @@ fun URLBar(
             }
         }
         AnimatedVisibility(visible = !isEditing) {
-            endComposable(modifier = iconModifier)
+            endComposable(modifier = iconModifier.padding(end = Dimensions.PADDING_SMALL))
         }
     }
 
@@ -145,7 +141,6 @@ private fun UrlBarStartComposable(
 @Composable
 fun UrlBarContainer(
     isIncognito: Boolean,
-    isEditing: Boolean,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
@@ -161,24 +156,12 @@ fun UrlBarContainer(
         MaterialTheme.colorScheme.onSurface
     }
 
-    val urlBarSurfaceModifier = Modifier
-        .then(
-            if (isEditing) {
-                Modifier.padding(
-                    vertical = Dimensions.PADDING_SMALL,
-                    horizontal = Dimensions.PADDING_LARGE
-                )
-            } else {
-                Modifier.padding(vertical = Dimensions.PADDING_SMALL)
-            }
-        )
-
     Surface(
         color = backgroundColor,
         contentColor = foregroundColor,
         shape = RoundedCornerShape(24.dp),
         tonalElevation = 2.dp,
-        modifier = urlBarSurfaceModifier.then(modifier)
+        modifier = modifier.padding(Dimensions.PADDING_SMALL)
     ) {
         content()
     }
