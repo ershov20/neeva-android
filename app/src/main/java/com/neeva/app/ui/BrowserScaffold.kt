@@ -1,5 +1,8 @@
 package com.neeva.app.ui
 
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
@@ -47,6 +51,29 @@ fun BrowserScaffold(
         LocalBrowserToolbarModel provides browserToolbarModel,
         LocalBrowserWrapper provides browserWrapper
     ) {
+        // Re-parent the WebLayer Fragment's Views directly into the Composable hierarchy.
+        // This is a dirty hack that works around WebLayer not playing well with Compose:
+        // * https://github.com/neevaco/neeva-android/issues/530
+        //
+        // * The WebLayer Fragment needs to be inserted using a FragmentTransaction, which requires
+        //   using a regular View ID in the Android View hierarchy.  Because Compose doesn't use
+        //   Views (and attempts to add an ID to the one created by the AndroidView were unreliably
+        //   found using Activity.findViewById()), we have to manually move the WebLayer Fragment's
+        //   Views into the FrameLayout that is whenever the BrowserScaffold is recomposed.
+        //   More annoyingly, because the BrowserScaffold can be removed from the Composable
+        //   hierarchy whenever the user navigates to another screen, the factory lambda will fire
+        //   and create a new FrameLayout.
+        //
+        // * WebLayer has its own mechanism for auto-hiding toolbars that is completely incompatible
+        //   with how a Composable Scaffold works.
+        AndroidView(
+            factory = { FrameLayout(it) },
+            modifier = Modifier.fillMaxSize(),
+            update = { composeContainer ->
+                browserWrapper.getFragment()?.view?.let { reparentView(it, composeContainer) }
+            }
+        )
+
         Column(modifier = Modifier.fillMaxSize()) {
             // Make sure that the top toolbar is visible if the user is editing the URL.
             BrowserToolbarContainer(
@@ -96,4 +123,17 @@ fun BrowserScaffold(
             }
         }
     }
+}
+
+private fun reparentView(childView: View, desiredParentView: ViewGroup) {
+    if (childView.parent == null || childView.parent == desiredParentView) return
+
+    (childView.parent as ViewGroup).removeView(childView)
+    desiredParentView.addView(
+        childView,
+        ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
+    )
 }

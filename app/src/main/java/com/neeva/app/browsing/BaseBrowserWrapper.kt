@@ -113,7 +113,14 @@ abstract class BaseBrowserWrapper internal constructor(
 
     private val browserInitializationLock = Object()
 
-    private lateinit var fragment: Fragment
+    private lateinit var _fragment: Fragment
+    override fun getFragment(): Fragment? {
+        return if (!::_fragment.isInitialized) {
+            null
+        } else {
+            _fragment
+        }
+    }
 
     /**
      * Updated whenever the [Browser] is recreated.
@@ -249,20 +256,20 @@ abstract class BaseBrowserWrapper internal constructor(
         useSingleBrowserToolbar: Boolean,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
-        if (!::fragment.isInitialized) {
+        if (!::_fragment.isInitialized) {
             // TODO(https://github.com/neevaco/neeva-android/issues/318): We should try to reuse any
             // existing Fragments that were kept by the FragmentManager after the Activity died in
             // the background.
-            fragment = createBrowserFragment()
+            _fragment = createBrowserFragment()
 
             // Keep the WebLayer instance across Activity restarts so that the Browser doesn't get
             // deleted when the configuration changes (e.g. the screen is rotated in fullscreen).
-            fragment.retainInstance = true
+            _fragment.retainInstance = true
         }
 
-        fragmentAttacher(fragment, isIncognito)
+        fragmentAttacher(_fragment, isIncognito)
         if (browserFlow.value == null) {
-            browserFlow.value = getBrowserFromFragment(fragment)
+            browserFlow.value = getBrowserFromFragment(_fragment)
         }
 
         val browser = browserFlow.value ?: throw IllegalStateException()

@@ -55,6 +55,9 @@ interface BrowserWrapper {
      */
     val isLazyTabFlow: StateFlow<Boolean>
 
+    /** Gets the [Fragment] created by WebLayer for this Browser. */
+    fun getFragment(): Fragment?
+
     /** Prepares the WebLayer Browser to interface with our app. */
     fun createAndAttachBrowser(
         displaySize: Rect,
