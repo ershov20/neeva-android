@@ -51,7 +51,7 @@ class URLBarModelImplTest : BaseTest() {
     private lateinit var model: URLBarModelImpl
 
     private val urlBarModelText: String
-        get() = model.state.value.userTypedInput
+        get() = model.stateFlow.value.userTypedInput
 
     override fun setUp() {
         super.setUp()
@@ -77,30 +77,30 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun onLocationBarTextChanged_withoutFocus_doesNothing() {
-        expectThat(model.state.value.isEditing).isFalse()
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+        expectThat(model.stateFlow.value.isEditing).isFalse()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
 
         model.onLocationBarTextChanged(TextFieldValue("no effect"))
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
     }
 
     @Test
     fun onLocationBarTextChanged_withFocus_setsText() {
         model.requestFocus()
-        expectThat(model.state.value.isEditing).isTrue()
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
 
         model.onLocationBarTextChanged(TextFieldValue("new text"))
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("new text")
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("new text")
     }
 
     @Test
     fun onLocationBarTextChanged_whenRemovingCharacterAndValidSuggestion_deletesSuggestion() {
         model.requestFocus()
-        expectThat(model.state.value.isEditing).isTrue()
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
 
         model.onLocationBarTextChanged(TextFieldValue("exam"))
 
@@ -124,7 +124,7 @@ class URLBarModelImplTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Confirm that everything looks good.
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.textFieldValue.text).isEqualTo("exam")
             expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
             expectThat(it.autocompleteSuggestionText).isEqualTo("ple.com")
@@ -141,7 +141,7 @@ class URLBarModelImplTest : BaseTest() {
         // Delete a character from the current query.  Because there is an autocomplete suggestion,
         // the text change should be rejected and the existing suggestion should be removed.
         model.onLocationBarTextChanged(TextFieldValue("exa"))
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.textFieldValue.text).isEqualTo("exam")
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
@@ -161,14 +161,14 @@ class URLBarModelImplTest : BaseTest() {
     @Test
     fun onLocationBarTextChanged_whenRemovingCharacterAndNoSuggestion_acceptsTextChange() {
         model.requestFocus()
-        expectThat(model.state.value.isEditing).isTrue()
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
 
         model.onLocationBarTextChanged(TextFieldValue("exam"))
 
         // Confirm that everything looks good.
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.textFieldValue.text).isEqualTo("exam")
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
@@ -179,7 +179,7 @@ class URLBarModelImplTest : BaseTest() {
         // Delete a character from the current query.  Because there is no autocomplete suggestion,
         // the text change should be accepted
         model.onLocationBarTextChanged(TextFieldValue("exa"))
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.textFieldValue.text).isEqualTo("exa")
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
@@ -191,9 +191,9 @@ class URLBarModelImplTest : BaseTest() {
     @Test
     fun onLocationBarTextChanged_whenAddingCharacterAndValidSuggestion_keepsSameSuggestion() {
         model.requestFocus()
-        expectThat(model.state.value.isEditing).isTrue()
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
 
         model.onLocationBarTextChanged(TextFieldValue("exam"))
 
@@ -217,7 +217,7 @@ class URLBarModelImplTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Confirm that everything looks good.
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.textFieldValue.text).isEqualTo("exam")
             expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
             expectThat(it.autocompleteSuggestionText).isEqualTo("ple.com")
@@ -233,7 +233,7 @@ class URLBarModelImplTest : BaseTest() {
 
         // Add a character that matches the same autocomplete suggestion.
         model.onLocationBarTextChanged(TextFieldValue("examp"))
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.textFieldValue.text).isEqualTo("examp")
             expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
             expectThat(it.autocompleteSuggestionText).isEqualTo("le.com")
@@ -253,9 +253,9 @@ class URLBarModelImplTest : BaseTest() {
     @Test
     fun onLocationBarTextChanged_whenAddingCharacterAndInvalidSuggestion_removesSuggestion() {
         model.requestFocus()
-        expectThat(model.state.value.isEditing).isTrue()
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
 
         model.onLocationBarTextChanged(TextFieldValue("exam"))
 
@@ -279,7 +279,7 @@ class URLBarModelImplTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Confirm that everything looks good.
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.textFieldValue.text).isEqualTo("exam")
             expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
             expectThat(it.autocompleteSuggestionText).isEqualTo("ple.com")
@@ -295,7 +295,7 @@ class URLBarModelImplTest : BaseTest() {
 
         // Add a character that no longer matches the suggestion.
         model.onLocationBarTextChanged(TextFieldValue("exam_"))
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.textFieldValue.text).isEqualTo("exam_")
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
@@ -315,38 +315,38 @@ class URLBarModelImplTest : BaseTest() {
     @Test
     fun onLocationBarTextChanged_whenOnlyCompositionChanges_stillAllowsAutocomplete() {
         model.requestFocus()
-        expectThat(model.state.value.isEditing).isTrue()
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("")
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
 
         val initialTextFieldValue = TextFieldValue("new text")
         model.onLocationBarTextChanged(initialTextFieldValue)
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("new text")
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("new text")
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
 
         val newTextFieldValue = initialTextFieldValue.copy(
             composition = TextRange(0, initialTextFieldValue.text.length)
         )
         model.onLocationBarTextChanged(newTextFieldValue)
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("new text")
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("new text")
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
     }
 
     @Test
     fun replaceLocationBarText() {
         model.replaceLocationBarText("random query")
-        val firstValue = model.state.value.textFieldValue
+        val firstValue = model.stateFlow.value.textFieldValue
         expectThat(firstValue.text).isEqualTo("random query")
         expectThat(firstValue.selection.collapsed).isTrue()
         expectThat(firstValue.selection.start).isEqualTo("random query".length)
-        expectThat(model.state.value.isAutocompleteAllowed).isFalse()
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isFalse()
 
         model.replaceLocationBarText("query text")
-        val secondValue = model.state.value.textFieldValue
+        val secondValue = model.stateFlow.value.textFieldValue
         expectThat(secondValue.text).isEqualTo("query text")
         expectThat(secondValue.selection.collapsed).isTrue()
         expectThat(secondValue.selection.start).isEqualTo("query text".length)
-        expectThat(model.state.value.isAutocompleteAllowed).isFalse()
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isFalse()
     }
 
     @Test
@@ -364,8 +364,8 @@ class URLBarModelImplTest : BaseTest() {
 
         model.requestFocus()
         model.onLocationBarTextChanged(TextFieldValue("exam"))
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("exam")
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("exam")
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
 
         // Indicate that a new suggestion has come down the pipeline that matches the user query.
         suggestionFlow.value = NavSuggestion(
@@ -377,7 +377,7 @@ class URLBarModelImplTest : BaseTest() {
         )
         coroutineScopeRule.scope.advanceUntilIdle()
 
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.autocompleteSuggestion).isEqualTo("example.com")
             expectThat(it.autocompleteSuggestionText).isEqualTo("ple.com")
             expectThat(it.uriToLoad).isEqualTo(Uri.parse("https://www.example.com"))
@@ -389,8 +389,8 @@ class URLBarModelImplTest : BaseTest() {
     fun autocompleteSuggestionFlow_forSearchButGivenWrongSuggestion_removesAutocomplete() {
         model.requestFocus()
         model.onLocationBarTextChanged(TextFieldValue("exam"))
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("exam")
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("exam")
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
 
         // Indicate that a new suggestion has come down the pipeline that matches the user query.
         suggestionFlow.value = NavSuggestion(
@@ -402,7 +402,7 @@ class URLBarModelImplTest : BaseTest() {
         )
         coroutineScopeRule.scope.advanceUntilIdle()
 
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
             expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri())
@@ -418,8 +418,8 @@ class URLBarModelImplTest : BaseTest() {
     fun autocompleteSuggestionFlow_forSiteButGivenWrongSuggestion_removesAutocomplete() {
         model.requestFocus()
         model.onLocationBarTextChanged(TextFieldValue("example.com"))
-        expectThat(model.state.value.textFieldValue.text).isEqualTo("example.com")
-        expectThat(model.state.value.isAutocompleteAllowed).isTrue()
+        expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("example.com")
+        expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
 
         // Indicate that a new suggestion has come down the pipeline that matches the user query.
         suggestionFlow.value = NavSuggestion(
@@ -431,7 +431,7 @@ class URLBarModelImplTest : BaseTest() {
         )
         coroutineScopeRule.scope.advanceUntilIdle()
 
-        model.state.value.let {
+        model.stateFlow.value.let {
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
             expectThat(it.uriToLoad).isEqualTo(Uri.parse("http://example.com"))
@@ -448,14 +448,14 @@ class URLBarModelImplTest : BaseTest() {
         // When the bar is focused, remove whatever text was being displayed.
         model.onFocusChanged(true)
         expectThat(urlBarModelText).isEqualTo("")
-        expectThat(model.state.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isEditing).isTrue()
 
         model.replaceLocationBarText("reddit.com/r/android")
         expectThat(urlBarModelText).isEqualTo("reddit.com/r/android")
 
         // When the bar is unfocused, it should return to showing the webpage domain.
         model.onFocusChanged(false)
-        expectThat(model.state.value.isEditing).isFalse()
+        expectThat(model.stateFlow.value.isEditing).isFalse()
         expectThat(urlBarModelText).isEqualTo("")
     }
 

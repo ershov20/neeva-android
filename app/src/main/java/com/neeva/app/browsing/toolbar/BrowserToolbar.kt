@@ -1,5 +1,6 @@
 package com.neeva.app.browsing.toolbar
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -13,59 +14,69 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
+import com.neeva.app.browsing.ActiveTabModel
+import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.findinpage.FindInPageToolbar
+import com.neeva.app.browsing.findinpage.PreviewFindInPageModel
 import com.neeva.app.browsing.urlbar.URLBar
+import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.settings.LocalDebugFlags
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
-fun BrowserToolbarContainer(
-    useSingleBrowserToolbar: Boolean,
-    isUpdateAvailable: Boolean,
-    topOffset: Float
-) {
+fun BrowserToolbarContainer(topOffset: Float) {
+    val browserToolbarModel = LocalBrowserToolbarModel.current
+    val findInPageModel = LocalBrowserWrapper.current.findInPageModel
+
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
+
+    val enableShowDesktopSite = LocalEnvironment.current.settingsDataModel
+        .getDebugFlagValue(LocalDebugFlags.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
+
     BrowserToolbar(
-        useSingleBrowserToolbar = useSingleBrowserToolbar,
-        isUpdateAvailable = isUpdateAvailable,
+        findInPageModel = findInPageModel,
+        enableShowDesktopSite = enableShowDesktopSite,
         modifier = Modifier
             .offset(y = topOffsetDp)
             .background(MaterialTheme.colorScheme.background)
     )
+
+    val isEditing = browserToolbarModel.urlBarModel.stateFlow.collectAsState()
+        .value.isEditing
+    BackHandler(enabled = isEditing) {
+        // This is the main mechanism for setting isEditing to false:
+        browserToolbarModel.urlBarModel.clearFocus()
+    }
 }
 
 @Composable
 fun BrowserToolbar(
-    useSingleBrowserToolbar: Boolean,
-    isUpdateAvailable: Boolean,
-    modifier: Modifier
+    findInPageModel: FindInPageModel,
+    enableShowDesktopSite: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
-    val browserWrapper = LocalBrowserWrapper.current
+    val isEditing = browserToolbarModel.urlBarModel.stateFlow.collectAsState()
+        .value.isEditing
+    val findInPageInfo = findInPageModel.findInPageInfoFlow.collectAsState().value
+    val navigationInfoFlow = browserToolbarModel.navigationInfoFlow.collectAsState()
 
-    val urlBarModel = browserWrapper.urlBarModel
-    val isEditing by urlBarModel.isEditing.collectAsState(false)
-
-    val findInPageModel = browserWrapper.findInPageModel
-    val findInPageInfo by findInPageModel.findInPageInfo.collectAsState()
-
-    val activeTabModel = browserWrapper.activeTabModel
-    val progress: Int by activeTabModel.progressFlow.collectAsState()
-    val navigationInfoFlow = activeTabModel.navigationInfoFlow.collectAsState()
-
-    // TODO(kobec): use a ViewModel interface pattern to encapsulate the params and wiring + see previews closer to the design.
     Surface(
         color = MaterialTheme.colorScheme.background,
         modifier = modifier
@@ -81,27 +92,25 @@ fun BrowserToolbar(
         } else {
             val isDesktopUserAgentEnabled = navigationInfoFlow.value.desktopUserAgentEnabled
             val isForwardEnabled = navigationInfoFlow.value.canGoForward
-            val enableShowDesktopSite = LocalEnvironment.current.settingsDataModel
-                .getDebugFlagValue(LocalDebugFlags.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
 
             val overflowMenuData = remember(
-                useSingleBrowserToolbar,
+                browserToolbarModel.useSingleBrowserToolbar,
                 isForwardEnabled,
-                isUpdateAvailable,
+                browserToolbarModel.isUpdateAvailable,
                 isDesktopUserAgentEnabled,
                 enableShowDesktopSite
             ) {
                 createBrowserOverflowMenuData(
-                    isIconRowVisible = !useSingleBrowserToolbar,
+                    isIconRowVisible = !browserToolbarModel.useSingleBrowserToolbar,
                     isForwardEnabled = isForwardEnabled,
-                    isUpdateAvailableVisible = isUpdateAvailable,
+                    isUpdateAvailableVisible = browserToolbarModel.isUpdateAvailable,
                     isDesktopUserAgentEnabled = isDesktopUserAgentEnabled,
                     enableShowDesktopSite = enableShowDesktopSite
                 )
             }
 
             Box {
-                if (useSingleBrowserToolbar) {
+                if (browserToolbarModel.useSingleBrowserToolbar) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         AnimatedVisibility(visible = !isEditing) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -119,8 +128,11 @@ fun BrowserToolbar(
                             }
                         }
 
-                        URLBar(modifier = Modifier.weight(1.0f)) { modifier ->
-                            ShareButton(modifier = modifier)
+                        URLBar(
+                            browserToolbarModel = browserToolbarModel,
+                            modifier = Modifier.weight(1.0f)
+                        ) { iconModifier ->
+                            ShareButton(modifier = iconModifier)
                         }
 
                         AnimatedVisibility(visible = !isEditing) {
@@ -143,20 +155,168 @@ fun BrowserToolbar(
                         }
                     }
                 } else {
-                    URLBar { modifier ->
+                    URLBar(browserToolbarModel) { iconModifier ->
                         OverflowMenu(
                             overflowMenuData = overflowMenuData,
                             onMenuItem = browserToolbarModel::onMenuItem,
-                            modifier = modifier
+                            modifier = iconModifier
                         )
                     }
                 }
 
                 LoadingBar(
-                    progress = progress,
+                    progressFlow = browserToolbarModel.tabProgressFlow,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
             }
         }
     }
+}
+
+@Composable
+internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
+    OneBooleanPreviewContainer { isIncognito ->
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
+                useSingleBrowserToolbar = useSingleBrowserToolbar,
+                isIncognito = isIncognito,
+                displayedInfo = ActiveTabModel.DisplayedInfo(
+                    ActiveTabModel.DisplayMode.PLACEHOLDER,
+                    "Search or enter address"
+                )
+            )
+        ) {
+
+            BrowserToolbar(
+                findInPageModel = PreviewFindInPageModel(),
+                enableShowDesktopSite = true
+            )
+        }
+    }
+}
+
+@Preview("Blank, LTR", locale = "en")
+@Preview("Blank, RTL", locale = "he")
+@Composable
+fun ToolbarPreview_Blank_Portrait() {
+    ToolbarPreview_Blank(false)
+}
+
+@Composable
+internal fun ToolbarPreview_Focus(useSingleBrowserToolbar: Boolean) {
+    OneBooleanPreviewContainer { isIncognito ->
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
+                useSingleBrowserToolbar = useSingleBrowserToolbar,
+                isIncognito = isIncognito,
+                displayedInfo = ActiveTabModel.DisplayedInfo(ActiveTabModel.DisplayMode.QUERY),
+                urlBarModelStateValue = URLBarModelState(
+                    isEditing = true,
+                    // TODO(kobec): Previews don't show the text cursor for some reason
+                )
+            )
+        ) {
+            BrowserToolbar(
+                findInPageModel = PreviewFindInPageModel(),
+                enableShowDesktopSite = true
+            )
+        }
+    }
+}
+
+@Preview("Focus, LTR", locale = "en")
+@Preview("Focus, RTL", locale = "he")
+@Composable
+fun ToolbarPreview_Focus_Portrait() {
+    ToolbarPreview_Focus(false)
+}
+
+@Composable
+internal fun ToolbarPreview_Typing(useSingleBrowserToolbar: Boolean) {
+    OneBooleanPreviewContainer { isIncognito ->
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
+                useSingleBrowserToolbar = useSingleBrowserToolbar,
+                isIncognito = isIncognito,
+                displayedInfo = ActiveTabModel.DisplayedInfo(ActiveTabModel.DisplayMode.QUERY),
+                urlBarModelStateValue = URLBarModelState(
+                    isEditing = true,
+                    // TODO(kobec): Previews don't show the text cursor for some reason
+                    textFieldValue = TextFieldValue(text = "typing", selection = TextRange(5))
+                )
+            )
+        ) {
+            BrowserToolbar(
+                findInPageModel = PreviewFindInPageModel(),
+                enableShowDesktopSite = true
+            )
+        }
+    }
+}
+
+@Preview("Typing, LTR", locale = "en")
+@Preview("Typing, RTL", locale = "he")
+@Composable
+fun ToolbarPreview_Typing_Portrait() {
+    ToolbarPreview_Typing(false)
+}
+
+@Composable
+internal fun ToolbarPreview_Search(useSingleBrowserToolbar: Boolean) {
+    OneBooleanPreviewContainer { isIncognito ->
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
+                useSingleBrowserToolbar = useSingleBrowserToolbar,
+                isIncognito = isIncognito,
+                displayedInfo = ActiveTabModel.DisplayedInfo(
+                    ActiveTabModel.DisplayMode.QUERY,
+                    displayedText = "search query"
+                ),
+                trackers = 9
+            )
+        ) {
+            BrowserToolbar(
+                findInPageModel = PreviewFindInPageModel(),
+                enableShowDesktopSite = true
+            )
+        }
+    }
+}
+
+@Preview("Search, LTR", locale = "en")
+@Preview("Search, RTL", locale = "he")
+@Composable
+fun ToolbarPreview_Search_Portrait() {
+    ToolbarPreview_Search(false)
+}
+
+@Composable
+internal fun ToolbarPreview_Loading(useSingleBrowserToolbar: Boolean) {
+    // TODO(kobec/dan): not completely accurate because of weblayer url bar i think...
+    OneBooleanPreviewContainer { isIncognito ->
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
+                useSingleBrowserToolbar = useSingleBrowserToolbar,
+                isIncognito = isIncognito,
+                displayedInfo = ActiveTabModel.DisplayedInfo(
+                    ActiveTabModel.DisplayMode.URL,
+                    displayedText = "website.url"
+                ),
+                trackers = 999,
+                tabProgressValue = 75
+            )
+        ) {
+            BrowserToolbar(
+                findInPageModel = PreviewFindInPageModel(),
+                enableShowDesktopSite = true
+            )
+        }
+    }
+}
+
+@Preview("Loading, LTR", locale = "en")
+@Preview("Loading, RTL", locale = "he")
+@Composable
+fun ToolbarPreview_Loading_Portrait() {
+    ToolbarPreview_Loading(false)
 }

@@ -33,7 +33,7 @@ class URLBarModelImpl(
         AppCompatResources.getDrawable(appContext, R.drawable.ic_neeva_logo)?.toBitmap()
 
     private val _state = MutableStateFlow(URLBarModelState())
-    override val state: StateFlow<URLBarModelState> = _state
+    override val stateFlow: StateFlow<URLBarModelState> = _state
 
     private val _urlBarControllerFlow = MutableStateFlow<UrlBarController?>(null)
     override val urlBarControllerFlow: StateFlow<UrlBarController?> = _urlBarControllerFlow

@@ -21,19 +21,19 @@ interface URLBarModel {
      * Flow of _all_ things that can change in the URL bar.  If you want to watch just one thing,
      * use one of the other Flows (or add a new one tailored to your use case).
      */
-    val state: StateFlow<URLBarModelState>
+    val stateFlow: StateFlow<URLBarModelState>
 
     /** Tracks the UrlBarController used to display information about the current page. */
     val urlBarControllerFlow: Flow<UrlBarController?>
 
     val queryTextFlow: Flow<String?>
-        get() = state.map { it.queryText }.distinctUntilChanged()
+        get() = stateFlow.map { it.queryText }.distinctUntilChanged()
 
     val isUserQueryBlank: Flow<Boolean>
-        get() = state.map { it.queryText.isNullOrBlank() }.distinctUntilChanged()
+        get() = stateFlow.map { it.queryText.isNullOrBlank() }.distinctUntilChanged()
 
     val isEditing: Flow<Boolean>
-        get() = state.map { it.isEditing }.distinctUntilChanged()
+        get() = stateFlow.map { it.isEditing }.distinctUntilChanged()
 
     /** Replaces all of the text that is in the URL bar. */
     fun replaceLocationBarText(newValue: String)

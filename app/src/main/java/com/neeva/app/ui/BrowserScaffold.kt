@@ -1,5 +1,6 @@
 package com.neeva.app.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.toolbar.BrowserBottomToolbar
 import com.neeva.app.browsing.toolbar.BrowserToolbarContainer
 import com.neeva.app.browsing.toolbar.BrowserToolbarModelImpl
+import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.suggestions.SuggestionPane
 import kotlinx.coroutines.flow.StateFlow
 
@@ -27,19 +29,18 @@ fun BrowserScaffold(
     webLayerModel: WebLayerModel
 ) {
     val appNavModel = LocalAppNavModel.current
-
     val browserWrapper by webLayerModel.currentBrowserFlow.collectAsState()
     val urlBarModel = browserWrapper.urlBarModel
 
     val toolbarConfiguration by toolbarConfigurationFlow.collectAsState()
-    val useSingleBrowserToolbar = toolbarConfiguration.useSingleBrowserToolbar
+    val urlBarModelState: URLBarModelState by urlBarModel.stateFlow.collectAsState()
+    val isEditing = urlBarModelState.isEditing
 
-    val isEditing: Boolean by urlBarModel.isEditing.collectAsState(false)
-
-    val browserToolbarModel = remember(appNavModel, browserWrapper) {
+    val browserToolbarModel = remember(appNavModel, browserWrapper, toolbarConfiguration) {
         BrowserToolbarModelImpl(
             appNavModel,
-            browserWrapper
+            browserWrapper,
+            toolbarConfiguration
         )
     }
 
@@ -50,9 +51,11 @@ fun BrowserScaffold(
         Column(modifier = Modifier.fillMaxSize()) {
             // Make sure that the top toolbar is visible if the user is editing the URL.
             BrowserToolbarContainer(
-                useSingleBrowserToolbar = useSingleBrowserToolbar,
-                isUpdateAvailable = toolbarConfiguration.isUpdateAvailable,
-                topOffset = if (isEditing) 0f else toolbarConfiguration.topControlOffset
+                topOffset = if (isEditing) {
+                    0f
+                } else {
+                    toolbarConfiguration.topControlOffset
+                }
             )
 
             // We have to use a Box with no background because the WebLayer Fragments are displayed
@@ -67,7 +70,7 @@ fun BrowserScaffold(
 
                 // Full sized views, drawn below the two toolbars.
                 when {
-                    isEditing -> {
+                    urlBarModelState.isEditing -> {
                         SuggestionPane(modifier = Modifier.fillMaxSize())
                     }
 
@@ -86,8 +89,9 @@ fun BrowserScaffold(
                     }
                 }
             }
+            Log.e("KOBE", "BrowserScaffold: Recomposing with isEditing = $isEditing")
 
-            if (!isEditing && !useSingleBrowserToolbar) {
+            if (!isEditing && !browserToolbarModel.useSingleBrowserToolbar) {
                 BrowserBottomToolbar(
                     bottomOffset = toolbarConfiguration.bottomControlOffset
                 )

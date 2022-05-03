@@ -5,14 +5,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun LoadingBar(
-    progress: Int,
+    progressFlow: StateFlow<Int>,
     modifier: Modifier = Modifier
 ) {
+    val progress: Int = progressFlow.collectAsState().value
     if (progress != 100) {
         LinearProgressIndicator(
             progress = progress / 100.0f,

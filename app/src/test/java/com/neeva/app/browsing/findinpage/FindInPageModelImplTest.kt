@@ -39,20 +39,20 @@ class FindInPageModelImplTest : BaseTest() {
 
     @Test
     fun findInPage_textIsNullByDefault() {
-        expectThat(model.findInPageInfo.value).isEqualTo(FindInPageInfo())
+        expectThat(model.findInPageInfoFlow.value).isEqualTo(FindInPageInfo())
     }
 
     @Test
     fun findInPage_whenNotShown_textIsNullWithNonNullInput() {
         // Skip calling model.showFindInPage(tab).
         model.updateFindInPageQuery("test")
-        expectThat(model.findInPageInfo.value).isEqualTo(FindInPageInfo())
+        expectThat(model.findInPageInfoFlow.value).isEqualTo(FindInPageInfo())
     }
 
     @Test
     fun findInPage_whenShown_textIsEmpty() {
         model.showFindInPage(tab)
-        expectThat(model.findInPageInfo.value).isEqualTo(FindInPageInfo(text = ""))
+        expectThat(model.findInPageInfoFlow.value).isEqualTo(FindInPageInfo(text = ""))
     }
 
     @Test
@@ -69,7 +69,7 @@ class FindInPageModelImplTest : BaseTest() {
         model.showFindInPage(tab)
         model.updateFindInPageQuery(query)
         verify(tab.findInPageController, times(1)).find(query, true)
-        expectThat(model.findInPageInfo.value.text).isEqualTo(query)
+        expectThat(model.findInPageInfoFlow.value.text).isEqualTo(query)
     }
 
     @Test
@@ -81,6 +81,6 @@ class FindInPageModelImplTest : BaseTest() {
             .setFindInPageCallback(findInPageCallback.capture())
 
         findInPageCallback.lastValue.onFindResult(5, 2, false)
-        expectThat(model.findInPageInfo.value).isEqualTo(FindInPageInfo("", 2, 5, false))
+        expectThat(model.findInPageInfoFlow.value).isEqualTo(FindInPageInfo("", 2, 5, false))
     }
 }

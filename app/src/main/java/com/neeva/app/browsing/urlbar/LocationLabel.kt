@@ -31,7 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
-import com.neeva.app.LocalBrowserWrapper
+import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.OneBooleanPreviewContainer
@@ -44,17 +44,16 @@ fun LocationLabel(
     placeholderColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val browserWrapper = LocalBrowserWrapper.current
-
-    val activeTabModel = browserWrapper.activeTabModel
-    val displayedInfo by activeTabModel.displayedInfoFlow.collectAsState()
+    val browserToolbarModel = LocalBrowserToolbarModel.current
+    val displayInfo = browserToolbarModel.displayedInfoFlow.collectAsState().value
 
     // WebLayer requires that you pass it an old-school color resource from the XML files.
     val colorResource = mapComposeColorToResource(LocalContentColor.current)
     val textSize = MaterialTheme.typography.bodyLarge.fontSize.value
 
     // Whenever the UrlBarController changes, ask it for the View we need to display and recompose.
-    val urlBarController by browserWrapper.urlBarModel.urlBarControllerFlow.collectAsState(null)
+    val urlBarController by browserToolbarModel.urlBarModel.urlBarControllerFlow
+        .collectAsState(null)
     val urlBarView: View? = remember(urlBarController) {
         urlBarController?.createUrlBarView(
             UrlBarOptions.builder()
@@ -67,8 +66,8 @@ fun LocationLabel(
 
     LocationLabelContent(
         urlBarView = urlBarView,
-        mode = displayedInfo.mode,
-        displayedText = displayedInfo.displayedText,
+        mode = displayInfo.mode,
+        displayedText = displayInfo.displayedText,
         placeholderColor = placeholderColor,
         modifier = modifier
     )
@@ -83,7 +82,7 @@ fun LocationLabelContent(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().padding(horizontal = Dimensions.PADDING_MEDIUM),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

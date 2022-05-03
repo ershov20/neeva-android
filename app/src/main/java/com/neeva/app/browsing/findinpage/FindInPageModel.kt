@@ -11,7 +11,7 @@ data class FindInPageInfo(
 
 /** Tracks the current Find In Page status. */
 interface FindInPageModel {
-    val findInPageInfo: StateFlow<FindInPageInfo>
+    val findInPageInfoFlow: StateFlow<FindInPageInfo>
 
     fun updateFindInPageQuery(text: String?)
 

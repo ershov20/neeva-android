@@ -20,9 +20,7 @@ import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
-import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.ui.OneBooleanPreviewContainer
-import kotlinx.coroutines.flow.MutableStateFlow
 
 /** Contains all the controls available to the user in the bottom toolbar. */
 @Composable
@@ -126,21 +124,4 @@ internal fun BottomToolbarPreview_SpaceStoreHasUrl() {
             BrowserBottomToolbar(isIncognito = isIncognito)
         }
     }
-}
-
-/** Empty [BrowserToolbarModel] that doesn't do anything. */
-private class PreviewBrowserToolbarModel(
-    navigationInfo: ActiveTabModel.NavigationInfo = ActiveTabModel.NavigationInfo(),
-    spaceStoreHasUrl: Boolean = false
-) : BrowserToolbarModel() {
-    override fun goBack() {}
-    override fun goForward() {}
-    override fun reload() {}
-    override fun share() {}
-    override fun onAddToSpace() {}
-    override fun onMenuItem(id: OverflowMenuItemId) {}
-    override fun onTabSwitcher() {}
-
-    override val navigationInfoFlow = MutableStateFlow(navigationInfo)
-    override val spaceStoreHasUrlFlow = MutableStateFlow(spaceStoreHasUrl)
 }

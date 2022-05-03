@@ -8,7 +8,7 @@ import org.chromium.weblayer.Tab
 
 class FindInPageModelImpl : FindInPageModel {
     private val _findInPageInfo = MutableStateFlow(FindInPageInfo())
-    override val findInPageInfo: StateFlow<FindInPageInfo> = _findInPageInfo
+    override val findInPageInfoFlow: StateFlow<FindInPageInfo> = _findInPageInfo
 
     private var activeTab: WeakReference<Tab> = WeakReference(null)
 
@@ -18,7 +18,7 @@ class FindInPageModelImpl : FindInPageModel {
             activeMatchIndex: Int,
             finalUpdate: Boolean
         ) {
-            _findInPageInfo.value = findInPageInfo.value.copy(
+            _findInPageInfo.value = findInPageInfoFlow.value.copy(
                 activeMatchIndex = activeMatchIndex,
                 numberOfMatches = numberOfMatches,
                 finalUpdate = finalUpdate
@@ -43,10 +43,10 @@ class FindInPageModelImpl : FindInPageModel {
 
     override fun updateFindInPageQuery(text: String?) {
         // Expect a call to show first as that registers the callback.
-        if (!text.isNullOrEmpty() && findInPageInfo.value.text == null) return
+        if (!text.isNullOrEmpty() && findInPageInfoFlow.value.text == null) return
 
         if (text != null) {
-            _findInPageInfo.value = findInPageInfo.value.copy(text = text)
+            _findInPageInfo.value = findInPageInfoFlow.value.copy(text = text)
             activeTab.get()?.findInPageController?.find(text, true)
         } else {
             _findInPageInfo.value = FindInPageInfo()
@@ -60,4 +60,13 @@ class FindInPageModelImpl : FindInPageModel {
             activeTab.get()?.findInPageController?.find(query, goForward)
         }
     }
+}
+
+/** For Preview testing. */
+class PreviewFindInPageModel : FindInPageModel {
+    override val findInPageInfoFlow: StateFlow<FindInPageInfo> = MutableStateFlow(FindInPageInfo())
+
+    override fun updateFindInPageQuery(text: String?) {}
+
+    override fun scrollToFindInPageResult(goForward: Boolean) {}
 }
