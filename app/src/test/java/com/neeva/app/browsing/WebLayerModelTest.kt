@@ -1,6 +1,8 @@
 package com.neeva.app.browsing
 
 import android.app.Application
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
@@ -51,6 +53,8 @@ class WebLayerModelTest : BaseTest() {
     private lateinit var activityCallbackProvider: ActivityCallbackProvider
     private lateinit var application: Application
     private lateinit var browserWrapperFactory: BrowserWrapperFactory
+    private lateinit var regularBrowserWrapper: RegularBrowserWrapper
+    private lateinit var regularBrowserFragment: Fragment
     private lateinit var webLayer: WebLayer
 
     @Mock private lateinit var activityCallbacks: ActivityCallbacks
@@ -61,7 +65,6 @@ class WebLayerModelTest : BaseTest() {
     @Mock private lateinit var incognitoBrowserWrapper: IncognitoBrowserWrapper
     @Mock private lateinit var incognitoProfile: Profile
     @Mock private lateinit var neevaUser: NeevaUser
-    @Mock private lateinit var regularBrowserWrapper: RegularBrowserWrapper
     @Mock private lateinit var regularProfile: Profile
     @Mock private lateinit var settingsDataModel: SettingsDataModel
     @Mock private lateinit var webLayerFactory: WebLayerFactory
@@ -75,6 +78,14 @@ class WebLayerModelTest : BaseTest() {
 
         activityCallbackProvider = mock {
             on { get() } doReturn activityCallbacks
+        }
+
+        regularBrowserFragment = mock {
+            on { viewLifecycleOwnerLiveData } doReturn MutableLiveData(null)
+        }
+
+        regularBrowserWrapper = mock {
+            on { createBrowserFragment() } doReturn regularBrowserFragment
         }
 
         browserWrapperFactory = mock {

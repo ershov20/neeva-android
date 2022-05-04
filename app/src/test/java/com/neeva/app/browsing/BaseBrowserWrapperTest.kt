@@ -6,6 +6,7 @@ import android.net.Uri
 import android.view.View
 import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
@@ -64,6 +65,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
     private lateinit var activeTabModelImpl: ActiveTabModelImpl
     private lateinit var browser: Browser
+    private lateinit var browserFragment: BrowserFragment
     private lateinit var browserWrapper: BrowserWrapper
     private lateinit var context: Context
     private lateinit var dispatchers: Dispatchers
@@ -72,7 +74,6 @@ class BaseBrowserWrapperTest : BaseTest() {
 
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
     @Mock private lateinit var activityCallbackProvider: ActivityCallbackProvider
-    @Mock private lateinit var browserFragment: BrowserFragment
     @Mock private lateinit var findInPageModel: FindInPageModelImpl
     @Mock private lateinit var cookieManager: CookieManager
     @Mock private lateinit var faviconCache: FaviconCache
@@ -110,6 +111,10 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         profile = mock {
             on { getCookieManager() } doReturn cookieManager
+        }
+
+        browserFragment = mock {
+            on { viewLifecycleOwnerLiveData } doReturn MutableLiveData(null)
         }
 
         browser = mock {

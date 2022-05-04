@@ -1,9 +1,8 @@
 package com.neeva.app.ui
 
-import android.view.View
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,12 +11,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.ToolbarConfiguration
+import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.toolbar.BrowserBottomToolbar
 import com.neeva.app.browsing.toolbar.BrowserToolbarContainer
@@ -31,8 +33,58 @@ fun BrowserScaffold(
     toolbarConfigurationFlow: StateFlow<ToolbarConfiguration>,
     webLayerModel: WebLayerModel
 ) {
-    val appNavModel = LocalAppNavModel.current
     val browserWrapper by webLayerModel.currentBrowserFlow.collectAsState()
+    Box(modifier = Modifier.fillMaxSize()) {
+        WebLayerContainer(browserWrapper)
+        BrowserOverlay(toolbarConfigurationFlow, browserWrapper)
+    }
+}
+
+/**
+ * Re-parent the WebLayer Fragment's Views directly into the Composable hierarchy
+ * underneath all of the other browser-related UI.
+ * This is a dirty hack that works around WebLayer not playing well with Compose:
+ * - https://github.com/neevaco/neeva-android/issues/530
+ *
+ * - The WebLayer Fragment needs to be inserted using a FragmentTransaction, which
+ *   requires using a regular View ID in the Android View hierarchy.  Because Compose
+ *   doesn't use Views (and attempts to add an ID to the one created by the AndroidView
+ *   were unreliably found using Activity.findViewById()), we have to manually move the
+ *   WebLayer Fragment's Views into the FrameLayout that is whenever the BrowserScaffold
+ *   is recomposed.  More annoyingly, because the BrowserScaffold can be removed from
+ *   the Composable hierarchy whenever the user navigates to another screen, the factory
+ *   lambda will fire and create a new FrameLayout.
+ *
+ * - WebLayer has its own mechanism for auto-hiding toolbars that is completely
+ *   incompatible with how a Composable Scaffold works.
+ */
+@Composable
+private fun WebLayerContainer(browserWrapper: BrowserWrapper) {
+    val currentEvent by browserWrapper.fragmentViewLifecycleEventFlow.collectAsState()
+    AndroidView(
+        factory = { FrameLayout(it) },
+        modifier = Modifier.fillMaxSize(),
+        update = { composeContainer ->
+            // Force Compose to update this Composable whenever the state of the Fragment's View
+            // says that it _should_ be visible.
+            if (currentEvent == Lifecycle.Event.ON_RESUME) {
+                browserWrapper.getFragment()?.view?.let {
+                    reparentView(it, composeContainer)
+                }
+            }
+        }
+    )
+}
+
+/** Full sized views that cover the browser, sandwiched between the toolbars. */
+@Composable
+private fun BoxScope.BrowserOverlay(
+    toolbarConfigurationFlow: StateFlow<ToolbarConfiguration>,
+    browserWrapper: BrowserWrapper
+) {
+    val shouldDisplayCrashedTab by browserWrapper.shouldDisplayCrashedTab.collectAsState(false)
+
+    val appNavModel = LocalAppNavModel.current
     val urlBarModel = browserWrapper.urlBarModel
 
     val toolbarConfiguration by toolbarConfigurationFlow.collectAsState()
@@ -51,30 +103,7 @@ fun BrowserScaffold(
         LocalBrowserToolbarModel provides browserToolbarModel,
         LocalBrowserWrapper provides browserWrapper
     ) {
-        // Re-parent the WebLayer Fragment's Views directly into the Composable hierarchy.
-        // This is a dirty hack that works around WebLayer not playing well with Compose:
-        // * https://github.com/neevaco/neeva-android/issues/530
-        //
-        // * The WebLayer Fragment needs to be inserted using a FragmentTransaction, which requires
-        //   using a regular View ID in the Android View hierarchy.  Because Compose doesn't use
-        //   Views (and attempts to add an ID to the one created by the AndroidView were unreliably
-        //   found using Activity.findViewById()), we have to manually move the WebLayer Fragment's
-        //   Views into the FrameLayout that is whenever the BrowserScaffold is recomposed.
-        //   More annoyingly, because the BrowserScaffold can be removed from the Composable
-        //   hierarchy whenever the user navigates to another screen, the factory lambda will fire
-        //   and create a new FrameLayout.
-        //
-        // * WebLayer has its own mechanism for auto-hiding toolbars that is completely incompatible
-        //   with how a Composable Scaffold works.
-        AndroidView(
-            factory = { FrameLayout(it) },
-            modifier = Modifier.fillMaxSize(),
-            update = { composeContainer ->
-                browserWrapper.getFragment()?.view?.let { reparentView(it, composeContainer) }
-            }
-        )
-
-        Column(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter)) {
             // Make sure that the top toolbar is visible if the user is editing the URL.
             BrowserToolbarContainer(
                 topOffset = if (isEditing) {
@@ -84,56 +113,29 @@ fun BrowserScaffold(
                 }
             )
 
-            // We have to use a Box with no background because the WebLayer Fragments are displayed
-            // in regular Android Views underneath this View in the hierarchy.
-            Box(
-                modifier = Modifier
-                    .weight(1.0f)
-                    .fillMaxWidth()
-            ) {
-                val shouldDisplayCrashedTab
-                    by browserWrapper.shouldDisplayCrashedTab.collectAsState(false)
+            // The Column will grow to take all the available space when suggestions (e.g.) are
+            // shown.  Otherwise, the Column will wrap only the toolbar's height.  This allows a gap
+            // for the Composable containing the WebLayer's Fragment's View.
+            val childModifier = Modifier.weight(1.0f).fillMaxWidth()
+            when {
+                isEditing -> {
+                    SuggestionPane(modifier = childModifier)
+                }
 
-                // Full sized views, drawn below the two toolbars.
-                when {
-                    isEditing -> {
-                        SuggestionPane(modifier = Modifier.fillMaxSize())
-                    }
-
-                    shouldDisplayCrashedTab -> {
-                        CrashedTab(
-                            onReload = browserWrapper::reload,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-
-                    else -> {
-                        // TODO(dan.alcantara): This is where the WebLayer Views _should_ go, but
-                        // WebLayer has a different idea of where its Android Views should live in
-                        // the hierarchy and doesn't seem to work well inside of a Composable
-                        // Scaffold, which has its own mechanisms for auto-hiding toolbars.
-                    }
+                shouldDisplayCrashedTab -> {
+                    CrashedTab(
+                        onReload = browserWrapper::reload,
+                        modifier = childModifier
+                    )
                 }
             }
+        }
 
-            if (!isEditing && !browserToolbarModel.useSingleBrowserToolbar) {
-                BrowserBottomToolbar(
-                    bottomOffset = toolbarConfiguration.bottomControlOffset
-                )
-            }
+        if (!isEditing && !browserToolbarModel.useSingleBrowserToolbar) {
+            BrowserBottomToolbar(
+                bottomOffset = toolbarConfiguration.bottomControlOffset,
+                modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+            )
         }
     }
-}
-
-private fun reparentView(childView: View, desiredParentView: ViewGroup) {
-    if (childView.parent == null || childView.parent == desiredParentView) return
-
-    (childView.parent as ViewGroup).removeView(childView)
-    desiredParentView.addView(
-        childView,
-        ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-    )
 }

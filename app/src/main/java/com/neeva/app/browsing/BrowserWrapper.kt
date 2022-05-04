@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.net.Uri
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.storage.favicons.FaviconCache
@@ -57,6 +58,9 @@ interface BrowserWrapper {
 
     /** Gets the [Fragment] created by WebLayer for this Browser. */
     fun getFragment(): Fragment?
+
+    /** Tracks the Lifecycle of the View associated with the Browser's Fragment. */
+    val fragmentViewLifecycleEventFlow: StateFlow<Lifecycle.Event>
 
     /** Prepares the WebLayer Browser to interface with our app. */
     fun createAndAttachBrowser(

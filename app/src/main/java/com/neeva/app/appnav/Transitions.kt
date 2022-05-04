@@ -32,7 +32,9 @@ fun enterTransitionFactory(scope: AnimatedContentScope<NavBackStackEntry>): Ente
             )
         }
 
-        else -> EnterTransition.None
+        else -> {
+            fadeIn(animationSpec = tween(ANIMATION_LENGTH_MS))
+        }
     }
 }
 
@@ -45,11 +47,9 @@ fun exitTransitionFactory(scope: AnimatedContentScope<NavBackStackEntry>): ExitT
     return when {
         // If the user is going to a child of the current destination, just fade it out.  This
         // avoids issues where (e.g.) Settings is being slid to the right while Clear Browsing Data
-        // is being slid in from the same direction.  The animation duration is doubled to try and
-        // hide the jank caused by the fact that the Browser UI lives in a completely different
-        // hierarchy outside of the AppNav.
+        // is being slid in from the same direction.
         target?.parent == current -> {
-            fadeOut(animationSpec = tween(ANIMATION_LENGTH_MS * 2))
+            fadeOut(animationSpec = tween(ANIMATION_LENGTH_MS))
         }
 
         current?.fadesOut == true -> {

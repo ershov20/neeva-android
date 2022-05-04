@@ -48,6 +48,7 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.removeViewFromParent
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
@@ -371,7 +372,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         // Detach the Fragment for the other profile so that WebLayer knows that the user isn't
         // actively using that Profile.  This also prevents WebLayer from automatically reshowing
         // the Browser attached to that Fragment as soon as the Activity starts up.
-        otherProfileFragment?.let { transaction.detach(it) }
+        otherProfileFragment?.let { fragment ->
+            transaction.detach(fragment)
+
+            // https://github.com/neevaco/neeva-android/issues/571
+            // Because we have to manually move the Fragment's View into the Composable hierarchy in
+            // the BrowserScaffold, we have to manually remove it from the hierarchy when we detach
+            // its Fragment.
+            removeViewFromParent(fragment.view)
+        }
 
         if (existingFragment != null) {
             // Re-attach the Fragment so that WebLayer knows that it is now active.

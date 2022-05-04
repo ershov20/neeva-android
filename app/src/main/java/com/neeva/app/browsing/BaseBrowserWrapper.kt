@@ -8,6 +8,9 @@ import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
@@ -121,6 +124,7 @@ abstract class BaseBrowserWrapper internal constructor(
             _fragment
         }
     }
+    override val fragmentViewLifecycleEventFlow = MutableStateFlow(Lifecycle.Event.ON_DESTROY)
 
     /**
      * Updated whenever the [Browser] is recreated.
@@ -243,8 +247,22 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     private fun getOrCreateBrowserFragment(): Fragment {
-        return activityCallbackProvider.get()?.getWebLayerFragment(isIncognito = isIncognito)
+        val fragment = activityCallbackProvider.get()
+            ?.getWebLayerFragment(isIncognito = isIncognito)
             ?: createBrowserFragment()
+
+        // Monitor the Fragment's View's lifecycle so that we can detect when we can grab it.
+        fragment.viewLifecycleOwnerLiveData.observeForever { viewLifecycleOwner ->
+            if (viewLifecycleOwner == null) return@observeForever
+
+            viewLifecycleOwner.lifecycle.addObserver(object : LifecycleEventObserver {
+                override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+                    fragmentViewLifecycleEventFlow.value = event
+                }
+            })
+        }
+
+        return fragment
     }
 
     /**
