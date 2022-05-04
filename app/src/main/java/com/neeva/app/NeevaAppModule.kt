@@ -160,6 +160,7 @@ object NeevaAppModule {
     fun providesBrowserWrapperFactory(
         activityCallbackProvider: ActivityCallbackProvider,
         application: Application,
+        cacheCleaner: CacheCleaner,
         domainProviderImpl: DomainProviderImpl,
         historyManager: HistoryManager,
         apolloWrapper: AuthenticatedApolloWrapper,
@@ -172,6 +173,7 @@ object NeevaAppModule {
         return BrowserWrapperFactory(
             activityCallbackProvider = activityCallbackProvider,
             application = application,
+            cacheCleaner = cacheCleaner,
             domainProviderImpl = domainProviderImpl,
             historyManager = historyManager,
             apolloWrapper = apolloWrapper,

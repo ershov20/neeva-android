@@ -59,6 +59,7 @@ class WebLayerModelTest : BaseTest() {
     @Mock private lateinit var domainProviderImpl: DomainProviderImpl
     @Mock private lateinit var historyManager: HistoryManager
     @Mock private lateinit var incognitoBrowserWrapper: IncognitoBrowserWrapper
+    @Mock private lateinit var incognitoProfile: Profile
     @Mock private lateinit var neevaUser: NeevaUser
     @Mock private lateinit var regularBrowserWrapper: RegularBrowserWrapper
     @Mock private lateinit var regularProfile: Profile
@@ -85,6 +86,10 @@ class WebLayerModelTest : BaseTest() {
             on {
                 getProfile(eq(RegularBrowserWrapper.NON_INCOGNITO_PROFILE_NAME))
             } doReturn regularProfile
+
+            on {
+                getIncognitoProfile(eq(IncognitoBrowserWrapper.INCOGNITO_PROFILE_NAME))
+            } doReturn incognitoProfile
         }
 
         webLayerModel = WebLayerModel(
@@ -124,11 +129,14 @@ class WebLayerModelTest : BaseTest() {
         runBlocking {
             verify(domainProviderImpl).initialize()
             verify(historyManager).pruneDatabase()
-            verify(cacheCleaner).run()
         }
 
         // Fire the callback WebLayerModel requires to store the WebLayer.
         completeWebLayerInitialization()
+
+        // Because an Incognito Fragment couldn't be found, the cacheCleaner should have tried to
+        // clean up everything.
+        runBlocking { verify(cacheCleaner).run() }
 
         coroutineScopeRule.scope.advanceUntilIdle()
         expectThat(webLayerModel.initializationState.value).isEqualTo(LoadingState.READY)

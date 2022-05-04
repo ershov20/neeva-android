@@ -21,7 +21,6 @@ class FileEncrypter(context: Context) {
     private val masterKey: MasterKey
 
     init {
-        appContext.applicationContext
         val spec = KeyGenParameterSpec.Builder(
             MasterKey.DEFAULT_MASTER_KEY_ALIAS,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT

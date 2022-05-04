@@ -63,6 +63,10 @@ class RegularBrowserWrapper(
     tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir)
 ) {
     companion object {
+        /**
+         * NEVER change this value or you will cause WebLayer to use a different Profile and
+         * (effectively) make all of their previous tabs inaccessible.
+         */
         internal const val NON_INCOGNITO_PROFILE_NAME = "DefaultProfile"
         private const val PERSISTENCE_ID = "Neeva_Browser"
 

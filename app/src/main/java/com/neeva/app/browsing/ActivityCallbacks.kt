@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import androidx.fragment.app.Fragment
 import java.lang.ref.WeakReference
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
@@ -30,6 +31,9 @@ interface ActivityCallbacks {
         onTopBarOffsetChanged(0)
         onBottomBarOffsetChanged(0)
     }
+
+    /** Returns the [Fragment] assoicated with the given WebLayer Profile type. */
+    fun getWebLayerFragment(isIncognito: Boolean): Fragment?
 
     /**
      * Called when the Fragment containing the Incognito profile should be removed from the

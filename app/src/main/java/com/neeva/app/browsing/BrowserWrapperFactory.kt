@@ -14,6 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 class BrowserWrapperFactory(
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val application: Application,
+    private val cacheCleaner: CacheCleaner,
     private val domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
     private val apolloWrapper: AuthenticatedApolloWrapper,
@@ -41,16 +42,17 @@ class BrowserWrapperFactory(
 
     fun createIncognitoBrowser(
         coroutineScope: CoroutineScope,
-        onDestroyed: (incognitoBrowserWrapper: IncognitoBrowserWrapper) -> Unit
+        onRemovedFromHierarchy: (incognitoBrowserWrapper: IncognitoBrowserWrapper) -> Unit
     ): IncognitoBrowserWrapper {
         return IncognitoBrowserWrapper(
             appContext = application,
+            cacheCleaner = cacheCleaner,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
             activityCallbackProvider = activityCallbackProvider,
             apolloWrapper = apolloWrapper,
             domainProvider = domainProviderImpl,
-            onDestroyed = onDestroyed
+            onRemovedFromHierarchy = onRemovedFromHierarchy
         )
     }
 }

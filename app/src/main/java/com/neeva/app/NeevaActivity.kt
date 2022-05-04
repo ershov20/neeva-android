@@ -329,6 +329,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         feedbackViewModel.takeScreenshot(window, webLayerModel.currentBrowser, callback)
     }
 
+    override fun getWebLayerFragment(isIncognito: Boolean): Fragment? {
+        return supportFragmentManager.findFragmentByTag(
+            when {
+                isIncognito -> TAG_INCOGNITO_PROFILE
+                else -> TAG_REGULAR_PROFILE
+            }
+        )
+    }
+
     /**
      * Attach the given [Fragment] to the Activity, which allows creation of the [Browser].
      *
@@ -340,8 +349,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         // Look for any existing WebLayer fragments.  Fragments may already exist if:
         // * The user swapped to the other Browser profile and then back
         // * The Activity died in the background or it was recreated because of a config change
-        val regularFragment = supportFragmentManager.findFragmentByTag(TAG_REGULAR_PROFILE)
-        val incognitoFragment = supportFragmentManager.findFragmentByTag(TAG_INCOGNITO_PROFILE)
+        val regularFragment = getWebLayerFragment(isIncognito = false)
+        val incognitoFragment = getWebLayerFragment(isIncognito = true)
 
         val otherProfileFragment: Fragment?
         val existingFragment: Fragment?
@@ -365,15 +374,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         otherProfileFragment?.let { transaction.detach(it) }
 
         if (existingFragment != null) {
-            if (fragment == existingFragment) {
-                // Re-attach the Fragment so that WebLayer knows that it is now active.
-                transaction.attach(fragment)
-            } else {
-                // In cases where the Activity restarts, the Fragments from the previous WebLayer
-                // initialization stick around in memory.  Remove it and add the new one.
-                transaction.remove(existingFragment)
-                transaction.add(R.id.weblayer_fragment, fragment, fragmentTag)
-            }
+            // Re-attach the Fragment so that WebLayer knows that it is now active.
+            check(fragment == existingFragment)
+            transaction.attach(fragment)
         } else {
             transaction.add(R.id.weblayer_fragment, fragment, fragmentTag)
         }
@@ -467,11 +470,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         activityViewModel.onTopBarOffsetChanged(offset)
 
     override fun removeIncognitoFragment() {
-        // Do a post to avoid a Fragment transaction while one is already occurring to remove the
-        // Incognito fragment, which can happen if the user closed all their incognito tabs
-        // manually.
+        // Because this may be triggered by another FragmentManager transaction, do a post to avoid
+        // possibly nesting FragmentManager transactions (and causing a crash).
         Handler(Looper.getMainLooper()).post {
-            supportFragmentManager.findFragmentByTag(TAG_INCOGNITO_PROFILE)?.let { fragment ->
+            getWebLayerFragment(isIncognito = true)?.let { fragment ->
                 supportFragmentManager.beginTransaction()
                     .remove(fragment)
                     .commitNow()

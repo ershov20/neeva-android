@@ -28,6 +28,7 @@ import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowsingDataType
 import org.chromium.weblayer.Profile
@@ -62,10 +63,10 @@ class WebLayerModel internal constructor(
     private val browserWrapperFactory: BrowserWrapperFactory,
     webLayerFactory: WebLayerFactory,
     application: Application,
-    cacheCleaner: CacheCleaner,
+    private val cacheCleaner: CacheCleaner,
     private val domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
-    dispatchers: Dispatchers,
+    private val dispatchers: Dispatchers,
     private val neevaUser: NeevaUser,
     private val settingsDataModel: SettingsDataModel,
     private val clientLogger: ClientLogger,
@@ -153,7 +154,6 @@ class WebLayerModel internal constructor(
         coroutineScope.launch(dispatchers.io) {
             domainProviderImpl.initialize()
             historyManager.pruneDatabase()
-            cacheCleaner.run()
             internalInitializationState.value = LoadingState.READY
         }
 
@@ -161,7 +161,27 @@ class WebLayerModel internal constructor(
             webLayerFactory.load { webLayer ->
                 webLayer.isRemoteDebuggingEnabled = true
                 regularProfile = RegularBrowserWrapper.getProfile(webLayer)
-                this.webLayer.value = webLayer
+
+                activityCallbackProvider.get()?.getWebLayerFragment(isIncognito = true)?.let {
+                    incognitoBrowser = createIncognitoBrowserWrapper()
+                }
+
+                coroutineScope.launch {
+                    if (incognitoBrowser == null) {
+                        // Clean up any previous incarnations of the Incognito profile.
+                        val incognitoProfile = IncognitoBrowserWrapper.getProfile(webLayer)
+                        IncognitoBrowserWrapper.cleanUpIncognito(
+                            dispatchers = dispatchers,
+                            incognitoProfile = incognitoProfile,
+                            cacheCleaner = cacheCleaner
+                        )
+                    }
+
+                    withContext(dispatchers.main) {
+                        // Let the rest of the app know that WebLayer is ready to use.
+                        this@WebLayerModel.webLayer.value = webLayer
+                    }
+                }
             }
         } catch (e: UnsupportedVersionException) {
             throw RuntimeException("Failed to initialize WebLayer", e)
@@ -198,7 +218,7 @@ class WebLayerModel internal constructor(
 
     private fun createIncognitoBrowserWrapper() = browserWrapperFactory.createIncognitoBrowser(
         coroutineScope = coroutineScope,
-        onDestroyed = {
+        onRemovedFromHierarchy = {
             // Because this is asynchronous, make sure that the destroyed one is the one we are
             // currently tracking.
             if (it != incognitoBrowser) return@createIncognitoBrowser
@@ -213,6 +233,7 @@ class WebLayerModel internal constructor(
         if (!currentBrowser.isIncognito && incognitoBrowser?.hasNoTabs() == true) {
             Log.d(TAG, "Culling unnecessary incognito profile")
             activityCallbackProvider.get()?.removeIncognitoFragment()
+            incognitoBrowser?.destroyProfile()
             incognitoBrowser = null
         }
     }

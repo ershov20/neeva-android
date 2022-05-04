@@ -242,13 +242,18 @@ abstract class BaseBrowserWrapper internal constructor(
         return Browser.fromFragment(fragment)
     }
 
+    private fun getOrCreateBrowserFragment(): Fragment {
+        return activityCallbackProvider.get()?.getWebLayerFragment(isIncognito = isIncognito)
+            ?: createBrowserFragment()
+    }
+
     /**
      * Creates a Fragment that contains the [Browser] used to interface with WebLayer.
      *
      * This [Browser] that is created must be associated with the correct incognito or non-incognito
      * profile to avoid leaking state.
      */
-    abstract fun createBrowserFragment(): Fragment
+    internal abstract fun createBrowserFragment(): Fragment
 
     /** Prepares the WebLayer Browser to interface with our app. */
     override fun createAndAttachBrowser(
@@ -257,10 +262,7 @@ abstract class BaseBrowserWrapper internal constructor(
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
         if (!::_fragment.isInitialized) {
-            // TODO(https://github.com/neevaco/neeva-android/issues/318): We should try to reuse any
-            // existing Fragments that were kept by the FragmentManager after the Activity died in
-            // the background.
-            _fragment = createBrowserFragment()
+            _fragment = getOrCreateBrowserFragment()
 
             // Keep the WebLayer instance across Activity restarts so that the Browser doesn't get
             // deleted when the configuration changes (e.g. the screen is rotated in fullscreen).
