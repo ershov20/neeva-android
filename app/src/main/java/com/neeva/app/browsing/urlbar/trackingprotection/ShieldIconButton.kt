@@ -56,7 +56,7 @@ fun ShieldIconButton(trackersBlocked: Int, modifier: Modifier) {
 @Preview("ShieldIcon 2x font scale", locale = "en", fontScale = 2.0f)
 @Preview("ShieldIcon RTL, 1x font scale", locale = "he")
 @Composable
-private fun ShieldIconPreview() {
+fun ShieldIconButtonPreview() {
     val iconModifier = Modifier
         .padding(vertical = Dimensions.PADDING_TINY)
         .padding(start = Dimensions.PADDING_SMALL)
