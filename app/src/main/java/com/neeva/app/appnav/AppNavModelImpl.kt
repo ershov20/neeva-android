@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import com.neeva.app.Dispatchers
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
@@ -80,11 +81,22 @@ class AppNavModelImpl(
             .launchIn(coroutineScope)
     }
 
-    /** Shows a specific screen or context sheet. */
-    private fun show(destination: AppNavDestination) {
+    /**
+     * Navigates the user to a specific screen or context sheet, if they are not already viewing
+     * that destination.
+     *
+     * The no-op is required to prevent the Accompanist Navigation Animation library (inexplicably)
+     * animating from a destination to itself, which avoids having two instances of the same
+     * Composable living in the hierarchy at the same time.
+     */
+    private fun show(
+        destination: AppNavDestination,
+        setOptions: NavOptionsBuilder.() -> Unit = {}
+    ) {
         if (navController.currentDestination?.route == destination.route) return
         navController.navigate(destination.route) {
             launchSingleTop = true
+            setOptions()
         }
     }
 
@@ -101,9 +113,7 @@ class AppNavModelImpl(
     override fun showBrowser(forceUserToStayInCardGrid: Boolean) {
         webLayerModel.currentBrowser.urlBarModel.clearFocus()
 
-        navController.navigate(route = AppNavDestination.BROWSER.route) {
-            launchSingleTop = true
-
+        show(AppNavDestination.BROWSER) {
             popUpTo(AppNavDestination.BROWSER.route) {
                 inclusive = true
             }
