@@ -1,8 +1,10 @@
 #!/bin/sh
 
-# Run this script to generate a `src-$version` directory and update
-# the `src` soft-link. This takes the output from a release in the
-# chromium/ directory and uses that to build the client library.
+# Run this script to create or update the `src` directory. Existing contents of
+# that directory will be deleted.
+#
+# This takes the output from a release in the chromium/ directory and uses that
+# to build the client library.
 #
 # For example:
 #   $ ./make-src.sh ../chromium/release-99
@@ -16,7 +18,7 @@ fi
 release_dir="$1"
 version=$(basename $release_dir | cut -d'-' -f2-)
 
-src_dir="src-$version"
+src_dir="src"
 
 rm -fr $src_dir
 mkdir -p "$src_dir/main/java"
@@ -29,6 +31,3 @@ cat "$release_dir/AndroidManifest.xml" | \
 unzip "$release_dir/client-java.zip" -d "$src_dir/main/java"
 unzip "$release_dir/client-aidl.zip" -d "$src_dir/main/aidl"
 unzip "$release_dir/client-res.zip" -d "$src_dir/main"
-
-rm -f src
-ln -s "$src_dir" src

@@ -62,7 +62,7 @@
 ### Constants ###
 
 script_name=$(basename $0)
-release_dir=${1:-"release-100"}
+release_dir=${1:-"release-$(cat CURRENT_VERSION)"}
 unpacked_dir=".unpacked"
 gen_dir="gen"
 
