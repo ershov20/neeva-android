@@ -108,7 +108,7 @@ android {
 
     // Chromium expects to be able to mmap these assets.
     androidResources {
-        noCompress 'dat', 'bin', 'pak'
+        noCompress 'dat', 'bin', 'pak', 'proto'
     }
 
     sourceSets {

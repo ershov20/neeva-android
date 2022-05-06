@@ -44,6 +44,7 @@ import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserEmbeddabilityMode
 import org.chromium.weblayer.BrowserRestoreCallback
+import org.chromium.weblayer.ContentFilterMode
 import org.chromium.weblayer.NewTabType
 import org.chromium.weblayer.OpenUrlCallback
 import org.chromium.weblayer.PageInfoDisplayOptions
@@ -295,6 +296,16 @@ abstract class BaseBrowserWrapper internal constructor(
         val browser = browserFlow.value ?: throw IllegalStateException()
         registerBrowserCallbacks(browser)
         browser.setMinimumSurfaceSize(displaySize.width(), displaySize.height())
+
+        // Configure content filtering.
+        val contentFilterManager = browser.profile.contentFilterManager
+        contentFilterManager.setRulesFile("assets/easyprivacy.proto")
+        // Set filtering mode to BLOCK_REQUESTS to enable "strict" tracking prevention.
+        contentFilterManager.setMode(ContentFilterMode.BLOCK_COOKIES)
+        // Exempt a list of top-level hostnames from filtering via calls like:
+        // contentFilterManager.addHostExclusion("foo.com")
+        // TODO: Call this function to enable content filtering when the UI is ready.
+        // contentFilterManager.startFiltering()
 
         // Set the Views that WebLayer will use as placeholders for our toolbar.
         //

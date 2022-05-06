@@ -12,6 +12,7 @@ import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
+import org.chromium.weblayer.ContentFilterCallback
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.FaviconCallback
 import org.chromium.weblayer.FullscreenCallback
@@ -207,12 +208,21 @@ class TabCallbacks(
         }
     }
 
+    private val contentFilterCallback = object : ContentFilterCallback() {
+        override fun onContentFilterStatsUpdated() {
+            // TODO: Update tracking prevention UI
+            // tab.getContentFilterStats().forEach { host, count ->
+            // }
+        }
+    }
+
     init {
         tab.fullscreenCallback = fullscreenCallback
         tab.setErrorPageCallback(ErrorCallbackImpl(activityCallbackProvider))
         tab.setNewTabCallback(newTabCallback)
         tab.navigationController.registerNavigationCallback(navigationCallback)
         tab.registerTabCallback(tabCallback)
+        tab.setContentFilterCallback(contentFilterCallback)
     }
 
     fun unregisterCallbacks() {

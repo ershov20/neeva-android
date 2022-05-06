@@ -27,6 +27,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserFragment
 import org.chromium.weblayer.BrowserRestoreCallback
+import org.chromium.weblayer.ContentFilterManager
 import org.chromium.weblayer.CookieManager
 import org.chromium.weblayer.FaviconFetcher
 import org.chromium.weblayer.NavigateParams
@@ -75,6 +76,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
     @Mock private lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Mock private lateinit var findInPageModel: FindInPageModelImpl
+    @Mock private lateinit var contentFilterManager: ContentFilterManager
     @Mock private lateinit var cookieManager: CookieManager
     @Mock private lateinit var faviconCache: FaviconCache
     @Mock private lateinit var fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
@@ -110,6 +112,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         )
 
         profile = mock {
+            on { getContentFilterManager() } doReturn contentFilterManager
             on { getCookieManager() } doReturn cookieManager
         }
 
