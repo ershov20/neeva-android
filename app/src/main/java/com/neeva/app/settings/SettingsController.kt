@@ -171,6 +171,7 @@ val mockSettingsControllerImpl by lazy {
         override fun getOnClickMap(): Map<Int, (() -> Unit)?> {
             return mapOf(
                 R.string.settings_sign_in_to_join_neeva to { },
+                R.string.settings_sign_out to { },
                 R.string.settings_clear_browsing_data to { },
                 R.string.settings_default_browser to { },
                 R.string.settings_debug_local_feature_flags to { }
@@ -183,7 +184,7 @@ val mockSettingsControllerImpl by lazy {
             return NeevaUserData(
                 displayName = "Jehan Kobe Chang",
                 email = "kobec@neeva.co",
-                pictureURI = Uri.parse("https://c.neevacdn.net/image/fetch/s")
+                pictureURI = null
             )
         }
 

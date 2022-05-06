@@ -103,7 +103,7 @@ fun SetDefaultAndroidBrowserPane(
 @Preview(name = "SetDefaultAndroidBrowserPane, RTL, 1x font size", locale = "he")
 @Preview(name = "SetDefaultAndroidBrowserPane, RTL, 2x font size", locale = "he", fontScale = 2.0f)
 @Composable
-fun SettingsMain_Preview() {
+fun SettingsDefaultAndroidBrowser_Preview() {
     NeevaTheme {
         SetDefaultAndroidBrowserPane(
             mockSettingsControllerImpl
@@ -120,7 +120,7 @@ fun SettingsMain_Preview() {
     fontScale = 2.0f
 )
 @Composable
-fun SettingsMain_Dark_Preview() {
+fun SettingsDefaultAndroidBrowser_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         SetDefaultAndroidBrowserPane(
             mockSettingsControllerImpl
