@@ -152,6 +152,10 @@ class ActiveTabModelImpl(
             updateNavigationInfo()
         }
 
+        override fun onNavigationFailed(navigation: Navigation) {
+            updateNavigationInfo()
+        }
+
         override fun onNavigationCompleted(navigation: Navigation) {
             updateNavigationInfo()
         }

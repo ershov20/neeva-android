@@ -2,6 +2,7 @@ package com.neeva.app.browsing
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.history.HistoryManager
@@ -102,6 +103,14 @@ class TabCallbacks(
         override fun onNavigationCompleted(navigation: Navigation) = commitVisit(navigation)
 
         override fun onNavigationFailed(navigation: Navigation) {
+            // https://github.com/neevaco/neeva-android/issues/582
+            // Navigation can fail if the user is still being asked if they want to open another app
+            // to view the website.
+            if (navigation.isUserDecidingIntentLaunch) {
+                Log.w(TAG, "Navigation failed because user is deciding intent launch")
+                return
+            }
+
             when {
                 navigation.isKnownProtocol -> {
                     // If protocol is known (e.g. https://, http://) and the navigation failed,
@@ -236,5 +245,9 @@ class TabCallbacks(
         tab.setNewTabCallback(null)
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
         tab.unregisterTabCallback(tabCallback)
+    }
+
+    companion object {
+        private val TAG = TabCallbacks::class.simpleName
     }
 }
