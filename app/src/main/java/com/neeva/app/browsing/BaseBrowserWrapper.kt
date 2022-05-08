@@ -740,9 +740,7 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
-    override suspend fun waitUntilBrowserIsReady(): Boolean {
-        return isBrowserReady.await()
-    }
+    override suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
 
     companion object {
         val TAG = BrowserWrapper::class.simpleName

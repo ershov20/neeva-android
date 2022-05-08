@@ -69,7 +69,7 @@ fun CardGridContainer(
             )
         ) {
             TabGrid(
-                browserWrapper = browsersFlow.value.regularBrowser,
+                browserWrapper = browsersFlow.value.regularBrowserWrapper,
                 cardsPaneModel = cardsPaneModel,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -87,7 +87,7 @@ fun CardGridContainer(
             )
         ) {
             SpaceGrid(
-                browserWrapper = browsersFlow.value.regularBrowser,
+                browserWrapper = browsersFlow.value.regularBrowserWrapper,
                 cardsPaneModel = cardsPaneModel,
                 modifier = Modifier.fillMaxWidth()
             )

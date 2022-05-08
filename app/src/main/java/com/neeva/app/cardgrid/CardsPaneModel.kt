@@ -61,7 +61,7 @@ class CardsPaneModelImpl(
 
     init {
         coroutineScope.launch {
-            webLayerModel.currentBrowserFlow.collectLatest {
+            webLayerModel.initializedBrowserFlow.collectLatest {
                 if (it.isIncognito) {
                     when (selectedScreen.value) {
                         SelectedScreen.INCOGNITO_TABS -> {

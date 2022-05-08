@@ -22,11 +22,12 @@ import com.neeva.app.ui.theme.Dimensions
 fun Card(
     label: String,
     onSelect: () -> Unit,
+    modifier: Modifier = Modifier,
     labelStartComposable: @Composable (() -> Unit)? = null,
     labelEndComposable: @Composable (() -> Unit)? = null,
-    topContent: @Composable () -> Unit,
+    topContent: @Composable () -> Unit
 ) {
-    Surface(modifier = Modifier.clickable { onSelect() }) {
+    Surface(modifier = modifier.clickable { onSelect() }) {
         Column(
             modifier = Modifier.padding(Dimensions.PADDING_SMALL),
             horizontalAlignment = Alignment.CenterHorizontally

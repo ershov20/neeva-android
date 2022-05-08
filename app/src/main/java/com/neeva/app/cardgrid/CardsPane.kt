@@ -19,7 +19,8 @@ enum class SelectedScreen {
 @Composable
 fun CardsPane(webLayerModel: WebLayerModel) {
     val cardsPaneModel = LocalCardsPaneModel.current
-    val currentBrowser by webLayerModel.currentBrowserFlow.collectAsState()
+    val currentBrowsers by webLayerModel.browsersFlow.collectAsState()
+    val currentBrowser = currentBrowsers.getCurrentBrowser()
 
     Surface(
         color = MaterialTheme.colorScheme.background,

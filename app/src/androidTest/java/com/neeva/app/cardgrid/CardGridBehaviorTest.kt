@@ -9,9 +9,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
-import com.neeva.app.appnav.AppNavDestination
+import com.neeva.app.openCardGrid
 import com.neeva.app.settings.SettingsToggle
-import java.util.concurrent.TimeUnit
+import com.neeva.app.waitForActivityStartup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
 import org.junit.Test
@@ -33,23 +33,8 @@ class CardGridBehaviorTest {
         val resources = androidComposeRule.activity.resources
 
         scenario.moveToState(Lifecycle.State.RESUMED)
+        androidComposeRule.waitForActivityStartup()
 
-        androidComposeRule.waitForIdle()
-
-        // Open the tab switcher.  Because a lot of things are changing under the hood and many
-        // recompositions are happening, waitForIdle() ends up being flaky.  Instead, wait until we
-        // know we've navigated to the correct screen by looking at the AppNavModel.
-        androidComposeRule
-            .onNodeWithContentDescription(resources.getString(R.string.toolbar_tab_switcher))
-            .performClick()
-        androidComposeRule.waitForIdle()
-        androidComposeRule.waitUntil(TimeUnit.SECONDS.toMillis(5)) {
-            val appNavModel = androidComposeRule.activity.appNavModel
-            val currentRoute = appNavModel?.currentDestination?.value?.route
-            currentRoute == AppNavDestination.CARD_GRID.route
-        }
-
-        // Close all the user's tabs.
         scenario.onActivity {
             // Disable asking the user before closing all their tabs.
             it.settingsDataModel
@@ -57,10 +42,11 @@ class CardGridBehaviorTest {
                 .invoke(false)
         }
 
+        // Close all the user's tabs.
+        androidComposeRule.openCardGrid(incognito = false)
         androidComposeRule
             .onNodeWithContentDescription(resources.getString(R.string.toolbar_neeva_menu))
             .performClick()
-
         androidComposeRule
             .onNodeWithContentDescription(
                 resources.getString(R.string.close_all_content_description)

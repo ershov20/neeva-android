@@ -33,7 +33,8 @@ fun BrowserScaffold(
     toolbarConfigurationFlow: StateFlow<ToolbarConfiguration>,
     webLayerModel: WebLayerModel
 ) {
-    val browserWrapper by webLayerModel.currentBrowserFlow.collectAsState()
+    val browsers by webLayerModel.browsersFlow.collectAsState()
+    val browserWrapper = browsers.getCurrentBrowser()
     Box(modifier = Modifier.fillMaxSize()) {
         WebLayerContainer(browserWrapper)
         BrowserOverlay(toolbarConfigurationFlow, browserWrapper)

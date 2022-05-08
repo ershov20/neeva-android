@@ -11,6 +11,7 @@ import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.appnav.AppNavDestination
+import com.neeva.app.waitForActivityStartup
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
@@ -33,7 +34,7 @@ class IncognitoOrientationChangeTest {
         val resources = androidComposeRule.activity.resources
 
         scenario.moveToState(Lifecycle.State.RESUMED)
-        androidComposeRule.waitForIdle()
+        androidComposeRule.waitForActivityStartup()
 
         // Open the tab switcher.  Because a lot of things are changing under the hood and many
         // recompositions are happening, waitForIdle() ends up being flaky.  Instead, wait until we

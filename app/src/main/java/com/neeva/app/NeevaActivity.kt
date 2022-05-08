@@ -11,10 +11,12 @@ import android.os.Looper
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.viewModels
+import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
@@ -57,6 +59,7 @@ import com.neeva.app.widget.NeevaWidgetProvider
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -103,9 +106,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     internal var appNavModel: AppNavModel? = null
-    private var cardsPaneModel: CardsPaneModel? = null
+    internal var cardsPaneModel: CardsPaneModel? = null
+    internal val firstComposeCompleted = CompletableDeferred<Boolean>()
 
     private lateinit var setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
+
+    @VisibleForTesting
+    internal val isBrowserPreparedFlow = mutableStateOf(false)
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -166,6 +173,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
                         firstRunModel.firstRunDone()
                     }
+
+                    firstComposeCompleted.complete(true)
                 }
             }
         }
@@ -228,7 +237,16 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
+    /** Processes the given [intent] when everything is initialized. */
     private fun processIntent(intent: Intent?) {
+        lifecycleScope.launch {
+            firstComposeCompleted.await()
+            processIntentInternal(intent)
+        }
+    }
+
+    /** Don't call this: call [processIntent] to ensure we're ready before processing the Intent. */
+    private fun processIntentInternal(intent: Intent?) {
         when (intent?.action) {
             ACTION_NEW_TAB -> {
                 lifecycleScope.launch {
@@ -291,9 +309,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
             }
 
-            else -> {
-                return
-            }
+            // Don't know what to do with it.
+            else -> {}
         }
     }
 
@@ -315,7 +332,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         val displaySize =
             WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(this).bounds
-
         browserWrapper.createAndAttachBrowser(
             displaySize,
             activityViewModel.toolbarConfiguration.value.useSingleBrowserToolbar,
@@ -324,6 +340,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         // Check if there are any Intents that have URLs that need to be loaded.
         activityViewModel.getPendingLaunchIntent()?.let { processIntent(it) }
+
+        isBrowserPreparedFlow.value = true
     }
 
     private fun takeScreenshotForFeedback(callback: () -> Unit) {

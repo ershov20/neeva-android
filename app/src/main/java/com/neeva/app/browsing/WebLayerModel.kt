@@ -25,7 +25,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -37,7 +36,7 @@ import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
 
 data class BrowsersState(
-    val regularBrowser: RegularBrowserWrapper,
+    val regularBrowserWrapper: RegularBrowserWrapper,
     val incognitoBrowserWrapper: IncognitoBrowserWrapper?,
     val isCurrentlyIncognito: Boolean = false
 ) {
@@ -45,7 +44,7 @@ data class BrowsersState(
         return if (isCurrentlyIncognito) {
             incognitoBrowserWrapper ?: throw IllegalStateException()
         } else {
-            regularBrowser
+            regularBrowserWrapper
         }
     }
 }
@@ -135,20 +134,15 @@ class WebLayerModel internal constructor(
     /** Keeps track of the current BrowserWrappers for the regular and incognito profiles. */
     val browsersFlow: StateFlow<BrowsersState> get() = _browsersFlow
 
-    /** Allows consumers to keep track of which BrowserWrapper is currently active. */
-    val currentBrowserFlow: StateFlow<BrowserWrapper> = _browsersFlow
-        .map { it.getCurrentBrowser() }
-        .distinctUntilChanged()
-        .stateIn(coroutineScope, SharingStarted.Eagerly, regularBrowser)
-
     /** Returns the currently active BrowserWrapper. */
-    val currentBrowser get() = currentBrowserFlow.value
+    val currentBrowser get() = browsersFlow.value.getCurrentBrowser()
 
     /** Tracks the current BrowserWrapper, emitting them only while the pipeline is initialized. */
     val initializedBrowserFlow: Flow<BrowserWrapper> =
         initializationState
             .filter { it == LoadingState.READY }
-            .combine(currentBrowserFlow) { _, browserWrapper -> browserWrapper }
+            .combine(browsersFlow) { _, browsers -> browsers.getCurrentBrowser() }
+            .distinctUntilChanged()
 
     init {
         coroutineScope.launch(dispatchers.io) {

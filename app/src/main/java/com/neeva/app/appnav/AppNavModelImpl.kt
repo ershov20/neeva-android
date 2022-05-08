@@ -57,7 +57,7 @@ class AppNavModelImpl(
             _currentDestination.value = destination
         }
 
-        webLayerModel.currentBrowserFlow
+        webLayerModel.initializedBrowserFlow
             .onEach { updateBackEnablingJob(it) }
             .flowOn(dispatchers.main)
             .launchIn(coroutineScope)
