@@ -2,19 +2,14 @@ package com.neeva.app.storage
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.annotation.WorkerThread
 import com.neeva.app.browsing.FileEncrypter
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileInputStream
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
-import okhttp3.internal.closeQuietly
 import org.chromium.weblayer.Tab
 
 /**
@@ -48,27 +43,14 @@ abstract class TabScreenshotManager(filesDir: File) {
                 return@captureScreenShot
             }
 
-            val dir = tabScreenshotDirectory
-            dir.mkdirs()
-
             val file = getTabScreenshotFile(tabGuid)
             if (file.exists()) file.delete()
 
-            var fileStream: OutputStream? = null
-            var bufferedStream: BufferedOutputStream? = null
-            try {
-                fileStream = getOutputStream(file)
-                bufferedStream = BufferedOutputStream(fileStream)
-                thumbnail?.compress(Bitmap.CompressFormat.JPEG, 100, bufferedStream)
-                bufferedStream.flush()
-                bufferedStream.close()
-            } catch (e: Exception) {
-                Log.e(TAG, "Failed to store bitmap", e)
-            } finally {
-                bufferedStream?.closeQuietly()
-                fileStream?.closeQuietly()
-                onCompleted()
+            BitmapIO.saveBitmap(tabScreenshotDirectory, file, ::getOutputStream) {
+                thumbnail?.compress(Bitmap.CompressFormat.JPEG, 100, it)
             }
+
+            onCompleted()
         }
     }
 
@@ -101,23 +83,7 @@ abstract class TabScreenshotManager(filesDir: File) {
     @WorkerThread
     fun restoreScreenshot(tabId: String): Bitmap? {
         val file = getTabScreenshotFile(tabId)
-        var fileStream: InputStream? = null
-        var bufferedStream: BufferedInputStream? = null
-
-        return try {
-            fileStream = getInputStream(file)
-            bufferedStream = BufferedInputStream(fileStream)
-            BitmapFactory.decodeStream(bufferedStream)
-        } catch (e: FileNotFoundException) {
-            Log.d(TAG, "Could not find file: ${e.message}")
-            null
-        } catch (e: Exception) {
-            Log.e(TAG, "Failed to restore bitmap", e)
-            null
-        } finally {
-            bufferedStream?.closeQuietly()
-            fileStream?.closeQuietly()
-        }
+        return BitmapIO.loadBitmap(file, ::getInputStream)
     }
 
     abstract fun getInputStream(file: File): InputStream

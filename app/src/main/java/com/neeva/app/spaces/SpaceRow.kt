@@ -38,6 +38,7 @@ import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.Dimensions.PADDING_SMALL
+import java.io.FileInputStream
 
 /** Returns a [State] that can be used in a Composable for obtaining a Bitmap. */
 @Composable
@@ -45,7 +46,9 @@ fun getThumbnailAsync(uri: Uri?): State<ImageBitmap?> {
     // By keying this on [uri], we can avoid recompositions until [uri] changes.  This avoids
     // infinite loops of recompositions that can be triggered via [Flow.collectAsState()].
     return produceState<ImageBitmap?>(initialValue = null, uri) {
-        value = BitmapIO.loadBitmap(uri)?.asImageBitmap()
+        value = BitmapIO
+            .loadBitmap(uri) { file -> FileInputStream(file) }
+            ?.asImageBitmap()
     }
 }
 

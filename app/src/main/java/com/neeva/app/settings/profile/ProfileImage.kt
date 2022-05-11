@@ -22,7 +22,7 @@ import androidx.compose.ui.res.painterResource
 import coil.compose.rememberImagePainter
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
-import com.neeva.app.storage.toBitmap
+import com.neeva.app.storage.toLetterBitmap
 
 @Composable
 fun ProfileImage(
@@ -54,7 +54,7 @@ fun ProfileImage(
 
 @Composable
 private fun SingleLetterPicture(displayName: String, modifier: Modifier) {
-    val bitmap = displayName.toBitmap(0.50f, MaterialTheme.colorScheme.primary.toArgb())
+    val bitmap = displayName.toLetterBitmap(0.50f, MaterialTheme.colorScheme.primary.toArgb())
         .asImageBitmap()
     Image(
         bitmap = bitmap,

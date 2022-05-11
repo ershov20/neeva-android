@@ -20,12 +20,15 @@ import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import com.neeva.app.storage.entities.Site
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import java.math.BigInteger
 import java.nio.file.Files
+import java.security.MessageDigest
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.withContext
@@ -60,16 +63,39 @@ abstract class FaviconCache(
     @WorkerThread
     @CallSuper
     open suspend fun saveFavicon(siteUri: Uri?, bitmap: Bitmap?) = withContext(dispatchers.io) {
-        bitmap ?: return@withContext null
+        // Because multiple URLs can be associated with the same favicon, create a filename
+        // based on an MD5 hash of the favicon's bytes.  That will allow multiple sites to share
+        // the same icon without having to explicitly track which site points at which file.
+        val stream = ByteArrayOutputStream()
+        bitmap?.compress(Bitmap.CompressFormat.PNG, 100, stream) ?: return@withContext null
+        val bitmapBytes = stream.toByteArray()
 
-        val bitmapFile = BitmapIO.saveBitmap(
-            directory = faviconDirectory,
-            dispatchers = dispatchers,
-            bitmap = bitmap
-        )
+        val hashBytes = MessageDigest.getInstance("MD5").digest(bitmapBytes)
+        val filename = BigInteger(1, hashBytes).toString(Character.MAX_RADIX)
+
+        // If the file exists, we can skip writing out the bitmap because the filename was based on
+        // the bytes of the bitmap file that was written out.
+        val file = File(faviconDirectory, filename)
+        try {
+            if (file.exists()) {
+                return@withContext Favicon(
+                    faviconURL = file.toUri().toString(),
+                    width = bitmap.width,
+                    height = bitmap.height
+                )
+            }
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Failed to check if bitmap exists: ${file.absolutePath}", e)
+            return@withContext null
+        }
+
+        // Write the bitmap out to storage.
+        val bitmapFile = BitmapIO.saveBitmap(faviconDirectory, file, ::getOutputStream) {
+            it.write(bitmapBytes)
+        }
 
         return@withContext Favicon(
-            faviconURL = bitmapFile?.toUri().toString(),
+            faviconURL = bitmapFile?.toUri()?.toString(),
             width = bitmap.width,
             height = bitmap.height
         )

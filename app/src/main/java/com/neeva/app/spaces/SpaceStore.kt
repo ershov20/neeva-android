@@ -1,7 +1,10 @@
 package com.neeva.app.spaces
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Base64
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
@@ -20,12 +23,15 @@ import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
+import com.neeva.app.storage.scaleDownMaintainingAspectRatio
+import com.neeva.app.storage.toByteArray
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
+import java.io.FileOutputStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -156,12 +162,11 @@ class SpaceStore(
                     thumbnail = null,
                     isPublic = true
                 )
-                spaceData.thumbnail = BitmapIO.saveBitmap(
+                spaceData.thumbnail = saveBitmap(
                     directory = thumbnailDirectory.resolve(MAKER_COMMUNITY_SPACE_ID),
                     dispatchers = dispatchers,
                     id = spaceData.id,
-                    bitmapString = it.spaceEntity.thumbnail,
-                    maxSize = MAX_THUMBNAIL_SIZE
+                    bitmapString = it.spaceEntity.thumbnail
                 )?.toUri()
                 return@map spaceData
             }
@@ -216,12 +221,11 @@ class SpaceStore(
             val entities =
                 entityQueries.filter { it.metadata?.docID != null }.map { entityQuery ->
                     val thumbnailUri = entityQuery.spaceEntity?.thumbnail?.let {
-                        BitmapIO.saveBitmap(
+                        saveBitmap(
                             directory = thumbnailDirectory.resolve(spaceID),
                             dispatchers = dispatchers,
-                            id = entityQuery.metadata?.docID,
-                            bitmapString = it,
-                            maxSize = MAX_THUMBNAIL_SIZE
+                            id = entityQuery.metadata!!.docID!!,
+                            bitmapString = it
                         )?.toUri()
                     }
                     SpaceItem(
@@ -241,12 +245,11 @@ class SpaceStore(
             spacesToFetch
                 .firstOrNull { space -> space.id == spaceID }
                 ?.let { space ->
-                    space.thumbnail = BitmapIO.saveBitmap(
+                    space.thumbnail = saveBitmap(
                         directory = thumbnailDirectory.resolve(space.id),
                         dispatchers = dispatchers,
                         id = spaceID,
-                        bitmapString = spaceQuery.space.thumbnail,
-                        maxSize = MAX_THUMBNAIL_SIZE
+                        bitmapString = spaceQuery.space.thumbnail
                     )?.toUri()
                     dao.upsert(space)
                 }
@@ -371,6 +374,43 @@ class SpaceStore(
                 val errorString = appContext.getString(R.string.error_generic)
                 snackbarModel.show(errorString)
             }
+        }
+    }
+
+    private suspend fun saveBitmap(
+        directory: File,
+        dispatchers: Dispatchers,
+        id: String,
+        bitmapString: String?
+    ) = withContext(dispatchers.io) {
+        // Don't bother writing the file out if it already exists.
+        val file = File(directory, id)
+        try {
+            if (file.exists()) return@withContext file
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Failed to check if bitmap exists: ${file.absolutePath}", e)
+            return@withContext null
+        }
+
+        val bitmap = bitmapString?.toBitmap() ?: return@withContext null
+        val scaledBitmap = bitmap.scaleDownMaintainingAspectRatio(MAX_THUMBNAIL_SIZE)
+        val bitmapBytes = scaledBitmap.toByteArray()
+        return@withContext BitmapIO.saveBitmap(directory, file, ::FileOutputStream) {
+            it.write(bitmapBytes)
+        }
+    }
+
+    private fun String.toBitmap(): Bitmap? {
+        val encoded = this
+            .takeIf { it.startsWith(BitmapIO.DATA_URI_PREFIX) }
+            ?.drop(BitmapIO.DATA_URI_PREFIX.length)
+            ?: return null
+
+        return try {
+            val byteArray = Base64.decode(encoded, Base64.DEFAULT)
+            BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+        } catch (e: IllegalArgumentException) {
+            null
         }
     }
 }

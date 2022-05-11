@@ -9,7 +9,8 @@ import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.storage.BitmapIO
 import java.io.BufferedInputStream
-import kotlinx.coroutines.Dispatchers
+import java.io.File
+import java.io.FileOutputStream
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.fail
 import org.junit.Rule
@@ -65,13 +66,11 @@ abstract class BaseScreenshotTest {
         // Save the image out to disk.  This file can be retrieved from the device using
         // Android Studio's "Device File Explorer".
         runBlocking {
+            val directory = InstrumentationRegistry.getInstrumentation().targetContext.cacheDir
             BitmapIO.saveBitmap(
-                directory = InstrumentationRegistry.getInstrumentation().targetContext.cacheDir,
-                dispatchers = Dispatchers(
-                    Dispatchers.Main,
-                    Dispatchers.Main
-                ),
-                id = filename,
+                directory = directory,
+                bitmapFile = File(directory, filename),
+                getOutputStream = ::FileOutputStream,
                 bitmap = bitmap
             )
         }

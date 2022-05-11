@@ -2,7 +2,7 @@ package com.neeva.app.storage.entities
 
 import android.graphics.Bitmap
 import android.net.Uri
-import com.neeva.app.storage.toBitmap
+import com.neeva.app.storage.toLetterBitmap
 
 /** Stores information about a website's favicon. */
 data class Favicon(
@@ -15,7 +15,7 @@ data class Favicon(
         fun Uri?.toBitmap(): Bitmap {
             val backgroundColor = hashCode().or(0xff000000.toInt())
             val text: String = this?.authority?.takeIf { it.isNotEmpty() }?.take(1) ?: ""
-            return text.toBitmap(0.75f, backgroundColor)
+            return text.toLetterBitmap(0.75f, backgroundColor)
         }
     }
 }

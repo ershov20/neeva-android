@@ -42,6 +42,7 @@ import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.createSingleColorBitmap
 import com.neeva.app.ui.theme.Dimensions
+import java.io.FileInputStream
 import kotlinx.coroutines.withContext
 
 private const val MAX_SUBITEMS_TO_SHOW = 4
@@ -81,7 +82,12 @@ fun spaceThumbnailState(
                         // waste cycles loading it.
                         shouldShowAdditionalItemCount(i, spaceItems.size)
                     }
-                    ?.let { BitmapIO.loadBitmap(it) }
+                    ?.let {
+                        BitmapIO.loadBitmap(it) {
+                            file ->
+                            FileInputStream(file)
+                        }
+                    }
             }
             bitmaps.add(itemBitmap)
         }
