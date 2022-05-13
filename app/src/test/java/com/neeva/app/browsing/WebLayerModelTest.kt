@@ -13,6 +13,8 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -39,6 +41,7 @@ import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
+import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
@@ -55,6 +58,7 @@ class WebLayerModelTest : BaseTest() {
     private lateinit var browserWrapperFactory: BrowserWrapperFactory
     private lateinit var regularBrowserWrapper: RegularBrowserWrapper
     private lateinit var regularBrowserFragment: Fragment
+    private lateinit var sharedPreferencesModel: SharedPreferencesModel
     private lateinit var webLayer: WebLayer
 
     @Mock private lateinit var activityCallbacks: ActivityCallbacks
@@ -93,6 +97,8 @@ class WebLayerModelTest : BaseTest() {
             on { createIncognitoBrowser(any(), any()) } doReturn incognitoBrowserWrapper
         }
 
+        sharedPreferencesModel = SharedPreferencesModel(application)
+
         webLayer = mock {
             on {
                 getProfile(eq(RegularBrowserWrapper.NON_INCOGNITO_PROFILE_NAME))
@@ -116,6 +122,7 @@ class WebLayerModelTest : BaseTest() {
                 io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler)
             ),
             neevaUser = neevaUser,
+            sharedPreferencesModel = sharedPreferencesModel,
             settingsDataModel = settingsDataModel,
             clientLogger = clientLogger,
             overrideCoroutineScope = coroutineScopeRule.scope
@@ -158,8 +165,58 @@ class WebLayerModelTest : BaseTest() {
     }
 
     @Test
+    fun testInitializationFlow_withIncognitoFragmentAndIncognitoSelected() {
+        // SETUP
+        // Signal that the Activity has an Incognito Fragment from a previous session.
+        val incognitoFragment: Fragment = mock {
+            on { viewLifecycleOwnerLiveData } doReturn MutableLiveData(null)
+        }
+        Mockito.`when`(activityCallbacks.getWebLayerFragment(eq(true)))
+            .thenReturn(incognitoFragment)
+
+        // Don't close the Incognito tabs on a profile switch.
+        Mockito.`when`(
+            settingsDataModel.getSettingsToggleValue(eq(SettingsToggle.CLOSE_INCOGNITO_TABS))
+        ).thenReturn(false)
+
+        // Say that the user was in Incognito before the app died.
+        sharedPreferencesModel.setValue(
+            folder = SharedPrefFolder.WEBLAYER,
+            key = WebLayerPrefs.IsCurrentlyIncognito.name,
+            value = true
+        )
+
+        // TEST
+        expectThat(webLayerModel.initializationState.value).isEqualTo(LoadingState.LOADING)
+
+        // Allow the coroutines to run, which should allow initialization to finish.
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        // Confirm that the other initialization tasks were run.
+        runBlocking {
+            verify(domainProviderImpl).initialize()
+            verify(historyManager).pruneDatabase()
+        }
+
+        // Fire the callback WebLayerModel requires to store the WebLayer.
+        completeWebLayerInitialization()
+
+        // CHECK EVERYTHING
+        // Because an Incognito Fragment existed, we shouldn't have tried to clean up anything.
+        runBlocking { verify(cacheCleaner, never()).run() }
+
+        coroutineScopeRule.scope.advanceUntilIdle()
+        expectThat(webLayerModel.initializationState.value).isEqualTo(LoadingState.READY)
+
+        val browsers = webLayerModel.browsersFlow.value
+        expectThat(browsers.isCurrentlyIncognito).isTrue()
+        expectThat(browsers.incognitoBrowserWrapper).isNotNull()
+    }
+
+    @Test
     fun switchToProfile_whenSwitchingBetweenProfiles_reactsCorrectly() {
         completeWebLayerInitialization()
+        verify(clientLogger, times(1)).onProfileSwitch(eq(false))
 
         webLayerModel.switchToProfile(true)
         coroutineScopeRule.scope.advanceUntilIdle()
@@ -169,13 +226,13 @@ class WebLayerModelTest : BaseTest() {
 
         webLayerModel.switchToProfile(false)
         coroutineScopeRule.scope.advanceUntilIdle()
-        verify(clientLogger).onProfileSwitch(eq(false))
+        verify(clientLogger, times(2)).onProfileSwitch(eq(false))
         expectThat(webLayerModel.browsersFlow.value.isCurrentlyIncognito).isEqualTo(false)
         expectThat(webLayerModel.currentBrowser).isEqualTo(regularBrowserWrapper)
     }
 
     @Test
-    fun switchToProfile_withoutIncognitoProfile_createsAndDeletesIncognitoProfile() {
+    fun switchToProfile_withoutIncognitoProfile_unsetsIncognitoBrowser() {
         completeWebLayerInitialization()
         webLayerModel.switchToProfile(true)
 
@@ -188,12 +245,11 @@ class WebLayerModelTest : BaseTest() {
         expectThat(browsersBefore.isCurrentlyIncognito).isTrue()
         expectThat(browsersBefore.incognitoBrowserWrapper).isEqualTo(incognitoBrowserWrapper)
 
-        // Signal that the Incognito profile was destroyed.
+        // Signal that the Incognito browser was destroyed.
         onDestroyedCaptor.lastValue.invoke(incognitoBrowserWrapper)
 
         val browsersAfter = webLayerModel.browsersFlow.value
         expectThat(browsersAfter.incognitoBrowserWrapper).isEqualTo(null)
-        expectThat(browsersAfter.isCurrentlyIncognito).isFalse()
     }
 
     @Test
@@ -227,7 +283,19 @@ class WebLayerModelTest : BaseTest() {
 
     @Test
     fun switchToProfile_whenSettingToggledOn_closesTabsOnSwitch() {
+        // Signal that the Activity has an Incognito Fragment from a previous session.
+        val incognitoFragment: Fragment = mock {
+            on { viewLifecycleOwnerLiveData } doReturn MutableLiveData(null)
+        }
+        Mockito.`when`(activityCallbacks.getWebLayerFragment(eq(true)))
+            .thenReturn(incognitoFragment)
+
         completeWebLayerInitialization()
+
+        // Because there is an incognito fragment open, we shouldn't have tried to delete anything.
+        runBlocking { verify(cacheCleaner, never()).run() }
+        verify(incognitoProfile, never()).destroyAndDeleteDataFromDiskSoon(any())
+
         webLayerModel.switchToProfile(true)
 
         // The Incognito Browser should have been created.
@@ -244,9 +312,14 @@ class WebLayerModelTest : BaseTest() {
 
         // Switch to the regular profile.
         webLayerModel.switchToProfile(false)
-        expectThat(webLayerModel.browsersFlow.value.isCurrentlyIncognito).isFalse()
+        coroutineScopeRule.scope.advanceUntilIdle()
 
-        verify(incognitoBrowserWrapper).closeAllTabs()
+        expectThat(webLayerModel.browsersFlow.value.isCurrentlyIncognito).isFalse()
+        expectThat(webLayerModel.browsersFlow.value.incognitoBrowserWrapper).isNull()
+
+        runBlocking { verify(cacheCleaner).run() }
+        verify(activityCallbacks).removeIncognitoFragment()
+        verify(incognitoProfile).destroyAndDeleteDataFromDiskSoon(any())
     }
 
     @Test

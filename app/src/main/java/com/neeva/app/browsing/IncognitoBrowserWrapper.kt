@@ -13,7 +13,6 @@ import com.neeva.app.storage.favicons.IncognitoFaviconCache
 import com.neeva.app.type.StartIncognitoInput
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
@@ -85,8 +84,8 @@ class IncognitoBrowserWrapper private constructor(
             incognitoProfile: Profile?,
             cacheCleaner: CacheCleaner
         ) {
-            // Tell WebLayer that it should destroy the incognito profile when it can.  This deletes any
-            // temporary files or cookies that were created while the user was in the incognito session.
+            // Tell WebLayer that it should destroy the incognito profile when it can.  This deletes
+            // temporary files or cookies that were created while the user was in that session.
             withContext(dispatchers.main) {
                 incognitoProfile?.apply {
                     Log.d(TAG, "Marking incognito profile for deletion")
@@ -110,17 +109,6 @@ class IncognitoBrowserWrapper private constructor(
         INCOGNITO_PROFILE_NAME,
         INCOGNITO_PERSISTENCE_ID
     )
-
-    internal fun destroyProfile() = coroutineScope.launch {
-        cleanUpIncognito(
-            dispatchers = dispatchers,
-            incognitoProfile = browser?.profile,
-            cacheCleaner = cacheCleaner
-        )
-
-        // Clear out the in-memory mapping of the favicons to URLs.
-        incognitoFaviconCache.clearMapping()
-    }
 
     override fun unregisterBrowserAndTabCallbacks() {
         super.unregisterBrowserAndTabCallbacks()

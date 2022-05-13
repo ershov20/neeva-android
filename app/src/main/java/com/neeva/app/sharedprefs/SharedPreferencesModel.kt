@@ -56,4 +56,5 @@ enum class SharedPrefFolder {
     ZERO_QUERY,
     HISTORY_UI,
     APP,
+    WEBLAYER
 }

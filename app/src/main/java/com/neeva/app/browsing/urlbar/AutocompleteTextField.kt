@@ -141,10 +141,15 @@ fun AutocompleteTextField(
                 modifier = Modifier
                     .focusRequester(focusRequester)
                     .onPreviewKeyEvent {
+                        // If we're seeing a hardware enter key, intercept it to prevent adding a
+                        // newline to the URL.
                         if (it.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_ENTER) {
-                            // If we're seeing a hardware enter key, intercept it to prevent
-                            // adding a newline to the URL.
-                            onLoadUrl()
+                            // Compose will _sometimes_ trigger this code on both a keydown and
+                            // keyup event.  To avoid creating two tabs, explicitly look for the
+                            // keydown event and ignore the keyup.
+                            if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
+                                onLoadUrl()
+                            }
                             true
                         } else {
                             false

@@ -112,7 +112,6 @@ class CardsPaneModelImpl(
 
     override fun showBrowser() {
         appNavModel.showBrowser()
-        webLayerModel.deleteIncognitoProfileIfUnused()
     }
 
     override fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo) {
