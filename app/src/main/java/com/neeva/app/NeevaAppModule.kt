@@ -168,7 +168,8 @@ object NeevaAppModule {
         dispatchers: Dispatchers,
         neevaUser: NeevaUser,
         settingsDataModel: SettingsDataModel,
-        clientLogger: ClientLogger
+        clientLogger: ClientLogger,
+        sharedPreferencesModel: SharedPreferencesModel
     ): BrowserWrapperFactory {
         return BrowserWrapperFactory(
             activityCallbackProvider = activityCallbackProvider,
@@ -181,7 +182,8 @@ object NeevaAppModule {
             dispatchers = dispatchers,
             neevaUser = neevaUser,
             settingsDataModel = settingsDataModel,
-            clientLogger = clientLogger
+            clientLogger = clientLogger,
+            sharedPreferencesModel = sharedPreferencesModel
         )
     }
 

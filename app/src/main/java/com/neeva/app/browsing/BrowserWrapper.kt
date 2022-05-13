@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.urlbar.URLBarModel
+import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.Job
@@ -35,6 +36,7 @@ interface BrowserWrapper {
     val findInPageModel: FindInPageModel
     val suggestionsModel: SuggestionsModel?
     val urlBarModel: URLBarModel
+    val cookieCutterModel: CookieCutterModel
 
     /** List of tabs ordered by how they should appear in the CardGrid. */
     val orderedTabList: StateFlow<List<TabInfo>>

@@ -5,6 +5,8 @@ import android.net.Uri
 import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.browsing.TabInfo.TabOpenType
+import com.neeva.app.cookiecutter.CookieCutterModel
+import com.neeva.app.cookiecutter.CookieCutterTabModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.entities.Visit
@@ -40,8 +42,14 @@ class TabCallbacks(
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
-    private val tabScreenshotManager: TabScreenshotManager
+    private val tabScreenshotManager: TabScreenshotManager,
+    private val cookieCutterModel: CookieCutterModel
 ) {
+    val cookieCutterTabModel = CookieCutterTabModel(
+        tab,
+        cookieCutterModel.trackingDataFlow
+    )
+
     /**
      * Triggered whenever a new Favicon is available for the given tab.  These are persisted
      * into the databases and provided to whatever UI needs them.
@@ -90,6 +98,8 @@ class TabCallbacks(
         var visitToCommit: Visit? = null
 
         override fun onNavigationStarted(navigation: Navigation) {
+            cookieCutterTabModel.resetStat()
+
             tabList.updateIsCrashed(tab.guid, isCrashed = false)
 
             // We can only check if the browser is restoring state when the navigation starts.  Once
@@ -219,9 +229,7 @@ class TabCallbacks(
 
     private val contentFilterCallback = object : ContentFilterCallback() {
         override fun onContentFilterStatsUpdated() {
-            // TODO: Update tracking prevention UI
-            // tab.getContentFilterStats().forEach { host, count ->
-            // }
+            cookieCutterTabModel.updateStats(tab.contentFilterStats)
         }
     }
 
@@ -245,6 +253,8 @@ class TabCallbacks(
         tab.setNewTabCallback(null)
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
         tab.unregisterTabCallback(tabCallback)
+        // TODO unregister content filter callback
+        //  https://github.com/neevaco/neeva-android/issues/597
     }
 
     companion object {

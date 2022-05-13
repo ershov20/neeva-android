@@ -18,7 +18,9 @@ import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
+import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
@@ -44,7 +46,6 @@ import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserEmbeddabilityMode
 import org.chromium.weblayer.BrowserRestoreCallback
-import org.chromium.weblayer.ContentFilterMode
 import org.chromium.weblayer.NewTabType
 import org.chromium.weblayer.OpenUrlCallback
 import org.chromium.weblayer.PageInfoDisplayOptions
@@ -65,8 +66,10 @@ abstract class BaseBrowserWrapper internal constructor(
     private val _urlBarModel: URLBarModelImpl,
     private val _findInPageModel: FindInPageModelImpl,
     private val historyManager: HistoryManager?,
-    private val tabScreenshotManager: TabScreenshotManager
+    private val tabScreenshotManager: TabScreenshotManager,
+    private val sharedPreferencesModel: SharedPreferencesModel
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
+
     constructor(
         isIncognito: Boolean,
         appContext: Context,
@@ -77,7 +80,8 @@ abstract class BaseBrowserWrapper internal constructor(
         faviconCache: FaviconCache,
         spaceStore: SpaceStore?,
         historyManager: HistoryManager?,
-        tabScreenshotManager: TabScreenshotManager
+        tabScreenshotManager: TabScreenshotManager,
+        sharedPreferencesModel: SharedPreferencesModel
     ) : this(
         isIncognito = isIncognito,
         appContext = appContext,
@@ -101,7 +105,8 @@ abstract class BaseBrowserWrapper internal constructor(
         ),
         _findInPageModel = FindInPageModelImpl(),
         historyManager = historyManager,
-        tabScreenshotManager = tabScreenshotManager
+        tabScreenshotManager = tabScreenshotManager,
+        sharedPreferencesModel = sharedPreferencesModel
     )
 
     private val tabList = TabList()
@@ -177,7 +182,7 @@ abstract class BaseBrowserWrapper internal constructor(
     private val tabListCallback = object : TabListCallback() {
         override fun onActiveTabChanged(activeTab: Tab?) {
             fullscreenCallback.exitFullscreen()
-            _activeTabModelImpl.onActiveTabChanged(activeTab)
+            changeActiveTab(activeTab)
             tabList.updatedSelectedTab(activeTab?.guid)
         }
 
@@ -274,6 +279,9 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     internal abstract fun createBrowserFragment(): Fragment
 
+    val _cookieCutterModel = CookieCutterModel(sharedPreferencesModel)
+    override val cookieCutterModel: CookieCutterModel get() = _cookieCutterModel
+
     /** Prepares the WebLayer Browser to interface with our app. */
     override fun createAndAttachBrowser(
         displaySize: Rect,
@@ -297,15 +305,8 @@ abstract class BaseBrowserWrapper internal constructor(
         registerBrowserCallbacks(browser)
         browser.setMinimumSurfaceSize(displaySize.width(), displaySize.height())
 
-        // Configure content filtering.
-        val contentFilterManager = browser.profile.contentFilterManager
-        contentFilterManager.setRulesFile("assets/easyprivacy.proto")
-        // Set filtering mode to BLOCK_REQUESTS to enable "strict" tracking prevention.
-        contentFilterManager.setMode(ContentFilterMode.BLOCK_COOKIES)
-        // Exempt a list of top-level hostnames from filtering via calls like:
-        // contentFilterManager.addHostExclusion("foo.com")
-        // TODO: Call this function to enable content filtering when the UI is ready.
-        // contentFilterManager.startFiltering()
+        // Configure content filtering
+        _cookieCutterModel.setUpTrackingProtection(browser.profile.contentFilterManager)
 
         // Set the Views that WebLayer will use as placeholders for our toolbar.
         //
@@ -422,10 +423,23 @@ abstract class BaseBrowserWrapper internal constructor(
             // the Browser before we have a chance to hook into it.
             // We work around this by manually calling onRestoreCompleted() if it's already done.
             restorer.onRestoreCompleted()
-            _activeTabModelImpl.onActiveTabChanged(browser.activeTab)
+            changeActiveTab(browser.activeTab)
         }
 
         return true
+    }
+
+    /**
+     * Change the active tab model and update any other state as needed (e.g., cookie cutter stat)
+     *
+     * @param tab Tab that will become active.
+     */
+    fun changeActiveTab(tab: Tab?) {
+        _activeTabModelImpl.onActiveTabChanged(tab)
+        if (cookieCutterModel.enableTrackingProtection) {
+            cookieCutterModel.trackingDataFlow.value =
+                tabCallbackMap[tab]?.cookieCutterTabModel?.currentTrackingData()
+        }
     }
 
     /**
@@ -466,7 +480,8 @@ abstract class BaseBrowserWrapper internal constructor(
             activityCallbackProvider = activityCallbackProvider,
             registerNewTab = this::registerNewTab,
             fullscreenCallback = fullscreenCallback,
-            tabScreenshotManager = tabScreenshotManager
+            tabScreenshotManager = tabScreenshotManager,
+            cookieCutterModel = _cookieCutterModel
         )
     }
 
@@ -495,7 +510,7 @@ abstract class BaseBrowserWrapper internal constructor(
             }
             tabCallbackMap.clear()
             tabList.clear()
-            _activeTabModelImpl.onActiveTabChanged(null)
+            changeActiveTab(null)
 
             browserFlow.value = null
             tabListRestorer = null

@@ -15,7 +15,9 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
+import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
@@ -72,6 +74,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var dispatchers: Dispatchers
     private lateinit var profile: Profile
     private lateinit var urlBarModel: URLBarModelImpl
+    private lateinit var sharedPreferencesModel: SharedPreferencesModel
 
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
     @Mock private lateinit var activityCallbackProvider: ActivityCallbackProvider
@@ -144,6 +147,23 @@ class BaseBrowserWrapperTest : BaseTest() {
             on { isEditing } doReturn urlBarModelIsEditing
         }
 
+        sharedPreferencesModel = mock {
+            on {
+                getValue(
+                    any(),
+                    eq(CookieCutterModel.ENABLE_TRACKING_PROTECTION_KEY),
+                    eq(true)
+                )
+            } doReturn true
+            on {
+                getValue(
+                    any(),
+                    eq(CookieCutterModel.BLOCKING_STRENGTH_KEY),
+                    eq(CookieCutterModel.Companion.BlockingStrength.TRACKER_COOKIE)
+                )
+            } doReturn CookieCutterModel.Companion.BlockingStrength.TRACKER_COOKIE
+        }
+
         browserWrapper = object : BaseBrowserWrapper(
             isIncognito = false,
             appContext = context,
@@ -157,7 +177,8 @@ class BaseBrowserWrapperTest : BaseTest() {
             _urlBarModel = urlBarModel,
             _findInPageModel = findInPageModel,
             historyManager = this@BaseBrowserWrapperTest.historyManager,
-            tabScreenshotManager = this@BaseBrowserWrapperTest.tabScreenshotManager
+            tabScreenshotManager = this@BaseBrowserWrapperTest.tabScreenshotManager,
+            sharedPreferencesModel = sharedPreferencesModel
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment

@@ -3,6 +3,7 @@ package com.neeva.app.browsing.toolbar
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelState
+import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,4 +31,6 @@ abstract class BrowserToolbarModel {
     //endregion
 
     abstract val urlBarModel: URLBarModel
+
+    abstract val cookieCutterModel: CookieCutterModel?
 }

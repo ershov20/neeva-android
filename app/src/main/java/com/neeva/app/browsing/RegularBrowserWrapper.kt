@@ -9,6 +9,7 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.favicons.RegularFaviconCache
@@ -37,7 +38,8 @@ class RegularBrowserWrapper(
     spaceStore: SpaceStore,
     settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
-    clientLogger: ClientLogger
+    clientLogger: ClientLogger,
+    sharedPreferencesModel: SharedPreferencesModel
 ) : BaseBrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -60,7 +62,8 @@ class RegularBrowserWrapper(
     ),
     spaceStore = spaceStore,
     historyManager = historyManager,
-    tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir)
+    tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir),
+    sharedPreferencesModel = sharedPreferencesModel
 ) {
     companion object {
         /**

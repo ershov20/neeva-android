@@ -36,7 +36,8 @@ fun URLBar(
     val urlBarModelState = urlBarModel.stateFlow.collectAsState()
     val isEditing = urlBarModelState.value.isEditing
 
-    val trackers = browserToolbarModel.trackersFlow.collectAsState().value
+    val trackerDataFlow = browserToolbarModel.cookieCutterModel?.trackingDataFlow?.collectAsState()
+    val trackerData = trackerDataFlow?.value
 
     val iconModifier = Modifier.padding(vertical = Dimensions.PADDING_TINY)
 
@@ -44,7 +45,7 @@ fun URLBar(
         AnimatedVisibility(visible = !isEditing) {
             UrlBarStartComposable(
                 showIncognitoBadge = browserToolbarModel.isIncognito,
-                trackersBlocked = trackers,
+                trackersBlocked = trackerData?.numTrackers ?: 0,
                 modifier = iconModifier.padding(start = Dimensions.PADDING_SMALL)
             )
         }

@@ -47,6 +47,8 @@ class BrowserToolbarModelImpl(
 
     override val useSingleBrowserToolbar get() = toolbarConfiguration.useSingleBrowserToolbar
     override val isUpdateAvailable get() = toolbarConfiguration.isUpdateAvailable
+
+    override val cookieCutterModel get() = browserWrapper.cookieCutterModel
 }
 
 /** Empty [BrowserToolbarModel] that doesn't do anything. */
@@ -76,4 +78,5 @@ internal class PreviewBrowserToolbarModel(
     override val tabProgressFlow get() = MutableStateFlow(tabProgressValue)
     override val trackersFlow get() = MutableStateFlow(trackers)
     override val urlBarModel get() = PreviewUrlBarModel(urlBarModelStateValue)
+    override val cookieCutterModel get() = null
 }

@@ -8,6 +8,7 @@ import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.StartIncognitoMutation
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.IncognitoTabScreenshotManager
 import com.neeva.app.storage.favicons.IncognitoFaviconCache
 import com.neeva.app.type.StartIncognitoInput
@@ -28,7 +29,8 @@ class IncognitoBrowserWrapper private constructor(
     private val apolloWrapper: ApolloWrapper,
     private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
     private val incognitoFaviconCache: IncognitoFaviconCache,
-    tabScreenshotManager: IncognitoTabScreenshotManager
+    tabScreenshotManager: IncognitoTabScreenshotManager,
+    sharedPreferencesModel: SharedPreferencesModel
 ) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
@@ -39,7 +41,8 @@ class IncognitoBrowserWrapper private constructor(
     faviconCache = incognitoFaviconCache,
     spaceStore = null,
     historyManager = null,
-    tabScreenshotManager = tabScreenshotManager
+    tabScreenshotManager = tabScreenshotManager,
+    sharedPreferencesModel = sharedPreferencesModel
 ) {
     constructor(
         appContext: Context,
@@ -50,7 +53,8 @@ class IncognitoBrowserWrapper private constructor(
         apolloWrapper: ApolloWrapper,
         domainProvider: DomainProvider,
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
-        tempDirectory: File = appContext.cacheDir.resolve(FOLDER_PREFIX)
+        tempDirectory: File = appContext.cacheDir.resolve(FOLDER_PREFIX),
+        sharedPreferencesModel: SharedPreferencesModel
     ) : this(
         appContext = appContext,
         cacheCleaner = cacheCleaner,
@@ -65,7 +69,8 @@ class IncognitoBrowserWrapper private constructor(
             domainProvider,
             dispatchers
         ),
-        tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory)
+        tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory),
+        sharedPreferencesModel = sharedPreferencesModel
     )
 
     companion object {
