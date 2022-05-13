@@ -54,7 +54,15 @@ android {
         }
 
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        staging {
+            initWith debug
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -75,7 +83,8 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         freeCompilerArgs = [
-            '-Xopt-in=kotlin.RequiresOptIn'     // Needed for the experimental Compose functions
+            // Needed for the experimental Compose functions
+            '-Xopt-in=kotlin.RequiresOptIn'
         ]
     }
 
@@ -92,8 +101,8 @@ android {
         packageName.set("com.neeva.app")
     }
 
-    // Ignore a bunch of files with the same that libraries may include but are completely useless
-    // for the APK.
+    // Ignore a bunch of files with the same name that libraries may include but are completely
+    // useless for the APK.
     packagingOptions {
         resources {
             excludes += [

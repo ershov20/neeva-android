@@ -19,3 +19,7 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# Keep everything under the Chromium package as a first step.  This will hopefully not be a problem
+# if/when WebLayer launches because it won't be part of our APK.
+-keep, includedescriptorclasses class org.chromium.** { *; }
