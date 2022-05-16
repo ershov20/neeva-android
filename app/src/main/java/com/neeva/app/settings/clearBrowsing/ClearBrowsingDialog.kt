@@ -12,12 +12,12 @@ fun ClearBrowsingDialog(
     dismissAction: () -> Unit,
 ) {
     val settingsDataModel = LocalEnvironment.current.settingsDataModel
-    val selectedOption = settingsDataModel.getTimeClearingOption()
+    val selectedOptionIndex = settingsDataModel.getTimeClearingOptionIndex()
     val radioOptions = TimeClearingOption.values().map { stringResource(it.string_id) }
     SettingsDialog(
         textId = R.string.clear_browsing_dialog_text,
         radioOptions = radioOptions,
-        selectedOptionIndex = selectedOption,
+        selectedOptionIndex = selectedOptionIndex,
         saveSelectedOptionIndex = settingsDataModel::saveSelectedTimeClearingOption,
         confirmStringId = R.string.clear_browsing_clear_data,
         confirmAction = { selectedOptionIndex ->

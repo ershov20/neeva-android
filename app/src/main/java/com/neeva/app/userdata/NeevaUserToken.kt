@@ -20,10 +20,7 @@ class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
         fun extractAuthTokenFromIntent(intent: Intent?): String? {
             val dataString = intent?.dataString ?: return null
             val dataUri = Uri.parse(dataString)
-            // TODO(kobec): waiting on the backend to fix this https://github.com/neevaco/neeva/issues/63900
-            if (!dataString.startsWith("neeva:://login") &&
-                !(dataUri.scheme == "neeva" && dataUri.host == "login")
-            ) {
+            if (dataUri.scheme != "neeva" || dataUri.host != "login") {
                 return null
             }
 

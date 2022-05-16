@@ -13,7 +13,6 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
  * FEATURE FLAGGING: used in any @Composable or anywhere else to get if a Feature Flag is enabled.
  *
  * This includes:
- *
  *    - Holding all toggle MutableStates (which are based on their SharedPref values)
  *    - Being a wrapper class for Settings-SharedPreferences
  *    - Holding DEBUG-mode-only flags as MutableStates
@@ -22,7 +21,7 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     internal val isDebugMode = BuildConfig.DEBUG
 
     private val toggleMap = mutableMapOf<String, MutableState<Boolean>>()
-    private val selectedTimeClearingOption = mutableStateOf(
+    private val selectedTimeClearingOptionIndex = mutableStateOf(
         getSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, 0)
     )
 
@@ -42,10 +41,8 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         default: Boolean,
         isDebugFlag: Boolean = false
     ): Boolean {
-        if (isDebugFlag && !isDebugMode) {
-            return false
-        }
-        return sharedPreferencesModel.getValue(SharedPrefFolder.SETTINGS, key, default)
+        if (isDebugFlag && !isDebugMode) { return false }
+        return getSharedPrefValue(key, default)
     }
 
     private fun <T> getSharedPrefValue(key: String, defaultValue: T): T {
@@ -80,8 +77,8 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         return toggleKeyName?.let { toggleMap[toggleKeyName] }
     }
 
-    fun getTimeClearingOption(): MutableState<Int> {
-        return selectedTimeClearingOption
+    fun getTimeClearingOptionIndex(): MutableState<Int> {
+        return selectedTimeClearingOptionIndex
     }
 
     fun saveSelectedTimeClearingOption(index: Int) {

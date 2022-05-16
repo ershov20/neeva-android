@@ -48,8 +48,6 @@ fun SettingsRow(
 ) {
     val rowDataValues = getSettingsRowDataValues(rowData)
 
-    val toggleState = settingsController.getToggleState(rowData.togglePreferenceKey)
-
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
             onClick?.let {
@@ -70,6 +68,7 @@ fun SettingsRow(
         }
 
         SettingsRowType.TOGGLE -> {
+            val toggleState = settingsController.getToggleState(rowData.togglePreferenceKey)
             if (toggleState != null && rowData.togglePreferenceKey != null) {
                 NeevaSwitch(
                     primaryLabel = rowDataValues.primaryLabel,
