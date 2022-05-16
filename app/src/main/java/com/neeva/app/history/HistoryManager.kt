@@ -36,7 +36,7 @@ class HistoryManager(
 ) {
     companion object {
         private const val MAX_FREQUENT_SITES = 40
-        private const val PAGE_SIZE = 10
+        private const val PAGE_SIZE = 30
 
         private val HISTORY_WINDOW = TimeUnit.DAYS.toMillis(7)
         private val HISTORY_START_DATE = Date(System.currentTimeMillis() - HISTORY_WINDOW)
@@ -45,12 +45,6 @@ class HistoryManager(
     }
 
     private val dao = historyDatabase.dao()
-
-    fun getHistoryBetween(startTime: Date, endTime: Date): Flow<PagingData<SitePlusVisit>> {
-        return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
-            dao.getPagedSitesVisitedBetween(startTime, endTime)
-        }.flow
-    }
 
     fun getHistoryAfter(startTime: Date): Flow<PagingData<SitePlusVisit>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
