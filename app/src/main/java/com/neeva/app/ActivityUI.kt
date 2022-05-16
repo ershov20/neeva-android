@@ -16,8 +16,8 @@ import com.neeva.app.cardgrid.CardsPaneModel
 import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsDataModel
-import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
@@ -46,15 +46,12 @@ val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value s
 val LocalCardsPaneModel = compositionLocalOf<CardsPaneModel> { error("No value set") }
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("No value set") }
-val LocalSetDefaultAndroidBrowserManager = compositionLocalOf<SetDefaultAndroidBrowserManager> {
-    error("No value set")
-}
+val LocalSettingsControllerImpl = compositionLocalOf<SettingsController> { error("No value set") }
 
 @Composable
 fun ActivityUI(
     toolbarConfiguration: StateFlow<ToolbarConfiguration>,
-    webLayerModel: WebLayerModel,
-    onSignOut: () -> Unit
+    webLayerModel: WebLayerModel
 ) {
     val appNavModel = LocalAppNavModel.current
     val overlaySheetModel = LocalEnvironment.current.overlaySheetModel
@@ -65,7 +62,6 @@ fun ActivityUI(
             toolbarConfiguration = toolbarConfiguration,
             webLayerModel = webLayerModel,
             appNavModel = appNavModel,
-            onSignOut = onSignOut,
             modifier = Modifier.fillMaxSize()
         )
 

@@ -10,9 +10,13 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.settings.clearBrowsing.TimeClearingOption
 import com.neeva.app.settings.setDefaultAndroidBrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
+import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 import java.util.Date
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * An interface handling all Settings-related controller logic.
@@ -62,7 +66,9 @@ class SettingsControllerImpl(
     private val neevaUser: NeevaUser,
     private val webLayerModel: WebLayerModel,
     private val onSignOut: () -> Unit,
-    private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
+    private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
+    private val coroutineScope: CoroutineScope,
+    private val snackbarModel: SnackbarModel
 ) : SettingsController {
     override fun onBackPressed() {
         appNavModel.popBackStack()
@@ -109,7 +115,7 @@ class SettingsControllerImpl(
     private fun getButtonClicks(): Map<Int, (() -> Unit)?> {
         return mutableMapOf(
             R.string.settings_sign_out to { signOut() },
-            R.string.settings_debug_open_50_tabs to { appNavModel.debugOpenManyTabs() }
+            R.string.settings_debug_open_50_tabs to { debugOpenManyTabs() }
         )
     }
 
@@ -150,6 +156,58 @@ class SettingsControllerImpl(
 
     override fun isDebugMode(): Boolean {
         return settingsDataModel.isDebugMode
+    }
+
+    private fun debugOpenManyTabs(numTabs: Int = 50) {
+        coroutineScope.launch {
+            val possibleUrls = listOf(
+                "https://en.wikipedia.org",
+                "https://youtube.com",
+                "https://amazon.com",
+                "https://facebook.com",
+                "https://twitter.com",
+                "https://fandom.com",
+                "https://pinterest.com",
+                "https://imdb.com",
+                "https://reddit.com",
+                "https://yelp.com",
+                "https://instagram.com",
+                "https://ebay.com",
+                "https://walmart.com",
+                "https://craigslist.org",
+                "https://healthline.com",
+                "https://tripadvisor.com",
+                "https://linkedin.com",
+                "https://webmd.com",
+                "https://netflix.com",
+                "https://apple.com",
+                "https://homedepot.com",
+                "https://mail.yahoo.com",
+                "https://cnn.com",
+                "https://etsy.com",
+                "https://google.com",
+                "https://yahoo.com",
+                "https://indeed.com",
+                "https://target.com",
+                "https://microsoft.com",
+                "https://nytimes.com",
+                "https://mayoclinic.org",
+                "https://espn.com",
+                "https://usps.com",
+                "https://quizlet.com",
+                "https://gamepedia.com",
+                "https://lowes.com",
+                "https://irs.gov",
+                "https://nih.gov",
+                "https://merriam-webster.com",
+                "https://steampowered.com"
+            )
+            for (i in 0 until numTabs) {
+                openUrl(uri = Uri.parse(possibleUrls[i % possibleUrls.size]), openViaIntent = false)
+                delay(250)
+            }
+            snackbarModel.show("Opened $numTabs tabs")
+        }
     }
 }
 

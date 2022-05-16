@@ -51,6 +51,4 @@ interface AppNavModel {
     fun shareCurrentPage()
 
     fun onMenuItem(id: OverflowMenuItemId)
-
-    fun debugOpenManyTabs(numTabs: Int = 50)
 }

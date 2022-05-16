@@ -2,13 +2,11 @@ package com.neeva.app.appnav
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
-import com.neeva.app.LocalEnvironment
-import com.neeva.app.LocalSetDefaultAndroidBrowserManager
+import com.neeva.app.LocalSettingsControllerImpl
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.CardsPane
@@ -18,7 +16,6 @@ import com.neeva.app.firstrun.SignInScreenContainer
 import com.neeva.app.firstrun.signup.SignUpLandingContainer
 import com.neeva.app.firstrun.signup.SignUpWithOtherContainer
 import com.neeva.app.history.HistoryContainer
-import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.featureFlags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
@@ -33,30 +30,9 @@ fun AppNav(
     toolbarConfiguration: StateFlow<ToolbarConfiguration>,
     webLayerModel: WebLayerModel,
     appNavModel: AppNavModel,
-    onSignOut: () -> Unit,
     modifier: Modifier
 ) {
-    val settingsDataModel = LocalEnvironment.current.settingsDataModel
-    val neevaUser = LocalEnvironment.current.neevaUser
-    val setDefaultAndroidBrowserManager = LocalSetDefaultAndroidBrowserManager.current
-
-    val settingsControllerImpl = remember(
-        appNavModel,
-        settingsDataModel,
-        neevaUser,
-        webLayerModel,
-        onSignOut,
-        setDefaultAndroidBrowserManager
-    ) {
-        SettingsControllerImpl(
-            appNavModel,
-            settingsDataModel,
-            neevaUser,
-            webLayerModel,
-            onSignOut,
-            setDefaultAndroidBrowserManager
-        )
-    }
+    val settingsControllerImpl = LocalSettingsControllerImpl.current
 
     AnimatedNavHost(
         navController = appNavModel.navController,

@@ -46,6 +46,7 @@ import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.LocalDebugFlags
+import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.spaces.SpaceStore
@@ -148,6 +149,18 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         coroutineScope = lifecycleScope
                     )
                 }
+                val settingsControllerImpl = remember(appNavModel) {
+                    SettingsControllerImpl(
+                        appNavModel!!,
+                        localEnvironmentState.settingsDataModel,
+                        localEnvironmentState.neevaUser,
+                        webLayerModel,
+                        activityViewModel::signOut,
+                        setDefaultAndroidBrowserManager,
+                        lifecycleScope,
+                        localEnvironmentState.snackbarModel
+                    )
+                }
 
                 NeevaTheme {
                     CompositionLocalProvider(
@@ -156,13 +169,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         LocalEnvironment provides localEnvironmentState,
                         LocalFeedbackViewModel provides feedbackViewModel,
                         LocalFirstRunModel provides firstRunModel,
-                        LocalSetDefaultAndroidBrowserManager
-                            provides setDefaultAndroidBrowserManager
+                        LocalSettingsControllerImpl provides settingsControllerImpl
                     ) {
                         ActivityUI(
                             toolbarConfiguration = activityViewModel.toolbarConfiguration,
-                            webLayerModel = webLayerModel,
-                            onSignOut = activityViewModel::signOut
+                            webLayerModel = webLayerModel
                         )
                     }
                 }
