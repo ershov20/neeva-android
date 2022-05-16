@@ -80,10 +80,10 @@ class FeedbackViewModel @Inject constructor(
         currentBrowser: BrowserWrapper,
         callback: () -> Unit
     ) = viewModelScope.launch(dispatchers.main) {
+        currentBrowser.allowScreenshots(true)
+
         val content = window.decorView
         val bitmap = Bitmap.createBitmap(content.width, content.height, Bitmap.Config.ARGB_8888)
-
-        currentBrowser.allowScreenshots(true)
 
         val copyResult = suspendCoroutine<Boolean> { continuation ->
             PixelCopy.request(
@@ -99,12 +99,16 @@ class FeedbackViewModel @Inject constructor(
             )
         }
 
-        currentBrowser.allowScreenshots(false)
-
         val scaledBitmap = bitmap.scaleDownMaintainingAspectRatio(MAX_SCREENSHOT_SIZE)
         screenshot = scaledBitmap.takeIf { copyResult }
-
         callback()
+
+        // https://github.com/neevaco/neeva-android/issues/600
+        // We reset the Browser's screenshot mode AFTER the callback() because it can get stuck
+        // until the user taps on the screen.  Currently, the only use case is to take a screenshot
+        // for the Support screen.  After closing that screen and returning to the browser screen,
+        // everything proceeds as it should, but it's unclear why.
+        currentBrowser.allowScreenshots(false)
     }
 
     fun removeScreenshot() {

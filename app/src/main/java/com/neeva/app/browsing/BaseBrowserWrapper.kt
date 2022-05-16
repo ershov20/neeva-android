@@ -741,6 +741,11 @@ abstract class BaseBrowserWrapper internal constructor(
             BrowserEmbeddabilityMode.UNSUPPORTED
         }
 
+        // https://github.com/neevaco/neeva-android/issues/600
+        // As an odd side-effect result of putting WebLayer in the Compose hierarchy, the coroutine
+        // gets hung up on the setEmbeddabilityMode() call until the user touches the screen.
+        // Programmatically forcing a recomposition of the WebLayerContainer does nothing, so
+        // there's some signal that the WebLayer Browser isn't getting to trigger the call.
         val result = suspendCoroutine<Boolean?> { continuation ->
             browser?.setEmbeddabilityMode(mode) {
                 continuation.resume(it)
@@ -751,6 +756,8 @@ abstract class BaseBrowserWrapper internal constructor(
 
         if (result != true) {
             Log.e(TAG, "Failed to update mode (allowScreenshots = $allowScreenshots)")
+        } else {
+            Log.d(TAG, "Successfully updated mode (allowScreenshots = $allowScreenshots)")
         }
     }
 
