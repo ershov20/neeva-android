@@ -50,6 +50,7 @@ import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.removeViewFromParent
 import com.neeva.app.ui.theme.NeevaTheme
@@ -81,6 +82,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var dispatchers: Dispatchers
+    @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var overlaySheetModel: OverlaySheetModel
     @Inject internal lateinit var settingsDataModel: SettingsDataModel
@@ -151,14 +153,17 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
                 val settingsControllerImpl = remember(appNavModel) {
                     SettingsControllerImpl(
-                        appNavModel!!,
-                        localEnvironmentState.settingsDataModel,
-                        localEnvironmentState.neevaUser,
-                        webLayerModel,
-                        activityViewModel::signOut,
-                        setDefaultAndroidBrowserManager,
-                        lifecycleScope,
-                        localEnvironmentState.snackbarModel
+                        context = context,
+                        appNavModel = appNavModel!!,
+                        settingsDataModel = localEnvironmentState.settingsDataModel,
+                        neevaUser = localEnvironmentState.neevaUser,
+                        webLayerModel = webLayerModel,
+                        onSignOut = activityViewModel::signOut,
+                        setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
+                        coroutineScope = lifecycleScope,
+                        dispatchers = dispatchers,
+                        snackbarModel = localEnvironmentState.snackbarModel,
+                        historyDatabase = historyDatabase
                     )
                 }
 

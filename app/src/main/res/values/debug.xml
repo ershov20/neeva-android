@@ -14,4 +14,5 @@
     <string name="settings_debug_enable_incognito_screenshots" translatable="false">Enable screenshots while in Incognito</string>
     <string name="settings_debug_enable_show_desktop_site" translatable="false">Enable Show Desktop Site in Overflow Menu</string>
     <string name="settings_debug_open_50_tabs" translatable="false">Open 50 tabs</string>
+    <string name="settings_debug_export_database" translatable="false">Export database</string>
 </resources>

@@ -1,15 +1,18 @@
 package com.neeva.app.settings
 
+import android.content.Context
 import android.net.Uri
 import android.text.format.DateUtils
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.neeva.app.Dispatchers
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.settings.clearBrowsing.TimeClearingOption
 import com.neeva.app.settings.setDefaultAndroidBrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
+import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
@@ -61,6 +64,7 @@ interface SettingsController {
 }
 
 class SettingsControllerImpl(
+    private val context: Context,
     private val appNavModel: AppNavModel,
     private val settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
@@ -68,7 +72,9 @@ class SettingsControllerImpl(
     private val onSignOut: () -> Unit,
     private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
     private val coroutineScope: CoroutineScope,
-    private val snackbarModel: SnackbarModel
+    private val dispatchers: Dispatchers,
+    private val snackbarModel: SnackbarModel,
+    private val historyDatabase: HistoryDatabase
 ) : SettingsController {
     override fun onBackPressed() {
         appNavModel.popBackStack()
@@ -115,7 +121,8 @@ class SettingsControllerImpl(
     private fun getButtonClicks(): Map<Int, (() -> Unit)?> {
         return mutableMapOf(
             R.string.settings_sign_out to { signOut() },
-            R.string.settings_debug_open_50_tabs to { debugOpenManyTabs() }
+            R.string.settings_debug_open_50_tabs to { debugOpenManyTabs() },
+            R.string.settings_debug_export_database to { debugExportDatabase() }
         )
     }
 
@@ -207,6 +214,15 @@ class SettingsControllerImpl(
                 delay(250)
             }
             snackbarModel.show("Opened $numTabs tabs")
+        }
+    }
+
+    fun debugExportDatabase() {
+        coroutineScope.launch {
+            historyDatabase.export(
+                context = context,
+                dispatchers = dispatchers
+            )
         }
     }
 }
