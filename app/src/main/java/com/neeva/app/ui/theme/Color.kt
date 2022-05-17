@@ -1,14 +1,13 @@
 package com.neeva.app.ui.theme
 
 import androidx.annotation.ColorRes
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import com.neeva.app.R
 
 // If any colors are changed here, make sure to update colors.xml, as well.
-
-val BackgroundLight = Color(0xFFFFFFFF)
-val BackgroundDark = Color(0xFF1C1C1E)
-val SelectionHighlight = Color(0xFFBBCFF3)
 
 /** Official colors defined from https://www.figma.com/file/axgC8GRRAo588urHgfIba7/Colors */
 object ColorPalette {
@@ -49,6 +48,7 @@ object ColorPalette {
         val SeafoamVariant = Color(0xffbbe3d5)
     }
 }
+
 val md_theme_light_primary = Color(0xFF2c47ef)
 val md_theme_light_onPrimary = Color(0xFFffffff)
 val md_theme_light_primaryContainer = Color(0xFFdde0ff)
@@ -195,6 +195,30 @@ fun mapComposeColorToResource(color: Color): Int = when (color) {
     md_theme_dark_shadow -> R.color.md_theme_dark_shadow
 
     else -> throw IllegalArgumentException("Color mapping is undefined")
+}
+
+/**
+ * Compose doesn't seem to have a way of letting us grab the background color of a Surface, which
+ * means that we have to explicitly add pre-calculated colors that include tonal elevation.
+ */
+@Composable
+fun getNavigationBarColor(
+    isIncognito: Boolean,
+    useDarkTheme: Boolean = isSystemInDarkTheme()
+): Color {
+    return if (useDarkTheme) {
+        if (isIncognito) {
+            colorResource(id = R.color.md_theme_dark_inverseSurface2)
+        } else {
+            colorResource(id = R.color.md_theme_dark_surface2)
+        }
+    } else {
+        if (isIncognito) {
+            colorResource(id = R.color.md_theme_light_inverseSurface2)
+        } else {
+            colorResource(id = R.color.md_theme_light_surface2)
+        }
+    }
 }
 
 /** Determines the alpha value to use when rendering controls that can be disabled. */
