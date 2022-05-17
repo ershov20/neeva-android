@@ -117,8 +117,13 @@ object MainSettingsData : SettingsPaneDataInterface {
             R.string.settings_about,
             listOf(
                 SettingsRowData(
-                    type = SettingsRowType.LINK,
+                    type = SettingsRowType.BUTTON,
                     primaryLabelId = R.string.settings_neeva_browser_version,
+                    openUrlViaIntent = true
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.LINK,
+                    primaryLabelId = R.string.settings_play_store_page,
                     url = NeevaConstants.playStoreUri,
                     openUrlViaIntent = true
                 ),

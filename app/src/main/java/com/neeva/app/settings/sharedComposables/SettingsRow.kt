@@ -32,9 +32,8 @@ private fun getSettingsRowDataValues(
 ): SettingsRowDataValues {
     var primaryLabel = stringResource(rowData.primaryLabelId)
     val secondaryLabel = rowData.secondaryLabelId?.let { stringResource(it) }
-    val versionString = BuildConfig.VERSION_NAME
     if (rowData.primaryLabelId == R.string.settings_neeva_browser_version) {
-        primaryLabel = stringResource(rowData.primaryLabelId, versionString)
+        primaryLabel = stringResource(rowData.primaryLabelId, BuildConfig.VERSION_NAME)
     }
     return SettingsRowDataValues(primaryLabel, secondaryLabel)
 }
@@ -42,20 +41,19 @@ private fun getSettingsRowDataValues(
 @Composable
 fun SettingsRow(
     rowData: SettingsRowData,
-    isForDebugOnly: Boolean = false,
     settingsController: SettingsController,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onDoubleClick: (() -> Unit)? = null
 ) {
     val rowDataValues = getSettingsRowDataValues(rowData)
 
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
-            onClick?.let {
-                SettingsButtonRow(
-                    label = rowDataValues.primaryLabel,
-                    onClick = it
-                )
-            }
+            SettingsButtonRow(
+                label = rowDataValues.primaryLabel,
+                onClick = onClick,
+                onDoubleClick = onDoubleClick
+            )
         }
 
         SettingsRowType.LINK -> {
@@ -96,8 +94,7 @@ fun SettingsRow(
                     SettingsNavigationRow(
                         primaryLabel = rowDataValues.primaryLabel,
                         enabled = rowData.enabled,
-                        onClick = onClick,
-                        isForDebugOnly = isForDebugOnly
+                        onClick = onClick
                     )
                 }
             }

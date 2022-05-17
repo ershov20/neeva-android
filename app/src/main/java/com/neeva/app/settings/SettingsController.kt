@@ -36,6 +36,7 @@ interface SettingsController {
 
     //region Main Settings
     fun getOnClickMap(): Map<Int, (() -> Unit)?>
+    fun getOnDoubleClickMap(): Map<Int, (() -> Unit)?>
     //endregion
 
     //region Profile Settings
@@ -59,7 +60,7 @@ interface SettingsController {
     //endregion
 
     //region Debug Settings
-    fun isDebugMode(): Boolean
+    fun isAdvancedSettingsAllowed(): Boolean
     //
 }
 
@@ -80,7 +81,7 @@ class SettingsControllerImpl(
         appNavModel.popBackStack()
     }
 
-    override fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit)? {
+    override fun getTogglePreferenceSetter(key: String?): (Boolean) -> Unit {
         return settingsDataModel.getTogglePreferenceSetter(key)
     }
 
@@ -103,6 +104,12 @@ class SettingsControllerImpl(
         return resultMap
     }
 
+    override fun getOnDoubleClickMap(): Map<Int, (() -> Unit)?> {
+        return mapOf(
+            R.string.settings_neeva_browser_version to { toggleIsAdvancedSettingsAllowed() }
+        )
+    }
+
     private fun getNavOnClickMap(): Map<Int, (() -> Unit)?> {
         val navMap = mutableMapOf<Int, (() -> Unit)?>(
             R.string.settings_sign_in_to_join_neeva to { appNavModel.showProfileSettings() },
@@ -119,7 +126,7 @@ class SettingsControllerImpl(
     }
 
     private fun getButtonClicks(): Map<Int, (() -> Unit)?> {
-        return mutableMapOf(
+        return mapOf(
             R.string.settings_sign_out to { signOut() },
             R.string.settings_debug_open_50_tabs to { debugOpenManyTabs() },
             R.string.settings_debug_export_database to { debugExportDatabase() }
@@ -161,8 +168,12 @@ class SettingsControllerImpl(
         appNavModel.openAndroidDefaultBrowserSettings()
     }
 
-    override fun isDebugMode(): Boolean {
-        return settingsDataModel.isDebugMode
+    override fun isAdvancedSettingsAllowed(): Boolean {
+        return settingsDataModel.getSettingsToggleValue(SettingsToggle.IS_ADVANCED_SETTINGS_ALLOWED)
+    }
+
+    private fun toggleIsAdvancedSettingsAllowed() {
+        settingsDataModel.toggleIsAdvancedSettingsAllowed()
     }
 
     private fun debugOpenManyTabs(numTabs: Int = 50) {
@@ -252,6 +263,8 @@ val mockSettingsControllerImpl by lazy {
             )
         }
 
+        override fun getOnDoubleClickMap(): Map<Int, (() -> Unit)?> = emptyMap()
+
         override fun isSignedOut(): Boolean { return false }
 
         override fun getNeevaUserData(): NeevaUserData {
@@ -275,6 +288,6 @@ val mockSettingsControllerImpl by lazy {
 
         override fun openAndroidDefaultBrowserSettings() { }
 
-        override fun isDebugMode(): Boolean { return true }
+        override fun isAdvancedSettingsAllowed(): Boolean { return true }
     }
 }

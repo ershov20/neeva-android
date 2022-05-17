@@ -13,9 +13,13 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun SettingsButtonRow(
     label: String,
-    onClick: () -> Unit
+    onClick: (() -> Unit)?,
+    onDoubleClick: (() -> Unit)? = null
 ) {
-    BaseRowLayout(onTapRow = onClick) {
+    BaseRowLayout(
+        onTapRow = onClick,
+        onDoubleTapRow = onDoubleClick
+    ) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,

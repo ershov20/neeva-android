@@ -22,7 +22,7 @@ fun SettingsGroupView(
             .fillMaxWidth()
             .wrapContentHeight(align = Alignment.Bottom)
     ) {
-        if (settingsController.isDebugMode() || !groupData.isForDebugOnly) {
+        if (settingsController.isAdvancedSettingsAllowed() || !groupData.isForDebugOnly) {
             groupData.titleId?.let { SectionHeader(it) }
 
             SettingRowsView(
@@ -46,9 +46,9 @@ fun SettingRowsView(
         groupData.rows.forEach { rowData ->
             SettingsRow(
                 rowData = rowData,
-                isForDebugOnly = groupData.isForDebugOnly,
                 settingsController = settingsController,
-                onClick = settingsController.getOnClickMap()[rowData.primaryLabelId]
+                onClick = settingsController.getOnClickMap()[rowData.primaryLabelId],
+                onDoubleClick = settingsController.getOnDoubleClickMap()[rowData.primaryLabelId]
             )
         }
     }

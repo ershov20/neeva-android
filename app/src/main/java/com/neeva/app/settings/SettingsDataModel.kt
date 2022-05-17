@@ -2,7 +2,6 @@ package com.neeva.app.settings
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import com.neeva.app.BuildConfig
 import com.neeva.app.settings.clearBrowsing.TimeClearingOptionsConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -18,8 +17,6 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
  *    - Holding DEBUG-mode-only flags as MutableStates
  */
 class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
-    internal val isDebugMode = BuildConfig.DEBUG
-
     private val toggleMap = mutableMapOf<String, MutableState<Boolean>>()
     private val selectedTimeClearingOptionIndex = mutableStateOf(
         getSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, 0)
@@ -27,22 +24,11 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
 
     init {
         SettingsToggle.values().forEach {
-            toggleMap[it.key] = mutableStateOf(getToggleSharedPrefValue(it.key, it.defaultValue))
+            toggleMap[it.key] = mutableStateOf(getSharedPrefValue(it.key, it.defaultValue))
         }
         LocalDebugFlags.values().forEach {
-            toggleMap[it.key] = mutableStateOf(
-                getToggleSharedPrefValue(it.key, it.defaultValue, true)
-            )
+            toggleMap[it.key] = mutableStateOf(getSharedPrefValue(it.key, it.defaultValue))
         }
-    }
-
-    private fun getToggleSharedPrefValue(
-        key: String,
-        default: Boolean,
-        isDebugFlag: Boolean = false
-    ): Boolean {
-        if (isDebugFlag && !isDebugMode) { return false }
-        return getSharedPrefValue(key, default)
     }
 
     private fun <T> getSharedPrefValue(key: String, defaultValue: T): T {
@@ -83,5 +69,10 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
 
     fun saveSelectedTimeClearingOption(index: Int) {
         setSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, index)
+    }
+
+    fun toggleIsAdvancedSettingsAllowed() {
+        val newValue = !getSettingsToggleValue(SettingsToggle.IS_ADVANCED_SETTINGS_ALLOWED)
+        getTogglePreferenceSetter(SettingsToggle.IS_ADVANCED_SETTINGS_ALLOWED.key).invoke(newValue)
     }
 }

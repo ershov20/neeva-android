@@ -2,6 +2,7 @@ package com.neeva.app.ui.layouts
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -33,6 +35,7 @@ import com.neeva.app.ui.theme.Dimensions
 fun BaseRowLayout(
     modifier: Modifier = Modifier,
     onTapRow: (() -> Unit)? = null,
+    onDoubleTapRow: (() -> Unit)? = null,
     onTapRowContentDescription: String? = null,
     startComposable: @Composable (() -> Unit)? = null,
     endComposable: @Composable (() -> Unit)? = null,
@@ -47,12 +50,28 @@ fun BaseRowLayout(
         contentColor = contentColor,
         modifier = modifier
             .then(
-                if (onTapRow != null) {
-                    Modifier.clickable(onClickLabel = onTapRowContentDescription) {
-                        onTapRow.invoke()
+                when {
+                    onTapRow == null && onDoubleTapRow == null -> {
+                        Modifier
                     }
-                } else {
-                    Modifier
+
+                    onTapRow != null && onDoubleTapRow == null -> {
+                        Modifier.clickable(onClickLabel = onTapRowContentDescription) {
+                            onTapRow.invoke()
+                        }
+                    }
+
+                    else -> {
+                        // It's not clear how to set the content description when you're using the
+                        // pointerInput modifier because we'd want to describe each action
+                        // individually.
+                        Modifier.pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = onTapRow?.let { { it() } },
+                                onDoubleTap = onDoubleTapRow?.let { { it() } }
+                            )
+                        }
+                    }
                 }
             )
             .defaultMinSize(minHeight = Dimensions.SIZE_TOUCH_TARGET)

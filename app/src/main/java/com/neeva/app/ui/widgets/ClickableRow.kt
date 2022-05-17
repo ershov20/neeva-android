@@ -14,14 +14,9 @@ fun ClickableRow(
     primaryLabel: String,
     secondaryLabel: String? = null,
     actionIconParams: RowActionIconParams,
-    enabled: Boolean = true,
-    isForDebugOnly: Boolean = false
+    enabled: Boolean = true
 ) {
-    val backgroundColor = if (isForDebugOnly) {
-        MaterialTheme.colorScheme.errorContainer
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
+    val backgroundColor = MaterialTheme.colorScheme.surface
     BaseRowLayout(
         onTapRow = actionIconParams.onTapAction.takeIf { enabled },
         onTapRowContentDescription = actionIconParams.contentDescription,

@@ -14,8 +14,7 @@ fun SettingsNavigationRow(
     primaryLabel: String,
     secondaryLabel: String? = null,
     enabled: Boolean = true,
-    onClick: () -> Unit,
-    isForDebugOnly: Boolean = false
+    onClick: () -> Unit
 ) {
     ClickableRow(
         primaryLabel = primaryLabel, secondaryLabel = secondaryLabel,
@@ -24,8 +23,7 @@ fun SettingsNavigationRow(
             actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
             size = Dimensions.SIZE_ICON_SMALL
         ),
-        enabled = enabled,
-        isForDebugOnly = isForDebugOnly
+        enabled = enabled
     )
 }
 
@@ -38,8 +36,7 @@ fun SettingsNavigationRowPreview() {
         SettingsNavigationRow(
             primaryLabel = stringResource(R.string.debug_long_string_primary),
             secondaryLabel = stringResource(R.string.debug_long_string_primary),
-            enabled = isEnabled,
-            onClick = {}
-        )
+            enabled = isEnabled
+        ) {}
     }
 }
