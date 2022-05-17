@@ -30,7 +30,8 @@ class IncognitoBrowserWrapper private constructor(
     private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
     private val incognitoFaviconCache: IncognitoFaviconCache,
     tabScreenshotManager: IncognitoTabScreenshotManager,
-    sharedPreferencesModel: SharedPreferencesModel
+    sharedPreferencesModel: SharedPreferencesModel,
+    domainProvider: DomainProvider
 ) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
@@ -42,7 +43,8 @@ class IncognitoBrowserWrapper private constructor(
     spaceStore = null,
     historyManager = null,
     tabScreenshotManager = tabScreenshotManager,
-    sharedPreferencesModel = sharedPreferencesModel
+    sharedPreferencesModel = sharedPreferencesModel,
+    domainProvider = domainProvider
 ) {
     constructor(
         appContext: Context,
@@ -70,7 +72,8 @@ class IncognitoBrowserWrapper private constructor(
             dispatchers
         ),
         tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory),
-        sharedPreferencesModel = sharedPreferencesModel
+        sharedPreferencesModel = sharedPreferencesModel,
+        domainProvider = domainProvider
     )
 
     companion object {

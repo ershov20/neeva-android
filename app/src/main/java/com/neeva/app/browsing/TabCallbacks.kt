@@ -5,14 +5,16 @@ import android.net.Uri
 import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.browsing.TabInfo.TabOpenType
-import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.cookiecutter.CookieCutterTabModel
+import com.neeva.app.cookiecutter.TabCookieCutterModel
+import com.neeva.app.cookiecutter.TrackingData
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.ContentFilterCallback
@@ -43,11 +45,13 @@ class TabCallbacks(
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
     private val tabScreenshotManager: TabScreenshotManager,
-    private val cookieCutterModel: CookieCutterModel
+    trackingDataFlow: MutableStateFlow<TrackingData?>,
+    domainProvider: DomainProvider
 ) {
-    val cookieCutterTabModel = CookieCutterTabModel(
+    val tabCookieCutterModel = TabCookieCutterModel(
         tab,
-        cookieCutterModel.trackingDataFlow
+        trackingDataFlow,
+        domainProvider
     )
 
     /**
@@ -98,7 +102,7 @@ class TabCallbacks(
         var visitToCommit: Visit? = null
 
         override fun onNavigationStarted(navigation: Navigation) {
-            cookieCutterTabModel.resetStat()
+            tabCookieCutterModel.resetStat()
 
             tabList.updateIsCrashed(tab.guid, isCrashed = false)
 
@@ -229,7 +233,7 @@ class TabCallbacks(
 
     private val contentFilterCallback = object : ContentFilterCallback() {
         override fun onContentFilterStatsUpdated() {
-            cookieCutterTabModel.updateStats(tab.contentFilterStats)
+            tabCookieCutterModel.updateStats(tab.contentFilterStats)
         }
     }
 

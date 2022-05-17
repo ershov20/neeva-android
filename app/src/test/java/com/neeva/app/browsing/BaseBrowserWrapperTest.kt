@@ -17,6 +17,7 @@ import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
@@ -87,6 +88,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var suggestionsModel: SuggestionsModel
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
+    @Mock private lateinit var domainProvider: DomainProvider
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
@@ -178,7 +180,8 @@ class BaseBrowserWrapperTest : BaseTest() {
             _findInPageModel = findInPageModel,
             historyManager = this@BaseBrowserWrapperTest.historyManager,
             tabScreenshotManager = this@BaseBrowserWrapperTest.tabScreenshotManager,
-            sharedPreferencesModel = sharedPreferencesModel
+            sharedPreferencesModel = sharedPreferencesModel,
+            domainProvider = domainProvider
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment

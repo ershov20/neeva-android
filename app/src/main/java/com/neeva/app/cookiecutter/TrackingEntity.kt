@@ -16,11 +16,22 @@ enum class TrackingEntity(description: String) {
     WARNERMEDIA("WarnerMedia"),
     IAS("IAS"),
     PINTEREST("Pinterest"),
-    VERIZONMEDIA("VerizonMedia")
+    VERIZONMEDIA("VerizonMedia");
+
+    companion object {
+        fun trackingEntityForHost(host: String?): TrackingEntity? {
+            TrackingEntity.values().forEach {
+                if (trackingEntityMap[it]?.contains(host) == true) {
+                    return it
+                }
+            }
+            return null
+        }
+    }
 }
 
 val trackingEntityMap = mapOf(
-    TrackingEntity.GOOGLE to arrayOf(
+    TrackingEntity.GOOGLE to setOf(
         "1emn.com",
         "2mdn.net",
         "admeld.com",
@@ -52,7 +63,7 @@ val trackingEntityMap = mapOf(
         "waze.com",
         "youtube.com"
     ),
-    TrackingEntity.FACEBOOK to arrayOf(
+    TrackingEntity.FACEBOOK to setOf(
         "accountkit.com",
         "atdmt.com",
         "atlassbx.com",
@@ -62,13 +73,13 @@ val trackingEntityMap = mapOf(
         "liverail.com",
         "whatsapp.net",
     ),
-    TrackingEntity.TWITTER to arrayOf(
+    TrackingEntity.TWITTER to setOf(
         "ads-twitter.com",
         "mopub.com",
         "twitter.com",
         "twttr.com",
     ),
-    TrackingEntity.AMAZON to arrayOf(
+    TrackingEntity.AMAZON to setOf(
         "alexa.com",
         "alexametrics.com",
         "amazon-adsystem.com",
@@ -83,20 +94,20 @@ val trackingEntityMap = mapOf(
         "twitch.tv",
         "wfm.com",
     ),
-    TrackingEntity.OUTBRAIN to arrayOf(
+    TrackingEntity.OUTBRAIN to setOf(
         "ligatus.com",
         "outbrain.com",
         "veeseo.com",
         "zemanta.com",
     ),
-    TrackingEntity.CRITEO to arrayOf(
+    TrackingEntity.CRITEO to setOf(
         "criteo.com",
         "criteo.net",
         "emailretargeting.com",
         "hlserve.com",
         "manage.com",
     ),
-    TrackingEntity.ADOBE to arrayOf(
+    TrackingEntity.ADOBE to setOf(
         "2o7.net",
         "adobe.com",
         "adobetag.com",
@@ -119,7 +130,7 @@ val trackingEntityMap = mapOf(
         "sitestat.com",
         "tubemogul.com",
     ),
-    TrackingEntity.ORACLE to arrayOf(
+    TrackingEntity.ORACLE to setOf(
         "sekindo.com",
         "addthis.com",
         "addthiscdn.com",
@@ -138,7 +149,7 @@ val trackingEntityMap = mapOf(
         "nexac.com",
         "responsys.net",
     ),
-    TrackingEntity.WARNERMEDIA to arrayOf(
+    TrackingEntity.WARNERMEDIA to setOf(
         "247realmedia.com",
         "adnxs.com",
         "adultswim.com",
@@ -154,14 +165,14 @@ val trackingEntityMap = mapOf(
         "warnerbros.com",
         "yieldoptimizer.com",
     ),
-    TrackingEntity.IAS to arrayOf(
+    TrackingEntity.IAS to setOf(
         "adsafeprotected.com",
         "iasds01.com",
     ),
-    TrackingEntity.PINTEREST to arrayOf(
+    TrackingEntity.PINTEREST to setOf(
         "pinterest.com"
     ),
-    TrackingEntity.VERIZONMEDIA to arrayOf(
+    TrackingEntity.VERIZONMEDIA to setOf(
         "adap.tv",
         "adsonar.com",
         "adtech.de",

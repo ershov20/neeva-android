@@ -63,7 +63,8 @@ class RegularBrowserWrapper(
     spaceStore = spaceStore,
     historyManager = historyManager,
     tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir),
-    sharedPreferencesModel = sharedPreferencesModel
+    sharedPreferencesModel = sharedPreferencesModel,
+    domainProvider = domainProvider
 ) {
     companion object {
         /**

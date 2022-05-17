@@ -20,6 +20,7 @@ import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
@@ -67,7 +68,8 @@ abstract class BaseBrowserWrapper internal constructor(
     private val _findInPageModel: FindInPageModelImpl,
     private val historyManager: HistoryManager?,
     private val tabScreenshotManager: TabScreenshotManager,
-    private val sharedPreferencesModel: SharedPreferencesModel
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val domainProvider: DomainProvider
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
 
     constructor(
@@ -81,7 +83,8 @@ abstract class BaseBrowserWrapper internal constructor(
         spaceStore: SpaceStore?,
         historyManager: HistoryManager?,
         tabScreenshotManager: TabScreenshotManager,
-        sharedPreferencesModel: SharedPreferencesModel
+        sharedPreferencesModel: SharedPreferencesModel,
+        domainProvider: DomainProvider
     ) : this(
         isIncognito = isIncognito,
         appContext = appContext,
@@ -106,7 +109,8 @@ abstract class BaseBrowserWrapper internal constructor(
         _findInPageModel = FindInPageModelImpl(),
         historyManager = historyManager,
         tabScreenshotManager = tabScreenshotManager,
-        sharedPreferencesModel = sharedPreferencesModel
+        sharedPreferencesModel = sharedPreferencesModel,
+        domainProvider = domainProvider
     )
 
     private val tabList = TabList()
@@ -438,7 +442,7 @@ abstract class BaseBrowserWrapper internal constructor(
         _activeTabModelImpl.onActiveTabChanged(tab)
         if (cookieCutterModel.enableTrackingProtection) {
             cookieCutterModel.trackingDataFlow.value =
-                tabCallbackMap[tab]?.cookieCutterTabModel?.currentTrackingData()
+                tabCallbackMap[tab]?.tabCookieCutterModel?.currentTrackingData()
         }
     }
 
@@ -481,7 +485,8 @@ abstract class BaseBrowserWrapper internal constructor(
             registerNewTab = this::registerNewTab,
             fullscreenCallback = fullscreenCallback,
             tabScreenshotManager = tabScreenshotManager,
-            cookieCutterModel = _cookieCutterModel
+            trackingDataFlow = _cookieCutterModel.trackingDataFlow,
+            domainProvider = domainProvider
         )
     }
 
