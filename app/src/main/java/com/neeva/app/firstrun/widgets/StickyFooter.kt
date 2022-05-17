@@ -25,9 +25,13 @@ fun StickyFooter(
 }
 
 @Composable
-fun OnboardingStickyFooter(scrollState: ScrollState, stickyFooterOnClick: () -> Unit) {
+fun OnboardingStickyFooter(
+    signup: Boolean,
+    scrollState: ScrollState,
+    stickyFooterOnClick: () -> Unit
+) {
     StickyFooter(scrollState) {
-        ToggleSignUpText(true) {
+        ToggleSignUpText(signup) {
             stickyFooterOnClick()
         }
     }

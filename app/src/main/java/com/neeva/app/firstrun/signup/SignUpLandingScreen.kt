@@ -36,7 +36,7 @@ fun SignUpLandingContainer(
     val useDarkTheme = useDarkThemeForPreviews ?: isSystemInDarkTheme()
     OnboardingContainer(
         showBrowser = onClose,
-        stickyFooterOnClick = navigateToSignIn,
+        useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn,
         useDarkThemeForPreviews = useDarkTheme
     ) { modifier ->
         SignUpLandingScreen(

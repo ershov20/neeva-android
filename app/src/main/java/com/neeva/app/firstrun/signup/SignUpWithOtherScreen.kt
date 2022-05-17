@@ -38,7 +38,7 @@ fun SignUpWithOtherContainer(
     val useDarkTheme = useDarkThemeForPreviews ?: isSystemInDarkTheme()
     OnboardingContainer(
         showBrowser = onClose,
-        stickyFooterOnClick = navigateToSignIn,
+        useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn,
         useDarkThemeForPreviews = useDarkTheme
     ) { modifier ->
         SignUpWithOtherScreen(

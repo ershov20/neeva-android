@@ -34,7 +34,7 @@ fun SignInScreenContainer(
 
     OnboardingContainer(
         showBrowser = onClose,
-        stickyFooterOnClick = navigateToSignUp,
+        useSignUpStickyFooter = false, stickyFooterOnClick = navigateToSignUp,
         useDarkThemeForPreviews = useDarkTheme
     ) { modifier ->
         SignInScreen(

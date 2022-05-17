@@ -24,6 +24,7 @@ import com.neeva.app.ui.theme.ColorPalette
 @Composable
 fun OnboardingContainer(
     showBrowser: () -> Unit,
+    useSignUpStickyFooter: Boolean,
     stickyFooterOnClick: () -> Unit,
     useDarkThemeForPreviews: Boolean,
     content: @Composable (Modifier) -> Unit
@@ -48,7 +49,7 @@ fun OnboardingContainer(
                 )
 
                 if (!isKeyboardOpen) {
-                    OnboardingStickyFooter(scrollState, stickyFooterOnClick)
+                    OnboardingStickyFooter(useSignUpStickyFooter, scrollState, stickyFooterOnClick)
                 }
             }
 
