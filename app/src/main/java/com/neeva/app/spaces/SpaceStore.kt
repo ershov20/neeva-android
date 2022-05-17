@@ -23,6 +23,7 @@ import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
+import com.neeva.app.storage.entities.spaceItem
 import com.neeva.app.storage.scaleDownMaintainingAspectRatio
 import com.neeva.app.storage.toByteArray
 import com.neeva.app.type.AddSpaceResultByURLInput
@@ -228,14 +229,7 @@ class SpaceStore(
                             bitmapString = it
                         )?.toUri()
                     }
-                    SpaceItem(
-                        id = entityQuery.metadata?.docID!!,
-                        spaceID = spaceID,
-                        url = entityQuery.spaceEntity?.url?.let { Uri.parse(it) },
-                        title = entityQuery.spaceEntity?.title,
-                        snippet = entityQuery.spaceEntity?.snippet,
-                        thumbnail = thumbnailUri
-                    )
+                    entityQuery.spaceItem(spaceID, thumbnailUri)
                 }
             entities.forEach { dao.upsert(it) }
             dao.getItemsFromSpace(spaceID)

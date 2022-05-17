@@ -1,6 +1,7 @@
 package com.neeva.app.spaces
 
 import android.graphics.Bitmap
+import android.net.Uri
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.storage.entities.Space
 import java.io.File
@@ -27,12 +28,17 @@ internal fun ListSpacesQuery.Space.toSpace(
     return Space(
         id = id,
         name = name,
+        description = querySpace.description ?: "",
         lastModifiedTs = lastModifiedTs,
         thumbnail = null,
         resultCount = querySpace.resultCount ?: 0,
         isDefaultSpace = querySpace.isDefaultSpace ?: false,
         isShared = querySpace.acl?.any { it.userID == userId } ?: false,
         isPublic = querySpace.hasPublicACL ?: false,
-        userACL = userACL
+        userACL = userACL,
+        ownerName = querySpace.owner?.displayName ?: "",
+        ownerPictureURL = querySpace.owner?.pictureURL?.let { Uri.parse(it) },
+        numViews = stats?.views ?: 0,
+        numFollowers = stats?.followers ?: 0
     )
 }

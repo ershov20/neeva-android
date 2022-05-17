@@ -2,11 +2,20 @@ query ListSpaces($kind: ListSpacesKind = All) {
   listSpaces(input: {kind: $kind}) {
     requestID
     space {
+      stats {
+        followers
+        views
+      }
       pageMetadata {
         pageID
       }
       space {
         name
+        description
+        owner {
+          displayName
+          pictureURL
+        }
         lastModifiedTs
         userACL {
           acl
@@ -29,6 +38,7 @@ query GetSpacesData($ids: [String!]) {
         pageID
       }
       space {
+        name
 	thumbnail
         entities {
           metadata {
@@ -39,6 +49,78 @@ query GetSpacesData($ids: [String!]) {
             title
             snippet
             thumbnail
+            content {
+              id
+              title
+              snippet
+              __typename
+              typeSpecific {
+              __typename
+              ... on TechDoc {
+                techDoc {
+                  name
+                  sections {
+                    body
+                  }
+                }
+              }
+              ... on NewsItem {
+                newsItem {
+                  title
+                  snippet
+                  url
+                  thumbnailImage {
+                    url
+                  }
+                  providerName
+                  datePublished
+                  favIconURL
+                  preference
+                  domain
+                }
+              }
+              ... on Web {
+                web {
+                  retailerProduct {
+                    url
+                    name
+                    description
+                    priceHistory {
+                      currentPrice
+                    }
+                    reviews {
+                      ratingSummary {
+                        numReviews
+                        rating {
+                          productStars
+                        }
+                      }
+                    }
+                  }
+                  recipes {
+                    title
+                    imageURL
+                    source
+                    totalTime
+                    recipeRating {
+                      recipeStars
+                      numReviews
+                    }
+                  }
+                }
+              }
+              ... on RichEntity {
+                richEntity {
+                  images {
+                    thumbnailURL
+                  }
+                  title
+                  subTitle
+                }
+              }
+            }
+            actionURL
+          }
           }
         }
       }

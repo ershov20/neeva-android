@@ -512,28 +512,34 @@ class SpaceStoreTest : BaseTest() {
     companion object {
         private val SPACE_1 = ListSpacesQuery.Space(
             pageMetadata = ListSpacesQuery.PageMetadata(pageID = "c5rgtmtdv9enb8j1gv60"),
+            stats = null,
             space = ListSpacesQuery.Space1(
                 name = "Saved For Later",
+                description = null,
                 lastModifiedTs = "2022-02-10T22:08:01Z",
                 userACL = ListSpacesQuery.UserACL(acl = SpaceACLLevel.Owner),
                 acl = listOf(ListSpacesQuery.Acl("c5rgtdldv9enb8j1gupg")),
                 hasPublicACL = true,
                 resultCount = null,
-                isDefaultSpace = true
+                isDefaultSpace = true,
+                owner = null,
             )
         )
         private val SPACE_2 = ListSpacesQuery.Space(
             pageMetadata = ListSpacesQuery.PageMetadata(
                 pageID = "nEgvD5HST7e62eEmhf0kkxx4xnEuNHBeEXxbGcoo"
             ),
+            stats = null,
             space = ListSpacesQuery.Space1(
                 name = "Jetpack Compose",
+                description = null,
                 lastModifiedTs = "2022-02-10T02:10:38Z",
                 userACL = ListSpacesQuery.UserACL(acl = SpaceACLLevel.Comment),
                 acl = listOf(ListSpacesQuery.Acl("c5rgtdldv9enb8j1gupg")),
                 hasPublicACL = false,
                 resultCount = 1,
-                isDefaultSpace = false
+                isDefaultSpace = false,
+                owner = null
             )
         )
 
