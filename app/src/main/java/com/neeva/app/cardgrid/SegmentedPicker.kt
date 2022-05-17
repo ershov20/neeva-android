@@ -106,7 +106,9 @@ fun SegmentedPicker(
 
     Row(
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth().padding(2.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp)
     ) {
         SegmentedPicker(
             selectedScreen = selectedScreen.value,

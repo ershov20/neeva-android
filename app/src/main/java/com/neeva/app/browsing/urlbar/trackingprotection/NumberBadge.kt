@@ -65,6 +65,7 @@ private fun BadgeBitmap(text: String, width: Int, height: Int, backgroundColor: 
     val canvas = Canvas(bitmap)
     canvas.drawColor(backgroundColor)
 
+    // TODO(kobec): find a way to get Paint() to use Material3 text (https://github.com/neevaco/neeva-android/issues/612)
     val textPaint = Paint()
     textPaint.textAlign = Paint.Align.CENTER
     textPaint.color = android.graphics.Color.WHITE
