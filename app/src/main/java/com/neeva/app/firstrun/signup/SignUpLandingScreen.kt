@@ -1,7 +1,6 @@
 package com.neeva.app.firstrun.signup
 
 import android.net.Uri
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -32,10 +31,8 @@ fun SignUpLandingContainer(
     openInCustomTabs: (Uri) -> Unit,
     onClose: () -> Unit,
     navigateToSignIn: () -> Unit,
-    showSignUpWithOther: () -> Unit,
-    overrideUseDarkTheme: Boolean? = null
+    showSignUpWithOther: () -> Unit
 ) {
-    val useDarkTheme = overrideUseDarkTheme ?: isSystemInDarkTheme()
     val neevaConstants: NeevaConstants = LocalEnvironment.current.neevaConstants
 
     SignUpLandingContainer(
@@ -44,8 +41,7 @@ fun SignUpLandingContainer(
         onClose = onClose,
         navigateToSignIn = navigateToSignIn,
         showSignUpWithOther = showSignUpWithOther,
-        neevaConstants = neevaConstants,
-        overrideUseDarkTheme = useDarkTheme
+        neevaConstants = neevaConstants
     )
 }
 
@@ -56,21 +52,16 @@ fun SignUpLandingContainer(
     onClose: () -> Unit,
     navigateToSignIn: () -> Unit,
     showSignUpWithOther: () -> Unit,
-    neevaConstants: NeevaConstants,
-    overrideUseDarkTheme: Boolean?
+    neevaConstants: NeevaConstants
 ) {
-    val useDarkTheme = overrideUseDarkTheme ?: isSystemInDarkTheme()
-
     OnboardingContainer(
         showBrowser = onClose,
-        useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn,
-        useDarkTheme = useDarkTheme
+        useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn
     ) { modifier ->
         SignUpLandingScreen(
             launchLoginIntent = launchLoginIntent,
             openInCustomTabs = openInCustomTabs,
             showSignUpWithOther = showSignUpWithOther,
-            useDarkTheme = useDarkTheme,
             neevaConstants = neevaConstants,
             modifier = modifier
         )
@@ -82,7 +73,6 @@ fun SignUpLandingScreen(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     openInCustomTabs: (Uri) -> Unit,
     showSignUpWithOther: () -> Unit,
-    useDarkTheme: Boolean,
     neevaConstants: NeevaConstants,
     modifier: Modifier
 ) {
@@ -99,16 +89,12 @@ fun SignUpLandingScreen(
         OnboardingButton(
             signup = true,
             provider = NeevaUser.SSOProvider.GOOGLE,
-            launchLoginIntent = launchLoginIntent,
-            useDarkTheme = useDarkTheme
+            launchLoginIntent = launchLoginIntent
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        OnboardingButton(
-            text = stringResource(id = R.string.other_sign_up_options),
-            useDarkTheme = useDarkTheme
-        ) {
+        OnboardingButton(text = stringResource(id = R.string.other_sign_up_options)) {
             showSignUpWithOther()
         }
 
@@ -139,7 +125,6 @@ fun SignUpLanding_Light_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
-            overrideUseDarkTheme = false,
             neevaConstants = NeevaConstants()
         )
     }
@@ -156,7 +141,6 @@ fun SignUpLanding_Dark_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
-            overrideUseDarkTheme = true,
             neevaConstants = NeevaConstants()
         )
     }
@@ -173,7 +157,6 @@ fun SignUpLanding_Landscape_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
-            overrideUseDarkTheme = false,
             neevaConstants = NeevaConstants()
         )
     }
@@ -190,7 +173,6 @@ fun SignUpLanding_Dark_Landscape_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
-            overrideUseDarkTheme = true,
             neevaConstants = NeevaConstants()
         )
     }

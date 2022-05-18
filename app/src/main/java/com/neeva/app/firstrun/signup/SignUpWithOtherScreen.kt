@@ -1,6 +1,5 @@
 package com.neeva.app.firstrun.signup
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -32,18 +31,14 @@ import com.neeva.app.userdata.NeevaUser
 fun SignUpWithOtherContainer(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     onClose: () -> Unit,
-    navigateToSignIn: () -> Unit,
-    useDarkThemeForPreviews: Boolean? = null
+    navigateToSignIn: () -> Unit
 ) {
-    val useDarkTheme = useDarkThemeForPreviews ?: isSystemInDarkTheme()
     OnboardingContainer(
         showBrowser = onClose,
-        useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn,
-        useDarkTheme = useDarkTheme
+        useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn
     ) { modifier ->
         SignUpWithOtherScreen(
             launchLoginIntent = launchLoginIntent,
-            useDarkThemeForPreviews = useDarkTheme,
             modifier = modifier
         )
     }
@@ -52,7 +47,6 @@ fun SignUpWithOtherContainer(
 @Composable
 fun SignUpWithOtherScreen(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    useDarkThemeForPreviews: Boolean,
     modifier: Modifier
 ) {
     val email = rememberSaveable { mutableStateOf("") }
@@ -90,8 +84,7 @@ fun SignUpWithOtherScreen(
             passwordProvided = password.value,
             signup = true,
             provider = NeevaUser.SSOProvider.OKTA,
-            launchLoginIntent = launchLoginIntent,
-            useDarkTheme = useDarkThemeForPreviews
+            launchLoginIntent = launchLoginIntent
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -103,8 +96,7 @@ fun SignUpWithOtherScreen(
         ToggleOnboardingButtons(
             signup = true,
             emailProvided = email.value,
-            launchLoginIntent = launchLoginIntent,
-            useDarkThemeForPreviews = useDarkThemeForPreviews
+            launchLoginIntent = launchLoginIntent
         )
 
         Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
@@ -132,8 +124,7 @@ fun SignUpOther_Dark_Preview() {
         SignUpWithOtherContainer(
             launchLoginIntent = {},
             onClose = {},
-            navigateToSignIn = {},
-            useDarkThemeForPreviews = true
+            navigateToSignIn = {}
         )
     }
 }
@@ -159,8 +150,7 @@ fun SignUpOther_Dark_Landscape_Preview() {
         SignUpWithOtherContainer(
             launchLoginIntent = {},
             onClose = {},
-            navigateToSignIn = {},
-            useDarkThemeForPreviews = true
+            navigateToSignIn = {}
         )
     }
 }

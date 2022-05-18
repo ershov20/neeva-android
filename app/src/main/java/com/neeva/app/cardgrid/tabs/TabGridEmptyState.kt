@@ -1,7 +1,6 @@
 package com.neeva.app.cardgrid.tabs
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
 
@@ -24,18 +24,18 @@ fun TabGridEmptyState(
     isIncognito: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val isNeevaThemeUsingDarkColors = LocalIsDarkTheme.current
     val emptyLogoId: Int
     val emptyStringId: Int
     if (isIncognito) {
-        // TODO(dan.alcantara): Material3 doesn't seem to have a MaterialTheme.colors.isLight().
-        emptyLogoId = if (isSystemInDarkTheme()) {
+        emptyLogoId = if (isNeevaThemeUsingDarkColors) {
             R.drawable.ic_empty_incognito_tabs_dark
         } else {
             R.drawable.ic_empty_incognito_tabs_light
         }
         emptyStringId = R.string.empty_incognito_tabs_title
     } else {
-        emptyLogoId = if (isSystemInDarkTheme()) {
+        emptyLogoId = if (isNeevaThemeUsingDarkColors) {
             R.drawable.ic_empty_regular_tabs_dark
         } else {
             R.drawable.ic_empty_regular_tabs_light
@@ -78,8 +78,19 @@ fun TabGridEmptyState(
 
 @Preview
 @Composable
-fun TabGridEmptyStatePreview() {
-    OneBooleanPreviewContainer { isIncognito ->
+fun TabGridEmptyStatePreview_Light() {
+    OneBooleanPreviewContainer(useDarkTheme = false) { isIncognito ->
+        TabGridEmptyState(
+            isIncognito = isIncognito,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+@Preview
+@Composable
+fun TabGridEmptyStatePreview_Dark() {
+    OneBooleanPreviewContainer(useDarkTheme = true) { isIncognito ->
         TabGridEmptyState(
             isIncognito = isIncognito,
             modifier = Modifier.fillMaxSize()

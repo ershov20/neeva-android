@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
-import com.neeva.app.LocalSettingsControllerImpl
+import com.neeva.app.LocalSettingsController
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.CardsPane
@@ -29,7 +29,7 @@ fun AppNav(
     appNavModel: AppNavModel,
     modifier: Modifier
 ) {
-    val settingsControllerImpl = LocalSettingsControllerImpl.current
+    val settingsControllerImpl = LocalSettingsController.current
     val neevaConstants = LocalEnvironment.current.neevaConstants
 
     AnimatedNavHost(

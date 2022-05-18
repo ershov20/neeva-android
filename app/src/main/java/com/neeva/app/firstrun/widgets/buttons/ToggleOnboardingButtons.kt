@@ -12,15 +12,13 @@ import com.neeva.app.userdata.NeevaUser
 fun ToggleOnboardingButtons(
     signup: Boolean,
     emailProvided: String,
-    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    useDarkThemeForPreviews: Boolean
+    launchLoginIntent: (LaunchLoginIntentParams) -> Unit
 ) {
     OnboardingButton(
         emailProvided = emailProvided,
         signup = signup,
         provider = NeevaUser.SSOProvider.GOOGLE,
-        launchLoginIntent = launchLoginIntent,
-        useDarkTheme = useDarkThemeForPreviews
+        launchLoginIntent = launchLoginIntent
     )
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -29,7 +27,6 @@ fun ToggleOnboardingButtons(
         emailProvided = emailProvided,
         signup = signup,
         provider = NeevaUser.SSOProvider.MICROSOFT,
-        launchLoginIntent = launchLoginIntent,
-        useDarkTheme = useDarkThemeForPreviews
+        launchLoginIntent = launchLoginIntent
     )
 }

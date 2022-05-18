@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
 import com.neeva.app.ui.TwoBooleanPreviewContainer
@@ -41,8 +42,7 @@ fun OnboardingButton(
     signup: Boolean,
     provider: NeevaUser.SSOProvider,
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    enabled: Boolean = true,
-    useDarkTheme: Boolean
+    enabled: Boolean = true
 ) {
     val onClick = {
         launchLoginIntent(
@@ -60,9 +60,8 @@ fun OnboardingButton(
         }
         else -> {
             OnboardingButton(
-                text = GetSSOProviderOnboardingText(provider, signup),
+                text = getSSOProviderOnboardingText(provider, signup),
                 enabled = enabled,
-                useDarkTheme = useDarkTheme,
                 startComposable = { SSOProviderImage(ssoProvider = provider) },
                 onClick = onClick
             )
@@ -71,7 +70,7 @@ fun OnboardingButton(
 }
 
 @Composable
-fun GetSSOProviderOnboardingText(provider: NeevaUser.SSOProvider, signup: Boolean): String {
+fun getSSOProviderOnboardingText(provider: NeevaUser.SSOProvider, signup: Boolean): String {
     when (provider) {
         NeevaUser.SSOProvider.MICROSOFT ->
             return if (signup) {
@@ -103,12 +102,11 @@ fun GetSSOProviderOnboardingText(provider: NeevaUser.SSOProvider, signup: Boolea
 fun OnboardingButton(
     text: String,
     enabled: Boolean = true,
-    useDarkTheme: Boolean,
     startComposable: @Composable (() -> Unit)? = null,
     endComposable: @Composable (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
-    val backgroundColor = if (useDarkTheme) {
+    val backgroundColor = if (LocalIsDarkTheme.current) {
         MaterialTheme.colorScheme.background
     } else {
         MaterialTheme.colorScheme.onPrimary
@@ -118,7 +116,7 @@ fun OnboardingButton(
     // In dark mode, we want it to have no elevation and a border
     // In light mode, we want it to have elevation but no border.
     // source: https://github.com/neevaco/neeva-android/pull/498#discussion_r843428796
-    val border = if (useDarkTheme) {
+    val border = if (LocalIsDarkTheme.current) {
         BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     } else {
         null
@@ -191,7 +189,7 @@ fun NeevaOnboardingButton(
             }
 
             Text(
-                text = GetSSOProviderOnboardingText(NeevaUser.SSOProvider.OKTA, signup),
+                text = getSSOProviderOnboardingText(NeevaUser.SSOProvider.OKTA, signup),
                 style = MaterialTheme.typography.titleMedium
             )
 
@@ -217,8 +215,7 @@ fun OnboardingButtonPreview_Light() {
         OnboardingButton(
             enabled = isEnabled,
             text = stringResource(R.string.sign_in_with_google),
-            startComposable = startComposable.takeIf { hasStartComposable },
-            useDarkTheme = false
+            startComposable = startComposable.takeIf { hasStartComposable }
         ) {}
     }
 }
@@ -235,8 +232,7 @@ fun OnboardingButtonPreview_Dark() {
         OnboardingButton(
             enabled = isEnabled,
             text = stringResource(R.string.sign_in_with_google),
-            startComposable = startComposable.takeIf { hasStartComposable },
-            useDarkTheme = true
+            startComposable = startComposable.takeIf { hasStartComposable }
         ) {}
     }
 }
@@ -251,8 +247,7 @@ fun NeevaOnboardingButtonPreview_Light() {
             signup = signup,
             enabled = isEnabled,
             provider = NeevaUser.SSOProvider.OKTA,
-            launchLoginIntent = {},
-            useDarkTheme = false
+            launchLoginIntent = {}
         )
     }
 }

@@ -50,8 +50,9 @@ val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value s
 val LocalCardsPaneModel = compositionLocalOf<CardsPaneModel> { error("No value set") }
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("No value set") }
+val LocalIsDarkTheme = compositionLocalOf { false }
 val LocalNavHostController = compositionLocalOf<NavHostController> { error("No value set") }
-val LocalSettingsControllerImpl = compositionLocalOf<SettingsController> { error("No value set") }
+val LocalSettingsController = compositionLocalOf<SettingsController> { error("No value set") }
 
 @Composable
 fun ActivityUI(

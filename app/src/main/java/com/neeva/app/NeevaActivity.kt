@@ -177,7 +177,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         LocalFeedbackViewModel provides feedbackViewModel,
                         LocalFirstRunModel provides firstRunModel,
                         LocalNavHostController provides navController,
-                        LocalSettingsControllerImpl provides settingsControllerImpl
+                        LocalSettingsController provides settingsControllerImpl
                     ) {
                         ActivityUI(
                             toolbarConfiguration = activityViewModel.toolbarConfiguration,

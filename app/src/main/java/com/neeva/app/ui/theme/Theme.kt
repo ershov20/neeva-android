@@ -5,6 +5,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.neeva.app.LocalIsDarkTheme
 
 private val LightThemeColors = lightColorScheme(
     primary = md_theme_light_primary,
@@ -67,7 +69,7 @@ private val DarkThemeColors = darkColorScheme(
 @Composable
 fun NeevaTheme(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
+    content: @Composable () -> Unit
 ) {
     val colors = if (!useDarkTheme) {
         LightThemeColors
@@ -75,9 +77,11 @@ fun NeevaTheme(
         DarkThemeColors
     }
 
-    MaterialTheme(
-        colorScheme = colors,
-        typography = AppTypography,
-        content = content
-    )
+    CompositionLocalProvider(LocalIsDarkTheme provides useDarkTheme) {
+        MaterialTheme(
+            colorScheme = colors,
+            typography = AppTypography,
+            content = content
+        )
+    }
 }
