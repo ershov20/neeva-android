@@ -155,7 +155,6 @@ dependencies {
     implementation 'androidx.window:window:1.0.0'
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
     implementation "com.google.accompanist:accompanist-navigation-animation:$accompanist_version"
-    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
     implementation "com.google.android.material:material:$google_android_material_version"
     implementation "com.google.android.gms:play-services-base:$play_services_version"
     implementation 'com.google.android.play:core-ktx:1.8.1'

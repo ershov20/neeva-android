@@ -10,20 +10,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.OneBooleanPreviewContainer
-import com.neeva.app.ui.theme.getNavigationBarColor
 
 /** Contains all the controls available to the user in the bottom toolbar. */
 @Composable
@@ -44,8 +41,6 @@ fun BrowserBottomToolbar(
     isIncognito: Boolean,
     modifier: Modifier = Modifier
 ) {
-    // If the possible background color values change, make sure to update getNavigationBarColor().
-    val navigationBarColor = getNavigationBarColor(isIncognito = isIncognito)
     val backgroundColor = if (isIncognito) {
         MaterialTheme.colorScheme.inverseSurface
     } else {
@@ -81,12 +76,6 @@ fun BrowserBottomToolbar(
                 modifier = Modifier.weight(1.0f)
             )
         }
-    }
-
-    // Update the navigation bar color whenever the background color of this is recomposed.
-    val systemUiController = rememberSystemUiController()
-    LaunchedEffect(navigationBarColor) {
-        systemUiController.setNavigationBarColor(navigationBarColor)
     }
 }
 

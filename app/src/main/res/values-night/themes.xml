@@ -14,7 +14,7 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:statusBarColor" tools:targetApi="l">@color/md_theme_dark_surface</item>
-        <item name="android:navigationBarColor">@color/md_theme_dark_surface2</item>
+        <item name="android:navigationBarColor">@color/md_theme_dark_surface</item>
 
         <!-- Customize your theme here. -->
     </style>
