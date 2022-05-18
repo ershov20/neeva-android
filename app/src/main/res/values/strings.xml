@@ -164,6 +164,7 @@
 
     <string name="space_detail_views">%1d Views</string>
     <string name="space_detail_followers">%1d Followers</string>
+    <string name="space_detail_show_descriptions">Show descriptions</string>
 
     <string name="error_generic">Something went wrong</string>
     <string name="error_url_failure">Could not open \"%1$s\"</string>
@@ -209,4 +210,5 @@
     <string name="settings_debug_export_database" translatable="false">Export database</string>
     <string name="settings_debug_m1_apphost" translatable="false">Enable using the m1.neeva.com app host</string>
     <string name="settings_debug_local_neeva_dev_apphost" translatable="false">Enable using the local.neeva.dev app host</string>
+    <string name="settings_debug_native_spaces" translatable="false">Enable native Spaces detail UI</string>
 </resources>

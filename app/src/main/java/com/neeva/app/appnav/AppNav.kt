@@ -18,6 +18,7 @@ import com.neeva.app.settings.featureFlags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.settings.profile.ProfileSettingsPane
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
+import com.neeva.app.spaces.SpaceDetail
 import com.neeva.app.ui.BrowserScaffold
 import kotlinx.coroutines.flow.StateFlow
 
@@ -90,6 +91,10 @@ fun AppNav(
             CardsPane(
                 webLayerModel = webLayerModel
             )
+        }
+
+        composable(AppNavDestination.SPACE_DETAIL.route) {
+            SpaceDetail()
         }
 
         composable(AppNavDestination.FEEDBACK.route) {

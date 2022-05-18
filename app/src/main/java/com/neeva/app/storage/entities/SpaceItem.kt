@@ -64,7 +64,7 @@ fun GetSpacesDataQuery.Entity.entityType() = when {
 
     this.recipe() != null -> SpaceEntityType.RECIPE
 
-    this.product() != null -> SpaceEntityType.PRODUCT
+    this.product() != null && this.product()?.url != null -> SpaceEntityType.PRODUCT
 
     else -> SpaceEntityType.WEB
 }
@@ -80,7 +80,8 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             thumbnail = this.news()?.thumbnailImage?.url?.let { Uri.parse(it) },
             provider = this.news()?.providerName,
             faviconURL = this.news()?.favIconURL?.let { Uri.parse(it) },
-            datePublished = this.news()?.datePublished
+            datePublished = this.news()?.datePublished,
+            entityType = SpaceEntityType.NEWS
         )
         SpaceEntityType.RICH_ENTITY -> SpaceItem(
             id = this.metadata?.docID!!,
@@ -89,6 +90,7 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             title = this.richEntity()?.title,
             snippet = this.richEntity()?.subTitle,
             thumbnail = this.richEntity()?.images?.first()?.thumbnailURL.let { Uri.parse(it) },
+            entityType = SpaceEntityType.RICH_ENTITY
         )
         SpaceEntityType.PRODUCT -> SpaceItem(
             id = this.metadata?.docID!!,
@@ -99,7 +101,8 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             thumbnail = thumbnailUri,
             stars = this.product()?.reviews?.ratingSummary?.rating?.productStars,
             numReviews = this.product()?.reviews?.ratingSummary?.numReviews,
-            price = this.product()?.priceHistory?.currentPrice
+            price = this.product()?.priceHistory?.currentPrice,
+            entityType = SpaceEntityType.PRODUCT
         )
         SpaceEntityType.RECIPE -> SpaceItem(
             id = this.metadata?.docID!!,
@@ -110,14 +113,16 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             thumbnail = this.recipe()?.imageURL?.let { Uri.parse(it) },
             stars = this.recipe()?.recipeRating?.recipeStars,
             numReviews = this.recipe()?.recipeRating?.numReviews,
-            totalTime = this.recipe()?.totalTime
+            totalTime = this.recipe()?.totalTime,
+            entityType = SpaceEntityType.RECIPE
         )
-        SpaceEntityType.WEB, SpaceEntityType.IMAGE -> SpaceItem(
+        else -> SpaceItem(
             id = this.metadata?.docID!!,
             spaceID = spaceID,
             url = this.spaceEntity?.url?.let { Uri.parse(it) },
             title = this.spaceEntity?.title,
             snippet = this.spaceEntity?.snippet,
-            thumbnail = thumbnailUri
+            thumbnail = thumbnailUri,
+            entityType = SpaceEntityType.WEB
         )
     }

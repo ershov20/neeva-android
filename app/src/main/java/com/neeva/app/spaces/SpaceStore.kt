@@ -19,6 +19,7 @@ import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.UnauthenticatedApolloWrapper
+import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.entities.Space
@@ -77,6 +78,9 @@ class SpaceStore(
     val editableSpacesFlow = allSpacesFlow
         .map { it.filterNot { space -> space.userACL >= SpaceACLLevel.Edit } }
     val stateFlow = MutableStateFlow(State.READY)
+
+    /** This ID determines what to show when we are at [AppNavDestination.SPACE_DETAIL] */
+    val detailedSpaceIDFlow = MutableStateFlow<String?>(null)
 
     val spacesFromCommunityFlow: MutableStateFlow<List<SpaceRowData>> =
         MutableStateFlow(emptyList())

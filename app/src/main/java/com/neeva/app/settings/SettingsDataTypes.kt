@@ -115,6 +115,11 @@ enum class SettingsToggle(
         primaryLabelId = R.string.settings_debug_local_neeva_dev_apphost,
         defaultValue = false,
         isAdvancedSetting = true
+    ),
+    DEBUG_NATIVE_SPACES(
+        primaryLabelId = R.string.settings_debug_native_spaces,
+        defaultValue = false,
+        isAdvancedSetting = true
     );
 
     val key: String = name

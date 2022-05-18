@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +30,8 @@ data class RowActionIconParams(
     val enabled: Boolean = true
 ) {
     enum class ActionType {
-        REFINE, DELETE, OPEN_URL, NAVIGATE_TO_SCREEN, BACK, FORWARD, REFRESH, SHOW_PAGE_INFO
+        REFINE, DELETE, OPEN_URL, NAVIGATE_TO_SCREEN, BACK, FORWARD, REFRESH, SHOW_PAGE_INFO,
+        SHARE
     }
 }
 
@@ -127,6 +129,14 @@ fun RowActionIcon(
         RowActionIconParams.ActionType.SHOW_PAGE_INFO -> {
             Icon(
                 painterResource(id = R.drawable.ic_info_black_24),
+                contentDescription = contentDescription,
+                modifier = modifier
+            )
+        }
+
+        RowActionIconParams.ActionType.SHARE -> {
+            Icon(
+                Icons.Default.Share,
                 contentDescription = contentDescription,
                 modifier = modifier
             )

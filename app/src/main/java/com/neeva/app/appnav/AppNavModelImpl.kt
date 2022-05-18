@@ -20,6 +20,8 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
+import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.entities.Space
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +32,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 class AppNavModelImpl(
     private val context: Context,
@@ -39,6 +42,7 @@ class AppNavModelImpl(
     private val dispatchers: Dispatchers,
     private val overlaySheetModel: OverlaySheetModel,
     private val snackbarModel: SnackbarModel,
+    private val spaceStore: SpaceStore,
     private val clientLogger: ClientLogger,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
     private val neevaConstants: NeevaConstants
@@ -163,6 +167,13 @@ class AppNavModelImpl(
     override fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
 
+    override fun showSpaceDetail(spaceID: String) {
+        coroutineScope.launch {
+            spaceStore.detailedSpaceIDFlow.emit(spaceID)
+        }
+        show(AppNavDestination.SPACE_DETAIL)
+    }
+
     override fun showSignInFlow() {
         show(AppNavDestination.SIGN_IN_FLOW)
     }
@@ -187,6 +198,18 @@ class AppNavModelImpl(
 
             putExtra(Intent.EXTRA_TEXT, activeTabModel.urlFlow.value.toString())
             putExtra(Intent.EXTRA_TITLE, activeTabModel.titleFlow.value)
+        }
+
+        safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
+    }
+
+    override fun shareSpace(space: Space) {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+
+            putExtra(Intent.EXTRA_TEXT, space.url(neevaConstants).toString())
+            putExtra(Intent.EXTRA_TITLE, space.name)
         }
 
         safeStartActivityForIntent(Intent.createChooser(sendIntent, null))

@@ -139,6 +139,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers,
                         overlaySheetModel = overlaySheetModel,
+                        spaceStore = spaceStore,
                         snackbarModel = snackbarModel,
                         clientLogger = clientLogger,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
@@ -150,6 +151,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         webLayerModel = webLayerModel,
                         appNavModel = appNavModel!!,
                         overlaySheetModel = overlaySheetModel,
+                        settingsDataModel = localEnvironmentState.settingsDataModel,
                         coroutineScope = lifecycleScope
                     )
                 }

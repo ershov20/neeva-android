@@ -19,6 +19,8 @@ import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.NeevaTextField
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
@@ -46,6 +48,7 @@ class CardsPaneModelImpl(
     private val webLayerModel: WebLayerModel,
     private val appNavModel: AppNavModel,
     private val overlaySheetModel: OverlaySheetModel,
+    private val settingsDataModel: SettingsDataModel,
     coroutineScope: CoroutineScope
 ) : CardsPaneModel {
     // Keep track of what screen is currently being viewed by the user.
@@ -132,8 +135,15 @@ class CardsPaneModelImpl(
     }
 
     override fun selectSpace(browserWrapper: BrowserWrapper, spaceUrl: Uri) {
-        browserWrapper.loadUrl(spaceUrl, inNewTab = true)
-        showBrowser()
+        val showNativeSpaceDetail = settingsDataModel
+            .getSettingsToggleValue(SettingsToggle.DEBUG_NATIVE_SPACES)
+        if (showNativeSpaceDetail) {
+            val id = spaceUrl.pathSegments.last() ?: return
+            appNavModel.showSpaceDetail(id)
+        } else {
+            browserWrapper.loadUrl(spaceUrl, inNewTab = true)
+            showBrowser()
+        }
     }
 
     override fun createSpace() {

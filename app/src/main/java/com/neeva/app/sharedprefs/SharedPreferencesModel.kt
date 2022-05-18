@@ -57,5 +57,6 @@ enum class SharedPrefFolder {
     HISTORY_UI,
     APP,
     COOKIE_CUTTER,
-    WEBLAYER
+    WEBLAYER,
+    SPACES
 }
