@@ -1,4 +1,4 @@
-package com.neeva.app.firstrun.widgets
+package com.neeva.app.firstrun.widgets.icons
 
 import androidx.compose.foundation.Image
 import androidx.compose.material3.MaterialTheme

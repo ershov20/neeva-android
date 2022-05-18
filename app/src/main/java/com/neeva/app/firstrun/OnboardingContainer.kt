@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import com.neeva.app.R
 import com.neeva.app.firstrun.widgets.OnboardingStickyFooter
+import com.neeva.app.firstrun.widgets.buttons.CloseButton
 import com.neeva.app.firstrun.widgets.textfields.rememberIsKeyboardOpen
 import com.neeva.app.ui.theme.ColorPalette
 
@@ -26,10 +27,10 @@ fun OnboardingContainer(
     showBrowser: () -> Unit,
     useSignUpStickyFooter: Boolean,
     stickyFooterOnClick: () -> Unit,
-    useDarkThemeForPreviews: Boolean,
+    useDarkTheme: Boolean,
     content: @Composable (Modifier) -> Unit
 ) {
-    val backgroundColor = if (useDarkThemeForPreviews) {
+    val backgroundColor = if (useDarkTheme) {
         MaterialTheme.colorScheme.background
     } else {
         ColorPalette.Brand.Offwhite

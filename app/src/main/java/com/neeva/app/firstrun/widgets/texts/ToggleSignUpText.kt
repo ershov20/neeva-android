@@ -1,4 +1,4 @@
-package com.neeva.app.firstrun
+package com.neeva.app.firstrun.widgets.texts
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +17,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.firstrun.FirstRunConstants
 import com.neeva.app.ui.OneBooleanPreviewContainer
 
 @Composable

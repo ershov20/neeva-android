@@ -16,7 +16,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.firstrun.widgets.texts.OnboardingTextField
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 
 @Composable

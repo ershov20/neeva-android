@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavHostController
 import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
@@ -15,6 +16,7 @@ import com.neeva.app.browsing.toolbar.BrowserToolbarModel
 import com.neeva.app.cardgrid.CardsPaneModel
 import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsDataModel
@@ -28,6 +30,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 /** Classes that should be passed around the entire Composable hierarchy. */
 data class LocalEnvironmentState(
+    val apolloWrapper: ApolloWrapper,
+    val clientLogger: ClientLogger,
     val dispatchers: Dispatchers,
     val domainProvider: DomainProvider,
     val historyManager: HistoryManager,
@@ -38,7 +42,6 @@ data class LocalEnvironmentState(
     val sharedPreferencesModel: SharedPreferencesModel,
     val snackbarModel: SnackbarModel,
     val spaceStore: SpaceStore,
-    val apolloWrapper: ApolloWrapper
 )
 
 val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("No value set") }
@@ -47,6 +50,7 @@ val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value s
 val LocalCardsPaneModel = compositionLocalOf<CardsPaneModel> { error("No value set") }
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
 val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("No value set") }
+val LocalNavHostController = compositionLocalOf<NavHostController> { error("No value set") }
 val LocalSettingsControllerImpl = compositionLocalOf<SettingsController> { error("No value set") }
 
 @Composable

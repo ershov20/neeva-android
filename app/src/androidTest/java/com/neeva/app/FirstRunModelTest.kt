@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.firstrun.FirstRunModel
+import com.neeva.app.firstrun.SignInFlowNavDestination
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -71,7 +72,7 @@ class FirstRunModelTest {
 
             scenario.onActivity { activity: NeevaActivity ->
                 expectThat(activity.appNavModel?.currentDestination?.value?.route)
-                    .isEqualTo(AppNavDestination.SIGN_UP_LANDING_PAGE.route)
+                    .isEqualTo(SignInFlowNavDestination.SIGN_UP_LANDING_PAGE.route)
             }
 
             scenario.close()

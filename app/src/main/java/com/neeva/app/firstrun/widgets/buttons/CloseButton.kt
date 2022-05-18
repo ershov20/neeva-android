@@ -1,4 +1,4 @@
-package com.neeva.app.firstrun
+package com.neeva.app.firstrun.widgets.buttons
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton

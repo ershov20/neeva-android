@@ -18,7 +18,6 @@ import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.logging.ClientLogger
-import com.neeva.app.logging.LogConfig
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
 import com.neeva.app.ui.SnackbarModel
@@ -164,19 +163,8 @@ class AppNavModelImpl(
     override fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
 
-    override fun showSignUpLanding() {
-        show(AppNavDestination.SIGN_UP_LANDING_PAGE)
-        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_LANDING, null)
-    }
-
-    override fun showSignUpWithOther() {
-        show(AppNavDestination.SIGN_UP_OTHER)
-        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_OTHER, null)
-    }
-
-    override fun showSignIn() {
-        show(AppNavDestination.SIGN_IN)
-        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_SIGN_IN, null)
+    override fun showSignInFlow() {
+        show(AppNavDestination.SIGN_IN_FLOW)
     }
 
     override fun showHistory() = show(AppNavDestination.HISTORY)

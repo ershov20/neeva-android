@@ -8,7 +8,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.neeva.app.firstrun.ToggleSignUpText
+import com.neeva.app.firstrun.widgets.texts.ToggleSignUpText
 
 @Composable
 fun StickyFooter(

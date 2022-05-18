@@ -1,4 +1,4 @@
-package com.neeva.app.firstrun.widgets.texts
+package com.neeva.app.firstrun.widgets.textfields
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,7 +22,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.firstrun.FirstRunConstants.getSubtextStyle
-import com.neeva.app.firstrun.widgets.textfields.clearFocusOnKeyboardDismiss
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 

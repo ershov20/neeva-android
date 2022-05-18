@@ -16,13 +16,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
-import com.neeva.app.firstrun.OnboardingButton
 import com.neeva.app.firstrun.OnboardingContainer
 import com.neeva.app.firstrun.widgets.OrSeparator
+import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.firstrun.widgets.buttons.ToggleOnboardingButtons
+import com.neeva.app.firstrun.widgets.textfields.OnboardingTextField
 import com.neeva.app.firstrun.widgets.textfields.PasswordTextField
 import com.neeva.app.firstrun.widgets.texts.BadPasswordText
-import com.neeva.app.firstrun.widgets.texts.OnboardingTextField
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
@@ -39,7 +39,7 @@ fun SignUpWithOtherContainer(
     OnboardingContainer(
         showBrowser = onClose,
         useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn,
-        useDarkThemeForPreviews = useDarkTheme
+        useDarkTheme = useDarkTheme
     ) { modifier ->
         SignUpWithOtherScreen(
             launchLoginIntent = launchLoginIntent,

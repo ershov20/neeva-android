@@ -3,7 +3,6 @@ package com.neeva.app.appnav
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
@@ -12,10 +11,7 @@ import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.CardsPane
 import com.neeva.app.feedback.FeedbackView
-import com.neeva.app.firstrun.LocalFirstRunModel
-import com.neeva.app.firstrun.SignInScreenContainer
-import com.neeva.app.firstrun.signup.SignUpLandingContainer
-import com.neeva.app.firstrun.signup.SignUpWithOtherContainer
+import com.neeva.app.firstrun.signInFlowNavGraph
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.featureFlags.FeatureFlagsPane
@@ -96,40 +92,12 @@ fun AppNav(
             )
         }
 
-        composable(AppNavDestination.SIGN_UP_LANDING_PAGE.route) {
-            val firstRunModel = LocalFirstRunModel.current
-            SignUpLandingContainer(
-                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
-                openInCustomTabs = firstRunModel.openInCustomTabs(LocalContext.current),
-                onClose = firstRunModel.getOnCloseOnboarding(appNavModel::showBrowser),
-                navigateToSignIn = appNavModel::showSignIn,
-                showSignUpWithOther = appNavModel::showSignUpWithOther,
-                neevaConstants = neevaConstants
-            )
-        }
-
-        composable(AppNavDestination.SIGN_UP_OTHER.route) {
-            val firstRunModel = LocalFirstRunModel.current
-            SignUpWithOtherContainer(
-                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
-                onClose = firstRunModel.getOnCloseOnboarding(appNavModel::showBrowser),
-                navigateToSignIn = appNavModel::showSignIn
-            )
-        }
-
-        composable(AppNavDestination.SIGN_IN.route) {
-            val firstRunModel = LocalFirstRunModel.current
-            SignInScreenContainer(
-                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
-                onClose = firstRunModel.getOnCloseOnboarding(appNavModel::showBrowser),
-                navigateToSignUp = appNavModel::showSignUpLanding
-            )
-        }
-
         composable(AppNavDestination.FEEDBACK.route) {
             FeedbackView(
                 currentURLFlow = webLayerModel.currentBrowser.activeTabModel.urlFlow
             )
         }
+
+        signInFlowNavGraph()
     }
 }

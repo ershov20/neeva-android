@@ -144,7 +144,7 @@ class SettingsControllerImpl(
             }
         )
         if (isSignedOut()) {
-            navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showSignUpLanding() }
+            navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showSignInFlow() }
         }
         return navMap
     }

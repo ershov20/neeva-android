@@ -3,7 +3,12 @@ package com.neeva.app.appnav
 import androidx.compose.animation.AnimatedContentScope.SlideDirection
 import androidx.compose.animation.ExperimentalAnimationApi
 
-/** Identifiers for the possible destinations a user can be sent to via the Navigation library. */
+/**
+ * Identifiers for the possible destinations a user can be sent to via the Navigation library.
+ *
+ * This includes only screens that are accessible from everywhere: sub-graphs are responsible for
+ * managing NavDestinations within their particular flows (e.g. Sign In).
+ */
 @OptIn(ExperimentalAnimationApi::class)
 enum class AppNavDestination(
     val parent: AppNavDestination? = null,
@@ -11,20 +16,17 @@ enum class AppNavDestination(
     val slidesOutToward: SlideDirection? = null
 ) {
     BROWSER,
+    SIGN_IN_FLOW,
+    CARD_GRID(parent = BROWSER, fadesOut = true),
 
     HISTORY(parent = BROWSER, slidesOutToward = SlideDirection.End),
-    CARD_GRID(parent = BROWSER, fadesOut = true),
-    SIGN_UP_LANDING_PAGE(parent = BROWSER, fadesOut = true),
-    SIGN_UP_OTHER(parent = SIGN_UP_LANDING_PAGE, fadesOut = true),
-    SIGN_IN(parent = SIGN_UP_LANDING_PAGE, fadesOut = true),
+    FEEDBACK(parent = BROWSER, slidesOutToward = SlideDirection.End),
 
     SETTINGS(parent = BROWSER, slidesOutToward = SlideDirection.End),
     PROFILE_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     CLEAR_BROWSING_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     SET_DEFAULT_BROWSER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
-    LOCAL_FEATURE_FLAGS_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
-
-    FEEDBACK(parent = BROWSER, slidesOutToward = SlideDirection.End);
+    LOCAL_FEATURE_FLAGS_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End);
 
     val route: String = this.name
 

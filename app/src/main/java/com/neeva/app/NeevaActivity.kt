@@ -176,6 +176,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         LocalEnvironment provides localEnvironmentState,
                         LocalFeedbackViewModel provides feedbackViewModel,
                         LocalFirstRunModel provides firstRunModel,
+                        LocalNavHostController provides navController,
                         LocalSettingsControllerImpl provides settingsControllerImpl
                     ) {
                         ActivityUI(
@@ -187,7 +188,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
                 LaunchedEffect(true) {
                     if (firstRunModel.shouldShowFirstRun()) {
-                        appNavModel?.showSignUpLanding()
+                        appNavModel?.showSignInFlow()
                         clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
                         firstRunModel.firstRunDone()
                     }

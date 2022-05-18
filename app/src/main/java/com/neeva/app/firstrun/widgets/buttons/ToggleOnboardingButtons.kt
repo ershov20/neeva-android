@@ -6,7 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.neeva.app.firstrun.LaunchLoginIntentParams
-import com.neeva.app.firstrun.OnboardingButton
 import com.neeva.app.userdata.NeevaUser
 
 @Composable

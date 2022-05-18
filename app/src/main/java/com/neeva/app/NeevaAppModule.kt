@@ -261,6 +261,8 @@ object NeevaAppModule {
     @Provides
     @Singleton
     fun providesLocalEnvironment(
+        apolloWrapper: AuthenticatedApolloWrapper,
+        clientLogger: ClientLogger,
         dispatchers: Dispatchers,
         domainProvider: DomainProvider,
         historyManager: HistoryManager,
@@ -270,10 +272,11 @@ object NeevaAppModule {
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
         snackbarModel: SnackbarModel,
-        spaceStore: SpaceStore,
-        apolloWrapper: AuthenticatedApolloWrapper
+        spaceStore: SpaceStore
     ): LocalEnvironmentState {
         return LocalEnvironmentState(
+            apolloWrapper = apolloWrapper,
+            clientLogger = clientLogger,
             dispatchers = dispatchers,
             domainProvider = domainProvider,
             historyManager = historyManager,
@@ -283,8 +286,7 @@ object NeevaAppModule {
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
             snackbarModel = snackbarModel,
-            spaceStore = spaceStore,
-            apolloWrapper = apolloWrapper
+            spaceStore = spaceStore
         )
     }
 }

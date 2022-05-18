@@ -13,11 +13,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
-import com.neeva.app.firstrun.OnboardingButton
 import com.neeva.app.firstrun.OnboardingContainer
+import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.firstrun.widgets.texts.AcknowledgementText
 import com.neeva.app.firstrun.widgets.texts.EmailPromoCheckbox
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
@@ -32,21 +33,44 @@ fun SignUpLandingContainer(
     onClose: () -> Unit,
     navigateToSignIn: () -> Unit,
     showSignUpWithOther: () -> Unit,
-    useDarkThemeForPreviews: Boolean? = null,
-    neevaConstants: NeevaConstants
+    overrideUseDarkTheme: Boolean? = null
 ) {
-    val useDarkTheme = useDarkThemeForPreviews ?: isSystemInDarkTheme()
+    val useDarkTheme = overrideUseDarkTheme ?: isSystemInDarkTheme()
+    val neevaConstants: NeevaConstants = LocalEnvironment.current.neevaConstants
+
+    SignUpLandingContainer(
+        launchLoginIntent = launchLoginIntent,
+        openInCustomTabs = openInCustomTabs,
+        onClose = onClose,
+        navigateToSignIn = navigateToSignIn,
+        showSignUpWithOther = showSignUpWithOther,
+        neevaConstants = neevaConstants,
+        overrideUseDarkTheme = useDarkTheme
+    )
+}
+
+@Composable
+fun SignUpLandingContainer(
+    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
+    openInCustomTabs: (Uri) -> Unit,
+    onClose: () -> Unit,
+    navigateToSignIn: () -> Unit,
+    showSignUpWithOther: () -> Unit,
+    neevaConstants: NeevaConstants,
+    overrideUseDarkTheme: Boolean?
+) {
+    val useDarkTheme = overrideUseDarkTheme ?: isSystemInDarkTheme()
 
     OnboardingContainer(
         showBrowser = onClose,
         useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn,
-        useDarkThemeForPreviews = useDarkTheme
+        useDarkTheme = useDarkTheme
     ) { modifier ->
         SignUpLandingScreen(
             launchLoginIntent = launchLoginIntent,
             openInCustomTabs = openInCustomTabs,
             showSignUpWithOther = showSignUpWithOther,
-            useDarkThemeForPreviews = useDarkTheme,
+            useDarkTheme = useDarkTheme,
             neevaConstants = neevaConstants,
             modifier = modifier
         )
@@ -58,7 +82,7 @@ fun SignUpLandingScreen(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     openInCustomTabs: (Uri) -> Unit,
     showSignUpWithOther: () -> Unit,
-    useDarkThemeForPreviews: Boolean,
+    useDarkTheme: Boolean,
     neevaConstants: NeevaConstants,
     modifier: Modifier
 ) {
@@ -76,14 +100,14 @@ fun SignUpLandingScreen(
             signup = true,
             provider = NeevaUser.SSOProvider.GOOGLE,
             launchLoginIntent = launchLoginIntent,
-            useDarkTheme = useDarkThemeForPreviews
+            useDarkTheme = useDarkTheme
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         OnboardingButton(
             text = stringResource(id = R.string.other_sign_up_options),
-            useDarkTheme = useDarkThemeForPreviews
+            useDarkTheme = useDarkTheme
         ) {
             showSignUpWithOther()
         }
@@ -115,6 +139,7 @@ fun SignUpLanding_Light_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
+            overrideUseDarkTheme = false,
             neevaConstants = NeevaConstants()
         )
     }
@@ -131,7 +156,7 @@ fun SignUpLanding_Dark_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
-            useDarkThemeForPreviews = true,
+            overrideUseDarkTheme = true,
             neevaConstants = NeevaConstants()
         )
     }
@@ -148,6 +173,7 @@ fun SignUpLanding_Landscape_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
+            overrideUseDarkTheme = false,
             neevaConstants = NeevaConstants()
         )
     }
@@ -164,7 +190,7 @@ fun SignUpLanding_Dark_Landscape_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
-            useDarkThemeForPreviews = true,
+            overrideUseDarkTheme = true,
             neevaConstants = NeevaConstants()
         )
     }

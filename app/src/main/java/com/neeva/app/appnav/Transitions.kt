@@ -9,7 +9,38 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.navigation.NavBackStackEntry
 
-private const val ANIMATION_LENGTH_MS = 250
+@OptIn(ExperimentalAnimationApi::class)
+object Transitions {
+    private const val ANIMATION_LENGTH_MS = 250
+
+    fun fadeInLambda(durationMultiplier: Int = 1): EnterTransition {
+        return fadeIn(animationSpec = tween(ANIMATION_LENGTH_MS * durationMultiplier))
+    }
+
+    fun fadeOutLambda(durationMultiplier: Int = 1): ExitTransition {
+        return fadeOut(animationSpec = tween(ANIMATION_LENGTH_MS * durationMultiplier))
+    }
+
+    fun slideIn(
+        scope: AnimatedContentScope<NavBackStackEntry>,
+        slideDirection: AnimatedContentScope.SlideDirection
+    ): EnterTransition {
+        return scope.slideIntoContainer(
+            towards = slideDirection,
+            animationSpec = tween(ANIMATION_LENGTH_MS)
+        )
+    }
+
+    fun slideOut(
+        scope: AnimatedContentScope<NavBackStackEntry>,
+        slideDirection: AnimatedContentScope.SlideDirection
+    ): ExitTransition {
+        return scope.slideOutOfContainer(
+            towards = slideDirection,
+            animationSpec = tween(ANIMATION_LENGTH_MS)
+        )
+    }
+}
 
 /** Creates animations for the NavDestination that the user is navigating to. */
 @OptIn(ExperimentalAnimationApi::class)
@@ -22,19 +53,14 @@ fun enterTransitionFactory(scope: AnimatedContentScope<NavBackStackEntry>): Ente
         current == target -> EnterTransition.None
 
         target?.fadesOut == true -> {
-            fadeIn(animationSpec = tween(ANIMATION_LENGTH_MS))
+            Transitions.fadeInLambda()
         }
 
         target?.slidesInToward != null -> {
-            scope.slideIntoContainer(
-                towards = target.slidesInToward!!,
-                animationSpec = tween(ANIMATION_LENGTH_MS)
-            )
+            Transitions.slideIn(scope, target.slidesInToward!!)
         }
 
-        else -> {
-            fadeIn(animationSpec = tween(ANIMATION_LENGTH_MS))
-        }
+        else -> EnterTransition.None
     }
 }
 
@@ -49,23 +75,20 @@ fun exitTransitionFactory(scope: AnimatedContentScope<NavBackStackEntry>): ExitT
         // avoids issues where (e.g.) Settings is being slid to the right while Clear Browsing Data
         // is being slid in from the same direction.
         target?.parent == current -> {
-            fadeOut(animationSpec = tween(ANIMATION_LENGTH_MS))
+            Transitions.fadeOutLambda()
         }
 
         current?.fadesOut == true -> {
-            fadeOut(animationSpec = tween(ANIMATION_LENGTH_MS))
+            Transitions.fadeOutLambda()
         }
 
         current?.slidesOutToward != null -> {
-            scope.slideOutOfContainer(
-                towards = current.slidesOutToward,
-                animationSpec = tween(ANIMATION_LENGTH_MS)
-            )
+            Transitions.slideOut(scope, current.slidesOutToward)
         }
 
         else -> {
             // Default to fading out just to avoid a visual pop.
-            fadeOut(animationSpec = tween(ANIMATION_LENGTH_MS))
+            Transitions.fadeOutLambda()
         }
     }
 }
@@ -73,7 +96,7 @@ fun exitTransitionFactory(scope: AnimatedContentScope<NavBackStackEntry>): ExitT
 /** Creates animations for the NavDestination that is being returned to after popping the stack. */
 @OptIn(ExperimentalAnimationApi::class)
 fun popEnterTransitionFactory(scope: AnimatedContentScope<NavBackStackEntry>): EnterTransition {
-    return fadeIn(animationSpec = tween(ANIMATION_LENGTH_MS))
+    return Transitions.fadeInLambda()
 }
 
 /** Creates animations for the NavDestination that is being popped off the stack. */

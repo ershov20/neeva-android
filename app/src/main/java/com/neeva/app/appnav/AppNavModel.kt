@@ -29,9 +29,7 @@ interface AppNavModel {
     fun showFeedback()
     fun showHelp()
 
-    fun showSignUpLanding()
-    fun showSignUpWithOther()
-    fun showSignIn()
+    fun showSignInFlow()
     // endregion
 
     // region External screens
