@@ -29,7 +29,7 @@ import kotlinx.coroutines.withContext
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(
-    historyDatabase: HistoryDatabase,
+    private val historyDatabase: HistoryDatabase,
     private val domainProvider: DomainProvider,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
@@ -46,6 +46,7 @@ class HistoryManager(
     }
 
     private val dao = historyDatabase.dao()
+    val hostInfoDao = historyDatabase.hostInfoDao()
 
     fun getHistoryAfter(startTime: Date): Flow<PagingData<SitePlusVisit>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {

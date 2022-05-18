@@ -2,11 +2,12 @@ package com.neeva.app.storage.entities
 
 import android.net.Uri
 import androidx.room.ColumnInfo
+import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.neeva.app.NeevaConstants
 import com.neeva.app.type.SpaceACLLevel
 
-@androidx.room.Entity(tableName = "Space")
+@Entity(tableName = "Space")
 data class Space(
     @PrimaryKey val id: String,
     val name: String,

@@ -294,7 +294,12 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     internal abstract fun createBrowserFragment(): Fragment
 
-    val _cookieCutterModel = CookieCutterModel(sharedPreferencesModel)
+    val _cookieCutterModel = CookieCutterModel(
+        sharedPreferencesModel,
+        historyManager?.hostInfoDao,
+        coroutineScope,
+        dispatchers
+    )
     override val cookieCutterModel: CookieCutterModel get() = _cookieCutterModel
 
     /** Prepares the WebLayer Browser to interface with our app. */

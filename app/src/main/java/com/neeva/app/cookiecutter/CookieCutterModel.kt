@@ -1,14 +1,22 @@
 package com.neeva.app.cookiecutter
 
+import com.neeva.app.Dispatchers
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.storage.daos.HostInfoDao
+import com.neeva.app.storage.entities.HostInfo
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.chromium.weblayer.ContentFilterManager
 import org.chromium.weblayer.ContentFilterMode
 
-// TODO: set up the profile
 class CookieCutterModel(
-    private val sharedPreferencesModel: SharedPreferencesModel
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val hostInfoDao: HostInfoDao?,
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers
 ) {
     lateinit var contentFilterManager: ContentFilterManager
 
@@ -41,9 +49,6 @@ class CookieCutterModel(
         const val BLOCKING_STRENGTH_KEY = "BLOCKING_STRENGTH"
         const val ENABLE_TRACKING_PROTECTION_KEY = "ENABLE_TRACKING_PROTECTION"
     }
-
-    // TODO convert this to database and persist to disk
-    val unblockedDomains: ArrayList<String> = ArrayList<String>()
 
     // TODO configure tracking protection when this flag is changed
     var enableTrackingProtection: Boolean
@@ -85,26 +90,49 @@ class CookieCutterModel(
         if (enableTrackingProtection) {
             contentFilterManager.setRulesFile(blockingStrength.blockingList)
             contentFilterManager.setMode(blockingStrength.mode)
-            unblockedDomains.forEach(
-                { domain -> contentFilterManager.addHostExclusion(domain) }
-            )
+
+            coroutineScope.launch(dispatchers.io) {
+                hostInfoDao?.getAllTrackingAllowedHosts()?.forEach(
+                    { hostInfo -> contentFilterManager.addHostExclusion(hostInfo.host) }
+                )
+            }
             contentFilterManager.startFiltering()
         } else {
             contentFilterManager.stopFiltering()
         }
     }
 
-    fun addToAllowList(domain: String) {
-        unblockedDomains.add(domain)
-        contentFilterManager.addHostExclusion(domain)
+    // host exclusion
+    fun addToAllowList(host: String) {
+        coroutineScope.launch {
+            withContext(dispatchers.io) {
+                hostInfoDao?.upsert(HostInfo(host = host, isTrackingAllowed = true))
+            }
+            withContext(dispatchers.main) {
+                contentFilterManager.addHostExclusion(host)
+            }
+        }
     }
 
-    fun removeFromAllowList(domain: String) {
-        unblockedDomains.remove(domain)
-        contentFilterManager.removeHostExclusion(domain)
+    fun removeFromAllowList(host: String) {
+        coroutineScope.launch {
+            withContext(dispatchers.io) {
+                hostInfoDao?.deleteFromHostInfo(host)
+            }
+            withContext(dispatchers.main) {
+                contentFilterManager.removeHostExclusion(host)
+            }
+        }
     }
 
-    fun removeAllHostExclusion() {
-        contentFilterManager.clearAllHostExclusions()
+    fun removeAllHostFromAllowList() {
+        coroutineScope.launch {
+            withContext(dispatchers.io) {
+                hostInfoDao?.deleteTrackingAllowedHosts()
+            }
+            withContext(dispatchers.main) {
+                contentFilterManager.clearAllHostExclusions()
+            }
+        }
     }
 }
