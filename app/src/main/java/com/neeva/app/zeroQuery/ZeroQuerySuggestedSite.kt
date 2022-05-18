@@ -101,9 +101,10 @@ private fun ZeroQuerySuggestedSitePreview_SmallContainer() {
         }
 
         val containerSize = 96.dp
+        val neevaConstants = NeevaConstants()
         Box(modifier = Modifier.width(containerSize)) {
             ZeroQuerySuggestedSite(
-                faviconBitmap = Uri.parse(NeevaConstants.appURL).toBitmap(),
+                faviconBitmap = Uri.parse(neevaConstants.appURL).toBitmap(),
                 overrideDrawableId = null,
                 label = label,
                 onClick = {}
@@ -125,9 +126,10 @@ private fun ZeroQuerySuggestedSitePreview_LargeContainer() {
         }
 
         val containerSize = 300.dp
+        val neevaConstants = NeevaConstants()
         Box(modifier = Modifier.width(containerSize)) {
             ZeroQuerySuggestedSite(
-                faviconBitmap = Uri.parse(NeevaConstants.appURL).toBitmap(),
+                faviconBitmap = Uri.parse(neevaConstants.appURL).toBitmap(),
                 overrideDrawableId = null,
                 label = label,
                 onClick = {}

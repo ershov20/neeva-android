@@ -13,6 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.Dispatchers
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.cardgrid.CardGrid
 import com.neeva.app.cardgrid.CardsPaneModel
@@ -29,8 +30,9 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SpaceGrid(
     browserWrapper: BrowserWrapper,
     cardsPaneModel: CardsPaneModel,
-    modifier: Modifier = Modifier,
-    dispatchers: Dispatchers = LocalEnvironment.current.dispatchers
+    dispatchers: Dispatchers = LocalEnvironment.current.dispatchers,
+    neevaConstants: NeevaConstants,
+    modifier: Modifier = Modifier
 ) {
     val spaceStore = LocalEnvironment.current.spaceStore
     val spaces by spaceStore.allSpacesFlow.collectAsState()
@@ -46,8 +48,9 @@ fun SpaceGrid(
         onSelectSpace = { spaceUrl -> cardsPaneModel.selectSpace(browserWrapper, spaceUrl) },
         spaces = spaces,
         itemProvider = { spaceId -> spaceStore.contentDataForSpace(spaceId) },
-        modifier = modifier,
-        dispatchers = dispatchers
+        dispatchers = dispatchers,
+        neevaConstants = neevaConstants,
+        modifier = modifier
     )
 }
 
@@ -59,6 +62,7 @@ fun SpaceGrid(
     spaces: List<Space>,
     itemProvider: suspend (spaceId: String) -> List<SpaceItem>,
     dispatchers: Dispatchers,
+    neevaConstants: NeevaConstants,
     modifier: Modifier = Modifier
 ) {
     CardGrid(
@@ -71,7 +75,7 @@ fun SpaceGrid(
             spaceId = space.id,
             spaceName = space.name,
             isSpacePublic = space.isPublic,
-            onSelect = { onSelectSpace(space.url()) },
+            onSelect = { onSelectSpace(space.url(neevaConstants)) },
             itemProvider = itemProvider,
             dispatchers = dispatchers
         )
@@ -135,7 +139,8 @@ class SpacesGridPreviews : BooleanPreviewParameterProvider<SpacesGridPreviews.Pa
                         }
                     }
                 },
-                dispatchers = previewDispatchers
+                dispatchers = previewDispatchers,
+                neevaConstants = NeevaConstants()
             )
         }
     }

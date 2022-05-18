@@ -2,27 +2,28 @@ package com.neeva.app.settings.featureFlags
 
 import androidx.annotation.StringRes
 import com.neeva.app.R
-import com.neeva.app.settings.LocalDebugFlags
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
+import com.neeva.app.settings.SettingsToggle
 
 object FeatureFlagsPaneData : SettingsPaneDataInterface {
     @StringRes
     override val topAppBarTitleResId: Int = R.string.settings_debug_local_feature_flags
     override val shouldShowUserName: Boolean = false
-    private val allFeatureFlags = LocalDebugFlags.values().map {
-        SettingsRowData(
-            type = SettingsRowType.TOGGLE,
-            primaryLabelId = it.flagDisplayName_stringId,
-            togglePreferenceKey = it.key
-        )
-    }
+    private val allDebugFlags = SettingsToggle.values()
+        .filter { it.isAdvancedSetting }
+        .map {
+            SettingsRowData(
+                type = SettingsRowType.TOGGLE,
+                settingsToggle = it
+            )
+        }
     override val data = listOf(
         SettingsGroupData(
             R.string.settings_debug_flags,
-            allFeatureFlags
+            allDebugFlags
         ),
         SettingsGroupData(
             R.string.settings_debug_actions,

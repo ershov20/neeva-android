@@ -3,13 +3,6 @@ package com.neeva.app.settings.main
 import android.net.Uri
 import androidx.annotation.StringRes
 import com.neeva.app.NeevaConstants
-import com.neeva.app.NeevaConstants.appConnectionsURL
-import com.neeva.app.NeevaConstants.appHelpCenterURL
-import com.neeva.app.NeevaConstants.appPrivacyURL
-import com.neeva.app.NeevaConstants.appReferralURL
-import com.neeva.app.NeevaConstants.appSettingsURL
-import com.neeva.app.NeevaConstants.appTermsURL
-import com.neeva.app.NeevaConstants.appWelcomeToursURL
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsPaneDataInterface
@@ -17,7 +10,7 @@ import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
-object MainSettingsData : SettingsPaneDataInterface {
+class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterface {
     @StringRes
     override val topAppBarTitleResId: Int = R.string.settings
     override val shouldShowUserName: Boolean = false
@@ -32,17 +25,17 @@ object MainSettingsData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_account_settings,
-                    url = Uri.parse(appSettingsURL)
+                    url = Uri.parse(neevaConstants.appSettingsURL)
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_connected_apps,
-                    url = Uri.parse(appConnectionsURL)
+                    url = Uri.parse(neevaConstants.appConnectionsURL)
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_invite_friends,
-                    url = Uri.parse(appReferralURL)
+                    url = Uri.parse(neevaConstants.appReferralURL)
                 ),
             )
         ),
@@ -55,20 +48,16 @@ object MainSettingsData : SettingsPaneDataInterface {
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_show_search_search_suggestions,
-                    togglePreferenceKey = SettingsToggle.SHOW_SEARCH_SUGGESTIONS.key
+                    settingsToggle = SettingsToggle.SHOW_SEARCH_SUGGESTIONS
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_block_pop_up_windows,
-                    togglePreferenceKey = SettingsToggle.BLOCK_POP_UP_WINDOWS.key,
+                    settingsToggle = SettingsToggle.BLOCK_POP_UP_WINDOWS,
                     enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_require_confirmation,
-                    secondaryLabelId = R.string.settings_when_closing_all_tabs,
-                    togglePreferenceKey = SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE.key,
+                    settingsToggle = SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE,
                 )
             )
         ),
@@ -81,20 +70,17 @@ object MainSettingsData : SettingsPaneDataInterface {
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_close_incognito_tabs,
-                    secondaryLabelId = R.string.settings_when_leaving_incognito_mode,
-                    togglePreferenceKey = SettingsToggle.CLOSE_INCOGNITO_TABS.key
+                    settingsToggle = SettingsToggle.CLOSE_INCOGNITO_TABS
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.tracking_protection,
-                    togglePreferenceKey = SettingsToggle.TRACKING_PROTECTION.key,
+                    settingsToggle = SettingsToggle.TRACKING_PROTECTION,
                     enabled = false
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_privacy_policy,
-                    url = Uri.parse(appPrivacyURL)
+                    url = Uri.parse(neevaConstants.appPrivacyURL)
                 ),
             )
         ),
@@ -104,12 +90,12 @@ object MainSettingsData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_welcome_tours,
-                    url = Uri.parse(appWelcomeToursURL)
+                    url = Uri.parse(neevaConstants.appWelcomeToursURL)
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_help_center,
-                    url = Uri.parse(appHelpCenterURL)
+                    url = Uri.parse(neevaConstants.appHelpCenterURL)
                 ),
             )
         ),
@@ -124,7 +110,7 @@ object MainSettingsData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_play_store_page,
-                    url = NeevaConstants.playStoreUri,
+                    url = neevaConstants.playStoreUri,
                     openUrlViaIntent = true
                 ),
                 SettingsRowData(
@@ -135,7 +121,7 @@ object MainSettingsData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_terms,
-                    url = Uri.parse(appTermsURL)
+                    url = Uri.parse(neevaConstants.appTermsURL)
                 ),
             )
         ),

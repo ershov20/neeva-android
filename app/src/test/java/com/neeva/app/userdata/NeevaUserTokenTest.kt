@@ -28,7 +28,8 @@ class NeevaUserTokenTest : BaseTest() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
             on { getValue(any(), eq(NeevaUserToken.KEY_TOKEN), eq("")) } doReturn ""
         }
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
+        val neevaConstants = NeevaConstants()
+        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
         val result = neevaUserToken.getToken()
         expectThat(result).isEmpty()
     }
@@ -40,8 +41,8 @@ class NeevaUserTokenTest : BaseTest() {
                 getValue(any(), eq(NeevaUserToken.KEY_TOKEN), any() as String)
             } doReturn "whatever"
         }
-
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
+        val neevaConstants = NeevaConstants()
+        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
         val result = neevaUserToken.getToken()
         expectThat(result).isEqualTo("whatever")
     }
@@ -54,9 +55,10 @@ class NeevaUserTokenTest : BaseTest() {
             } doReturn "whatever"
         }
 
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
+        val neevaConstants = NeevaConstants()
+        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
         val result = neevaUserToken.loginCookieString()
-        expectThat(result).isEqualTo("${NeevaConstants.loginCookie}=whatever")
+        expectThat(result).isEqualTo("${neevaConstants.loginCookie}=whatever")
     }
 
     @Test
@@ -101,7 +103,8 @@ class NeevaUserTokenTest : BaseTest() {
     @Test
     fun setToken() {
         val sharedPreferencesModel = mock<SharedPreferencesModel>()
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
+        val neevaConstants = NeevaConstants()
+        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
 
         neevaUserToken.setToken("expectedToken")
         verify(sharedPreferencesModel).setValue(
@@ -114,7 +117,8 @@ class NeevaUserTokenTest : BaseTest() {
     @Test
     fun removeToken() {
         val sharedPreferencesModel = mock<SharedPreferencesModel>()
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel)
+        val neevaConstants = NeevaConstants()
+        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
 
         neevaUserToken.removeToken()
         verify(sharedPreferencesModel).removeValue(

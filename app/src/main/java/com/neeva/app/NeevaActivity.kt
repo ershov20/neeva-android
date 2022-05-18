@@ -45,9 +45,9 @@ import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
-import com.neeva.app.settings.LocalDebugFlags
 import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
@@ -83,6 +83,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var historyDatabase: HistoryDatabase
+    @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var overlaySheetModel: OverlaySheetModel
     @Inject internal lateinit var settingsDataModel: SettingsDataModel
@@ -140,7 +141,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         overlaySheetModel = overlaySheetModel,
                         snackbarModel = snackbarModel,
                         clientLogger = clientLogger,
-                        onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback
+                        onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
+                        neevaConstants = neevaConstants
                     )
                 }
                 cardsPaneModel = remember(appNavModel) {
@@ -195,7 +197,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             }
         }
 
-        setDefaultAndroidBrowserManager = SetDefaultAndroidBrowserManager.create(this)
+        setDefaultAndroidBrowserManager =
+            SetDefaultAndroidBrowserManager.create(this, neevaConstants)
 
         lifecycleScope.launch {
             // Keep track of when the BrowserWrapper changes so that the Activity can attach their
@@ -249,7 +252,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         val appWidgetManager = AppWidgetManager.getInstance(this)
         val ids = appWidgetManager.getAppWidgetIds(componentName)
         ids.forEach { id ->
-            NeevaWidgetProvider.updateWidget(this, appWidgetManager, id)
+            NeevaWidgetProvider.updateWidget(
+                context = this,
+                appWidgetManager = appWidgetManager,
+                appWidgetId = id,
+                appURL = neevaConstants.appURL
+            )
         }
     }
 
@@ -314,7 +322,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 webLayerModel.switchToProfile(useIncognito = false)
 
                 intent.extras?.getString(SearchManager.QUERY)?.let {
-                    val searchUri = it.toSearchUri()
+                    val searchUri = it.toSearchUri(neevaConstants)
 
                     webLayerModel.currentBrowser.loadUrl(
                         uri = searchUri,
@@ -339,7 +347,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         // Hide the contents of the screen from Android Recents when the user switches to another
         // app while looking at an Incognito tab.
         val enableIncognitoScreenshots = settingsDataModel
-            .getDebugFlagValue(LocalDebugFlags.DEBUG_ENABLE_INCOGNITO_SCREENSHOTS)
+            .getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_INCOGNITO_SCREENSHOTS)
         if (browserWrapper.isIncognito && !enableIncognitoScreenshots) {
             window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
         } else {

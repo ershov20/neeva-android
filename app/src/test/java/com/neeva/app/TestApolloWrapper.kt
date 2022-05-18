@@ -20,9 +20,11 @@ import strikt.assertions.isEmpty
 class TestApolloWrapper(
     serverUrl: String = "https://fake.url",
     private val testInterceptor: TestInterceptor = TestInterceptor(),
-    neevaUserToken: NeevaUserToken = mock()
+    neevaUserToken: NeevaUserToken = mock(),
+    neevaConstants: NeevaConstants = NeevaConstants()
 ) : AuthenticatedApolloWrapper(
     neevaUserToken = neevaUserToken,
+    neevaConstants = neevaConstants,
     _apolloClient = ApolloClient.Builder()
         .serverUrl(serverUrl)
         .okHttpClient(

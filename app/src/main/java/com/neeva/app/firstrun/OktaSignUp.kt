@@ -26,6 +26,7 @@ object OktaSignUp {
         activityContext: Context,
         snackbarModel: SnackbarModel,
         neevaUserToken: NeevaUserToken,
+        neevaConstants: NeevaConstants,
         emailProvided: String,
         passwordProvided: String = "",
         marketingEmailOptOut: Boolean = false
@@ -46,16 +47,16 @@ object OktaSignUp {
             .method("POST", requestBody)
             .addHeader("Accept", "application/json")
             .addHeader("Content-Type", "application/json")
-            .addHeader("X-Neeva-Client-ID", NeevaConstants.browserIdentifier)
+            .addHeader("X-Neeva-Client-ID", neevaConstants.browserIdentifier)
             .addHeader("X-Neeva-Client-Version", BuildConfig.VERSION_NAME)
-            .url(NeevaConstants.createOktaAccountURL)
+            .url(neevaConstants.createOktaAccountURL)
             .build()
         val cookieJar = FirstRunCookieJar()
         val client = OkHttpClient.Builder().cookieJar(cookieJar).build()
         val response = client.newCall(request).execute()
 
         cookieJar
-            .authCookie()
+            .authCookie(loginCookie = neevaConstants.loginCookie)
             ?.let { cookie ->
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse("neeva://login/cb?sessionKey=${cookie.value}")
@@ -134,5 +135,5 @@ class FirstRunCookieJar : CookieJar {
         this.cookies = cookies
     }
 
-    fun authCookie() = cookies.find { it.name == NeevaConstants.loginCookie }
+    fun authCookie(loginCookie: String) = cookies.find { it.name == loginCookie }
 }

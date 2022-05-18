@@ -4,6 +4,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.TestApolloWrapper
 import com.neeva.app.history.HistoryManager
@@ -53,20 +54,17 @@ class SuggestionsModelTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
+    private lateinit var apolloWrapper: TestApolloWrapper
+    private lateinit var clientLogger: ClientLogger
+    private lateinit var historyManager: HistoryManager
+    private lateinit var model: SuggestionsModel
+    private val neevaConstants = NeevaConstants()
+    private lateinit var siteSuggestions: MutableStateFlow<List<NavSuggestion>>
+    private lateinit var urlBarIsEditing: MutableStateFlow<Boolean>
+    private lateinit var urlBarText: MutableStateFlow<TextFieldValue>
     private lateinit var testDispatcher: Dispatchers
 
     @Mock lateinit var domainProvider: DomainProvider
-
-    private lateinit var siteSuggestions: MutableStateFlow<List<NavSuggestion>>
-    private lateinit var urlBarText: MutableStateFlow<TextFieldValue>
-    private lateinit var urlBarIsEditing: MutableStateFlow<Boolean>
-
-    private lateinit var historyManager: HistoryManager
-    private lateinit var apolloWrapper: TestApolloWrapper
-
-    private lateinit var model: SuggestionsModel
-
-    private lateinit var clientLogger: ClientLogger
 
     override fun setUp() {
         super.setUp()
@@ -92,12 +90,13 @@ class SuggestionsModelTest : BaseTest() {
         clientLogger = mock()
 
         model = SuggestionsModel(
-            coroutineScopeRule.scope,
-            historyManager,
-            settingsDataModel,
-            apolloWrapper,
-            testDispatcher,
-            clientLogger
+            coroutineScope = coroutineScopeRule.scope,
+            historyManager = historyManager,
+            settingsDataModel = settingsDataModel,
+            apolloWrapper = apolloWrapper,
+            dispatchers = testDispatcher,
+            neevaConstants = neevaConstants,
+            clientLogger = clientLogger
         )
 
         coroutineScopeRule.scope.advanceUntilIdle()
@@ -183,35 +182,35 @@ class SuggestionsModelTest : BaseTest() {
                     boldSpan = listOf(SuggestionsQuery.BoldSpan(0, 5)),
                     source = QuerySuggestionSource.Bing,
                     annotation = emptyAnnotation
-                ).toQueryRowSuggestion(),
+                ).toQueryRowSuggestion(neevaConstants),
                 SuggestionsQuery.QuerySuggestion(
                     type = QuerySuggestionType.Standard,
                     suggestedQuery = "reddit nfl streams",
                     boldSpan = listOf(SuggestionsQuery.BoldSpan(0, 5)),
                     source = QuerySuggestionSource.Bing,
                     annotation = emptyAnnotation
-                ).toQueryRowSuggestion(),
+                ).toQueryRowSuggestion(neevaConstants),
                 SuggestionsQuery.QuerySuggestion(
                     type = QuerySuggestionType.Standard,
                     suggestedQuery = "reddit news",
                     boldSpan = listOf(SuggestionsQuery.BoldSpan(0, 5)),
                     source = QuerySuggestionSource.Bing,
                     annotation = emptyAnnotation
-                ).toQueryRowSuggestion(),
+                ).toQueryRowSuggestion(neevaConstants),
                 SuggestionsQuery.QuerySuggestion(
                     type = QuerySuggestionType.Standard,
                     suggestedQuery = "reddit.com",
                     boldSpan = listOf(SuggestionsQuery.BoldSpan(0, 5)),
                     source = QuerySuggestionSource.Bing,
                     annotation = emptyAnnotation
-                ).toQueryRowSuggestion(),
+                ).toQueryRowSuggestion(neevaConstants),
                 SuggestionsQuery.QuerySuggestion(
                     type = QuerySuggestionType.Standard,
                     suggestedQuery = "reddit cfb",
                     boldSpan = listOf(SuggestionsQuery.BoldSpan(0, 5)),
                     source = QuerySuggestionSource.Bing,
                     annotation = emptyAnnotation
-                ).toQueryRowSuggestion()
+                ).toQueryRowSuggestion(neevaConstants)
             )
         )
 

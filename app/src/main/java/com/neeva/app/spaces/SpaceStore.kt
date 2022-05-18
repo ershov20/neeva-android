@@ -16,7 +16,7 @@ import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
-import com.neeva.app.NeevaConstants.appSpacesURL
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.UnauthenticatedApolloWrapper
 import com.neeva.app.storage.BitmapIO
@@ -51,6 +51,7 @@ class SpaceStore(
     private val unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
     private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
     private val neevaUser: NeevaUser,
+    private val neevaConstants: NeevaConstants,
     private val snackbarModel: SnackbarModel,
     private val dispatchers: Dispatchers
 ) {
@@ -99,7 +100,7 @@ class SpaceStore(
     suspend fun refresh(space: Space? = null) {
         if (neevaUser.neevaUserToken.getToken().isEmpty()) {
             if (space == null) {
-                fetchCommunitySpaces()
+                fetchCommunitySpaces(appSpacesURL = neevaConstants.appSpacesURL)
             }
             return
         }
@@ -112,7 +113,7 @@ class SpaceStore(
 
         stateFlow.value = State.REFRESHING
         val succeeded = if (space == null) {
-            fetchCommunitySpaces()
+            fetchCommunitySpaces(appSpacesURL = neevaConstants.appSpacesURL)
             performRefresh()
         } else {
             performFetch(listOf(space))
@@ -141,7 +142,7 @@ class SpaceStore(
         }
     }
 
-    private suspend fun fetchCommunitySpaces() = withContext(dispatchers.io) {
+    private suspend fun fetchCommunitySpaces(appSpacesURL: String) = withContext(dispatchers.io) {
         val response =
             unauthenticatedApolloWrapper.performQuery(
                 GetSpacesDataQuery(Optional.presentIfNotNull(listOf(MAKER_COMMUNITY_SPACE_ID))),
@@ -161,7 +162,8 @@ class SpaceStore(
                     id = Uri.parse(it.spaceEntity?.url!!).pathSegments[1],
                     name = it.spaceEntity.title!!,
                     thumbnail = null,
-                    isPublic = true
+                    isPublic = true,
+                    appSpacesURL = appSpacesURL
                 )
                 spaceData.thumbnail = saveBitmap(
                     directory = thumbnailDirectory.resolve(MAKER_COMMUNITY_SPACE_ID),

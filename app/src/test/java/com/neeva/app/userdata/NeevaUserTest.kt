@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.TestApolloWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -31,18 +32,20 @@ class NeevaUserTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
+    private lateinit var apolloWrapper: TestApolloWrapper
     private lateinit var dispatchers: Dispatchers
-    private lateinit var sharedPreferencesModel: SharedPreferencesModel
+    private lateinit var mockWebLayerModel: WebLayerModel
+    private lateinit var neevaConstants: NeevaConstants
     private lateinit var neevaUserToken: NeevaUserToken
     private lateinit var neevaUserData: NeevaUserData
     private lateinit var neevaUser: NeevaUser
-    private lateinit var mockWebLayerModel: WebLayerModel
-    private lateinit var apolloWrapper: TestApolloWrapper
+    private lateinit var sharedPreferencesModel: SharedPreferencesModel
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     override fun setUp() {
         super.setUp()
+        neevaConstants = NeevaConstants()
         setUpLoggedInUser(ApplicationProvider.getApplicationContext())
         setUpMockWeblayerModel()
         apolloWrapper = TestApolloWrapper(neevaUserToken = neevaUserToken)
@@ -51,7 +54,7 @@ class NeevaUserTest : BaseTest() {
 
     private fun setUpLoggedInUser(context: Context) {
         sharedPreferencesModel = SharedPreferencesModel(context)
-        neevaUserToken = NeevaUserToken(sharedPreferencesModel)
+        neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
         neevaUserToken.setToken("myToken")
         neevaUserData = NeevaUserData(
             "my-id",

@@ -2,7 +2,7 @@ package com.neeva.app.settings.clearBrowsing
 
 import android.net.Uri
 import androidx.annotation.StringRes
-import com.neeva.app.NeevaConstants.appManageMemory
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsPaneDataInterface
@@ -10,37 +10,14 @@ import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
-object ClearBrowsingPaneData : SettingsPaneDataInterface {
+class ClearBrowsingPaneData(neevaConstants: NeevaConstants) : SettingsPaneDataInterface {
     @StringRes
     override val topAppBarTitleResId: Int = R.string.settings_clear_browsing_data
     override val shouldShowUserName: Boolean = false
     override val data = listOf(
         SettingsGroupData(
             R.string.settings_data_on_this_device,
-            listOf(
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_browsing_history,
-                    togglePreferenceKey = SettingsToggle.CLEAR_BROWSING_HISTORY.key
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_cache,
-                    togglePreferenceKey = SettingsToggle.CLEAR_CACHE.key
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.settings_cookies_primary,
-                    secondaryLabelId = R.string.settings_cookies_secondary,
-                    togglePreferenceKey = SettingsToggle.CLEAR_COOKIES.key
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    primaryLabelId = R.string.tracking_protection,
-                    togglePreferenceKey = SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION.key,
-                    enabled = false
-                )
-            )
+            timeClearingOptionToggles
         ),
         SettingsGroupData(
             rows = listOf(
@@ -56,11 +33,32 @@ object ClearBrowsingPaneData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.LINK,
                     primaryLabelId = R.string.settings_manage_neeva_memory,
-                    url = Uri.parse(appManageMemory)
+                    url = Uri.parse(neevaConstants.appManageMemory)
                 )
             )
         ),
     )
+    companion object {
+        val timeClearingOptionToggles = listOf(
+            SettingsRowData(
+                type = SettingsRowType.TOGGLE,
+                settingsToggle = SettingsToggle.CLEAR_BROWSING_HISTORY
+            ),
+            SettingsRowData(
+                type = SettingsRowType.TOGGLE,
+                settingsToggle = SettingsToggle.CLEAR_CACHE
+            ),
+            SettingsRowData(
+                type = SettingsRowType.TOGGLE,
+                settingsToggle = SettingsToggle.CLEAR_COOKIES
+            ),
+            SettingsRowData(
+                type = SettingsRowType.TOGGLE,
+                settingsToggle = SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION,
+                enabled = false
+            )
+        )
+    }
 }
 
 enum class TimeClearingOption(@StringRes val string_id: Int) {

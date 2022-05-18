@@ -2,16 +2,15 @@ package com.neeva.app.settings.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.NeevaConstants
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun MainSettingsPane(
-    settingsController: SettingsController
-) {
-    SettingsPane(settingsController, MainSettingsData)
+fun MainSettingsPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
+    SettingsPane(settingsController, MainSettingsData(neevaConstants))
 }
 
 @Preview(name = "Main settings, 1x font size", locale = "en")
@@ -21,9 +20,7 @@ fun MainSettingsPane(
 @Composable
 fun SettingsMain_Preview() {
     NeevaTheme {
-        MainSettingsPane(
-            mockSettingsControllerImpl
-        )
+        MainSettingsPane(mockSettingsControllerImpl, NeevaConstants())
     }
 }
 
@@ -34,8 +31,6 @@ fun SettingsMain_Preview() {
 @Composable
 fun SettingsMain_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        MainSettingsPane(
-            mockSettingsControllerImpl
-        )
+        MainSettingsPane(mockSettingsControllerImpl, NeevaConstants())
     }
 }

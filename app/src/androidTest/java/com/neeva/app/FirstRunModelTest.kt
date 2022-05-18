@@ -45,7 +45,7 @@ class FirstRunModelTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
 
         // Set the user token.  First run shouldn't be shown.
-        val neevaUserToken = NeevaUserToken(SharedPreferencesModel(context))
+        val neevaUserToken = NeevaUserToken(SharedPreferencesModel(context), NeevaConstants())
         neevaUserToken.setToken("not a real token, but it's set so first run should get skipped")
 
         val intent = Intent.makeMainActivity(ComponentName(context, NeevaActivity::class.java))

@@ -18,6 +18,7 @@ import androidx.lifecycle.Lifecycle
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
@@ -87,6 +88,7 @@ private fun BoxScope.BrowserOverlay(
 
     val appNavModel = LocalAppNavModel.current
     val urlBarModel = browserWrapper.urlBarModel
+    val neevaConstants = LocalEnvironment.current.neevaConstants
 
     val toolbarConfiguration by toolbarConfigurationFlow.collectAsState()
     val urlBarModelState: URLBarModelState by urlBarModel.stateFlow.collectAsState()
@@ -96,7 +98,8 @@ private fun BoxScope.BrowserOverlay(
         BrowserToolbarModelImpl(
             appNavModel,
             browserWrapper,
-            toolbarConfiguration
+            toolbarConfiguration,
+            neevaConstants
         )
     }
 

@@ -97,7 +97,7 @@ fun FaviconView(
 private fun FaviconViewPreviews() {
     TwoBooleanPreviewContainer { showBackground, showBitmap ->
         val bitmap = if (showBitmap) {
-            Uri.parse(NeevaConstants.appURL).toBitmap()
+            Uri.parse(NeevaConstants().appURL).toBitmap()
         } else {
             null
         }

@@ -3,6 +3,7 @@ package com.neeva.app.browsing
 import android.app.Application
 import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
@@ -24,7 +25,8 @@ class BrowserWrapperFactory(
     private val neevaUser: NeevaUser,
     private val settingsDataModel: SettingsDataModel,
     private val clientLogger: ClientLogger,
-    private val sharedPreferencesModel: SharedPreferencesModel
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val neevaConstants: NeevaConstants
 ) {
     fun createRegularBrowser(coroutineScope: CoroutineScope): RegularBrowserWrapper {
         return RegularBrowserWrapper(
@@ -39,7 +41,8 @@ class BrowserWrapperFactory(
             neevaUser = neevaUser,
             settingsDataModel = settingsDataModel,
             clientLogger = clientLogger,
-            sharedPreferencesModel = sharedPreferencesModel
+            sharedPreferencesModel = sharedPreferencesModel,
+            neevaConstants = neevaConstants
         )
     }
 
@@ -56,7 +59,8 @@ class BrowserWrapperFactory(
             apolloWrapper = apolloWrapper,
             domainProvider = domainProviderImpl,
             onRemovedFromHierarchy = onRemovedFromHierarchy,
-            sharedPreferencesModel = sharedPreferencesModel
+            sharedPreferencesModel = sharedPreferencesModel,
+            neevaConstants = neevaConstants
         )
     }
 }

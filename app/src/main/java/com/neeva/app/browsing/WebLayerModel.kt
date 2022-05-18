@@ -93,6 +93,7 @@ class WebLayerModel internal constructor(
     private val dispatchers: Dispatchers,
     private val neevaUser: NeevaUser,
     private val sharedPreferencesModel: SharedPreferencesModel,
+    private val neevaConstants: NeevaConstants,
     private val settingsDataModel: SettingsDataModel,
     private val clientLogger: ClientLogger,
     overrideCoroutineScope: CoroutineScope?
@@ -108,6 +109,7 @@ class WebLayerModel internal constructor(
         dispatchers: Dispatchers,
         neevaUser: NeevaUser,
         sharedPreferencesModel: SharedPreferencesModel,
+        neevaConstants: NeevaConstants,
         settingsDataModel: SettingsDataModel,
         clientLogger: ClientLogger
     ) : this(
@@ -123,7 +125,8 @@ class WebLayerModel internal constructor(
         sharedPreferencesModel = sharedPreferencesModel,
         settingsDataModel = settingsDataModel,
         clientLogger = clientLogger,
-        overrideCoroutineScope = null
+        overrideCoroutineScope = null,
+        neevaConstants = neevaConstants
     )
 
     companion object {
@@ -302,11 +305,11 @@ class WebLayerModel internal constructor(
 
     fun onAuthTokenUpdated() {
         regularProfile.cookieManager.setCookie(
-            Uri.parse(NeevaConstants.appURL),
+            Uri.parse(neevaConstants.appURL),
             neevaUser.neevaUserToken.loginCookieString()
         ) { success ->
             val currentUrl = regularBrowser.activeTabModel.urlFlow.value
-            if (success && currentUrl.toString().startsWith(NeevaConstants.appURL)) {
+            if (success && currentUrl.toString().startsWith(neevaConstants.appURL)) {
                 regularBrowser.reload()
             }
         }
@@ -329,8 +332,8 @@ class WebLayerModel internal constructor(
             ) {
                 // Since all cookies got cleared, add back the original Neeva Cookie after it finished clearing.
                 regularProfile.cookieManager.setCookie(
-                    Uri.parse(NeevaConstants.appURL),
-                    "${NeevaConstants.loginCookie}=$oldNeevaAuthToken;",
+                    Uri.parse(neevaConstants.appURL),
+                    "${neevaConstants.loginCookie}=$oldNeevaAuthToken;",
                     null
                 )
             }
@@ -339,32 +342,32 @@ class WebLayerModel internal constructor(
     }
 
     fun clearBrowsingData(
-        clearingOptions: Map<String, Boolean>,
+        clearingOptions: Map<SettingsToggle, Boolean>,
         fromMillis: Long,
         toMillis: Long
     ) {
         val clearCookiesFlags = mutableListOf<Int>()
-        clearingOptions.keys.forEach {
-            if (clearingOptions[it] == true) {
-                when (it) {
-                    SettingsToggle.CLEAR_BROWSING_HISTORY.key -> {
+        clearingOptions
+            .filter { it.value }
+            .forEach { (toggle, isEnabled) ->
+                when (toggle) {
+                    SettingsToggle.CLEAR_BROWSING_HISTORY -> {
                         historyManager.clearHistory(fromMillis)
                     }
-                    SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION.key -> {
+                    SettingsToggle.CLEAR_BROWSING_TRACKING_PROTECTION -> {
                     }
-                    SettingsToggle.CLEAR_DOWNLOADED_FILES.key -> {
+                    SettingsToggle.CLEAR_DOWNLOADED_FILES -> {
                     }
-                    SettingsToggle.CLEAR_COOKIES.key -> {
+                    SettingsToggle.CLEAR_COOKIES -> {
                         clearCookiesFlags.add(BrowsingDataType.COOKIES_AND_SITE_DATA)
                     }
-                    SettingsToggle.CLEAR_CACHE.key -> {
+                    SettingsToggle.CLEAR_CACHE -> {
                         clearCookiesFlags.add(BrowsingDataType.CACHE)
                     }
                     else -> { }
                     // TODO(kobec): finish this for the other parameters
                 }
             }
-        }
         clearNonNeevaCookies(clearCookiesFlags, fromMillis, toMillis)
     }
 

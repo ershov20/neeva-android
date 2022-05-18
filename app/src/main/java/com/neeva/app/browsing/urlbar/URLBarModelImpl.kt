@@ -8,6 +8,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.graphics.drawable.toBitmap
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.isNeevaSearchUri
 import com.neeva.app.browsing.toSearchUri
@@ -27,7 +28,8 @@ class URLBarModelImpl(
     appContext: Context,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
-    private val faviconCache: FaviconCache
+    private val faviconCache: FaviconCache,
+    private val neevaConstants: NeevaConstants
 ) : URLBarModel {
     internal val neevaFavicon =
         AppCompatResources.getDrawable(appContext, R.drawable.ic_neeva_logo)?.toBitmap()
@@ -73,7 +75,7 @@ class URLBarModelImpl(
             ?: run {
                 // If there isn't a match, show the search provider's icon if the URI will perform
                 // a search.
-                val isSearchUri = userInputStateValue.uriToLoad.isNeevaSearchUri()
+                val isSearchUri = userInputStateValue.uriToLoad.isNeevaSearchUri(neevaConstants)
                 return newState.copy(
                     faviconBitmap = if (isSearchUri) neevaFavicon else null,
                     autocompleteSuggestion = null
@@ -84,7 +86,7 @@ class URLBarModelImpl(
         newState = newState.copy(autocompleteSuggestion = autocompletedText)
 
         // Load the favicon from the cache, if it's available.
-        val uriToLoad = suggestion?.url ?: getUrlToLoad(autocompletedText)
+        val uriToLoad = suggestion?.url ?: getUrlToLoad(autocompletedText, neevaConstants)
         if (uriToLoad != userInputStateValue.uriToLoad) {
             val favicon = faviconCache.getFavicon(uriToLoad, false)
             newState = newState.copy(
@@ -111,7 +113,8 @@ class URLBarModelImpl(
 
             // Disable autocomplete suggestions so that the user can keep refining queries that are
             // pasted directly into the URL bar from a query navigation suggestion.
-            newIsAutocompleteAllowed = false
+            newIsAutocompleteAllowed = false,
+            neevaConstants = neevaConstants
         )
     }
 
@@ -142,7 +145,8 @@ class URLBarModelImpl(
                     // The user deleted text from an existing string, so we should disable
                     // autocomplete suggestions to avoid trapping the user in a state where they are
                     // given the same suggestion over and over again.
-                    newIsAutocompleteAllowed = false
+                    newIsAutocompleteAllowed = false,
+                    neevaConstants = neevaConstants
                 )
             }
 
@@ -151,7 +155,8 @@ class URLBarModelImpl(
                 // autocomplete suggestions.
                 currentState.withUpdatedTextFieldValue(
                     newTextFieldValue = newValue,
-                    newIsAutocompleteAllowed = true
+                    newIsAutocompleteAllowed = true,
+                    neevaConstants = neevaConstants
                 )
             }
 
@@ -167,7 +172,8 @@ class URLBarModelImpl(
 
                 currentState.withUpdatedTextFieldValue(
                     newTextFieldValue = newValue,
-                    newIsAutocompleteAllowed = isAutocompleteAllowed
+                    newIsAutocompleteAllowed = isAutocompleteAllowed,
+                    neevaConstants = neevaConstants
                 )
             }
         }
@@ -236,7 +242,7 @@ class URLBarModelImpl(
         }
 
         /** Returns which URL should be loaded when the user submits their text. */
-        internal fun getUrlToLoad(urlBarContents: String): Uri {
+        internal fun getUrlToLoad(urlBarContents: String, neevaConstants: NeevaConstants): Uri {
             return when {
                 // Try to figure out if the user typed in a query or a URL.
                 Patterns.WEB_URL.matcher(urlBarContents).matches() -> {
@@ -249,7 +255,7 @@ class URLBarModelImpl(
                 }
 
                 else -> {
-                    urlBarContents.toSearchUri()
+                    urlBarContents.toSearchUri(neevaConstants)
                 }
             }
         }
@@ -257,7 +263,8 @@ class URLBarModelImpl(
         /** Creates a new [URLBarModelState] accounting for a change in the text. */
         internal fun URLBarModelState.withUpdatedTextFieldValue(
             newTextFieldValue: TextFieldValue,
-            newIsAutocompleteAllowed: Boolean
+            newIsAutocompleteAllowed: Boolean,
+            neevaConstants: NeevaConstants
         ): URLBarModelState {
             var newState = copy(
                 isAutocompleteAllowed = newIsAutocompleteAllowed,
@@ -270,7 +277,7 @@ class URLBarModelImpl(
                 // Toss out the existing autocomplete suggestion.
                 newState = newState.copy(
                     autocompleteSuggestion = null,
-                    uriToLoad = getUrlToLoad(newState.textFieldValue.text),
+                    uriToLoad = getUrlToLoad(newState.textFieldValue.text, neevaConstants),
                     faviconBitmap = null
                 )
             }

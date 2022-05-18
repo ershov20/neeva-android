@@ -8,10 +8,6 @@ import com.apollographql.apollo3.api.Mutation
 import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.exception.ApolloException
 import com.apollographql.apollo3.network.okHttpClient
-import com.neeva.app.NeevaConstants.appHost
-import com.neeva.app.NeevaConstants.browserTypeCookie
-import com.neeva.app.NeevaConstants.browserVersionCookie
-import com.neeva.app.NeevaConstants.loginCookie
 import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -25,20 +21,22 @@ import okhttp3.Response
 /** Authenticated version of [ApolloWrapper] that sends the user token */
 open class AuthenticatedApolloWrapper(
     private val neevaUserToken: NeevaUserToken,
+    neevaConstants: NeevaConstants,
     _apolloClient: ApolloClient? = null,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers
 ) : ApolloWrapper(
     _apolloClient = _apolloClient,
     coroutineScope = coroutineScope,
-    dispatchers = dispatchers
+    dispatchers = dispatchers,
+    neevaConstants = neevaConstants
 ) {
     override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
         val cookies = super.loadForRequest(url)
-        val token = neevaUserToken.getToken() ?: return cookies
+        val token = neevaUserToken.getToken()
         if (token.isNotEmpty()) {
-            val authCookie = Cookie.Builder().name(loginCookie).secure()
-                .domain(appHost).expiresAt(Long.MAX_VALUE).value(token).build()
+            val authCookie = Cookie.Builder().name(neevaConstants.loginCookie).secure()
+                .domain(neevaConstants.appHost).expiresAt(Long.MAX_VALUE).value(token).build()
             cookies.add(authCookie)
         }
         return cookies
@@ -71,11 +69,13 @@ open class AuthenticatedApolloWrapper(
 open class UnauthenticatedApolloWrapper(
     _apolloClient: ApolloClient? = null,
     coroutineScope: CoroutineScope,
-    dispatchers: Dispatchers
+    dispatchers: Dispatchers,
+    neevaConstants: NeevaConstants
 ) : ApolloWrapper(
     _apolloClient = _apolloClient,
     coroutineScope = coroutineScope,
-    dispatchers = dispatchers
+    dispatchers = dispatchers,
+    neevaConstants = neevaConstants
 ) {
     override suspend fun <D : Mutation.Data> performMutation(
         mutation: Mutation<D>,
@@ -104,13 +104,14 @@ open class UnauthenticatedApolloWrapper(
 abstract class ApolloWrapper(
     _apolloClient: ApolloClient? = null,
     val coroutineScope: CoroutineScope,
-    val dispatchers: Dispatchers
+    val dispatchers: Dispatchers,
+    val neevaConstants: NeevaConstants
 ) : CookieJar, Interceptor {
     val apolloClient: ApolloClient = _apolloClient ?: createApolloClient()
 
     private fun createApolloClient(): ApolloClient {
         return ApolloClient.Builder()
-            .serverUrl(NeevaConstants.apolloURL)
+            .serverUrl(neevaConstants.apolloURL)
             .okHttpClient(
                 OkHttpClient.Builder()
                     .addInterceptor(this)
@@ -123,7 +124,7 @@ abstract class ApolloWrapper(
     override fun intercept(chain: Interceptor.Chain): Response {
         val request = chain.request().newBuilder()
             .addHeader("User-Agent", "NeevaBrowserAndroid")
-            .addHeader("X-Neeva-Client-ID", NeevaConstants.browserIdentifier)
+            .addHeader("X-Neeva-Client-ID", neevaConstants.browserIdentifier)
             .addHeader("X-Neeva-Client-Version", BuildConfig.VERSION_NAME)
             .build()
         return chain.proceed(request)
@@ -133,7 +134,7 @@ abstract class ApolloWrapper(
 
     @CallSuper
     override fun loadForRequest(url: HttpUrl) =
-        mutableListOf(browserTypeCookie, browserVersionCookie)
+        mutableListOf(neevaConstants.browserTypeCookie, neevaConstants.browserVersionCookie)
 
     @CallSuper
     open suspend fun <D : Query.Data> performQuery(

@@ -8,6 +8,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.LoadingState
+import com.neeva.app.NeevaConstants
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
@@ -56,6 +57,7 @@ class WebLayerModelTest : BaseTest() {
     private lateinit var activityCallbackProvider: ActivityCallbackProvider
     private lateinit var application: Application
     private lateinit var browserWrapperFactory: BrowserWrapperFactory
+    private lateinit var neevaConstants: NeevaConstants
     private lateinit var regularBrowserWrapper: RegularBrowserWrapper
     private lateinit var regularBrowserFragment: Fragment
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
@@ -99,6 +101,8 @@ class WebLayerModelTest : BaseTest() {
 
         sharedPreferencesModel = SharedPreferencesModel(application)
 
+        neevaConstants = NeevaConstants()
+
         webLayer = mock {
             on {
                 getProfile(eq(RegularBrowserWrapper.NON_INCOGNITO_PROFILE_NAME))
@@ -123,6 +127,7 @@ class WebLayerModelTest : BaseTest() {
             ),
             neevaUser = neevaUser,
             sharedPreferencesModel = sharedPreferencesModel,
+            neevaConstants = neevaConstants,
             settingsDataModel = settingsDataModel,
             clientLogger = clientLogger,
             overrideCoroutineScope = coroutineScopeRule.scope

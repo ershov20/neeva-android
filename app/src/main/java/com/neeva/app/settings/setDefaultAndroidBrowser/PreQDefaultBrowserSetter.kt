@@ -11,7 +11,8 @@ import com.neeva.app.NeevaConstants
 
 /** Setting Android Default Browser for devices lower than Android Q. */
 class PreQDefaultBrowserSetter(
-    context: Context
+    context: Context,
+    private val neevaConstants: NeevaConstants
 ) : SetDefaultAndroidBrowserManager() {
     private val neevaPackageName = context.packageName
     private var packageManager: PackageManager = context.packageManager
@@ -20,7 +21,7 @@ class PreQDefaultBrowserSetter(
         mutableStateOf(isNeevaTheDefaultBrowser())
 
     override fun isNeevaTheDefaultBrowser(): Boolean {
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(NeevaConstants.appURL))
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(neevaConstants.appURL))
         val resolveInfo: ResolveInfo? =
             packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
         // Look at https://github.com/neevaco/neeva-android/issues/408 if it is not working the right way.
@@ -35,6 +36,5 @@ class PreQDefaultBrowserSetter(
         return false
     }
 
-    override fun requestToBeDefaultBrowser() {
-    }
+    override fun requestToBeDefaultBrowser() {}
 }

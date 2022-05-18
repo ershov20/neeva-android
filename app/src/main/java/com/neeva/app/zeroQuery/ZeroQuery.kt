@@ -51,6 +51,7 @@ data class SuggestedSite(
 fun ZeroQuery(
     urlBarModel: URLBarModel,
     faviconCache: FaviconCache,
+    neevaConstants: NeevaConstants,
     topContent: @Composable () -> Unit = {},
 ) {
     val browserWrapper = LocalBrowserWrapper.current
@@ -73,9 +74,11 @@ fun ZeroQuery(
     val isCommunitySpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.CommunitySpacesState)
     val isSpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SpacesState)
 
+    val defaultSuggestions = DefaultSuggestions(neevaConstants = neevaConstants)
+
     val suggestedSearchesWithDefaults: List<QueryRowSuggestion> = remember(suggestedQueries) {
         val updatedList = suggestedQueries.toMutableList()
-        DefaultSuggestions.DEFAULT_SEARCH_SUGGESTIONS.forEach { suggestion ->
+        defaultSuggestions.DEFAULT_SEARCH_SUGGESTIONS.forEach { suggestion ->
             if (updatedList.size < 3 && updatedList.none { it.query == suggestion.query }) {
                 updatedList.add(suggestion)
             }
@@ -87,7 +90,7 @@ fun ZeroQuery(
         val updatedList: MutableList<Site> = suggestedSites.toMutableList()
         val domainList = updatedList
             .map { domainProvider.getRegisteredDomain(Uri.parse(it.siteURL)) }
-        DefaultSuggestions.DEFAULT_SITE_SUGGESTIONS.forEach { site ->
+        defaultSuggestions.DEFAULT_SITE_SUGGESTIONS.forEach { site ->
             val siteDomain = domainProvider.getRegisteredDomain(Uri.parse(site.siteURL))
             if (updatedList.size < 7 && !domainList.contains(siteDomain)) {
                 updatedList.add(site)
@@ -102,7 +105,7 @@ fun ZeroQuery(
                     index = 0,
                     element = SuggestedSite(
                         site = Site(
-                            siteURL = NeevaConstants.appURL,
+                            siteURL = neevaConstants.appURL,
                             title = homeLabel,
                             largestFavicon = null
                         ),
@@ -221,7 +224,7 @@ fun ZeroQuery(
             ) {
                 items(spaces.subList(0, minOf(3, spaces.size))) { space ->
                     SpaceRow(space = space, isCurrentUrlInSpace = null) {
-                        browserWrapper.loadUrl(space.url())
+                        browserWrapper.loadUrl(space.url(neevaConstants))
                     }
                 }
             }
@@ -229,8 +232,8 @@ fun ZeroQuery(
     }
 }
 
-fun Site.toSearchSuggest(): QueryRowSuggestion? {
-    if (!siteURL.startsWith(NeevaConstants.appSearchURL)) return null
+fun Site.toSearchSuggest(neevaConstants: NeevaConstants): QueryRowSuggestion? {
+    if (!siteURL.startsWith(neevaConstants.appSearchURL)) return null
     val query = Uri.parse(this.siteURL).getQueryParameter("q") ?: return null
 
     return QueryRowSuggestion(
@@ -240,8 +243,8 @@ fun Site.toSearchSuggest(): QueryRowSuggestion? {
     )
 }
 
-fun String.toSearchSuggest(): QueryRowSuggestion = QueryRowSuggestion(
-    url = this.toSearchUri(),
+fun String.toSearchSuggest(neevaConstants: NeevaConstants): QueryRowSuggestion = QueryRowSuggestion(
+    url = this.toSearchUri(neevaConstants),
     query = this,
     drawableID = R.drawable.ic_baseline_history_24
 )

@@ -10,15 +10,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.neeva.app.NeevaConstants.appPrivacyURL
-import com.neeva.app.NeevaConstants.appTermsURL
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.firstrun.FirstRunConstants
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.widgets.AnnotatedSpannable
 
 @Composable
-fun AcknowledgementText(openInCustomTabs: (Uri) -> Unit) {
+fun AcknowledgementText(
+    appTermsURL: String,
+    appPrivacyURL: String,
+    openInCustomTabs: (Uri) -> Unit
+) {
     AnnotatedSpannable(
         rawHtml = stringResource(R.string.acknowledge_agreement, appTermsURL, appPrivacyURL),
         modifier = Modifier
@@ -55,6 +58,10 @@ fun AcknowledgementText(openInCustomTabs: (Uri) -> Unit) {
 @Composable
 fun AcknowledgementTextPreview() {
     LightDarkPreviewContainer {
-        AcknowledgementText { }
+        val neevaConstants = NeevaConstants()
+        AcknowledgementText(
+            appTermsURL = neevaConstants.appTermsURL,
+            appPrivacyURL = neevaConstants.appPrivacyURL
+        ) { }
     }
 }

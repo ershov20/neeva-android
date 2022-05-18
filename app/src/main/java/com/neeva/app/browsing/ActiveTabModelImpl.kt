@@ -26,7 +26,8 @@ import org.chromium.weblayer.TabCallback
 class ActiveTabModelImpl(
     private val spaceStore: SpaceStore? = null,
     val coroutineScope: CoroutineScope,
-    val dispatchers: Dispatchers
+    val dispatchers: Dispatchers,
+    private val neevaConstants: NeevaConstants
 ) : ActiveTabModel {
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     override val urlFlow: StateFlow<Uri> = _urlFlow
@@ -105,8 +106,8 @@ class ActiveTabModelImpl(
     }
 
     private fun updateUrl(uri: Uri) {
-        val isNeevaHomepage = uri.toString() == NeevaConstants.appURL
-        val isNeevaSearch = uri.toString().startsWith(NeevaConstants.appSearchURL)
+        val isNeevaHomepage = uri.toString() == neevaConstants.appURL
+        val isNeevaSearch = uri.toString().startsWith(neevaConstants.appSearchURL)
         val query = if (isNeevaSearch) uri.getQueryParameter("q") else null
 
         val mode = when {

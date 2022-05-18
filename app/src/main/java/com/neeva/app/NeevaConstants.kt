@@ -3,8 +3,7 @@ package com.neeva.app
 import android.net.Uri
 import okhttp3.Cookie
 
-object NeevaConstants {
-    val appHost: String = "neeva.com"
+class NeevaConstants(val appHost: String = "neeva.com") {
     val appURL: String = "https://$appHost/"
     val appSearchURL: String = "${appURL}search"
     val appSpacesURL: String = "${appURL}spaces"
@@ -27,9 +26,9 @@ object NeevaConstants {
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
 
     /** Identifies the Android client when making backend requests. */
-    const val browserIdentifier = "co.neeva.app.android.browser"
+    val browserIdentifier = "co.neeva.app.android.browser"
 
-    const val loginCookie: String = "httpd~login"
+    val loginCookie: String = "httpd~login"
     val browserTypeCookie = Cookie.Builder()
         .name("BrowserType")
         .secure()

@@ -4,6 +4,7 @@ import android.net.Uri
 import android.util.Log
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.browsing.toSearchUri
@@ -68,7 +69,8 @@ class SuggestionsModel(
     val settingsDataModel: SettingsDataModel,
     private val apolloWrapper: ApolloWrapper,
     dispatchers: Dispatchers,
-    val clientLogger: ClientLogger
+    val neevaConstants: NeevaConstants,
+    val clientLogger: ClientLogger,
 ) {
     companion object {
         val TAG = SuggestionsModel::class.simpleName
@@ -129,7 +131,7 @@ class SuggestionsModel(
     private fun updateWith(suggestionResultsData: SuggestionsQuery.Data?) {
         val suggestionResults = suggestionResultsData?.suggest
         val queryRowSuggestions = suggestionResults?.querySuggestion
-            ?.map { it.toQueryRowSuggestion() }
+            ?.map { it.toQueryRowSuggestion(neevaConstants) }
             ?: emptyList()
         val viewableSuggestions = suggestionResults?.urlSuggestion
             ?.filter { !it.subtitle.isNullOrEmpty() && !it.title.isNullOrEmpty() }
@@ -170,21 +172,22 @@ fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() = NavSuggestion(
     type = SuggestionType.MEMORIZED_SUGGESTION
 )
 
-fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion() = QueryRowSuggestion(
-    url = this.suggestedQuery.toSearchUri(),
-    query = this.suggestedQuery,
-    drawableID = when {
-        this.type == QuerySuggestionType.Standard -> R.drawable.ic_baseline_search_24
-        this.type == QuerySuggestionType.SearchHistory -> R.drawable.ic_baseline_history_24
-        !this.annotation?.description.isNullOrEmpty() -> R.drawable.ic_baseline_image_24
-        else -> R.drawable.ic_baseline_search_24
-    },
-    description = this.annotation?.description,
-    imageURL = this.annotation?.imageURL,
-    annotationType = AnnotationType.fromString(this.annotation?.annotationType),
-    stockInfo = this.annotation?.stockInfo,
-    dictionaryInfo = this.annotation?.dictionaryInfo
-)
+fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion(neevaConstants: NeevaConstants) =
+    QueryRowSuggestion(
+        url = this.suggestedQuery.toSearchUri(neevaConstants),
+        query = this.suggestedQuery,
+        drawableID = when {
+            this.type == QuerySuggestionType.Standard -> R.drawable.ic_baseline_search_24
+            this.type == QuerySuggestionType.SearchHistory -> R.drawable.ic_baseline_history_24
+            !this.annotation?.description.isNullOrEmpty() -> R.drawable.ic_baseline_image_24
+            else -> R.drawable.ic_baseline_search_24
+        },
+        description = this.annotation?.description,
+        imageURL = this.annotation?.imageURL,
+        annotationType = AnnotationType.fromString(this.annotation?.annotationType),
+        stockInfo = this.annotation?.stockInfo,
+        dictionaryInfo = this.annotation?.dictionaryInfo
+    )
 
 /** Generates Nav Suggestion for Sites in History. */
 fun Site.toNavSuggestion(domainProvider: DomainProvider): NavSuggestion {

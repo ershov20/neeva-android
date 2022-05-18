@@ -20,7 +20,8 @@ enum class ClientLoggerStatus {
 
 class ClientLogger(
     private val apolloWrapper: ApolloWrapper,
-    private val sharedPreferencesModel: SharedPreferencesModel
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val neevaConstants: NeevaConstants
 ) {
     private val env: ClientLogEnvironment =
         if (BuildConfig.DEBUG) ClientLogEnvironment.Dev else ClientLogEnvironment.Prod
@@ -53,7 +54,7 @@ class ClientLogger(
 
         // Check feature flag when we start supporting it
         val clientLogBase =
-            ClientLogBase(NeevaConstants.browserIdentifier, BuildConfig.VERSION_NAME, env)
+            ClientLogBase(neevaConstants.browserIdentifier, BuildConfig.VERSION_NAME, env)
         val clientLogCounter = ClientLogCounter(
             path.interactionName,
             Optional.presentIfNotNull(mutableAttributes)

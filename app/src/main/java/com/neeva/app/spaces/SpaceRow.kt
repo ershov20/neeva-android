@@ -28,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.BitmapIO
@@ -57,8 +56,9 @@ data class SpaceRowData(
     val name: String,
     var thumbnail: Uri?,
     val isPublic: Boolean,
+    val appSpacesURL: String
 ) {
-    fun url(): Uri = Uri.parse("${NeevaConstants.appSpacesURL}/$id")
+    fun url(): Uri = Uri.parse("$appSpacesURL/$id")
 }
 
 @Composable

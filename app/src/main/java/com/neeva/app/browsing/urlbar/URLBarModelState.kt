@@ -3,6 +3,7 @@ package com.neeva.app.browsing.urlbar
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.ui.text.input.TextFieldValue
+import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.isNeevaSearchUri
 import com.neeva.app.suggestions.SuggestionType
 
@@ -40,10 +41,10 @@ data class URLBarModelState(
             ?.takeIf { isAutocompleteAllowed }
             ?.drop(userTypedInput.length)
 
-    fun getSuggestionType(): SuggestionType {
+    fun getSuggestionType(neevaConstants: NeevaConstants): SuggestionType {
         return when {
             autocompleteSuggestion != null -> SuggestionType.AUTOCOMPLETE_SUGGESTION
-            uriToLoad.isNeevaSearchUri() -> SuggestionType.NO_SUGGESTION_QUERY
+            uriToLoad.isNeevaSearchUri(neevaConstants) -> SuggestionType.NO_SUGGESTION_QUERY
             else -> SuggestionType.NO_SUGGESTION_URL
         }
     }

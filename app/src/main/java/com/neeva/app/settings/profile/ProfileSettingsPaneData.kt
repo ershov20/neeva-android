@@ -1,12 +1,14 @@
 package com.neeva.app.settings.profile
 
+import android.net.Uri
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 
-object ProfileSettingsPaneData : SettingsPaneDataInterface {
+class ProfileSettingsPaneData(neevaConstants: NeevaConstants) : SettingsPaneDataInterface {
     // For Profile Settings, the TopAppBar Title is the user's display name.
     override val topAppBarTitleResId: Int = -1
     override val shouldShowUserName: Boolean = true
@@ -26,7 +28,8 @@ object ProfileSettingsPaneData : SettingsPaneDataInterface {
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.SUBSCRIPTION,
-                    primaryLabelId = R.string.settings_membership_status
+                    primaryLabelId = R.string.settings_membership_status,
+                    url = Uri.parse(neevaConstants.appMembershipURL)
                 )
             )
         ),

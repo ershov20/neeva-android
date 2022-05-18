@@ -11,6 +11,7 @@ import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
+import com.neeva.app.NeevaConstants
 import com.neeva.app.TestApolloWrapper
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.type.SpaceACLLevel
@@ -57,13 +58,19 @@ class SpaceStoreTest : BaseTest() {
     private lateinit var spaceStore: SpaceStore
     private lateinit var file: File
     private lateinit var testDispatcher: Dispatchers
+    private lateinit var neevaConstants: NeevaConstants
 
     override fun setUp() {
         super.setUp()
 
+        neevaConstants = NeevaConstants()
+
         context = ApplicationProvider.getApplicationContext()
         database = HistoryDatabase.createInMemory(context)
-        val neevaUserToken = NeevaUserToken(mock())
+        val neevaUserToken = NeevaUserToken(
+            sharedPreferencesModel = mock(),
+            neevaConstants = neevaConstants
+        )
         neevaUserToken.setToken("NotAnEmptyToken")
 
         neevaUser = NeevaUser(
@@ -76,14 +83,15 @@ class SpaceStoreTest : BaseTest() {
             io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
         )
         spaceStore = SpaceStore(
-            context,
-            database,
-            coroutineScopeRule.scope,
-            mock(),
-            apolloWrapper,
-            neevaUser,
-            snackbarModel,
-            testDispatcher
+            appContext = context,
+            historyDatabase = database,
+            coroutineScope = coroutineScopeRule.scope,
+            unauthenticatedApolloWrapper = mock(),
+            authenticatedApolloWrapper = apolloWrapper,
+            neevaUser = neevaUser,
+            neevaConstants = neevaConstants,
+            snackbarModel = snackbarModel,
+            dispatchers = testDispatcher
         )
         file = context.cacheDir.resolve("space_store_test")
     }

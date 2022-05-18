@@ -11,6 +11,7 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
@@ -61,21 +62,31 @@ object NeevaAppModule {
     @Singleton
     fun providesAuthenticatedApolloWrapper(
         neevaUserToken: NeevaUserToken,
+        neevaConstants: NeevaConstants,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers
     ): AuthenticatedApolloWrapper {
         return AuthenticatedApolloWrapper(
-            neevaUserToken, null, coroutineScope, dispatchers
+            neevaUserToken = neevaUserToken,
+            neevaConstants = neevaConstants,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers
         )
     }
 
     @Provides
     @Singleton
     fun providesUnauthenticatedApolloWrapper(
+        neevaConstants: NeevaConstants,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers
     ): UnauthenticatedApolloWrapper {
-        return UnauthenticatedApolloWrapper(null, coroutineScope, dispatchers)
+        return UnauthenticatedApolloWrapper(
+            _apolloClient = null,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants
+        )
     }
 
     @Provides
@@ -83,8 +94,9 @@ object NeevaAppModule {
     fun providesClientLogger(
         apolloWrapper: AuthenticatedApolloWrapper,
         sharedPreferencesModel: SharedPreferencesModel,
+        neevaConstants: NeevaConstants
     ): ClientLogger {
-        return ClientLogger(apolloWrapper, sharedPreferencesModel)
+        return ClientLogger(apolloWrapper, sharedPreferencesModel, neevaConstants)
     }
 
     @Provides
@@ -108,9 +120,16 @@ object NeevaAppModule {
         historyDatabase: HistoryDatabase,
         domainProviderImpl: DomainProviderImpl,
         coroutineScope: CoroutineScope,
-        dispatchers: Dispatchers
+        dispatchers: Dispatchers,
+        neevaConstants: NeevaConstants
     ): HistoryManager {
-        return HistoryManager(historyDatabase, domainProviderImpl, coroutineScope, dispatchers)
+        return HistoryManager(
+            historyDatabase = historyDatabase,
+            domainProvider = domainProviderImpl,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants
+        )
     }
 
     @Provides
@@ -122,18 +141,20 @@ object NeevaAppModule {
         unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
         authenticatedApolloWrapper: AuthenticatedApolloWrapper,
         neevaUser: NeevaUser,
+        neevaConstants: NeevaConstants,
         snackbarModel: SnackbarModel,
         dispatchers: Dispatchers
     ): SpaceStore {
         return SpaceStore(
-            context,
-            historyDatabase,
-            coroutineScope,
-            unauthenticatedApolloWrapper,
-            authenticatedApolloWrapper,
-            neevaUser,
-            snackbarModel,
-            dispatchers
+            appContext = context,
+            historyDatabase = historyDatabase,
+            coroutineScope = coroutineScope,
+            unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
+            authenticatedApolloWrapper = authenticatedApolloWrapper,
+            neevaUser = neevaUser,
+            neevaConstants = neevaConstants,
+            snackbarModel = snackbarModel,
+            dispatchers = dispatchers
         )
     }
 
@@ -145,14 +166,42 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesNeevaUserToken(sharedPreferencesModel: SharedPreferencesModel): NeevaUserToken {
-        return NeevaUserToken(sharedPreferencesModel)
+    fun providesNeevaConstants(settingsDataModel: SettingsDataModel): NeevaConstants {
+        // This is done during initialization so that the app consistently hits the same server during the app's lifetime.
+        // To use a different host, you will need to restart the app.
+        val appHost = when {
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_M1_APP_HOST) -> {
+                "m1.neeva.com"
+            }
+
+            settingsDataModel
+                .getSettingsToggleValue(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST) -> {
+                "local.neeva.dev"
+            }
+
+            else -> {
+                "neeva.com"
+            }
+        }
+        return NeevaConstants(appHost = appHost)
     }
 
     @Provides
     @Singleton
     fun providesNeevaUser(neevaUserToken: NeevaUserToken): NeevaUser {
         return NeevaUser(neevaUserToken = neevaUserToken)
+    }
+
+    @Provides
+    @Singleton
+    fun providesNeevaUserToken(
+        sharedPreferencesModel: SharedPreferencesModel,
+        neevaConstants: NeevaConstants
+    ): NeevaUserToken {
+        return NeevaUserToken(
+            sharedPreferencesModel = sharedPreferencesModel,
+            neevaConstants = neevaConstants
+        )
     }
 
     @Provides
@@ -169,7 +218,8 @@ object NeevaAppModule {
         neevaUser: NeevaUser,
         settingsDataModel: SettingsDataModel,
         clientLogger: ClientLogger,
-        sharedPreferencesModel: SharedPreferencesModel
+        sharedPreferencesModel: SharedPreferencesModel,
+        neevaConstants: NeevaConstants
     ): BrowserWrapperFactory {
         return BrowserWrapperFactory(
             activityCallbackProvider = activityCallbackProvider,
@@ -183,7 +233,8 @@ object NeevaAppModule {
             neevaUser = neevaUser,
             settingsDataModel = settingsDataModel,
             clientLogger = clientLogger,
-            sharedPreferencesModel = sharedPreferencesModel
+            sharedPreferencesModel = sharedPreferencesModel,
+            neevaConstants = neevaConstants
         )
     }
 
@@ -213,6 +264,7 @@ object NeevaAppModule {
         dispatchers: Dispatchers,
         domainProvider: DomainProvider,
         historyManager: HistoryManager,
+        neevaConstants: NeevaConstants,
         neevaUser: NeevaUser,
         overlaySheetModel: OverlaySheetModel,
         settingsDataModel: SettingsDataModel,
@@ -225,6 +277,7 @@ object NeevaAppModule {
             dispatchers = dispatchers,
             domainProvider = domainProvider,
             historyManager = historyManager,
+            neevaConstants = neevaConstants,
             neevaUser = neevaUser,
             overlaySheetModel = overlaySheetModel,
             settingsDataModel = settingsDataModel,

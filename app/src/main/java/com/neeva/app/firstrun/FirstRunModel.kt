@@ -6,6 +6,7 @@ import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.compositionLocalOf
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.sharedprefs.SharedPrefFolder
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 class FirstRunModel @Inject constructor(
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val neevaUserToken: NeevaUserToken,
+    private val neevaConstants: NeevaConstants,
     private var clientLogger: ClientLogger,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
@@ -125,6 +127,7 @@ class FirstRunModel @Inject constructor(
                     activityContext = context,
                     snackbarModel = snackbarModel,
                     neevaUserToken = neevaUserToken,
+                    neevaConstants = neevaConstants,
                     emailProvided = emailProvided,
                     passwordProvided = passwordProvided
                 )

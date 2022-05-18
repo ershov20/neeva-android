@@ -29,14 +29,15 @@ import kotlinx.coroutines.launch
 interface SettingsController {
     //region For General Settings Pane UI behavior
     fun onBackPressed()
-    fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit)?
-    fun getToggleState(key: String?): MutableState<Boolean>?
+    fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit
+    fun getToggleState(settingsToggle: SettingsToggle): MutableState<Boolean>
     fun openUrl(uri: Uri, openViaIntent: Boolean)
     //endregion
 
     //region Main Settings
     fun getOnClickMap(): Map<Int, (() -> Unit)?>
     fun getOnDoubleClickMap(): Map<Int, (() -> Unit)?>
+    fun getToggleChangedCallBackMap(): Map<String, (() -> Unit)?>
     //endregion
 
     //region Profile Settings
@@ -47,7 +48,7 @@ interface SettingsController {
 
     //region Clear Browsing Data
     fun clearBrowsingData(
-        clearingOptions: Map<String, Boolean>,
+        clearingOptions: Map<SettingsToggle, Boolean>,
         timeClearingOption: TimeClearingOption
     )
     //endregion
@@ -81,12 +82,15 @@ class SettingsControllerImpl(
         appNavModel.popBackStack()
     }
 
-    override fun getTogglePreferenceSetter(key: String?): (Boolean) -> Unit {
-        return settingsDataModel.getTogglePreferenceSetter(key)
+    override fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {
+        return { newValue ->
+            getToggleChangedCallBackMap()[settingsToggle.key]?.invoke()
+            settingsDataModel.getTogglePreferenceSetter(settingsToggle)(newValue)
+        }
     }
 
-    override fun getToggleState(key: String?): MutableState<Boolean>? {
-        return settingsDataModel.getToggleState(key)
+    override fun getToggleState(settingsToggle: SettingsToggle): MutableState<Boolean> {
+        return settingsDataModel.getToggleState(settingsToggle)
     }
 
     override fun openUrl(uri: Uri, openViaIntent: Boolean) {
@@ -107,6 +111,26 @@ class SettingsControllerImpl(
     override fun getOnDoubleClickMap(): Map<Int, (() -> Unit)?> {
         return mapOf(
             R.string.settings_neeva_browser_version to { toggleIsAdvancedSettingsAllowed() }
+        )
+    }
+
+    override fun getToggleChangedCallBackMap(): Map<String, (() -> Unit)?> {
+        return mapOf(
+            SettingsToggle.TRACKING_PROTECTION.key to { /*TODO(chung)*/ },
+            SettingsToggle.DEBUG_M1_APP_HOST.key to {
+                /*TODO(kobec): Remind user to restart*/
+                if (getToggleState(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST).value) {
+                    getTogglePreferenceSetter(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST)
+                        .invoke(false)
+                }
+            },
+            SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST.key to {
+                /*TODO(kobec): Remind user to restart*/
+                if (getToggleState(SettingsToggle.DEBUG_M1_APP_HOST).value) {
+                    getTogglePreferenceSetter(SettingsToggle.DEBUG_M1_APP_HOST)
+                        .invoke(false)
+                }
+            }
         )
     }
 
@@ -147,7 +171,7 @@ class SettingsControllerImpl(
     }
 
     override fun clearBrowsingData(
-        clearingOptions: Map<String, Boolean>,
+        clearingOptions: Map<SettingsToggle, Boolean>,
         timeClearingOption: TimeClearingOption
     ) {
         val toMillis = Date().time
@@ -243,11 +267,11 @@ val mockSettingsControllerImpl by lazy {
     object : SettingsController {
         override fun onBackPressed() {}
 
-        override fun getTogglePreferenceSetter(key: String?): ((Boolean) -> Unit) {
+        override fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {
             return { }
         }
 
-        override fun getToggleState(key: String?): MutableState<Boolean> {
+        override fun getToggleState(settingsToggle: SettingsToggle): MutableState<Boolean> {
             return mutableStateOf(false)
         }
 
@@ -265,6 +289,8 @@ val mockSettingsControllerImpl by lazy {
 
         override fun getOnDoubleClickMap(): Map<Int, (() -> Unit)?> = emptyMap()
 
+        override fun getToggleChangedCallBackMap(): Map<String, (() -> Unit)?> = emptyMap()
+
         override fun isSignedOut(): Boolean { return false }
 
         override fun getNeevaUserData(): NeevaUserData {
@@ -278,7 +304,7 @@ val mockSettingsControllerImpl by lazy {
         override fun signOut() {}
 
         override fun clearBrowsingData(
-            clearingOptions: Map<String, Boolean>,
+            clearingOptions: Map<SettingsToggle, Boolean>,
             timeClearingOption: TimeClearingOption
         ) {}
 

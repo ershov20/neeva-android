@@ -69,9 +69,16 @@ abstract class BaseBrowserWrapper internal constructor(
     private val historyManager: HistoryManager?,
     private val tabScreenshotManager: TabScreenshotManager,
     private val sharedPreferencesModel: SharedPreferencesModel,
-    private val domainProvider: DomainProvider
+    private val domainProvider: DomainProvider,
+    val neevaConstants: NeevaConstants
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
-
+    /**
+     * Constructor used to create a BaseBrowserWrapper that automatically creates various internal
+     * classes.
+     *
+     * Tests should use the main constructor directly and pass in mocks for the
+     * [ActiveTabModelImpl], [URLBarModelImpl], and whatever else the test needs.
+     */
     constructor(
         isIncognito: Boolean,
         appContext: Context,
@@ -84,7 +91,8 @@ abstract class BaseBrowserWrapper internal constructor(
         historyManager: HistoryManager?,
         tabScreenshotManager: TabScreenshotManager,
         sharedPreferencesModel: SharedPreferencesModel,
-        domainProvider: DomainProvider
+        domainProvider: DomainProvider,
+        neevaConstants: NeevaConstants
     ) : this(
         isIncognito = isIncognito,
         appContext = appContext,
@@ -97,20 +105,23 @@ abstract class BaseBrowserWrapper internal constructor(
         _activeTabModelImpl = ActiveTabModelImpl(
             spaceStore = spaceStore,
             coroutineScope = coroutineScope,
-            dispatchers = dispatchers
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants
         ),
         _urlBarModel = URLBarModelImpl(
             suggestionFlow = suggestionsModel?.autocompleteSuggestionFlow ?: MutableStateFlow(null),
             appContext = appContext,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
-            faviconCache = faviconCache
+            faviconCache = faviconCache,
+            neevaConstants = neevaConstants
         ),
         _findInPageModel = FindInPageModelImpl(),
         historyManager = historyManager,
         tabScreenshotManager = tabScreenshotManager,
         sharedPreferencesModel = sharedPreferencesModel,
-        domainProvider = domainProvider
+        domainProvider = domainProvider,
+        neevaConstants = neevaConstants
     )
 
     private val tabList = TabList()
@@ -390,7 +401,7 @@ abstract class BaseBrowserWrapper internal constructor(
             onBlankTabCreated = this::onBlankTabCreated,
             onEmptyTabList = {
                 createTabWithUri(
-                    uri = Uri.parse(NeevaConstants.appURL),
+                    uri = Uri.parse(neevaConstants.appURL),
                     parentTabId = null,
                     isViaIntent = false,
                     stayInApp = true
@@ -413,9 +424,9 @@ abstract class BaseBrowserWrapper internal constructor(
 
         // Let Neeva know that it's serving an Android client.
         browser.profile.cookieManager.setCookie(
-            Uri.parse(NeevaConstants.appURL),
-            NeevaConstants.browserTypeCookie.toString() +
-                NeevaConstants.browserVersionCookie.toString(),
+            Uri.parse(neevaConstants.appURL),
+            neevaConstants.browserTypeCookie.toString() +
+                neevaConstants.browserVersionCookie.toString(),
             null
         )
 

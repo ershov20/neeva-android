@@ -2,16 +2,15 @@ package com.neeva.app.settings.clearBrowsing
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.NeevaConstants
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun ClearBrowsingPane(
-    settingsController: SettingsController
-) {
-    SettingsPane(settingsController, ClearBrowsingPaneData)
+fun ClearBrowsingPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
+    SettingsPane(settingsController, ClearBrowsingPaneData(neevaConstants))
 }
 
 @Preview(name = "Clear Browsing Pane, 1x font size", locale = "en")
@@ -21,7 +20,7 @@ fun ClearBrowsingPane(
 @Composable
 fun ClearBrowsingSettings_Preview() {
     NeevaTheme {
-        ClearBrowsingPane(mockSettingsControllerImpl)
+        ClearBrowsingPane(mockSettingsControllerImpl, neevaConstants = NeevaConstants())
     }
 }
 
@@ -32,6 +31,6 @@ fun ClearBrowsingSettings_Preview() {
 @Composable
 fun ClearBrowsingSettings_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        ClearBrowsingPane(mockSettingsControllerImpl)
+        ClearBrowsingPane(mockSettingsControllerImpl, neevaConstants = NeevaConstants())
     }
 }

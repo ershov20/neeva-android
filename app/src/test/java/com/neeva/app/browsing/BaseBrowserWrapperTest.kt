@@ -73,6 +73,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var browserWrapper: BrowserWrapper
     private lateinit var context: Context
     private lateinit var dispatchers: Dispatchers
+    private lateinit var neevaConstants: NeevaConstants
     private lateinit var profile: Profile
     private lateinit var urlBarModel: URLBarModelImpl
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
@@ -101,6 +102,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     override fun setUp() {
         super.setUp()
 
+        neevaConstants = NeevaConstants()
         context = ApplicationProvider.getApplicationContext()
 
         navigationInfoFlow = MutableStateFlow(ActiveTabModel.NavigationInfo())
@@ -178,10 +180,11 @@ class BaseBrowserWrapperTest : BaseTest() {
             _activeTabModelImpl = activeTabModelImpl,
             _urlBarModel = urlBarModel,
             _findInPageModel = findInPageModel,
-            historyManager = this@BaseBrowserWrapperTest.historyManager,
-            tabScreenshotManager = this@BaseBrowserWrapperTest.tabScreenshotManager,
+            historyManager = historyManager,
+            tabScreenshotManager = tabScreenshotManager,
             sharedPreferencesModel = sharedPreferencesModel,
-            domainProvider = domainProvider
+            domainProvider = domainProvider,
+            neevaConstants = neevaConstants
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment
@@ -249,7 +252,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             urlCaptor.capture(),
             navigateParamsCaptor.capture()
         )
-        expectThat(urlCaptor.lastValue).isEqualTo(Uri.parse(NeevaConstants.appURL))
+        expectThat(urlCaptor.lastValue).isEqualTo(Uri.parse(neevaConstants.appURL))
         expectThat(navigateParamsCaptor.lastValue.isIntentProcessingDisabled).isEqualTo(true)
     }
 
@@ -318,7 +321,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         verify(activeTabModelImpl, never())
-            .loadUrlInActiveTab(eq(Uri.parse(NeevaConstants.appURL)), any())
+            .loadUrlInActiveTab(eq(Uri.parse(neevaConstants.appURL)), any())
         verify(activeTabModelImpl, never()).loadUrlInActiveTab(eq(expectedUri), any())
 
         // Finish browser restoration.  It should have allowed the blocked URL to load and create
@@ -330,7 +333,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         verify(browser, times(2)).createTab()
         verify(mockTabs.first().navigationController)
-            .navigate(eq(Uri.parse(NeevaConstants.appURL)), any())
+            .navigate(eq(Uri.parse(neevaConstants.appURL)), any())
         verify(mockTabs.last().navigationController).navigate(eq(expectedUri), any())
         expectThat(browserWrapper.orderedTabList.value).hasSize(2)
     }

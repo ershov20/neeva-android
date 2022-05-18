@@ -117,6 +117,7 @@
     <string name="settings_sign_out">Sign out</string>
     <string name="settings_data_on_this_device">Data on this device</string>
     <string name="settings_clear_selected_data_on_device">Clear selected data on this device</string>
+    <string name="settings_clear_downloaded_files">Clear downloaded files</string>
     <string name="settings_browsing_history">Browsing history</string>
     <string name="settings_cache">Cache</string>
     <string name="settings_cookies_primary">Cookies</string>
@@ -206,4 +207,6 @@
     <string name="settings_debug_enable_show_desktop_site" translatable="false">Enable Show Desktop Site in Overflow Menu</string>
     <string name="settings_debug_open_50_tabs" translatable="false">Open 50 tabs</string>
     <string name="settings_debug_export_database" translatable="false">Export database</string>
+    <string name="settings_debug_m1_apphost" translatable="false">Enable using the m1.neeva.com app host</string>
+    <string name="settings_debug_local_neeva_dev_apphost" translatable="false">Enable using the local.neeva.dev app host</string>
 </resources>

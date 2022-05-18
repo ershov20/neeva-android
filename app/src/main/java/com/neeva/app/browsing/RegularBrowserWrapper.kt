@@ -39,7 +39,8 @@ class RegularBrowserWrapper(
     settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
     clientLogger: ClientLogger,
-    sharedPreferencesModel: SharedPreferencesModel
+    sharedPreferencesModel: SharedPreferencesModel,
+    neevaConstants: NeevaConstants
 ) : BaseBrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -47,12 +48,13 @@ class RegularBrowserWrapper(
     dispatchers = dispatchers,
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = SuggestionsModel(
-        coroutineScope,
-        historyManager,
-        settingsDataModel,
-        apolloWrapper,
-        dispatchers,
-        clientLogger
+        coroutineScope = coroutineScope,
+        historyManager = historyManager,
+        settingsDataModel = settingsDataModel,
+        apolloWrapper = apolloWrapper,
+        dispatchers = dispatchers,
+        neevaConstants = neevaConstants,
+        clientLogger = clientLogger
     ),
     faviconCache = RegularFaviconCache(
         filesDir = appContext.cacheDir,
@@ -64,7 +66,8 @@ class RegularBrowserWrapper(
     historyManager = historyManager,
     tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir),
     sharedPreferencesModel = sharedPreferencesModel,
-    domainProvider = domainProvider
+    domainProvider = domainProvider,
+    neevaConstants = neevaConstants
 ) {
     companion object {
         /**
@@ -102,20 +105,20 @@ class RegularBrowserWrapper(
         // user's data with their Incognito history.
         browser.profile.cookieManager.apply {
             // Asynchronously parse out a pre-existing login cookie and store it locally.
-            getCookiePairs(Uri.parse(NeevaConstants.appURL)) { cookies ->
+            getCookiePairs(Uri.parse(neevaConstants.appURL)) { cookies ->
                 cookies
-                    .filter { it.key == NeevaConstants.loginCookie }
+                    .filter { it.key == neevaConstants.loginCookie }
                     .forEach { neevaUser.neevaUserToken.setToken(it.value) }
             }
 
             // If Neeva's login cookie changes, we need to save it and refetch the user's data.
             addCookieChangedCallback(
-                Uri.parse(NeevaConstants.appURL),
-                NeevaConstants.loginCookie,
+                Uri.parse(neevaConstants.appURL),
+                neevaConstants.loginCookie,
                 object : CookieChangedCallback() {
                     override fun onCookieChanged(cookie: String, cause: Int) {
                         val key = cookie.trim().substringBefore('=')
-                        if (key != NeevaConstants.loginCookie || !cookie.contains('=')) return
+                        if (key != neevaConstants.loginCookie || !cookie.contains('=')) return
 
                         val value = cookie.trim().substringAfter('=')
                         neevaUser.neevaUserToken.setToken(value)
@@ -130,7 +133,7 @@ class RegularBrowserWrapper(
             // scenarios where the user logs via the app.
             if (neevaUser.neevaUserToken.getToken().isNotEmpty()) {
                 setCookie(
-                    Uri.parse(NeevaConstants.appURL),
+                    Uri.parse(neevaConstants.appURL),
                     neevaUser.neevaUserToken.loginCookieString()
                 ) {}
             }
@@ -141,6 +144,6 @@ class RegularBrowserWrapper(
 
     override fun onBlankTabCreated(tab: Tab) {
         // Direct the tab to go to the home page instead of leaving it on `about:blank`.
-        tab.navigationController.navigate(Uri.parse(NeevaConstants.appURL))
+        tab.navigationController.navigate(Uri.parse(neevaConstants.appURL))
     }
 }

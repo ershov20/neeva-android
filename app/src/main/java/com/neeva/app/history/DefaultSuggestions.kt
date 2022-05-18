@@ -1,11 +1,12 @@
 package com.neeva.app.history
 
+import com.neeva.app.NeevaConstants
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.zeroQuery.toSearchSuggest
 
 /** Default placeholder suggestions for the zero query surface */
-object DefaultSuggestions {
+class DefaultSuggestions(neevaConstants: NeevaConstants) {
     val DEFAULT_SITE_SUGGESTIONS = listOf(
         Site(
             siteURL = "https://wikipedia.org",
@@ -76,5 +77,5 @@ object DefaultSuggestions {
     )
     val DEFAULT_SEARCH_SUGGESTIONS = listOf(
         "Best Headphones", "Lemon Bar Recipe", "React Hooks"
-    ).map { it.toSearchSuggest() }
+    ).map { it.toSearchSuggest(neevaConstants) }
 }

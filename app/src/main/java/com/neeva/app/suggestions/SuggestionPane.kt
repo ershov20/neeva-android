@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 @Composable
 fun SuggestionPane(modifier: Modifier = Modifier) {
     val historyManager = LocalEnvironment.current.historyManager
+    val neevaConstants = LocalEnvironment.current.neevaConstants
 
     val browserWrapper = LocalBrowserWrapper.current
     val urlBarModel = browserWrapper.urlBarModel
@@ -70,7 +71,8 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
             else -> {
                 ZeroQuery(
                     urlBarModel = urlBarModel,
-                    faviconCache = faviconCache
+                    faviconCache = faviconCache,
+                    neevaConstants = neevaConstants
                 ) {
                     CurrentPageRow(browserWrapper)
                 }

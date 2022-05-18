@@ -38,7 +38,7 @@ class CardGridBehaviorTest {
         scenario.onActivity {
             // Disable asking the user before closing all their tabs.
             it.settingsDataModel
-                .getTogglePreferenceSetter(SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE.key)
+                .getTogglePreferenceSetter(SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE)
                 .invoke(false)
         }
 

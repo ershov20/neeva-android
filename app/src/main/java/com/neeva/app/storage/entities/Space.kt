@@ -3,7 +3,7 @@ package com.neeva.app.storage.entities
 import android.net.Uri
 import androidx.room.ColumnInfo
 import androidx.room.PrimaryKey
-import com.neeva.app.NeevaConstants.appSpacesURL
+import com.neeva.app.NeevaConstants
 import com.neeva.app.type.SpaceACLLevel
 
 @androidx.room.Entity(tableName = "Space")
@@ -32,5 +32,6 @@ data class Space(
     @ColumnInfo(defaultValue = "0")
     val numFollowers: Int = 0
 ) {
-    fun url(): Uri = Uri.parse("$appSpacesURL/$id")
+    fun url(neevaConstants: NeevaConstants): Uri =
+        Uri.parse("${neevaConstants.appSpacesURL}/$id")
 }

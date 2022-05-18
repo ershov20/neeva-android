@@ -41,7 +41,8 @@ class AppNavModelImpl(
     private val overlaySheetModel: OverlaySheetModel,
     private val snackbarModel: SnackbarModel,
     private val clientLogger: ClientLogger,
-    private val onTakeScreenshot: (callback: () -> Unit) -> Unit
+    private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
+    private val neevaConstants: NeevaConstants
 ) : AppNavModel {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     override val currentDestination: StateFlow<NavDestination?>
@@ -187,7 +188,7 @@ class AppNavModelImpl(
     }
 
     override fun showHelp() {
-        openUrl(Uri.parse(NeevaConstants.appHelpCenterURL))
+        openUrl(Uri.parse(neevaConstants.appHelpCenterURL))
     }
 
     override fun shareCurrentPage() {
@@ -255,7 +256,7 @@ class AppNavModelImpl(
             }
 
             OverflowMenuItemId.UPDATE -> {
-                openUrlViaIntent(NeevaConstants.playStoreUri)
+                openUrlViaIntent(neevaConstants.playStoreUri)
             }
 
             OverflowMenuItemId.DOWNLOADS -> {
@@ -263,7 +264,7 @@ class AppNavModelImpl(
             }
 
             OverflowMenuItemId.SPACES_WEBSITE -> {
-                openUrl(Uri.parse(NeevaConstants.appSpacesURL))
+                openUrl(Uri.parse(neevaConstants.appSpacesURL))
             }
 
             OverflowMenuItemId.CLOSE_ALL_TABS -> {

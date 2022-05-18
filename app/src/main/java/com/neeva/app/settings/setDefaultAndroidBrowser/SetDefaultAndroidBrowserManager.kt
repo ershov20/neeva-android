@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.neeva.app.NeevaConstants
 
 /**
  * Used to check/set the Default Browser.
@@ -23,11 +24,14 @@ abstract class SetDefaultAndroidBrowserManager {
     abstract fun requestToBeDefaultBrowser()
 
     companion object {
-        fun create(activity: AppCompatActivity): SetDefaultAndroidBrowserManager {
+        fun create(
+            activity: AppCompatActivity,
+            neevaConstants: NeevaConstants
+        ): SetDefaultAndroidBrowserManager {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 NeevaRoleManager(activity)
             } else {
-                PreQDefaultBrowserSetter(activity)
+                PreQDefaultBrowserSetter(activity, neevaConstants)
             }
         }
     }

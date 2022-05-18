@@ -9,7 +9,10 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 /**
  * Singleton that provides and saves Neeva user identity token to SharedPrefs.
  */
-class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
+class NeevaUserToken(
+    val sharedPreferencesModel: SharedPreferencesModel,
+    val neevaConstants: NeevaConstants
+) {
     var cachedToken: String = ""
     init {
         cachedToken = getTokenFromSharedPref()
@@ -31,7 +34,7 @@ class NeevaUserToken(val sharedPreferencesModel: SharedPreferencesModel) {
     }
 
     fun loginCookieString(): String {
-        return "${NeevaConstants.loginCookie}=${getToken()}"
+        return "${neevaConstants.loginCookie}=${getToken()}"
     }
 
     fun getToken(): String {

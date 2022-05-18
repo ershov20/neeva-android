@@ -35,7 +35,7 @@ import com.neeva.app.browsing.findinpage.PreviewFindInPageModel
 import com.neeva.app.browsing.urlbar.URLBar
 import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.overflowmenu.OverflowMenu
-import com.neeva.app.settings.LocalDebugFlags
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -47,7 +47,7 @@ fun BrowserToolbarContainer(topOffset: Float) {
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
 
     val enableShowDesktopSite = LocalEnvironment.current.settingsDataModel
-        .getDebugFlagValue(LocalDebugFlags.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
+        .getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
 
     BrowserToolbar(
         findInPageModel = findInPageModel,

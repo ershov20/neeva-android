@@ -16,7 +16,9 @@ class NeevaWidgetProvider : AppWidgetProvider() {
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
-    ) = appWidgetIds.forEach { appWidgetId -> updateWidget(context, appWidgetManager, appWidgetId) }
+    ) = appWidgetIds.forEach { appWidgetId ->
+        updateWidget(context, appWidgetManager, appWidgetId, NeevaConstants().appURL)
+    }
 
     companion object {
         private fun createPendingIntent(context: Context, intent: Intent): PendingIntent {
@@ -28,7 +30,12 @@ class NeevaWidgetProvider : AppWidgetProvider() {
             )
         }
 
-        fun updateWidget(context: Context, appWidgetManager: AppWidgetManager, appWidgetId: Int) {
+        fun updateWidget(
+            context: Context,
+            appWidgetManager: AppWidgetManager,
+            appWidgetId: Int,
+            appURL: String
+        ) {
             val urlBarIntent = createPendingIntent(
                 context,
                 Intent(context, NeevaActivity::class.java).setAction(NeevaActivity.ACTION_NEW_TAB)
@@ -44,7 +51,7 @@ class NeevaWidgetProvider : AppWidgetProvider() {
 
             val homeIntent = createPendingIntent(
                 context,
-                Intent(Intent.ACTION_VIEW, Uri.parse(NeevaConstants.appURL))
+                Intent(Intent.ACTION_VIEW, Uri.parse(appURL))
                     .setPackage(context.packageName)
             )
 

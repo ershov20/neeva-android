@@ -6,6 +6,7 @@ import android.util.Log
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.StartIncognitoMutation
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -31,7 +32,8 @@ class IncognitoBrowserWrapper private constructor(
     private val incognitoFaviconCache: IncognitoFaviconCache,
     tabScreenshotManager: IncognitoTabScreenshotManager,
     sharedPreferencesModel: SharedPreferencesModel,
-    domainProvider: DomainProvider
+    domainProvider: DomainProvider,
+    neevaConstants: NeevaConstants
 ) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
@@ -44,7 +46,8 @@ class IncognitoBrowserWrapper private constructor(
     historyManager = null,
     tabScreenshotManager = tabScreenshotManager,
     sharedPreferencesModel = sharedPreferencesModel,
-    domainProvider = domainProvider
+    domainProvider = domainProvider,
+    neevaConstants = neevaConstants
 ) {
     constructor(
         appContext: Context,
@@ -56,7 +59,8 @@ class IncognitoBrowserWrapper private constructor(
         domainProvider: DomainProvider,
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
         tempDirectory: File = appContext.cacheDir.resolve(FOLDER_PREFIX),
-        sharedPreferencesModel: SharedPreferencesModel
+        sharedPreferencesModel: SharedPreferencesModel,
+        neevaConstants: NeevaConstants
     ) : this(
         appContext = appContext,
         cacheCleaner = cacheCleaner,
@@ -73,7 +77,8 @@ class IncognitoBrowserWrapper private constructor(
         ),
         tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory),
         sharedPreferencesModel = sharedPreferencesModel,
-        domainProvider = domainProvider
+        domainProvider = domainProvider,
+        neevaConstants = neevaConstants
     )
 
     companion object {
@@ -124,7 +129,7 @@ class IncognitoBrowserWrapper private constructor(
     }
 
     override fun shouldInterceptLoad(uri: Uri): Boolean {
-        return !isIncognitoMutationPerformed && uri.isNeevaUri()
+        return !isIncognitoMutationPerformed && uri.isNeevaUri(neevaConstants)
     }
 
     /** Perform the mutation necessary to get the Incognito URL. */

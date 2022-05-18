@@ -8,6 +8,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.storage.favicons.FaviconCache
@@ -42,19 +43,22 @@ class URLBarModelImplTest : BaseTest() {
     @Rule @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    @Mock private lateinit var faviconCache: FaviconCache
-
+    private lateinit var activeTabModel: ActiveTabModel
     private lateinit var dispatchers: Dispatchers
+    private lateinit var model: URLBarModelImpl
+    private lateinit var neevaConstants: NeevaConstants
     private lateinit var suggestionFlow: MutableStateFlow<NavSuggestion?>
     private lateinit var urlFlow: MutableStateFlow<Uri>
-    private lateinit var activeTabModel: ActiveTabModel
-    private lateinit var model: URLBarModelImpl
 
     private val urlBarModelText: String
         get() = model.stateFlow.value.userTypedInput
 
+    @Mock private lateinit var faviconCache: FaviconCache
+
     override fun setUp() {
         super.setUp()
+
+        neevaConstants = NeevaConstants()
 
         dispatchers = Dispatchers(
             main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
@@ -71,7 +75,8 @@ class URLBarModelImplTest : BaseTest() {
             appContext = ApplicationProvider.getApplicationContext(),
             coroutineScope = coroutineScopeRule.scope,
             faviconCache = faviconCache,
-            dispatchers = dispatchers
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants
         )
     }
 
@@ -145,7 +150,7 @@ class URLBarModelImplTest : BaseTest() {
             expectThat(it.textFieldValue.text).isEqualTo("exam")
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
-            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri())
+            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri(neevaConstants))
             expectThat(it.faviconBitmap).isEqualTo(null)
         }
 
@@ -172,7 +177,7 @@ class URLBarModelImplTest : BaseTest() {
             expectThat(it.textFieldValue.text).isEqualTo("exam")
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
-            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri())
+            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri(neevaConstants))
             expectThat(it.faviconBitmap).isEqualTo(null)
         }
 
@@ -183,7 +188,7 @@ class URLBarModelImplTest : BaseTest() {
             expectThat(it.textFieldValue.text).isEqualTo("exa")
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
-            expectThat(it.uriToLoad).isEqualTo("exa".toSearchUri())
+            expectThat(it.uriToLoad).isEqualTo("exa".toSearchUri(neevaConstants))
             expectThat(it.faviconBitmap).isEqualTo(null)
         }
     }
@@ -299,7 +304,7 @@ class URLBarModelImplTest : BaseTest() {
             expectThat(it.textFieldValue.text).isEqualTo("exam_")
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
-            expectThat(it.uriToLoad).isEqualTo("exam_".toSearchUri())
+            expectThat(it.uriToLoad).isEqualTo("exam_".toSearchUri(neevaConstants))
             expectThat(it.faviconBitmap).isEqualTo(null)
         }
 
@@ -405,7 +410,7 @@ class URLBarModelImplTest : BaseTest() {
         model.stateFlow.value.let {
             expectThat(it.autocompleteSuggestion).isNull()
             expectThat(it.autocompleteSuggestionText).isNull()
-            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri())
+            expectThat(it.uriToLoad).isEqualTo("exam".toSearchUri(neevaConstants))
             expectThat(it.faviconBitmap).isEqualTo(model.neevaFavicon)
         }
 
@@ -505,15 +510,18 @@ class URLBarModelImplTest : BaseTest() {
     @Test
     fun getUrlToLoad_withUrl_returnsUrl() {
         expectThat(
-            URLBarModelImpl.getUrlToLoad("https://www.url.bar.contents.com").toString()
+            URLBarModelImpl.getUrlToLoad(
+                "https://www.url.bar.contents.com",
+                neevaConstants
+            ).toString()
         ).isEqualTo("https://www.url.bar.contents.com")
     }
 
     @Test
     fun getUrlToLoad_withQuery_returnsUrl() {
         expectThat(
-            URLBarModelImpl.getUrlToLoad("query text")
-        ).isEqualTo("query text".toSearchUri())
+            URLBarModelImpl.getUrlToLoad("query text", neevaConstants)
+        ).isEqualTo("query text".toSearchUri(neevaConstants))
     }
 
     @Test

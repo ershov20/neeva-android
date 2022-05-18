@@ -1,5 +1,6 @@
 package com.neeva.app.browsing.toolbar
 
+import com.neeva.app.NeevaConstants
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActiveTabModel
@@ -12,7 +13,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class BrowserToolbarModelImpl(
     private val appNavModel: AppNavModel,
     private val browserWrapper: BrowserWrapper,
-    private val toolbarConfiguration: ToolbarConfiguration
+    private val toolbarConfiguration: ToolbarConfiguration,
+    private val neevaConstants: NeevaConstants
 ) : BrowserToolbarModel() {
     override fun goBack() = browserWrapper.goBack()
     override fun goForward() = browserWrapper.goForward()
@@ -31,7 +33,7 @@ class BrowserToolbarModelImpl(
     override fun onLoadUrl(urlBarModelState: URLBarModelState) {
         browserWrapper.loadUrl(urlBarModelState.uriToLoad)
         browserWrapper.suggestionsModel?.logSuggestionTap(
-            urlBarModelState.getSuggestionType(),
+            urlBarModelState.getSuggestionType(neevaConstants),
             null
         )
     }

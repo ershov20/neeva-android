@@ -13,6 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
 import com.neeva.app.firstrun.OnboardingButton
@@ -31,9 +32,11 @@ fun SignUpLandingContainer(
     onClose: () -> Unit,
     navigateToSignIn: () -> Unit,
     showSignUpWithOther: () -> Unit,
-    useDarkThemeForPreviews: Boolean? = null
+    useDarkThemeForPreviews: Boolean? = null,
+    neevaConstants: NeevaConstants
 ) {
     val useDarkTheme = useDarkThemeForPreviews ?: isSystemInDarkTheme()
+
     OnboardingContainer(
         showBrowser = onClose,
         useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn,
@@ -44,6 +47,7 @@ fun SignUpLandingContainer(
             openInCustomTabs = openInCustomTabs,
             showSignUpWithOther = showSignUpWithOther,
             useDarkThemeForPreviews = useDarkTheme,
+            neevaConstants = neevaConstants,
             modifier = modifier
         )
     }
@@ -55,6 +59,7 @@ fun SignUpLandingScreen(
     openInCustomTabs: (Uri) -> Unit,
     showSignUpWithOther: () -> Unit,
     useDarkThemeForPreviews: Boolean,
+    neevaConstants: NeevaConstants,
     modifier: Modifier
 ) {
     Column(modifier = modifier) {
@@ -89,7 +94,11 @@ fun SignUpLandingScreen(
 
         Spacer(modifier = Modifier.height(38.dp))
 
-        AcknowledgementText(openInCustomTabs = openInCustomTabs)
+        AcknowledgementText(
+            openInCustomTabs = openInCustomTabs,
+            appTermsURL = neevaConstants.appTermsURL,
+            appPrivacyURL = neevaConstants.appPrivacyURL
+        )
 
         Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
     }
@@ -105,7 +114,8 @@ fun SignUpLanding_Light_Preview() {
             openInCustomTabs = {},
             onClose = {},
             navigateToSignIn = {},
-            showSignUpWithOther = {}
+            showSignUpWithOther = {},
+            neevaConstants = NeevaConstants()
         )
     }
 }
@@ -121,7 +131,8 @@ fun SignUpLanding_Dark_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
-            useDarkThemeForPreviews = true
+            useDarkThemeForPreviews = true,
+            neevaConstants = NeevaConstants()
         )
     }
 }
@@ -136,7 +147,8 @@ fun SignUpLanding_Landscape_Preview() {
             openInCustomTabs = {},
             onClose = {},
             navigateToSignIn = {},
-            showSignUpWithOther = {}
+            showSignUpWithOther = {},
+            neevaConstants = NeevaConstants()
         )
     }
 }
@@ -152,7 +164,8 @@ fun SignUpLanding_Dark_Landscape_Preview() {
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
-            useDarkThemeForPreviews = true
+            useDarkThemeForPreviews = true,
+            neevaConstants = NeevaConstants()
         )
     }
 }

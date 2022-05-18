@@ -36,6 +36,7 @@ class ActiveTabModelImplTest : BaseTest() {
     private lateinit var model: ActiveTabModelImpl
 
     private lateinit var mainTab: MockTabHarness
+    private lateinit var neevaConstants: NeevaConstants
     private lateinit var neevaHomepageTab: MockTabHarness
     private lateinit var neevaSearchTab: MockTabHarness
     private lateinit var neevaSpacesTab: MockTabHarness
@@ -44,9 +45,12 @@ class ActiveTabModelImplTest : BaseTest() {
     override fun setUp() {
         super.setUp()
 
+        neevaConstants = NeevaConstants()
+
         model = ActiveTabModelImpl(
             coroutineScope = mock(),
-            dispatchers = mock()
+            dispatchers = mock(),
+            neevaConstants = neevaConstants
         )
 
         mainTab = MockTabHarness(
@@ -57,7 +61,7 @@ class ActiveTabModelImplTest : BaseTest() {
         )
         neevaHomepageTab = MockTabHarness(
             currentTitle = "Neeva homepage",
-            currentUri = Uri.parse(NeevaConstants.appURL),
+            currentUri = Uri.parse(neevaConstants.appURL),
             canGoBack = false,
             canGoForward = false
         )

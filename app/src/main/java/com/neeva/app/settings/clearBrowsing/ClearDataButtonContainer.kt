@@ -11,21 +11,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsRowData
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
 
 @Composable
-fun ClearDataButtonView(
-    getToggleState: (key: String?) -> MutableState<Boolean>?,
+fun ClearDataButtonContainer(
+    getToggleState: (SettingsToggle) -> MutableState<Boolean>,
     rowData: SettingsRowData,
-    onClearBrowsingData: (Map<String, Boolean>, TimeClearingOption) -> Unit
+    onClearBrowsingData: (Map<SettingsToggle, Boolean>, TimeClearingOption) -> Unit
 ) {
-    val title = stringResource(id = rowData.primaryLabelId)
+    val title = rowData.primaryLabelId?.let { stringResource(id = it) }
     val showDialog = remember { mutableStateOf(false) }
     val cleared = remember { mutableStateOf(false) }
 
     ClearDataButton(
-        text = title,
+        text = title ?: "",
         cleared = cleared.value,
         openDialog = { showDialog.value = true }
     )
@@ -33,10 +34,9 @@ fun ClearDataButtonView(
         ClearBrowsingDialog(
             confirmAction = { timeClearingOption ->
                 onClearBrowsingData(
-                    getClearingOptionsMap(
-                        ClearBrowsingPaneData.data[0].rows,
-                        getToggleState
-                    ),
+                    ClearBrowsingPaneData.timeClearingOptionToggles
+                        .mapNotNull { it.settingsToggle }
+                        .associateWith { getToggleState(it).value },
                     timeClearingOption
                 )
                 cleared.value = true
@@ -74,20 +74,6 @@ fun ClearDataButton(
             )
         }
     }
-}
-
-private fun getClearingOptionsMap(
-    rowData: List<SettingsRowData>,
-    getToggleState: (String?) -> MutableState<Boolean>?
-): MutableMap<String, Boolean> {
-    val clearingOptions = mutableMapOf<String, Boolean>()
-    rowData.forEach {
-        if (it.togglePreferenceKey != null) {
-            val clearOptionValue = getToggleState(it.togglePreferenceKey)?.value ?: false
-            clearingOptions[it.togglePreferenceKey] = clearOptionValue
-        }
-    }
-    return clearingOptions
 }
 
 class ClearDataButtonPreviews {

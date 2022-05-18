@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.spaces.SpaceGrid
 import com.neeva.app.cardgrid.tabs.TabGrid
@@ -20,6 +21,7 @@ fun CardGridContainer(
     cardsPaneModel: CardsPaneModel,
     previousScreen: SelectedScreen?,
     selectedScreen: SelectedScreen,
+    neevaConstants: NeevaConstants,
     modifier: Modifier = Modifier
 ) {
     val browsersFlow = webLayerModel.browsersFlow.collectAsState()
@@ -89,6 +91,7 @@ fun CardGridContainer(
             SpaceGrid(
                 browserWrapper = browsersFlow.value.regularBrowserWrapper,
                 cardsPaneModel = cardsPaneModel,
+                neevaConstants = neevaConstants,
                 modifier = Modifier.fillMaxWidth()
             )
         }

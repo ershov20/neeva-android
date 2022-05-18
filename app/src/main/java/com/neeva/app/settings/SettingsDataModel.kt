@@ -2,12 +2,13 @@ package com.neeva.app.settings
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.neeva.app.settings.clearBrowsing.TimeClearingOption
 import com.neeva.app.settings.clearBrowsing.TimeClearingOptionsConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 
 /**
- * A data model for getting any Settings-related state (SettingsToggle or SelectedTimeClearingOption).
+ * A data model for getting any Settings-related state ([SettingsToggle] or [TimeClearingOption]).
  * Used to get toggle states in SettingsController.
  * FEATURE FLAGGING: used in any @Composable or anywhere else to get if a Feature Flag is enabled.
  *
@@ -26,9 +27,6 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         SettingsToggle.values().forEach {
             toggleMap[it.key] = mutableStateOf(getSharedPrefValue(it.key, it.defaultValue))
         }
-        LocalDebugFlags.values().forEach {
-            toggleMap[it.key] = mutableStateOf(getSharedPrefValue(it.key, it.defaultValue))
-        }
     }
 
     private fun <T> getSharedPrefValue(key: String, defaultValue: T): T {
@@ -39,28 +37,20 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         sharedPreferencesModel.setValue(SharedPrefFolder.SETTINGS, key, newValue)
     }
 
-    fun getTogglePreferenceSetter(togglePreferenceKey: String?): (Boolean) -> Unit {
+    fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {
         return { newToggleValue ->
-            val toggleState = toggleMap[togglePreferenceKey]
-            toggleState?.value = newToggleValue
-            togglePreferenceKey?.let { setSharedPrefValue(it, newToggleValue) }
+            getToggleState(settingsToggle).value = newToggleValue
+            setSharedPrefValue(settingsToggle.key, newToggleValue)
         }
     }
 
     fun getSettingsToggleValue(settingsToggle: SettingsToggle): Boolean {
-        return getToggleValue(settingsToggle.key, settingsToggle.defaultValue)
+        return getToggleState(settingsToggle).value
     }
 
-    fun getDebugFlagValue(settingsToggle: LocalDebugFlags): Boolean {
-        return getToggleValue(settingsToggle.key, settingsToggle.defaultValue)
-    }
-
-    private fun getToggleValue(toggleKeyName: String?, defaultValue: Boolean): Boolean {
-        return getToggleState(toggleKeyName)?.value ?: defaultValue
-    }
-
-    fun getToggleState(toggleKeyName: String?): MutableState<Boolean>? {
-        return toggleKeyName?.let { toggleMap[toggleKeyName] }
+    fun getToggleState(settingsToggle: SettingsToggle): MutableState<Boolean> {
+        check(toggleMap[settingsToggle.key] != null)
+        return toggleMap[settingsToggle.key] ?: mutableStateOf(false)
     }
 
     fun getTimeClearingOptionIndex(): MutableState<Int> {
@@ -73,6 +63,6 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
 
     fun toggleIsAdvancedSettingsAllowed() {
         val newValue = !getSettingsToggleValue(SettingsToggle.IS_ADVANCED_SETTINGS_ALLOWED)
-        getTogglePreferenceSetter(SettingsToggle.IS_ADVANCED_SETTINGS_ALLOWED.key).invoke(newValue)
+        getTogglePreferenceSetter(SettingsToggle.IS_ADVANCED_SETTINGS_ALLOWED).invoke(newValue)
     }
 }

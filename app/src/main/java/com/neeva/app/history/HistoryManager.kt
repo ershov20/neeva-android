@@ -32,7 +32,8 @@ class HistoryManager(
     historyDatabase: HistoryDatabase,
     private val domainProvider: DomainProvider,
     private val coroutineScope: CoroutineScope,
-    private val dispatchers: Dispatchers
+    private val dispatchers: Dispatchers,
+    private val neevaConstants: NeevaConstants
 ) {
     companion object {
         private const val MAX_FREQUENT_SITES = 40
@@ -60,8 +61,10 @@ class HistoryManager(
 
     /** Provides the top 3 suggestions based on how often a user visited a site. */
     val suggestedQueries: Flow<List<QueryRowSuggestion>> = dao
-        .getQuerySuggestionsFlow()
-        .map { siteList -> siteList.mapNotNull { it.toSearchSuggest() }.take(3) }
+        .getQuerySuggestionsFlow(query = neevaConstants.appSearchURL)
+        .map { siteList ->
+            siteList.mapNotNull { it.toSearchSuggest(neevaConstants) }.take(3)
+        }
 
     /** Provides non-Neeva sites from history as suggestions. */
     val suggestedSites: Flow<List<Site>> =
@@ -70,7 +73,7 @@ class HistoryManager(
             // This includes search suggestions and Spaces, e.g.
             sites.filterNot {
                 val registeredDomain = domainProvider.getRegisteredDomain(Uri.parse(it.siteURL))
-                registeredDomain == NeevaConstants.appHost
+                registeredDomain == neevaConstants.appHost
             }
         }
 

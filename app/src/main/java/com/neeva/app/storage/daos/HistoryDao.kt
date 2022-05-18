@@ -7,7 +7,6 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
-import com.neeva.app.NeevaConstants
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
@@ -107,7 +106,7 @@ interface HistoryDao : SiteDao, VisitDao {
     )
     /** Get query suggestions as a flow. By default, it gives 3 most recent search suggestions. */
     fun getQuerySuggestionsFlow(
-        query: String = NeevaConstants.appSearchURL,
+        query: String,
         limit: Int = 3
     ): Flow<List<Site>>
 

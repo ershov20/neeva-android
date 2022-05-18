@@ -22,13 +22,15 @@ import strikt.assertions.isNullOrEmpty
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class LoginCookieInstrumentationTest {
-    private lateinit var sharedPreferencesModel: SharedPreferencesModel
+    private lateinit var neevaConstants: NeevaConstants
     private lateinit var neevaUserToken: NeevaUserToken
     private lateinit var neevaUser: NeevaUser
+    private lateinit var sharedPreferencesModel: SharedPreferencesModel
 
     private fun setUpLoggedInUser(context: Context) {
+        neevaConstants = NeevaConstants()
         sharedPreferencesModel = SharedPreferencesModel(context)
-        neevaUserToken = NeevaUserToken(sharedPreferencesModel)
+        neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
         neevaUserToken.setToken("myToken")
         val data = NeevaUserData(
             "my-id",
@@ -61,11 +63,11 @@ class LoginCookieInstrumentationTest {
             // ApolloWrapper should give a null response and ONLY clear the NeevaUser.data.
             // The token + cookies should still be set to "myToken".
             activity.webLayerModel.currentBrowser
-                .getCookiePairs(Uri.parse(NeevaConstants.appURL)) {
+                .getCookiePairs(Uri.parse(neevaConstants.appURL)) {
                     expectThat(
                         it.find {
                             cookiePair ->
-                            cookiePair.key == NeevaConstants.loginCookie
+                            cookiePair.key == neevaConstants.loginCookie
                         }?.value
                     ).isEqualTo("myToken")
                 }
@@ -90,11 +92,11 @@ class LoginCookieInstrumentationTest {
             expectThat(activity.neevaUser.data).isEqualTo(NeevaUserData())
 
             activity.webLayerModel.currentBrowser
-                .getCookiePairs(Uri.parse(NeevaConstants.appURL)) {
+                .getCookiePairs(Uri.parse(neevaConstants.appURL)) {
                     expectThat(
                         it.find {
                             cookiePair ->
-                            cookiePair.key == NeevaConstants.loginCookie
+                            cookiePair.key == neevaConstants.loginCookie
                         }?.value
                     ).isNullOrEmpty()
                 }

@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.LocalSettingsControllerImpl
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
@@ -33,6 +34,7 @@ fun AppNav(
     modifier: Modifier
 ) {
     val settingsControllerImpl = LocalSettingsControllerImpl.current
+    val neevaConstants = LocalEnvironment.current.neevaConstants
 
     AnimatedNavHost(
         navController = appNavModel.navController,
@@ -49,19 +51,22 @@ fun AppNav(
 
         composable(AppNavDestination.SETTINGS.route) {
             MainSettingsPane(
-                settingsController = settingsControllerImpl
+                settingsController = settingsControllerImpl,
+                neevaConstants = neevaConstants
             )
         }
 
         composable(AppNavDestination.PROFILE_SETTINGS.route) {
             ProfileSettingsPane(
-                settingsController = settingsControllerImpl
+                settingsController = settingsControllerImpl,
+                neevaConstants = neevaConstants
             )
         }
 
         composable(AppNavDestination.CLEAR_BROWSING_SETTINGS.route) {
             ClearBrowsingPane(
-                settingsController = settingsControllerImpl
+                settingsController = settingsControllerImpl,
+                neevaConstants = neevaConstants
             )
         }
 
@@ -98,7 +103,8 @@ fun AppNav(
                 openInCustomTabs = firstRunModel.openInCustomTabs(LocalContext.current),
                 onClose = firstRunModel.getOnCloseOnboarding(appNavModel::showBrowser),
                 navigateToSignIn = appNavModel::showSignIn,
-                showSignUpWithOther = appNavModel::showSignUpWithOther
+                showSignUpWithOther = appNavModel::showSignUpWithOther,
+                neevaConstants = neevaConstants
             )
         }
 

@@ -31,6 +31,7 @@ data class LocalEnvironmentState(
     val dispatchers: Dispatchers,
     val domainProvider: DomainProvider,
     val historyManager: HistoryManager,
+    val neevaConstants: NeevaConstants,
     val neevaUser: NeevaUser,
     val overlaySheetModel: OverlaySheetModel,
     val settingsDataModel: SettingsDataModel,
