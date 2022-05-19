@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.fragment.app.Fragment
@@ -228,6 +229,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             // hide the system bars.
             onEnterFullscreen()
         }
+
+        // Keep track of whether the keyboard is open so that we can synchronize UI across both
+        // WebLayer (with its Android Views) and Compose (with its own Composable hierarchy).
+        val rootView: View = findViewById(android.R.id.content)
+        rootView.viewTreeObserver.addOnGlobalLayoutListener {
+            val insets = ViewCompat.getRootWindowInsets(rootView)
+            val isKeyboardOpen = insets?.isVisible(WindowInsetsCompat.Type.ime()) ?: false
+            activityViewModel.onKeyboardStateChanged(isKeyboardOpen)
+        }
     }
 
     private fun showBrowser() = appNavModel?.showBrowser()
@@ -361,7 +371,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(this).bounds
         browserWrapper.createAndAttachBrowser(
             displaySize,
-            activityViewModel.toolbarConfiguration.value.useSingleBrowserToolbar,
+            activityViewModel.toolbarConfiguration,
             this::attachWebLayerFragment
         )
 

@@ -13,6 +13,7 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
+import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.cookiecutter.CookieCutterModel
@@ -230,7 +231,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     private fun createAndAttachBrowser() {
         browserWrapper.createAndAttachBrowser(
             displaySize = Rect(0, 0, 100, 200),
-            useSingleBrowserToolbar = false,
+            toolbarConfiguration = MutableStateFlow(ToolbarConfiguration()),
             fragmentAttacher = fragmentAttacher
         )
     }

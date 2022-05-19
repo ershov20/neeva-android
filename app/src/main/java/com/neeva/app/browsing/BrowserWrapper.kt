@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.net.Uri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.cookiecutter.CookieCutterModel
@@ -67,7 +68,7 @@ interface BrowserWrapper {
     /** Prepares the WebLayer Browser to interface with our app. */
     fun createAndAttachBrowser(
         displaySize: Rect,
-        useSingleBrowserToolbar: Boolean,
+        toolbarConfiguration: StateFlow<ToolbarConfiguration>,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     )
 

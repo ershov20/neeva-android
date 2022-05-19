@@ -23,6 +23,9 @@ data class ToolbarConfiguration(
     /** Whether the browser is showing a single toolbar or both a top and bottom toolbar. */
     val useSingleBrowserToolbar: Boolean = false,
 
+    /** Whether or not the keyboard is open, which should remove any bottom toolbars. */
+    val isKeyboardOpen: Boolean = false,
+
     /** Offsets the top toolbar so that it can smoothly leave and return. */
     val topControlOffset: Float = 0.0f,
 
@@ -36,6 +39,7 @@ data class ToolbarConfiguration(
 class NeevaActivityViewModel(
     /** Intent that must be processed once WebLayer has finished initializing. */
     private var pendingLaunchIntent: Intent?,
+
     private val neevaUser: NeevaUser,
     private val spaceStore: SpaceStore,
     private val webLayerModel: WebLayerModel,
@@ -148,6 +152,12 @@ class NeevaActivityViewModel(
             }
             snackbarModel.show(activity.getString(R.string.error_url_failure, urlString))
         }
+    }
+
+    fun onKeyboardStateChanged(isKeyboardOpen: Boolean) {
+        toolbarConfiguration.value = toolbarConfiguration.value.copy(
+            isKeyboardOpen = isKeyboardOpen
+        )
     }
 
     companion object {

@@ -14,6 +14,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
+import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModel
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -170,6 +172,9 @@ abstract class BaseBrowserWrapper internal constructor(
 
     /** Tracks when the WebLayer [Browser] has finished restoration and the [tabList] is ready. */
     private val isBrowserReady = CompletableDeferred<Boolean>()
+
+    /** Tracks whether the keyboard is visible and adjusts the bottom toolbar. */
+    private var bottomToolbarStateJob: Job? = null
 
     init {
         faviconCache.profileProvider = FaviconCache.ProfileProvider { getProfile() }
@@ -305,7 +310,7 @@ abstract class BaseBrowserWrapper internal constructor(
     /** Prepares the WebLayer Browser to interface with our app. */
     override fun createAndAttachBrowser(
         displaySize: Rect,
-        useSingleBrowserToolbar: Boolean,
+        toolbarConfiguration: StateFlow<ToolbarConfiguration>,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
         if (!::_fragment.isInitialized) {
@@ -342,7 +347,7 @@ abstract class BaseBrowserWrapper internal constructor(
         toolbarJob = activeTabModel.navigationInfoFlow
             .filterNot { it.navigationListSize == 0 }
             .onEach {
-                setToolbarPlaceholders(useSingleBrowserToolbar)
+                setToolbarPlaceholders(toolbarConfiguration)
                 toolbarJob?.cancel()
                 toolbarJob = null
             }
@@ -361,7 +366,7 @@ abstract class BaseBrowserWrapper internal constructor(
      * placeholders that are the same height as the real toolbars and offset the toolbars whenever
      * the callback fires.
      */
-    private fun setToolbarPlaceholders(useSingleBrowserToolbar: Boolean) {
+    private fun setToolbarPlaceholders(toolbarConfiguration: StateFlow<ToolbarConfiguration>) {
         val browser = browserFlow.value ?: return
 
         val topControlsPlaceholder = View(appContext)
@@ -374,12 +379,29 @@ abstract class BaseBrowserWrapper internal constructor(
         topControlsPlaceholder.requestLayout()
 
         // Do the same for the bottom controls, if the screen is too narrow to use a single bar.
-        if (!useSingleBrowserToolbar) {
+        if (!toolbarConfiguration.value.useSingleBrowserToolbar) {
+            val visibleHeight =
+                appContext.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height)
+
             val bottomControlsPlaceholder = View(appContext)
             browser.setBottomView(bottomControlsPlaceholder)
-            bottomControlsPlaceholder.layoutParams.height =
-                appContext.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height)
+            bottomControlsPlaceholder.layoutParams.height = visibleHeight
             bottomControlsPlaceholder.requestLayout()
+
+            // Start a job that shrinks the placeholder to 0px high when the keyboard is visible
+            // and resets it when the keyboard is hidden.
+            bottomToolbarStateJob?.cancel()
+            bottomToolbarStateJob = toolbarConfiguration
+                .map { it.isKeyboardOpen }
+                .distinctUntilChanged()
+                .onEach { isKeyboardOpen ->
+                    bottomControlsPlaceholder.layoutParams.height = when {
+                        isKeyboardOpen -> 0
+                        else -> visibleHeight
+                    }
+                    bottomControlsPlaceholder.requestLayout()
+                }
+                .launchIn(coroutineScope)
         }
     }
 
