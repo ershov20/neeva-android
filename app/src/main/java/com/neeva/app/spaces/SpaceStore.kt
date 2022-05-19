@@ -236,7 +236,7 @@ class SpaceStore(
                         )?.toUri()
                     }
                     entityQuery.spaceItem(spaceID, thumbnailUri)
-                }
+                }.filterNotNull()
             entities.forEach { dao.upsert(it) }
             dao.getItemsFromSpace(spaceID)
                 .filterNot { entities.contains(it) }

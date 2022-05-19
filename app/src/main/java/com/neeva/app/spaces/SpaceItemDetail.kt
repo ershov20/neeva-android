@@ -5,9 +5,11 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -27,12 +30,12 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
+import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.widgets.UriDisplayView
 
 @Composable
 fun SpaceItemDetail(
@@ -46,18 +49,25 @@ fun SpaceItemDetail(
         Modifier.clickable { spaceItem.url?.let { appNavModel.openUrl(it) } }
     ) {
         Column {
-            SpaceItemDetailMainContent(
-                thumbnailUri = spaceItem.thumbnail,
-                isRegularWebItem = isRegularWebItem,
-                content = {
-                    SpaceItemDetailTextContent(
-                        spaceItem = spaceItem,
-                        showDescriptions = showDescriptions
-                    )
-                }
-            )
+            if (spaceItem.entityType == SpaceEntityType.IMAGE) {
+                SpaceItemDetailImageContent(spaceItem = spaceItem)
+            } else {
+                SpaceItemDetailMainContent(
+                    thumbnailUri = spaceItem.thumbnail,
+                    isRegularWebItem = isRegularWebItem,
+                    content = {
+                        SpaceItemDetailTextContent(
+                            spaceItem = spaceItem,
+                            showDescriptions = showDescriptions
+                        )
+                    }
+                )
+            }
 
-            if (!spaceItem.snippet.isNullOrEmpty() && showDescriptions) {
+            val shouldShowDescriptionsForEntity =
+                !spaceItem.snippet.isNullOrEmpty() && showDescriptions &&
+                    spaceItem.entityType != SpaceEntityType.IMAGE
+            if (shouldShowDescriptionsForEntity) {
                 BaseRowLayout(
                     backgroundColor =
                     if (isRegularWebItem) {
@@ -67,7 +77,7 @@ fun SpaceItemDetail(
                     },
                     mainContent = {
                         Text(
-                            text = spaceItem.snippet,
+                            text = spaceItem.snippet ?: "",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = Int.MAX_VALUE,
@@ -90,6 +100,38 @@ fun SpaceItemDetail(
 }
 
 @Composable
+fun ColumnScope.SpaceItemDetailImageContent(
+    spaceItem: SpaceItem
+) {
+    PictureUrlPainter(pictureURI = spaceItem.url)?.let {
+        Image(
+            painter = it,
+            contentScale = ContentScale.Fit,
+            contentDescription = null,
+            modifier = Modifier
+                .heightIn(max = 300.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+    }
+    spaceItem.title?.let {
+        BaseRowLayout(
+            backgroundColor = MaterialTheme.colorScheme.surface,
+            mainContent = {
+                Text(
+                    text = spaceItem.title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = Dimensions.PADDING_MEDIUM)
+                )
+            }
+        )
+    }
+}
+
+@Composable
 fun SpaceItemDetailTextContent(
     spaceItem: SpaceItem,
     showDescriptions: Boolean = false
@@ -108,9 +150,9 @@ fun SpaceItemDetailTextContent(
                 .fillMaxWidth()
                 .padding(vertical = Dimensions.PADDING_MEDIUM)
         )
-        spaceItem.url?.let { url ->
-            UriDisplayView(uri = url)
-        }
+
+        SpaceEntityInfo(spaceItem = spaceItem)
+
         if (!spaceItem.snippet.isNullOrEmpty() && !showDescriptions) {
             Text(
                 text = spaceItem.snippet,

@@ -49,80 +49,89 @@ data class SpaceItem(
 )
 
 private fun GetSpacesDataQuery.Entity.news() =
-    this.spaceEntity?.content?.typeSpecific?.onNewsItem?.newsItem
+    spaceEntity?.content?.typeSpecific?.onNewsItem?.newsItem
 private fun GetSpacesDataQuery.Entity.richEntity() =
-    this.spaceEntity?.content?.typeSpecific?.onRichEntity?.richEntity
+    spaceEntity?.content?.typeSpecific?.onRichEntity?.richEntity
 private fun GetSpacesDataQuery.Entity.recipe() =
-    this.spaceEntity?.content?.typeSpecific?.onWeb?.web?.recipes?.first()
+    spaceEntity?.content?.typeSpecific?.onWeb?.web?.recipes?.first()
 private fun GetSpacesDataQuery.Entity.product() =
-    this.spaceEntity?.content?.typeSpecific?.onWeb?.web?.retailerProduct
+    spaceEntity?.content?.typeSpecific?.onWeb?.web?.retailerProduct
 
 fun GetSpacesDataQuery.Entity.entityType() = when {
-    this.news() != null -> SpaceEntityType.NEWS
+    news() != null -> SpaceEntityType.NEWS
 
-    this.richEntity() != null -> SpaceEntityType.RICH_ENTITY
+    richEntity() != null -> SpaceEntityType.RICH_ENTITY
 
-    this.recipe() != null -> SpaceEntityType.RECIPE
+    recipe() != null -> SpaceEntityType.RECIPE
 
-    this.product() != null && this.product()?.url != null -> SpaceEntityType.PRODUCT
+    product() != null && product()?.url != null -> SpaceEntityType.PRODUCT
+
+    isSupportedImage() -> SpaceEntityType.IMAGE
 
     else -> SpaceEntityType.WEB
 }
 
-fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = null) =
-    when (this.entityType()) {
+private fun GetSpacesDataQuery.Entity.isSupportedImage() =
+    spaceEntity?.url?.lowercase()?.endsWith(".jpg") == true ||
+        spaceEntity?.url?.lowercase()?.endsWith(".jpeg") == true ||
+        spaceEntity?.url?.lowercase()?.endsWith(".png") == true
+
+fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = null): SpaceItem? {
+    val id = metadata?.docID ?: return null
+    return when (entityType()) {
         SpaceEntityType.NEWS -> SpaceItem(
-            id = this.metadata?.docID!!,
+            id = id,
             spaceID = spaceID,
-            url = this.news()?.url.let { Uri.parse(it) },
-            title = this.news()?.title,
-            snippet = this.news()?.snippet,
-            thumbnail = this.news()?.thumbnailImage?.url?.let { Uri.parse(it) },
-            provider = this.news()?.providerName,
-            faviconURL = this.news()?.favIconURL?.let { Uri.parse(it) },
-            datePublished = this.news()?.datePublished,
+            url = news()?.url.let { Uri.parse(it) },
+            title = news()?.title,
+            snippet = news()?.snippet,
+            thumbnail = news()?.thumbnailImage?.url?.let { Uri.parse(it) },
+            provider = news()?.providerName,
+            faviconURL = news()?.favIconURL?.let { Uri.parse(it) },
+            datePublished = news()?.datePublished,
             entityType = SpaceEntityType.NEWS
         )
         SpaceEntityType.RICH_ENTITY -> SpaceItem(
-            id = this.metadata?.docID!!,
+            id = id,
             spaceID = spaceID,
-            url = this.spaceEntity?.url?.let { Uri.parse(it) },
-            title = this.richEntity()?.title,
-            snippet = this.richEntity()?.subTitle,
-            thumbnail = this.richEntity()?.images?.first()?.thumbnailURL.let { Uri.parse(it) },
+            url = spaceEntity?.url?.let { Uri.parse(it) },
+            title = richEntity()?.title,
+            snippet = richEntity()?.subTitle,
+            thumbnail = richEntity()?.images?.first()?.thumbnailURL.let { Uri.parse(it) },
             entityType = SpaceEntityType.RICH_ENTITY
         )
         SpaceEntityType.PRODUCT -> SpaceItem(
-            id = this.metadata?.docID!!,
+            id = id,
             spaceID = spaceID,
-            url = this.product()?.url?.let { Uri.parse(it) },
-            title = this.product()?.name,
-            snippet = this.spaceEntity?.snippet ?: this.product()?.description?.first(),
+            url = product()?.url?.let { Uri.parse(it) },
+            title = product()?.name,
+            snippet = spaceEntity?.snippet ?: product()?.description?.first(),
             thumbnail = thumbnailUri,
-            stars = this.product()?.reviews?.ratingSummary?.rating?.productStars,
-            numReviews = this.product()?.reviews?.ratingSummary?.numReviews,
-            price = this.product()?.priceHistory?.currentPrice,
+            stars = product()?.reviews?.ratingSummary?.rating?.productStars,
+            numReviews = product()?.reviews?.ratingSummary?.numReviews,
+            price = product()?.priceHistory?.currentPrice,
             entityType = SpaceEntityType.PRODUCT
         )
         SpaceEntityType.RECIPE -> SpaceItem(
-            id = this.metadata?.docID!!,
+            id = id,
             spaceID = spaceID,
-            url = this.spaceEntity?.url?.let { Uri.parse(it) },
-            title = this.recipe()?.title,
-            snippet = this.spaceEntity?.snippet,
-            thumbnail = this.recipe()?.imageURL?.let { Uri.parse(it) },
-            stars = this.recipe()?.recipeRating?.recipeStars,
-            numReviews = this.recipe()?.recipeRating?.numReviews,
-            totalTime = this.recipe()?.totalTime,
+            url = spaceEntity?.url?.let { Uri.parse(it) },
+            title = recipe()?.title,
+            snippet = spaceEntity?.snippet,
+            thumbnail = recipe()?.imageURL?.let { Uri.parse(it) },
+            stars = recipe()?.recipeRating?.recipeStars,
+            numReviews = recipe()?.recipeRating?.numReviews,
+            totalTime = recipe()?.totalTime,
             entityType = SpaceEntityType.RECIPE
         )
         else -> SpaceItem(
-            id = this.metadata?.docID!!,
+            id = id,
             spaceID = spaceID,
-            url = this.spaceEntity?.url?.let { Uri.parse(it) },
-            title = this.spaceEntity?.title,
-            snippet = this.spaceEntity?.snippet,
+            url = spaceEntity?.url?.let { Uri.parse(it) },
+            title = spaceEntity?.title,
+            snippet = spaceEntity?.snippet,
             thumbnail = thumbnailUri,
-            entityType = SpaceEntityType.WEB
+            entityType = entityType()
         )
     }
+}
