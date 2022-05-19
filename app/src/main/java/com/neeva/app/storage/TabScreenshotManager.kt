@@ -20,6 +20,22 @@ abstract class TabScreenshotManager(filesDir: File) {
     companion object {
         private val TAG = TabScreenshotManager::class.simpleName
         private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
+
+        // Copied from https://source.chromium.org/chromium/chromium/src/+/main:weblayer/browser/tab_impl.h;drc=242da5037807dde3daf097ba74f875db83b8b613;l=76
+        enum class ScreenshotErrors {
+            NONE,
+            SCALE_OUT_OF_RANGE,
+            TAB_NOT_ACTIVE,
+            WEB_CONTENTS_NOT_VISIBLE,
+            NO_SURFACE,
+            NO_RENDER_WIDGET_HOST_VIEW,
+            NO_WINDOW_ANDROID,
+            EMPTY_VIEWPORT,
+            HIDDEN_BY_CONTROLS,
+            SCALED_TO_EMPTY,
+            CAPTURE_FAILED,
+            BITMAP_ALLOCATION_FAILED
+        }
     }
 
     private val tabScreenshotDirectory = File(filesDir, DIRECTORY_TAB_SCREENSHOTS)
@@ -35,10 +51,16 @@ abstract class TabScreenshotManager(filesDir: File) {
         }
 
         val tabGuid = tab.guid
+        val captureStack = Throwable()
 
         tab.captureScreenShot(0.5f) { thumbnail, errorCode ->
             if (errorCode != 0) {
-                Log.w(TAG, "Failed to create tab thumbnail: Error=$errorCode")
+                val errorName = ScreenshotErrors.values().getOrNull(errorCode)?.name
+                Log.w(
+                    TAG,
+                    "Failed to create tab thumbnail: Tab=$tab, Error=$errorCode $errorName",
+                    captureStack
+                )
                 onCompleted()
                 return@captureScreenShot
             }

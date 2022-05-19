@@ -240,6 +240,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
+    override fun onPause() {
+        webLayerModel.currentBrowser.takeScreenshotOfActiveTab()
+        super.onPause()
+    }
+
     private fun showBrowser() = appNavModel?.showBrowser()
 
     private suspend fun fetchNeevaUserInfo() {

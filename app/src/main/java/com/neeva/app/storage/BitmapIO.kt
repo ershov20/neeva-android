@@ -92,7 +92,7 @@ object BitmapIO {
             bufferedStream = BufferedInputStream(inputStream)
             BitmapFactory.decodeStream(bufferedStream)
         } catch (e: FileNotFoundException) {
-            Log.d(TAG, "Could not find file", e)
+            Log.d(TAG, "${e.message}")
             null
         } catch (e: Exception) {
             Log.e(TAG, "Failed to restore bitmap", e)

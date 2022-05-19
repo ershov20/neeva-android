@@ -108,7 +108,8 @@ abstract class BaseBrowserWrapper internal constructor(
             spaceStore = spaceStore,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
-            neevaConstants = neevaConstants
+            neevaConstants = neevaConstants,
+            tabScreenshotManager = tabScreenshotManager
         ),
         _urlBarModel = URLBarModelImpl(
             suggestionFlow = suggestionsModel?.autocompleteSuggestionFlow ?: MutableStateFlow(null),
@@ -299,7 +300,7 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     internal abstract fun createBrowserFragment(): Fragment
 
-    val _cookieCutterModel = CookieCutterModel(
+    private val _cookieCutterModel = CookieCutterModel(
         sharedPreferencesModel,
         historyManager?.hostInfoDao,
         coroutineScope,
@@ -515,14 +516,12 @@ abstract class BaseBrowserWrapper internal constructor(
             isIncognito = isIncognito,
             tab = tab,
             coroutineScope = coroutineScope,
-            dispatchers = dispatchers,
             historyManager = historyManager,
             faviconCache = faviconCache,
             tabList = tabList,
             activityCallbackProvider = activityCallbackProvider,
             registerNewTab = this::registerNewTab,
             fullscreenCallback = fullscreenCallback,
-            tabScreenshotManager = tabScreenshotManager,
             trackingDataFlow = _cookieCutterModel.trackingDataFlow,
             domainProvider = domainProvider
         )
@@ -585,7 +584,7 @@ abstract class BaseBrowserWrapper internal constructor(
                 tabOpenType = tabOpenType
             )
 
-            selectTab(newTab, takeScreenshotBeforeSelecting = false)
+            selectTab(newTab)
         }
     }
 
@@ -606,16 +605,7 @@ abstract class BaseBrowserWrapper internal constructor(
         tabList.findTab(primitive.id)?.let { selectTab(it) }
     }
 
-    private fun selectTab(tab: Tab, takeScreenshotBeforeSelecting: Boolean = true) {
-        if (takeScreenshotBeforeSelecting) {
-            // Screenshot the previous tab right before replacement to keep it as fresh as possible.
-            // You may not want to do this in cases where the WebLayer's View is the wrong height,
-            // which can happen if the keyboard is up.
-            // TODO(dan.alcantara): Find a better way of handling
-            //                      https://github.com/neevaco/neeva-android/issues/218
-            takeScreenshotOfActiveTab()
-        }
-
+    private fun selectTab(tab: Tab) {
         browser?.setActiveTab(tab)
     }
 

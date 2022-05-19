@@ -4,6 +4,7 @@ import android.net.Uri
 import com.neeva.app.BaseTest
 import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.ActiveTabModel.DisplayMode
+import com.neeva.app.storage.TabScreenshotManager
 import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NavigationController
@@ -12,6 +13,7 @@ import org.chromium.weblayer.TabCallback
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
@@ -33,8 +35,9 @@ import strikt.assertions.isTrue
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class ActiveTabModelImplTest : BaseTest() {
-    private lateinit var model: ActiveTabModelImpl
+    @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
 
+    private lateinit var model: ActiveTabModelImpl
     private lateinit var mainTab: MockTabHarness
     private lateinit var neevaConstants: NeevaConstants
     private lateinit var neevaHomepageTab: MockTabHarness
@@ -50,7 +53,8 @@ class ActiveTabModelImplTest : BaseTest() {
         model = ActiveTabModelImpl(
             coroutineScope = mock(),
             dispatchers = mock(),
-            neevaConstants = neevaConstants
+            neevaConstants = neevaConstants,
+            tabScreenshotManager = tabScreenshotManager
         )
 
         mainTab = MockTabHarness(
@@ -263,8 +267,13 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
         expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
 
-        mainTab.navigationCallbacks.first().onLoadProgressChanged(42.9)
-        expectThat(model.progressFlow.value).isEqualTo(4290)
+        mainTab.navigationCallbacks.first().onLoadProgressChanged(0.429)
+        expectThat(model.progressFlow.value).isEqualTo(43)
+        verify(tabScreenshotManager, never()).captureAndSaveScreenshot(any(), any())
+
+        mainTab.navigationCallbacks.first().onLoadProgressChanged(1.0)
+        expectThat(model.progressFlow.value).isEqualTo(100)
+        verify(tabScreenshotManager).captureAndSaveScreenshot(any(), any())
     }
 
     @Test

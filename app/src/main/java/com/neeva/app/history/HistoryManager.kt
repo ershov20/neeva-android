@@ -29,7 +29,7 @@ import kotlinx.coroutines.withContext
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(
-    private val historyDatabase: HistoryDatabase,
+    historyDatabase: HistoryDatabase,
     private val domainProvider: DomainProvider,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,

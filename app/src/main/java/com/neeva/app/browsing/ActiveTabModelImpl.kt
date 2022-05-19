@@ -4,6 +4,7 @@ import android.net.Uri
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.TabScreenshotManager
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,8 @@ class ActiveTabModelImpl(
     private val spaceStore: SpaceStore? = null,
     val coroutineScope: CoroutineScope,
     val dispatchers: Dispatchers,
-    private val neevaConstants: NeevaConstants
+    private val neevaConstants: NeevaConstants,
+    private val tabScreenshotManager: TabScreenshotManager
 ) : ActiveTabModel {
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     override val urlFlow: StateFlow<Uri> = _urlFlow
@@ -147,6 +149,10 @@ class ActiveTabModelImpl(
     private val selectedTabNavigationCallback = object : NavigationCallback() {
         override fun onLoadProgressChanged(progress: Double) {
             _progressFlow.value = (100 * progress).roundToInt()
+
+            if (_progressFlow.value == 100) {
+                tabScreenshotManager.captureAndSaveScreenshot(activeTab)
+            }
         }
 
         override fun onNavigationStarted(navigation: Navigation) {

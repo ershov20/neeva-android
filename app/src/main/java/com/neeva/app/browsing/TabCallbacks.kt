@@ -3,13 +3,11 @@ package com.neeva.app.browsing
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import com.neeva.app.Dispatchers
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.cookiecutter.TabCookieCutterModel
 import com.neeva.app.cookiecutter.TrackingData
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
 import java.util.Date
@@ -37,14 +35,12 @@ class TabCallbacks(
     private val isIncognito: Boolean,
     private val tab: Tab,
     private val coroutineScope: CoroutineScope,
-    private val dispatchers: Dispatchers,
     private val historyManager: HistoryManager?,
     private val faviconCache: FaviconCache?,
     private val tabList: TabList,
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
-    private val tabScreenshotManager: TabScreenshotManager,
     trackingDataFlow: MutableStateFlow<TrackingData?>,
     domainProvider: DomainProvider
 ) {
@@ -165,10 +161,6 @@ class TabCallbacks(
         }
 
         private fun commitVisit(navigation: Navigation) {
-            if (tab.getBrowserIfAlive()?.activeTab == tab) {
-                tabScreenshotManager.captureAndSaveScreenshot(tab)
-            }
-
             // Try to avoid recording visits to history when we are revisiting the same page.
             val shouldRecordVisit = when {
                 visitToCommit == null -> false
