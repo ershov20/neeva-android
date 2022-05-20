@@ -73,9 +73,8 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                     settingsToggle = SettingsToggle.CLOSE_INCOGNITO_TABS
                 ),
                 SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    settingsToggle = SettingsToggle.TRACKING_PROTECTION,
-                    enabled = false
+                    type = SettingsRowType.NAVIGATION,
+                    primaryLabelId = R.string.settings_cookie_cutter
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,

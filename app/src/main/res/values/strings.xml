@@ -127,6 +127,13 @@
     <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
     <string name="settings_cookies_secondary">Clearing it will sign you out of most sites</string>
     <string name="settings_membership_status">Membership status</string>
+    <string name="settings_cookie_cutter">Cookie Cutter</string>
+    <string name="settings_trackers">Trackers</string>
+
+    <string name="blocking_strength_standard_title">Standard</string>
+    <string name="blocking_strength_strict_title">Strict</string>
+    <string name="blocking_strength_standard_description">Tracker cookies only</string>
+    <string name="blocking_strength_strict_description">Tracker request</string>
 
     <string name="clear_browsing_dialog_text">The items you selected will be deleted. It cannot be undone.</string>
     <string name="clear_browsing_clear_data">Clear data</string>

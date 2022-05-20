@@ -233,7 +233,6 @@ object NeevaAppModule {
             neevaUser = neevaUser,
             settingsDataModel = settingsDataModel,
             clientLogger = clientLogger,
-            sharedPreferencesModel = sharedPreferencesModel,
             neevaConstants = neevaConstants
         )
     }

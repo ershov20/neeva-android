@@ -42,6 +42,9 @@ class TabCookieCutterModel(
     val trackingDataFlow: MutableStateFlow<TrackingData?>,
     val domainProvider: DomainProvider
 ) {
+    /** When true, the tab will be reloaded when it becomes active tab. */
+    var reloadUponForeground = false
+
     // TODO: listen to enableTrackingProtection in CookieCutterModel and refresh tab
     private var stats: Map<String, Int>? = null
         set(value) {

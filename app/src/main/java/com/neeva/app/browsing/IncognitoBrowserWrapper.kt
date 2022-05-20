@@ -9,7 +9,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.StartIncognitoMutation
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.storage.IncognitoTabScreenshotManager
 import com.neeva.app.storage.favicons.IncognitoFaviconCache
 import com.neeva.app.type.StartIncognitoInput
@@ -31,9 +31,9 @@ class IncognitoBrowserWrapper private constructor(
     private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
     private val incognitoFaviconCache: IncognitoFaviconCache,
     tabScreenshotManager: IncognitoTabScreenshotManager,
-    sharedPreferencesModel: SharedPreferencesModel,
     domainProvider: DomainProvider,
-    neevaConstants: NeevaConstants
+    neevaConstants: NeevaConstants,
+    settingsDataModel: SettingsDataModel
 ) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
@@ -45,9 +45,9 @@ class IncognitoBrowserWrapper private constructor(
     spaceStore = null,
     historyManager = null,
     tabScreenshotManager = tabScreenshotManager,
-    sharedPreferencesModel = sharedPreferencesModel,
     domainProvider = domainProvider,
-    neevaConstants = neevaConstants
+    neevaConstants = neevaConstants,
+    settingsDataModel = settingsDataModel
 ) {
     constructor(
         appContext: Context,
@@ -59,8 +59,8 @@ class IncognitoBrowserWrapper private constructor(
         domainProvider: DomainProvider,
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
         tempDirectory: File = appContext.cacheDir.resolve(FOLDER_PREFIX),
-        sharedPreferencesModel: SharedPreferencesModel,
-        neevaConstants: NeevaConstants
+        neevaConstants: NeevaConstants,
+        settingsDataModel: SettingsDataModel
     ) : this(
         appContext = appContext,
         cacheCleaner = cacheCleaner,
@@ -76,9 +76,9 @@ class IncognitoBrowserWrapper private constructor(
             dispatchers
         ),
         tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory),
-        sharedPreferencesModel = sharedPreferencesModel,
         domainProvider = domainProvider,
-        neevaConstants = neevaConstants
+        neevaConstants = neevaConstants,
+        settingsDataModel = settingsDataModel
     )
 
     companion object {

@@ -22,7 +22,8 @@ import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
@@ -70,9 +71,9 @@ abstract class BaseBrowserWrapper internal constructor(
     private val _findInPageModel: FindInPageModelImpl,
     private val historyManager: HistoryManager?,
     private val tabScreenshotManager: TabScreenshotManager,
-    private val sharedPreferencesModel: SharedPreferencesModel,
     private val domainProvider: DomainProvider,
-    val neevaConstants: NeevaConstants
+    val neevaConstants: NeevaConstants,
+    private val settingsDataModel: SettingsDataModel
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
     /**
      * Constructor used to create a BaseBrowserWrapper that automatically creates various internal
@@ -92,9 +93,9 @@ abstract class BaseBrowserWrapper internal constructor(
         spaceStore: SpaceStore?,
         historyManager: HistoryManager?,
         tabScreenshotManager: TabScreenshotManager,
-        sharedPreferencesModel: SharedPreferencesModel,
         domainProvider: DomainProvider,
-        neevaConstants: NeevaConstants
+        neevaConstants: NeevaConstants,
+        settingsDataModel: SettingsDataModel
     ) : this(
         isIncognito = isIncognito,
         appContext = appContext,
@@ -122,9 +123,9 @@ abstract class BaseBrowserWrapper internal constructor(
         _findInPageModel = FindInPageModelImpl(),
         historyManager = historyManager,
         tabScreenshotManager = tabScreenshotManager,
-        sharedPreferencesModel = sharedPreferencesModel,
         domainProvider = domainProvider,
-        neevaConstants = neevaConstants
+        neevaConstants = neevaConstants,
+        settingsDataModel = settingsDataModel
     )
 
     private val tabList = TabList()
@@ -258,6 +259,17 @@ abstract class BaseBrowserWrapper internal constructor(
         }
     }
 
+    fun updateCookieCutterConfigAndRefreshTabs() {
+        cookieCutterModel.updateTrackingProtectionConfiguration()
+        tabList.forEach {
+            if (it == browser?.activeTab) {
+                it.navigationController.reload()
+            } else {
+                tabCallbackMap[it]?.tabCookieCutterModel?.reloadUponForeground = true
+            }
+        }
+    }
+
     private val browserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
         override fun onBottomViewOffsetChanged(offset: Int) {
             activityCallbackProvider.get()?.onBottomBarOffsetChanged(offset)
@@ -300,11 +312,11 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     internal abstract fun createBrowserFragment(): Fragment
 
-    private val _cookieCutterModel = CookieCutterModel(
-        sharedPreferencesModel,
+    val _cookieCutterModel = CookieCutterModel(
         historyManager?.hostInfoDao,
         coroutineScope,
-        dispatchers
+        dispatchers,
+        settingsDataModel
     )
     override val cookieCutterModel: CookieCutterModel get() = _cookieCutterModel
 
@@ -479,9 +491,13 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     fun changeActiveTab(tab: Tab?) {
         _activeTabModelImpl.onActiveTabChanged(tab)
-        if (cookieCutterModel.enableTrackingProtection) {
+        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)) {
             cookieCutterModel.trackingDataFlow.value =
                 tabCallbackMap[tab]?.tabCookieCutterModel?.currentTrackingData()
+        }
+        if (tabCallbackMap[tab]?.tabCookieCutterModel?.reloadUponForeground == true) {
+            tab?.navigationController?.reload()
+            tabCallbackMap[tab]?.tabCookieCutterModel?.reloadUponForeground = false
         }
     }
 

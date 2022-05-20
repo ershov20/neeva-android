@@ -168,7 +168,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers,
                         snackbarModel = localEnvironmentState.snackbarModel,
-                        historyDatabase = historyDatabase
+                        historyDatabase = historyDatabase,
+                        webLayerModel::updateBrowsersCookieCutterConfig
                     )
                 }
 

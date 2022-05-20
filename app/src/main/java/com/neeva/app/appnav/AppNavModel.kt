@@ -27,6 +27,7 @@ interface AppNavModel {
     fun showClearBrowsingSettings()
     fun showDefaultBrowserSettings()
     fun showLocalFeatureFlagsPane()
+    fun showCookieCutterSettings()
     fun showHistory()
     fun showFeedback()
     fun showHelp()

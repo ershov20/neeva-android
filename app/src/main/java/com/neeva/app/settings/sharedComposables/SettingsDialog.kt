@@ -44,6 +44,7 @@ fun SettingsDialog(
         text = {
             Column {
                 Text(text = stringResource(textId))
+                Spacer(Modifier.height(24.dp))
                 RadioButtonGroup(
                     radioOptions,
                     selectedOptionIndex.value,
@@ -82,7 +83,6 @@ fun RadioButtonGroup(
 ) {
     if (radioOptions != null && radioOptions.isNotEmpty()) {
         Column {
-            Spacer(Modifier.height(24.dp))
             radioOptions.forEachIndexed { index, _ ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

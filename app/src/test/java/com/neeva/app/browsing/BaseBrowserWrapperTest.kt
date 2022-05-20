@@ -16,10 +16,9 @@ import com.neeva.app.R
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
-import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
@@ -77,7 +76,6 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var neevaConstants: NeevaConstants
     private lateinit var profile: Profile
     private lateinit var urlBarModel: URLBarModelImpl
-    private lateinit var sharedPreferencesModel: SharedPreferencesModel
 
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
     @Mock private lateinit var activityCallbackProvider: ActivityCallbackProvider
@@ -91,6 +89,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var suggestionsModel: SuggestionsModel
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
     @Mock private lateinit var domainProvider: DomainProvider
+    @Mock private lateinit var settingsDataModel: SettingsDataModel
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
@@ -152,23 +151,6 @@ class BaseBrowserWrapperTest : BaseTest() {
             on { isEditing } doReturn urlBarModelIsEditing
         }
 
-        sharedPreferencesModel = mock {
-            on {
-                getValue(
-                    any(),
-                    eq(CookieCutterModel.ENABLE_TRACKING_PROTECTION_KEY),
-                    eq(true)
-                )
-            } doReturn true
-            on {
-                getValue(
-                    any(),
-                    eq(CookieCutterModel.BLOCKING_STRENGTH_KEY),
-                    eq(CookieCutterModel.Companion.BlockingStrength.TRACKER_COOKIE)
-                )
-            } doReturn CookieCutterModel.Companion.BlockingStrength.TRACKER_COOKIE
-        }
-
         browserWrapper = object : BaseBrowserWrapper(
             isIncognito = false,
             appContext = context,
@@ -183,9 +165,9 @@ class BaseBrowserWrapperTest : BaseTest() {
             _findInPageModel = findInPageModel,
             historyManager = historyManager,
             tabScreenshotManager = tabScreenshotManager,
-            sharedPreferencesModel = sharedPreferencesModel,
             domainProvider = domainProvider,
-            neevaConstants = neevaConstants
+            neevaConstants = neevaConstants,
+            settingsDataModel = settingsDataModel
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment

@@ -41,7 +41,8 @@ enum class SettingsRowType {
     PROFILE,
     BUTTON,
     CLEAR_DATA_BUTTON,
-    SUBSCRIPTION
+    SUBSCRIPTION,
+    RADIO_BUTTON
 }
 
 enum class SettingsToggle(

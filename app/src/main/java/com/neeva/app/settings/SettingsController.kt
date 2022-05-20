@@ -9,6 +9,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.settings.clearBrowsing.TimeClearingOption
 import com.neeva.app.settings.setDefaultAndroidBrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
@@ -53,6 +54,11 @@ interface SettingsController {
     )
     //endregion
 
+    //region Cookie Cutter Data
+    fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength
+    fun setCookieCutterStrength(strength: CookieCutterModel.BlockingStrength)
+    //endregion
+
     //region Set Default Android Browser
     fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager
 
@@ -76,7 +82,8 @@ class SettingsControllerImpl(
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
     private val snackbarModel: SnackbarModel,
-    private val historyDatabase: HistoryDatabase
+    private val historyDatabase: HistoryDatabase,
+    private val onTrackingProtectionUpdate: () -> Unit
 ) : SettingsController {
     override fun onBackPressed() {
         appNavModel.popBackStack()
@@ -84,8 +91,8 @@ class SettingsControllerImpl(
 
     override fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {
         return { newValue ->
-            getToggleChangedCallBackMap()[settingsToggle.key]?.invoke()
             settingsDataModel.getTogglePreferenceSetter(settingsToggle)(newValue)
+            getToggleChangedCallBackMap()[settingsToggle.key]?.invoke()
         }
     }
 
@@ -116,7 +123,9 @@ class SettingsControllerImpl(
 
     override fun getToggleChangedCallBackMap(): Map<String, (() -> Unit)?> {
         return mapOf(
-            SettingsToggle.TRACKING_PROTECTION.key to { /*TODO(chung)*/ },
+            SettingsToggle.TRACKING_PROTECTION.key to {
+                onTrackingProtectionUpdate()
+            },
             SettingsToggle.DEBUG_M1_APP_HOST.key to {
                 /*TODO(kobec): Remind user to restart*/
                 if (getToggleState(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST).value) {
@@ -141,6 +150,9 @@ class SettingsControllerImpl(
             R.string.settings_default_browser to { appNavModel.showDefaultBrowserSettings() },
             R.string.settings_debug_local_feature_flags to {
                 appNavModel.showLocalFeatureFlagsPane()
+            },
+            R.string.settings_cookie_cutter to {
+                appNavModel.showCookieCutterSettings()
             }
         )
         if (isSignedOut()) {
@@ -194,6 +206,15 @@ class SettingsControllerImpl(
 
     override fun isAdvancedSettingsAllowed(): Boolean {
         return settingsDataModel.getSettingsToggleValue(SettingsToggle.IS_ADVANCED_SETTINGS_ALLOWED)
+    }
+
+    override fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength {
+        return settingsDataModel.getCookieCutterStrength()
+    }
+
+    override fun setCookieCutterStrength(strength: CookieCutterModel.BlockingStrength) {
+        settingsDataModel.setCookieCutterStrength(strength)
+        onTrackingProtectionUpdate()
     }
 
     private fun toggleIsAdvancedSettingsAllowed() {
@@ -302,6 +323,14 @@ val mockSettingsControllerImpl by lazy {
         }
 
         override fun signOut() {}
+
+        override fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength {
+            return CookieCutterModel.BlockingStrength.TRACKER_COOKIE
+        }
+
+        override fun setCookieCutterStrength(
+            strength: CookieCutterModel.BlockingStrength
+        ) {}
 
         override fun clearBrowsingData(
             clearingOptions: Map<SettingsToggle, Boolean>,

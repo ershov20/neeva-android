@@ -164,6 +164,7 @@ class AppNavModelImpl(
     override fun showSettings() = show(AppNavDestination.SETTINGS)
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
+    override fun showCookieCutterSettings() = show(AppNavDestination.COOKIE_CUTTER_SETTINGS)
     override fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
 
