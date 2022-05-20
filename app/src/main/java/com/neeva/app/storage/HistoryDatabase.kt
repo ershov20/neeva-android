@@ -28,7 +28,7 @@ import kotlinx.coroutines.withContext
 
 @Database(
     entities = [Site::class, Visit::class, SpaceItem::class, Space::class, HostInfo::class],
-    version = 13,
+    version = 14,
     autoMigrations = [
         AutoMigration(from = 6, to = 7, spec = HistoryDatabase.MigrationFrom6To7::class),
         AutoMigration(from = 7, to = 8, spec = HistoryDatabase.MigrationFrom7To8::class),
@@ -37,6 +37,7 @@ import kotlinx.coroutines.withContext
         AutoMigration(from = 10, to = 11, spec = HistoryDatabase.MigrationFrom10To11::class),
         AutoMigration(from = 11, to = 12, spec = HistoryDatabase.MigrationFrom11To12::class),
         AutoMigration(from = 12, to = 13, spec = HistoryDatabase.MigrationFrom12To13::class),
+        AutoMigration(from = 13, to = 14, spec = HistoryDatabase.MigrationFrom13To14::class),
     ]
 )
 @TypeConverters(com.neeva.app.storage.TypeConverters::class)
@@ -92,6 +93,8 @@ abstract class HistoryDatabase : RoomDatabase() {
     class MigrationFrom11To12 : AutoMigrationSpec
 
     class MigrationFrom12To13 : AutoMigrationSpec
+
+    class MigrationFrom13To14 : AutoMigrationSpec
 
     suspend fun export(
         context: Context,

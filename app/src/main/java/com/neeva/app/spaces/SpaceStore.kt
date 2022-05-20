@@ -226,7 +226,7 @@ class SpaceStore(
             val entityQueries = spaceQuery.space?.entities ?: return@forEach
 
             val entities =
-                entityQueries.filter { it.metadata?.docID != null }.map { entityQuery ->
+                entityQueries.filter { it.metadata?.docID != null }.mapNotNull { entityQuery ->
                     val thumbnailUri = entityQuery.spaceEntity?.thumbnail?.let {
                         saveBitmap(
                             directory = thumbnailDirectory.resolve(spaceID),
@@ -236,7 +236,10 @@ class SpaceStore(
                         )?.toUri()
                     }
                     entityQuery.spaceItem(spaceID, thumbnailUri)
-                }.filterNotNull()
+                }
+            entities.withIndex().forEach {
+                it.value.itemIndex = it.index
+            }
             entities.forEach { dao.upsert(it) }
             dao.getItemsFromSpace(spaceID)
                 .filterNot { entities.contains(it) }

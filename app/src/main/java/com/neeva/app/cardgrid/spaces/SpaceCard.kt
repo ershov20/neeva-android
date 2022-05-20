@@ -28,10 +28,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
+import coil.ImageLoader
+import coil.request.ImageRequest
 import com.neeva.app.Dispatchers
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
@@ -66,6 +70,8 @@ fun spaceThumbnailState(
     itemProvider: suspend (spaceId: String) -> List<SpaceItem>,
     dispatchers: Dispatchers
 ): State<SpaceItemThumbnails> {
+    val context = LocalContext.current.applicationContext
+
     // By keying this on [spaceId], we can avoid recompositions until the spaceId changes.
     return produceState(
         initialValue = SpaceItemThumbnails(),
@@ -83,9 +89,15 @@ fun spaceThumbnailState(
                         shouldShowAdditionalItemCount(i, spaceItems.size)
                     }
                     ?.let {
-                        BitmapIO.loadBitmap(it) {
-                            file ->
-                            FileInputStream(file)
+                        // if it is a file just load it, if not, fetch the Bitmap.
+                        if (it.scheme == "file") {
+                            BitmapIO.loadBitmap(it) { file ->
+                                FileInputStream(file)
+                            }
+                        } else {
+                            val loader = ImageLoader(context)
+                            val request = ImageRequest.Builder(context).data(it.toString()).build()
+                            loader.execute(request).drawable?.toBitmap()
                         }
                     }
             }

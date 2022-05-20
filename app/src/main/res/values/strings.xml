@@ -168,6 +168,7 @@
     <string name="space_create">Create a Space</string>
     <string name="space_create_placeholder">Space name</string>
     <string name="space_create_success">Created \"%1s\"</string>
+    <string name="space_edit">Edit</string>
 
     <string name="space_detail_views">%1d Views</string>
     <string name="space_detail_followers">%1d Followers</string>

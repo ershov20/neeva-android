@@ -35,7 +35,7 @@ interface SpaceItemDao {
     @Delete
     suspend fun deleteSpaceItem(vararg spaceItem: SpaceItem)
 
-    @Query("SELECT * FROM spaceItem WHERE spaceID = :spaceID")
+    @Query("SELECT * FROM spaceItem WHERE spaceID = :spaceID ORDER BY itemIndex ASC")
     suspend fun getItemsFromSpace(spaceID: String): List<SpaceItem>
 
     @Query("SELECT DISTINCT spaceID FROM spaceItem WHERE url = :url")

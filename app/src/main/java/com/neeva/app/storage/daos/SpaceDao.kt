@@ -28,7 +28,7 @@ interface SpaceDao : SpaceItemDao {
     @Query("SELECT id FROM space")
     suspend fun allSpaceIds(): List<String>
 
-    @Query("SELECT * FROM space")
+    @Query("SELECT * FROM space ORDER BY lastModifiedTs DESC")
     fun allSpacesFlow(): Flow<List<Space>>
 
     @Query("SELECT * FROM space")

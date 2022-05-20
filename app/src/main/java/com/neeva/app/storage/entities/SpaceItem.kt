@@ -20,6 +20,9 @@ data class SpaceItem(
     val thumbnail: Uri?,
 
     @ColumnInfo(defaultValue = "0")
+    var itemIndex: Int = -1,
+
+    @ColumnInfo(defaultValue = "0")
     val entityType: SpaceEntityType = SpaceEntityType.WEB,
 
     /** [SpaceEntityType.RECIPE] and [SpaceEntityType.PRODUCT] specific */
