@@ -71,7 +71,7 @@ enum class SettingsToggle(
     ),
     TRACKING_PROTECTION(
         primaryLabelId = R.string.tracking_protection,
-        defaultValue = false
+        defaultValue = true
     ),
     CLEAR_BROWSING_HISTORY(
         primaryLabelId = R.string.settings_browsing_history,

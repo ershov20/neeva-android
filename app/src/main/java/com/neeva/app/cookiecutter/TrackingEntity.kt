@@ -1,22 +1,24 @@
 package com.neeva.app.cookiecutter
 
+import com.neeva.app.R
+
 /*
  * This list is copied from:
  * https://github.com/neevaco/neeva-ios/blob/main/Client/Frontend/Overlay/Content/Menu/TrackingProtection/TrackingEntity.swift
  */
-enum class TrackingEntity(description: String) {
-    GOOGLE("Google"),
-    FACEBOOK("Facebook"),
-    TWITTER("Twitter"),
-    AMAZON("Amazon"),
-    OUTBRAIN("Outbrain"),
-    CRITEO("Criteo"),
-    ADOBE("Adobe"),
-    ORACLE("Oracle"),
-    WARNERMEDIA("WarnerMedia"),
-    IAS("IAS"),
-    PINTEREST("Pinterest"),
-    VERIZONMEDIA("VerizonMedia");
+enum class TrackingEntity(val description: String, val imageId: Int) {
+    GOOGLE("Google", R.drawable.google_image),
+    FACEBOOK("Facebook", R.drawable.facebook),
+    TWITTER("Twitter", R.drawable.twitter),
+    AMAZON("Amazon", R.drawable.amazon),
+    OUTBRAIN("Outbrain", R.drawable.outbrain),
+    CRITEO("Criteo", R.drawable.criteo),
+    ADOBE("Adobe", R.drawable.adobe),
+    ORACLE("Oracle", R.drawable.oracle),
+    WARNERMEDIA("WarnerMedia", R.drawable.warnermedia),
+    IAS("IAS", R.drawable.ias),
+    PINTEREST("Pinterest", R.drawable.pinterest),
+    VERIZONMEDIA("VerizonMedia", R.drawable.verizonmedia);
 
     companion object {
         fun trackingEntityForHost(host: String?): TrackingEntity? {

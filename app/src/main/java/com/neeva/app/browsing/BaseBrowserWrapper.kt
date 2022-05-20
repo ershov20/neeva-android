@@ -73,7 +73,8 @@ abstract class BaseBrowserWrapper internal constructor(
     private val tabScreenshotManager: TabScreenshotManager,
     private val domainProvider: DomainProvider,
     val neevaConstants: NeevaConstants,
-    private val settingsDataModel: SettingsDataModel
+    private val settingsDataModel: SettingsDataModel,
+    override val cookieCutterModel: CookieCutterModel
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
     /**
      * Constructor used to create a BaseBrowserWrapper that automatically creates various internal
@@ -125,7 +126,13 @@ abstract class BaseBrowserWrapper internal constructor(
         tabScreenshotManager = tabScreenshotManager,
         domainProvider = domainProvider,
         neevaConstants = neevaConstants,
-        settingsDataModel = settingsDataModel
+        settingsDataModel = settingsDataModel,
+        cookieCutterModel = CookieCutterModel(
+            historyManager?.hostInfoDao,
+            coroutineScope,
+            dispatchers,
+            settingsDataModel
+        )
     )
 
     private val tabList = TabList()
@@ -264,6 +271,8 @@ abstract class BaseBrowserWrapper internal constructor(
         tabList.forEach {
             if (it == browser?.activeTab) {
                 it.navigationController.reload()
+                // TODO(kobec/chung): remove resetStat when we add onContentFilterStatsStarted
+                tabCallbackMap[it]?.tabCookieCutterModel?.resetStat()
             } else {
                 tabCallbackMap[it]?.tabCookieCutterModel?.reloadUponForeground = true
             }
@@ -312,14 +321,6 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     internal abstract fun createBrowserFragment(): Fragment
 
-    val _cookieCutterModel = CookieCutterModel(
-        historyManager?.hostInfoDao,
-        coroutineScope,
-        dispatchers,
-        settingsDataModel
-    )
-    override val cookieCutterModel: CookieCutterModel get() = _cookieCutterModel
-
     /** Prepares the WebLayer Browser to interface with our app. */
     override fun createAndAttachBrowser(
         displaySize: Rect,
@@ -344,7 +345,7 @@ abstract class BaseBrowserWrapper internal constructor(
         browser.setMinimumSurfaceSize(displaySize.width(), displaySize.height())
 
         // Configure content filtering
-        _cookieCutterModel.setUpTrackingProtection(browser.profile.contentFilterManager)
+        cookieCutterModel.setUpTrackingProtection(browser.profile.contentFilterManager)
 
         // Set the Views that WebLayer will use as placeholders for our toolbar.
         //
@@ -538,7 +539,8 @@ abstract class BaseBrowserWrapper internal constructor(
             activityCallbackProvider = activityCallbackProvider,
             registerNewTab = this::registerNewTab,
             fullscreenCallback = fullscreenCallback,
-            trackingDataFlow = _cookieCutterModel.trackingDataFlow,
+            trackingDataFlow = cookieCutterModel.trackingDataFlow,
+            enableTrackingProtection = cookieCutterModel.enableTrackingProtection,
             domainProvider = domainProvider
         )
     }

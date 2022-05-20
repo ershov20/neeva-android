@@ -128,10 +128,7 @@ fun BrowserToolbar(
                             }
                         }
 
-                        URLBar(
-                            browserToolbarModel = browserToolbarModel,
-                            modifier = Modifier.weight(1.0f)
-                        ) { iconModifier ->
+                        URLBar(modifier = Modifier.weight(1.0f)) { iconModifier ->
                             ShareButton(modifier = iconModifier)
                         }
 
@@ -155,7 +152,7 @@ fun BrowserToolbar(
                         }
                     }
                 } else {
-                    URLBar(browserToolbarModel) { iconModifier ->
+                    URLBar { iconModifier ->
                         OverflowMenu(
                             overflowMenuData = overflowMenuData,
                             onMenuItem = browserToolbarModel::onMenuItem,

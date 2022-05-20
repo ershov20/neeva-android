@@ -3,6 +3,7 @@ package com.neeva.app.browsing
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.State
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.cookiecutter.TabCookieCutterModel
 import com.neeva.app.cookiecutter.TrackingData
@@ -42,12 +43,14 @@ class TabCallbacks(
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
     trackingDataFlow: MutableStateFlow<TrackingData?>,
+    enableTrackingProtection: State<Boolean>,
     domainProvider: DomainProvider
 ) {
     val tabCookieCutterModel = TabCookieCutterModel(
-        tab,
-        trackingDataFlow,
-        domainProvider
+        tab = tab,
+        trackingDataFlow = trackingDataFlow,
+        enableTrackingProtection = enableTrackingProtection,
+        domainProvider = domainProvider
     )
 
     /**
@@ -98,6 +101,7 @@ class TabCallbacks(
         var visitToCommit: Visit? = null
 
         override fun onNavigationStarted(navigation: Navigation) {
+            // TODO(kobec/chung): remove resetStat when we add onContentFilterStatsStarted
             tabCookieCutterModel.resetStat()
 
             tabList.updateIsCrashed(tab.guid, isCrashed = false)
@@ -208,6 +212,8 @@ class TabCallbacks(
         }
 
         override fun onVisibleUriChanged(uri: Uri) {
+            // TODO(kobec/chung): remove resetStat when we add onContentFilterStatsStarted
+            tabCookieCutterModel.resetStat()
             tabList.updateUrl(tab.guid, uri)
         }
 

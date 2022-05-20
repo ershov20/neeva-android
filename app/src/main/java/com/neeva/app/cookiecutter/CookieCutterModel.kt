@@ -23,6 +23,8 @@ class CookieCutterModel(
     lateinit var contentFilterManager: ContentFilterManager
 
     val trackingDataFlow = MutableStateFlow<TrackingData?>(null)
+    val enableTrackingProtection = settingsDataModel
+        .getToggleState(SettingsToggle.TRACKING_PROTECTION)
 
     enum class BlockingStrength(
         @StringRes val description: Int,
@@ -60,16 +62,17 @@ class CookieCutterModel(
     }
 
     fun updateTrackingProtectionConfiguration() {
-        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)) {
-            val blockingStrength: BlockingStrength =
-                settingsDataModel.getCookieCutterStrength()
+        if (enableTrackingProtection.value) {
+            val blockingStrength: BlockingStrength = settingsDataModel.getCookieCutterStrength()
             contentFilterManager.setRulesFile(blockingStrength.blockingList)
             contentFilterManager.setMode(blockingStrength.mode)
 
             coroutineScope.launch(dispatchers.io) {
-                hostInfoDao?.getAllTrackingAllowedHosts()?.forEach(
-                    { hostInfo -> contentFilterManager.addHostExclusion(hostInfo.host) }
-                )
+                hostInfoDao?.getAllTrackingAllowedHosts()?.forEach { hostInfo ->
+                    contentFilterManager.addHostExclusion(
+                        hostInfo.host
+                    )
+                }
             }
             contentFilterManager.startFiltering()
         } else {
@@ -77,7 +80,7 @@ class CookieCutterModel(
         }
     }
 
-    // host exclusion
+    /** Allow trackers on the given [host] */
     fun addToAllowList(host: String) {
         coroutineScope.launch {
             withContext(dispatchers.io) {

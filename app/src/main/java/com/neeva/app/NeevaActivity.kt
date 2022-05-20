@@ -169,7 +169,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         dispatchers = dispatchers,
                         snackbarModel = localEnvironmentState.snackbarModel,
                         historyDatabase = historyDatabase,
-                        webLayerModel::updateBrowsersCookieCutterConfig
+                        onTrackingProtectionUpdate = webLayerModel::updateBrowsersCookieCutterConfig
                     )
                 }
 

@@ -1,4 +1,4 @@
-package com.neeva.app.browsing.urlbar.trackingprotection.badge
+package com.neeva.app.cookiecutter.ui
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

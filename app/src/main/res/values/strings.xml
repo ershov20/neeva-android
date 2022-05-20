@@ -205,6 +205,13 @@
     <string name="mobile_site">Mobile site</string>
 
     <string name="badge_image_text">%1$s+</string>
+    <string name="cookie_cutter_dismiss_popup">Close Cookie Cutter popover</string>
+
+    <string name="cookie_cutter_trackers">Trackers</string>
+    <string name="cookie_cutter_domains">Domains</string>
+    <string name="cookie_cutter_whos_tracking_you">Who\'s tracking you</string>
+    <string name="cookie_cutter">Cookie Cutter</string>
+    <string name="cookie_cutter_settings">Cookie Cutter settings</string>
 
     <!-- Debug settings -->
     <string name="settings_debug_local" translatable="false">Advanced</string>

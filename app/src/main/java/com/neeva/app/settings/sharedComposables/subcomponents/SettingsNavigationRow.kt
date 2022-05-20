@@ -21,7 +21,8 @@ fun SettingsNavigationRow(
         actionIconParams = RowActionIconParams(
             onTapAction = onClick,
             actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
-            size = Dimensions.SIZE_ICON_SMALL
+            size = Dimensions.SIZE_ICON_SMALL,
+            enabled = enabled
         ),
         enabled = enabled
     )

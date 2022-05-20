@@ -5,6 +5,7 @@ import android.graphics.Rect
 import android.net.Uri
 import android.view.View
 import android.widget.FrameLayout
+import androidx.compose.runtime.mutableStateOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
@@ -16,6 +17,7 @@ import com.neeva.app.R
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
+import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
@@ -90,6 +92,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
     @Mock private lateinit var domainProvider: DomainProvider
     @Mock private lateinit var settingsDataModel: SettingsDataModel
+    @Mock private lateinit var cookieCutterModel: CookieCutterModel
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
@@ -151,6 +154,11 @@ class BaseBrowserWrapperTest : BaseTest() {
             on { isEditing } doReturn urlBarModelIsEditing
         }
 
+        cookieCutterModel = mock {
+            on { trackingDataFlow } doReturn MutableStateFlow(null)
+            on { enableTrackingProtection } doReturn mutableStateOf(true)
+        }
+
         browserWrapper = object : BaseBrowserWrapper(
             isIncognito = false,
             appContext = context,
@@ -167,7 +175,8 @@ class BaseBrowserWrapperTest : BaseTest() {
             tabScreenshotManager = tabScreenshotManager,
             domainProvider = domainProvider,
             neevaConstants = neevaConstants,
-            settingsDataModel = settingsDataModel
+            settingsDataModel = settingsDataModel,
+            cookieCutterModel = cookieCutterModel
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment

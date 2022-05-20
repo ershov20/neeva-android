@@ -1,4 +1,4 @@
-package com.neeva.app.browsing.urlbar.trackingprotection
+package com.neeva.app.cookiecutter.ui
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -14,7 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.neeva.app.R
-import com.neeva.app.browsing.urlbar.trackingprotection.badge.NumberBadge
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
