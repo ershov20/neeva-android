@@ -19,7 +19,7 @@ android {
         }
 
         staging {
-            initWith debug
+            initWith release
         }
     }
     compileOptions {

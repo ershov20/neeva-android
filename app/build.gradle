@@ -60,10 +60,10 @@ android {
         }
 
         staging {
-            initWith debug
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            initWith release
+            applicationIdSuffix '.staging'
+            versionNameSuffix '-STAGING'
+            signingConfig signingConfigs.debug
         }
     }
 
