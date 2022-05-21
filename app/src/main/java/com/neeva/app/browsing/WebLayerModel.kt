@@ -347,10 +347,9 @@ class WebLayerModel internal constructor(
         toMillis: Long
     ) {
         val clearCookiesFlags = mutableListOf<Int>()
-        clearingOptions
-            .filter { it.value }
-            .forEach { (toggle, isEnabled) ->
-                when (toggle) {
+        clearingOptions.forEach { (toggleType, toggleEnabled) ->
+            if (toggleEnabled) {
+                when (toggleType) {
                     SettingsToggle.CLEAR_BROWSING_HISTORY -> {
                         historyManager.clearHistory(fromMillis)
                     }
@@ -368,6 +367,7 @@ class WebLayerModel internal constructor(
                     // TODO(kobec): finish this for the other parameters
                 }
             }
+        }
         clearNonNeevaCookies(clearCookiesFlags, fromMillis, toMillis)
     }
 

@@ -17,10 +17,12 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
+import org.chromium.weblayer.BrowsingDataType
 import org.chromium.weblayer.Callback
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.WebLayer
@@ -71,6 +73,7 @@ class WebLayerModelTest : BaseTest() {
     @Mock private lateinit var incognitoBrowserWrapper: IncognitoBrowserWrapper
     @Mock private lateinit var incognitoProfile: Profile
     @Mock private lateinit var neevaUser: NeevaUser
+    @Mock private lateinit var neevaUserToken: NeevaUserToken
     @Mock private lateinit var regularProfile: Profile
     @Mock private lateinit var settingsDataModel: SettingsDataModel
     @Mock private lateinit var webLayerFactory: WebLayerFactory
@@ -102,6 +105,18 @@ class WebLayerModelTest : BaseTest() {
         sharedPreferencesModel = SharedPreferencesModel(application)
 
         neevaConstants = NeevaConstants()
+
+        neevaUser = mock {
+            on { neevaUserToken } doReturn neevaUserToken
+        }
+
+        neevaUserToken = mock {
+            on { getToken() } doReturn "fake token"
+        }
+
+        regularProfile = mock {
+            on { cookieManager } doReturn mock()
+        }
 
         webLayer = mock {
             on {
@@ -349,5 +364,99 @@ class WebLayerModelTest : BaseTest() {
         expectThat(webLayerModel.browsersFlow.value.isCurrentlyIncognito).isFalse()
 
         verify(incognitoBrowserWrapper, never()).closeAllTabs()
+    }
+
+    @Test
+    fun clearBrowsingData_clearOnlyHistory() {
+        completeWebLayerInitialization()
+        val clearingOptions = mapOf(
+            SettingsToggle.CLEAR_BROWSING_HISTORY to true,
+            SettingsToggle.CLEAR_COOKIES to false,
+            SettingsToggle.CLEAR_CACHE to false
+        )
+
+        webLayerModel.clearBrowsingData(clearingOptions, fromMillis = 0, toMillis = 2)
+
+        verify(historyManager).clearHistory(eq(0))
+        verify(regularProfile, never()).clearBrowsingData(
+            eq(listOf<Int>().toIntArray()),
+            eq(0),
+            eq(2),
+            any()
+        )
+    }
+
+    @Test
+    fun clearBrowsingData_clearOnlyCookies() {
+        completeWebLayerInitialization()
+        val clearingOptions = mapOf(
+            SettingsToggle.CLEAR_BROWSING_HISTORY to false,
+            SettingsToggle.CLEAR_COOKIES to true,
+            SettingsToggle.CLEAR_CACHE to false
+        )
+        webLayerModel.clearBrowsingData(clearingOptions, fromMillis = 0, toMillis = 2)
+
+        verify(historyManager, never()).clearHistory(any())
+        verify(regularProfile).clearBrowsingData(
+            eq(listOf(BrowsingDataType.COOKIES_AND_SITE_DATA).toIntArray()),
+            eq(0),
+            eq(2),
+            any()
+        )
+    }
+
+    @Test
+    fun clearBrowsingData_clearOnlyCacheAndCookies() {
+        completeWebLayerInitialization()
+        val clearingOptions = mapOf(
+            SettingsToggle.CLEAR_BROWSING_HISTORY to false,
+            SettingsToggle.CLEAR_COOKIES to true,
+            SettingsToggle.CLEAR_CACHE to true
+        )
+
+        webLayerModel.clearBrowsingData(clearingOptions, fromMillis = 0, toMillis = 2)
+
+        verify(historyManager, never()).clearHistory(eq(0))
+        verify(regularProfile).clearBrowsingData(
+            eq(listOf(BrowsingDataType.COOKIES_AND_SITE_DATA, BrowsingDataType.CACHE).toIntArray()),
+            eq(0),
+            eq(2),
+            any()
+        )
+    }
+
+    @Test
+    fun clearBrowsingData_clearAll() {
+        completeWebLayerInitialization()
+        val clearingOptions = mapOf(
+            SettingsToggle.CLEAR_BROWSING_HISTORY to true,
+            SettingsToggle.CLEAR_COOKIES to true,
+            SettingsToggle.CLEAR_CACHE to true
+        )
+        webLayerModel.clearBrowsingData(clearingOptions, fromMillis = 0, toMillis = 2)
+        verify(regularProfile).clearBrowsingData(
+            eq(listOf(BrowsingDataType.COOKIES_AND_SITE_DATA, BrowsingDataType.CACHE).toIntArray()),
+            eq(0),
+            eq(2),
+            any()
+        )
+    }
+
+    @Test
+    fun clearBrowsingData_clearNone() {
+        completeWebLayerInitialization()
+        val clearingOptions = mapOf(
+            SettingsToggle.CLEAR_BROWSING_HISTORY to false,
+            SettingsToggle.CLEAR_COOKIES to false,
+            SettingsToggle.CLEAR_CACHE to false
+        )
+        webLayerModel.clearBrowsingData(clearingOptions, fromMillis = 0, toMillis = 2)
+        verify(historyManager, never()).clearHistory(eq(0))
+        verify(regularProfile, never()).clearBrowsingData(
+            eq(listOf<Int>().toIntArray()),
+            eq(0),
+            eq(2),
+            any()
+        )
     }
 }
