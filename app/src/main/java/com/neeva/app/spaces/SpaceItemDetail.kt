@@ -49,7 +49,7 @@ fun SpaceItemDetail(
         Modifier.clickable { spaceItem.url?.let { appNavModel.openUrl(it) } }
     ) {
         Column {
-            if (spaceItem.entityType == SpaceEntityType.IMAGE) {
+            if (spaceItem.itemEntityType == SpaceEntityType.IMAGE) {
                 SpaceItemDetailImageContent(spaceItem = spaceItem)
             } else {
                 SpaceItemDetailMainContent(
@@ -66,7 +66,7 @@ fun SpaceItemDetail(
 
             val shouldShowDescriptionsForEntity =
                 !spaceItem.snippet.isNullOrEmpty() && showDescriptions &&
-                    spaceItem.entityType != SpaceEntityType.IMAGE
+                    spaceItem.itemEntityType != SpaceEntityType.IMAGE
             if (shouldShowDescriptionsForEntity) {
                 BaseRowLayout(
                     backgroundColor =

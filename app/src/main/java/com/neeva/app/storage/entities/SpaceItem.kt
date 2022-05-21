@@ -6,6 +6,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.neeva.app.GetSpacesDataQuery
 
+/**
+ * NEVER change the names of these enums.  Room does a straight Enum-To-String conversion by storing
+ * the name of the enum in the table.  If Room can't find a match, the app will crash on conversion.
+ */
 enum class SpaceEntityType {
     WEB, IMAGE, NEWS, PRODUCT, RECIPE, RICH_ENTITY
 }
@@ -22,32 +26,25 @@ data class SpaceItem(
     @ColumnInfo(defaultValue = "0")
     var itemIndex: Int = -1,
 
-    @ColumnInfo(defaultValue = "0")
-    val entityType: SpaceEntityType = SpaceEntityType.WEB,
+    @ColumnInfo(defaultValue = "WEB")
+    val itemEntityType: SpaceEntityType = SpaceEntityType.WEB,
 
     /** [SpaceEntityType.RECIPE] and [SpaceEntityType.PRODUCT] specific */
-    @ColumnInfo(defaultValue = "")
     val stars: Double? = null,
 
-    @ColumnInfo(defaultValue = "")
     val numReviews: Int? = null,
 
     /** [SpaceEntityType.RECIPE] specific */
-    @ColumnInfo(defaultValue = "")
     val totalTime: String? = null,
 
     /** [SpaceEntityType.PRODUCT] specific */
-    @ColumnInfo(defaultValue = "")
     val price: Double? = null,
 
     /** [SpaceEntityType.NEWS] specific */
-    @ColumnInfo(defaultValue = "")
     val provider: String? = null,
 
-    @ColumnInfo(defaultValue = "")
     val faviconURL: Uri? = null,
 
-    @ColumnInfo(defaultValue = "")
     val datePublished: String? = null
 )
 
@@ -92,7 +89,7 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             provider = news()?.providerName,
             faviconURL = news()?.favIconURL?.let { Uri.parse(it) },
             datePublished = news()?.datePublished,
-            entityType = SpaceEntityType.NEWS
+            itemEntityType = SpaceEntityType.NEWS
         )
         SpaceEntityType.RICH_ENTITY -> SpaceItem(
             id = id,
@@ -101,7 +98,7 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             title = richEntity()?.title,
             snippet = richEntity()?.subTitle,
             thumbnail = richEntity()?.images?.first()?.thumbnailURL.let { Uri.parse(it) },
-            entityType = SpaceEntityType.RICH_ENTITY
+            itemEntityType = SpaceEntityType.RICH_ENTITY
         )
         SpaceEntityType.PRODUCT -> SpaceItem(
             id = id,
@@ -113,7 +110,7 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             stars = product()?.reviews?.ratingSummary?.rating?.productStars,
             numReviews = product()?.reviews?.ratingSummary?.numReviews,
             price = product()?.priceHistory?.currentPrice,
-            entityType = SpaceEntityType.PRODUCT
+            itemEntityType = SpaceEntityType.PRODUCT
         )
         SpaceEntityType.RECIPE -> SpaceItem(
             id = id,
@@ -125,7 +122,7 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             stars = recipe()?.recipeRating?.recipeStars,
             numReviews = recipe()?.recipeRating?.numReviews,
             totalTime = recipe()?.totalTime,
-            entityType = SpaceEntityType.RECIPE
+            itemEntityType = SpaceEntityType.RECIPE
         )
         else -> SpaceItem(
             id = id,
@@ -134,7 +131,7 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             title = spaceEntity?.title,
             snippet = spaceEntity?.snippet,
             thumbnail = thumbnailUri,
-            entityType = entityType()
+            itemEntityType = entityType()
         )
     }
 }

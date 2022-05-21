@@ -17,7 +17,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,7 +36,7 @@ import com.neeva.app.ui.widgets.UriDisplayView
 
 @Composable
 fun ColumnScope.SpaceEntityInfo(spaceItem: SpaceItem) {
-    when (spaceItem.entityType) {
+    when (spaceItem.itemEntityType) {
         SpaceEntityType.NEWS -> NewsInfo(
             faviconURL = spaceItem.faviconURL,
             providerName = spaceItem.provider
@@ -70,7 +69,7 @@ fun ColumnScope.RecipeOrProductInfo(
 ) {
     ProviderInfo(faviconBitmap, domain)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (spaceItem.entityType == SpaceEntityType.PRODUCT) {
+        if (spaceItem.itemEntityType == SpaceEntityType.PRODUCT) {
             Text(
                 text = buildAnnotatedString {
                     spaceItem.price?.let { append("$$it") }
@@ -91,7 +90,7 @@ fun ColumnScope.RecipeOrProductInfo(
                 imageVector = Icons.Default.Star,
                 contentDescription = null,
                 tint =
-                if (spaceItem.entityType == SpaceEntityType.RECIPE) {
+                if (spaceItem.itemEntityType == SpaceEntityType.RECIPE) {
                     ColorPalette.Brand.Orange
                 } else {
                     ColorPalette.Brand.Red
@@ -103,7 +102,7 @@ fun ColumnScope.RecipeOrProductInfo(
             text = buildAnnotatedString {
                 spaceItem.stars?.let { append("%.1f ".format(it)) }
                 spaceItem.numReviews?.let { append("($it)") }
-                if (spaceItem.entityType == SpaceEntityType.RECIPE) {
+                if (spaceItem.itemEntityType == SpaceEntityType.RECIPE) {
                     if ((spaceItem.numReviews != null || spaceItem.stars != null) &&
                         spaceItem.totalTime != null
                     ) {
@@ -218,7 +217,7 @@ fun SpaceEntityRecipeInfoPreview() {
                     stars = if (isStarsNull) null else 4.62,
                     numReviews = if (isStarsNull) null else 129,
                     totalTime = if (isTotalTimeNull) null else "1 hr 23 minutes",
-                    entityType = SpaceEntityType.RECIPE
+                    itemEntityType = SpaceEntityType.RECIPE
                 )
             )
         }
@@ -243,7 +242,7 @@ fun SpaceEntityProductInfoPreview() {
                     stars = if (isStarsNull) null else 4.83,
                     numReviews = if (isStarsNull) null else 1278,
                     price = if (isPriceNull) null else 1293.28,
-                    entityType = SpaceEntityType.PRODUCT
+                    itemEntityType = SpaceEntityType.PRODUCT
                 )
             )
         }

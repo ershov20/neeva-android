@@ -21,16 +21,9 @@ data class Space(
     val isPublic: Boolean,
     val userACL: SpaceACLLevel,
 
-    @ColumnInfo(defaultValue = "")
     val ownerName: String = "",
-
-    @ColumnInfo(defaultValue = "")
     val ownerPictureURL: Uri? = null,
-
-    @ColumnInfo(defaultValue = "0")
     val numViews: Int = 0,
-
-    @ColumnInfo(defaultValue = "0")
     val numFollowers: Int = 0
 ) {
     fun url(neevaConstants: NeevaConstants): Uri =
