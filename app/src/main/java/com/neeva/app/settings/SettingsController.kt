@@ -87,8 +87,8 @@ class SettingsControllerImpl(
 
     override fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {
         return { newValue ->
-            settingsDataModel.getTogglePreferenceSetter(settingsToggle)(newValue)
             getToggleChangedCallBackMap()[settingsToggle.key]?.invoke()
+            settingsDataModel.getTogglePreferenceSetter(settingsToggle)(newValue)
         }
     }
 
@@ -123,14 +123,14 @@ class SettingsControllerImpl(
                 onTrackingProtectionUpdate()
             },
             SettingsToggle.DEBUG_M1_APP_HOST.key to {
-                /*TODO(kobec): Remind user to restart*/
+                snackbarModel.show("Restart for app host changes to take effect.")
                 if (getToggleState(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST).value) {
                     getTogglePreferenceSetter(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST)
                         .invoke(false)
                 }
             },
             SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST.key to {
-                /*TODO(kobec): Remind user to restart*/
+                snackbarModel.show("Restart for app host changes to take effect.")
                 if (getToggleState(SettingsToggle.DEBUG_M1_APP_HOST).value) {
                     getTogglePreferenceSetter(SettingsToggle.DEBUG_M1_APP_HOST)
                         .invoke(false)
