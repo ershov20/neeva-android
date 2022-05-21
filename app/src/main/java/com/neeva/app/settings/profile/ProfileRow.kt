@@ -34,7 +34,7 @@ fun ProfileRowContainer(
     when {
         isSignedOut && onClick != null -> {
             SettingsButtonRow(
-                label = stringResource(R.string.settings_sign_in_to_join_neeva),
+                primaryLabel = stringResource(R.string.settings_sign_in_to_join_neeva),
                 onClick = onClick
             )
         }

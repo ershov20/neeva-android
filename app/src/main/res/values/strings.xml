@@ -222,7 +222,9 @@
     <string name="settings_debug_enable_incognito_screenshots" translatable="false">Enable screenshots while in Incognito</string>
     <string name="settings_debug_enable_show_desktop_site" translatable="false">Enable Show Desktop Site in Overflow Menu</string>
     <string name="settings_debug_open_50_tabs" translatable="false">Open 50 tabs</string>
-    <string name="settings_debug_export_database" translatable="false">Export database</string>
+    <string name="settings_debug_export_database" translatable="false">Export history database</string>
+    <string name="settings_debug_import_database" translatable="false">Import history database</string>
+    <string name="settings_debug_import_database_description" translatable="false">Destroys your existing database</string>
     <string name="settings_debug_m1_apphost" translatable="false">Enable using the m1.neeva.com app host</string>
     <string name="settings_debug_local_neeva_dev_apphost" translatable="false">Enable using the local.neeva.dev app host</string>
     <string name="settings_debug_native_spaces" translatable="false">Enable native Spaces detail UI</string>

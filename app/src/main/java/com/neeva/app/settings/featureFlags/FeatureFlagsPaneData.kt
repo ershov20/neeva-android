@@ -35,6 +35,11 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
                     primaryLabelId = R.string.settings_debug_export_database
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.BUTTON,
+                    primaryLabelId = R.string.settings_debug_import_database,
+                    secondaryLabelId = R.string.settings_debug_import_database_description
                 )
             )
         )

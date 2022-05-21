@@ -1,18 +1,17 @@
 package com.neeva.app.settings.sharedComposables.subcomponents
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.widgets.StackedText
 
 @Composable
 fun SettingsButtonRow(
-    label: String,
+    primaryLabel: String,
+    secondaryLabel: String? = null,
     onClick: (() -> Unit)?,
     onDoubleClick: (() -> Unit)? = null
 ) {
@@ -20,12 +19,9 @@ fun SettingsButtonRow(
         onTapRow = onClick,
         onDoubleTapRow = onDoubleClick
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+        StackedText(
+            primaryLabel = primaryLabel,
+            secondaryLabel = secondaryLabel
         )
     }
 }
@@ -38,7 +34,7 @@ fun SettingsButtonRow(
 fun SettingsButton_Preview() {
     NeevaTheme {
         SettingsButtonRow(
-            label = stringResource(R.string.debug_long_string_primary),
+            primaryLabel = stringResource(R.string.debug_long_string_primary),
             onClick = {}
         )
     }
@@ -52,7 +48,7 @@ fun SettingsButton_Preview() {
 fun SettingsButton_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         SettingsButtonRow(
-            label = stringResource(R.string.debug_long_string_primary),
+            primaryLabel = stringResource(R.string.debug_long_string_primary),
             onClick = {}
         )
     }

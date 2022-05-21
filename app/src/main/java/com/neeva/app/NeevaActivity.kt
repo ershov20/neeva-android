@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
@@ -50,6 +51,7 @@ import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.SnackbarModel
@@ -88,6 +90,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var overlaySheetModel: OverlaySheetModel
     @Inject internal lateinit var settingsDataModel: SettingsDataModel
+    @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Inject lateinit var snackbarModel: SnackbarModel
     @Inject lateinit var spaceStore: SpaceStore
 
@@ -158,7 +161,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
                 val settingsControllerImpl = remember(appNavModel) {
                     SettingsControllerImpl(
-                        context = context,
                         appNavModel = appNavModel!!,
                         settingsDataModel = localEnvironmentState.settingsDataModel,
                         neevaUser = localEnvironmentState.neevaUser,
@@ -166,9 +168,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         onSignOut = activityViewModel::signOut,
                         setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
                         coroutineScope = lifecycleScope,
-                        dispatchers = dispatchers,
                         snackbarModel = localEnvironmentState.snackbarModel,
-                        historyDatabase = historyDatabase,
+                        activityCallbackProvider = activityCallbackProvider,
                         onTrackingProtectionUpdate = webLayerModel::updateBrowsersCookieCutterConfig
                     )
                 }
@@ -553,4 +554,34 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     override fun fireExternalIntentForUri(uri: Uri, closeTabIfSuccessful: Boolean) =
         activityViewModel.fireExternalIntentForUri(this, uri, closeTabIfSuccessful)
+
+    /** When activated, asks the user to select a file containing a previously exported database. */
+    private val importDatabase = registerForActivityResult(ActivityResultContracts.OpenDocument()) {
+        it?.let {
+            lifecycleScope.launch(dispatchers.io) {
+                HistoryDatabase.prepareDatabaseForImport(
+                    context = this@NeevaActivity,
+                    contentUri = it,
+                    sharedPreferencesModel = sharedPreferencesModel
+                )
+            }
+        }
+    }
+
+    /**
+     * Asks the user to select a file containing a previously exported database and overwrites their
+     * existing database with it.
+     */
+    override fun importHistoryDatabase() {
+        importDatabase.launch(arrayOf("application/zip"))
+    }
+
+    override fun exportHistoryDatabase() {
+        lifecycleScope.launch {
+            historyDatabase.export(
+                context = this@NeevaActivity,
+                dispatchers = dispatchers
+            )
+        }
+    }
 }

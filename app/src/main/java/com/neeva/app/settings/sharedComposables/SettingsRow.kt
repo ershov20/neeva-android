@@ -59,7 +59,8 @@ fun SettingsRow(
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
             SettingsButtonRow(
-                label = rowDataValues.primaryLabel,
+                primaryLabel = rowDataValues.primaryLabel,
+                secondaryLabel = rowDataValues.secondaryLabel,
                 onClick = onClick,
                 onDoubleClick = onDoubleClick
             )

@@ -110,8 +110,11 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesDatabase(@ApplicationContext context: Context): HistoryDatabase {
-        return HistoryDatabase.create(context)
+    fun providesDatabase(
+        @ApplicationContext context: Context,
+        sharedPreferencesModel: SharedPreferencesModel
+    ): HistoryDatabase {
+        return HistoryDatabase.create(context, sharedPreferencesModel)
     }
 
     @Provides

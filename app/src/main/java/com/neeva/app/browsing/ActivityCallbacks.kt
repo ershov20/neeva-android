@@ -51,6 +51,12 @@ interface ActivityCallbacks {
      * @param closeTabIfSuccessful If the intent was successfully handled, close the tab.
      */
     fun fireExternalIntentForUri(uri: Uri, closeTabIfSuccessful: Boolean)
+
+    /** Asks the user to select a previously exported database to replace their current one. */
+    fun importHistoryDatabase()
+
+    /** Exports the user's database and shares it out to an app of the user's choosing. */
+    fun exportHistoryDatabase()
 }
 
 /** Tracks which Activity the WebLayer is interacting with. */
