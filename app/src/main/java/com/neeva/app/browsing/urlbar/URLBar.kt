@@ -14,44 +14,35 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
-import com.neeva.app.cookiecutter.TrackingData
-import com.neeva.app.cookiecutter.ui.CookieCutterPopover
-import com.neeva.app.cookiecutter.ui.TrackingProtectionButton
+import com.neeva.app.cookiecutter.ui.icon.TrackingProtectionButton
+import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopover
+import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
 import com.neeva.app.ui.theme.Dimensions
-import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun URLBar(
+    cookieCutterPopoverModel: CookieCutterPopoverModel,
     modifier: Modifier = Modifier,
     endComposable: @Composable (modifier: Modifier) -> Unit
 ) {
-    val appNavModel = LocalAppNavModel.current
     val browserToolbarModel = LocalBrowserToolbarModel.current
     val urlBarModel = browserToolbarModel.urlBarModel
     val urlBarModelState = urlBarModel.stateFlow.collectAsState()
     val isEditing = urlBarModelState.value.isEditing
-
-    val trackingDataFlow = browserToolbarModel.cookieCutterModel?.trackingDataFlow
 
     val iconModifier = Modifier.padding(vertical = Dimensions.PADDING_TINY)
 
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         AnimatedVisibility(visible = !isEditing) {
             UrlBarStartComposable(
-                showIncognitoBadge = browserToolbarModel.isIncognito,
-                trackingDataFlow = trackingDataFlow,
-                openCookieCutterSettings = appNavModel::showCookieCutterSettings,
+                isIncognito = browserToolbarModel.isIncognito,
+                cookieCutterPopoverModel = cookieCutterPopoverModel,
                 modifier = iconModifier
             )
         }
@@ -106,26 +97,21 @@ fun URLBar(
 
 @Composable
 fun UrlBarStartComposable(
-    showIncognitoBadge: Boolean,
-    trackingDataFlow: StateFlow<TrackingData?>?,
-    openCookieCutterSettings: () -> Unit,
+    isIncognito: Boolean,
+    cookieCutterPopoverModel: CookieCutterPopoverModel,
     modifier: Modifier
 ) {
-    val trackingData = trackingDataFlow?.collectAsState()?.value
-    var showPopover by remember { mutableStateOf(false) }
     TrackingProtectionButton(
-        showIncognitoBadge = showIncognitoBadge,
-        trackersBlocked = trackingData?.numTrackers ?: 0,
-        modifier = modifier
-    ) {
-        showPopover = true
-    }
+        showIncognitoBadge = isIncognito,
+        trackingDataFlow = cookieCutterPopoverModel.trackingDataFlow,
+        modifier = modifier,
+        onClick = cookieCutterPopoverModel::openPopover
+    )
 
-    if (showPopover) {
+    if (cookieCutterPopoverModel.popoverVisible.value) {
         CookieCutterPopover(
-            trackingData = trackingData,
-            openCookieCutterSettings = openCookieCutterSettings,
-            onDismissRequest = { showPopover = false }
+            isIncognito = isIncognito,
+            cookieCutterPopoverModel = cookieCutterPopoverModel
         )
     }
 }

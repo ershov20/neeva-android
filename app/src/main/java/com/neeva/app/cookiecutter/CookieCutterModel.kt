@@ -1,30 +1,26 @@
 package com.neeva.app.cookiecutter
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.Dispatchers
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.storage.daos.HostInfoDao
-import com.neeva.app.storage.entities.HostInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.chromium.weblayer.ContentFilterManager
 import org.chromium.weblayer.ContentFilterMode
 
-class CookieCutterModel(
-    private val hostInfoDao: HostInfoDao?,
-    private val coroutineScope: CoroutineScope,
-    private val dispatchers: Dispatchers,
-    private val settingsDataModel: SettingsDataModel,
-) {
-    lateinit var contentFilterManager: ContentFilterManager
+interface CookieCutterModel {
+    var trackersAllowListFlow: MutableStateFlow<TrackersAllowList?>
+    val trackingDataFlow: MutableStateFlow<TrackingData?>
+    val enableTrackingProtection: MutableState<Boolean>
 
-    val trackingDataFlow = MutableStateFlow<TrackingData?>(null)
-    val enableTrackingProtection = settingsDataModel
-        .getToggleState(SettingsToggle.TRACKING_PROTECTION)
+    fun setUpTrackingProtection(manager: ContentFilterManager)
+    fun updateTrackingProtectionConfiguration()
 
     enum class BlockingStrength(
         @StringRes val description: Int,
@@ -55,15 +51,35 @@ class CookieCutterModel(
     companion object {
         const val BLOCKING_STRENGTH_SHARED_PREF_KEY = "BLOCKING_STRENGTH"
     }
+}
 
-    fun setUpTrackingProtection(manager: ContentFilterManager) {
+class CookieCutterModelImpl(
+    private val hostInfoDao: HostInfoDao?,
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers,
+    private val settingsDataModel: SettingsDataModel
+) : CookieCutterModel {
+    private lateinit var contentFilterManager: ContentFilterManager
+    override var trackersAllowListFlow = MutableStateFlow<TrackersAllowList?>(null)
+
+    override val trackingDataFlow = MutableStateFlow<TrackingData?>(null)
+    override val enableTrackingProtection = settingsDataModel
+        .getToggleState(SettingsToggle.TRACKING_PROTECTION)
+
+    override fun setUpTrackingProtection(manager: ContentFilterManager) {
         contentFilterManager = manager
         updateTrackingProtectionConfiguration()
+        trackersAllowListFlow.value = TrackersAllowListImpl(
+            hostInfoDao = hostInfoDao,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            contentFilterManager = contentFilterManager
+        )
     }
 
-    fun updateTrackingProtectionConfiguration() {
+    override fun updateTrackingProtectionConfiguration() {
         if (enableTrackingProtection.value) {
-            val blockingStrength: BlockingStrength = settingsDataModel.getCookieCutterStrength()
+            val blockingStrength = settingsDataModel.getCookieCutterStrength()
             contentFilterManager.setRulesFile(blockingStrength.blockingList)
             contentFilterManager.setMode(blockingStrength.mode)
 
@@ -79,38 +95,13 @@ class CookieCutterModel(
             contentFilterManager.stopFiltering()
         }
     }
+}
 
-    /** Allow trackers on the given [host] */
-    fun addToAllowList(host: String) {
-        coroutineScope.launch {
-            withContext(dispatchers.io) {
-                hostInfoDao?.upsert(HostInfo(host = host, isTrackingAllowed = true))
-            }
-            withContext(dispatchers.main) {
-                contentFilterManager.addHostExclusion(host)
-            }
-        }
-    }
-
-    fun removeFromAllowList(host: String) {
-        coroutineScope.launch {
-            withContext(dispatchers.io) {
-                hostInfoDao?.deleteFromHostInfo(host)
-            }
-            withContext(dispatchers.main) {
-                contentFilterManager.removeHostExclusion(host)
-            }
-        }
-    }
-
-    fun removeAllHostFromAllowList() {
-        coroutineScope.launch {
-            withContext(dispatchers.io) {
-                hostInfoDao?.deleteTrackingAllowedHosts()
-            }
-            withContext(dispatchers.main) {
-                contentFilterManager.clearAllHostExclusions()
-            }
-        }
-    }
+class PreviewCookieCutterModel : CookieCutterModel {
+    override var trackersAllowListFlow: MutableStateFlow<TrackersAllowList?> =
+        MutableStateFlow(PreviewTrackersAllowList())
+    override val trackingDataFlow: MutableStateFlow<TrackingData?> = MutableStateFlow(null)
+    override val enableTrackingProtection: MutableState<Boolean> = mutableStateOf(true)
+    override fun setUpTrackingProtection(manager: ContentFilterManager) { }
+    override fun updateTrackingProtectionConfiguration() { }
 }

@@ -2,7 +2,6 @@ package com.neeva.app.settings.clearBrowsing
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.neeva.app.NeevaConstants
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.cookieCutter.CookieCutterPaneData
 import com.neeva.app.settings.mockSettingsControllerImpl
@@ -10,8 +9,8 @@ import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun CookieCutterPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
-    SettingsPane(settingsController, CookieCutterPaneData(neevaConstants))
+fun CookieCutterPane(settingsController: SettingsController) {
+    SettingsPane(settingsController, CookieCutterPaneData())
 }
 
 @Preview(name = "Cookie Cutter Pane, 1x font size", locale = "en")
@@ -21,7 +20,7 @@ fun CookieCutterPane(settingsController: SettingsController, neevaConstants: Nee
 @Composable
 fun CookieCutterSettings_Preview() {
     NeevaTheme {
-        CookieCutterPane(mockSettingsControllerImpl, neevaConstants = NeevaConstants())
+        CookieCutterPane(mockSettingsControllerImpl)
     }
 }
 
@@ -32,6 +31,6 @@ fun CookieCutterSettings_Preview() {
 @Composable
 fun CookieCutterSettings_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        CookieCutterPane(mockSettingsControllerImpl, neevaConstants = NeevaConstants())
+        CookieCutterPane(mockSettingsControllerImpl)
     }
 }

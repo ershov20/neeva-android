@@ -24,6 +24,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
@@ -34,6 +35,9 @@ import com.neeva.app.browsing.findinpage.FindInPageToolbar
 import com.neeva.app.browsing.findinpage.PreviewFindInPageModel
 import com.neeva.app.browsing.urlbar.URLBar
 import com.neeva.app.browsing.urlbar.URLBarModelState
+import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
+import com.neeva.app.cookiecutter.ui.popover.PreviewCookieCutterPopoverModel
+import com.neeva.app.cookiecutter.ui.popover.rememberCookieCutterPopoverModel
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
@@ -43,15 +47,25 @@ import com.neeva.app.ui.theme.Dimensions
 fun BrowserToolbarContainer(topOffset: Float) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
     val findInPageModel = LocalBrowserWrapper.current.findInPageModel
+    val urlFlow = LocalBrowserWrapper.current.activeTabModel.urlFlow
 
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
 
     val enableShowDesktopSite = LocalEnvironment.current.settingsDataModel
         .getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
 
+    val appNavModel = LocalAppNavModel.current
+    val cookieCutterPopoverModel = rememberCookieCutterPopoverModel(
+        appNavModel = appNavModel,
+        reloadTab = browserToolbarModel::reload,
+        cookieCutterModel = browserToolbarModel.cookieCutterModel,
+        urlFlow = urlFlow
+    )
+
     BrowserToolbar(
         findInPageModel = findInPageModel,
         enableShowDesktopSite = enableShowDesktopSite,
+        cookieCutterPopoverModel = cookieCutterPopoverModel,
         modifier = Modifier
             .offset(y = topOffsetDp)
             .background(MaterialTheme.colorScheme.background)
@@ -69,6 +83,7 @@ fun BrowserToolbarContainer(topOffset: Float) {
 fun BrowserToolbar(
     findInPageModel: FindInPageModel,
     enableShowDesktopSite: Boolean,
+    cookieCutterPopoverModel: CookieCutterPopoverModel,
     modifier: Modifier = Modifier,
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
@@ -128,7 +143,10 @@ fun BrowserToolbar(
                             }
                         }
 
-                        URLBar(modifier = Modifier.weight(1.0f)) { iconModifier ->
+                        URLBar(
+                            cookieCutterPopoverModel = cookieCutterPopoverModel,
+                            modifier = Modifier.weight(1.0f)
+                        ) { iconModifier ->
                             ShareButton(modifier = iconModifier)
                         }
 
@@ -152,7 +170,7 @@ fun BrowserToolbar(
                         }
                     }
                 } else {
-                    URLBar { iconModifier ->
+                    URLBar(cookieCutterPopoverModel = cookieCutterPopoverModel) { iconModifier ->
                         OverflowMenu(
                             overflowMenuData = overflowMenuData,
                             onMenuItem = browserToolbarModel::onMenuItem,
@@ -186,7 +204,8 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
 
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true
+                enableShowDesktopSite = true,
+                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
     }
@@ -215,7 +234,8 @@ internal fun ToolbarPreview_Focus(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true
+                enableShowDesktopSite = true,
+                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
     }
@@ -245,7 +265,8 @@ internal fun ToolbarPreview_Typing(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true
+                enableShowDesktopSite = true,
+                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
     }
@@ -274,7 +295,8 @@ internal fun ToolbarPreview_Search(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true
+                enableShowDesktopSite = true,
+                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
     }
@@ -305,7 +327,8 @@ internal fun ToolbarPreview_Loading(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true
+                enableShowDesktopSite = true,
+                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
     }

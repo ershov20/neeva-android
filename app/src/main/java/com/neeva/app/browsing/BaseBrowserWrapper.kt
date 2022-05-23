@@ -20,6 +20,7 @@ import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.cookiecutter.CookieCutterModel
+import com.neeva.app.cookiecutter.CookieCutterModelImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
@@ -127,7 +128,7 @@ abstract class BaseBrowserWrapper internal constructor(
         domainProvider = domainProvider,
         neevaConstants = neevaConstants,
         settingsDataModel = settingsDataModel,
-        cookieCutterModel = CookieCutterModel(
+        cookieCutterModel = CookieCutterModelImpl(
             historyManager?.hostInfoDao,
             coroutineScope,
             dispatchers,

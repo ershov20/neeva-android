@@ -7,6 +7,7 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.urlbar.PreviewUrlBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelState
+import com.neeva.app.cookiecutter.PreviewCookieCutterModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -80,5 +81,5 @@ internal class PreviewBrowserToolbarModel(
     override val tabProgressFlow get() = MutableStateFlow(tabProgressValue)
     override val trackersFlow get() = MutableStateFlow(trackers)
     override val urlBarModel get() = PreviewUrlBarModel(urlBarModelStateValue)
-    override val cookieCutterModel get() = null
+    override val cookieCutterModel get() = PreviewCookieCutterModel()
 }

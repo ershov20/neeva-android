@@ -1,4 +1,4 @@
-package com.neeva.app.cookiecutter.ui
+package com.neeva.app.cookiecutter.ui.icon
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

@@ -1,4 +1,4 @@
-package com.neeva.app.cookiecutter.ui
+package com.neeva.app.cookiecutter.ui.icon
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -7,6 +7,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -14,8 +15,27 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.neeva.app.R
+import com.neeva.app.cookiecutter.TrackingData
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
+import kotlinx.coroutines.flow.StateFlow
+
+@Composable
+fun TrackingProtectionButton(
+    showIncognitoBadge: Boolean,
+    trackingDataFlow: StateFlow<TrackingData?>?,
+    modifier: Modifier,
+    onClick: () -> Unit
+) {
+    // Putting collectAsState here so it does not cause unnecessary recompositions with the Popover
+    val trackingData = trackingDataFlow?.collectAsState()?.value
+    TrackingProtectionButton(
+        showIncognitoBadge = showIncognitoBadge,
+        trackersBlocked = trackingData?.numTrackers ?: 0,
+        modifier = modifier,
+        onClick = onClick
+    )
+}
 
 @Composable
 fun TrackingProtectionButton(

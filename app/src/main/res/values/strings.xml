@@ -206,7 +206,7 @@
     <string name="mobile_site">Mobile site</string>
 
     <string name="badge_image_text">%1$s+</string>
-    <string name="cookie_cutter_dismiss_popup">Close Cookie Cutter popover</string>
+    <string name="cookie_cutter_dismiss">Close Cookie Cutter popover</string>
 
     <string name="cookie_cutter_trackers">Trackers</string>
     <string name="cookie_cutter_domains">Domains</string>

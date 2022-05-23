@@ -32,5 +32,5 @@ abstract class BrowserToolbarModel {
 
     abstract val urlBarModel: URLBarModel
 
-    abstract val cookieCutterModel: CookieCutterModel?
+    abstract val cookieCutterModel: CookieCutterModel
 }

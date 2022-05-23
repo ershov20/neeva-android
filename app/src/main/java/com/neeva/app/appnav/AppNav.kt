@@ -69,22 +69,15 @@ fun AppNav(
         }
 
         composable(AppNavDestination.COOKIE_CUTTER_SETTINGS.route) {
-            CookieCutterPane(
-                settingsController = settingsControllerImpl,
-                neevaConstants = neevaConstants
-            )
+            CookieCutterPane(settingsController = settingsControllerImpl)
         }
 
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {
-            SetDefaultAndroidBrowserPane(
-                settingsController = settingsControllerImpl
-            )
+            SetDefaultAndroidBrowserPane(settingsController = settingsControllerImpl)
         }
 
         composable(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS.route) {
-            FeatureFlagsPane(
-                settingsController = settingsControllerImpl
-            )
+            FeatureFlagsPane(settingsController = settingsControllerImpl)
         }
 
         composable(AppNavDestination.HISTORY.route) {
