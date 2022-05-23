@@ -13,6 +13,7 @@ import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
 import com.neeva.app.TestApolloWrapper
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
@@ -68,7 +69,7 @@ class SpaceStoreTest : BaseTest() {
         context = ApplicationProvider.getApplicationContext()
         database = HistoryDatabase.createInMemory(context)
         val neevaUserToken = NeevaUserToken(
-            sharedPreferencesModel = mock(),
+            sharedPreferencesModel = SharedPreferencesModel(context),
             neevaConstants = neevaConstants
         )
         neevaUserToken.setToken("NotAnEmptyToken")

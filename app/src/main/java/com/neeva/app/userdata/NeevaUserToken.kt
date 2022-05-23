@@ -10,16 +10,10 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
  * Singleton that provides and saves Neeva user identity token to SharedPrefs.
  */
 class NeevaUserToken(
-    val sharedPreferencesModel: SharedPreferencesModel,
-    val neevaConstants: NeevaConstants
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val neevaConstants: NeevaConstants
 ) {
-    var cachedToken: String = ""
-    init {
-        cachedToken = getTokenFromSharedPref()
-    }
     companion object {
-        internal const val KEY_TOKEN = "TOKEN"
-
         fun extractAuthTokenFromIntent(intent: Intent?): String? {
             val dataString = intent?.dataString ?: return null
             val dataUri = Uri.parse(dataString)
@@ -38,20 +32,22 @@ class NeevaUserToken(
     }
 
     fun getToken(): String {
-        return cachedToken
-    }
-
-    fun getTokenFromSharedPref(): String {
-        return sharedPreferencesModel.getValue(SharedPrefFolder.USER, KEY_TOKEN, "")
+        return sharedPreferencesModel.getValue(
+            SharedPrefFolder.User,
+            SharedPrefFolder.User.Token,
+            ""
+        )
     }
 
     fun setToken(token: String) {
-        cachedToken = token
-        return sharedPreferencesModel.setValue(SharedPrefFolder.USER, KEY_TOKEN, token)
+        sharedPreferencesModel.setValue(
+            SharedPrefFolder.User,
+            SharedPrefFolder.User.Token,
+            token
+        )
     }
 
     fun removeToken() {
-        cachedToken = ""
-        sharedPreferencesModel.removeValue(SharedPrefFolder.USER, KEY_TOKEN)
+        sharedPreferencesModel.removeValue(SharedPrefFolder.User, SharedPrefFolder.User.Token)
     }
 }

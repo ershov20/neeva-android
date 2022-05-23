@@ -49,7 +49,6 @@ import kotlinx.coroutines.flow.asStateFlow
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SpaceDetail() {
-    val showDescriptionsPreferenceKey = "SHOW_DESCRIPTIONS"
     val spaceStore = LocalEnvironment.current.spaceStore
     val spaces = spaceStore.allSpacesFlow.collectAsState()
     val spaceID = spaceStore.detailedSpaceIDFlow.collectAsState()
@@ -62,8 +61,8 @@ fun SpaceDetail() {
     val showDescriptions = remember {
         mutableStateOf(
             sharedPrefs.getValue(
-                SharedPrefFolder.SPACES,
-                showDescriptionsPreferenceKey,
+                SharedPrefFolder.Spaces,
+                SharedPrefFolder.Spaces.ShowDescriptionsPreferenceKey,
                 defaultValue = false
             )
         )
@@ -81,8 +80,8 @@ fun SpaceDetail() {
                 showDescriptions = showDescriptions.value
             ) {
                 sharedPrefs.setValue(
-                    SharedPrefFolder.SPACES,
-                    showDescriptionsPreferenceKey,
+                    SharedPrefFolder.Spaces,
+                    SharedPrefFolder.Spaces.ShowDescriptionsPreferenceKey,
                     !showDescriptions.value
                 )
                 showDescriptions.value = !showDescriptions.value

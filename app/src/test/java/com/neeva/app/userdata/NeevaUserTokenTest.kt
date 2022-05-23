@@ -26,7 +26,7 @@ class NeevaUserTokenTest : BaseTest() {
     @Test
     fun getToken_resultIsEmpty_returnsEmpty() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
-            on { getValue(any(), eq(NeevaUserToken.KEY_TOKEN), eq("")) } doReturn ""
+            on { getValue(any(), eq(SharedPrefFolder.User.Token), eq("")) } doReturn ""
         }
         val neevaConstants = NeevaConstants()
         val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
@@ -38,7 +38,7 @@ class NeevaUserTokenTest : BaseTest() {
     fun getToken_stringIsSet_returnsString() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
             on {
-                getValue(any(), eq(NeevaUserToken.KEY_TOKEN), any() as String)
+                getValue(any(), eq(SharedPrefFolder.User.Token), any() as String)
             } doReturn "whatever"
         }
         val neevaConstants = NeevaConstants()
@@ -51,7 +51,7 @@ class NeevaUserTokenTest : BaseTest() {
     fun loginCookieString() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
             on {
-                getValue(any(), eq(NeevaUserToken.KEY_TOKEN), any() as String)
+                getValue(any(), eq(SharedPrefFolder.User.Token), any() as String)
             } doReturn "whatever"
         }
 
@@ -108,8 +108,8 @@ class NeevaUserTokenTest : BaseTest() {
 
         neevaUserToken.setToken("expectedToken")
         verify(sharedPreferencesModel).setValue(
-            eq(SharedPrefFolder.USER),
-            eq(NeevaUserToken.KEY_TOKEN),
+            eq(SharedPrefFolder.User),
+            eq(SharedPrefFolder.User.Token),
             eq("expectedToken")
         )
     }
@@ -122,8 +122,8 @@ class NeevaUserTokenTest : BaseTest() {
 
         neevaUserToken.removeToken()
         verify(sharedPreferencesModel).removeValue(
-            eq(SharedPrefFolder.USER),
-            eq(NeevaUserToken.KEY_TOKEN)
+            eq(SharedPrefFolder.User),
+            eq(SharedPrefFolder.User.Token)
         )
     }
 }

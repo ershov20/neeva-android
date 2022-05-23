@@ -71,9 +71,7 @@ class LoginCookieInstrumentationTest {
                         }?.value
                     ).isEqualTo("myToken")
                 }
-            expectThat(activity.neevaUser.neevaUserToken.cachedToken).isEqualTo("myToken")
-            expectThat(activity.neevaUser.neevaUserToken.getTokenFromSharedPref())
-                .isEqualTo("myToken")
+            expectThat(activity.neevaUser.neevaUserToken.getToken()).isEqualTo("myToken")
             expectThat(activity.neevaUser.data).isEqualTo(NeevaUserData())
         }
     }
@@ -87,8 +85,7 @@ class LoginCookieInstrumentationTest {
             activity.activityViewModel.signOut()
 
             // ^^ sign out should have cleared NeevaUser.data and NeevaUserToken!
-            expectThat(activity.neevaUser.neevaUserToken.cachedToken).isEmpty()
-            expectThat(activity.neevaUser.neevaUserToken.getTokenFromSharedPref()).isEmpty()
+            expectThat(activity.neevaUser.neevaUserToken.getToken()).isEmpty()
             expectThat(activity.neevaUser.data).isEqualTo(NeevaUserData())
 
             activity.webLayerModel.currentBrowser

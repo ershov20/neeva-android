@@ -17,4 +17,4 @@ enum class ZeroQueryPrefs(
 }
 
 internal class ZeroQueryModel(sharedPreferencesModel: SharedPreferencesModel) :
-    CollapsingSectionStateModel<ZeroQueryPrefs>(sharedPreferencesModel, SharedPrefFolder.ZERO_QUERY)
+    CollapsingSectionStateModel<ZeroQueryPrefs>(sharedPreferencesModel, SharedPrefFolder.ZeroQuery)

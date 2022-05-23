@@ -44,17 +44,19 @@ class LogConfig {
     }
 
     companion object {
-        private const val SESSION_ID_V2_KEY = "SESSION_ID_V2"
-
         fun sessionID(sharedPreferencesModel: SharedPreferencesModel): String {
             var sessionId = sharedPreferencesModel.getValue(
-                SharedPrefFolder.APP,
-                SESSION_ID_V2_KEY,
+                SharedPrefFolder.App,
+                SharedPrefFolder.App.SessionIdV2Key,
                 ""
             )
             if (sessionId == "") {
                 sessionId = UUID.randomUUID().toString()
-                sharedPreferencesModel.setValue(SharedPrefFolder.APP, SESSION_ID_V2_KEY, sessionId)
+                sharedPreferencesModel.setValue(
+                    SharedPrefFolder.App,
+                    SharedPrefFolder.App.SessionIdV2Key,
+                    sessionId
+                )
             }
             return sessionId
         }

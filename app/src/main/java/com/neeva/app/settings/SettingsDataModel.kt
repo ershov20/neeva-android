@@ -39,11 +39,11 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     }
 
     private fun <T> getSharedPrefValue(key: String, defaultValue: T): T {
-        return sharedPreferencesModel.getValue(SharedPrefFolder.SETTINGS, key, defaultValue)
+        return sharedPreferencesModel.getValue(SharedPrefFolder.Settings, key, defaultValue)
     }
 
     private fun setSharedPrefValue(key: String, newValue: Any) {
-        sharedPreferencesModel.setValue(SharedPrefFolder.SETTINGS, key, newValue)
+        sharedPreferencesModel.setValue(SharedPrefFolder.Settings, key, newValue)
     }
 
     fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {

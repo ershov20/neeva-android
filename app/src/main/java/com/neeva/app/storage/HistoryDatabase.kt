@@ -56,7 +56,6 @@ abstract class HistoryDatabase : RoomDatabase() {
         private val TAG = HistoryDatabase::class.simpleName
         private const val DATABASE_FILENAME = "HistoryDB"
         private const val CACHE_IMPORT_PATH = "extracted"
-        private const val CHECK_FOR_IMPORTED_DATABASE_KEY = "CHECK_FOR_IMPORTED_DATABASE_KEY"
 
         fun create(
             context: Context,
@@ -85,8 +84,8 @@ abstract class HistoryDatabase : RoomDatabase() {
             sharedPreferencesModel: SharedPreferencesModel
         ) {
             sharedPreferencesModel.setValue(
-                SharedPrefFolder.APP,
-                CHECK_FOR_IMPORTED_DATABASE_KEY,
+                SharedPrefFolder.App,
+                SharedPrefFolder.App.CheckForImportedDatabaseKey,
                 true
             )
 
@@ -108,14 +107,14 @@ abstract class HistoryDatabase : RoomDatabase() {
             sharedPreferencesModel: SharedPreferencesModel
         ) {
             val checkForDatabase = sharedPreferencesModel.getValue(
-                SharedPrefFolder.APP,
-                CHECK_FOR_IMPORTED_DATABASE_KEY,
+                SharedPrefFolder.App,
+                SharedPrefFolder.App.CheckForImportedDatabaseKey,
                 false
             )
             if (!checkForDatabase) return
             sharedPreferencesModel.setValue(
-                SharedPrefFolder.APP,
-                CHECK_FOR_IMPORTED_DATABASE_KEY,
+                SharedPrefFolder.App,
+                SharedPrefFolder.App.CheckForImportedDatabaseKey,
                 false
             )
 

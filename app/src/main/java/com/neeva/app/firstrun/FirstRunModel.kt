@@ -28,15 +28,12 @@ class FirstRunModel @Inject constructor(
     private val snackbarModel: SnackbarModel
 ) {
     companion object {
-        private const val FIRST_RUN_DONE_KEY = "HAS_FINISHED_FIRST_RUN"
-        private const val SHOULD_LOG_FIRST_LOGIN_KEY = "SHOULD_LOG_FIRST_LOGIN"
-
         fun firstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
             sharedPreferencesModel.setValue(
-                SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, true
+                SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.FirstRunDone, true
             )
             sharedPreferencesModel.setValue(
-                SharedPrefFolder.FIRST_RUN, SHOULD_LOG_FIRST_LOGIN_KEY, true
+                SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.ShouldLogFirstLogin, true
             )
         }
     }
@@ -67,7 +64,7 @@ class FirstRunModel @Inject constructor(
     fun shouldShowFirstRun(): Boolean {
         return neevaUserToken.getToken().isEmpty() &&
             !sharedPreferencesModel
-                .getValue(SharedPrefFolder.FIRST_RUN, FIRST_RUN_DONE_KEY, false)
+                .getValue(SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.FirstRunDone, false)
     }
 
     fun firstRunDone() {
@@ -76,13 +73,13 @@ class FirstRunModel @Inject constructor(
 
     fun shouldLogFirstLogin(): Boolean {
         return sharedPreferencesModel.getValue(
-            SharedPrefFolder.FIRST_RUN, SHOULD_LOG_FIRST_LOGIN_KEY, false
+            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.ShouldLogFirstLogin, false
         )
     }
 
     fun setShouldLogFirstLogin(value: Boolean) {
         sharedPreferencesModel.setValue(
-            SharedPrefFolder.FIRST_RUN, SHOULD_LOG_FIRST_LOGIN_KEY, value
+            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.ShouldLogFirstLogin, value
         )
     }
 

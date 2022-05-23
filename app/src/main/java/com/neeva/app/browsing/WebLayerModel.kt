@@ -50,14 +50,6 @@ data class BrowsersState(
     }
 }
 
-enum class WebLayerPrefs {
-    /**
-     * Boolean: Tracks whether the user is using the Regular or Incognito profile.  Meant to be read
-     * only during WebLayerModel initialization.
-     */
-    IsCurrentlyIncognito
-}
-
 /**
  * Manages and maintains the interface between the Neeva browser and WebLayer.
  *
@@ -220,8 +212,8 @@ class WebLayerModel internal constructor(
         )
 
         val userWasIncognitoWhenAppDied = sharedPreferencesModel.getValue(
-            folder = SharedPrefFolder.WEBLAYER,
-            key = WebLayerPrefs.IsCurrentlyIncognito.name,
+            folder = SharedPrefFolder.WebLayer,
+            sharedPrefKey = SharedPrefFolder.WebLayer.IsCurrentlyIncognito,
             defaultValue = false
         )
         switchToProfile(useIncognito = userWasIncognitoWhenAppDied)
@@ -241,8 +233,8 @@ class WebLayerModel internal constructor(
         // Keep track of what mode the user entered so that we can send them back there after the
         // app restarts.
         sharedPreferencesModel.setValue(
-            folder = SharedPrefFolder.WEBLAYER,
-            key = WebLayerPrefs.IsCurrentlyIncognito.name,
+            folder = SharedPrefFolder.WebLayer,
+            sharedPrefKey = SharedPrefFolder.WebLayer.IsCurrentlyIncognito,
             value = useIncognito
         )
 
