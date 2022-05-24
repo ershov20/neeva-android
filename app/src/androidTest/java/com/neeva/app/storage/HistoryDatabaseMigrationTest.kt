@@ -4,6 +4,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.neeva.app.storage.entities.SpaceEntityType
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -128,6 +129,63 @@ class HistoryDatabaseMigrationTest {
             expectThat(this.getString(1)).isEqualTo("reddit.com")
             expectThat(this.getString(2)).isEqualTo("reddit provider name")
             expectThat(this.getString(3)).isEqualTo("https://www.reddit.com/favicon.png")
+
+            close()
+        }
+    }
+
+    @Test
+    fun migrate11To15() {
+        helper.createDatabase(TEST_DB_FILENAME, 11).apply {
+            // Insert data using SQL queries.  Can't use DAO classes because they're built with the
+            // latest schema.
+
+            // Insert two SpaceItem into the database
+            execSQL(
+                """
+                INSERT INTO SpaceItem(
+                    id,spaceID, url, title, snippet, thumbnail
+                )
+                VALUES(
+                    "0", "100", "https://example.com", "Example", "Description", "")
+            """
+            )
+            execSQL(
+                """
+                INSERT INTO SpaceItem(
+                    id,spaceID, url, title, snippet, thumbnail
+                )
+                VALUES(
+                    "1", "100", "https://allrecipes.com", "Recipe", "Recipe Description",
+                    "https://allrecipes.com/recipe_thumbnails/01")
+            """
+            )
+
+            // Allow the database to be reopened as version 15.
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(
+            TEST_DB_FILENAME, 15, true
+        )
+        db.query("SELECT * FROM SpaceItem").apply {
+            expectThat(count).isEqualTo(2)
+
+            this.moveToFirst()
+            expectThat(this.getString(0)).isEqualTo("0")
+            expectThat(this.getString(1)).isEqualTo("100")
+            expectThat(this.getString(2)).isEqualTo("https://example.com")
+            expectThat(this.getString(6)).isEqualTo("0")
+            expectThat(this.getString(7)).isEqualTo("WEB")
+            expectThat(SpaceEntityType.valueOf((this.getString(7)))).isEqualTo(SpaceEntityType.WEB)
+
+            this.moveToNext()
+            expectThat(this.getString(0)).isEqualTo("1")
+            expectThat(this.getString(1)).isEqualTo("100")
+            expectThat(this.getString(2)).isEqualTo("https://allrecipes.com")
+            expectThat(this.getString(6)).isEqualTo("0")
+            expectThat(this.getString(7)).isEqualTo("WEB")
+            expectThat(SpaceEntityType.valueOf((this.getString(7)))).isEqualTo(SpaceEntityType.WEB)
 
             close()
         }
