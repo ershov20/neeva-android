@@ -75,12 +75,23 @@ class FeedbackViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Take a screenshot of the screen.
+     *
+     * We check if the browser is visible before configuring it to be screenshotable because
+     * WebLayer will block while it waits for the Browser to be in the Android View hierarchy.
+     * Because the Browser is only attached when the user is in [AppNavDestination.BROWSER], this
+     * will prevent this coroutine from completing until the user returns to the browser view.
+     */
     fun takeScreenshot(
+        isBrowserVisible: Boolean,
         window: Window,
         currentBrowser: BrowserWrapper,
         callback: () -> Unit
     ) = viewModelScope.launch(dispatchers.main) {
-        currentBrowser.allowScreenshots(true)
+        if (isBrowserVisible) {
+            currentBrowser.allowScreenshots(true)
+        }
 
         val content = window.decorView
         val bitmap = Bitmap.createBitmap(content.width, content.height, Bitmap.Config.ARGB_8888)
@@ -108,7 +119,9 @@ class FeedbackViewModel @Inject constructor(
         // until the user taps on the screen.  Currently, the only use case is to take a screenshot
         // for the Support screen.  After closing that screen and returning to the browser screen,
         // everything proceeds as it should, but it's unclear why.
-        currentBrowser.allowScreenshots(false)
+        if (isBrowserVisible) {
+            currentBrowser.allowScreenshots(false)
+        }
     }
 
     fun removeScreenshot() {

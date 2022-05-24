@@ -30,6 +30,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.appnav.AppNavModelImpl
 import com.neeva.app.browsing.ActivityCallbackProvider
@@ -389,7 +390,17 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     private fun takeScreenshotForFeedback(callback: () -> Unit) {
-        feedbackViewModel.takeScreenshot(window, webLayerModel.currentBrowser, callback)
+        val isBrowserVisible = when {
+            appNavModel?.currentDestination?.value?.route == AppNavDestination.BROWSER.route -> true
+            else -> false
+        }
+
+        feedbackViewModel.takeScreenshot(
+            isBrowserVisible = isBrowserVisible,
+            window = window,
+            currentBrowser = webLayerModel.currentBrowser,
+            callback = callback
+        )
     }
 
     override fun getWebLayerFragment(isIncognito: Boolean): Fragment? {

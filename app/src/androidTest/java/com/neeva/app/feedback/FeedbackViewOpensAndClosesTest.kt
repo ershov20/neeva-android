@@ -10,6 +10,7 @@ import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.appnav.AppNavDestination
+import com.neeva.app.openCardGrid
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNavDestination
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,13 +28,36 @@ class FeedbackViewOpensAndClosesTest {
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
 
     @Test
-    fun opensAndClosesSupportSuccessfully() {
+    fun opensAndClosesSupportSuccessfully_fromBrowser() {
         // https://github.com/neevaco/neeva-android/pull/604
         val scenario = androidComposeRule.activityRule.scenario
-        val resources = androidComposeRule.activity.resources
 
         scenario.moveToState(Lifecycle.State.RESUMED)
         androidComposeRule.waitForActivityStartup()
+
+        navigateToSupportAndBack()
+
+        androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
+    }
+
+    @Test
+    fun opensAndClosesSupportSuccessfully_fromCardGrid() {
+        // https://github.com/neevaco/neeva-android/issues/639
+        val scenario = androidComposeRule.activityRule.scenario
+
+        scenario.moveToState(Lifecycle.State.RESUMED)
+        androidComposeRule.waitForActivityStartup()
+
+        // Go to the CardGrid before trying to go to Support.
+        androidComposeRule.openCardGrid(incognito = false)
+
+        navigateToSupportAndBack()
+
+        androidComposeRule.waitForNavDestination(AppNavDestination.CARD_GRID)
+    }
+
+    private fun navigateToSupportAndBack() {
+        val resources = androidComposeRule.activity.resources
 
         androidComposeRule
             .onNodeWithContentDescription(resources.getString(R.string.toolbar_neeva_menu))
@@ -49,12 +73,10 @@ class FeedbackViewOpensAndClosesTest {
             .assertExists()
         androidComposeRule.waitForIdle()
 
-        // Go back to the browser.
+        // Go back to the previous screen.
         androidComposeRule.runOnUiThread {
             androidComposeRule.activity.onBackPressed()
         }
-        androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
-        androidComposeRule.waitForIdle()
 
         // Ideally, we would check if the embeddability mode is set back to the original value, but
         // WebLayer doesn't expose that.
