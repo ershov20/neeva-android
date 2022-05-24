@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.view.KeyEvent
+import android.view.View
 import android.view.ViewGroup
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.IdlingResource
@@ -88,10 +89,16 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForActivityStart
     fun NeevaActivity.isBrowserLoadingIdle(): Boolean {
         val browsers = webLayerModel.browsersFlow.value
         val loadingProgress = browsers.regularBrowserWrapper.activeTabModel.progressFlow.value
+
         return when {
             // Wait for the browser to finish loading whatever it's loading.
             !(loadingProgress == 0 || loadingProgress == 100) -> {
                 Log.d(TAG, "Not idle -- Load in progress: $loadingProgress")
+                false
+            }
+
+            !firstComposeCompleted.isCompleted -> {
+                Log.d(TAG, "Not idle -- First compose not completed")
                 false
             }
 
@@ -173,7 +180,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: Str
 }
 
 /** Enters a URL into the URL bar, assuming it is already visible. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.typeIntoUrlBar(url: String) {
+fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(url: String) {
     onNodeWithContentDescription(getString(com.neeva.app.R.string.url_bar_placeholder)).apply {
         performTextInput(url)
         performKeyPress(
@@ -183,14 +190,35 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.typeIntoUrlBar(url: 
         )
     }
 
-    // Wait until the URL bar state updates enough for the user to see the browser instead of the
-    // Zero Query/suggestions pane.
-    waitUntil(WAIT_TIMEOUT) {
-        Log.d(TAG, "Waiting for URL bar to go away")
-        !activity.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.isEditing
+    val browserViewIdlingResource = object : IdlingResource {
+        override val isIdleNow: Boolean get() {
+            val bottomToolbarPlaceholderHeight = activity
+                .findViewById<View>(R.id.browser_bottom_toolbar_placeholder)
+                ?.layoutParams
+                ?.height
+
+            return when {
+                // Wait until the URL bar state updates enough for the user to see the browser
+                // instead of the Zero Query/suggestions pane.
+                activity.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.isEditing -> {
+                    Log.d(TAG, "Waiting for URL bar to leave editing mode")
+                    false
+                }
+
+                // Wait until the bottom toolbar becomes visible again after the keyboard goes away.
+                bottomToolbarPlaceholderHeight == null || bottomToolbarPlaceholderHeight == 0 -> {
+                    Log.d(TAG, "Waiting for bottom toolbar after keyboard dismissal")
+                    false
+                }
+
+                else -> true
+            }
+        }
     }
 
+    registerIdlingResource(browserViewIdlingResource)
     waitForIdle()
+    unregisterIdlingResource(browserViewIdlingResource)
 }
 
 /** Wait for the NavController to tell us the user is at a particular [AppNavDestination]. */

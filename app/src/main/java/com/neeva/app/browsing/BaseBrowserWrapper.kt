@@ -399,6 +399,10 @@ abstract class BaseBrowserWrapper internal constructor(
                 appContext.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height)
 
             val bottomControlsPlaceholder = View(appContext)
+
+            // Create a view with an ID so that we can find it during instrumentation tests.
+            bottomControlsPlaceholder.id = R.id.browser_bottom_toolbar_placeholder
+
             browser.setBottomView(bottomControlsPlaceholder)
             bottomControlsPlaceholder.layoutParams.height = visibleHeight
             bottomControlsPlaceholder.requestLayout()

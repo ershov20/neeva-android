@@ -64,7 +64,7 @@ class IntentLaunchTest {
         androidComposeRule.sendAppToBackground()
 
         // Send the user back into the app with an external Intent.
-        val secondIntent = createViewIntent("http://localhost?external_intent")
+        val secondIntent = createViewIntent("http://127.0.0.1?external_intent")
         InstrumentationRegistry.getInstrumentation().context.startActivity(secondIntent)
 
         // Confirm that we see two tabs in the tab switcher.
@@ -95,7 +95,7 @@ class IntentLaunchTest {
 
         // Open an incognito tab to force the user into Incognito mode.
         androidComposeRule.openCardGrid(incognito = true)
-        androidComposeRule.openLazyTab("http://localhost?incognito")
+        androidComposeRule.openLazyTab("http://127.0.0.1?incognito")
 
         // Wait for the incognito Browser tab count to be correct.
         androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
@@ -110,7 +110,7 @@ class IntentLaunchTest {
 
         // Send the user back into the app with an external Intent.
         InstrumentationRegistry.getInstrumentation().context
-            .startActivity(createViewIntent("http://localhost?external_intent"))
+            .startActivity(createViewIntent("http://127.0.0.1?external_intent"))
 
         // Confirm that we see two regular tabs in the tab switcher.
         androidComposeRule.openCardGrid(incognito = false)
@@ -147,7 +147,7 @@ class IntentLaunchTest {
             expectedNumIncognitoTabs = null
         )
 
-        androidComposeRule.typeIntoUrlBar("http://localhost?lazily_created_tab")
+        androidComposeRule.typeIntoUrlBar("http://127.0.0.1?lazily_created_tab")
 
         // Wait until the other tab registers.
         androidComposeRule.waitForBrowserState(
@@ -191,7 +191,7 @@ class IntentLaunchTest {
             expectedNumIncognitoTabs = null
         )
 
-        androidComposeRule.typeIntoUrlBar("http://localhost?lazily_created_tab")
+        androidComposeRule.typeIntoUrlBar("http://127.0.0.1?lazily_created_tab")
 
         // Wait until the other tab registers.
         androidComposeRule.waitForBrowserState(
@@ -214,7 +214,7 @@ class IntentLaunchTest {
 
         // Open an incognito tab to force the user into Incognito mode.
         androidComposeRule.openCardGrid(incognito = true)
-        androidComposeRule.openLazyTab("http://localhost?incognito")
+        androidComposeRule.openLazyTab("http://127.0.0.1?incognito")
 
         // Confirm that we're currently in incognito with one tab in each browser profile.
         androidComposeRule.waitForBrowserState(
@@ -246,7 +246,7 @@ class IntentLaunchTest {
             expectedNumIncognitoTabs = 1
         )
 
-        androidComposeRule.typeIntoUrlBar("http://localhost?lazily_created_tab")
+        androidComposeRule.typeIntoUrlBar("http://127.0.0.1?lazily_created_tab")
 
         // Confirm we're currently NOT in incognito, with two regular tabs and one incognito tab.
         androidComposeRule.waitForBrowserState(

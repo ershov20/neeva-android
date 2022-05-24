@@ -12,13 +12,11 @@ import com.neeva.app.createNeevaActivityAndroidComposeTestRule
 import com.neeva.app.openCardGrid
 import com.neeva.app.openLazyTab
 import com.neeva.app.waitForActivityStartup
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SuppressWarnings("deprecation")
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class IncognitoTabSwitcherTest {
     @get:Rule(order = 0)
@@ -37,7 +35,7 @@ class IncognitoTabSwitcherTest {
 
         // Create a new tab to nowhere in particular.
         androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.openLazyTab("http://localhost?regular")
+        androidComposeRule.openLazyTab("http://127.0.0.1?regular")
 
         // Confirm that we see two regular tabs.
         androidComposeRule.openCardGrid(incognito = false)
@@ -50,7 +48,7 @@ class IncognitoTabSwitcherTest {
             .assertExists()
 
         // Open a lazy new tab to nowhere in particular.
-        androidComposeRule.openLazyTab("http://localhost?incognito")
+        androidComposeRule.openLazyTab("http://127.0.0.1?incognito")
 
         // Confirm that we have one incognito tab and two regular tabs.
         androidComposeRule.openCardGrid(incognito = true)
