@@ -88,10 +88,12 @@ jobs:
           post-emulator-launch-assemble-command: ''
           system-image: system-images;android-28;default;x86_64
           test-command: ./gradlew :app:connectedDebugAndroidTest
-
-      - run:
-          name: Saving instrumentation test results
-          command: cp -R app/build/outputs/androidTest-results artifacts
+          post-run-tests-steps:
+              - run:
+                  name: Saving run info to logcat to artifacts
+                  command:
+                      adb logcat -dv threadtime | gzip --best > artifacts/logcat.gz;
+                      cp -R app/build/reports artifacts/
 
       - store_artifacts:
           path: artifacts
