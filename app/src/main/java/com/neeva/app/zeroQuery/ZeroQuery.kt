@@ -24,11 +24,13 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalSettingsController
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.history.DefaultSuggestions
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.spaces.SpaceRowData
 import com.neeva.app.spaces.getThumbnailAsync
@@ -60,6 +62,7 @@ fun ZeroQuery(
     val appNavModel = LocalAppNavModel.current
     val spaceStore = LocalEnvironment.current.spaceStore
     val sharedPreferencesModel = LocalEnvironment.current.sharedPreferencesModel
+    val settingsController = LocalSettingsController.current
 
     val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
@@ -73,6 +76,8 @@ fun ZeroQuery(
     val isSuggestedQueriesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedQueriesState)
     val isCommunitySpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.CommunitySpacesState)
     val isSpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SpacesState)
+    val isNativeSpacesEnabled =
+        settingsController.getToggleState(SettingsToggle.DEBUG_NATIVE_SPACES)
 
     val defaultSuggestions = DefaultSuggestions(neevaConstants = neevaConstants)
 
@@ -204,8 +209,11 @@ fun ZeroQuery(
                     thumbnail = thumbnail,
                     isCurrentUrlInSpace = null
                 ) {
-                    appNavModel.openUrl(it.url())
-                    appNavModel.showBrowser()
+                    if (isNativeSpacesEnabled.value) {
+                        appNavModel.showSpaceDetail(it.id)
+                    } else {
+                        appNavModel.openUrl(it.url())
+                    }
                 }
             }
         }
@@ -224,7 +232,11 @@ fun ZeroQuery(
             ) {
                 items(spaces.subList(0, minOf(3, spaces.size))) { space ->
                     SpaceRow(space = space, isCurrentUrlInSpace = null) {
-                        browserWrapper.loadUrl(space.url(neevaConstants))
+                        if (isNativeSpacesEnabled.value) {
+                            appNavModel.showSpaceDetail(space.id)
+                        } else {
+                            appNavModel.openUrl(space.url(neevaConstants))
+                        }
                     }
                 }
             }

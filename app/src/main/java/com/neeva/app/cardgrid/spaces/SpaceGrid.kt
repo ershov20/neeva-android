@@ -35,7 +35,7 @@ fun SpaceGrid(
     modifier: Modifier = Modifier
 ) {
     val spaceStore = LocalEnvironment.current.spaceStore
-    val spaces by spaceStore.allSpacesFlow.collectAsState()
+    val spaces by spaceStore.allSpacesFlow.collectAsState(emptyList())
     val gridState = LazyGridState()
 
     // TODO(dan.alcantara): Find a better place to trigger these refreshes.

@@ -88,13 +88,6 @@ fun SpaceItemDetail(
                     }
                 )
             }
-
-            Spacer(
-                Modifier
-                    .fillMaxWidth()
-                    .height(2.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            )
         }
     }
 }

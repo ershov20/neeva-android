@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.AddToSpaceMutation
 import com.neeva.app.AuthenticatedApolloWrapper
+import com.neeva.app.BatchDeleteSpaceResultMutation
 import com.neeva.app.CreateSpaceMutation
 import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.Dispatchers
@@ -28,6 +29,7 @@ import com.neeva.app.storage.entities.spaceItem
 import com.neeva.app.storage.scaleDownMaintainingAspectRatio
 import com.neeva.app.storage.toByteArray
 import com.neeva.app.type.AddSpaceResultByURLInput
+import com.neeva.app.type.BatchDeleteSpaceResultInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
@@ -38,8 +40,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -71,6 +75,47 @@ class SpaceStore(
 
     private val dao = historyDatabase.spaceDao()
 
+    /** This ID determines what to show when we are at [AppNavDestination.SPACE_DETAIL] */
+    val detailedSpaceIDFlow = MutableStateFlow<String?>(null)
+    val fetchedSpaceFlow = detailedSpaceIDFlow
+        .filterNotNull()
+        .flowOn(dispatchers.io)
+        .map { id ->
+            dao.getSpaceById(id)?.let { return@map null }
+
+            val response = unauthenticatedApolloWrapper.performQuery(
+                GetSpacesDataQuery(Optional.presentIfNotNull(listOf(id))), false
+            )
+            val space = response?.data?.getSpace?.space?.first() ?: return@map null
+            space.pageMetadata?.pageID?.let { id ->
+                val name = space.space?.name ?: return@let null
+                val entityQueries = space.space.entities ?: return@let null
+
+                // We push the SpaceItems to the DB for now, but not the Space. This will avoid
+                // caching the not-yet-followed Space and we will clean up the SpaceItems because
+                // they are orphaned (their corresponding Space is not in DB)
+                updateSpaceEntities(id, entityQueries)
+
+                return@let Space(
+                    id = id,
+                    name = name,
+                    description = space.space.description ?: "",
+                    lastModifiedTs = "",
+                    thumbnail = null,
+                    resultCount = 0,
+                    isDefaultSpace = false,
+                    isShared = false,
+                    isPublic = true,
+                    userACL = SpaceACLLevel.PublicView,
+                    ownerName = space.space.owner?.displayName ?: "",
+                    ownerPictureURL = space.space.owner?.pictureURL?.let { Uri.parse(it) },
+                    numViews = space.stats?.views ?: 0,
+                    numFollowers = space.stats?.followers ?: 0
+                )
+            }
+        }.stateIn(coroutineScope, SharingStarted.Lazily, null)
+        .filterNotNull()
+
     val allSpacesFlow = dao.allSpacesFlow()
         .flowOn(dispatchers.io)
         .distinctUntilChanged()
@@ -78,9 +123,6 @@ class SpaceStore(
     val editableSpacesFlow = allSpacesFlow
         .map { it.filterNot { space -> space.userACL >= SpaceACLLevel.Edit } }
     val stateFlow = MutableStateFlow(State.READY)
-
-    /** This ID determines what to show when we are at [AppNavDestination.SPACE_DETAIL] */
-    val detailedSpaceIDFlow = MutableStateFlow<String?>(null)
 
     val spacesFromCommunityFlow: MutableStateFlow<List<SpaceRowData>> =
         MutableStateFlow(emptyList())
@@ -225,22 +267,8 @@ class SpaceStore(
             val spaceID = spaceQuery.pageMetadata?.pageID ?: return@forEach
             val entityQueries = spaceQuery.space?.entities ?: return@forEach
 
-            val entities =
-                entityQueries.filter { it.metadata?.docID != null }.mapNotNull { entityQuery ->
-                    val thumbnailUri = entityQuery.spaceEntity?.thumbnail?.let {
-                        saveBitmap(
-                            directory = thumbnailDirectory.resolve(spaceID),
-                            dispatchers = dispatchers,
-                            id = entityQuery.metadata!!.docID!!,
-                            bitmapString = it
-                        )?.toUri()
-                    }
-                    entityQuery.spaceItem(spaceID, thumbnailUri)
-                }
-            entities.withIndex().forEach {
-                it.value.itemIndex = it.index
-            }
-            entities.forEach { dao.upsert(it) }
+            val entities = updateSpaceEntities(spaceID, entityQueries)
+
             dao.getItemsFromSpace(spaceID)
                 .filterNot { entities.contains(it) }
                 .forEach { dao.deleteSpaceItem(it) }
@@ -259,6 +287,31 @@ class SpaceStore(
         }
 
         return true
+    }
+
+    private suspend fun updateSpaceEntities(
+        spaceID: String,
+        entityQueries: List<GetSpacesDataQuery.Entity>
+    ): List<SpaceItem> {
+        val entities =
+            entityQueries
+                .filter { it.metadata?.docID != null }
+                .mapNotNull { entityQuery ->
+                    val thumbnailUri = entityQuery.spaceEntity?.thumbnail?.let {
+                        saveBitmap(
+                            directory = thumbnailDirectory.resolve(spaceID),
+                            dispatchers = dispatchers,
+                            id = entityQuery.metadata!!.docID!!,
+                            bitmapString = it
+                        )?.toUri()
+                    }
+                    entityQuery.spaceItem(spaceID, thumbnailUri)
+                }
+        entities.withIndex().forEach {
+            it.value.itemIndex = it.index
+        }
+        entities.forEach { dao.upsert(it) }
+        return entities
     }
 
     private suspend fun contentURLsForSpace(spaceID: String) =
@@ -335,6 +388,25 @@ class SpaceStore(
             val errorString = appContext.getString(R.string.error_generic)
             snackbarModel.show(errorString)
             false
+        }
+    }
+
+    fun removeFromSpace(item: SpaceItem) {
+        coroutineScope.launch(dispatchers.io) {
+            val response = authenticatedApolloWrapper.performMutation(
+                BatchDeleteSpaceResultMutation(
+                    BatchDeleteSpaceResultInput(
+                        spaceID = item.spaceID,
+                        resultIDs = listOf(item.id)
+                    )
+                ),
+                userMustBeLoggedIn = true
+            )
+            response?.data?.let { dao.deleteSpaceItem(item) }
+
+            // We verified that the mutation was successful, so technically we don't need this.
+            // It mainly helps with the Space lastUpdatedTime to be set correctly.
+            refresh(dao.getSpaceById(item.spaceID))
         }
     }
 

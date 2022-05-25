@@ -34,11 +34,20 @@ query ListSpaces($kind: ListSpacesKind = All) {
 query GetSpacesData($ids: [String!]) {
   getSpace(input: { ids: $ids }) {
     space {
+      stats {
+        followers
+        views
+      }
       pageMetadata {
         pageID
       }
       space {
         name
+        description
+        owner {
+          displayName
+          pictureURL
+        }
 	thumbnail
         entities {
           metadata {
@@ -138,4 +147,8 @@ mutation CreateSpace($name: String!) {
 
 mutation DeleteSpaceResultByURL($input: DeleteSpaceResultByURLInput!) {
   deleteSpaceResultByURL(input: $input)
+}
+
+mutation BatchDeleteSpaceResult($input: BatchDeleteSpaceResultInput!) {
+  batchDeleteSpaceResult(input: $input)
 }
