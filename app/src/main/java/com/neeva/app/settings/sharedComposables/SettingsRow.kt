@@ -2,9 +2,6 @@ package com.neeva.app.settings.sharedComposables
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
@@ -52,9 +49,6 @@ fun SettingsRow(
     onDoubleClick: (() -> Unit)? = null
 ) {
     val rowDataValues = getSettingsRowDataValues(rowData)
-
-    var selectedOptionIndex: MutableState<CookieCutterModel.BlockingStrength> =
-        remember { mutableStateOf(CookieCutterModel.BlockingStrength.TRACKER_COOKIE) }
 
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
@@ -139,18 +133,15 @@ fun SettingsRow(
             }
         }
 
-        SettingsRowType.RADIO_BUTTON -> {
+        SettingsRowType.COOKIE_CUTTER_BLOCKING_STRENGTH -> {
             RadioButtonGroup(
                 CookieCutterModel.BlockingStrength.values().map {
                     stringResource(it.title)
                 },
                 settingsController.getCookieCutterStrength().ordinal,
                 onSelect = { index ->
-                    val blockingStrength =
-                        CookieCutterModel.BlockingStrength.values()[index]
-                    if (blockingStrength != null) {
-                        settingsController.setCookieCutterStrength(blockingStrength)
-                    }
+                    val blockingStrength = CookieCutterModel.BlockingStrength.values()[index]
+                    settingsController.setCookieCutterStrength(blockingStrength)
                 }
             )
         }

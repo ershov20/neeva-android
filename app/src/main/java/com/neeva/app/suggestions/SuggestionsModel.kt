@@ -144,21 +144,14 @@ class SuggestionsModel(
         )
     }
 
-    fun logSuggestionTap(type: SuggestionType, pos: Int?) {
+    fun logSuggestionTap(type: SuggestionType, position: Int?) {
         val interactionType = when (type) {
-            SuggestionType.QUERY_SUGGESTION ->
-                LogConfig.Interaction.QUERY_SUGGESTION
-            SuggestionType.AUTOCOMPLETE_SUGGESTION ->
-                LogConfig.Interaction.AUTOCOMPLETE_SUGGESTION
-            SuggestionType.HISTORY_SUGGESTION ->
-                LogConfig.Interaction.HISTORY_SUGGESTION
-            SuggestionType.MEMORIZED_SUGGESTION ->
-                LogConfig.Interaction.MEMORIZED_SUGGESTION
-            SuggestionType.NO_SUGGESTION_URL ->
-                LogConfig.Interaction.NO_SUGGESTION_URL
-            SuggestionType.NO_SUGGESTION_QUERY ->
-                LogConfig.Interaction.NO_SUGGESTION_QUERY
-            else -> return
+            SuggestionType.QUERY_SUGGESTION -> LogConfig.Interaction.QUERY_SUGGESTION
+            SuggestionType.AUTOCOMPLETE_SUGGESTION -> LogConfig.Interaction.AUTOCOMPLETE_SUGGESTION
+            SuggestionType.HISTORY_SUGGESTION -> LogConfig.Interaction.HISTORY_SUGGESTION
+            SuggestionType.MEMORIZED_SUGGESTION -> LogConfig.Interaction.MEMORIZED_SUGGESTION
+            SuggestionType.NO_SUGGESTION_URL -> LogConfig.Interaction.NO_SUGGESTION_URL
+            SuggestionType.NO_SUGGESTION_QUERY -> LogConfig.Interaction.NO_SUGGESTION_QUERY
         }
         clientLogger.logCounter(interactionType, null)
     }

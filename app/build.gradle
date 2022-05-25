@@ -169,7 +169,6 @@ dependencies {
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
 
-    androidTestImplementation 'app.cash.turbine:turbine:0.7.0'
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
     androidTestImplementation "io.strikt:strikt-core:$strikt_version"
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

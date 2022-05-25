@@ -7,7 +7,6 @@ import com.neeva.app.BuildConfig
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.ui.SnackbarModel
-import com.neeva.app.userdata.NeevaUserToken
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -25,7 +24,6 @@ object OktaSignUp {
     suspend fun createOktaAccount(
         activityContext: Context,
         snackbarModel: SnackbarModel,
-        neevaUserToken: NeevaUserToken,
         neevaConstants: NeevaConstants,
         emailProvided: String,
         passwordProvided: String = "",

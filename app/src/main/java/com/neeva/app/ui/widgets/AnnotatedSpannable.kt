@@ -58,24 +58,24 @@ fun AnnotatedSpannable(
                     val end = spannable.getSpanEnd(it)
                     SpanInfo(it, start, end)
                 }
-                .forEach {
+                .forEach { spanInfo ->
                     // Convert each individual Span into an annotation on the AnnotatedString.
-                    when (it.style) {
+                    when (spanInfo.style) {
                         is URLSpan -> {
                             this.addStyle(
                                 SpanStyle(textDecoration = TextDecoration.Underline),
-                                it.start, it.end
+                                spanInfo.start, spanInfo.end
                             )
 
                             this.addStringAnnotation(
-                                tag = it.style.url,
-                                annotation = it.style.url,
-                                it.start, it.end
+                                tag = spanInfo.style.url,
+                                annotation = spanInfo.style.url,
+                                spanInfo.start, spanInfo.end
                             )
                         }
 
                         is StyleSpan -> {
-                            val spanStyle = when (it.style.style) {
+                            val spanStyle = when (spanInfo.style.style) {
                                 Typeface.NORMAL -> SpanStyle(fontStyle = FontStyle.Normal)
                                 Typeface.BOLD -> SpanStyle(fontWeight = FontWeight.Bold)
                                 Typeface.ITALIC -> SpanStyle(fontStyle = FontStyle.Italic)
@@ -87,9 +87,7 @@ fun AnnotatedSpannable(
 
                                 else -> null
                             }
-                            spanStyle?.let { spanStyle ->
-                                this.addStyle(spanStyle, it.start, it.end)
-                            }
+                            spanStyle?.let { addStyle(it, spanInfo.start, spanInfo.end) }
                         }
 
                         else -> {

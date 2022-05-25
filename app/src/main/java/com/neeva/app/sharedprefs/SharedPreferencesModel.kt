@@ -23,6 +23,7 @@ class SharedPreferencesModel(private val appContext: Context) {
         defaultValue: T
     ) = getValue(folder, sharedPrefKey.preferenceKey, defaultValue)
 
+    @Suppress("UNCHECKED_CAST")
     fun <T> getValue(folder: SharedPrefFolder, key: String, defaultValue: T): T {
         val sharedPrefs = getSharedPreferences(folder)
         val returnValue: Any? = when (defaultValue) {
@@ -55,7 +56,7 @@ class SharedPreferencesModel(private val appContext: Context) {
         removeValue(folder, sharedPrefKey.preferenceKey)
     }
 
-    fun removeValue(folder: SharedPrefFolder, key: String) {
+    private fun removeValue(folder: SharedPrefFolder, key: String) {
         getSharedPreferences(folder)
             .edit()
             .remove(key)

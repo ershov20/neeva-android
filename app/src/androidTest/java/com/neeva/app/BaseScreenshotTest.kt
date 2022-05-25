@@ -109,7 +109,7 @@ abstract class BaseScreenshotTest {
         }
     }
 
-    inline fun failWithInstructions(failureMessage: String) = fail(
+    fun failWithInstructions(failureMessage: String) = fail(
         """
         $failureMessage
 

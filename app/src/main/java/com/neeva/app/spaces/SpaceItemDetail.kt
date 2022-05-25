@@ -189,7 +189,7 @@ fun SpaceItemDetailMainContent(
                     )
                 } else {
                     Image(
-                        painter = painter!!,
+                        painter = painter,
                         contentScale = ContentScale.Crop,
                         contentDescription = null,
                         modifier = Modifier

@@ -42,7 +42,7 @@ enum class SettingsRowType {
     BUTTON,
     CLEAR_DATA_BUTTON,
     SUBSCRIPTION,
-    RADIO_BUTTON
+    COOKIE_CUTTER_BLOCKING_STRENGTH
 }
 
 enum class SettingsToggle(

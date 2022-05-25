@@ -87,17 +87,17 @@ class SpaceStore(
                 GetSpacesDataQuery(Optional.presentIfNotNull(listOf(id))), false
             )
             val space = response?.data?.getSpace?.space?.first() ?: return@map null
-            space.pageMetadata?.pageID?.let { id ->
+            space.pageMetadata?.pageID?.let { pageID ->
                 val name = space.space?.name ?: return@let null
                 val entityQueries = space.space.entities ?: return@let null
 
                 // We push the SpaceItems to the DB for now, but not the Space. This will avoid
                 // caching the not-yet-followed Space and we will clean up the SpaceItems because
                 // they are orphaned (their corresponding Space is not in DB)
-                updateSpaceEntities(id, entityQueries)
+                updateSpaceEntities(pageID, entityQueries)
 
                 return@let Space(
-                    id = id,
+                    id = pageID,
                     name = name,
                     description = space.space.description ?: "",
                     lastModifiedTs = "",

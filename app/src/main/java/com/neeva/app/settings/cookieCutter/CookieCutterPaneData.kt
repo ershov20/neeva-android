@@ -25,7 +25,7 @@ class CookieCutterPaneData : SettingsPaneDataInterface {
             R.string.settings_trackers,
             listOf(
                 SettingsRowData(
-                    type = SettingsRowType.RADIO_BUTTON,
+                    type = SettingsRowType.COOKIE_CUTTER_BLOCKING_STRENGTH,
                 )
             )
         ),

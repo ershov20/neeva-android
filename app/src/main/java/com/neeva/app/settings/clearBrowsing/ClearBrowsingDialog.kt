@@ -20,9 +20,9 @@ fun ClearBrowsingDialog(
         selectedOptionIndex = selectedOptionIndex,
         saveSelectedOptionIndex = settingsDataModel::saveSelectedTimeClearingOption,
         confirmStringId = R.string.clear_browsing_clear_data,
-        confirmAction = { selectedOptionIndex ->
-            if (selectedOptionIndex != null) {
-                val timeClearingOption = TimeClearingOption.values().getOrNull(selectedOptionIndex)
+        confirmAction = { selectedIndex ->
+            if (selectedIndex != null) {
+                val timeClearingOption = TimeClearingOption.values().getOrNull(selectedIndex)
                 // instead of silently failing, you will get an error if that TimeClearingOption is not found.
                 confirmAction(timeClearingOption!!)
             }

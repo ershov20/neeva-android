@@ -136,7 +136,7 @@ class SettingsDialogPreviews :
                 radioOptions = radioOptions,
                 selectedOptionIndex = selectedOption,
                 confirmStringId = R.string.confirm,
-                confirmAction = { {} },
+                confirmAction = { run {} },
                 dismissStringId = R.string.cancel,
                 dismissAction = {}
             )

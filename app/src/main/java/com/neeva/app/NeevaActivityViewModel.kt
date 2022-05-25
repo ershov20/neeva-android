@@ -15,6 +15,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
+import java.lang.IllegalArgumentException
 import java.net.URISyntaxException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -95,15 +96,20 @@ class NeevaActivityViewModel(
         private val snackbarModel: SnackbarModel,
         private val dispatchers: Dispatchers
     ) : ViewModelProvider.Factory {
-        override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return NeevaActivityViewModel(
-                pendingLaunchIntent,
-                neevaUser,
-                spaceStore,
-                webLayerModel,
-                snackbarModel,
-                dispatchers
-            ) as? T ?: throw IllegalArgumentException("Unexpected ViewModel class: $modelClass")
+        @Suppress("UNCHECKED_CAST")
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            if (modelClass.isAssignableFrom(NeevaActivityViewModel::class.java)) {
+                return NeevaActivityViewModel(
+                    pendingLaunchIntent = pendingLaunchIntent,
+                    neevaUser = neevaUser,
+                    spaceStore = spaceStore,
+                    webLayerModel = webLayerModel,
+                    snackbarModel = snackbarModel,
+                    dispatchers = dispatchers
+                ) as T
+            } else {
+                throw IllegalArgumentException()
+            }
         }
     }
 

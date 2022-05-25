@@ -95,7 +95,11 @@ fun exitTransitionFactory(scope: AnimatedContentScope<NavBackStackEntry>): ExitT
 
 /** Creates animations for the NavDestination that is being returned to after popping the stack. */
 @OptIn(ExperimentalAnimationApi::class)
+@SuppressWarnings("unused")
 fun popEnterTransitionFactory(scope: AnimatedContentScope<NavBackStackEntry>): EnterTransition {
+    // Pretend like we have a stack of screens: sliding occurs when a screen is coming onto or
+    // removed from the stack, but anything that was there stayed in place behind it so it can just
+    // be faded back in.
     return Transitions.fadeInLambda()
 }
 

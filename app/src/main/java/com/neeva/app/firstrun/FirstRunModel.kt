@@ -123,7 +123,6 @@ class FirstRunModel @Inject constructor(
                 OktaSignUp.createOktaAccount(
                     activityContext = context,
                     snackbarModel = snackbarModel,
-                    neevaUserToken = neevaUserToken,
                     neevaConstants = neevaConstants,
                     emailProvided = emailProvided,
                     passwordProvided = passwordProvided

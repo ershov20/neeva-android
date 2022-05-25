@@ -49,7 +49,7 @@ class ClientLogger(
                 Optional.presentIfNotNull(LogConfig.Attributes.SESSION_UUID_V2.attributeName),
                 Optional.presentIfNotNull(LogConfig.sessionID(sharedPreferencesModel))
             )
-            mutableAttributes?.add(sessionIdAttribute)
+            mutableAttributes.add(sessionIdAttribute)
         }
 
         // Check feature flag when we start supporting it

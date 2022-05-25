@@ -445,14 +445,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         // Detach the Fragment for the other profile so that WebLayer knows that the user isn't
         // actively using that Profile.  This also prevents WebLayer from automatically reshowing
         // the Browser attached to that Fragment as soon as the Activity starts up.
-        otherProfileFragment?.let { fragment ->
-            transaction.detach(fragment)
+        otherProfileFragment?.apply {
+            transaction.detach(this)
 
             // https://github.com/neevaco/neeva-android/issues/571
             // Because we have to manually move the Fragment's View into the Composable hierarchy in
             // the BrowserScaffold, we have to manually remove it from the hierarchy when we detach
             // its Fragment.
-            removeViewFromParent(fragment.view)
+            removeViewFromParent(view)
         }
 
         if (existingFragment != null) {

@@ -34,8 +34,8 @@ class BrowserToolbarModelImpl(
     override fun onLoadUrl(urlBarModelState: URLBarModelState) {
         browserWrapper.loadUrl(urlBarModelState.uriToLoad)
         browserWrapper.suggestionsModel?.logSuggestionTap(
-            urlBarModelState.getSuggestionType(neevaConstants),
-            null
+            type = urlBarModelState.getSuggestionType(neevaConstants),
+            position = null
         )
     }
 
