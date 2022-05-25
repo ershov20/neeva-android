@@ -1,7 +1,6 @@
 package com.neeva.app.browsing.urlbar
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -24,7 +23,6 @@ import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopover
 import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
 import com.neeva.app.ui.theme.Dimensions
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun URLBar(
     cookieCutterPopoverModel: CookieCutterPopoverModel,
@@ -110,7 +108,6 @@ fun UrlBarStartComposable(
 
     if (cookieCutterPopoverModel.popoverVisible.value) {
         CookieCutterPopover(
-            isIncognito = isIncognito,
             cookieCutterPopoverModel = cookieCutterPopoverModel
         )
     }

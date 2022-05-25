@@ -21,6 +21,7 @@ import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.cookiecutter.CookieCutterModelImpl
+import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
@@ -73,7 +74,7 @@ abstract class BaseBrowserWrapper internal constructor(
     private val historyManager: HistoryManager?,
     private val tabScreenshotManager: TabScreenshotManager,
     private val domainProvider: DomainProvider,
-    val neevaConstants: NeevaConstants,
+    protected val neevaConstants: NeevaConstants,
     private val settingsDataModel: SettingsDataModel,
     override val cookieCutterModel: CookieCutterModel
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
@@ -97,7 +98,8 @@ abstract class BaseBrowserWrapper internal constructor(
         tabScreenshotManager: TabScreenshotManager,
         domainProvider: DomainProvider,
         neevaConstants: NeevaConstants,
-        settingsDataModel: SettingsDataModel
+        settingsDataModel: SettingsDataModel,
+        trackerAllowList: TrackersAllowList
     ) : this(
         isIncognito = isIncognito,
         appContext = appContext,
@@ -129,7 +131,7 @@ abstract class BaseBrowserWrapper internal constructor(
         neevaConstants = neevaConstants,
         settingsDataModel = settingsDataModel,
         cookieCutterModel = CookieCutterModelImpl(
-            historyManager?.hostInfoDao,
+            trackerAllowList,
             coroutineScope,
             dispatchers,
             settingsDataModel

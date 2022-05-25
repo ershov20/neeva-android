@@ -9,37 +9,39 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
 
 class BrowserWrapperFactory(
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val application: Application,
-    private val cacheCleaner: CacheCleaner,
+    private val apolloWrapper: AuthenticatedApolloWrapper,
+    private val clientLogger: ClientLogger,
+    private val dispatchers: Dispatchers,
     private val domainProviderImpl: DomainProviderImpl,
     private val historyManager: HistoryManager,
-    private val apolloWrapper: AuthenticatedApolloWrapper,
-    private val spaceStore: SpaceStore,
-    private val dispatchers: Dispatchers,
+    private val hostInfoDao: HostInfoDao,
+    private val neevaConstants: NeevaConstants,
     private val neevaUser: NeevaUser,
     private val settingsDataModel: SettingsDataModel,
-    private val clientLogger: ClientLogger,
-    private val neevaConstants: NeevaConstants
+    private val spaceStore: SpaceStore
 ) {
     fun createRegularBrowser(coroutineScope: CoroutineScope): RegularBrowserWrapper {
         return RegularBrowserWrapper(
             appContext = application,
+            activityCallbackProvider = activityCallbackProvider,
+            apolloWrapper = apolloWrapper,
+            clientLogger = clientLogger,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
-            activityCallbackProvider = activityCallbackProvider,
             domainProvider = domainProviderImpl,
-            apolloWrapper = apolloWrapper,
             historyManager = historyManager,
-            spaceStore = spaceStore,
+            hostInfoDao = hostInfoDao,
+            neevaConstants = neevaConstants,
             neevaUser = neevaUser,
             settingsDataModel = settingsDataModel,
-            clientLogger = clientLogger,
-            neevaConstants = neevaConstants
+            spaceStore = spaceStore
         )
     }
 
@@ -49,7 +51,6 @@ class BrowserWrapperFactory(
     ): IncognitoBrowserWrapper {
         return IncognitoBrowserWrapper(
             appContext = application,
-            cacheCleaner = cacheCleaner,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
             activityCallbackProvider = activityCallbackProvider,

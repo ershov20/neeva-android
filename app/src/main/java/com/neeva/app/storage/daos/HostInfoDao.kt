@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import com.neeva.app.storage.entities.HostInfo
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface HostInfoDao {
@@ -24,11 +25,27 @@ interface HostInfoDao {
     @Query("SELECT * FROM HostInfo WHERE host = :host")
     suspend fun getHostInfoByName(host: String): HostInfo?
 
+    @Query("SELECT * FROM HostInfo WHERE host = :host")
+    fun getHostInfoByNameFlow(host: String): Flow<HostInfo?>
+
     @Transaction
     suspend fun upsert(hostInfo: HostInfo) {
         when (getHostInfoByName(hostInfo.host)) {
             null -> add(hostInfo)
             else -> null
+        }
+    }
+
+    @Transaction
+    suspend fun toggleTrackingAllowedForHost(host: String): Boolean {
+        val isTrackingCurrentlyAllowed = getHostInfoByName(host)?.isTrackingAllowed ?: false
+
+        return if (isTrackingCurrentlyAllowed) {
+            deleteFromHostInfo(host)
+            true
+        } else {
+            upsert(HostInfo(host = host, isTrackingAllowed = true))
+            false
         }
     }
 }

@@ -5,12 +5,14 @@ import android.net.Uri
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.cookiecutter.RegularTrackersAllowList
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.RegularTabScreenshotManager
+import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.userdata.NeevaUser
@@ -28,17 +30,18 @@ import org.chromium.weblayer.WebLayer
  */
 class RegularBrowserWrapper(
     appContext: Context,
+    activityCallbackProvider: ActivityCallbackProvider,
+    private val apolloWrapper: ApolloWrapper,
+    clientLogger: ClientLogger,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
-    activityCallbackProvider: ActivityCallbackProvider,
     domainProvider: DomainProvider,
-    private val apolloWrapper: ApolloWrapper,
     historyManager: HistoryManager,
-    spaceStore: SpaceStore,
-    settingsDataModel: SettingsDataModel,
+    hostInfoDao: HostInfoDao,
+    neevaConstants: NeevaConstants,
     private val neevaUser: NeevaUser,
-    clientLogger: ClientLogger,
-    neevaConstants: NeevaConstants
+    settingsDataModel: SettingsDataModel,
+    spaceStore: SpaceStore
 ) : BaseBrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -65,7 +68,12 @@ class RegularBrowserWrapper(
     tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir),
     domainProvider = domainProvider,
     neevaConstants = neevaConstants,
-    settingsDataModel = settingsDataModel
+    settingsDataModel = settingsDataModel,
+    trackerAllowList = RegularTrackersAllowList(
+        hostInfoDao = hostInfoDao,
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers
+    )
 ) {
     companion object {
         /**

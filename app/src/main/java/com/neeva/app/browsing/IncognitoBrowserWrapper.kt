@@ -8,6 +8,7 @@ import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.StartIncognitoMutation
+import com.neeva.app.cookiecutter.IncognitoTrackersAllowList
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.storage.IncognitoTabScreenshotManager
@@ -23,17 +24,16 @@ import org.chromium.weblayer.WebLayer
 /** Maintains the logic for an Incognito browser profile. */
 class IncognitoBrowserWrapper private constructor(
     appContext: Context,
-    private val cacheCleaner: CacheCleaner,
-    coroutineScope: CoroutineScope,
-    dispatchers: Dispatchers,
     activityCallbackProvider: ActivityCallbackProvider,
     private val apolloWrapper: ApolloWrapper,
-    private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
-    private val incognitoFaviconCache: IncognitoFaviconCache,
-    tabScreenshotManager: IncognitoTabScreenshotManager,
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers,
     domainProvider: DomainProvider,
+    private val incognitoFaviconCache: IncognitoFaviconCache,
     neevaConstants: NeevaConstants,
-    settingsDataModel: SettingsDataModel
+    private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
+    settingsDataModel: SettingsDataModel,
+    tabScreenshotManager: IncognitoTabScreenshotManager
 ) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
@@ -47,11 +47,11 @@ class IncognitoBrowserWrapper private constructor(
     tabScreenshotManager = tabScreenshotManager,
     domainProvider = domainProvider,
     neevaConstants = neevaConstants,
-    settingsDataModel = settingsDataModel
+    settingsDataModel = settingsDataModel,
+    trackerAllowList = IncognitoTrackersAllowList()
 ) {
     constructor(
         appContext: Context,
-        cacheCleaner: CacheCleaner,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
         activityCallbackProvider: ActivityCallbackProvider,
@@ -63,22 +63,21 @@ class IncognitoBrowserWrapper private constructor(
         settingsDataModel: SettingsDataModel
     ) : this(
         appContext = appContext,
-        cacheCleaner = cacheCleaner,
-        coroutineScope = coroutineScope,
-        dispatchers = dispatchers,
         activityCallbackProvider = activityCallbackProvider,
         apolloWrapper = apolloWrapper,
-        onRemovedFromHierarchy = onRemovedFromHierarchy,
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers,
+        domainProvider = domainProvider,
         incognitoFaviconCache = IncognitoFaviconCache(
             appContext,
             tempDirectory,
             domainProvider,
             dispatchers
         ),
-        tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory),
-        domainProvider = domainProvider,
         neevaConstants = neevaConstants,
-        settingsDataModel = settingsDataModel
+        onRemovedFromHierarchy = onRemovedFromHierarchy,
+        settingsDataModel = settingsDataModel,
+        tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory)
     )
 
     companion object {

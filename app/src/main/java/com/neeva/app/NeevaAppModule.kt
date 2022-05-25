@@ -212,31 +212,30 @@ object NeevaAppModule {
     fun providesBrowserWrapperFactory(
         activityCallbackProvider: ActivityCallbackProvider,
         application: Application,
-        cacheCleaner: CacheCleaner,
-        domainProviderImpl: DomainProviderImpl,
-        historyManager: HistoryManager,
         apolloWrapper: AuthenticatedApolloWrapper,
-        spaceStore: SpaceStore,
+        clientLogger: ClientLogger,
         dispatchers: Dispatchers,
+        domainProviderImpl: DomainProviderImpl,
+        historyDatabase: HistoryDatabase,
+        historyManager: HistoryManager,
+        neevaConstants: NeevaConstants,
         neevaUser: NeevaUser,
         settingsDataModel: SettingsDataModel,
-        clientLogger: ClientLogger,
-        sharedPreferencesModel: SharedPreferencesModel,
-        neevaConstants: NeevaConstants
+        spaceStore: SpaceStore,
     ): BrowserWrapperFactory {
         return BrowserWrapperFactory(
             activityCallbackProvider = activityCallbackProvider,
             application = application,
-            cacheCleaner = cacheCleaner,
+            apolloWrapper = apolloWrapper,
+            clientLogger = clientLogger,
+            dispatchers = dispatchers,
             domainProviderImpl = domainProviderImpl,
             historyManager = historyManager,
-            apolloWrapper = apolloWrapper,
-            spaceStore = spaceStore,
-            dispatchers = dispatchers,
+            hostInfoDao = historyDatabase.hostInfoDao(),
+            neevaConstants = neevaConstants,
             neevaUser = neevaUser,
             settingsDataModel = settingsDataModel,
-            clientLogger = clientLogger,
-            neevaConstants = neevaConstants
+            spaceStore = spaceStore
         )
     }
 

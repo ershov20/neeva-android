@@ -46,7 +46,6 @@ class HistoryManager(
     }
 
     private val dao = historyDatabase.dao()
-    val hostInfoDao = historyDatabase.hostInfoDao()
 
     fun getHistoryAfter(startTime: Date): Flow<PagingData<SitePlusVisit>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {

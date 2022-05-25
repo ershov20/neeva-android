@@ -1,169 +1,158 @@
 package com.neeva.app.cookiecutter
 
 import com.neeva.app.Dispatchers
-import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverSwitch
 import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.storage.entities.HostInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.chromium.weblayer.ContentFilterManager
 
 /**
- * An interface for reading and writing which website hostnames to allow trackers on.
+ * An interface for reading and writing which hostnames to allow trackers on.
  */
-interface TrackersAllowList {
-    /**
-     * Allow trackers on the given [host]. Internally creates a [Job].
-     * [onSuccess] is only called if the change was successful.
-     *
-     * Returns false if the job didn't run because another job was already running.
-     */
-    fun addToAllowList(host: String, onSuccess: () -> Unit): Boolean
+abstract class TrackersAllowList {
+    /** Lambda to invoke when allowing a host to use trackers. */
+    protected var onAddHostExclusion: ((String) -> Unit)? = null
 
-    /**
-     * Disable trackers on the given [host]. Internally creates a [Job].
-     * [onSuccess] is only called if the change was successful.
-     *
-     * Returns false if the job didn't run because another job was already running.
-     */
-    fun removeFromAllowList(host: String, onSuccess: () -> Unit): Boolean
+    /** Lambda to invoke when disallowing a host from using trackers. */
+    protected var onRemoveHostExclusion: ((String) -> Unit)? = null
 
-    /**
-     * Provides the setter to allowing or disallowing trackers on a given [host].
-     * [onSuccess] is only called if the change was successful.
-     *
-     * Returns false if the job didn't run because another job was already running.
-     */
-    fun getAllowListSetter(
-        host: String,
-        onSuccess: () -> Unit
-    ): (newValue: Boolean) -> Boolean
+    fun setUpTrackingProtection(
+        onAddHostExclusion: ((String) -> Unit)?,
+        onRemoveHostExclusion: ((String) -> Unit)?
+    ) {
+        this.onAddHostExclusion = onAddHostExclusion
+        this.onRemoveHostExclusion = onRemoveHostExclusion
+    }
+
+    /** Returns all of the hosts where tracking is explicitly allowed by the user. */
+    abstract suspend fun getAllHostsInList(): Collection<HostInfo>
 
     /** Returns a flow describing if trackers are allowed on the given [host]. */
-    fun getAllowsTrackersFlow(host: String): Flow<Boolean?>
+    abstract fun getHostAllowsTrackersFlow(host: String): Flow<Boolean>
 
-    /** Disallows trackers on every host. */
-    fun removeAllHostFromAllowList()
+    /**
+     * Toggles whether or not the given [host] is allowed to use trackers.
+     *
+     * [onSuccess] is only called if the change was successful and no other operation was in flight.
+     *
+     * @return Whether or not the job was started successfully.
+     */
+    abstract fun toggleHostInAllowList(host: String, onSuccess: () -> Unit): Boolean
+}
+
+/*
+ * Manages the allowlist of hosts where Tracking Protection has been disabled for the regular
+ * browser profile.
+ *
+ * This class initially tries to persist the changes to the allowlist to the database before telling
+ * WebLayer about the new exception.
+ *
+ * Only one operation is allowed to run at any given time to avoid putting the user in a bad state.
+ */
+class RegularTrackersAllowList(
+    private val hostInfoDao: HostInfoDao,
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers
+) : TrackersAllowList() {
+    private var currentJob: Job? = null
+
+    override suspend fun getAllHostsInList() = hostInfoDao.getAllTrackingAllowedHosts()
+
+    override fun getHostAllowsTrackersFlow(host: String): Flow<Boolean> {
+        return hostInfoDao.getHostInfoByNameFlow(host)
+            .map {
+                // If the host is not currently in the database, we disallow tracking by default.
+                it?.isTrackingAllowed ?: false
+            }
+            .distinctUntilChanged()
+    }
+
+    override fun toggleHostInAllowList(host: String, onSuccess: () -> Unit): Boolean {
+        val isJobRunning = currentJob?.isActive ?: false
+        if (isJobRunning) return false
+
+        currentJob = coroutineScope.launch {
+            val shouldRemoveHostExclusion = withContext(dispatchers.io) {
+                hostInfoDao.toggleTrackingAllowedForHost(host)
+            }
+
+            withContext(dispatchers.main) {
+                if (shouldRemoveHostExclusion) {
+                    onRemoveHostExclusion?.invoke(host)
+                } else {
+                    onAddHostExclusion?.invoke(host)
+                }
+
+                onSuccess()
+            }
+        }
+
+        return true
+    }
 }
 
 /**
- * Warning: Not thread safe.
- *
- * [CookieCutterPopoverSwitch] mitigates this issue by disabling after clicking so only 1 job gets
- * fired at a time.
+ * Maintains an in-memory collection of hosts that the user is allowing trackers to be run on
+ * for the Incognito profile.  This collection is lost when the Incognito session ends, either
+ * because the app dies or because the Incognito profile was destroyed.
  */
-class TrackersAllowListImpl(
-    private val hostInfoDao: HostInfoDao?,
-    private val coroutineScope: CoroutineScope,
-    private val dispatchers: Dispatchers,
-    private val contentFilterManager: ContentFilterManager
-) : TrackersAllowList {
-    private var currentJob: Job? = null
+class IncognitoTrackersAllowList : TrackersAllowList() {
+    private val allowedHosts = MutableStateFlow<Set<HostInfo>>(emptySet())
 
-    init {
-        // initialize the ContentFilterManager with HostInfoDao values
-        coroutineScope.launch {
-            val allTrackingAllowedHosts = withContext(dispatchers.io) {
-                hostInfoDao?.getAllTrackingAllowedHosts()
-            }
+    override suspend fun getAllHostsInList() = allowedHosts.value
 
-            withContext(dispatchers.main) {
-                allTrackingAllowedHosts?.forEach {
-                    contentFilterManager.addHostExclusion(it.host)
-                }
-            }
+    override fun getHostAllowsTrackersFlow(host: String): Flow<Boolean> {
+        return allowedHosts.map { currentSet ->
+            currentSet.any { it.host == host }
         }
     }
 
-    override fun addToAllowList(host: String, onSuccess: () -> Unit): Boolean {
-        if (!isJobRunning()) {
-            currentJob = coroutineScope.launch {
-                withContext(dispatchers.io) {
-                    hostInfoDao?.upsert(HostInfo(host = host, isTrackingAllowed = true))
-                }
-                withContext(dispatchers.main) {
-                    contentFilterManager.addHostExclusion(host)
-                    onSuccess()
-                }
+    private fun addToAllowList(host: String, onSuccess: () -> Unit): Boolean {
+        return onAddHostExclusion
+            ?.let {
+                allowedHosts.value = allowedHosts.value.plus(
+                    HostInfo(host = host, isTrackingAllowed = true)
+                )
+
+                onAddHostExclusion?.invoke(host)
+                onSuccess()
+                true
             }
-            return true
+            ?: false
+    }
+
+    private fun removeFromAllowList(host: String, onSuccess: () -> Unit): Boolean {
+        return onRemoveHostExclusion
+            ?.let {
+                val currentSet = allowedHosts.value.toMutableSet()
+                currentSet.removeAll { it.host == host }
+                allowedHosts.value = currentSet
+
+                onRemoveHostExclusion?.invoke(host)
+                onSuccess()
+                true
+            }
+            ?: false
+    }
+
+    override fun toggleHostInAllowList(host: String, onSuccess: () -> Unit): Boolean {
+        val isTrackingCurrentlyAllowed = allowedHosts.value.any { it.host == host }
+        return if (isTrackingCurrentlyAllowed) {
+            removeFromAllowList(host, onSuccess = onSuccess)
         } else {
-            return false
+            addToAllowList(host, onSuccess = onSuccess)
         }
-    }
-
-    override fun removeFromAllowList(host: String, onSuccess: () -> Unit): Boolean {
-        if (!isJobRunning()) {
-            currentJob = coroutineScope.launch {
-                withContext(dispatchers.io) {
-                    hostInfoDao?.deleteFromHostInfo(host)
-                }
-                withContext(dispatchers.main) {
-                    contentFilterManager.removeHostExclusion(host)
-                    onSuccess()
-                }
-            }
-            return true
-        } else {
-            return false
-        }
-    }
-
-    override fun getAllowListSetter(
-        host: String,
-        onSuccess: () -> Unit,
-    ): (Boolean) -> Boolean {
-        return { cookieCutterEnabled ->
-            if (cookieCutterEnabled) {
-                removeFromAllowList(host, onSuccess = onSuccess)
-            } else {
-                addToAllowList(host, onSuccess = onSuccess)
-            }
-        }
-    }
-
-    /**
-     * Based on the [HostInfoDao] database, returns if the given [host] allows trackers.
-     * For a [host] not in the database, defaults to not allowing trackers.
-     */
-    override fun getAllowsTrackersFlow(host: String): Flow<Boolean?> {
-        val result = MutableStateFlow<Boolean?>(null)
-        coroutineScope.launch(dispatchers.io) {
-            // If host does not exist in HostInfoDao, assume tracking is not allowed by default
-            result.value = hostInfoDao?.getHostInfoByName(host)?.isTrackingAllowed ?: false
-        }
-        return result
-    }
-
-    override fun removeAllHostFromAllowList() {
-        currentJob = coroutineScope.launch {
-            withContext(dispatchers.io) {
-                hostInfoDao?.deleteTrackingAllowedHosts()
-            }
-            withContext(dispatchers.main) {
-                contentFilterManager.clearAllHostExclusions()
-            }
-        }
-    }
-
-    private fun isJobRunning(): Boolean {
-        return currentJob?.isActive ?: false
     }
 }
 
-class PreviewTrackersAllowList : TrackersAllowList {
-    override fun addToAllowList(host: String, onSuccess: () -> Unit): Boolean { return true }
-    override fun removeFromAllowList(host: String, onSuccess: () -> Unit): Boolean { return true }
-    override fun getAllowListSetter(
-        host: String,
-        onSuccess: () -> Unit
-    ): (newValue: Boolean) -> Boolean = { true }
-    override fun getAllowsTrackersFlow(host: String): Flow<Boolean?> {
-        return MutableStateFlow(false)
-    }
-    override fun removeAllHostFromAllowList() { }
+class PreviewTrackersAllowList : TrackersAllowList() {
+    override suspend fun getAllHostsInList(): List<HostInfo> = emptyList()
+    override fun getHostAllowsTrackersFlow(host: String) = MutableStateFlow(false)
+    override fun toggleHostInAllowList(host: String, onSuccess: () -> Unit) = true
 }

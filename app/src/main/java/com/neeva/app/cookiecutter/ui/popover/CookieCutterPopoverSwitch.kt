@@ -9,34 +9,32 @@ import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.ui.NeevaSwitch
 
 /**
- * A [NeevaSwitch] that disables when tapped and enables when the [trackersAllowList]'s job.
- * succeeds.
+ * [NeevaSwitch] that disables when tapped and enables when the [trackersAllowList]'s job succeeds.
  */
 @Composable
 internal fun CookieCutterPopoverSwitch(
-    isIncognito: Boolean,
     cookieCutterEnabled: Boolean,
     host: String,
     trackersAllowList: TrackersAllowList,
-    onSuccess: (newValue: Boolean) -> Unit
+    onSuccess: () -> Unit
 ) {
     val allowClickingSwitch = remember { mutableStateOf(true) }
-    // TODO(dan): remove isIncognito if when https://github.com/neevaco/neeva-android/issues/641 is fixed.
     NeevaSwitch(
         primaryLabel = stringResource(id = R.string.cookie_cutter),
         isChecked = cookieCutterEnabled,
-        enabled = !isIncognito && allowClickingSwitch.value,
-        onCheckedChange = { isCookieCutterEnabled ->
+        enabled = allowClickingSwitch.value,
+        onCheckedChange = {
+            // Disallow the switch from doing anything until the TrackersAllowList is updated.
             allowClickingSwitch.value = false
-            val jobDidRun = trackersAllowList.getAllowListSetter(
-                host = host,
-                onSuccess = {
-                    allowClickingSwitch.value = true
-                    onSuccess(isCookieCutterEnabled)
-                }
-            ).invoke(isCookieCutterEnabled)
 
-            if (jobDidRun) {
+            val jobDidRun = trackersAllowList.toggleHostInAllowList(host = host) {
+                allowClickingSwitch.value = true
+                onSuccess()
+            }
+
+            if (!jobDidRun) {
+                // The job couldn't be started because another was already in progress.
+                // Re-enable the switch so the user can try again.
                 allowClickingSwitch.value = true
             }
         }

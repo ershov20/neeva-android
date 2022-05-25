@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 /** Stores all controller and state logic needed in [CookieCutterPopover] UI. */
 interface CookieCutterPopoverModel {
     val trackingDataFlow: StateFlow<TrackingData?>?
-    val trackersAllowListFlow: StateFlow<TrackersAllowList?>?
+    val trackersAllowList: TrackersAllowList
     val popoverVisible: MutableState<Boolean>
     val urlFlow: StateFlow<Uri>
 
@@ -36,14 +36,12 @@ fun rememberCookieCutterPopoverModel(
 ): CookieCutterPopoverModel {
     val popoverVisible = remember { mutableStateOf(false) }
 
-    return remember(appNavModel, cookieCutterModel, urlFlow) {
-        val trackingDataFlow = cookieCutterModel.trackingDataFlow
-
+    return remember(appNavModel, cookieCutterModel, popoverVisible, urlFlow) {
         CookieCutterPopoverModelImpl(
             appNavModel = appNavModel,
             popoverVisible = popoverVisible,
-            trackingDataFlow = trackingDataFlow,
-            trackersAllowListFlow = cookieCutterModel.trackersAllowListFlow,
+            trackingDataFlow = cookieCutterModel.trackingDataFlow,
+            trackersAllowList = cookieCutterModel.trackersAllowList,
             urlFlow = urlFlow,
             onReloadTab = reloadTab
         )
@@ -54,7 +52,7 @@ class CookieCutterPopoverModelImpl(
     private val appNavModel: AppNavModel,
     override val popoverVisible: MutableState<Boolean>,
     override val trackingDataFlow: StateFlow<TrackingData?>?,
-    override val trackersAllowListFlow: StateFlow<TrackersAllowList?>?,
+    override val trackersAllowList: TrackersAllowList,
     override val urlFlow: StateFlow<Uri>,
     override val onReloadTab: () -> Unit
 ) : CookieCutterPopoverModel {
@@ -87,7 +85,7 @@ class PreviewCookieCutterPopoverModel : CookieCutterPopoverModel {
             )
         )
 
-    override val trackersAllowListFlow = MutableStateFlow(PreviewTrackersAllowList())
+    override val trackersAllowList = PreviewTrackersAllowList()
     override val popoverVisible = mutableStateOf(false)
     override val urlFlow: StateFlow<Uri> = MutableStateFlow(Uri.parse("www.neeva.com"))
     override val onReloadTab: () -> Unit = { }
