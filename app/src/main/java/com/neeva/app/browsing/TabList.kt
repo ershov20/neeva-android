@@ -12,7 +12,7 @@ import org.chromium.weblayer.Tab
  * with each.
  */
 class TabList {
-    private val tabs: MutableList<Tab> = mutableListOf()
+    private val tabs: MutableList<String> = mutableListOf()
     private val tabInfoMap: MutableMap<String, TabInfo> = mutableMapOf()
 
     private val _orderedTabList = MutableStateFlow<List<TabInfo>>(emptyList())
@@ -20,14 +20,12 @@ class TabList {
     val hasNoTabsFlow: Flow<Boolean> = _orderedTabList.map { it.isEmpty() }
 
     fun hasNoTabs(): Boolean = tabs.isEmpty()
-    fun indexOf(tab: Tab) = tabs.indexOf(tab)
-    fun findTab(id: String) = tabs.firstOrNull { it.guid == id }
-    fun getTab(index: Int) = tabs[index]
+    fun indexOf(id: String) = tabs.indexOf(id)
     fun getTabInfo(id: String) = tabInfoMap[id]
 
     fun add(tab: Tab) {
-        if (tabs.contains(tab)) return
-        tabs.add(tab)
+        if (tabs.contains(tab.guid)) return
+        tabs.add(tab.guid)
 
         tabInfoMap[tab.guid] = TabInfo(
             id = tab.guid,
@@ -41,9 +39,9 @@ class TabList {
     }
 
     /** Removes the given Tab from the list.  If we had a corresponding TabInfo, it is returned. */
-    fun remove(tab: Tab): TabInfo? {
-        tabs.remove(tab)
-        val childInfo = tabInfoMap.remove(tab.guid)
+    fun remove(tabId: String): TabInfo? {
+        tabs.remove(tabId)
+        val childInfo = tabInfoMap.remove(tabId)
         updateFlow()
         return childInfo
     }
@@ -124,10 +122,10 @@ class TabList {
     }
 
     private fun updateFlow() {
-        _orderedTabList.value = tabs.map { tabInfoMap[it.guid]!! }
+        _orderedTabList.value = tabs.mapNotNull { guid -> tabInfoMap[guid] }
     }
 
-    internal fun forEach(closure: (Tab) -> Unit) {
+    internal fun forEach(closure: (String) -> Unit) {
         tabs.forEach(action = closure)
     }
 }

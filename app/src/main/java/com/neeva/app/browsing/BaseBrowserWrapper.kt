@@ -139,7 +139,7 @@ abstract class BaseBrowserWrapper internal constructor(
     )
 
     private val tabList = TabList()
-    private val tabCallbackMap: HashMap<Tab, TabCallbacks> = HashMap()
+    private val tabCallbackMap: HashMap<String, TabCallbacks> = HashMap()
 
     final override val orderedTabList: StateFlow<List<TabInfo>> get() = tabList.orderedTabList
 
@@ -226,24 +226,29 @@ abstract class BaseBrowserWrapper internal constructor(
             }
 
             // Remove the tab from our local state.
-            val newIndex = (tabList.indexOf(tab) - 1).coerceAtLeast(0)
-            val tabInfo = tabList.remove(tab)
+            val newIndex = (tabList.indexOf(tabId) - 1).coerceAtLeast(0)
+            val tabInfo = tabList.remove(tabId)
 
             // Remove all the callbacks associated with the tab to avoid any callbacks after the tab
             // gets destroyed.
-            unregisterTabCallbacks(tab)
+            unregisterTabCallbacks(tabId)
 
-            // If a tab is still active, this tab was closed in the background.
+            // If the closed tab was the active tab, mark a different tab as active.
             browser?.let {
                 if (it.activeTab != null) return
 
-                val parentTab = tabInfo?.data?.parentTabId?.let {
-                    parentId ->
-                    tabList.findTab(parentId)
+                val parentTabId = tabInfo?.data?.parentTabId
+                val parentTab = getTab(parentTabId)
+                if (parentTab != null) {
+                    it.setActiveTab(parentTab)
+                    return@let
                 }
-                when {
-                    parentTab != null -> it.setActiveTab(parentTab)
-                    orderedTabList.value.isNotEmpty() -> it.setActiveTab(tabList.getTab(newIndex))
+
+                val newIndexTabId = orderedTabList.value.getOrNull(newIndex)?.id
+                val newIndexTab = getTab(newIndexTabId)
+                if (newIndexTab != null) {
+                    it.setActiveTab(newIndexTab)
+                    return@let
                 }
             }
         }
@@ -272,8 +277,9 @@ abstract class BaseBrowserWrapper internal constructor(
     fun updateCookieCutterConfigAndRefreshTabs() {
         cookieCutterModel.updateTrackingProtectionConfiguration()
         tabList.forEach {
-            if (it == browser?.activeTab) {
-                it.navigationController.reload()
+            val activeTab = getActiveTab()
+            if (it == activeTab?.guid) {
+                activeTab.navigationController.reload()
                 // TODO(kobec/chung): remove resetStat when we add onContentFilterStatsStarted
                 tabCallbackMap[it]?.tabCookieCutterModel?.resetStat()
             } else {
@@ -499,13 +505,19 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     fun changeActiveTab(tab: Tab?) {
         _activeTabModelImpl.onActiveTabChanged(tab)
-        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)) {
-            cookieCutterModel.trackingDataFlow.value =
-                tabCallbackMap[tab]?.tabCookieCutterModel?.currentTrackingData()
-        }
-        if (tabCallbackMap[tab]?.tabCookieCutterModel?.reloadUponForeground == true) {
-            tab?.navigationController?.reload()
-            tabCallbackMap[tab]?.tabCookieCutterModel?.reloadUponForeground = false
+
+        tab?.guid?.let { guid ->
+            val tabCookieCutterModel = tabCallbackMap[guid]?.tabCookieCutterModel
+
+            if (settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)) {
+                cookieCutterModel.trackingDataFlow.value =
+                    tabCookieCutterModel?.currentTrackingData()
+            }
+
+            if (tabCookieCutterModel?.reloadUponForeground == true) {
+                tab.navigationController.reload()
+                tabCookieCutterModel.reloadUponForeground = false
+            }
         }
     }
 
@@ -535,8 +547,15 @@ abstract class BaseBrowserWrapper internal constructor(
      * results in a no-op.
      */
     fun registerTabCallbacks(tab: Tab) {
-        if (tabCallbackMap[tab] != null) return
-        tabCallbackMap[tab] = TabCallbacks(
+        if (tabCallbackMap[tab.guid] != null) {
+            val previousTabInstance = tabCallbackMap[tab.guid]?.tab
+            if (previousTabInstance != tab) {
+                Log.w(TAG, "Replacing previous tab callbacks for same ID with new Tab instance")
+                unregisterTabCallbacks(tab.guid)
+            }
+        }
+
+        tabCallbackMap[tab.guid] = TabCallbacks(
             isIncognito = isIncognito,
             tab = tab,
             coroutineScope = coroutineScope,
@@ -552,11 +571,8 @@ abstract class BaseBrowserWrapper internal constructor(
         )
     }
 
-    private fun unregisterTabCallbacks(tab: Tab) {
-        tabCallbackMap[tab]?.let {
-            it.unregisterCallbacks()
-            tabCallbackMap.remove(tab)
-        }
+    private fun unregisterTabCallbacks(tabId: String) {
+        tabCallbackMap.remove(tabId)?.unregisterCallbacks()
     }
 
     /** Removes all the callbacks that are set up to interact with WebLayer. */
@@ -618,16 +634,16 @@ abstract class BaseBrowserWrapper internal constructor(
         registerTabCallbacks(tab)
     }
 
-    override fun closeTab(primitive: TabInfo) {
-        tabList.findTab(primitive.id)?.dispatchBeforeUnloadAndClose()
+    override fun closeTab(id: String) {
+        getTab(id)?.dispatchBeforeUnloadAndClose()
     }
 
     override fun closeAllTabs() {
-        tabList.forEach { it.dispatchBeforeUnloadAndClose() }
+        tabList.forEach { closeTab(it) }
     }
 
-    override fun selectTab(primitive: TabInfo) {
-        tabList.findTab(primitive.id)?.let { selectTab(it) }
+    override fun selectTab(id: String) {
+        getTab(id)?.let { selectTab(it) }
     }
 
     private fun selectTab(tab: Tab) {
@@ -639,8 +655,7 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     override fun takeScreenshotOfActiveTab(onCompleted: () -> Unit) {
-        val tab = browser?.activeTab
-        tabScreenshotManager.captureAndSaveScreenshot(tab, onCompleted)
+        tabScreenshotManager.captureAndSaveScreenshot(getActiveTab(), onCompleted)
     }
 
     override fun showPageInfo() {
@@ -666,13 +681,13 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     private fun conditionallyCloseActiveTab(expected: TabInfo.TabOpenType): Boolean {
-        return browser?.activeTab
+        return getActiveTab()
             ?.let { activeTab ->
                 val tabInfo = tabList.getTabInfo(activeTab.guid)
                 tabInfo?.data?.openType
                     ?.takeIf { it == expected }
                     ?.let {
-                        closeTab(tabInfo)
+                        closeTab(tabInfo.id)
                         true
                     }
             } ?: false
@@ -750,7 +765,7 @@ abstract class BaseBrowserWrapper internal constructor(
             uri
         }
 
-        if (inNewTab || _activeTabModelImpl.activeTab == null) {
+        if (inNewTab || getActiveTab() == null) {
             createTabWithUri(
                 uri = urlToLoad,
                 parentTabId = parentTabId,
@@ -778,7 +793,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
     /** Dismisses any transient dialogs or popups that are covering the page. */
     override fun dismissTransientUi(): Boolean {
-        return _activeTabModelImpl.activeTab?.dismissTransientUi() ?: false
+        return getActiveTab()?.dismissTransientUi() ?: false
     }
 
     override fun canGoBackward(): Boolean {
@@ -788,7 +803,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
     // region: Find In Page
     override fun showFindInPage() {
-        _activeTabModelImpl.activeTab?.let { _findInPageModel.showFindInPage(it) }
+        getActiveTab()?.let { _findInPageModel.showFindInPage(it) }
     }
     // endregion
 
@@ -821,6 +836,15 @@ abstract class BaseBrowserWrapper internal constructor(
 
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
     override suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
+
+    private fun getActiveTab(): Tab? {
+        return browser?.activeTab
+    }
+
+    private fun getTab(id: String?): Tab? {
+        if (id == null) return null
+        return browser?.tabs?.firstOrNull { tab -> tab.guid == id }
+    }
 
     companion object {
         val TAG = BrowserWrapper::class.simpleName

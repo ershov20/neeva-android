@@ -118,12 +118,12 @@ class CardsPaneModelImpl(
     }
 
     override fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo) {
-        browserWrapper.selectTab(tab)
+        browserWrapper.selectTab(tab.id)
         showBrowser()
     }
 
     override fun closeTab(browserWrapper: BrowserWrapper, tab: TabInfo) {
-        browserWrapper.closeTab(tab)
+        browserWrapper.closeTab(tab.id)
     }
 
     override fun openLazyTab(browserWrapper: BrowserWrapper) {

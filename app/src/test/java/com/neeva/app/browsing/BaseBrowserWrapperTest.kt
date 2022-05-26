@@ -98,6 +98,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
     private lateinit var mockTabs: MutableList<Tab>
 
+    private var activeTab: Tab? = null
     private var shouldInterceptLoad: Boolean = false
     private var wasBlankTabCreated: Boolean = false
 
@@ -131,6 +132,9 @@ class BaseBrowserWrapperTest : BaseTest() {
         }
 
         browser = mock {
+            on { setActiveTab(any()) } doAnswer { activeTab = it.arguments[0] as Tab }
+            on { getActiveTab() } doAnswer { activeTab }
+
             on { createTab() } doAnswer {
                 createMockTab().also {
                     // WebLayer synchronously fires the `onTabAdded` callback before returning the
@@ -259,7 +263,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         // Say that the user's Browser currently has an active tab open.
         val numTabsBefore = browserWrapper.orderedTabList.value.size
-        Mockito.`when`(activeTabModelImpl.activeTab).thenReturn(mockTabs.last())
+        browser.setActiveTab(mockTabs.last())
 
         // Say that the load should be intercepted, then load the URL.
         shouldInterceptLoad = true
@@ -341,7 +345,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         // Say that the user's Browser currently has an active tab open.
         val numTabsBefore = browserWrapper.orderedTabList.value.size
-        Mockito.`when`(activeTabModelImpl.activeTab).thenReturn(mockTabs.last())
+        browser.setActiveTab(mockTabs.last())
 
         // Loading a URL should open it in the existing tab.
         browserWrapper.loadUrl(
@@ -366,9 +370,9 @@ class BaseBrowserWrapperTest : BaseTest() {
         completeBrowserRestoration()
         coroutineScopeRule.scope.advanceUntilIdle()
 
-        // Say that the user's Browser currently has no active tabs open.
+        // After restoration, we'll have created a new active tab.  Reset it for the test.
         val numTabsBefore = browserWrapper.orderedTabList.value.size
-        Mockito.`when`(activeTabModelImpl.activeTab).thenReturn(null)
+        activeTab = null
 
         // Load a URL in a tab without a parent.
         browserWrapper.loadUrl(

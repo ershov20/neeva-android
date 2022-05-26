@@ -34,7 +34,7 @@ import org.chromium.weblayer.TabCallback
  */
 class TabCallbacks(
     private val isIncognito: Boolean,
-    private val tab: Tab,
+    internal val tab: Tab,
     private val coroutineScope: CoroutineScope,
     private val historyManager: HistoryManager?,
     private val faviconCache: FaviconCache?,

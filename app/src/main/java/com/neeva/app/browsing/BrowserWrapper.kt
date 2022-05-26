@@ -75,8 +75,8 @@ interface BrowserWrapper {
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
     suspend fun waitUntilBrowserIsReady(): Boolean
 
-    fun selectTab(primitive: TabInfo)
-    fun closeTab(primitive: TabInfo)
+    fun selectTab(id: String)
+    fun closeTab(id: String)
     fun closeAllTabs()
 
     /**
