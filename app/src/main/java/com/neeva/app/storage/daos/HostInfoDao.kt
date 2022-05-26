@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.neeva.app.storage.entities.HostInfo
 import kotlinx.coroutines.flow.Flow
 
@@ -28,11 +29,14 @@ interface HostInfoDao {
     @Query("SELECT * FROM HostInfo WHERE host = :host")
     fun getHostInfoByNameFlow(host: String): Flow<HostInfo?>
 
+    @Update
+    suspend fun update(hostInfo: HostInfo)
+
     @Transaction
     suspend fun upsert(hostInfo: HostInfo) {
         when (getHostInfoByName(hostInfo.host)) {
             null -> add(hostInfo)
-            else -> null
+            else -> update(hostInfo)
         }
     }
 

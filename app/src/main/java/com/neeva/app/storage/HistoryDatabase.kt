@@ -9,12 +9,10 @@ import androidx.annotation.WorkerThread
 import androidx.core.content.FileProvider
 import androidx.room.AutoMigration
 import androidx.room.Database
-import androidx.room.DeleteColumn
-import androidx.room.DeleteTable
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.AutoMigrationSpec
+import com.neeva.app.BuildConfig
 import com.neeva.app.Dispatchers
 import com.neeva.app.ZipUtils
 import com.neeva.app.sharedprefs.SharedPrefFolder
@@ -33,17 +31,18 @@ import kotlinx.coroutines.withContext
 
 @Database(
     entities = [Site::class, Visit::class, SpaceItem::class, Space::class, HostInfo::class],
-    version = 15,
+    version = 16,
     autoMigrations = [
-        AutoMigration(from = 6, to = 7, spec = HistoryDatabase.MigrationFrom6To7::class),
-        AutoMigration(from = 7, to = 8, spec = HistoryDatabase.MigrationFrom7To8::class),
-        AutoMigration(from = 8, to = 9, spec = HistoryDatabase.MigrationFrom8To9::class),
-        AutoMigration(from = 9, to = 10, spec = HistoryDatabase.MigrationFrom9To10::class),
-        AutoMigration(from = 10, to = 11, spec = HistoryDatabase.MigrationFrom10To11::class),
-        AutoMigration(from = 11, to = 12, spec = HistoryDatabase.MigrationFrom11To12::class),
-        AutoMigration(from = 12, to = 13, spec = HistoryDatabase.MigrationFrom12To13::class),
-        AutoMigration(from = 13, to = 14, spec = HistoryDatabase.MigrationFrom13To14::class),
-        AutoMigration(from = 14, to = 15, spec = HistoryDatabase.MigrationFrom14To15::class),
+        AutoMigration(from = 6, to = 7, spec = Migrations.MigrationFrom6To7::class),
+        AutoMigration(from = 7, to = 8, spec = Migrations.MigrationFrom7To8::class),
+        AutoMigration(from = 8, to = 9, spec = Migrations.MigrationFrom8To9::class),
+        AutoMigration(from = 9, to = 10, spec = Migrations.MigrationFrom9To10::class),
+        AutoMigration(from = 10, to = 11, spec = Migrations.MigrationFrom10To11::class),
+        AutoMigration(from = 11, to = 12, spec = Migrations.MigrationFrom11To12::class),
+        AutoMigration(from = 12, to = 13, spec = Migrations.MigrationFrom12To13::class),
+        AutoMigration(from = 13, to = 14, spec = Migrations.MigrationFrom13To14::class),
+        AutoMigration(from = 14, to = 15, spec = Migrations.MigrationFrom14To15::class),
+        AutoMigration(from = 15, to = 16, spec = Migrations.MigrationFrom15To16::class)
     ]
 )
 @TypeConverters(com.neeva.app.storage.TypeConverters::class)
@@ -147,43 +146,6 @@ abstract class HistoryDatabase : RoomDatabase() {
         }
     }
 
-    @DeleteColumn.Entries(
-        DeleteColumn(tableName = "Domain", columnName = "encodedImage"),
-        DeleteColumn(tableName = "Site", columnName = "visitCount"),
-        DeleteColumn(tableName = "Site", columnName = "lastVisitTimestamp"),
-        DeleteColumn(tableName = "Site", columnName = "encodedImage"),
-        DeleteColumn(tableName = "Site", columnName = "description"),
-        DeleteColumn(tableName = "Site", columnName = "entityType"),
-        DeleteColumn(tableName = "Site", columnName = "imageURL"),
-    )
-    class MigrationFrom6To7 : AutoMigrationSpec
-
-    @DeleteTable.Entries(
-        DeleteTable(tableName = "Domain")
-    )
-    class MigrationFrom7To8 : AutoMigrationSpec
-
-    @DeleteColumn.Entries(
-        DeleteColumn(tableName = "Visit", columnName = "visitRootID"),
-        DeleteColumn(tableName = "Visit", columnName = "visitType")
-    )
-    class MigrationFrom8To9 : AutoMigrationSpec
-
-    class MigrationFrom9To10 : AutoMigrationSpec
-
-    class MigrationFrom10To11 : AutoMigrationSpec
-
-    class MigrationFrom11To12 : AutoMigrationSpec
-
-    class MigrationFrom12To13 : AutoMigrationSpec
-
-    class MigrationFrom13To14 : AutoMigrationSpec
-
-    @DeleteColumn.Entries(
-        DeleteColumn(tableName = "SpaceItem", columnName = "entityType")
-    )
-    class MigrationFrom14To15 : AutoMigrationSpec
-
     suspend fun export(
         context: Context,
         dispatchers: Dispatchers
@@ -214,7 +176,10 @@ abstract class HistoryDatabase : RoomDatabase() {
             // might want to send it to.
             val uri = FileProvider.getUriForFile(context, authority, exportedFile)
             val sendIntent = Intent(Intent.ACTION_SEND)
-                .putExtra(Intent.EXTRA_SUBJECT, "Database export ${Date()}")
+                .putExtra(
+                    Intent.EXTRA_SUBJECT,
+                    "Database export ${BuildConfig.VERSION_NAME} ${Date()}"
+                )
                 .putExtra(Intent.EXTRA_STREAM, uri)
                 .setType("*/*")
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

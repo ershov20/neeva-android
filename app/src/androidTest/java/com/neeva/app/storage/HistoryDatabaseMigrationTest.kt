@@ -21,7 +21,7 @@ class HistoryDatabaseMigrationTest {
     val helper: MigrationTestHelper = MigrationTestHelper(
         InstrumentationRegistry.getInstrumentation(),
         HistoryDatabase::class.java,
-        listOf(HistoryDatabase.MigrationFrom6To7()),
+        listOf(Migrations.MigrationFrom6To7()),
         FrameworkSQLiteOpenHelperFactory()
     )
 
