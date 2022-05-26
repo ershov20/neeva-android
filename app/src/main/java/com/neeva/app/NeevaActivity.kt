@@ -144,9 +144,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers,
                         overlaySheetModel = overlaySheetModel,
-                        spaceStore = spaceStore,
                         snackbarModel = snackbarModel,
-                        clientLogger = clientLogger,
+                        spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
                         neevaConstants = neevaConstants
                     )

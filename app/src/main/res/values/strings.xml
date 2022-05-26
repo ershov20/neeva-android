@@ -110,6 +110,7 @@
     <string name="settings_neeva_browser_version">Neeva Browser %s</string>
     <string name="settings_play_store_page">Check for updates</string>
     <string name="settings_licenses">Licenses</string>
+    <string name="settings_additional_licenses">Additional licenses</string>
     <string name="settings_terms">Terms</string>
     <string name="privacy_policy">Privacy Policy</string>
     <string name="settings_sign_in_to_join_neeva">Sign In or Join Neeva</string>
@@ -213,6 +214,8 @@
     <string name="cookie_cutter_whos_tracking_you">Who\'s tracking you</string>
     <string name="cookie_cutter">Cookie Cutter</string>
     <string name="cookie_cutter_settings">Cookie Cutter settings</string>
+
+    <string name="chromium">Chromium</string>
 
     <!-- Debug settings -->
     <string name="settings_debug_local" translatable="false">Advanced</string>

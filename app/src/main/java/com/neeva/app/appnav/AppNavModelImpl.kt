@@ -11,13 +11,13 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.neeva.app.Dispatchers
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.logging.ClientLogger
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
 import com.neeva.app.spaces.SpaceStore
@@ -43,7 +43,6 @@ class AppNavModelImpl(
     private val overlaySheetModel: OverlaySheetModel,
     private val snackbarModel: SnackbarModel,
     private val spaceStore: SpaceStore,
-    private val clientLogger: ClientLogger,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
     private val neevaConstants: NeevaConstants
 ) : AppNavModel {
@@ -146,6 +145,10 @@ class AppNavModelImpl(
         safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
     }
 
+    override fun showAdditionalLicenses() {
+        safeStartActivityForIntent(Intent(context, OssLicensesMenuActivity::class.java))
+    }
+
     override fun openUrlViaIntent(uri: Uri) {
         safeStartActivityForIntent(Intent(Intent.ACTION_VIEW, uri))
         showBrowser()
@@ -161,12 +164,13 @@ class AppNavModelImpl(
     }
 
     override fun showCardGrid() = show(AppNavDestination.CARD_GRID)
-    override fun showSettings() = show(AppNavDestination.SETTINGS)
-    override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     override fun showCookieCutterSettings() = show(AppNavDestination.COOKIE_CUTTER_SETTINGS)
     override fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
+    override fun showLicenses() = show(AppNavDestination.LICENSES)
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
+    override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
+    override fun showSettings() = show(AppNavDestination.SETTINGS)
 
     override fun showSpaceDetail(spaceID: String) {
         coroutineScope.launch {

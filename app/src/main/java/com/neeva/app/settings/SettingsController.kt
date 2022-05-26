@@ -147,9 +147,8 @@ class SettingsControllerImpl(
             R.string.settings_debug_local_feature_flags to {
                 appNavModel.showLocalFeatureFlagsPane()
             },
-            R.string.settings_cookie_cutter to {
-                appNavModel.showCookieCutterSettings()
-            }
+            R.string.settings_cookie_cutter to { appNavModel.showCookieCutterSettings() },
+            R.string.settings_licenses to { appNavModel.showLicenses() }
         )
         if (isSignedOut()) {
             navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showSignInFlow() }

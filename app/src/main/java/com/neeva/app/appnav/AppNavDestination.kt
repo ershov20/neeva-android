@@ -28,7 +28,8 @@ enum class AppNavDestination(
     CLEAR_BROWSING_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     SET_DEFAULT_BROWSER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     LOCAL_FEATURE_FLAGS_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
-    COOKIE_CUTTER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End);
+    COOKIE_CUTTER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
+    LICENSES(parent = SETTINGS, slidesOutToward = SlideDirection.End);
 
     val route: String = this.name
 

@@ -13,6 +13,7 @@ import com.neeva.app.cardgrid.CardsPane
 import com.neeva.app.feedback.FeedbackView
 import com.neeva.app.firstrun.signInFlowNavGraph
 import com.neeva.app.history.HistoryContainer
+import com.neeva.app.settings.LicensesPane
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.clearBrowsing.CookieCutterPane
 import com.neeva.app.settings.featureFlags.FeatureFlagsPane
@@ -78,6 +79,13 @@ fun AppNav(
 
         composable(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS.route) {
             FeatureFlagsPane(settingsController = settingsControllerImpl)
+        }
+
+        composable(AppNavDestination.LICENSES.route) {
+            LicensesPane(
+                onShowAdditionalLicenses = appNavModel::showAdditionalLicenses,
+                onClose = appNavModel::popBackStack
+            )
         }
 
         composable(AppNavDestination.HISTORY.route) {

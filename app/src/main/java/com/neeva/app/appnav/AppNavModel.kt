@@ -21,22 +21,24 @@ interface AppNavModel {
     // region Internal screens
     fun showBrowser(forceUserToStayInCardGrid: Boolean = true)
     fun showCardGrid()
-    fun showSpaceDetail(spaceID: String)
-    fun showSettings()
-    fun showProfileSettings()
     fun showClearBrowsingSettings()
-    fun showDefaultBrowserSettings()
-    fun showLocalFeatureFlagsPane()
     fun showCookieCutterSettings()
-    fun showHistory()
+    fun showDefaultBrowserSettings()
     fun showFeedback()
     fun showHelp()
+    fun showHistory()
+    fun showLicenses()
+    fun showLocalFeatureFlagsPane()
+    fun showProfileSettings()
+    fun showSettings()
+    fun showSpaceDetail(spaceID: String)
 
     fun showSignInFlow()
     // endregion
 
     // region External screens
     fun openAndroidDefaultBrowserSettings()
+    fun showAdditionalLicenses()
 
     fun openUrlViaIntent(uri: Uri)
 

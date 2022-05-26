@@ -114,8 +114,7 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                 ),
                 SettingsRowData(
                     type = SettingsRowType.NAVIGATION,
-                    primaryLabelId = R.string.settings_licenses,
-                    enabled = false
+                    primaryLabelId = R.string.settings_licenses
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,
