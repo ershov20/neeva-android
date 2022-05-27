@@ -20,6 +20,8 @@ import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.UnauthenticatedApolloWrapper
+import com.neeva.app.UpdateSpaceEntityDisplayDataMutation
+import com.neeva.app.UpdateSpaceMutation
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.HistoryDatabase
@@ -32,6 +34,8 @@ import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.BatchDeleteSpaceResultInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
+import com.neeva.app.type.UpdateSpaceEntityDisplayDataInput
+import com.neeva.app.type.UpdateSpaceInput
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
@@ -43,7 +47,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -70,6 +73,7 @@ class SpaceStore(
     enum class State {
         READY,
         REFRESHING,
+        UPDATING_DB_AFTER_MUTATION,
         FAILED
     }
 
@@ -127,6 +131,8 @@ class SpaceStore(
     val spacesFromCommunityFlow: MutableStateFlow<List<SpaceRowData>> =
         MutableStateFlow(emptyList())
 
+    val editSpaceInfoFlow = MutableStateFlow<EditSpaceInfo?>(null)
+
     @VisibleForTesting
     val thumbnailDirectory = File(appContext.cacheDir, DIRECTORY)
 
@@ -143,11 +149,9 @@ class SpaceStore(
         lastFetchedSpaceIds = emptyList()
     }
 
-    suspend fun refresh(space: Space? = null) {
+    suspend fun refresh() {
         if (neevaUser.neevaUserToken.getToken().isEmpty()) {
-            if (space == null) {
-                fetchCommunitySpaces(appSpacesURL = neevaConstants.appSpacesURL)
-            }
+            fetchCommunitySpaces(appSpacesURL = neevaConstants.appSpacesURL)
             return
         }
         // TODO(yusuf) : Early return here if there is no connectivity
@@ -158,12 +162,8 @@ class SpaceStore(
         }
 
         stateFlow.value = State.REFRESHING
-        val succeeded = if (space == null) {
-            fetchCommunitySpaces(appSpacesURL = neevaConstants.appSpacesURL)
-            performRefresh()
-        } else {
-            performFetch(listOf(space))
-        }
+
+        val succeeded = performRefresh()
 
         stateFlow.value = if (succeeded) {
             State.READY
@@ -224,11 +224,12 @@ class SpaceStore(
 
     private suspend fun performRefresh(): Boolean = withContext(dispatchers.io) {
         val response =
-            authenticatedApolloWrapper.performQuery(ListSpacesQuery(), userMustBeLoggedIn = true)
-                ?: return@withContext false
+            authenticatedApolloWrapper.performQuery(
+                ListSpacesQuery(), userMustBeLoggedIn = true
+            )?.data ?: return@withContext false
 
         // If there are no spaces to process, but the response was fine, just indicate success.
-        val listSpaces = response.data?.listSpaces ?: return@withContext true
+        val listSpaces = response.listSpaces ?: return@withContext true
         val oldSpaceMap = dao.allSpaces().associateBy { it.id }
 
         // Fetch all the of the user's Spaces.
@@ -254,16 +255,18 @@ class SpaceStore(
         return@withContext performFetch(spacesToFetch)
     }
 
-    private suspend fun performFetch(spacesToFetch: List<Space>): Boolean {
-        if (spacesToFetch.isEmpty()) return true
+    private suspend fun performFetch(
+        spacesToFetch: List<Space>
+    ): Boolean = withContext(dispatchers.io) {
+        if (spacesToFetch.isEmpty()) return@withContext true
 
         // Get updated data for any Spaces that have changed since the last fetch.
         val spacesDataResponse = authenticatedApolloWrapper.performQuery(
             GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id })),
             userMustBeLoggedIn = true
-        ) ?: return false
+        )?.data ?: return@withContext false
 
-        spacesDataResponse.data?.getSpace?.space?.forEach { spaceQuery ->
+        spacesDataResponse.getSpace?.space?.forEach { spaceQuery ->
             val spaceID = spaceQuery.pageMetadata?.pageID ?: return@forEach
             val entityQueries = spaceQuery.space?.entities ?: return@forEach
 
@@ -286,7 +289,7 @@ class SpaceStore(
                 }
         }
 
-        return true
+        return@withContext true
     }
 
     private suspend fun updateSpaceEntities(
@@ -363,8 +366,9 @@ class SpaceStore(
         url: Uri,
         title: String,
         description: String? = null
-    ): Boolean {
+    ): Boolean = withContext(dispatchers.io) {
         val spaceID = space.id
+        stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
         val response = authenticatedApolloWrapper.performMutation(
             AddToSpaceMutation(
                 input = AddSpaceResultByURLInput(
@@ -379,20 +383,75 @@ class SpaceStore(
             userMustBeLoggedIn = true
         )
 
-        return response?.data?.entityId?.let {
+        return@withContext response?.data?.entityId?.let {
             Log.i(TAG, "Added item to space with id=$it")
             snackbarModel.show(appContext.getString(R.string.space_add_url, space.name))
-            refresh(space = space)
+            dao.upsert(
+                SpaceItem(
+                    id = it,
+                    spaceID = space.id,
+                    url = url,
+                    title = title,
+                    snippet = description,
+                    thumbnail = null
+                )
+            )
+            stateFlow.value = State.READY
             true
         } ?: run {
             val errorString = appContext.getString(R.string.error_generic)
             snackbarModel.show(errorString)
+            stateFlow.value = State.READY
             false
+        }
+    }
+
+    fun updateSpaceItem(item: SpaceItem, title: String, description: String) {
+        coroutineScope.launch(dispatchers.io) {
+            stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
+            val response = authenticatedApolloWrapper.performMutation(
+                UpdateSpaceEntityDisplayDataMutation(
+                    UpdateSpaceEntityDisplayDataInput(
+                        spaceID = Optional.presentIfNotNull(item.spaceID),
+                        resultID = Optional.presentIfNotNull(item.id),
+                        title = Optional.presentIfNotNull(title),
+                        snippet = Optional.presentIfNotNull(description)
+                    )
+                ),
+                userMustBeLoggedIn = true
+            )
+            response?.data?.let {
+                Log.i(TAG, "Updated space item with id=${item.id}")
+                dao.upsert(item.copy(title = title, snippet = description))
+            }
+            stateFlow.value = State.READY
+        }
+    }
+
+    fun updateSpace(space: Space, title: String, description: String) {
+        coroutineScope.launch(dispatchers.io) {
+            stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
+            val response = authenticatedApolloWrapper.performMutation(
+                UpdateSpaceMutation(
+                    UpdateSpaceInput(
+                        id = space.id,
+                        name = Optional.presentIfNotNull(title),
+                        description = Optional.presentIfNotNull(description)
+                    )
+                ),
+                userMustBeLoggedIn = true
+            )
+            response?.data?.let {
+                Log.i(TAG, "Updated space with id=${space.id}")
+                dao.upsert(space.copy(name = title, description = description))
+            }
+            stateFlow.value = State.READY
         }
     }
 
     fun removeFromSpace(item: SpaceItem) {
         coroutineScope.launch(dispatchers.io) {
+            stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
             val response = authenticatedApolloWrapper.performMutation(
                 BatchDeleteSpaceResultMutation(
                     BatchDeleteSpaceResultInput(
@@ -403,15 +462,13 @@ class SpaceStore(
                 userMustBeLoggedIn = true
             )
             response?.data?.let { dao.deleteSpaceItem(item) }
-
-            // We verified that the mutation was successful, so technically we don't need this.
-            // It mainly helps with the Space lastUpdatedTime to be set correctly.
-            refresh(dao.getSpaceById(item.spaceID))
+            stateFlow.value = State.READY
         }
     }
 
     suspend fun removeFromSpace(space: Space, uri: Uri): Boolean {
         val spaceID = space.id
+        stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
         val response = authenticatedApolloWrapper.performMutation(
             DeleteSpaceResultByURLMutation(
                 input = DeleteSpaceResultByURLInput(
@@ -426,11 +483,14 @@ class SpaceStore(
             val successString = appContext.getString(R.string.space_remove_url, space.name)
             Log.i(TAG, successString)
             snackbarModel.show(successString)
-            refresh(space = space)
+            val spaceItem = dao.getItemsFromSpace(spaceID).find { it.url == uri }
+            spaceItem?.let { dao.deleteSpaceItem(it) }
+            stateFlow.value = State.READY
             true
         } ?: run {
             val errorString = appContext.getString(R.string.error_generic)
             snackbarModel.show(errorString)
+            stateFlow.value = State.READY
             false
         }
     }

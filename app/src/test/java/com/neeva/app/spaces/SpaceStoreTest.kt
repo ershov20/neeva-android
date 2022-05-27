@@ -147,7 +147,7 @@ class SpaceStoreTest : BaseTest() {
             spaceStore.refresh()
             coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
 
-            val spaceID = SPACE_1.pageMetadata!!.pageID
+            val spaceID = SPACE_1.pageMetadata!!.pageID!!
             val directory = File(spaceStore.thumbnailDirectory, spaceID)
             val file = File(directory, spaceID)
             expectThat(directory.exists()).isTrue()
@@ -390,7 +390,7 @@ class SpaceStoreTest : BaseTest() {
         }
 
     @Test
-    fun addToSpace_mutatesAndRefreshesWithGetSpacesOnly() =
+    fun addToSpace_mutatesAndUpdatesLocalStateOnly() =
         runTest(coroutineScopeRule.scope.testScheduler) {
             apolloWrapper.addResponse(RESPONSE_LIST_SPACE_QUERY)
             apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY)
@@ -430,7 +430,6 @@ class SpaceStoreTest : BaseTest() {
             expectThat(apolloWrapper.performedMutations).isEmpty()
 
             apolloWrapper.addResponse(RESPONSE_ADD_TO_SPACE_MUTATION)
-            apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY_SECOND_SPACE_ONLY_URL_ADDED)
 
             val success = spaceStore.addOrRemoveFromSpace(
                 SPACE_2.pageMetadata?.pageID!!,
@@ -443,8 +442,7 @@ class SpaceStoreTest : BaseTest() {
             expectThat(apolloWrapper.performedMutations).hasSize(1)
             expectThat(apolloWrapper.performedMutations[0]).isA<AddToSpaceMutation>()
 
-            expectThat(apolloWrapper.performedQueries).hasSize(3)
-            expectThat(apolloWrapper.performedQueries[2]).isA<GetSpacesDataQuery>()
+            expectThat(apolloWrapper.performedQueries).hasSize(2)
 
             expectThat(
                 spaceStore.spaceStoreContainsUrl(
@@ -454,7 +452,7 @@ class SpaceStoreTest : BaseTest() {
         }
 
     @Test
-    fun deleteFromSpace_mutatesAndRefreshesWithGetSpacesOnly() =
+    fun deleteFromSpace_mutatesAndUpdatesLocalStateOnly() =
         runTest(coroutineScopeRule.scope.testScheduler) {
             apolloWrapper.addResponse(RESPONSE_LIST_SPACE_QUERY)
             apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY)
@@ -496,7 +494,6 @@ class SpaceStoreTest : BaseTest() {
             expectThat(apolloWrapper.performedMutations).isEmpty()
 
             apolloWrapper.addResponse(RESPONSE_DELETE_FROM_SPACE_MUTATION)
-            apolloWrapper.addResponse(RESPONSE_GET_SPACES_DATA_QUERY_SECOND_SPACE_ONLY_URL_DELETED)
 
             val success = spaceStore.addOrRemoveFromSpace(
                 SPACE_2.pageMetadata?.pageID!!,
@@ -508,8 +505,7 @@ class SpaceStoreTest : BaseTest() {
 
             expectThat(apolloWrapper.performedMutations).hasSize(1)
             expectThat(apolloWrapper.performedMutations[0]).isA<DeleteSpaceResultByURLMutation>()
-            expectThat(apolloWrapper.performedQueries).hasSize(3)
-            expectThat(apolloWrapper.performedQueries[2]).isA<GetSpacesDataQuery>()
+            expectThat(apolloWrapper.performedQueries).hasSize(2)
 
             expectThat(
                 spaceStore.spaceStoreContainsUrl(

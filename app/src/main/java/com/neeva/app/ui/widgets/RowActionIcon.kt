@@ -2,8 +2,10 @@ package com.neeva.app.ui.widgets
 
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.Delete
@@ -31,7 +33,7 @@ data class RowActionIconParams(
 ) {
     enum class ActionType {
         REFINE, DELETE, OPEN_URL, NAVIGATE_TO_SCREEN, BACK, FORWARD, REFRESH, SHOW_PAGE_INFO,
-        SHARE
+        SHARE, EDIT, ADD
     }
 }
 
@@ -137,6 +139,22 @@ fun RowActionIcon(
         RowActionIconParams.ActionType.SHARE -> {
             Icon(
                 Icons.Default.Share,
+                contentDescription = contentDescription,
+                modifier = modifier
+            )
+        }
+
+        RowActionIconParams.ActionType.EDIT -> {
+            Icon(
+                Icons.Default.Edit,
+                contentDescription = contentDescription,
+                modifier = modifier
+            )
+        }
+
+        RowActionIconParams.ActionType.ADD -> {
+            Icon(
+                Icons.Default.Add,
                 contentDescription = contentDescription,
                 modifier = modifier
             )

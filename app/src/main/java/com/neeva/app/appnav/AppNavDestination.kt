@@ -18,7 +18,8 @@ enum class AppNavDestination(
     BROWSER,
     SIGN_IN_FLOW,
     CARD_GRID(parent = BROWSER, fadesOut = true),
-    SPACE_DETAIL(parent = BROWSER, slidesOutToward = SlideDirection.Start),
+    SPACE_DETAIL(parent = BROWSER, slidesOutToward = SlideDirection.End),
+    EDIT_SPACE_DIALOG(parent = SPACE_DETAIL, slidesOutToward = SlideDirection.End),
 
     HISTORY(parent = BROWSER, slidesOutToward = SlideDirection.End),
     FEEDBACK(parent = BROWSER, slidesOutToward = SlideDirection.End),

@@ -5,7 +5,9 @@ import android.net.Uri
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import com.neeva.app.overflowmenu.OverflowMenuItemId
+import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.storage.entities.Space
+import com.neeva.app.storage.entities.SpaceItem
 import kotlinx.coroutines.flow.StateFlow
 
 /** Handles navigation between different screens, both internally and to external destinations. */
@@ -32,6 +34,7 @@ interface AppNavModel {
     fun showProfileSettings()
     fun showSettings()
     fun showSpaceDetail(spaceID: String)
+    fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?)
 
     fun showSignInFlow()
     // endregion

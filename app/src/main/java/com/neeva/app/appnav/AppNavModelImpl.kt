@@ -20,8 +20,11 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
+import com.neeva.app.spaces.EditSpaceInfo
+import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.entities.Space
+import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import kotlinx.coroutines.CoroutineScope
@@ -177,6 +180,11 @@ class AppNavModelImpl(
             spaceStore.detailedSpaceIDFlow.emit(spaceID)
         }
         show(AppNavDestination.SPACE_DETAIL)
+    }
+
+    override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {
+        spaceStore.editSpaceInfoFlow.value = EditSpaceInfo(mode, spaceItem, space)
+        show(AppNavDestination.EDIT_SPACE_DIALOG)
     }
 
     override fun showSignInFlow() {

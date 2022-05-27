@@ -24,8 +24,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.DropdownMenu
@@ -121,14 +123,15 @@ fun SpaceDetail() {
         }
 
         content.value?.let { content ->
-            items(content, key = { it.id }) { spaceItem ->
+            items(content, key = { it.id + it.title + it.snippet }) { spaceItem ->
+                val appNavModel = LocalAppNavModel.current
                 val canEdit = remember(space) {
                     space.value?.userACL == SpaceACLLevel.Edit ||
                         space.value?.userACL == SpaceACLLevel.Owner
                 }
                 val dismissDirectionSet = remember(canEdit) {
                     if (canEdit) {
-                        setOf(DismissDirection.EndToStart)
+                        setOf(DismissDirection.EndToStart, DismissDirection.StartToEnd)
                     } else {
                         emptySet()
                     }
@@ -138,6 +141,12 @@ fun SpaceDetail() {
                         if (it == DismissValue.DismissedToStart) {
                             spaceStore.removeFromSpace(spaceItem)
                             return@rememberDismissState true
+                        } else if (it == DismissValue.DismissedToEnd) {
+                            appNavModel.showEditSpaceDialog(
+                                SpaceEditMode.EDITING_SPACE_ITEM,
+                                spaceItem,
+                                null
+                            )
                         }
                         false
                     }
@@ -147,7 +156,6 @@ fun SpaceDetail() {
                     directions = dismissDirectionSet,
                     background = {
                         val direction = dismissState.dismissDirection ?: return@SwipeToDismiss
-                        // TODO Enable StartToEnd Edit.
                         val color by animateColorAsState(
                             when {
                                 !canEdit -> MaterialTheme.colorScheme.background
@@ -202,6 +210,27 @@ fun SpaceDetailToolbar(
 ) {
     val neevaConstants = LocalEnvironment.current.neevaConstants
     val url = space?.url(neevaConstants = neevaConstants)
+    val canEdit = space?.userACL == SpaceACLLevel.Edit || space?.userACL == SpaceACLLevel.Owner
+    val isTitleVisible by remember {
+        derivedStateOf {
+            lazyListState.firstVisibleItemIndex > 0
+        }
+    }
+    val showDescriptionsIcon = @Composable {
+        Icon(
+            painter = painterResource(
+                if (showDescriptions) {
+                    R.drawable.ic_hide_descriptions
+                } else {
+                    R.drawable.ic_show_descriptions
+                }
+            ),
+            contentDescription = stringResource(
+                id = R.string.space_detail_show_descriptions
+            )
+        )
+    }
+
     SmallTopAppBar(
         navigationIcon = {
             val appNavModel = LocalAppNavModel.current
@@ -213,14 +242,8 @@ fun SpaceDetailToolbar(
             )
         },
         title = {
-            val isVisible by remember {
-                derivedStateOf {
-                    lazyListState.firstVisibleItemIndex > 0
-                }
-            }
-
             AnimatedVisibility(
-                visible = isVisible,
+                visible = isTitleVisible,
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
@@ -245,22 +268,43 @@ fun SpaceDetailToolbar(
         actions = {
             var expanded by remember { mutableStateOf(false) }
             val appNavModel = LocalAppNavModel.current
-            IconButton(
-                onClick = toggleShowDescriptions
-            ) {
-                Icon(
-                    painter = painterResource(
-                        if (showDescriptions) {
-                            R.drawable.ic_hide_descriptions
-                        } else {
-                            R.drawable.ic_show_descriptions
-                        }
-                    ),
-                    contentDescription = stringResource(
-                        id = R.string.space_detail_show_descriptions
-                    ),
-                    tint = MaterialTheme.colorScheme.onBackground
+            val onEditSpace = {
+                appNavModel.showEditSpaceDialog(
+                    SpaceEditMode.EDITING_SPACE,
+                    null,
+                    space
                 )
+            }
+            val onAddToSpace = {
+                appNavModel.showEditSpaceDialog(
+                    SpaceEditMode.ADDING_SPACE_ITEM,
+                    null,
+                    space
+                )
+            }
+
+            if (canEdit && !isTitleVisible) {
+                RowActionIconButton(
+                    iconParams = RowActionIconParams(
+                        onTapAction = onAddToSpace,
+                        actionType = RowActionIconParams.ActionType.ADD
+                    )
+                )
+
+                RowActionIconButton(
+                    iconParams = RowActionIconParams(
+                        onTapAction = onEditSpace,
+                        actionType = RowActionIconParams.ActionType.EDIT
+                    )
+                )
+            }
+
+            if (!isTitleVisible) {
+                IconButton(
+                    onClick = toggleShowDescriptions
+                ) {
+                    showDescriptionsIcon
+                }
             }
 
             RowActionIconButton(
@@ -287,20 +331,78 @@ fun SpaceDetailToolbar(
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = stringResource(id = R.string.spaces_edit),
+                                imageVector = Icons.Default.ExitToApp,
+                                contentDescription = stringResource(
+                                    id = R.string.space_edit_on_web
+                                ),
                                 tint = MaterialTheme.colorScheme.onSurface
                             )
                         },
                         text = {
                             Text(
-                                text = stringResource(id = R.string.space_edit),
+                                text = stringResource(id = R.string.space_edit_on_web),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                             )
                         },
                         onClick = { appNavModel.openUrl(spaceUrl) }
                     )
+                    if (canEdit && isTitleVisible) {
+                        DropdownMenuItem(
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = stringResource(
+                                        id = R.string.space_edit
+                                    ),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.space_edit),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                            },
+                            onClick = onEditSpace
+                        )
+
+                        DropdownMenuItem(
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = stringResource(
+                                        id = R.string.space_add_space_item
+                                    ),
+                                    tint = MaterialTheme.colorScheme.onSurface
+                                )
+                            },
+                            text = {
+                                Text(
+                                    text = stringResource(id = R.string.space_add_space_item),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                            },
+                            onClick = onAddToSpace
+                        )
+                    }
+                    if (isTitleVisible) {
+                        DropdownMenuItem(
+                            leadingIcon = showDescriptionsIcon,
+                            text = {
+                                Text(
+                                    text = stringResource(
+                                        id = R.string.space_detail_show_descriptions
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                )
+                            },
+                            onClick = toggleShowDescriptions
+                        )
+                    }
                 }
             }
         },

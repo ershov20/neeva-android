@@ -152,3 +152,12 @@ mutation DeleteSpaceResultByURL($input: DeleteSpaceResultByURLInput!) {
 mutation BatchDeleteSpaceResult($input: BatchDeleteSpaceResultInput!) {
   batchDeleteSpaceResult(input: $input)
 }
+
+mutation UpdateSpace($input: UpdateSpaceInput!) {
+  updateSpace(input: $input)
+}
+
+mutation UpdateSpaceEntityDisplayData($input: UpdateSpaceEntityDisplayDataInput!) {
+   updateSpaceEntityDisplayData(input: $input)
+}
+
