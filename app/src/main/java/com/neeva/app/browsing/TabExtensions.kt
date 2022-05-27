@@ -4,9 +4,6 @@ import android.net.Uri
 import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.Tab
 
-/** Returns the [Tab]'s [Browser] if it hasn't been destroyed, and null otherwise. */
-fun Tab.getBrowserIfAlive() = browser.takeUnless { it.isDestroyed }
-
 val Tab.currentDisplayUrl: Uri?
     get() {
         navigationController.apply {
@@ -31,7 +28,7 @@ val Tab.currentDisplayTitle: String?
 
 val Tab.isSelected: Boolean
     get() {
-        return getBrowserIfAlive()?.activeTab == this
+        return browser.takeIfAlive()?.activeTab?.guid == this.guid
     }
 
 /** Navigates the Tab to the given URL. */

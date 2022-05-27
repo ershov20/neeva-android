@@ -75,7 +75,7 @@ interface BrowserWrapper {
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
     suspend fun waitUntilBrowserIsReady(): Boolean
 
-    fun selectTab(id: String)
+    fun selectTab(id: String): Boolean
     fun closeTab(id: String)
     fun closeAllTabs()
 
@@ -158,6 +158,8 @@ interface BrowserWrapper {
     fun restoreScreenshotOfTab(tabId: String): Bitmap?
     suspend fun allowScreenshots(allowScreenshots: Boolean)
     // endregion
+
+    fun reregisterActiveTabIfNecessary()
 }
 
 class CookiePair(val key: String, val value: String)

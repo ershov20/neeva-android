@@ -14,6 +14,7 @@ import com.neeva.app.storage.favicons.FaviconCache
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.ContentFilterCallback
@@ -33,6 +34,7 @@ import org.chromium.weblayer.TabCallback
  * Consumers must call [unregisterCallbacks] when the Tab's callbacks are no longer necessary.
  */
 class TabCallbacks(
+    browserFlow: StateFlow<Browser?>,
     private val isIncognito: Boolean,
     internal val tab: Tab,
     private val coroutineScope: CoroutineScope,
@@ -47,7 +49,8 @@ class TabCallbacks(
     domainProvider: DomainProvider
 ) {
     val tabCookieCutterModel = TabCookieCutterModel(
-        tab = tab,
+        browserFlow = browserFlow,
+        tabId = tab.guid,
         trackingDataFlow = trackingDataFlow,
         enableTrackingProtection = enableTrackingProtection,
         domainProvider = domainProvider
@@ -108,7 +111,7 @@ class TabCallbacks(
 
             // We can only check if the browser is restoring state when the navigation starts.  Once
             // we hit the commit phase, it'll return false.
-            val isRestoringState = tab.getBrowserIfAlive()?.isRestoringPreviousState == true
+            val isRestoringState = browserFlow.value?.isRestoringPreviousState == true
             if (!isRestoringState) {
                 visitToCommit = Visit(timestamp = Date())
             }
@@ -197,7 +200,7 @@ class TabCallbacks(
     /** General callbacks for the tab that allow it to interface with our app. */
     private val tabCallback = object : TabCallback() {
         override fun bringTabToFront() {
-            tab.getBrowserIfAlive()?.setActiveTab(tab)
+            browserFlow.setActiveTab(tab.guid)
             activityCallbackProvider.get()?.bringToForeground()
         }
 
@@ -218,7 +221,20 @@ class TabCallbacks(
         }
 
         override fun showContextMenu(params: ContextMenuParams) {
-            if (tab != tab.getBrowserIfAlive()?.activeTab) return
+            if (tab.isDestroyed) {
+                Log.e(TAG, "Cannot display context menu: Tab is destroyed")
+                return
+            }
+
+            if (browserFlow.getActiveTabId() != tab.guid) {
+                Log.e(TAG, "Cannot display context menu: Tab is not active")
+                return
+            }
+
+            if (browserFlow.getActiveTab() != tab) {
+                Log.w(TAG, "Warning: Tab instances are not equal.  Showing context menu anyway")
+            }
+
             activityCallbackProvider.get()?.showContextMenuForTab(params, tab)
         }
 

@@ -38,7 +38,6 @@ import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.ContextMenuCreator
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.browsing.isSelected
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.cardgrid.CardsPaneModel
 import com.neeva.app.cardgrid.CardsPaneModelImpl
@@ -265,6 +264,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         activityViewModel.checkForUpdates(this)
         clientLogger.logCounter(LogConfig.Interaction.APP_ENTER_FOREGROUND, null)
         updateWidgets()
+
+        webLayerModel.currentBrowser.reregisterActiveTabIfNecessary()
     }
 
     private fun updateWidgets() {
@@ -526,8 +527,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
-        if (tab.isDestroyed || !tab.isSelected) return
-
         findViewById<View>(R.id.weblayer_fragment)?.apply {
             // Need to use the NeevaActivity as the context because the WebLayer View doesn't have
             // access to the correct resources.

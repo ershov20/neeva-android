@@ -215,7 +215,6 @@ abstract class BaseBrowserWrapper internal constructor(
         override fun onActiveTabChanged(activeTab: Tab?) {
             fullscreenCallback.exitFullscreen()
             changeActiveTab(activeTab)
-            tabList.updatedSelectedTab(activeTab?.guid)
         }
 
         override fun onTabRemoved(tab: Tab) {
@@ -238,16 +237,12 @@ abstract class BaseBrowserWrapper internal constructor(
                 if (it.activeTab != null) return
 
                 val parentTabId = tabInfo?.data?.parentTabId
-                val parentTab = getTab(parentTabId)
-                if (parentTab != null) {
-                    it.setActiveTab(parentTab)
+                if (browserFlow.setActiveTab(parentTabId)) {
                     return@let
                 }
 
                 val newIndexTabId = orderedTabList.value.getOrNull(newIndex)?.id
-                val newIndexTab = getTab(newIndexTabId)
-                if (newIndexTab != null) {
-                    it.setActiveTab(newIndexTab)
+                if (browserFlow.setActiveTab(newIndexTabId)) {
                     return@let
                 }
             }
@@ -260,6 +255,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
         override fun onWillDestroyBrowserAndAllTabs() {
             unregisterBrowserAndTabCallbacks()
+            tabList.clear()
         }
     }
 
@@ -336,6 +332,8 @@ abstract class BaseBrowserWrapper internal constructor(
         toolbarConfiguration: StateFlow<ToolbarConfiguration>,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
+        Log.d(TAG, "createAndAttachBrowser: incognito=$isIncognito browser=${browserFlow.value}")
+
         if (!::_fragment.isInitialized) {
             _fragment = getOrCreateBrowserFragment()
 
@@ -345,9 +343,8 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         fragmentAttacher(_fragment, isIncognito)
-        if (browserFlow.value == null) {
-            browserFlow.value = getBrowserFromFragment(_fragment)
-        }
+        browserFlow.value = getBrowserFromFragment(_fragment)
+        Log.d(TAG, "createAndAttachBrowser: browser=${browserFlow.value}")
 
         val browser = browserFlow.value ?: throw IllegalStateException()
         registerBrowserCallbacks(browser)
@@ -505,6 +502,9 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     fun changeActiveTab(tab: Tab?) {
         _activeTabModelImpl.onActiveTabChanged(tab)
+        tabList.updatedSelectedTab(tab?.guid)
+
+        reregisterTabIfNecessary(tab)
 
         tab?.guid?.let { guid ->
             val tabCookieCutterModel = tabCallbackMap[guid]?.tabCookieCutterModel
@@ -521,6 +521,20 @@ abstract class BaseBrowserWrapper internal constructor(
         }
     }
 
+    override fun reregisterActiveTabIfNecessary() {
+        reregisterTabIfNecessary(browserFlow.getActiveTab())
+    }
+
+    /**
+     * Attempt at error correction: https://github.com/neevaco/neeva-android/issues/654
+     *
+     * If the Tab instance for the given Tab doesn't match the instance we're storing in the
+     * TabCallbacks, re-register it so that all of our callbacks will actually fire.
+     */
+    private fun reregisterTabIfNecessary(tab: Tab?) {
+        tab?.let { registerTabCallbacks(it) }
+    }
+
     /**
      * Registers all the callbacks that are necessary for the Tab when it is opened.
      *
@@ -534,7 +548,7 @@ abstract class BaseBrowserWrapper internal constructor(
             NewTabType.FOREGROUND_TAB,
             NewTabType.NEW_POPUP,
             NewTabType.NEW_WINDOW -> {
-                selectTab(tab)
+                selectTab(tab.guid)
             }
 
             else -> { /* Do nothing. */ }
@@ -543,19 +557,26 @@ abstract class BaseBrowserWrapper internal constructor(
 
     /**
      * Takes a newly created [tab] and registers all the callbacks we need to keep track of and
-     * manipulate its state.  Calling this function when the tab's callbacks were already registered
-     * results in a no-op.
+     * manipulate its state.
      */
-    fun registerTabCallbacks(tab: Tab) {
+    private fun registerTabCallbacks(tab: Tab) {
         if (tabCallbackMap[tab.guid] != null) {
             val previousTabInstance = tabCallbackMap[tab.guid]?.tab
-            if (previousTabInstance != tab) {
-                Log.w(TAG, "Replacing previous tab callbacks for same ID with new Tab instance")
+            val previousTabBrowser = previousTabInstance?.browser
+            if (previousTabInstance != tab || previousTabBrowser != tab.browser) {
+                Log.w(TAG, "Replacing previous tab callbacks")
+                Log.w(TAG, "\tTab was destroyed: ${previousTabInstance?.isDestroyed}")
+                Log.w(TAG, "\tBrowser refs: ${tab.browser} vs ${previousTabInstance?.browser}")
+                Log.w(TAG, "\tBrowser was destroyed: ${previousTabInstance?.browser?.isDestroyed}")
                 unregisterTabCallbacks(tab.guid)
+            } else {
+                Log.d(TAG, "Keeping previous tab callbacks")
+                return
             }
         }
 
         tabCallbackMap[tab.guid] = TabCallbacks(
+            browserFlow = browserFlow,
             isIncognito = isIncognito,
             tab = tab,
             coroutineScope = coroutineScope,
@@ -589,11 +610,8 @@ abstract class BaseBrowserWrapper internal constructor(
             // the map itself.
             tabCallbackMap.keys.toList().forEach {
                 unregisterTabCallbacks(it)
-                tabList.remove(it)
             }
             tabCallbackMap.clear()
-            tabList.clear()
-            changeActiveTab(null)
 
             browserFlow.value = null
             tabListRestorer = null
@@ -625,7 +643,7 @@ abstract class BaseBrowserWrapper internal constructor(
                 tabOpenType = tabOpenType
             )
 
-            selectTab(newTab)
+            selectTab(newTab.guid)
         }
     }
 
@@ -642,12 +660,8 @@ abstract class BaseBrowserWrapper internal constructor(
         tabList.forEach { closeTab(it) }
     }
 
-    override fun selectTab(id: String) {
-        getTab(id)?.let { selectTab(it) }
-    }
-
-    private fun selectTab(tab: Tab) {
-        browser?.setActiveTab(tab)
+    override fun selectTab(id: String): Boolean {
+        return browserFlow.setActiveTab(id)
     }
 
     override fun restoreScreenshotOfTab(tabId: String): Bitmap? {
@@ -837,16 +851,10 @@ abstract class BaseBrowserWrapper internal constructor(
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
     override suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
 
-    private fun getActiveTab(): Tab? {
-        return browser?.activeTab
-    }
-
-    private fun getTab(id: String?): Tab? {
-        if (id == null) return null
-        return browser?.tabs?.firstOrNull { tab -> tab.guid == id }
-    }
+    private fun getActiveTab(): Tab? = browserFlow.getActiveTab()
+    private fun getTab(id: String?): Tab? = browserFlow.getTab(id)
 
     companion object {
-        val TAG = BrowserWrapper::class.simpleName
+        private const val TAG = "BrowserWrapper"
     }
 }

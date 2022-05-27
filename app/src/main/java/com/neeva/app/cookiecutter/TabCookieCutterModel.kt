@@ -2,11 +2,12 @@ package com.neeva.app.cookiecutter
 
 import android.net.Uri
 import androidx.compose.runtime.State
-import com.neeva.app.browsing.getBrowserIfAlive
+import com.neeva.app.browsing.getActiveTabId
 import com.neeva.app.cookiecutter.TrackingEntity.Companion.trackingEntityForHost
 import com.neeva.app.publicsuffixlist.DomainProvider
 import kotlinx.coroutines.flow.MutableStateFlow
-import org.chromium.weblayer.Tab
+import kotlinx.coroutines.flow.StateFlow
+import org.chromium.weblayer.Browser
 
 data class TrackingData(
     val numTrackers: Int,
@@ -39,7 +40,8 @@ data class TrackingData(
 }
 
 class TabCookieCutterModel(
-    val tab: Tab,
+    private val browserFlow: StateFlow<Browser?>,
+    private val tabId: String,
     private val trackingDataFlow: MutableStateFlow<TrackingData?>,
     private val enableTrackingProtection: State<Boolean>,
     val domainProvider: DomainProvider
@@ -61,7 +63,7 @@ class TabCookieCutterModel(
         }
         set(value) {
             field = value
-            if (tab.getBrowserIfAlive()?.activeTab == tab) {
+            if (browserFlow.getActiveTabId() == tabId) {
                 trackingDataFlow.value = TrackingData.create(stats, domainProvider)
             }
         }

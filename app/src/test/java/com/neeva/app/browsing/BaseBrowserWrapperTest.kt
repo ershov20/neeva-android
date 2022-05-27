@@ -44,7 +44,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
@@ -551,7 +550,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         // Say that the user has an active tab.
         val numTabsBefore = browserWrapper.orderedTabList.value.size
-        Mockito.`when`(activeTabModelImpl.activeTab).thenReturn(mockTabs.last())
+        browser.setActiveTab(mockTabs.last())
 
         // Opening a lazy tab should tell the URL bar to take focus so that the user can see zero
         // query and the other suggestions.
