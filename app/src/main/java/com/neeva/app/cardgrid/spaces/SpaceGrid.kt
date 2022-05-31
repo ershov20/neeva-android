@@ -18,6 +18,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.cardgrid.CardGrid
 import com.neeva.app.cardgrid.CardsPaneModel
 import com.neeva.app.previewDispatchers
+import com.neeva.app.spaces.SpacesIntro
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.type.SpaceACLLevel
@@ -35,6 +36,7 @@ fun SpaceGrid(
     modifier: Modifier = Modifier
 ) {
     val spaceStore = LocalEnvironment.current.spaceStore
+    val neevaUser = LocalEnvironment.current.neevaUser
     val spaces by spaceStore.allSpacesFlow.collectAsState(emptyList())
     val gridState = LazyGridState()
 
@@ -43,15 +45,19 @@ fun SpaceGrid(
         spaceStore.refresh()
     }
 
-    SpaceGrid(
-        gridState = gridState,
-        onSelectSpace = { spaceUrl -> cardsPaneModel.selectSpace(browserWrapper, spaceUrl) },
-        spaces = spaces,
-        itemProvider = { spaceId -> spaceStore.contentDataForSpace(spaceId) },
-        dispatchers = dispatchers,
-        neevaConstants = neevaConstants,
-        modifier = modifier
-    )
+    if (neevaUser.isSignedOut()) {
+        SpacesIntro(includeSpaceCard = true)
+    } else {
+        SpaceGrid(
+            gridState = gridState,
+            onSelectSpace = { spaceUrl -> cardsPaneModel.selectSpace(browserWrapper, spaceUrl) },
+            spaces = spaces,
+            itemProvider = { spaceId -> spaceStore.contentDataForSpace(spaceId) },
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants,
+            modifier = modifier
+        )
+    }
 }
 
 @OptIn(ExperimentalFoundationApi::class)

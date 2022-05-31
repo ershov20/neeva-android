@@ -67,7 +67,7 @@ class SpaceStore(
         private val TAG = SpaceStore::class.simpleName
         private const val DIRECTORY = "spaces"
         private const val MAX_THUMBNAIL_SIZE = 300
-        private const val MAKER_COMMUNITY_SPACE_ID = "xlvaUJmdPRSrcqRHPEzVPuWf4RP74EyHvz5QvxLN"
+        const val MAKER_COMMUNITY_SPACE_ID = "xlvaUJmdPRSrcqRHPEzVPuWf4RP74EyHvz5QvxLN"
     }
 
     enum class State {
@@ -202,6 +202,27 @@ class SpaceStore(
                     Uri.parse(it.spaceEntity.url).pathSegments.size == 2
             }
             ?: return@withContext
+        val space = response.data?.getSpace?.space?.first()?.let {
+            Space(
+                id = MAKER_COMMUNITY_SPACE_ID,
+                name = appContext.getString(R.string.community_spaces),
+                description = it.space?.description ?: "",
+                lastModifiedTs = "",
+                thumbnail = null,
+                resultCount = entities.count(),
+                isDefaultSpace = false,
+                isShared = false,
+                isPublic = true,
+                userACL = SpaceACLLevel.PublicView,
+                numFollowers = it.stats?.followers ?: 0,
+                ownerName = it.space?.owner?.displayName ?: "",
+                ownerPictureURL = it.space?.owner?.pictureURL?.let { uri -> Uri.parse(uri) }
+            )
+        } ?: return@withContext
+
+        dao.upsert(space)
+        updateSpaceEntities(MAKER_COMMUNITY_SPACE_ID, entities)
+
         spacesFromCommunityFlow.emit(
             entities.map {
                 val spaceData = SpaceRowData(

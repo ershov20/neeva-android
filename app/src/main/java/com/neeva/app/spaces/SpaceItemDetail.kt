@@ -28,6 +28,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
 import com.neeva.app.storage.entities.SpaceEntityType
@@ -43,10 +44,19 @@ fun SpaceItemDetail(
     showDescriptions: Boolean = false
 ) {
     val appNavModel = LocalAppNavModel.current
+    val neevaConstants = LocalEnvironment.current.neevaConstants
     val isRegularWebItem = !spaceItem.url?.toString().isNullOrEmpty()
 
     Surface(
-        Modifier.clickable { spaceItem.url?.let { appNavModel.openUrl(it) } }
+        Modifier.clickable {
+            spaceItem.url?.let {
+                if (it.toString().startsWith(neevaConstants.appSpacesURL)) {
+                    appNavModel.showSpaceDetail(it.pathSegments.last())
+                } else {
+                    appNavModel.openUrl(it)
+                }
+            }
+        }
     ) {
         Column {
             if (spaceItem.itemEntityType == SpaceEntityType.IMAGE) {
