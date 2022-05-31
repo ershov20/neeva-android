@@ -10,9 +10,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
+import com.neeva.app.WAIT_TIMEOUT
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.waitForActivityStartup
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
 import org.junit.Test
@@ -43,7 +43,7 @@ class IncognitoOrientationChangeTest {
             .onNodeWithContentDescription(resources.getString(R.string.toolbar_tab_switcher))
             .performClick()
         androidComposeRule.waitForIdle()
-        androidComposeRule.waitUntil(TimeUnit.SECONDS.toMillis(5)) {
+        androidComposeRule.waitUntil(WAIT_TIMEOUT) {
             val appNavModel = androidComposeRule.activity.appNavModel
             val currentRoute = appNavModel?.currentDestination?.value?.route
             currentRoute == AppNavDestination.CARD_GRID.route
