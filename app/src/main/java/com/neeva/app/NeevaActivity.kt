@@ -554,6 +554,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         // possibly nesting FragmentManager transactions (and causing a crash).
         Handler(Looper.getMainLooper()).post {
             getWebLayerFragment(isIncognito = true)?.let { fragment ->
+                fragment.view?.let { removeViewFromParent(it) }
+
                 supportFragmentManager.beginTransaction()
                     .remove(fragment)
                     .commitNow()

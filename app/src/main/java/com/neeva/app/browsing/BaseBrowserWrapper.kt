@@ -151,14 +151,8 @@ abstract class BaseBrowserWrapper internal constructor(
 
     private val browserInitializationLock = Object()
 
-    private lateinit var _fragment: Fragment
-    override fun getFragment(): Fragment? {
-        return if (!::_fragment.isInitialized) {
-            null
-        } else {
-            _fragment
-        }
-    }
+    private var _fragment: Fragment? = null
+    override fun getFragment(): Fragment? = _fragment
     override val fragmentViewLifecycleEventFlow = MutableStateFlow(Lifecycle.Event.ON_DESTROY)
 
     /**
@@ -334,17 +328,17 @@ abstract class BaseBrowserWrapper internal constructor(
     ) = synchronized(browserInitializationLock) {
         Log.d(TAG, "createAndAttachBrowser: incognito=$isIncognito browser=${browserFlow.value}")
 
-        if (!::_fragment.isInitialized) {
-            _fragment = getOrCreateBrowserFragment()
+        val fragment: Fragment = _fragment ?: getOrCreateBrowserFragment().also {
+            _fragment = it
 
             // Keep the WebLayer instance across Activity restarts so that the Browser doesn't get
             // deleted when the configuration changes (e.g. the screen is rotated in fullscreen).
-            _fragment.retainInstance = true
+            it.retainInstance = true
         }
 
-        fragmentAttacher(_fragment, isIncognito)
-        browserFlow.value = getBrowserFromFragment(_fragment)
-        Log.d(TAG, "createAndAttachBrowser: browser=${browserFlow.value}")
+        fragmentAttacher(fragment, isIncognito)
+        browserFlow.value = getBrowserFromFragment(fragment)
+        Log.d(TAG, "createAndAttachBrowser: fragment=$_fragment browser=${browserFlow.value}")
 
         val browser = browserFlow.value ?: throw IllegalStateException()
         registerBrowserCallbacks(browser)
@@ -604,15 +598,18 @@ abstract class BaseBrowserWrapper internal constructor(
                 unregisterTabListCallback(tabListCallback)
                 unregisterBrowserControlsOffsetCallback(browserControlsOffsetCallback)
                 tabListRestorer?.let { unregisterBrowserRestoreCallback(it) }
+
+                profile.setTablessOpenUrlCallback(null)
             }
 
-            // Avoid a ConcurrentModificationException by iterating on a copy of the keys rather than
-            // the map itself.
+            // Avoid a ConcurrentModificationException by iterating on a copy of the keys rather
+            // than the map itself.
             tabCallbackMap.keys.toList().forEach {
                 unregisterTabCallbacks(it)
             }
             tabCallbackMap.clear()
 
+            _fragment = null
             browserFlow.value = null
             tabListRestorer = null
         }
