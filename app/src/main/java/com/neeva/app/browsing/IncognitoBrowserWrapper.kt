@@ -77,7 +77,12 @@ class IncognitoBrowserWrapper private constructor(
         neevaConstants = neevaConstants,
         onRemovedFromHierarchy = onRemovedFromHierarchy,
         settingsDataModel = settingsDataModel,
-        tabScreenshotManager = IncognitoTabScreenshotManager(appContext, tempDirectory)
+        tabScreenshotManager = IncognitoTabScreenshotManager(
+            appContext = appContext,
+            filesDir = tempDirectory,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers
+        )
     )
 
     companion object {

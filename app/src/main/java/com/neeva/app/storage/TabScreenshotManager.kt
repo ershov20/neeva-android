@@ -4,22 +4,33 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.annotation.WorkerThread
+import com.neeva.app.Dispatchers
 import com.neeva.app.browsing.FileEncrypter
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import org.chromium.weblayer.Tab
 
 /**
  * Manages thumbnails for each tab to display in the tab switcher.  These thumbnails are created by
  * WebLayer and persisted into our cache directory.
  */
-abstract class TabScreenshotManager(filesDir: File) {
+abstract class TabScreenshotManager(
+    filesDir: File,
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers
+) {
     companion object {
-        private val TAG = TabScreenshotManager::class.simpleName
+        private const val TAG = "TabScreenshotManager"
         private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
+        internal const val SCREENSHOT_TIMEOUT_MS = 1000L
 
         // Copied from https://source.chromium.org/chromium/chromium/src/+/main:weblayer/browser/tab_impl.h;drc=242da5037807dde3daf097ba74f875db83b8b613;l=76
         enum class ScreenshotErrors {
@@ -50,9 +61,12 @@ abstract class TabScreenshotManager(filesDir: File) {
             return
         }
 
-        val tabGuid = tab.guid
         val captureStack = Throwable()
 
+        // Kick off taking a screenshot and asynchronously wait for WebLayer to finish.  While it
+        // would be nice to put it into the coroutine below using a suspendCoroutine, the
+        // suspendCoroutine doesn't play nicely with a timeout.
+        val deferredThumbnail = CompletableDeferred<Bitmap?>()
         tab.captureScreenShot(0.5f) { thumbnail, errorCode ->
             if (errorCode != 0) {
                 val errorName = ScreenshotErrors.values().getOrNull(errorCode)?.name
@@ -61,15 +75,23 @@ abstract class TabScreenshotManager(filesDir: File) {
                     "Failed to create tab thumbnail: Tab=$tab, Error=$errorCode $errorName",
                     captureStack
                 )
-                onCompleted()
-                return@captureScreenShot
             }
+            deferredThumbnail.complete(thumbnail)
+        }
 
-            val file = getTabScreenshotFile(tabGuid)
-            if (file.exists()) file.delete()
+        coroutineScope.launch(dispatchers.main) {
+            val thumbnail = withTimeoutOrNull(SCREENSHOT_TIMEOUT_MS) { deferredThumbnail.await() }
 
-            BitmapIO.saveBitmap(tabScreenshotDirectory, file, ::getOutputStream) {
-                thumbnail?.compress(Bitmap.CompressFormat.JPEG, 100, it)
+            if (thumbnail != null) {
+                val file = getTabScreenshotFile(tab.guid)
+
+                withContext(dispatchers.io) {
+                    if (file.exists()) file.delete()
+
+                    BitmapIO.saveBitmap(tabScreenshotDirectory, file, ::getOutputStream) { stream ->
+                        thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                    }
+                }
             }
 
             onCompleted()
@@ -113,7 +135,11 @@ abstract class TabScreenshotManager(filesDir: File) {
 }
 
 /** Caches unencrypted screenshots of tabs. */
-class RegularTabScreenshotManager(filesDir: File) : TabScreenshotManager(filesDir) {
+class RegularTabScreenshotManager(
+    filesDir: File,
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers
+) : TabScreenshotManager(filesDir, coroutineScope, dispatchers) {
     override fun getInputStream(file: File) = FileInputStream(file)
     override fun getOutputStream(file: File) = FileOutputStream(file)
 }
@@ -121,8 +147,10 @@ class RegularTabScreenshotManager(filesDir: File) : TabScreenshotManager(filesDi
 /** Caches screenshots of tabs and encrypts them so that they can't be accessed by outside apps. */
 class IncognitoTabScreenshotManager(
     appContext: Context,
-    filesDir: File
-) : TabScreenshotManager(filesDir) {
+    filesDir: File,
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers
+) : TabScreenshotManager(filesDir, coroutineScope, dispatchers) {
     private val encrypter: FileEncrypter = FileEncrypter(appContext)
 
     override fun getInputStream(file: File): InputStream = encrypter.getInputStream(file)

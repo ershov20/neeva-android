@@ -65,7 +65,11 @@ class RegularBrowserWrapper(
     ),
     spaceStore = spaceStore,
     historyManager = historyManager,
-    tabScreenshotManager = RegularTabScreenshotManager(appContext.cacheDir),
+    tabScreenshotManager = RegularTabScreenshotManager(
+        filesDir = appContext.cacheDir,
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers
+    ),
     domainProvider = domainProvider,
     neevaConstants = neevaConstants,
     settingsDataModel = settingsDataModel,

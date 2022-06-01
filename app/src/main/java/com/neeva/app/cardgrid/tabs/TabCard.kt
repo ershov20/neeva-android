@@ -40,6 +40,8 @@ import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.FaviconView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun thumbnailState(
@@ -48,7 +50,7 @@ fun thumbnailState(
 ): State<Bitmap?> {
     // By keying this on [uri], we can avoid recompositions until the tab ID changes.
     return produceState<Bitmap?>(initialValue = null, key1 = id) {
-        value = screenshotProvider(id)
+        withContext(Dispatchers.IO) { value = screenshotProvider(id) }
     }
 }
 
