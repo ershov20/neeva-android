@@ -1,5 +1,7 @@
 package com.neeva.app.firstrun.widgets.buttons
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,13 +21,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
+import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.getClickableAlpha
@@ -44,13 +49,22 @@ fun OnboardingButton(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     enabled: Boolean = true
 ) {
+    val firstRunModel = LocalFirstRunModel.current
+    val context = LocalContext.current
+    val appNavModel = LocalAppNavModel.current
+    val resultLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        firstRunModel.handleLoginActivityResult(context, result) { appNavModel.openUrl(it) }
+    }
     val onClick = {
         launchLoginIntent(
             LaunchLoginIntentParams(
                 provider = provider,
                 signup = signup,
                 emailProvided = emailProvided,
-                passwordProvided = passwordProvided
+                passwordProvided = passwordProvided,
+                resultLauncher = resultLauncher
             )
         )
     }

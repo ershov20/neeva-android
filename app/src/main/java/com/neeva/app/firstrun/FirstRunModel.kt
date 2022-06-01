@@ -1,10 +1,21 @@
 package com.neeva.app.firstrun
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.util.Log
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.runtime.compositionLocalOf
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.logging.ClientLogger
@@ -15,19 +26,53 @@ import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-class FirstRunModel @Inject constructor(
+fun interface GoogleSignInAccountProvider {
+    fun getGoogleSignInAccount(intent: Intent?): Task<GoogleSignInAccount>
+}
+
+@Singleton
+class FirstRunModel internal constructor(
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val neevaUserToken: NeevaUserToken,
     private val neevaConstants: NeevaConstants,
     private var clientLogger: ClientLogger,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
-    private val snackbarModel: SnackbarModel
+    private val snackbarModel: SnackbarModel,
+    private val googleSignInAccountProvider: GoogleSignInAccountProvider
 ) {
+    @Inject
+    constructor(
+        sharedPreferencesModel: SharedPreferencesModel,
+        neevaUserToken: NeevaUserToken,
+        neevaConstants: NeevaConstants,
+        clientLogger: ClientLogger,
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+        snackbarModel: SnackbarModel
+    ) : this(
+        sharedPreferencesModel = sharedPreferencesModel,
+        neevaUserToken = neevaUserToken,
+        neevaConstants = neevaConstants,
+        clientLogger = clientLogger,
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers,
+        snackbarModel = snackbarModel,
+        googleSignInAccountProvider = GoogleSignInAccountProvider {
+            GoogleSignIn.getSignedInAccountFromIntent(it)
+        }
+    )
+
     companion object {
+        private const val SERVER_CLIENT_ID =
+            "892902198757-84tm1f14ne0pa6n3dmeehgeo5mk4mhl9.apps.googleusercontent.com"
+        const val TAG = "FirstRunModel"
+
         fun firstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
             sharedPreferencesModel.setValue(
                 SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.FirstRunDone, true
@@ -38,20 +83,43 @@ class FirstRunModel @Inject constructor(
         }
     }
 
+    private lateinit var googleSignInClient: GoogleSignInClient
+
+    /** Holds the [LaunchLoginIntentParams] for the latest login */
+    private val intentParamFlow = MutableStateFlow<LaunchLoginIntentParams?>(null)
+
     private fun authUri(
         signup: Boolean,
         provider: NeevaUser.SSOProvider,
-        loginHint: String = ""
+        loginHint: String = "",
+        identityToken: String = "",
+        authorizationCode: String = ""
     ): Uri {
+        val path = if (provider == NeevaUser.SSOProvider.GOOGLE && identityToken.isNotEmpty()) {
+            "login-mobile"
+        } else {
+            "login"
+        }
+
+        // TODO remove this temporary hack. There is a leftover callback check that doesn't handle
+        // Android in the neeva.com/login path. We should add Android case for that path and delete
+        // this.
+        val callback = if (provider == NeevaUser.SSOProvider.GOOGLE && identityToken.isNotEmpty()) {
+            "android"
+        } else {
+            "ios"
+        }
         val builder = Uri.Builder()
             .scheme("https")
             .authority("neeva.com")
-            .path("login")
+            .path(path)
             .appendQueryParameter("provider", provider.url)
             .appendQueryParameter("finalPath", provider.finalPath)
             .appendQueryParameter("signup", signup.toString())
             .appendQueryParameter("ignoreCountryCode", "true")
-            .appendQueryParameter("loginCallbackType", "ios")
+            .appendQueryParameter("loginCallbackType", callback)
+            .appendQueryParameter("identityToken", identityToken)
+            .appendQueryParameter("authorizationCode", authorizationCode)
         return when (provider) {
             NeevaUser.SSOProvider.OKTA ->
                 builder
@@ -104,6 +172,9 @@ class FirstRunModel @Inject constructor(
                 CustomTabsClient.getPackageName(context, listOf("com.android.chrome"))
             )
             intent.data = uri
+            if (context !is Activity) {
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
             context.startActivity(intent)
         }
     }
@@ -129,7 +200,20 @@ class FirstRunModel @Inject constructor(
                 )
             }
             return
+        } else if (provider == NeevaUser.SSOProvider.GOOGLE && context is Activity) {
+            // Fallback to custom tabs for Google sign in if the context is not an Activity
+            val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestIdToken(SERVER_CLIENT_ID)
+                .requestServerAuthCode(SERVER_CLIENT_ID, true)
+                .build()
+
+            googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
+            intentParamFlow.value?.resultLauncher
+                ?.launch(googleSignInClient.signInIntent)
+                ?.let { return }
         }
+
         val intent = CustomTabsIntent.Builder()
             .setShowTitle(true)
             .build()
@@ -147,10 +231,56 @@ class FirstRunModel @Inject constructor(
         context.startActivity(intent)
     }
 
+    /**
+     * Executes [onSuccess] if we can extract a valid auth uri from the [ActivityResult] and
+     * falls back to custom tabs if we can not.
+     */
+    fun handleLoginActivityResult(
+        context: Context,
+        result: ActivityResult,
+        onSuccess: (Uri) -> Unit
+    ) {
+        extractLoginUri(result)
+            ?.let(onSuccess) ?: run {
+            openInCustomTabs(context).invoke(
+                authUri(
+                    signup = intentParamFlow.value?.signup ?: false,
+                    provider = intentParamFlow.value?.provider ?: NeevaUser.SSOProvider.GOOGLE,
+                    loginHint = intentParamFlow.value?.emailProvided ?: ""
+                )
+            )
+        }
+    }
+
+    private fun extractLoginUri(result: ActivityResult): Uri? {
+        val data = result.takeIf { it.resultCode == Activity.RESULT_OK }?.data ?: run {
+            Log.e(TAG, "ActivityResult was not successful")
+            return null
+        }
+
+        try {
+            val account = googleSignInAccountProvider.getGoogleSignInAccount(data)
+            val idToken = account.result.idToken ?: return null
+            val authCode = account.result.serverAuthCode ?: return null
+
+            return authUri(
+                signup = intentParamFlow.value?.signup ?: false,
+                provider = intentParamFlow.value?.provider ?: NeevaUser.SSOProvider.GOOGLE,
+                identityToken = idToken,
+                authorizationCode = authCode
+            )
+        } catch (e: ApiException) {
+            Log.e(TAG, "Failed to extract signed in account from intent", e)
+            return null
+        }
+    }
+
     fun getLaunchLoginIntent(
         context: Context,
     ): (LaunchLoginIntentParams) -> Unit {
         return { launchLoginIntentParams ->
+            intentParamFlow.value = launchLoginIntentParams
+
             when (launchLoginIntentParams.provider) {
                 NeevaUser.SSOProvider.MICROSOFT -> {
                     launchCustomTabsLoginIntent(
@@ -192,7 +322,8 @@ data class LaunchLoginIntentParams(
     val provider: NeevaUser.SSOProvider,
     val signup: Boolean,
     val emailProvided: String? = null,
-    val passwordProvided: String? = null
+    val passwordProvided: String? = null,
+    val resultLauncher: ActivityResultLauncher<Intent>
 )
 
 val LocalFirstRunModel = compositionLocalOf<FirstRunModel> { error("No value set") }
