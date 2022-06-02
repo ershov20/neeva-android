@@ -15,8 +15,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -45,12 +45,19 @@ data class EditSpaceInfo(
 )
 
 @Composable
-fun EditSpaceDialog() {
+fun EditSpaceDialog(
+    mode: SpaceEditMode,
+    id: String?
+) {
     val appNavModel = LocalAppNavModel.current
     val spaceStore = LocalEnvironment.current.spaceStore
-    val editSpaceInfo = spaceStore.editSpaceInfoFlow.collectAsState()
+    val editSpaceInfo = produceState<EditSpaceInfo?>(initialValue = null, mode, id) {
+        value = spaceStore.getEditSpaceInfo(
+            mode = mode,
+            id = id
+        )
+    }
 
-    // TODO Present a graceful error if EditSpaceInfo is null when we come here.
     editSpaceInfo.value?.let {
         EditSpaceDialog(
             mode = it.editMode,

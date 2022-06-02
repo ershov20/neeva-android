@@ -67,21 +67,20 @@ import com.neeva.app.ui.widgets.RowActionIconParams
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun SpaceDetail() {
+fun SpaceDetail(spaceID: String?) {
     val spaceStore = LocalEnvironment.current.spaceStore
     val spaces = spaceStore.allSpacesFlow.collectAsState()
-    val spaceID = spaceStore.detailedSpaceIDFlow.collectAsState()
     val spaceStoreState = spaceStore.stateFlow.collectAsState()
     val fetchedSpace = spaceStore.fetchedSpaceFlow.collectAsState(initial = null)
     val space = remember(spaceID, spaceStoreState, fetchedSpace.value) {
         derivedStateOf {
-            spaces.value.find { it.id == spaceID.value } ?: fetchedSpace.value
+            spaces.value.find { it.id == spaceID } ?: fetchedSpace.value
         }
     }
     val content = getSpaceContentsAsync(
         fetchedSpace = fetchedSpace.value,
         spaceStoreState = spaceStoreState.value,
-        spaceID = spaceID.value
+        spaceID = spaceID
     )
     val sharedPrefs = LocalEnvironment.current.sharedPreferencesModel
     val showDescriptions = remember {
@@ -227,7 +226,8 @@ fun SpaceDetailToolbar(
             ),
             contentDescription = stringResource(
                 id = R.string.space_detail_show_descriptions
-            )
+            ),
+            tint = MaterialTheme.colorScheme.onSurface
         )
     }
 
@@ -301,10 +301,9 @@ fun SpaceDetailToolbar(
 
             if (!isTitleVisible) {
                 IconButton(
-                    onClick = toggleShowDescriptions
-                ) {
-                    showDescriptionsIcon
-                }
+                    onClick = toggleShowDescriptions,
+                    content = showDescriptionsIcon
+                )
             }
 
             RowActionIconButton(

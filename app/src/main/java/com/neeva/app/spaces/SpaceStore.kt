@@ -131,8 +131,6 @@ class SpaceStore(
     val spacesFromCommunityFlow: MutableStateFlow<List<SpaceRowData>> =
         MutableStateFlow(emptyList())
 
-    val editSpaceInfoFlow = MutableStateFlow<EditSpaceInfo?>(null)
-
     @VisibleForTesting
     val thumbnailDirectory = File(appContext.cacheDir, DIRECTORY)
 
@@ -532,6 +530,23 @@ class SpaceStore(
             }
         }
     }
+
+    suspend fun getEditSpaceInfo(mode: SpaceEditMode, id: String?): EditSpaceInfo? =
+        id?.let { editingId ->
+            when (mode) {
+                SpaceEditMode.EDITING_SPACE, SpaceEditMode.ADDING_SPACE_ITEM -> EditSpaceInfo(
+                    space = dao.getSpaceById(editingId),
+                    spaceItem = null,
+                    editMode = mode
+                )
+
+                SpaceEditMode.EDITING_SPACE_ITEM -> EditSpaceInfo(
+                    space = null,
+                    spaceItem = dao.getSpaceItemById(editingId),
+                    editMode = mode
+                )
+            }
+        }
 
     private suspend fun saveBitmap(
         directory: File,

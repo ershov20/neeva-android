@@ -20,7 +20,6 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
-import com.neeva.app.spaces.EditSpaceInfo
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.entities.Space
@@ -95,10 +94,13 @@ class AppNavModelImpl(
      */
     private fun show(
         destination: AppNavDestination,
-        setOptions: NavOptionsBuilder.() -> Unit = {}
+        navArguments: List<String> = emptyList(),
+        setOptions: NavOptionsBuilder.() -> Unit = {},
     ) {
-        if (navController.currentDestination?.route == destination.route) return
-        navController.navigate(destination.route) {
+        val destinationPath =
+            destination.route + buildString { navArguments.forEach { this.append("/$it") } }
+        if (navController.currentDestination?.route == destinationPath) return
+        navController.navigate(destinationPath) {
             launchSingleTop = true
             setOptions()
         }
@@ -176,15 +178,16 @@ class AppNavModelImpl(
     override fun showSettings() = show(AppNavDestination.SETTINGS)
 
     override fun showSpaceDetail(spaceID: String) {
+        // We still set the detailedSpaceIDFlow value in case we need to fetch the Space.
         coroutineScope.launch {
-            spaceStore.detailedSpaceIDFlow.emit(spaceID)
+            spaceStore.detailedSpaceIDFlow.value = spaceID
         }
-        show(AppNavDestination.SPACE_DETAIL)
+        show(AppNavDestination.SPACE_DETAIL, navArguments = listOf(spaceID))
     }
 
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {
-        spaceStore.editSpaceInfoFlow.value = EditSpaceInfo(mode, spaceItem, space)
-        show(AppNavDestination.EDIT_SPACE_DIALOG)
+        val id = space?.id ?: spaceItem?.id ?: return
+        show(AppNavDestination.EDIT_SPACE_DIALOG, navArguments = listOf(mode.name, id))
     }
 
     override fun showSignInFlow() {

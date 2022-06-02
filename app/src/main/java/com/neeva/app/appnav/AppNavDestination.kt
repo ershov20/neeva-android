@@ -49,7 +49,7 @@ enum class AppNavDestination(
 
     companion object {
         fun fromRouteName(route: String?): AppNavDestination? {
-            return values().firstOrNull { it.route == route }
+            return values().firstOrNull { route?.startsWith(it.route) == true }
         }
     }
 }

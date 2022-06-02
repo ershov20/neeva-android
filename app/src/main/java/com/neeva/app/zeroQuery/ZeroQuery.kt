@@ -190,29 +190,31 @@ fun ZeroQuery(
             }
         }
 
-        item {
-            Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
-        }
-
-        collapsingSection(
-            label = R.string.community_spaces,
-            collapsingSectionState = isCommunitySpacesExpanded.value,
-            onUpdateCollapsingSectionState = {
-                zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
+        if (communitySpaces.isNotEmpty()) {
+            item {
+                Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
             }
-        ) {
-            items(communitySpaces.take(5), key = { it.id }) {
-                val thumbnail: ImageBitmap? by getThumbnailAsync(uri = it.thumbnail)
-                SpaceRow(
-                    spaceName = it.name,
-                    isSpacePublic = it.isPublic,
-                    thumbnail = thumbnail,
-                    isCurrentUrlInSpace = null
-                ) {
-                    if (isNativeSpacesEnabled.value) {
-                        appNavModel.showSpaceDetail(it.id)
-                    } else {
-                        appNavModel.openUrl(it.url())
+
+            collapsingSection(
+                label = R.string.community_spaces,
+                collapsingSectionState = isCommunitySpacesExpanded.value,
+                onUpdateCollapsingSectionState = {
+                    zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
+                }
+            ) {
+                items(communitySpaces.take(5), key = { it.id }) {
+                    val thumbnail: ImageBitmap? by getThumbnailAsync(uri = it.thumbnail)
+                    SpaceRow(
+                        spaceName = it.name,
+                        isSpacePublic = it.isPublic,
+                        thumbnail = thumbnail,
+                        isCurrentUrlInSpace = null
+                    ) {
+                        if (isNativeSpacesEnabled.value) {
+                            appNavModel.showSpaceDetail(it.id)
+                        } else {
+                            appNavModel.openUrl(it.url())
+                        }
                     }
                 }
             }

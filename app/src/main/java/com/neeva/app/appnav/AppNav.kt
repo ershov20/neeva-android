@@ -3,6 +3,8 @@ package com.neeva.app.appnav
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalEnvironment
@@ -22,6 +24,7 @@ import com.neeva.app.settings.profile.ProfileSettingsPane
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
 import com.neeva.app.spaces.EditSpaceDialog
 import com.neeva.app.spaces.SpaceDetail
+import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.ui.BrowserScaffold
 import kotlinx.coroutines.flow.StateFlow
 
@@ -103,12 +106,23 @@ fun AppNav(
             )
         }
 
-        composable(AppNavDestination.SPACE_DETAIL.route) {
-            SpaceDetail()
+        composable(AppNavDestination.SPACE_DETAIL.route.plus("/{spaceId}")) { backStackEntry ->
+            SpaceDetail(spaceID = backStackEntry.arguments?.getString("spaceId"))
         }
 
-        composable(AppNavDestination.EDIT_SPACE_DIALOG.route) {
-            EditSpaceDialog()
+        composable(
+            AppNavDestination.EDIT_SPACE_DIALOG.route.plus("/{mode}/{id}"),
+            arguments = listOf(
+                navArgument("mode") {
+                    type = NavType.EnumType(type = SpaceEditMode::class.java)
+                },
+                navArgument("id") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            EditSpaceDialog(
+                mode = (backStackEntry.arguments?.get("mode") as SpaceEditMode),
+                id = backStackEntry.arguments?.getString("id")
+            )
         }
 
         composable(AppNavDestination.FEEDBACK.route) {
