@@ -83,9 +83,10 @@ abstract class HistoryDatabase : RoomDatabase() {
             sharedPreferencesModel: SharedPreferencesModel
         ) {
             sharedPreferencesModel.setValue(
-                SharedPrefFolder.App,
-                SharedPrefFolder.App.CheckForImportedDatabaseKey,
-                true
+                folder = SharedPrefFolder.App,
+                sharedPrefKey = SharedPrefFolder.App.CheckForImportedDatabaseKey,
+                value = true,
+                mustCommitImmediately = true
             )
 
             if (ZipUtils.extract(context, contentUri, File(context.cacheDir, CACHE_IMPORT_PATH))) {
@@ -106,15 +107,16 @@ abstract class HistoryDatabase : RoomDatabase() {
             sharedPreferencesModel: SharedPreferencesModel
         ) {
             val checkForDatabase = sharedPreferencesModel.getValue(
-                SharedPrefFolder.App,
-                SharedPrefFolder.App.CheckForImportedDatabaseKey,
-                false
+                folder = SharedPrefFolder.App,
+                sharedPrefKey = SharedPrefFolder.App.CheckForImportedDatabaseKey,
+                defaultValue = false
             )
             if (!checkForDatabase) return
             sharedPreferencesModel.setValue(
-                SharedPrefFolder.App,
-                SharedPrefFolder.App.CheckForImportedDatabaseKey,
-                false
+                folder = SharedPrefFolder.App,
+                sharedPrefKey = SharedPrefFolder.App.CheckForImportedDatabaseKey,
+                value = false,
+                mustCommitImmediately = true
             )
 
             val extractedDirectory = context.cacheDir.resolve(CACHE_IMPORT_PATH)

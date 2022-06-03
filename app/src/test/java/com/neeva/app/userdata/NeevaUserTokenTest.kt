@@ -110,7 +110,8 @@ class NeevaUserTokenTest : BaseTest() {
         verify(sharedPreferencesModel).setValue(
             eq(SharedPrefFolder.User),
             eq(SharedPrefFolder.User.Token),
-            eq("expectedToken")
+            eq("expectedToken"),
+            eq(true)
         )
     }
 

@@ -35,11 +35,21 @@ class SharedPreferencesModel(private val appContext: Context) {
         return (returnValue as? T) ?: defaultValue
     }
 
-    fun <T : Any> setValue(folder: SharedPrefFolder, sharedPrefKey: SharedPrefKey<T>, value: T) {
-        setValue(folder, sharedPrefKey.preferenceKey, value)
+    fun <T : Any> setValue(
+        folder: SharedPrefFolder,
+        sharedPrefKey: SharedPrefKey<T>,
+        value: T,
+        mustCommitImmediately: Boolean = false
+    ) {
+        setValue(folder, sharedPrefKey.preferenceKey, value, mustCommitImmediately)
     }
 
-    fun setValue(folder: SharedPrefFolder, key: String, value: Any) {
+    fun setValue(
+        folder: SharedPrefFolder,
+        key: String,
+        value: Any,
+        mustCommitImmediately: Boolean = false
+    ) {
         val editor = getSharedPreferences(folder).edit()
         if (editor != null) {
             val putLambda = when (value) {
@@ -48,7 +58,12 @@ class SharedPreferencesModel(private val appContext: Context) {
                 is Int -> editor.putInt(key, value)
                 else -> throw IllegalArgumentException("Unsupported value type given")
             }
-            putLambda.commit()
+
+            if (mustCommitImmediately) {
+                putLambda.commit()
+            } else {
+                putLambda.apply()
+            }
         }
     }
 
@@ -73,9 +88,25 @@ sealed class SharedPrefFolder(internal val folderName: String) {
     object App : SharedPrefFolder("APP") {
         val CheckForImportedDatabaseKey = SharedPrefKey<Boolean>("CHECK_FOR_IMPORTED_DATABASE_KEY")
         val SessionIdV2Key = SharedPrefKey<String>("SESSION_ID_V2")
-    }
 
-    object CookieCutter : SharedPrefFolder("COOKIE_CUTTER")
+        /**
+         * Tracks whether the user is using the Regular or Incognito profile.  Meant to be read only
+         * during WebLayerModel initialization.
+         */
+        val IsCurrentlyIncognito = SharedPrefKey<Boolean>("IS_CURRENTLY_INCOGNITO")
+
+        val SpacesShowDescriptionsPreferenceKey =
+            SharedPrefKey<Boolean>("SPACES_SHOW_DESCRIPTIONS")
+
+        val ZeroQuerySuggestedSitesState =
+            SharedPrefKey<String>("ZERO_QUERY_SUGGESTED_SITES_STATE")
+        val ZeroQuerySuggestedQueriesState =
+            SharedPrefKey<String>("ZERO_QUERY_SUGGESTED_QUERIES_STATE")
+        val ZeroQueryCommunitySpacesState =
+            SharedPrefKey<String>("ZERO_QUERY_COMMUNITY_SPACES_STATE")
+        val ZeroQuerySpacesState =
+            SharedPrefKey<String>("ZERO_QUERY_SPACES_STATE")
+    }
 
     object FirstRun : SharedPrefFolder("FIRST_RUN") {
         val FirstRunDone = SharedPrefKey<Boolean>("HAS_FINISHED_FIRST_RUN")
@@ -84,23 +115,9 @@ sealed class SharedPrefFolder(internal val folderName: String) {
 
     object Settings : SharedPrefFolder("SETTINGS")
 
-    object Spaces : SharedPrefFolder("SPACES") {
-        val ShowDescriptionsPreferenceKey = SharedPrefKey<Boolean>("SHOW_DESCRIPTIONS")
-    }
-
     object User : SharedPrefFolder("USER") {
         val Token = SharedPrefKey<String>("TOKEN")
     }
-
-    object WebLayer : SharedPrefFolder("WEBLAYER") {
-        /**
-         * Tracks whether the user is using the Regular or Incognito profile.  Meant to be read only
-         * during WebLayerModel initialization.
-         */
-        val IsCurrentlyIncognito = SharedPrefKey<Boolean>("IsCurrentlyIncognito")
-    }
-
-    object ZeroQuery : SharedPrefFolder("ZERO_QUERY")
 }
 
 /**

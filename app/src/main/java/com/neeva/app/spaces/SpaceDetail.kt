@@ -86,8 +86,8 @@ fun SpaceDetail(spaceID: String?) {
     val showDescriptions = remember {
         mutableStateOf(
             sharedPrefs.getValue(
-                SharedPrefFolder.Spaces,
-                SharedPrefFolder.Spaces.ShowDescriptionsPreferenceKey,
+                SharedPrefFolder.App,
+                SharedPrefFolder.App.SpacesShowDescriptionsPreferenceKey,
                 defaultValue = false
             )
         )
@@ -107,8 +107,8 @@ fun SpaceDetail(spaceID: String?) {
                 showDescriptions = showDescriptions.value
             ) {
                 sharedPrefs.setValue(
-                    SharedPrefFolder.Spaces,
-                    SharedPrefFolder.Spaces.ShowDescriptionsPreferenceKey,
+                    SharedPrefFolder.App,
+                    SharedPrefFolder.App.SpacesShowDescriptionsPreferenceKey,
                     !showDescriptions.value
                 )
                 showDescriptions.value = !showDescriptions.value

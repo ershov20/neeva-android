@@ -212,8 +212,8 @@ class WebLayerModel internal constructor(
         )
 
         val userWasIncognitoWhenAppDied = sharedPreferencesModel.getValue(
-            folder = SharedPrefFolder.WebLayer,
-            sharedPrefKey = SharedPrefFolder.WebLayer.IsCurrentlyIncognito,
+            folder = SharedPrefFolder.App,
+            sharedPrefKey = SharedPrefFolder.App.IsCurrentlyIncognito,
             defaultValue = false
         )
         switchToProfile(useIncognito = userWasIncognitoWhenAppDied)
@@ -233,8 +233,8 @@ class WebLayerModel internal constructor(
         // Keep track of what mode the user entered so that we can send them back there after the
         // app restarts.
         sharedPreferencesModel.setValue(
-            folder = SharedPrefFolder.WebLayer,
-            sharedPrefKey = SharedPrefFolder.WebLayer.IsCurrentlyIncognito,
+            folder = SharedPrefFolder.App,
+            sharedPrefKey = SharedPrefFolder.App.IsCurrentlyIncognito,
             value = useIncognito
         )
 
