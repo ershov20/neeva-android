@@ -23,7 +23,8 @@
             android:name=".NeevaActivity"
             android:exported="true"
             android:theme="@style/Theme.NeevaSearchBrowser.NoActionBar"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|screenLayout">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

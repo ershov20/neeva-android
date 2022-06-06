@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserEmbeddabilityMode
@@ -179,8 +180,8 @@ abstract class BaseBrowserWrapper internal constructor(
     /** Tracks when the WebLayer [Browser] has finished restoration and the [tabList] is ready. */
     private val isBrowserReady = CompletableDeferred<Boolean>()
 
-    /** Tracks whether the keyboard is visible and adjusts the bottom toolbar. */
-    private var bottomToolbarStateJob: Job? = null
+    /** Tracks configuration changes that affect the bottom toolbar. */
+    private var bottomToolbarExistsJob: Job? = null
 
     init {
         faviconCache.profileProvider = FaviconCache.ProfileProvider { getProfile() }
@@ -393,34 +394,50 @@ abstract class BaseBrowserWrapper internal constructor(
         topControlsPlaceholder.requestLayout()
 
         // Do the same for the bottom controls, if the screen is too narrow to use a single bar.
-        if (!toolbarConfiguration.value.useSingleBrowserToolbar) {
-            val visibleHeight =
-                appContext.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height)
-
-            val bottomControlsPlaceholder = View(appContext)
-
-            // Create a view with an ID so that we can find it during instrumentation tests.
-            bottomControlsPlaceholder.id = R.id.browser_bottom_toolbar_placeholder
-
-            browser.setBottomView(bottomControlsPlaceholder)
-            bottomControlsPlaceholder.layoutParams.height = visibleHeight
-            bottomControlsPlaceholder.requestLayout()
-
-            // Start a job that shrinks the placeholder to 0px high when the keyboard is visible
-            // and resets it when the keyboard is hidden.
-            bottomToolbarStateJob?.cancel()
-            bottomToolbarStateJob = toolbarConfiguration
-                .map { it.isKeyboardOpen }
-                .distinctUntilChanged()
-                .onEach { isKeyboardOpen ->
-                    bottomControlsPlaceholder.layoutParams.height = when {
-                        isKeyboardOpen -> 0
-                        else -> visibleHeight
-                    }
-                    bottomControlsPlaceholder.requestLayout()
-                }
-                .launchIn(coroutineScope)
+        val bottomToolbarPlaceholder = View(appContext).apply {
+            // Set the ID so that we can find it during instrumentation tests.
+            id = R.id.browser_bottom_toolbar_placeholder
         }
+        val heightWhenVisible =
+            appContext.resources.getDimensionPixelSize(R.dimen.bottom_toolbar_height)
+
+        // Shrink the placeholder to 0px high when the keyboard is visible and reset it when the
+        // keyboard is hidden.
+        var keyboardJob: Job? = null
+        val keyboardFlow: Flow<Boolean> = toolbarConfiguration
+            .map { it.isKeyboardOpen }
+            .distinctUntilChanged()
+            .onEach { isKeyboardOpen ->
+                val currentHeight = bottomToolbarPlaceholder.layoutParams.height
+                val expectedHeight = when (isKeyboardOpen) {
+                    true -> 0
+                    false -> heightWhenVisible
+                }
+                if (currentHeight != expectedHeight) {
+                    bottomToolbarPlaceholder.layoutParams.height = expectedHeight
+                    bottomToolbarPlaceholder.requestLayout()
+                }
+            }
+
+        // Keep track of whether the bottom toolbar should be visible and let WebLayer know.
+        bottomToolbarExistsJob?.cancel()
+        bottomToolbarExistsJob = toolbarConfiguration
+            .map { it.useSingleBrowserToolbar }
+            .distinctUntilChanged()
+            .onEach { useSingleBrowserToolbar ->
+                keyboardJob?.cancel()
+
+                if (useSingleBrowserToolbar) {
+                    browser.setBottomView(null)
+                } else {
+                    browser.setBottomView(bottomToolbarPlaceholder)
+                    keyboardJob = keyboardFlow.launchIn(coroutineScope)
+                }
+            }
+            .launchIn(coroutineScope)
+            .apply {
+                invokeOnCompletion { keyboardJob?.cancel() }
+            }
     }
 
     /**
@@ -608,6 +625,9 @@ abstract class BaseBrowserWrapper internal constructor(
                 unregisterTabCallbacks(it)
             }
             tabCallbackMap.clear()
+
+            bottomToolbarExistsJob?.cancel()
+            bottomToolbarExistsJob = null
 
             _fragment = null
             browserFlow.value = null

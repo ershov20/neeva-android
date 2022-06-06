@@ -4,6 +4,7 @@ import android.app.SearchManager
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
@@ -257,6 +258,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         processIntent(intent)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        activityViewModel.determineScreenConfiguration(this)
     }
 
     override fun onStart() {
