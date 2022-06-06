@@ -130,7 +130,7 @@ fun GetSpacesDataQuery.Entity.spaceItem(spaceID: String, thumbnailUri: Uri? = nu
             url = spaceEntity?.url?.let { Uri.parse(it) },
             title = spaceEntity?.title,
             snippet = spaceEntity?.snippet,
-            thumbnail = thumbnailUri,
+            thumbnail = spaceEntity?.thumbnail?.let { Uri.parse(it) } ?: thumbnailUri,
             itemEntityType = entityType()
         )
     }
