@@ -7,6 +7,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import java.io.File
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.chromium.weblayer.CaptureScreenShotCallback
@@ -29,6 +30,7 @@ import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
+@ExperimentalCoroutinesApi
 @RunWith(RobolectricTestRunner::class)
 class RegularTabScreenshotManagerTest : BaseTest() {
     @Rule
