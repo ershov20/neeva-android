@@ -63,6 +63,7 @@ fun ZeroQuery(
     val spaceStore = LocalEnvironment.current.spaceStore
     val sharedPreferencesModel = LocalEnvironment.current.sharedPreferencesModel
     val settingsController = LocalSettingsController.current
+    val neevaUser = LocalEnvironment.current.neevaUser
 
     val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
 
@@ -105,18 +106,20 @@ fun ZeroQuery(
             .map { SuggestedSite(it) }
             .toMutableList()
             .apply {
-                // The first suggested item should always send the user Home.
-                add(
-                    index = 0,
-                    element = SuggestedSite(
-                        site = Site(
-                            siteURL = neevaConstants.appURL,
-                            title = homeLabel,
-                            largestFavicon = null
-                        ),
-                        overrideDrawableId = R.drawable.ic_house
+                if (!neevaUser.isSignedOut()) {
+                    // The first suggested item should always send the user Home.
+                    add(
+                        index = 0,
+                        element = SuggestedSite(
+                            site = Site(
+                                siteURL = neevaConstants.appURL,
+                                title = homeLabel,
+                                largestFavicon = null
+                            ),
+                            overrideDrawableId = R.drawable.ic_house
+                        )
                     )
-                )
+                }
             }
             .take(8)
     }
@@ -190,7 +193,7 @@ fun ZeroQuery(
             }
         }
 
-        if (communitySpaces.isNotEmpty()) {
+        if (neevaUser.isSignedOut() && communitySpaces.isNotEmpty()) {
             item {
                 Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
             }
@@ -220,7 +223,7 @@ fun ZeroQuery(
             }
         }
 
-        if (spaces.isNotEmpty()) {
+        if (!neevaUser.isSignedOut() && spaces.isNotEmpty()) {
             item {
                 Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
             }
