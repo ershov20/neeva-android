@@ -37,6 +37,15 @@ data class TrackingData(
             )
         }
     }
+
+    /** Return the top 3 tracking entity (e.g., Google, Facebook...) which has the most trackers */
+    fun whoIsTrackingYouHosts(): Map<TrackingEntity, Int> {
+        return this.trackingEntities
+            .toList()
+            .sortedByDescending { (_, value) -> value }
+            .take(3)
+            .toMap()
+    }
 }
 
 class TabCookieCutterModel(
@@ -68,15 +77,7 @@ class TabCookieCutterModel(
             }
         }
 
-    fun whoIsTrackingYouHosts(trackingData: TrackingData): Map<TrackingEntity, Int> {
-        return trackingData.trackingEntities
-            .toList()
-            .sortedByDescending { (_, value) -> value }
-            .take(3)
-            .toMap()
-    }
-
-    fun currentTrackingData(): TrackingData? {
+    fun currentTrackingData(): TrackingData {
         return TrackingData.create(stats, domainProvider)
     }
 
