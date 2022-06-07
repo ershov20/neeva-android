@@ -19,7 +19,7 @@ android {
 
         minSdk 28
         targetSdk 31
-        versionCode 89
+        versionCode 91
         versionName "0.69.0"
 
         vectorDrawables {
