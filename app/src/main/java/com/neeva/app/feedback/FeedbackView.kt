@@ -97,7 +97,6 @@ fun FeedbackView(
                         urlToSend.value.takeIf { shareUrl.value },
                         shareScreenshot.value
                     )
-                    onDismiss()
                 }
             )
         }
