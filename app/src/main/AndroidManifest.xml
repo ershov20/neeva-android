@@ -24,6 +24,7 @@
             android:exported="true"
             android:theme="@style/Theme.NeevaSearchBrowser.NoActionBar"
             android:launchMode="singleTask"
+            android:windowSoftInputMode="stateHidden"
             android:configChanges="orientation|screenSize|screenLayout">
 
             <intent-filter>

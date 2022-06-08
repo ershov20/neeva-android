@@ -193,7 +193,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
                 LaunchedEffect(true) {
                     if (firstRunModel.shouldShowFirstRun()) {
-                        appNavModel?.showSignInFlow()
+                        appNavModel?.showWelcome()
                         clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
                         firstRunModel.firstRunDone()
                     }

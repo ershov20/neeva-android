@@ -16,6 +16,7 @@ enum class AppNavDestination(
     val slidesOutToward: SlideDirection? = null
 ) {
     BROWSER,
+    WELCOME,
     SIGN_IN_FLOW,
     CARD_GRID(parent = BROWSER, fadesOut = true),
     SPACE_DETAIL(parent = BROWSER, slidesOutToward = SlideDirection.End),
@@ -28,6 +29,10 @@ enum class AppNavDestination(
     PROFILE_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     CLEAR_BROWSING_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     SET_DEFAULT_BROWSER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
+    SET_DEFAULT_BROWSER_SETTINGS_FROM_WELCOME(
+        parent = WELCOME,
+        slidesOutToward = SlideDirection.End
+    ),
     LOCAL_FEATURE_FLAGS_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     COOKIE_CUTTER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     LICENSES(parent = SETTINGS, slidesOutToward = SlideDirection.End);

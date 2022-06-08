@@ -4,12 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -20,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.ui.FullScreenDialogTopBar
@@ -32,7 +31,8 @@ import com.neeva.app.ui.theme.NeevaTheme
  */
 @Composable
 fun SetDefaultAndroidBrowserPane(
-    settingsController: SettingsController
+    settingsController: SettingsController,
+    fromWelcomeScreen: Boolean
 ) {
     Surface {
         Column(
@@ -85,14 +85,12 @@ fun SetDefaultAndroidBrowserPane(
 
                 Spacer(Modifier.height(28.dp))
 
-                Button(
+                OnboardingButton(
+                    text = stringResource(id = R.string.go_to_settings),
                     onClick = {
-                        settingsController.openAndroidDefaultBrowserSettings()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(id = R.string.go_to_settings))
-                }
+                        settingsController.openAndroidDefaultBrowserSettings(fromWelcomeScreen)
+                    }
+                )
             }
         }
     }
@@ -106,7 +104,8 @@ fun SetDefaultAndroidBrowserPane(
 fun SettingsDefaultAndroidBrowser_Preview() {
     NeevaTheme {
         SetDefaultAndroidBrowserPane(
-            mockSettingsControllerImpl
+            mockSettingsControllerImpl,
+            fromWelcomeScreen = false
         )
     }
 }
@@ -123,7 +122,8 @@ fun SettingsDefaultAndroidBrowser_Preview() {
 fun SettingsDefaultAndroidBrowser_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         SetDefaultAndroidBrowserPane(
-            mockSettingsControllerImpl
+            mockSettingsControllerImpl,
+            fromWelcomeScreen = false
         )
     }
 }

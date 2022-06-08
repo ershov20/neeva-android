@@ -47,7 +47,7 @@ fun SettingRowsView(
             SettingsRow(
                 rowData = rowData,
                 settingsController = settingsController,
-                onClick = settingsController.getOnClickMap()[rowData.primaryLabelId],
+                onClick = settingsController.getOnClickMap(false)[rowData.primaryLabelId],
                 onDoubleClick = settingsController.getOnDoubleClickMap()[rowData.primaryLabelId]
             )
         }

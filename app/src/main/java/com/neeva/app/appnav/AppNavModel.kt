@@ -25,7 +25,7 @@ interface AppNavModel {
     fun showCardGrid()
     fun showClearBrowsingSettings()
     fun showCookieCutterSettings()
-    fun showDefaultBrowserSettings()
+    fun showDefaultBrowserSettings(fromWelcomeScreen: Boolean)
     fun showFeedback()
     fun showHelp()
     fun showHistory()
@@ -36,11 +36,12 @@ interface AppNavModel {
     fun showSpaceDetail(spaceID: String)
     fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?)
 
+    fun showWelcome()
     fun showSignInFlow()
     // endregion
 
     // region External screens
-    fun openAndroidDefaultBrowserSettings()
+    fun openAndroidDefaultBrowserSettings(fromWelcomeScreen: Boolean)
     fun showAdditionalLicenses()
 
     fun openUrlViaIntent(uri: Uri)

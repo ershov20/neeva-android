@@ -13,6 +13,7 @@ import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.CardsPane
 import com.neeva.app.feedback.FeedbackView
+import com.neeva.app.firstrun.WelcomeScreen
 import com.neeva.app.firstrun.signInFlowNavGraph
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.settings.LicensesPane
@@ -48,6 +49,13 @@ fun AppNav(
         popExitTransition = ::popExitTransitionFactory,
         modifier = modifier
     ) {
+        composable(AppNavDestination.WELCOME.route) {
+            WelcomeScreen(
+                settingsController = settingsControllerImpl,
+                navigateToZeroQuery = appNavModel::openLazyTab
+            )
+        }
+
         composable(AppNavDestination.BROWSER.route) {
             BrowserScaffold(toolbarConfiguration, webLayerModel)
         }
@@ -78,7 +86,17 @@ fun AppNav(
         }
 
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {
-            SetDefaultAndroidBrowserPane(settingsController = settingsControllerImpl)
+            SetDefaultAndroidBrowserPane(
+                settingsController = settingsControllerImpl,
+                fromWelcomeScreen = false
+            )
+        }
+
+        composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS_FROM_WELCOME.route) {
+            SetDefaultAndroidBrowserPane(
+                settingsController = settingsControllerImpl,
+                fromWelcomeScreen = true
+            )
         }
 
         composable(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS.route) {

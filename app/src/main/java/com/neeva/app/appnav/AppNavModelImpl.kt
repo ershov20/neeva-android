@@ -146,8 +146,11 @@ class AppNavModelImpl(
         )
     }
 
-    override fun openAndroidDefaultBrowserSettings() {
+    override fun openAndroidDefaultBrowserSettings(fromWelcomeScreen: Boolean) {
         safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+        if (fromWelcomeScreen) {
+            openLazyTab()
+        }
     }
 
     override fun showAdditionalLicenses() {
@@ -171,7 +174,14 @@ class AppNavModelImpl(
     override fun showCardGrid() = show(AppNavDestination.CARD_GRID)
     override fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     override fun showCookieCutterSettings() = show(AppNavDestination.COOKIE_CUTTER_SETTINGS)
-    override fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
+    override fun showDefaultBrowserSettings(fromWelcomeScreen: Boolean) {
+        if (fromWelcomeScreen) {
+            show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS_FROM_WELCOME)
+        } else {
+            show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
+        }
+    }
+
     override fun showLicenses() = show(AppNavDestination.LICENSES)
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
@@ -188,6 +198,10 @@ class AppNavModelImpl(
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {
         val id = space?.id ?: spaceItem?.id ?: return
         show(AppNavDestination.EDIT_SPACE_DIALOG, navArguments = listOf(mode.name, id))
+    }
+
+    override fun showWelcome() {
+        show(AppNavDestination.WELCOME)
     }
 
     override fun showSignInFlow() {
