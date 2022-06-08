@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
@@ -13,18 +14,16 @@ import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.openCardGrid
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNavDestination
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class FeedbackViewOpensAndClosesTest {
-    @get:Rule(order = 0)
+class FeedbackViewOpensAndClosesTest : BaseBrowserTest() {
+    @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()
 
-    @get:Rule(order = 1)
+    @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
 
     @Test

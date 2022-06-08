@@ -160,6 +160,7 @@ class SettingsControllerImpl(
         return mapOf(
             R.string.settings_sign_out to { signOut() },
             R.string.settings_debug_open_50_tabs to { debugOpenManyTabs() },
+            R.string.settings_debug_open_500_tabs to { debugOpenManyTabs(500) },
             R.string.settings_debug_export_database to { debugExportDatabase() },
             R.string.settings_debug_import_database to { debugImportDatabase() }
         )
@@ -217,7 +218,7 @@ class SettingsControllerImpl(
         settingsDataModel.toggleIsAdvancedSettingsAllowed()
     }
 
-    private fun debugOpenManyTabs(numTabs: Int = 50) {
+    private fun debugOpenManyTabs(numTabs: Int = 50, msBetweenOpens: Long = 1000) {
         coroutineScope.launch {
             val possibleUrls = listOf(
                 "https://en.wikipedia.org",
@@ -263,9 +264,11 @@ class SettingsControllerImpl(
             )
             for (i in 0 until numTabs) {
                 openUrl(uri = Uri.parse(possibleUrls[i % possibleUrls.size]), openViaIntent = false)
-                delay(250)
+                delay(msBetweenOpens)
+                if (i % 50 == 49) {
+                    snackbarModel.show("Opened ${i + 1}/$numTabs tabs")
+                }
             }
-            snackbarModel.show("Opened $numTabs tabs")
         }
     }
 

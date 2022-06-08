@@ -36,7 +36,9 @@ commands:
 
       - run:
             name: Creating directory for artifacts
-            command: mkdir -p artifacts
+            command:
+                rm -rf artifacts;
+                mkdir -p artifacts
 
 jobs:
   run-ktlint:
@@ -85,15 +87,15 @@ jobs:
       - android/start-emulator-and-run-tests:
           additional-avd-args: -d "pixel_2"
           additional-emulator-args: -partition-size 2048
-          post-emulator-launch-assemble-command: ''
+          post-emulator-launch-assemble-command: ./gradlew :app:assembleDebugAndroidTest
           system-image: system-images;android-28;default;x86_64
-          test-command: ./gradlew :app:connectedDebugAndroidTest
-          post-run-tests-steps:
-              - run:
-                  name: Saving run info to logcat to artifacts
-                  command:
-                      adb logcat -dv threadtime | gzip --best > artifacts/logcat.gz;
-                      cp -R app/build/reports artifacts/
+          test-command: ./gradlew :app:connectedDebugAndroidTest -i
+
+      - run:
+          name: Saving run info to artifacts
+          when: on_fail
+          command:
+              tar -cvzpf artifacts/test_logs.tgz app/build/outputs/androidTest-results/ app/build/reports/
 
       - store_artifacts:
           path: artifacts

@@ -112,7 +112,7 @@ fun ZeroQuery(
                         index = 0,
                         element = SuggestedSite(
                             site = Site(
-                                siteURL = neevaConstants.appURL,
+                                siteURL = neevaConstants.homepageURL,
                                 title = homeLabel,
                                 largestFavicon = null
                             ),

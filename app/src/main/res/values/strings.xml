@@ -239,6 +239,7 @@
     <string name="settings_debug_enable_incognito_screenshots" translatable="false">Enable screenshots while in Incognito</string>
     <string name="settings_debug_enable_show_desktop_site" translatable="false">Enable Show Desktop Site in Overflow Menu</string>
     <string name="settings_debug_open_50_tabs" translatable="false">Open 50 tabs</string>
+    <string name="settings_debug_open_500_tabs" translatable="false">Open 500 tabs</string>
     <string name="settings_debug_export_database" translatable="false">Export history database</string>
     <string name="settings_debug_import_database" translatable="false">Import history database</string>
     <string name="settings_debug_import_database_description" translatable="false">Destroys your existing database</string>

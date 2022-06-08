@@ -141,6 +141,11 @@ abstract class ApolloWrapper(
         query: Query<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
+        if (NeevaBrowser.isBeingInstrumented()) {
+            Log.w(TAG, "Skipping query because app is being instrumented")
+            return null
+        }
+
         return try {
             val response = apolloClient.query(query).execute()
             if (response.hasErrors()) {
@@ -172,6 +177,11 @@ abstract class ApolloWrapper(
         mutation: Mutation<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
+        if (NeevaBrowser.isBeingInstrumented()) {
+            Log.w(TAG, "Skipping mutation because app is being instrumented")
+            return null
+        }
+
         return try {
             val response = apolloClient.mutation(mutation).execute()
             if (response.hasErrors()) {

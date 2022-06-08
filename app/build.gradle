@@ -231,6 +231,9 @@ tasks.withType(Test) {
         exceptionFormat "full"
         events "started", "skipped", "passed", "failed"
         showStandardStreams true
+        showCauses true
+        showExceptions true
+        showStackTraces true
     }
 }
 

@@ -5,8 +5,10 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.neeva.app.BaseBrowserTest
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
+import com.neeva.app.WebpageServingRule
 import com.neeva.app.createMainIntent
 import com.neeva.app.createNeevaActivityAndroidComposeTestRule
 import com.neeva.app.openCardGrid
@@ -18,11 +20,11 @@ import org.junit.runner.RunWith
 
 @SuppressWarnings("deprecation")
 @RunWith(AndroidJUnit4::class)
-class IncognitoTabSwitcherTest {
-    @get:Rule(order = 0)
+class IncognitoTabSwitcherTest : BaseBrowserTest() {
+    @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()
 
-    @get:Rule(order = 1)
+    @get:Rule(order = 10000)
     val androidComposeRule = createNeevaActivityAndroidComposeTestRule(createMainIntent())
 
     @Test
@@ -35,7 +37,7 @@ class IncognitoTabSwitcherTest {
 
         // Create a new tab to nowhere in particular.
         androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.openLazyTab("http://127.0.0.1?regular")
+        androidComposeRule.openLazyTab(WebpageServingRule.urlFor("?regular"))
 
         // Confirm that we see two regular tabs.
         androidComposeRule.openCardGrid(incognito = false)
@@ -48,7 +50,7 @@ class IncognitoTabSwitcherTest {
             .assertExists()
 
         // Open a lazy new tab to nowhere in particular.
-        androidComposeRule.openLazyTab("http://127.0.0.1?incognito")
+        androidComposeRule.openLazyTab(WebpageServingRule.urlFor("?incognito"))
 
         // Confirm that we have one incognito tab and two regular tabs.
         androidComposeRule.openCardGrid(incognito = true)

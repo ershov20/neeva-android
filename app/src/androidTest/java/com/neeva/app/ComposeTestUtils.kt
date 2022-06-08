@@ -11,6 +11,7 @@ import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.test.performTextInput
@@ -165,9 +166,23 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.sendAppToBackground(
 }
 
 /**
+ * Navigates the user to a new website on the current tab.
+ *
+ * Assumes that the user is in [AppNavDestination.BROWSER].
+ */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.loadUrlInCurrentTab(url: String) {
+    expectThat(activity.appNavModel!!.currentDestination.value!!.route)
+        .isEqualTo(AppNavDestination.BROWSER.route)
+
+    // Click on the URL bar and then type in the provided URL.
+    onNodeWithTag("LocationLabel").performClick()
+    typeIntoUrlBar(url)
+}
+
+/**
  * Opens a lazy tab from the current screen of the Card Grid.
  *
- * Assumes that the user is in viewing the regular or incognito TabGrid.
+ * Assumes that the user is viewing the regular or incognito TabGrid.
  */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: String) {
     expectThat(activity.appNavModel!!.currentDestination.value!!.route)
@@ -181,7 +196,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: Str
 
 /** Enters a URL into the URL bar, assuming it is already visible. */
 fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(url: String) {
-    onNodeWithContentDescription(getString(com.neeva.app.R.string.url_bar_placeholder)).apply {
+    onNodeWithContentDescription(getString(R.string.url_bar_placeholder)).apply {
         performTextInput(url)
         performKeyPress(
             androidx.compose.ui.input.key.KeyEvent(
@@ -309,4 +324,17 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
             else -> true
         }
     }
+}
+
+/** Waits until the provided [condition] becomes true. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(condition: () -> Boolean) {
+    waitUntil(WAIT_TIMEOUT) {
+        condition()
+    }
+}
+
+/** Hits the system's back button on the UI thread. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.onBackPressed() {
+    runOnUiThread { activity.onBackPressed() }
+    waitForIdle()
 }

@@ -61,8 +61,6 @@ abstract class TabScreenshotManager(
             return
         }
 
-        // Save the Tab's GUID in case the tab is in the process of being destroyed.
-        val tabGuid = tab.guid
         val captureStack = Throwable()
 
         // Kick off taking a screenshot and asynchronously wait for WebLayer to finish.  While it
@@ -84,7 +82,10 @@ abstract class TabScreenshotManager(
         coroutineScope.launch(dispatchers.main) {
             val thumbnail = withTimeoutOrNull(SCREENSHOT_TIMEOUT_MS) { deferredThumbnail.await() }
 
-            if (thumbnail != null) {
+            // Save the GUID in case the tab gets destroyed while we're on the IO dispatcher.
+            val tabGuid = tab.takeUnless { it.isDestroyed }?.guid
+
+            if (tabGuid != null && thumbnail != null) {
                 val file = getTabScreenshotFile(tabGuid)
 
                 withContext(dispatchers.io) {

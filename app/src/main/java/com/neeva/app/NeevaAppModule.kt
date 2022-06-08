@@ -27,11 +27,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 
-@Module(
-    includes = [
-        CoroutineModule::class
-    ]
-)
+@Module
 @InstallIn(SingletonComponent::class)
 object NeevaAppModule {
     @Provides

@@ -14,12 +14,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.R
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
@@ -65,8 +68,14 @@ fun BrowserScaffold(
 private fun WebLayerContainer(browserWrapper: BrowserWrapper) {
     val currentEvent by browserWrapper.fragmentViewLifecycleEventFlow.collectAsState()
     AndroidView(
-        factory = { FrameLayout(it) },
-        modifier = Modifier.fillMaxSize(),
+        factory = {
+            FrameLayout(it).apply {
+                id = R.id.weblayer_fragment_view_container
+            }
+        },
+        modifier = Modifier
+            .fillMaxSize()
+            .semantics { testTag = "WebLayerContainer" },
         update = { composeContainer ->
             // Force Compose to update this Composable whenever the state of the Fragment's View
             // says that it _should_ be visible.

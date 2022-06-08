@@ -11,15 +11,13 @@ import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.SignInFlowNavDestination
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUserToken
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Test
 import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-class FirstRunModelTest {
+class FirstRunModelTest : BaseBrowserTest() {
     @Test
     fun skipFirstRunIfSharedPrefSet() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext

@@ -68,7 +68,7 @@ class ActiveTabModelImpl(
 
     /** Tracks which tab is currently active. */
     private val activeTabFlow = MutableStateFlow<Tab?>(null)
-    internal val activeTab: Tab? get() = activeTabFlow.value
+    internal val activeTab: Tab? get() = activeTabFlow.value.takeUnless { it?.isDestroyed == true }
 
     /** Emits the number of cookie trackers from the active tab's webpage. */
     private val _trackersFlow = MutableStateFlow(0)
