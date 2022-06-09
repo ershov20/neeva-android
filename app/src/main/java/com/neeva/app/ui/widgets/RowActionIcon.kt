@@ -32,8 +32,18 @@ data class RowActionIconParams(
     val enabled: Boolean = true
 ) {
     enum class ActionType {
-        REFINE, DELETE, OPEN_URL, NAVIGATE_TO_SCREEN, BACK, FORWARD, REFRESH, SHOW_PAGE_INFO,
-        SHARE, EDIT, ADD
+        ADD,
+        BACK,
+        COPY,
+        DELETE,
+        EDIT,
+        FORWARD,
+        NAVIGATE_TO_SCREEN,
+        OPEN_URL,
+        REFINE,
+        REFRESH,
+        SHARE,
+        SHOW_PAGE_INFO
     }
 }
 
@@ -155,6 +165,14 @@ fun RowActionIcon(
         RowActionIconParams.ActionType.ADD -> {
             Icon(
                 Icons.Default.Add,
+                contentDescription = contentDescription,
+                modifier = modifier
+            )
+        }
+
+        RowActionIconParams.ActionType.COPY -> {
+            Icon(
+                painterResource(id = R.drawable.ic_content_copy_24),
                 contentDescription = contentDescription,
                 modifier = modifier
             )

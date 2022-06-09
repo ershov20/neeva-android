@@ -1,22 +1,30 @@
 package com.neeva.app.suggestions
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.ui.LightDarkPreviewContainer
+import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
 
 @Composable
 fun CurrentPageRow(browserWrapper: BrowserWrapper) {
+    val snackbarModel: SnackbarModel = LocalEnvironment.current.snackbarModel
+
     val activeTabModel = browserWrapper.activeTabModel
     val faviconCache = browserWrapper.faviconCache
     val urlBarModel = browserWrapper.urlBarModel
@@ -31,6 +39,9 @@ fun CurrentPageRow(browserWrapper: BrowserWrapper) {
 
     val faviconBitmap by faviconCache.getFaviconAsync(currentURL)
 
+    val context = LocalContext.current
+    val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+
     if (!isLazyTab && !isShowingPlaceholder && currentURL.toString().isNotBlank()) {
         val label = if (isShowingQuery) {
             displayedText
@@ -42,12 +53,22 @@ fun CurrentPageRow(browserWrapper: BrowserWrapper) {
             CurrentPageRow(
                 faviconBitmap = faviconBitmap,
                 label = label,
-                isShowingQuery = isShowingQuery
-            ) {
-                urlBarModel.replaceLocationBarText(
-                    if (isShowingQuery) displayedText else currentURL.toString()
-                )
-            }
+                isShowingQuery = isShowingQuery,
+                onEditPressed = {
+                    urlBarModel.replaceLocationBarText(
+                        if (isShowingQuery) displayedText else currentURL.toString()
+                    )
+                },
+                onCopyPressed = clipboardManager?.let {
+                    {
+                        it.apply {
+                            setPrimaryClip(ClipData.newPlainText("address", currentURL.toString()))
+                        }
+                        snackbarModel.show(message = context.getString(R.string.link_copied))
+                        urlBarModel.clearFocus()
+                    }
+                }
+            )
 
             SuggestionDivider()
         }
@@ -59,7 +80,8 @@ fun CurrentPageRow(
     faviconBitmap: Bitmap?,
     label: String,
     isShowingQuery: Boolean,
-    onEditPressed: () -> Unit
+    onEditPressed: () -> Unit,
+    onCopyPressed: (() -> Unit)?
 ) {
     NavSuggestionRow(
         iconParams = RowActionStartIconParams(
@@ -72,12 +94,15 @@ fun CurrentPageRow(
                 R.string.edit_current_url
             }
         ),
-        onTapRow = { onEditPressed.invoke() },
+        onTapRow = onEditPressed,
         secondaryLabel = label,
-        actionIconParams = RowActionIconParams(
-            onTapAction = onEditPressed,
-            actionType = RowActionIconParams.ActionType.REFINE
-        ),
+        actionIconParams = onCopyPressed?.let {
+            RowActionIconParams(
+                onTapAction = it,
+                actionType = RowActionIconParams.ActionType.COPY,
+                contentDescription = stringResource(R.string.menu_copy_link_address)
+            )
+        },
         showActualUrlInSecondaryLabel = true
     )
 }
@@ -91,7 +116,9 @@ fun CurrentPageRowPreview() {
         CurrentPageRow(
             faviconBitmap = null,
             label = "https://www.example.com",
-            isShowingQuery = false
-        ) {}
+            isShowingQuery = false,
+            onEditPressed = {},
+            onCopyPressed = {}
+        )
     }
 }
