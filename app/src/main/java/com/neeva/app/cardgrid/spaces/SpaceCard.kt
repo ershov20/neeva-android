@@ -2,6 +2,7 @@ package com.neeva.app.cardgrid.spaces
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +46,7 @@ import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.createSingleColorBitmap
+import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 import java.io.FileInputStream
 import kotlinx.coroutines.withContext
@@ -269,7 +271,9 @@ fun SpaceSubItem(
             shouldShowAdditionalItemCount(index, numItems) -> {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.background)
                 ) {
                     Text(
                         stringResource(
@@ -283,12 +287,13 @@ fun SpaceSubItem(
             index < numItems -> {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().background(ColorPalette.Brand.PolarVariant)
                 ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_baseline_bookmark_border_24),
+                        painter = painterResource(id = R.drawable.ic_bookmarks_black_24),
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        modifier = Modifier.padding(Dimensions.PADDING_SMALL),
+                        tint = Color.White
                     )
                 }
             }

@@ -92,6 +92,7 @@ class SpaceStoreTest : BaseTest() {
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
             snackbarModel = snackbarModel,
+            overlaySheetModel = mock(),
             dispatchers = testDispatcher
         )
         file = context.cacheDir.resolve("space_store_test")

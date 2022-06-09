@@ -168,3 +168,11 @@ mutation AddSpacePublicACL($input: AddSpacePublicACLInput!) {
 mutation DeleteSpacePublicACL($input: DeleteSpacePublicACLInput!) {
   deleteSpacePublicACL(input: $input)
 }
+
+mutation LeaveSpace($input: LeaveSpaceInput!) {
+  leaveSpace(input: $input)
+}
+
+mutation DeleteSpace($input: DeleteSpaceInput!) {
+  deleteSpace(input: $input)
+}

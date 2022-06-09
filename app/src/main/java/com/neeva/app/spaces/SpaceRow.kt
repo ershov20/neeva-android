@@ -20,6 +20,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -40,6 +41,7 @@ import com.neeva.app.storage.entities.Space
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.Dimensions.PADDING_SMALL
 import java.io.FileInputStream
@@ -123,6 +125,7 @@ fun SpaceRow(
 ) {
     val startComposable = @Composable {
         Surface(
+            color = ColorPalette.Brand.PolarVariant,
             tonalElevation = 1.dp,
             shape = RoundedCornerShape(Dimensions.RADIUS_SMALL)
         ) {
@@ -131,7 +134,7 @@ fun SpaceRow(
                     painter = painterResource(id = R.drawable.ic_bookmarks_black_24),
                     contentDescription = null,
                     modifier = Modifier.padding(PADDING_SMALL),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = Color.White
                 )
             } else {
                 Image(

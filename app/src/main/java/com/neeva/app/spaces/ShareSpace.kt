@@ -151,60 +151,69 @@ fun ShareSpaceUI(
                 }
             }
 
-            Row(
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier
-                    .padding(Dimensions.PADDING_LARGE)
-                    .fillMaxWidth()
-            ) {
-                val appNavModel = LocalAppNavModel.current
-                SocialShareButton(
-                    name = stringResource(id = R.string.twitter_social_title),
-                    iconResourceID = R.drawable.twitter_logo_blue
-                ) {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("http://twitter.com/share?url=$spaceURL")
-                    )
-                    appNavModel.safeStartActivityForIntent(intent)
-                }
-
-                SocialShareButton(
-                    name = stringResource(id = R.string.linkedin_social_title),
-                    iconResourceID = R.drawable.linkedin_logo
-                ) {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://linkedin.com/shareArticle?mini=true&url=$spaceURL")
-                    )
-                    appNavModel.safeStartActivityForIntent(intent)
-                }
-
-                SocialShareButton(
-                    name = stringResource(id = R.string.facebook_social_title),
-                    iconResourceID = R.drawable.facebook_logo
-                ) {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://www.facebook.com/sharer/sharer.php?u=$spaceURL")
-                    )
-                    appNavModel.safeStartActivityForIntent(intent)
-                }
-
-                SocialShareButton(
-                    name = stringResource(id = R.string.copy_link_social_title),
-                    iconResourceID = R.drawable.ic_link,
-                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
-                    onClick = onCopyLink
-                )
-
-                SocialShareButton(
-                    name = stringResource(id = R.string.more),
-                    icon = Icons.Default.Share,
-                    onClick = onMore
-                )
-            }
+            SocialShareRow(spaceURL = spaceURL, onCopyLink = onCopyLink, onMore = onMore)
         }
+    }
+}
+
+@Composable
+fun SocialShareRow(
+    spaceURL: Uri,
+    onCopyLink: () -> Unit,
+    onMore: () -> Unit
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier
+            .padding(Dimensions.PADDING_LARGE)
+            .fillMaxWidth()
+    ) {
+        val appNavModel = LocalAppNavModel.current
+        SocialShareButton(
+            name = stringResource(id = R.string.twitter_social_title),
+            iconResourceID = R.drawable.twitter_logo_blue
+        ) {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("http://twitter.com/share?url=$spaceURL")
+            )
+            appNavModel.safeStartActivityForIntent(intent)
+        }
+
+        SocialShareButton(
+            name = stringResource(id = R.string.linkedin_social_title),
+            iconResourceID = R.drawable.linkedin_logo
+        ) {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://linkedin.com/shareArticle?mini=true&url=$spaceURL")
+            )
+            appNavModel.safeStartActivityForIntent(intent)
+        }
+
+        SocialShareButton(
+            name = stringResource(id = R.string.facebook_social_title),
+            iconResourceID = R.drawable.facebook_logo
+        ) {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.facebook.com/sharer/sharer.php?u=$spaceURL")
+            )
+            appNavModel.safeStartActivityForIntent(intent)
+        }
+
+        SocialShareButton(
+            name = stringResource(id = R.string.copy_link_social_title),
+            iconResourceID = R.drawable.ic_link,
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
+            onClick = onCopyLink
+        )
+
+        SocialShareButton(
+            name = stringResource(id = R.string.more),
+            icon = Icons.Default.Share,
+            onClick = onMore
+        )
     }
 }
 

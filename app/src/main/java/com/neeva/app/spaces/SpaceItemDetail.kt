@@ -191,7 +191,7 @@ fun SpaceItemDetailMainContent(
                         modifier = Modifier
                             .size(72.dp)
                             .background(
-                                color = ColorPalette.Brand.Maya,
+                                color = ColorPalette.Brand.PolarVariant,
                                 shape = RoundedCornerShape(Dimensions.RADIUS_MEDIUM)
                             )
                             .padding(Dimensions.PADDING_LARGE),

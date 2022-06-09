@@ -39,6 +39,8 @@
     <string name="tabs">Tabs</string>
     <string name="page_info">Page Info</string>string>
     <string name="save">Save</string>
+    <string name="delete">Delete</string>
+    <string name="unfollow">Unfollow</string>
 
     <string name="spaces_edit">Edit spaces</string>
 
@@ -187,6 +189,7 @@
     <string name="space_edit_dialog_update_action">Update</string>
     <string name="space_detail_views">%1d Views</string>
     <string name="space_detail_followers">%1d Followers</string>
+    <string name="space_stats_private">Only visible to you and people you shared with</string>
     <string name="space_detail_show_descriptions">Show descriptions</string>
     <string name="space_intro_title">Kill the clutter</string>
     <string name="space_intro_body">
@@ -198,6 +201,9 @@
     <string name="enable_link">Enable sharable link</string>
     <string name="enable_link_subtitle">Anyone with the link can view</string>
     <string name="shown_as_owner">You will be shown as the owner of the Space</string>
+    <string name="space_delete_confirmation">Are you sure you want to delete this Space?</string>
+    <string name="space_unfollow_confirmation">Are you sure you want to unfollow this Space?</string>
+    <string name="create_space">Create a new Space</string>
 
     <string name="twitter_social_title">Twitter</string>
     <string name="linkedin_social_title">Linkedin</string>

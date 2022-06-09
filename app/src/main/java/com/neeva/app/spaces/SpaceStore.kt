@@ -7,6 +7,17 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.AddSpacePublicACLMutation
@@ -14,11 +25,14 @@ import com.neeva.app.AddToSpaceMutation
 import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.BatchDeleteSpaceResultMutation
 import com.neeva.app.CreateSpaceMutation
+import com.neeva.app.DeleteSpaceMutation
 import com.neeva.app.DeleteSpacePublicACLMutation
 import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
+import com.neeva.app.LeaveSpaceMutation
 import com.neeva.app.ListSpacesQuery
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.UnauthenticatedApolloWrapper
@@ -35,12 +49,17 @@ import com.neeva.app.storage.toByteArray
 import com.neeva.app.type.AddSpacePublicACLInput
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.BatchDeleteSpaceResultInput
+import com.neeva.app.type.DeleteSpaceInput
 import com.neeva.app.type.DeleteSpacePublicACLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
+import com.neeva.app.type.LeaveSpaceInput
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.type.UpdateSpaceEntityDisplayDataInput
 import com.neeva.app.type.UpdateSpaceInput
+import com.neeva.app.ui.NeevaTextField
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
 import java.io.FileOutputStream
@@ -65,6 +84,7 @@ class SpaceStore(
     private val neevaUser: NeevaUser,
     private val neevaConstants: NeevaConstants,
     private val snackbarModel: SnackbarModel,
+    private val overlaySheetModel: OverlaySheetModel,
     private val dispatchers: Dispatchers
 ) {
     companion object {
@@ -523,6 +543,40 @@ class SpaceStore(
         }
     }
 
+    fun deleteOrUnfollowSpace(spaceId: String) {
+        coroutineScope.launch(dispatchers.io) {
+            val space = dao.getSpaceById(spaceId) ?: return@launch
+
+            stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
+
+            val mutation = when (space.userACL == SpaceACLLevel.Owner) {
+                true -> DeleteSpaceMutation(
+                    input = DeleteSpaceInput(
+                        id = space.id
+                    )
+                )
+
+                false -> LeaveSpaceMutation(
+                    input = LeaveSpaceInput(
+                        id = space.id
+                    )
+                )
+            }
+            val response = authenticatedApolloWrapper.performMutation(
+                mutation,
+                userMustBeLoggedIn = true
+            )
+
+            response?.data?.let {
+                dao.deleteSpace(space)
+            } ?: run {
+                val errorString = appContext.getString(R.string.error_generic)
+                snackbarModel.show(errorString)
+            }
+            stateFlow.value = State.READY
+        }
+    }
+
     fun createSpace(spaceName: String) {
         coroutineScope.launch(dispatchers.io) {
             val response = authenticatedApolloWrapper.performMutation(
@@ -574,6 +628,36 @@ class SpaceStore(
                 snackbarModel.show(errorString)
             }
             stateFlow.value = State.READY
+        }
+    }
+
+    fun createSpace() {
+        overlaySheetModel.showOverlaySheet(titleResId = R.string.space_create) {
+            val spaceName = remember { mutableStateOf("") }
+            val spaceStore = LocalEnvironment.current.spaceStore
+
+            Column(modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)) {
+                NeevaTextField(
+                    text = spaceName.value,
+                    onTextChanged = { spaceName.value = it },
+                    placeholderText = stringResource(R.string.space_create_placeholder)
+                )
+
+                Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
+
+                Button(
+                    enabled = spaceName.value.isNotEmpty(),
+                    onClick = {
+                        spaceStore.createSpace(spaceName.value)
+                        overlaySheetModel.hideOverlaySheet()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(R.string.save))
+                }
+
+                Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
+            }
         }
     }
 

@@ -1,28 +1,14 @@
 package com.neeva.app.cardgrid
 
 import android.net.Uri
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import com.neeva.app.LocalEnvironment
-import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
-import com.neeva.app.ui.NeevaTextField
-import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -41,7 +27,6 @@ interface CardsPaneModel {
     fun closeAllTabs(browserWrapper: BrowserWrapper)
 
     fun selectSpace(browserWrapper: BrowserWrapper, spaceUrl: Uri)
-    fun createSpace()
 }
 
 class CardsPaneModelImpl(
@@ -143,36 +128,6 @@ class CardsPaneModelImpl(
         } else {
             browserWrapper.loadUrl(spaceUrl, inNewTab = true)
             showBrowser()
-        }
-    }
-
-    override fun createSpace() {
-        overlaySheetModel.showOverlaySheet(titleResId = R.string.space_create) {
-            val spaceName = remember { mutableStateOf("") }
-            val spaceStore = LocalEnvironment.current.spaceStore
-
-            Column(modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)) {
-                NeevaTextField(
-                    text = spaceName.value,
-                    onTextChanged = { spaceName.value = it },
-                    placeholderText = stringResource(R.string.space_create_placeholder)
-                )
-
-                Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
-
-                Button(
-                    enabled = spaceName.value.isNotEmpty(),
-                    onClick = {
-                        spaceStore.createSpace(spaceName.value)
-                        overlaySheetModel.hideOverlaySheet()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.save))
-                }
-
-                Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
-            }
         }
     }
 }

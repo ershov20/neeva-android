@@ -36,6 +36,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
@@ -59,6 +60,7 @@ import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.type.SpaceACLLevel
+import com.neeva.app.ui.ConfirmationAlertDialog
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
@@ -93,6 +95,10 @@ fun SpaceDetail(spaceID: String?) {
         )
     }
 
+    val showRemoveSpaceConfirmationDialog = remember {
+        mutableStateOf(false)
+    }
+
     val state = rememberLazyListState()
 
     LazyColumn(
@@ -104,6 +110,7 @@ fun SpaceDetail(spaceID: String?) {
             SpaceDetailToolbar(
                 lazyListState = state,
                 space = space.value,
+                showRemoveSpaceConfirmationDialog = showRemoveSpaceConfirmationDialog,
                 showDescriptions = showDescriptions.value
             ) {
                 sharedPrefs.setValue(
@@ -198,6 +205,38 @@ fun SpaceDetail(spaceID: String?) {
             }
         }
     }
+    if (showRemoveSpaceConfirmationDialog.value) {
+        val isOwner = space.value?.userACL == SpaceACLLevel.Owner
+        val actionLabel = stringResource(
+            if (isOwner) {
+                R.string.delete
+            } else {
+                R.string.unfollow
+            }
+        )
+
+        val message = stringResource(
+            if (isOwner) {
+                R.string.space_delete_confirmation
+            } else {
+                R.string.space_unfollow_confirmation
+            }
+        )
+
+        val spaceStore = LocalEnvironment.current.spaceStore
+        val appNavModel = LocalAppNavModel.current
+
+        ConfirmationAlertDialog(
+            title = actionLabel,
+            message = message,
+            onDismiss = { showRemoveSpaceConfirmationDialog.value = false },
+            onConfirm = {
+                showRemoveSpaceConfirmationDialog.value = false
+                space.value?.id?.let { spaceStore.deleteOrUnfollowSpace(it) }
+                appNavModel.popBackStack()
+            }
+        )
+    }
 }
 
 @Composable
@@ -205,6 +244,7 @@ fun SpaceDetailToolbar(
     lazyListState: LazyListState,
     space: Space?,
     showDescriptions: Boolean,
+    showRemoveSpaceConfirmationDialog: MutableState<Boolean>,
     toggleShowDescriptions: () -> Unit
 ) {
     val neevaConstants = LocalEnvironment.current.neevaConstants
@@ -215,6 +255,7 @@ fun SpaceDetailToolbar(
             lazyListState.firstVisibleItemIndex > 0
         }
     }
+    val appNavModel = LocalAppNavModel.current
     val showDescriptionsIcon = @Composable {
         Icon(
             painter = painterResource(
@@ -233,7 +274,6 @@ fun SpaceDetailToolbar(
 
     SmallTopAppBar(
         navigationIcon = {
-            val appNavModel = LocalAppNavModel.current
             RowActionIconButton(
                 iconParams = RowActionIconParams(
                     onTapAction = { appNavModel.popBackStack() },
@@ -335,6 +375,35 @@ fun SpaceDetailToolbar(
                     onDismissRequest = { expanded = false },
                     modifier = Modifier.defaultMinSize(minWidth = 250.dp)
                 ) {
+                    val isOwner = space.userACL == SpaceACLLevel.Owner
+                    val label = stringResource(
+                        id = if (isOwner) {
+                            R.string.delete
+                        } else {
+                            R.string.unfollow
+                        }
+                    )
+
+                    DropdownMenuItem(
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = label,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        },
+                        text = {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        },
+                        onClick = {
+                            showRemoveSpaceConfirmationDialog.value = true
+                        }
+                    )
+
                     DropdownMenuItem(
                         leadingIcon = {
                             Icon(
@@ -354,6 +423,7 @@ fun SpaceDetailToolbar(
                         },
                         onClick = { appNavModel.openUrl(spaceUrl) }
                     )
+
                     if (canEdit && isTitleVisible) {
                         DropdownMenuItem(
                             leadingIcon = {
@@ -439,10 +509,12 @@ fun getSpaceContentsAsync(
 @Composable
 fun SpaceDetailToolbarPreview() {
     OneBooleanPreviewContainer { showDescriptions ->
+        val dialogState = remember { mutableStateOf(false) }
         SpaceDetailToolbar(
             rememberLazyListState(),
             space = null,
             showDescriptions = showDescriptions,
+            showRemoveSpaceConfirmationDialog = dialogState,
             toggleShowDescriptions = {}
         )
     }

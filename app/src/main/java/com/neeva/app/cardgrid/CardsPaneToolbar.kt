@@ -109,10 +109,11 @@ private fun CardsPaneToolbarAddButton(
     cardsPaneModel: CardsPaneModel,
     browserWrapper: BrowserWrapper
 ) {
+    val spaceStore = LocalEnvironment.current.spaceStore
     IconButton(
         onClick = {
             when (cardsPaneModel.selectedScreen.value) {
-                SelectedScreen.SPACES -> cardsPaneModel.createSpace()
+                SelectedScreen.SPACES -> spaceStore.createSpace()
                 else -> cardsPaneModel.openLazyTab(browserWrapper)
             }
         }

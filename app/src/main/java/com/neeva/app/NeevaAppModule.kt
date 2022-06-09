@@ -143,6 +143,7 @@ object NeevaAppModule {
         neevaUser: NeevaUser,
         neevaConstants: NeevaConstants,
         snackbarModel: SnackbarModel,
+        overlaySheetModel: OverlaySheetModel,
         dispatchers: Dispatchers
     ): SpaceStore {
         return SpaceStore(
@@ -154,6 +155,7 @@ object NeevaAppModule {
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
             snackbarModel = snackbarModel,
+            overlaySheetModel = overlaySheetModel,
             dispatchers = dispatchers
         )
     }
