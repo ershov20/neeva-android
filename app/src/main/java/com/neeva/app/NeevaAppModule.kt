@@ -15,6 +15,7 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
+import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
@@ -211,11 +212,12 @@ object NeevaAppModule {
         apolloWrapper: AuthenticatedApolloWrapper,
         clientLogger: ClientLogger,
         dispatchers: Dispatchers,
-        domainProviderImpl: DomainProviderImpl,
+        domainProvider: DomainProvider,
         historyDatabase: HistoryDatabase,
         historyManager: HistoryManager,
         neevaConstants: NeevaConstants,
         neevaUser: NeevaUser,
+        regularFaviconCache: RegularFaviconCache,
         settingsDataModel: SettingsDataModel,
         spaceStore: SpaceStore,
     ): BrowserWrapperFactory {
@@ -225,11 +227,12 @@ object NeevaAppModule {
             apolloWrapper = apolloWrapper,
             clientLogger = clientLogger,
             dispatchers = dispatchers,
-            domainProviderImpl = domainProviderImpl,
+            domainProvider = domainProvider,
             historyManager = historyManager,
             hostInfoDao = historyDatabase.hostInfoDao(),
             neevaConstants = neevaConstants,
             neevaUser = neevaUser,
+            regularFaviconCache = regularFaviconCache,
             settingsDataModel = settingsDataModel,
             spaceStore = spaceStore
         )

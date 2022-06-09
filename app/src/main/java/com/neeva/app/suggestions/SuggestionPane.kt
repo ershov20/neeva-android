@@ -7,8 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
-import com.neeva.app.zeroQuery.IncognitoZeroQuery
-import com.neeva.app.zeroQuery.ZeroQuery
+import com.neeva.app.zeroquery.IncognitoZeroQuery
+import com.neeva.app.zeroquery.RegularProfileZeroQuery
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -69,9 +69,8 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
             }
 
             else -> {
-                ZeroQuery(
+                RegularProfileZeroQuery(
                     urlBarModel = urlBarModel,
-                    faviconCache = faviconCache,
                     neevaConstants = neevaConstants
                 ) {
                     CurrentPageRow(browserWrapper)

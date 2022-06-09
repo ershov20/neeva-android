@@ -1,4 +1,4 @@
-package com.neeva.app.zeroQuery
+package com.neeva.app.zeroquery
 
 import android.graphics.Bitmap
 import android.net.Uri
@@ -14,10 +14,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,7 +24,6 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
-import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.toUserVisibleString
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
@@ -35,16 +32,14 @@ import com.neeva.app.ui.widgets.FaviconView
 @Composable
 fun ZeroQuerySuggestedSite(
     suggestedSite: SuggestedSite,
-    faviconCache: FaviconCache,
     domainProvider: DomainProvider,
     onClick: (Uri) -> Unit
 ) {
     val siteUri = Uri.parse(suggestedSite.site.siteURL)
-    val faviconBitmap by faviconCache.getFaviconAsync(LocalContext.current, suggestedSite.site)
     val label = suggestedSite.site.toUserVisibleString(domainProvider)
 
     ZeroQuerySuggestedSite(
-        faviconBitmap = faviconBitmap,
+        faviconBitmap = suggestedSite.bitmap,
         overrideDrawableId = suggestedSite.overrideDrawableId,
         label = label,
         onClick = { onClick(siteUri) }

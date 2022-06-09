@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.daos.SitePlusVisit
@@ -16,7 +17,6 @@ import com.neeva.app.storage.entities.Visit
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.toNavSuggestion
-import com.neeva.app.zeroQuery.toSearchSuggest
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
@@ -133,4 +133,15 @@ class HistoryManager(
     }
 
     suspend fun getAllFaviconUris(): List<String> = dao.getAllFavicons()
+}
+
+fun Site.toSearchSuggest(neevaConstants: NeevaConstants): QueryRowSuggestion? {
+    if (!siteURL.startsWith(neevaConstants.appSearchURL)) return null
+    val query = Uri.parse(this.siteURL).getQueryParameter("q") ?: return null
+
+    return QueryRowSuggestion(
+        url = Uri.parse(this.siteURL),
+        query = query,
+        drawableID = R.drawable.ic_baseline_history_24
+    )
 }

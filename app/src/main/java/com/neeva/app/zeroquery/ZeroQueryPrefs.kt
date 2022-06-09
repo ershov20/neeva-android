@@ -1,10 +1,8 @@
-package com.neeva.app.zeroQuery
+package com.neeva.app.zeroquery
 
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPrefKey
-import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionState
-import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionStateModel
 import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionStateSharedPref
 
 enum class ZeroQueryPrefs(
@@ -33,7 +31,3 @@ enum class ZeroQueryPrefs(
         SharedPrefFolder.App.ZeroQuerySpacesState
     );
 }
-
-internal class ZeroQueryModel(
-    sharedPreferencesModel: SharedPreferencesModel
-) : CollapsingSectionStateModel(sharedPreferencesModel, SharedPrefFolder.App)

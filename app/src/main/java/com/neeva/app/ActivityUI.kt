@@ -26,6 +26,7 @@ import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetHost
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import kotlinx.coroutines.flow.StateFlow
 
 /** Classes that should be passed around the entire Composable hierarchy. */
@@ -49,10 +50,13 @@ val LocalBrowserToolbarModel = compositionLocalOf<BrowserToolbarModel> { error("
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value set") }
 val LocalCardsPaneModel = compositionLocalOf<CardsPaneModel> { error("No value set") }
 val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
-val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("No value set") }
 val LocalIsDarkTheme = compositionLocalOf { false }
 val LocalNavHostController = compositionLocalOf<NavHostController> { error("No value set") }
 val LocalSettingsController = compositionLocalOf<SettingsController> { error("No value set") }
+
+val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("No value set") }
+val LocalRegularProfileZeroQueryViewModel =
+    compositionLocalOf<RegularProfileZeroQueryViewModel> { error("No value set") }
 
 @Composable
 fun ActivityUI(

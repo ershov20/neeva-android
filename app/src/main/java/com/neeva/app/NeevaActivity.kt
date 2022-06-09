@@ -62,11 +62,11 @@ import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.widget.NeevaWidgetProvider
+import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -86,9 +86,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
+    @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
-    @Inject lateinit var coroutineScope: CoroutineScope
+    @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var historyDatabase: HistoryDatabase
+    @Inject lateinit var localEnvironmentState: LocalEnvironmentState
     @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var overlaySheetModel: OverlaySheetModel
@@ -97,13 +99,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var snackbarModel: SnackbarModel
     @Inject lateinit var spaceStore: SpaceStore
 
-    @Inject lateinit var firstRunModel: FirstRunModel
-    @Inject lateinit var localEnvironmentState: LocalEnvironmentState
-
-    @Inject lateinit var clientLogger: ClientLogger
-
     private val feedbackViewModel: FeedbackViewModel by viewModels()
     internal val webLayerModel: WebLayerModel by viewModels()
+    private val zeroQueryViewModel: RegularProfileZeroQueryViewModel by viewModels()
 
     internal val activityViewModel: NeevaActivityViewModel by viewModels {
         NeevaActivityViewModel.Factory(
@@ -114,8 +112,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             snackbarModel,
             overlaySheetModel,
             firstRunModel,
-            dispatchers,
-            coroutineScope
+            dispatchers
         )
     }
 
@@ -152,7 +149,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         snackbarModel = snackbarModel,
                         spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
-                        neevaConstants = neevaConstants,
+                        neevaConstants = neevaConstants
                     )
                 }
                 cardsPaneModel = remember(appNavModel) {
@@ -187,7 +184,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         LocalFeedbackViewModel provides feedbackViewModel,
                         LocalFirstRunModel provides firstRunModel,
                         LocalNavHostController provides navController,
-                        LocalSettingsController provides settingsControllerImpl
+                        LocalSettingsController provides settingsControllerImpl,
+                        LocalRegularProfileZeroQueryViewModel provides zeroQueryViewModel
                     ) {
                         ActivityUI(
                             toolbarConfiguration = activityViewModel.toolbarConfiguration,
@@ -401,8 +399,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     private fun takeScreenshotForFeedback(callback: () -> Unit) {
-        val isBrowserVisible = when {
-            appNavModel?.currentDestination?.value?.route == AppNavDestination.BROWSER.route -> true
+        val isBrowserVisible = when (appNavModel?.currentDestination?.value?.route) {
+            AppNavDestination.BROWSER.route -> true
             else -> false
         }
 

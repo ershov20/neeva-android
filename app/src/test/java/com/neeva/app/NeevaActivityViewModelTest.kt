@@ -98,7 +98,7 @@ class NeevaActivityViewModelTest : BaseTest() {
             firstRunModel = firstRunModel,
             spaceStore = spaceStore,
             dispatchers = dispatchers,
-            coroutineScope = coroutineScopeRule.scope
+            overrideCoroutineScope = coroutineScopeRule.scope
         )
     }
 

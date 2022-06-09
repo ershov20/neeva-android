@@ -40,6 +40,7 @@ class RegularBrowserWrapper(
     hostInfoDao: HostInfoDao,
     neevaConstants: NeevaConstants,
     private val neevaUser: NeevaUser,
+    regularFaviconCache: RegularFaviconCache,
     settingsDataModel: SettingsDataModel,
     spaceStore: SpaceStore
 ) : BaseBrowserWrapper(
@@ -57,12 +58,7 @@ class RegularBrowserWrapper(
         neevaConstants = neevaConstants,
         clientLogger = clientLogger
     ),
-    faviconCache = RegularFaviconCache(
-        filesDir = appContext.cacheDir,
-        domainProvider = domainProvider,
-        historyManager = historyManager,
-        dispatchers = dispatchers
-    ),
+    faviconCache = regularFaviconCache,
     spaceStore = spaceStore,
     historyManager = historyManager,
     tabScreenshotManager = RegularTabScreenshotManager(

@@ -1,4 +1,4 @@
-package com.neeva.app.zeroQuery
+package com.neeva.app.zeroquery
 
 import com.neeva.app.BaseScreenshotTest
 import org.junit.Test

@@ -19,7 +19,6 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
-import java.lang.IllegalArgumentException
 import java.net.URISyntaxException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,7 +56,7 @@ class NeevaActivityViewModel(
     private val overlaySheetModel: OverlaySheetModel,
     private val firstRunModel: FirstRunModel,
     private val dispatchers: Dispatchers,
-    coroutineScope: CoroutineScope
+    overrideCoroutineScope: CoroutineScope? = null
 ) : ViewModel() {
     internal val toolbarConfiguration = MutableStateFlow(ToolbarConfiguration())
 
@@ -75,7 +74,7 @@ class NeevaActivityViewModel(
                 }
             }
             .flowOn(dispatchers.main)
-            .launchIn(coroutineScope)
+            .launchIn(overrideCoroutineScope ?: viewModelScope)
     }
 
     /**
@@ -125,8 +124,7 @@ class NeevaActivityViewModel(
         private val snackbarModel: SnackbarModel,
         private val overlaySheetModel: OverlaySheetModel,
         private val firstRunModel: FirstRunModel,
-        private val dispatchers: Dispatchers,
-        private val coroutineScope: CoroutineScope
+        private val dispatchers: Dispatchers
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -139,8 +137,7 @@ class NeevaActivityViewModel(
                     snackbarModel = snackbarModel,
                     overlaySheetModel = overlaySheetModel,
                     firstRunModel = firstRunModel,
-                    dispatchers = dispatchers,
-                    coroutineScope = coroutineScope
+                    dispatchers = dispatchers
                 ) as T
             } else {
                 throw IllegalArgumentException()

@@ -1,6 +1,6 @@
-package com.neeva.app.zeroQuery
+package com.neeva.app.zeroquery
 
-import android.net.Uri
+import android.graphics.Bitmap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
@@ -16,27 +16,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalRegularProfileZeroQueryViewModel
 import com.neeva.app.LocalSettingsController
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.browsing.urlbar.URLBarModel
-import com.neeva.app.history.DefaultSuggestions
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.spaces.SpaceRowData
 import com.neeva.app.spaces.getThumbnailAsync
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Space
-import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.ui.layouts.GridLayout
@@ -46,33 +43,26 @@ import com.neeva.app.ui.widgets.collapsingsection.collapsingThreeStateSection
 
 data class SuggestedSite(
     val site: Site,
+    val bitmap: Bitmap? = null,
     val overrideDrawableId: Int? = null
 )
 
 @Composable
-fun ZeroQuery(
+fun RegularProfileZeroQuery(
     urlBarModel: URLBarModel,
-    faviconCache: FaviconCache,
     neevaConstants: NeevaConstants,
     topContent: @Composable () -> Unit = {},
 ) {
     val browserWrapper = LocalBrowserWrapper.current
     val domainProvider = LocalEnvironment.current.domainProvider
-    val historyManager = LocalEnvironment.current.historyManager
     val appNavModel = LocalAppNavModel.current
     val spaceStore = LocalEnvironment.current.spaceStore
-    val sharedPreferencesModel = LocalEnvironment.current.sharedPreferencesModel
     val settingsController = LocalSettingsController.current
     val neevaUser = LocalEnvironment.current.neevaUser
 
-    val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
-
-    val suggestedQueries by historyManager.suggestedQueries.collectAsState(emptyList())
-    val suggestedSites by historyManager.suggestedSites.collectAsState(emptyList())
-
-    val homeLabel = stringResource(id = R.string.home)
-
-    val zeroQueryModel = remember { ZeroQueryModel(sharedPreferencesModel) }
+    val zeroQueryModel = LocalRegularProfileZeroQueryViewModel.current
+    val suggestedSearchesWithDefaults by zeroQueryModel.suggestedSearches.collectAsState()
+    val suggestedSitesPlusHome by zeroQueryModel.suggestedSites.collectAsState()
     val isSuggestedSitesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedSitesState)
     val isSuggestedQueriesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedQueriesState)
     val isCommunitySpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.CommunitySpacesState)
@@ -80,50 +70,7 @@ fun ZeroQuery(
     val isNativeSpacesEnabled =
         settingsController.getToggleState(SettingsToggle.DEBUG_NATIVE_SPACES)
 
-    val defaultSuggestions = DefaultSuggestions(neevaConstants = neevaConstants)
-
-    val suggestedSearchesWithDefaults: List<QueryRowSuggestion> = remember(suggestedQueries) {
-        val updatedList = suggestedQueries.toMutableList()
-        defaultSuggestions.DEFAULT_SEARCH_SUGGESTIONS.forEach { suggestion ->
-            if (updatedList.size < 3 && updatedList.none { it.query == suggestion.query }) {
-                updatedList.add(suggestion)
-            }
-        }
-        return@remember updatedList
-    }
-
-    val suggestedSitesPlusHome: List<SuggestedSite> = remember(suggestedSites) {
-        val updatedList: MutableList<Site> = suggestedSites.toMutableList()
-        val domainList = updatedList
-            .map { domainProvider.getRegisteredDomain(Uri.parse(it.siteURL)) }
-        defaultSuggestions.DEFAULT_SITE_SUGGESTIONS.forEach { site ->
-            val siteDomain = domainProvider.getRegisteredDomain(Uri.parse(site.siteURL))
-            if (updatedList.size < 7 && !domainList.contains(siteDomain)) {
-                updatedList.add(site)
-            }
-        }
-        updatedList
-            .map { SuggestedSite(it) }
-            .toMutableList()
-            .apply {
-                if (!neevaUser.isSignedOut()) {
-                    // The first suggested item should always send the user Home.
-                    add(
-                        index = 0,
-                        element = SuggestedSite(
-                            site = Site(
-                                siteURL = neevaConstants.homepageURL,
-                                title = homeLabel,
-                                largestFavicon = null
-                            ),
-                            overrideDrawableId = R.drawable.ic_house
-                        )
-                    )
-                }
-            }
-            .take(8)
-    }
-
+    val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
     val communitySpaces: List<SpaceRowData>
         by spaceStore.spacesFromCommunityFlow.collectAsState(emptyList())
 
@@ -143,7 +90,6 @@ fun ZeroQuery(
                 GridLayout(4, suggestedSitesPlusHome) { suggestedSite ->
                     ZeroQuerySuggestedSite(
                         suggestedSite = suggestedSite,
-                        faviconCache = faviconCache,
                         domainProvider = domainProvider,
                         onClick = browserWrapper::loadUrl
                     )
@@ -161,7 +107,6 @@ fun ZeroQuery(
                         Box(modifier = Modifier.width(64.dp + Dimensions.PADDING_LARGE * 2)) {
                             ZeroQuerySuggestedSite(
                                 suggestedSite = suggestedSite,
-                                faviconCache = faviconCache,
                                 domainProvider = domainProvider,
                                 onClick = browserWrapper::loadUrl
                             )
@@ -247,17 +192,6 @@ fun ZeroQuery(
             }
         }
     }
-}
-
-fun Site.toSearchSuggest(neevaConstants: NeevaConstants): QueryRowSuggestion? {
-    if (!siteURL.startsWith(neevaConstants.appSearchURL)) return null
-    val query = Uri.parse(this.siteURL).getQueryParameter("q") ?: return null
-
-    return QueryRowSuggestion(
-        url = Uri.parse(this.siteURL),
-        query = query,
-        drawableID = R.drawable.ic_baseline_history_24
-    )
 }
 
 fun String.toSearchSuggest(neevaConstants: NeevaConstants): QueryRowSuggestion = QueryRowSuggestion(

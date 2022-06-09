@@ -1,4 +1,4 @@
-package com.neeva.app.zeroQuery
+package com.neeva.app.zeroquery
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
