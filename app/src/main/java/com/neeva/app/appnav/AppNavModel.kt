@@ -35,6 +35,7 @@ interface AppNavModel {
     fun showSettings()
     fun showSpaceDetail(spaceID: String)
     fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?)
+    fun showShareSpaceSheet(spaceID: String)
 
     fun showWelcome()
     fun showSignInFlow()

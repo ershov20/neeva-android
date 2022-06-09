@@ -161,3 +161,10 @@ mutation UpdateSpaceEntityDisplayData($input: UpdateSpaceEntityDisplayDataInput!
    updateSpaceEntityDisplayData(input: $input)
 }
 
+mutation AddSpacePublicACL($input: AddSpacePublicACLInput!) {
+  addSpacePublicACL(input: $input)
+}
+
+mutation DeleteSpacePublicACL($input: DeleteSpacePublicACLInput!) {
+  deleteSpacePublicACL(input: $input)
+}

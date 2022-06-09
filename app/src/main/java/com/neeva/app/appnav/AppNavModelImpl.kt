@@ -20,6 +20,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
+import com.neeva.app.spaces.ShareSpaceUIContainer
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.entities.Space
@@ -187,6 +188,10 @@ class AppNavModelImpl(
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showSettings() = show(AppNavDestination.SETTINGS)
 
+    override fun showWelcome() {
+        show(AppNavDestination.WELCOME)
+    }
+
     override fun showSpaceDetail(spaceID: String) {
         // We still set the detailedSpaceIDFlow value in case we need to fetch the Space.
         coroutineScope.launch {
@@ -200,8 +205,39 @@ class AppNavModelImpl(
         show(AppNavDestination.EDIT_SPACE_DIALOG, navArguments = listOf(mode.name, id))
     }
 
-    override fun showWelcome() {
-        show(AppNavDestination.WELCOME)
+    override fun showShareSpaceSheet(spaceID: String) {
+        overlaySheetModel.showOverlaySheet(titleResId = R.string.share_space_title) {
+            ShareSpaceUIContainer(spaceID = spaceID)
+        }
+    }
+
+    override fun showAddToSpace() {
+        overlaySheetModel.showOverlaySheet(titleResId = R.string.toolbar_save_to_space) {
+            val spaceStore = LocalEnvironment.current.spaceStore
+            val browserWrapper = webLayerModel.currentBrowser
+            val activeTabModel = browserWrapper.activeTabModel
+
+            LaunchedEffect(true) {
+                spaceStore.refresh()
+            }
+
+            AddToSpaceUI(activeTabModel, spaceStore) { space ->
+                browserWrapper.modifySpace(space.id)
+                overlaySheetModel.hideOverlaySheet()
+            }
+        }
+    }
+
+    override fun shareSpace(space: Space) {
+        val sendIntent: Intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            type = "text/plain"
+
+            putExtra(Intent.EXTRA_TEXT, space.url(neevaConstants).toString())
+            putExtra(Intent.EXTRA_TITLE, space.name)
+        }
+
+        safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
     }
 
     override fun showSignInFlow() {
@@ -231,35 +267,6 @@ class AppNavModelImpl(
         }
 
         safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
-    }
-
-    override fun shareSpace(space: Space) {
-        val sendIntent: Intent = Intent().apply {
-            action = Intent.ACTION_SEND
-            type = "text/plain"
-
-            putExtra(Intent.EXTRA_TEXT, space.url(neevaConstants).toString())
-            putExtra(Intent.EXTRA_TITLE, space.name)
-        }
-
-        safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
-    }
-
-    override fun showAddToSpace() {
-        overlaySheetModel.showOverlaySheet(titleResId = R.string.toolbar_save_to_space) {
-            val spaceStore = LocalEnvironment.current.spaceStore
-            val browserWrapper = webLayerModel.currentBrowser
-            val activeTabModel = browserWrapper.activeTabModel
-
-            LaunchedEffect(true) {
-                spaceStore.refresh()
-            }
-
-            AddToSpaceUI(activeTabModel, spaceStore) { space ->
-                browserWrapper.modifySpace(space.id)
-                overlaySheetModel.hideOverlaySheet()
-            }
-        }
     }
 
     override fun onMenuItem(id: OverflowMenuItemId) {

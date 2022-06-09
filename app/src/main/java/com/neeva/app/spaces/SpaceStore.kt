@@ -9,10 +9,12 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
+import com.neeva.app.AddSpacePublicACLMutation
 import com.neeva.app.AddToSpaceMutation
 import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.BatchDeleteSpaceResultMutation
 import com.neeva.app.CreateSpaceMutation
+import com.neeva.app.DeleteSpacePublicACLMutation
 import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
@@ -30,8 +32,10 @@ import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.storage.entities.spaceItem
 import com.neeva.app.storage.scaleDownMaintainingAspectRatio
 import com.neeva.app.storage.toByteArray
+import com.neeva.app.type.AddSpacePublicACLInput
 import com.neeva.app.type.AddSpaceResultByURLInput
 import com.neeva.app.type.BatchDeleteSpaceResultInput
+import com.neeva.app.type.DeleteSpacePublicACLInput
 import com.neeva.app.type.DeleteSpaceResultByURLInput
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.type.UpdateSpaceEntityDisplayDataInput
@@ -226,16 +230,21 @@ class SpaceStore(
                 val spaceData = SpaceRowData(
                     id = Uri.parse(it.spaceEntity?.url!!).pathSegments[1],
                     name = it.spaceEntity.title!!,
-                    thumbnail = null,
+                    thumbnail = it.spaceEntity.thumbnail?.let {
+                        thumbnailUri ->
+                        Uri.parse(thumbnailUri)
+                    },
                     isPublic = true,
                     appSpacesURL = appSpacesURL
                 )
-                spaceData.thumbnail = saveBitmap(
-                    directory = thumbnailDirectory.resolve(MAKER_COMMUNITY_SPACE_ID),
-                    dispatchers = dispatchers,
-                    id = spaceData.id,
-                    bitmapString = it.spaceEntity.thumbnail
-                )?.toUri()
+                if (spaceData.thumbnail == null) {
+                    spaceData.thumbnail = saveBitmap(
+                        directory = thumbnailDirectory.resolve(MAKER_COMMUNITY_SPACE_ID),
+                        dispatchers = dispatchers,
+                        id = spaceData.id,
+                        bitmapString = it.spaceEntity.thumbnail
+                    )?.toUri()
+                }
                 return@map spaceData
             }
         )
@@ -528,6 +537,43 @@ class SpaceStore(
                 val errorString = appContext.getString(R.string.error_generic)
                 snackbarModel.show(errorString)
             }
+        }
+    }
+
+    /** Toggles between making the [Space] public or private */
+    fun toggleSpacePublicACL(spaceID: String) {
+        coroutineScope.launch(dispatchers.io) {
+            val space = dao.getSpaceById(spaceID) ?: return@launch
+
+            stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
+
+            val isPublic = space.isPublic
+
+            val mutation = when (isPublic) {
+                true -> DeleteSpacePublicACLMutation(
+                    input = DeleteSpacePublicACLInput(
+                        id = Optional.presentIfNotNull(space.id)
+                    )
+                )
+
+                false -> AddSpacePublicACLMutation(
+                    input = AddSpacePublicACLInput(
+                        id = Optional.presentIfNotNull(space.id)
+                    )
+                )
+            }
+            val response = authenticatedApolloWrapper.performMutation(
+                mutation,
+                userMustBeLoggedIn = true
+            )
+
+            response?.data?.let {
+                dao.upsert(space.copy(isPublic = !isPublic))
+            } ?: run {
+                val errorString = appContext.getString(R.string.error_generic)
+                snackbarModel.show(errorString)
+            }
+            stateFlow.value = State.READY
         }
     }
 

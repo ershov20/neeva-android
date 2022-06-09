@@ -308,7 +308,15 @@ fun SpaceDetailToolbar(
 
             RowActionIconButton(
                 iconParams = RowActionIconParams(
-                    onTapAction = { space?.let { appNavModel.shareSpace(it) } },
+                    onTapAction = {
+                        space?.let {
+                            if (it.userACL == SpaceACLLevel.Owner) {
+                                appNavModel.showShareSpaceSheet(space.id)
+                            } else {
+                                appNavModel.shareSpace(it)
+                            }
+                        }
+                    },
                     actionType = RowActionIconParams.ActionType.SHARE
                 )
             )

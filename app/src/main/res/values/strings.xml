@@ -13,6 +13,7 @@
     <string name="undo">Undo</string>
     <string name="done">Done</string>
     <string name="remove">Remove</string>
+    <string name="more">More</string>
 
     <string name="new_tab_content_description">Create new tab</string>
     <string name="close_all_content_description">Close all tabs</string>
@@ -191,6 +192,16 @@
         Save and share content instantly. Stay organized by adding images, websites and documents to a Space today.
     </string>
     <string name="space_intro_cta">Sign in to get started</string>
+    <string name="share_space_title">Share Space</string>
+    <string name="copy_clipboard">Copied to clipboard</string>
+    <string name="enable_link">Enable sharable link</string>
+    <string name="enable_link_subtitle">Anyone with the link can view</string>
+    <string name="shown_as_owner">You will be shown as the owner of the Space</string>
+
+    <string name="twitter_social_title">Twitter</string>
+    <string name="linkedin_social_title">Linkedin</string>
+    <string name="facebook_social_title">Facebook</string>
+    <string name="copy_link_social_title">Copy link</string>
 
     <string name="error_generic">Something went wrong</string>
     <string name="error_url_failure">Could not open \"%1$s\"</string>

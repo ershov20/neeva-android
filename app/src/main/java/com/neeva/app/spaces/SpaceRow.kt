@@ -23,11 +23,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
+import coil.ImageLoader
+import coil.request.ImageRequest
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.BitmapIO
@@ -38,16 +43,27 @@ import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.Dimensions.PADDING_SMALL
 import java.io.FileInputStream
+import kotlinx.coroutines.withContext
 
 /** Returns a [State] that can be used in a Composable for obtaining a Bitmap. */
 @Composable
 fun getThumbnailAsync(uri: Uri?): State<ImageBitmap?> {
+    val context = LocalContext.current
+    val dispatchers = LocalEnvironment.current.dispatchers
     // By keying this on [uri], we can avoid recompositions until [uri] changes.  This avoids
     // infinite loops of recompositions that can be triggered via [Flow.collectAsState()].
     return produceState<ImageBitmap?>(initialValue = null, uri) {
-        value = BitmapIO
-            .loadBitmap(uri) { file -> FileInputStream(file) }
-            ?.asImageBitmap()
+        value = withContext(dispatchers.io) {
+            if (uri?.scheme == "file") {
+                BitmapIO.loadBitmap(uri) { file ->
+                    FileInputStream(file)
+                }?.asImageBitmap()
+            } else {
+                val loader = ImageLoader(context)
+                val request = ImageRequest.Builder(context).data(uri.toString()).build()
+                loader.execute(request).drawable?.toBitmap()?.asImageBitmap()
+            }
+        }
     }
 }
 
