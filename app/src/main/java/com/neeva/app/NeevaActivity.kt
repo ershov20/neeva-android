@@ -66,6 +66,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -86,6 +87,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var dispatchers: Dispatchers
+    @Inject lateinit var coroutineScope: CoroutineScope
     @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
@@ -110,7 +112,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             spaceStore,
             webLayerModel,
             snackbarModel,
-            dispatchers
+            overlaySheetModel,
+            firstRunModel,
+            dispatchers,
+            coroutineScope
         )
     }
 
@@ -147,7 +152,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         snackbarModel = snackbarModel,
                         spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
-                        neevaConstants = neevaConstants
+                        neevaConstants = neevaConstants,
                     )
                 }
                 cardsPaneModel = remember(appNavModel) {

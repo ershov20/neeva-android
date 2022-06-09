@@ -88,6 +88,7 @@
     <string name="invalid_request_error">Invalid name and/or password</string>
     <string name="invalid_token_error">Token has already been used</string>
     <string name="generic_signup_error">Account creation unsuccessful</string>
+    <string name="preview_overlay_prompt">See results for \"%1s\"</string>
 
     <string name="settings_account_settings">Account settings</string>
     <string name="settings_connected_apps">Connected apps</string>

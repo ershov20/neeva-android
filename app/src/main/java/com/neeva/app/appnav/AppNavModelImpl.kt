@@ -46,7 +46,7 @@ class AppNavModelImpl(
     private val snackbarModel: SnackbarModel,
     private val spaceStore: SpaceStore,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
-    private val neevaConstants: NeevaConstants
+    private val neevaConstants: NeevaConstants,
 ) : AppNavModel {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     override val currentDestination: StateFlow<NavDestination?>

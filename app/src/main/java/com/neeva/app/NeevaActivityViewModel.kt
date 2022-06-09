@@ -11,13 +11,22 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
+import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.firstrun.FirstRunModel
+import com.neeva.app.firstrun.signup.PreviewModeSignUpPrompt
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import java.lang.IllegalArgumentException
 import java.net.URISyntaxException
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 data class ToolbarConfiguration(
@@ -45,9 +54,29 @@ class NeevaActivityViewModel(
     private val spaceStore: SpaceStore,
     private val webLayerModel: WebLayerModel,
     private val snackbarModel: SnackbarModel,
-    private val dispatchers: Dispatchers
+    private val overlaySheetModel: OverlaySheetModel,
+    private val firstRunModel: FirstRunModel,
+    private val dispatchers: Dispatchers,
+    coroutineScope: CoroutineScope
 ) : ViewModel() {
     internal val toolbarConfiguration = MutableStateFlow(ToolbarConfiguration())
+
+    init {
+        webLayerModel.currentBrowser.activeTabModel.displayedInfoFlow
+            .filter { neevaUser.isSignedOut() && it.mode == ActiveTabModel.DisplayMode.QUERY }
+            .filter { firstRunModel.shouldShowPreviewPromptForSignedOutQuery() }
+            .flowOn(dispatchers.io)
+            .onEach {
+                overlaySheetModel.showOverlaySheet {
+                    PreviewModeSignUpPrompt(
+                        query = it.displayedText,
+                        onDismiss = overlaySheetModel::hideOverlaySheet
+                    )
+                }
+            }
+            .flowOn(dispatchers.main)
+            .launchIn(coroutineScope)
+    }
 
     /**
      * Returns an Intent that needs to be processed when everything has been initialized.
@@ -94,7 +123,10 @@ class NeevaActivityViewModel(
         private val spaceStore: SpaceStore,
         private val webLayerModel: WebLayerModel,
         private val snackbarModel: SnackbarModel,
-        private val dispatchers: Dispatchers
+        private val overlaySheetModel: OverlaySheetModel,
+        private val firstRunModel: FirstRunModel,
+        private val dispatchers: Dispatchers,
+        private val coroutineScope: CoroutineScope
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -105,7 +137,10 @@ class NeevaActivityViewModel(
                     spaceStore = spaceStore,
                     webLayerModel = webLayerModel,
                     snackbarModel = snackbarModel,
-                    dispatchers = dispatchers
+                    overlaySheetModel = overlaySheetModel,
+                    firstRunModel = firstRunModel,
+                    dispatchers = dispatchers,
+                    coroutineScope = coroutineScope
                 ) as T
             } else {
                 throw IllegalArgumentException()

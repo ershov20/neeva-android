@@ -68,17 +68,17 @@ fun OverlaySheet(
                 )
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                titleResId?.let { titleResId ->
-                    BaseRowLayout(
-                        endComposable = {
-                            IconButton(onClick = onDismiss) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_close_24),
-                                    contentDescription = stringResource(R.string.close),
-                                )
-                            }
+                BaseRowLayout(
+                    endComposable = {
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_baseline_close_24),
+                                contentDescription = stringResource(R.string.close),
+                            )
                         }
-                    ) {
+                    }
+                ) {
+                    titleResId?.let { titleResId ->
                         Text(
                             text = stringResource(titleResId),
                             style = MaterialTheme.typography.titleMedium,
@@ -86,7 +86,6 @@ fun OverlaySheet(
                         )
                     }
                 }
-
                 content()
             }
         }

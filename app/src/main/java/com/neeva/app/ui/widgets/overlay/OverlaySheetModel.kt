@@ -13,7 +13,7 @@ data class OverlaySheetHostState(
 class OverlaySheetModel {
     internal val hostState = mutableStateOf(OverlaySheetHostState())
 
-    fun showOverlaySheet(titleResId: Int, content: @Composable () -> Unit = {}) {
+    fun showOverlaySheet(titleResId: Int? = null, content: @Composable () -> Unit = {}) {
         hostState.value = OverlaySheetHostState(
             isVisible = true,
             titleResId = titleResId,

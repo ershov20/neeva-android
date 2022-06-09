@@ -83,7 +83,6 @@ class SpaceStore(
     val detailedSpaceIDFlow = MutableStateFlow<String?>(null)
     val fetchedSpaceFlow = detailedSpaceIDFlow
         .filterNotNull()
-        .flowOn(dispatchers.io)
         .map { id ->
             dao.getSpaceById(id)?.let { return@map null }
 
@@ -117,7 +116,8 @@ class SpaceStore(
                     numFollowers = space.stats?.followers ?: 0
                 )
             }
-        }.stateIn(coroutineScope, SharingStarted.Lazily, null)
+        }.flowOn(dispatchers.io)
+        .stateIn(coroutineScope, SharingStarted.Lazily, null)
         .filterNotNull()
 
     val allSpacesFlow = dao.allSpacesFlow()

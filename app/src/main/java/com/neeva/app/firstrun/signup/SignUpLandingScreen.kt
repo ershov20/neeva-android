@@ -74,14 +74,16 @@ fun SignUpLandingScreen(
     openInCustomTabs: (Uri) -> Unit,
     showSignUpWithOther: () -> Unit,
     neevaConstants: NeevaConstants,
+    primaryLabelString: String = stringResource(id = R.string.first_run_intro),
+    welcomeHeaderModifier: Modifier = Modifier
+        .padding(top = dimensionResource(id = R.dimen.sign_up_landing_padding_top)),
     modifier: Modifier
 ) {
     Column(modifier = modifier) {
         WelcomeHeader(
-            primaryLabel = stringResource(id = R.string.first_run_intro),
+            primaryLabel = primaryLabelString,
             secondaryLabel = stringResource(id = R.string.first_run_create_your_free_account),
-            modifier = Modifier
-                .padding(top = dimensionResource(id = R.dimen.sign_up_landing_padding_top))
+            modifier = welcomeHeaderModifier
         )
 
         Spacer(modifier = Modifier.height(28.dp))

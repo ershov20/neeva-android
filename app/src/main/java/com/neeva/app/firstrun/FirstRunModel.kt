@@ -69,6 +69,7 @@ class FirstRunModel internal constructor(
     )
 
     companion object {
+        private const val PREVIEW_MODE_COUNT_THRESHOLD = 10
         private const val SERVER_CLIENT_ID =
             "892902198757-84tm1f14ne0pa6n3dmeehgeo5mk4mhl9.apps.googleusercontent.com"
         const val TAG = "FirstRunModel"
@@ -149,6 +150,27 @@ class FirstRunModel internal constructor(
         sharedPreferencesModel.setValue(
             SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.ShouldLogFirstLogin, value
         )
+    }
+
+    fun shouldShowPreviewPromptForSignedOutQuery(): Boolean {
+        val hasSignedInBefore = sharedPreferencesModel.getValue(
+            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.HasSignedInBefore,
+            defaultValue = false
+        )
+
+        // Preview mode is only valid when the user has never signed in before.
+        if (hasSignedInBefore) return false
+
+        val previewQueries = sharedPreferencesModel.getValue(
+            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.PreviewQueryCount,
+            defaultValue = 0
+        ) + 1
+
+        sharedPreferencesModel.setValue(
+            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.PreviewQueryCount, previewQueries
+        )
+
+        return previewQueries % PREVIEW_MODE_COUNT_THRESHOLD == 0
     }
 
     fun logEvent(interaction: LogConfig.Interaction) {

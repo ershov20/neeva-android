@@ -3,12 +3,16 @@ package com.neeva.app
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -19,6 +23,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.eq
@@ -39,11 +44,14 @@ class NeevaActivityViewModelTest : BaseTest() {
     val coroutineScopeRule = CoroutineScopeRule()
 
     @Mock private lateinit var neevaActivity: NeevaActivity
-    @Mock private lateinit var neevaUser: NeevaUser
     @Mock private lateinit var spaceStore: SpaceStore
-    @Mock private lateinit var browserWrapper: BrowserWrapper
     @Mock private lateinit var snackbarModel: SnackbarModel
 
+    private lateinit var activeTabModel: ActiveTabModel
+    private lateinit var browserWrapper: BrowserWrapper
+    private lateinit var firstRunModel: FirstRunModel
+    private lateinit var overlaySheetModel: OverlaySheetModel
+    private lateinit var neevaUser: NeevaUser
     private lateinit var webLayerModel: WebLayerModel
     private lateinit var neevaActivityViewModel: NeevaActivityViewModel
 
@@ -57,8 +65,28 @@ class NeevaActivityViewModelTest : BaseTest() {
             io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
         )
 
+        activeTabModel = mock {
+            on { displayedInfoFlow } doReturn MutableStateFlow(ActiveTabModel.DisplayedInfo())
+        }
+
+        browserWrapper = mock {
+            on { activeTabModel } doReturn activeTabModel
+        }
+
         webLayerModel = mock {
             on { currentBrowser } doReturn browserWrapper
+        }
+
+        neevaUser = mock {
+            on { isSignedOut() } doReturn false
+        }
+
+        overlaySheetModel = mock {
+            on { showOverlaySheet(any(), any()) } doAnswer {}
+        }
+
+        firstRunModel = mock {
+            on { shouldShowPreviewPromptForSignedOutQuery() } doReturn false
         }
 
         neevaActivityViewModel = NeevaActivityViewModel(
@@ -66,8 +94,11 @@ class NeevaActivityViewModelTest : BaseTest() {
             neevaUser = neevaUser,
             webLayerModel = webLayerModel,
             snackbarModel = snackbarModel,
+            overlaySheetModel = overlaySheetModel,
+            firstRunModel = firstRunModel,
             spaceStore = spaceStore,
-            dispatchers = dispatchers
+            dispatchers = dispatchers,
+            coroutineScope = coroutineScopeRule.scope
         )
     }
 

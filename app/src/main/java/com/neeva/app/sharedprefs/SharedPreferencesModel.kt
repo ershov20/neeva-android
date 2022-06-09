@@ -110,6 +110,8 @@ sealed class SharedPrefFolder(internal val folderName: String) {
 
     object FirstRun : SharedPrefFolder("FIRST_RUN") {
         val FirstRunDone = SharedPrefKey<Boolean>("HAS_FINISHED_FIRST_RUN")
+        val HasSignedInBefore = SharedPrefKey<Boolean>("HAS_SIGNED_IN_AT_LEAST_ONCE")
+        val PreviewQueryCount = SharedPrefKey<Int>("NUM_PREVIEW_QUERIES")
         val ShouldLogFirstLogin = SharedPrefKey<Boolean>("SHOULD_LOG_FIRST_LOGIN")
     }
 

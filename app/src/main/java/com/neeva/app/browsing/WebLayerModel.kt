@@ -301,8 +301,16 @@ class WebLayerModel internal constructor(
             neevaUser.neevaUserToken.loginCookieString()
         ) { success ->
             val currentUrl = regularBrowser.activeTabModel.urlFlow.value
-            if (success && currentUrl.toString().startsWith(neevaConstants.appURL)) {
-                regularBrowser.reload()
+            if (success) {
+                sharedPreferencesModel.setValue(
+                    SharedPrefFolder.FirstRun,
+                    SharedPrefFolder.FirstRun.HasSignedInBefore,
+                    true
+                )
+
+                if (currentUrl.toString().startsWith(neevaConstants.appURL)) {
+                    regularBrowser.reload()
+                }
             }
         }
     }
