@@ -54,6 +54,9 @@ jobs:
   run-unit-tests:
     docker:
       - image: cimg/android:2021.12.2
+
+    resource_class: large
+
     steps:
       - bootstrap-checkout
 

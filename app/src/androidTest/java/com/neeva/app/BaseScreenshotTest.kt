@@ -12,6 +12,7 @@ import com.neeva.app.storage.BitmapIO
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
+import kotlin.math.abs
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.fail
 import org.junit.Rule
@@ -102,10 +103,33 @@ abstract class BaseScreenshotTest {
 
         for (x in 0 until bitmap.width) {
             for (y in 0 until bitmap.height) {
-                if (bitmap.getPixel(x, y) != goldenBitmap.getPixel(x, y)) {
+                if (!fuzzyPixelComparison(goldenBitmap.getPixel(x, y), bitmap.getPixel(x, y))) {
                     failWithInstructions("Difference at pixel ($x, $y).")
                 }
             }
+        }
+    }
+
+    /**
+     * Compares the colors, allowing them to be off by _just a little bit_ to work around the
+     * differences between the X86_64 and ARM64 emulators.
+     */
+    fun fuzzyPixelComparison(expectedPixel: Int, actualPixel: Int): Boolean {
+        if (expectedPixel == actualPixel) return true
+
+        val expectedRed = expectedPixel and 0x000000ff
+        val expectedGreen = (expectedPixel and 0x0000ff00) shr 8
+        val expectedBlue = (expectedPixel and 0x00ff0000) shr 16
+
+        val actualRed = actualPixel and 0x000000ff
+        val actualGreen = (actualPixel and 0x0000ff00) shr 8
+        val actualBlue = (actualPixel and 0x00ff0000) shr 16
+
+        return when {
+            abs(expectedRed - actualRed) > 1 -> false
+            abs(expectedGreen - actualGreen) > 1 -> false
+            abs(expectedBlue - actualBlue) > 1 -> false
+            else -> true
         }
     }
 
@@ -113,16 +137,20 @@ abstract class BaseScreenshotTest {
         """
         $failureMessage
 
-        If you need to add or update an existing golden image and are on an Intel Mac:
+        If you need to add or update an existing golden image:
         1. Make sure that you have the command line tools installed:
            https://developer.android.com/studio/command-line/sdkmanager
-         
-        2. Start an emulator using the exact same commands CircleCI uses. 
-           Run these commands once to setup the emulator (only needs to be done once):
-           sdkmanager "system-images;android-28;default;x86_64"
-           echo "no" | avdmanager --verbose create avd -n "CircleCI" -k "system-images;android-28;default;x86_64" -d "pixel_2"
 
-           This command will actually start the emulator:
+        2. Create an emulator using the same commands CircleCI uses (only needs to be done once):
+           Intel Macbook:
+             sdkmanager "system-images;android-28;default;x86_64"
+             echo "no" | avdmanager --verbose create avd -n "CircleCI" -k "system-images;android-28;default;x86_64" -d "pixel_2"
+
+           M1 Macbook:
+             sdkmanager "system-images;android-28;default;arm64-v8a"
+             echo "no" | avdmanager --verbose create avd -n "CircleCI" -k "system-images;android-28;default;arm64-v8a" -d "pixel_2"
+
+        3. Actually start the emulator:
            emulator -avd "CircleCI" -no-audio -no-boot-anim -verbose -no-snapshot -gpu swiftshader_indirect -partition-size 2048
 
         3. Run the test by itself by right clicking on the test function in Android Studio.
@@ -132,7 +160,7 @@ abstract class BaseScreenshotTest {
            cd neeva-android
            ./pull_new_golden_screenshots.sh
 
-        4. Re-run the test again and make sure it passes.
+        5. Re-run the test again and make sure it passes.
 
         Troubleshooting:
         * If you see "Backend Internal error: Exception during IR lowering", rebuild the
