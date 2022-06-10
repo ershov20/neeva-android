@@ -223,7 +223,6 @@ fun SpaceDetail(spaceID: String?) {
             }
         )
 
-        val spaceStore = LocalEnvironment.current.spaceStore
         val appNavModel = LocalAppNavModel.current
 
         ConfirmationAlertDialog(
@@ -307,7 +306,6 @@ fun SpaceDetailToolbar(
         },
         actions = {
             var expanded by remember { mutableStateOf(false) }
-            val appNavModel = LocalAppNavModel.current
             val onEditSpace = {
                 appNavModel.showEditSpaceDialog(
                     SpaceEditMode.EDITING_SPACE,

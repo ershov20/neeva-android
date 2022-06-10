@@ -36,7 +36,6 @@ import com.neeva.app.ui.theme.NeevaTheme
 @Composable
 fun WelcomeScreen(
     settingsController: SettingsController,
-    navigateToZeroQuery: () -> Unit
 ) {
     val backgroundColor = if (LocalIsDarkTheme.current) {
         MaterialTheme.colorScheme.background
@@ -75,7 +74,7 @@ fun WelcomeScreen(
 
                         Spacer(modifier = Modifier.height(28.dp))
 
-                        WelcomeScreenGetStartedButton(settingsController, navigateToZeroQuery)
+                        WelcomeScreenGetStartedButton(settingsController)
                     }
                 }
             } else {
@@ -105,7 +104,7 @@ fun WelcomeScreen(
 
                     Spacer(modifier = Modifier.height(28.dp))
 
-                    WelcomeScreenGetStartedButton(settingsController, navigateToZeroQuery)
+                    WelcomeScreenGetStartedButton(settingsController)
                 }
             }
         }
@@ -115,24 +114,12 @@ fun WelcomeScreen(
 @Composable
 fun WelcomeScreenGetStartedButton(
     settingsController: SettingsController,
-    navigateToZeroQuery: () -> Unit
 ) {
-    val setDefaultAndroidBrowserManager = settingsController.getSetDefaultAndroidBrowserManager()
-
-    when (setDefaultAndroidBrowserManager.isRoleManagerAvailable()) {
-        true -> OnboardingButton(
-            text = stringResource(id = R.string.get_started),
-            onClick = {
-                setDefaultAndroidBrowserManager.requestToBeDefaultBrowser()
-                navigateToZeroQuery()
-            }
-        )
-        else -> OnboardingButton(
-            text = stringResource(id = R.string.get_started),
-            onClick = settingsController
-                .getOnClickMap(true)[R.string.settings_default_browser]!!
-        )
-    }
+    OnboardingButton(
+        text = stringResource(id = R.string.get_started),
+        onClick = settingsController
+            .getOnClickMap(true)[R.string.settings_default_browser]!!
+    )
 }
 
 @Preview("1x scale", locale = "en")
@@ -143,7 +130,6 @@ fun WelcomeScreen_Light_Preview() {
     NeevaTheme {
         WelcomeScreen(
             mockSettingsControllerImpl,
-            navigateToZeroQuery = {}
         )
     }
 }
@@ -156,7 +142,6 @@ fun WelcomeScreen_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         WelcomeScreen(
             mockSettingsControllerImpl,
-            navigateToZeroQuery = {}
         )
     }
 }

@@ -1,10 +1,8 @@
 package com.neeva.app.settings.setDefaultAndroidBrowser
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -16,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.R
 import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.settings.SettingsController
@@ -34,11 +32,28 @@ fun SetDefaultAndroidBrowserPane(
     settingsController: SettingsController,
     fromWelcomeScreen: Boolean
 ) {
+    val appNavModel = LocalAppNavModel.current
+
+    SetDefaultAndroidBrowserPane(
+        settingsController = settingsController,
+        fromWelcomeScreen = fromWelcomeScreen
+    ) {
+        appNavModel.openLazyTab()
+    }
+}
+
+@Composable
+fun SetDefaultAndroidBrowserPane(
+    settingsController: SettingsController,
+    fromWelcomeScreen: Boolean,
+    showZeroQuery: () -> Unit
+) {
+    val setDefaultAndroidBrowserManager = settingsController.getSetDefaultAndroidBrowserManager()
+    val isRoleManagerAvailable = setDefaultAndroidBrowserManager.isRoleManagerAvailable()
+
     Surface {
         Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             FullScreenDialogTopBar(
@@ -47,48 +62,75 @@ fun SetDefaultAndroidBrowserPane(
             )
 
             Column(
-                Modifier
+                modifier = Modifier
                     .verticalScroll(rememberScrollState())
                     .padding(Dimensions.PADDING_LARGE)
+                    .weight(1.0f),
+                verticalArrangement = Arrangement.SpaceAround
             ) {
-                Spacer(Modifier.height(28.dp))
 
-                Text(
-                    text = stringResource(id = R.string.switch_default_browser),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(Dimensions.PADDING_MEDIUM)
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.switch_default_browser),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
 
-                Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = stringResource(id = R.string.switch_default_browser_promo),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                }
 
-                Text(
-                    text = stringResource(id = R.string.switch_default_browser_promo),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.outline
-                )
+                if (!isRoleManagerAvailable) {
+                    // Because RoleManager is not available, we need to spell out the instructions
+                    // to the user on how to change the default browser, since they will need to
+                    // leave the app and manually make the change in Settings.
 
-                Spacer(Modifier.height(28.dp))
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(Dimensions.PADDING_MEDIUM)
+                    ) {
+                        Text(
+                            text = stringResource(
+                                id = R.string.switch_default_browser_follow_3_steps
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.outline
+                        )
 
-                Text(
-                    text = stringResource(id = R.string.switch_default_browser_follow_3_steps),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.outline
-                )
+                        Text(
+                            text = stringResource(
+                                id = R.string.switch_default_browser_instructions
+                            ),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
 
-                Spacer(Modifier.height(12.dp))
-
-                Text(
-                    text = stringResource(id = R.string.switch_default_browser_instructions),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(Modifier.height(28.dp))
+                val resourceId = if (isRoleManagerAvailable) {
+                    R.string.set_neeva_as_default_browser
+                } else {
+                    R.string.go_to_settings
+                }
 
                 OnboardingButton(
-                    text = stringResource(id = R.string.go_to_settings),
+                    text = stringResource(id = resourceId),
                     onClick = {
-                        settingsController.openAndroidDefaultBrowserSettings(fromWelcomeScreen)
+                        if (fromWelcomeScreen && isRoleManagerAvailable) {
+                            // If user is on the welcome screen and RoleManager is available, this
+                            // button shows a dialog while navigating the browser to zero query. No
+                            // matter the choice on the dialog, when the dialog is gone, the user
+                            // lands on the zero query screen.
+
+                            setDefaultAndroidBrowserManager.requestToBeDefaultBrowser()
+                            showZeroQuery()
+                        } else {
+                            settingsController.openAndroidDefaultBrowserSettings(fromWelcomeScreen)
+                        }
                     }
                 )
             }
@@ -106,7 +148,7 @@ fun SettingsDefaultAndroidBrowser_Preview() {
         SetDefaultAndroidBrowserPane(
             mockSettingsControllerImpl,
             fromWelcomeScreen = false
-        )
+        ) {}
     }
 }
 
@@ -124,6 +166,6 @@ fun SettingsDefaultAndroidBrowser_Dark_Preview() {
         SetDefaultAndroidBrowserPane(
             mockSettingsControllerImpl,
             fromWelcomeScreen = false
-        )
+        ) {}
     }
 }

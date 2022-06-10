@@ -52,7 +52,6 @@ fun AppNav(
         composable(AppNavDestination.WELCOME.route) {
             WelcomeScreen(
                 settingsController = settingsControllerImpl,
-                navigateToZeroQuery = appNavModel::openLazyTab
             )
         }
 

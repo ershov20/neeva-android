@@ -33,8 +33,6 @@ fun AddToSpaceUI(
     } else {
         LazyColumn {
             item {
-                val spaceStore = LocalEnvironment.current.spaceStore
-
                 BaseRowLayout(
                     onTapRow = spaceStore::createSpace,
                     startComposable = {
