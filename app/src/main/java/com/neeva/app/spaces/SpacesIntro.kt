@@ -17,7 +17,7 @@ import com.neeva.app.LocalEnvironment
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
 import com.neeva.app.cardgrid.spaces.SpaceCard
-import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
+import com.neeva.app.firstrun.widgets.buttons.NeevaOnboardingButton
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -81,8 +81,9 @@ fun SpacesIntro(onClick: () -> Unit = {}) {
             contentDescription = null
         )
 
-        OnboardingButton(
+        NeevaOnboardingButton(
             text = stringResource(id = R.string.space_intro_cta),
+            signup = true,
             onClick = onClick
         )
     }

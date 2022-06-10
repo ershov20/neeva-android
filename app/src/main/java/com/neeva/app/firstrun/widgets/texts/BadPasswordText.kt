@@ -11,7 +11,7 @@ import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun BadPasswordText(password: String) {
-    val message = if (!isGoodPassword(password = password)) {
+    val message = if (password.isNotEmpty() && !isGoodPassword(password = password)) {
         stringResource(R.string.weak_password)
     } else {
         ""

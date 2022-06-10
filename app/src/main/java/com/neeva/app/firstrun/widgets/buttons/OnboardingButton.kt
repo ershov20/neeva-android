@@ -70,7 +70,11 @@ fun OnboardingButton(
     }
     when (provider) {
         NeevaUser.SSOProvider.OKTA -> {
-            NeevaOnboardingButton(signup = signup, onClick = onClick)
+            NeevaOnboardingButton(
+                text = getSSOProviderOnboardingText(NeevaUser.SSOProvider.OKTA, signup),
+                signup = signup,
+                onClick = onClick
+            )
         }
         else -> {
             OnboardingButton(
@@ -173,6 +177,7 @@ fun OnboardingButton(
 @Composable
 fun NeevaOnboardingButton(
     enabled: Boolean = true,
+    text: String,
     signup: Boolean,
     onClick: () -> Unit
 ) {
@@ -203,7 +208,7 @@ fun NeevaOnboardingButton(
             }
 
             Text(
-                text = getSSOProviderOnboardingText(NeevaUser.SSOProvider.OKTA, signup),
+                text = text,
                 style = MaterialTheme.typography.titleMedium
             )
 
