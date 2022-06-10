@@ -2,15 +2,21 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.neeva.app.BaseTest
+import com.neeva.app.CoroutineScopeRule
+import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.ActiveTabModel.DisplayMode
+import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.storage.TabScreenshotManager
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
 import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
@@ -32,9 +38,14 @@ import strikt.assertions.isFalse
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
 class ActiveTabModelImplTest : BaseTest() {
+    @Rule
+    @JvmField
+    val coroutineScopeRule = CoroutineScopeRule()
+
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
 
     private lateinit var model: ActiveTabModelImpl
@@ -43,18 +54,24 @@ class ActiveTabModelImplTest : BaseTest() {
     private lateinit var neevaHomepageTab: MockTabHarness
     private lateinit var neevaSearchTab: MockTabHarness
     private lateinit var neevaSpacesTab: MockTabHarness
+    lateinit var tabList: TabList
 
     @Before
     override fun setUp() {
         super.setUp()
 
         neevaConstants = NeevaConstants()
+        tabList = TabList()
 
         model = ActiveTabModelImpl(
-            coroutineScope = mock(),
-            dispatchers = mock(),
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = Dispatchers(
+                StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
+                StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
+            ),
             neevaConstants = neevaConstants,
-            tabScreenshotManager = tabScreenshotManager
+            tabScreenshotManager = tabScreenshotManager,
+            tabList = tabList
         )
 
         mainTab = MockTabHarness(
@@ -296,6 +313,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
         model.goBack()
         verify(harness.navigationController, never()).goBack()
+        verify(harness.tab, never()).dispatchBeforeUnloadAndClose()
 
         // Say that the user navigated somewhere and we can now go backward.
         harness.canGoBack = true
@@ -303,6 +321,74 @@ class ActiveTabModelImplTest : BaseTest() {
 
         model.goBack()
         verify(harness.navigationController, times(1)).goBack()
+    }
+
+    @Test
+    fun goBack_forChildTab() {
+        // Set the tab.
+        val parentTabHarness = MockTabHarness(
+            currentTitle = "Parent",
+            currentUri = Uri.parse("https://www.techmeme.com/"),
+            canGoBack = false,
+            canGoForward = false,
+            tabId = "parent tab"
+        )
+        val childTabHarness = MockTabHarness(
+            currentTitle = "Child",
+            currentUri = Uri.parse("https://www.sitelinkedfromtechmeme.com/"),
+            canGoBack = false,
+            canGoForward = false,
+            tabId = "child tab",
+            parentTabId = parentTabHarness.tabId
+        )
+
+        model.onActiveTabChanged(childTabHarness.tab)
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
+
+        // Hit "back" on the child tab.
+        model.goBack()
+
+        // Even though there are no navigations on this tab, because it is a child we should have
+        // closed it.
+        verify(childTabHarness.navigationController, never()).goBack()
+        verify(childTabHarness.tab).dispatchBeforeUnloadAndClose()
+    }
+
+    @Test
+    fun goBack_forChildTabAfterParentClosed_doesNothing() {
+        // Set the tab.
+        val parentTabHarness = MockTabHarness(
+            currentTitle = "Parent",
+            currentUri = Uri.parse("https://www.techmeme.com/"),
+            canGoBack = false,
+            canGoForward = false,
+            tabId = "parent tab"
+        )
+        val childTabHarness = MockTabHarness(
+            currentTitle = "Child",
+            currentUri = Uri.parse("https://www.sitelinkedfromtechmeme.com/"),
+            canGoBack = false,
+            canGoForward = false,
+            tabId = "child tab",
+            parentTabId = parentTabHarness.tabId
+        )
+
+        model.onActiveTabChanged(childTabHarness.tab)
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
+
+        // Say that the parent tab has been removed.
+        tabList.remove(parentTabHarness.tabId)
+        model.onTabRemoved(parentTabHarness.tab.guid)
+
+        // We shouldn't be able to hit back, now.
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
+
+        // Hit "back" on the child tab.
+        model.goBack()
+
+        // Nothing should happen.
+        verify(childTabHarness.navigationController, never()).goBack()
+        verify(childTabHarness.tab, never()).dispatchBeforeUnloadAndClose()
     }
 
     @Test
@@ -346,11 +432,14 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(navigateParamsCaptor.lastValue.isIntentProcessingDisabled).isTrue()
     }
 
-    class MockTabHarness(
+    private var nextMockTabId: Int = 0
+    inner class MockTabHarness(
         var currentTitle: String? = null,
         var currentUri: Uri? = null,
         var canGoBack: Boolean = false,
-        var canGoForward: Boolean = false
+        var canGoForward: Boolean = false,
+        val tabId: String = (nextMockTabId++).toString(),
+        val parentTabId: String? = null
     ) {
         val tabCallbacks = mutableSetOf<TabCallback>()
         val navigationCallbacks = mutableSetOf<NavigationCallback>()
@@ -380,6 +469,8 @@ class ActiveTabModelImplTest : BaseTest() {
         }
 
         val tab = mock<Tab> {
+            on { guid } doReturn tabId
+
             on { navigationController } doReturn navigationController
 
             on { registerTabCallback(any()) } doAnswer {
@@ -395,6 +486,15 @@ class ActiveTabModelImplTest : BaseTest() {
                 tabCallbacks.remove(callback)
                 Unit
             }
+        }
+
+        init {
+            tabList.add(tab)
+            tabList.updateParentInfo(
+                tab = tab,
+                parentTabId = parentTabId,
+                tabOpenType = parentTabId?.let { TabOpenType.CHILD_TAB } ?: TabOpenType.DEFAULT
+            )
         }
     }
 }

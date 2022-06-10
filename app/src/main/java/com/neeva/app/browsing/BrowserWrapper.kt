@@ -116,12 +116,6 @@ interface BrowserWrapper {
     fun closeActiveTabIfOpenedViaIntent(): Boolean
 
     /**
-     * Closes the active Tab if and only if it was opened as a child of another Tab.
-     * @return True if the tab was closed.
-     */
-    fun closeActiveChildTab(): Boolean
-
-    /**
      * Start a load of the given [uri].
      *
      * If the user is currently in the process of opening a new tab lazily, this will open a new Tab

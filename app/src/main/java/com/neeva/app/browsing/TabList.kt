@@ -115,6 +115,17 @@ class TabList {
             }
     }
 
+    internal fun isParentTabInList(tabId: String?): Boolean {
+        if (tabId == null) return false
+
+        val tabInfo = getTabInfo(tabId)
+        return tabInfo?.data
+            ?.takeIf { it.openType == TabInfo.TabOpenType.CHILD_TAB }
+            ?.let { data ->
+                data.parentTabId?.let { tabs.contains(it) }
+            } ?: false
+    }
+
     internal fun clear() {
         tabs.clear()
         tabInfoMap.clear()

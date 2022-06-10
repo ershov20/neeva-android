@@ -493,11 +493,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 browserWrapper.goBack()
             }
 
-            browserWrapper.closeActiveChildTab() -> {
-                // Closing the child tab will kick the user back to the parent tab, if possible.
-                return
-            }
-
             browserWrapper.closeActiveTabIfOpenedViaIntent() -> {
                 // Let Android kick the user back to the calling app.
                 super.onBackPressed()

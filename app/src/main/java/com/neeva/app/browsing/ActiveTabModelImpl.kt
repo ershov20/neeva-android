@@ -29,7 +29,8 @@ class ActiveTabModelImpl(
     val coroutineScope: CoroutineScope,
     val dispatchers: Dispatchers,
     private val neevaConstants: NeevaConstants,
-    private val tabScreenshotManager: TabScreenshotManager
+    private val tabScreenshotManager: TabScreenshotManager,
+    private val tabList: TabList
 ) : ActiveTabModel {
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     override val urlFlow: StateFlow<Uri> = _urlFlow
@@ -96,6 +97,14 @@ class ActiveTabModelImpl(
         updateNavigationInfo()
         updateUrl(newActiveTab?.currentDisplayUrl ?: Uri.EMPTY)
         _titleFlow.value = newActiveTab?.currentDisplayTitle ?: ""
+    }
+
+    internal fun onTabRemoved(removedTabId: String) {
+        val activeTabGuid = activeTab?.guid ?: return
+        val tabInfo = tabList.getTabInfo(activeTabGuid) ?: return
+        if (tabInfo.data.parentTabId == removedTabId) {
+            updateNavigationInfo()
+        }
     }
 
     fun reload() {
@@ -172,6 +181,9 @@ class ActiveTabModelImpl(
         if (activeTab?.navigationController?.canGoBack() == true) {
             activeTab?.navigationController?.goBack()
             updateNavigationInfo()
+        } else if (tabList.isParentTabInList(activeTab?.guid)) {
+            activeTab?.dispatchBeforeUnloadAndClose()
+            updateNavigationInfo()
         }
     }
 
@@ -190,9 +202,12 @@ class ActiveTabModelImpl(
     }
 
     private fun updateNavigationInfo() {
+        val hasBackNavigations = activeTab?.navigationController?.canGoBack() ?: false
+        val isParentTabInList = tabList.isParentTabInList(activeTab?.guid)
+
         _navigationInfoFlow.value = ActiveTabModel.NavigationInfo(
             activeTab?.navigationController?.navigationListSize ?: 0,
-            activeTab?.navigationController?.canGoBack() ?: false,
+            hasBackNavigations || isParentTabInList,
             activeTab?.navigationController?.canGoForward() ?: false,
             activeTab?.isDesktopUserAgentEnabled ?: false
         )

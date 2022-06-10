@@ -75,23 +75,24 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var context: Context
     private lateinit var dispatchers: Dispatchers
     private lateinit var neevaConstants: NeevaConstants
+    private lateinit var tabList: TabList
     private lateinit var profile: Profile
     private lateinit var urlBarModel: URLBarModelImpl
 
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
     @Mock private lateinit var activityCallbackProvider: ActivityCallbackProvider
-    @Mock private lateinit var findInPageModel: FindInPageModelImpl
     @Mock private lateinit var contentFilterManager: ContentFilterManager
+    @Mock private lateinit var cookieCutterModel: CookieCutterModel
     @Mock private lateinit var cookieManager: CookieManager
+    @Mock private lateinit var domainProvider: DomainProvider
     @Mock private lateinit var faviconCache: FaviconCache
+    @Mock private lateinit var findInPageModel: FindInPageModelImpl
     @Mock private lateinit var fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     @Mock private lateinit var historyManager: HistoryManager
+    @Mock private lateinit var settingsDataModel: SettingsDataModel
     @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var suggestionsModel: SuggestionsModel
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
-    @Mock private lateinit var domainProvider: DomainProvider
-    @Mock private lateinit var settingsDataModel: SettingsDataModel
-    @Mock private lateinit var cookieCutterModel: CookieCutterModel
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
@@ -107,6 +108,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         neevaConstants = NeevaConstants()
         context = ApplicationProvider.getApplicationContext()
+        tabList = TabList()
 
         navigationInfoFlow = MutableStateFlow(ActiveTabModel.NavigationInfo())
         urlBarModelIsEditing = MutableStateFlow(false)
@@ -171,6 +173,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             suggestionsModel = suggestionsModel,
             faviconCache = faviconCache,
             spaceStore = spaceStore,
+            tabList = tabList,
             _activeTabModelImpl = activeTabModelImpl,
             _urlBarModel = urlBarModel,
             _findInPageModel = findInPageModel,

@@ -48,7 +48,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserEmbeddabilityMode
@@ -69,6 +68,7 @@ abstract class BaseBrowserWrapper internal constructor(
     override val suggestionsModel: SuggestionsModel?,
     final override val faviconCache: FaviconCache,
     protected val spaceStore: SpaceStore?,
+    private val tabList: TabList,
     private val _activeTabModelImpl: ActiveTabModelImpl,
     private val _urlBarModel: URLBarModelImpl,
     private val _findInPageModel: FindInPageModelImpl,
@@ -100,7 +100,8 @@ abstract class BaseBrowserWrapper internal constructor(
         domainProvider: DomainProvider,
         neevaConstants: NeevaConstants,
         settingsDataModel: SettingsDataModel,
-        trackerAllowList: TrackersAllowList
+        trackerAllowList: TrackersAllowList,
+        tabList: TabList = TabList()
     ) : this(
         isIncognito = isIncognito,
         appContext = appContext,
@@ -110,12 +111,14 @@ abstract class BaseBrowserWrapper internal constructor(
         suggestionsModel = suggestionsModel,
         faviconCache = faviconCache,
         spaceStore = spaceStore,
+        tabList = tabList,
         _activeTabModelImpl = ActiveTabModelImpl(
             spaceStore = spaceStore,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
             neevaConstants = neevaConstants,
-            tabScreenshotManager = tabScreenshotManager
+            tabScreenshotManager = tabScreenshotManager,
+            tabList = tabList
         ),
         _urlBarModel = URLBarModelImpl(
             suggestionFlow = suggestionsModel?.autocompleteSuggestionFlow ?: MutableStateFlow(null),
@@ -139,7 +142,6 @@ abstract class BaseBrowserWrapper internal constructor(
         )
     )
 
-    private val tabList = TabList()
     private val tabCallbackMap: HashMap<String, TabCallbacks> = HashMap()
 
     final override val orderedTabList: StateFlow<List<TabInfo>> get() = tabList.orderedTabList
@@ -222,6 +224,10 @@ abstract class BaseBrowserWrapper internal constructor(
             // Remove the tab from our local state.
             val newIndex = (tabList.indexOf(tabId) - 1).coerceAtLeast(0)
             val tabInfo = tabList.remove(tabId)
+
+            // If the active tab is a child of the removed tab, update it so that we have the
+            // correct navigation info.
+            _activeTabModelImpl.onTabRemoved(tabId)
 
             // Remove all the callbacks associated with the tab to avoid any callbacks after the tab
             // gets destroyed.
@@ -700,23 +706,11 @@ abstract class BaseBrowserWrapper internal constructor(
      * @return True if the tab was closed.
      */
     override fun closeActiveTabIfOpenedViaIntent(): Boolean {
-        return conditionallyCloseActiveTab(TabInfo.TabOpenType.VIA_INTENT)
-    }
-
-    /**
-     * Closes the active Tab if and only if it was opened as a child of another Tab.
-     * @return True if the tab was closed.
-     */
-    override fun closeActiveChildTab(): Boolean {
-        return conditionallyCloseActiveTab(TabInfo.TabOpenType.CHILD_TAB)
-    }
-
-    private fun conditionallyCloseActiveTab(expected: TabInfo.TabOpenType): Boolean {
         return getActiveTab()
             ?.let { activeTab ->
                 val tabInfo = tabList.getTabInfo(activeTab.guid)
                 tabInfo?.data?.openType
-                    ?.takeIf { it == expected }
+                    ?.takeIf { it == TabInfo.TabOpenType.VIA_INTENT }
                     ?.let {
                         closeTab(tabInfo.id)
                         true
