@@ -87,14 +87,14 @@ fun AppNav(
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {
             SetDefaultAndroidBrowserPane(
                 settingsController = settingsControllerImpl,
-                fromWelcomeScreen = false
+                showAsDialog = false
             )
         }
 
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS_FROM_WELCOME.route) {
             SetDefaultAndroidBrowserPane(
                 settingsController = settingsControllerImpl,
-                fromWelcomeScreen = true
+                showAsDialog = true
             )
         }
 

@@ -15,6 +15,7 @@
     <string name="done">Done</string>
     <string name="remove">Remove</string>
     <string name="more">More</string>
+    <string name="maybe_later">Maybe later</string>
 
     <string name="new_tab_content_description">Create new tab</string>
     <string name="close_all_content_description">Close all tabs</string>
@@ -98,8 +99,8 @@
     <string name="settings_connected_apps">Connected apps</string>
     <string name="settings_invite_friends">Invite friends</string>
     <string name="settings_general">General</string>
-    <string name="set_neeva_as_default_browser">Set Neeva as your default browser</string>
-    <string name="settings_default_browser">Default Browser</string>
+    <string name="set_neeva_as_default_browser">Switch your default browser</string>
+    <string name="settings_default_browser">Default browser</string>
     <string name="settings_show_search_search_suggestions">Show search suggestions</string>
     <string name="settings_block_pop_up_windows">Block pop-up windows</string>
     <string name="settings_require_confirmation">Require confirmation</string>
@@ -214,15 +215,14 @@
     <string name="error_url_failure">Could not open \"%1$s\"</string>
 
     <string name="navigate_to_profile">Navigate to Profile</string>
-    <string name="switch_default_browser">Switch Your Default Browser</string>
-    <string name="switch_default_browser_promo">
-        Block invasive trackers across the Web.\nOpen links safely with blazing fast browsing and peace of mind.</string>
+    <string name="switch_default_browser_title">Make Neeva your default browser</string>
+    <string name="switch_default_browser_promo">Block invasive trackers across the Web.\nOpen links safely with blazing fast browsing and peace of mind.</string>
 
     <string name="switch_default_browser_follow_3_steps">Follow these 3 easy steps:</string>
     <string name="switch_default_browser_instructions">
         1. Go to Settings\n\n
         2. Tap Browser App\n\n
-        3. Select Neeva Search &amp; Browser</string>
+        3. Select Neeva</string>
     <string name="go_to_settings">Go to Settings</string>
 
     <string name="menu_download_image">Download image</string>

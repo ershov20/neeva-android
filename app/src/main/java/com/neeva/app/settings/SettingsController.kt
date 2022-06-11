@@ -61,7 +61,7 @@ interface SettingsController {
     fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager
 
     // Meant for system images lower than Android Q
-    fun openAndroidDefaultBrowserSettings(fromWelcomeScreen: Boolean)
+    fun openAndroidDefaultBrowserSettings(shouldOpenLazyTabAfterward: Boolean)
     //endregion
 
     //region Debug Settings
@@ -199,8 +199,8 @@ class SettingsControllerImpl(
         return setDefaultAndroidBrowserManager
     }
 
-    override fun openAndroidDefaultBrowserSettings(fromWelcomeScreen: Boolean) {
-        appNavModel.openAndroidDefaultBrowserSettings(fromWelcomeScreen)
+    override fun openAndroidDefaultBrowserSettings(shouldOpenLazyTabAfterward: Boolean) {
+        appNavModel.openAndroidDefaultBrowserSettings(shouldOpenLazyTabAfterward)
     }
 
     override fun isAdvancedSettingsAllowed(): Boolean {

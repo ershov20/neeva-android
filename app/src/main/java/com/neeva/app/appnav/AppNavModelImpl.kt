@@ -147,10 +147,10 @@ class AppNavModelImpl(
         )
     }
 
-    override fun openAndroidDefaultBrowserSettings(fromWelcomeScreen: Boolean) {
+    override fun openAndroidDefaultBrowserSettings(shouldOpenLazyTab: Boolean) {
         safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
-        if (fromWelcomeScreen) {
-            openLazyTab(false)
+        if (shouldOpenLazyTab) {
+            openLazyTab(focusUrlBar = false)
         }
     }
 

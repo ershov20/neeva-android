@@ -42,7 +42,7 @@ interface AppNavModel {
     // endregion
 
     // region External screens
-    fun openAndroidDefaultBrowserSettings(fromWelcomeScreen: Boolean)
+    fun openAndroidDefaultBrowserSettings(shouldOpenLazyTab: Boolean)
     fun showAdditionalLicenses()
 
     fun openUrlViaIntent(uri: Uri)
