@@ -17,7 +17,7 @@ interface AppNavModel {
 
     fun popBackStack()
 
-    fun openLazyTab()
+    fun openLazyTab(focusUrlBar: Boolean = true)
     fun openUrl(url: Uri)
 
     // region Internal screens

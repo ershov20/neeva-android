@@ -100,7 +100,7 @@ class URLBarModelImpl(
 
     /** Completely replaces what is displayed in the URL bar for user editing. */
     override fun replaceLocationBarText(newValue: String) {
-        requestFocus()
+        showZeroQuery()
 
         val currentState = _state.value
         if (!currentState.isEditing) return
@@ -183,12 +183,12 @@ class URLBarModelImpl(
         _state.value.autocompleteSuggestion?.let { replaceLocationBarText(it) }
     }
 
-    override fun requestFocus() = onFocusChanged(isFocused = true)
-    override fun clearFocus() = onFocusChanged(isFocused = false)
+    override fun showZeroQuery(focusUrlBar: Boolean) {
+        _state.value = URLBarModelState(isEditing = true, focusUrlBar = focusUrlBar)
+    }
 
-    internal fun onFocusChanged(isFocused: Boolean) {
-        // The user has either started editing a query or stopped trying.  Reset everything.
-        _state.value = URLBarModelState(isEditing = isFocused)
+    override fun clearFocus() {
+        _state.value = URLBarModelState(isEditing = false)
     }
 
     companion object {

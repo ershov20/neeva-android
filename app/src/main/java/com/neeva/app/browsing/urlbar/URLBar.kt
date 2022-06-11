@@ -33,6 +33,7 @@ fun URLBar(
     val urlBarModel = browserToolbarModel.urlBarModel
     val urlBarModelState = urlBarModel.stateFlow.collectAsState()
     val isEditing = urlBarModelState.value.isEditing
+    val focusUrlBar = urlBarModelState.value.focusUrlBar
 
     val iconModifier = Modifier.padding(vertical = Dimensions.PADDING_TINY)
 
@@ -67,6 +68,7 @@ fun URLBar(
                     onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
                     onLoadUrl = { browserToolbarModel.onLoadUrl(urlBarModelState.value) },
                     onAcceptAutocompleteSuggestion = urlBarModel::acceptAutocompleteSuggestion,
+                    focusUrlBar = focusUrlBar,
                     modifier = childModifier.then(
                         if (isEditing) {
                             Modifier.padding(start = Dimensions.PADDING_MEDIUM)
@@ -78,7 +80,7 @@ fun URLBar(
             } else {
                 LocationLabel(
                     placeholderColor = placeholderColor,
-                    modifier = childModifier.clickable { urlBarModel.requestFocus() }
+                    modifier = childModifier.clickable { urlBarModel.showZeroQuery() }
                 )
             }
         }

@@ -14,6 +14,6 @@ class PreviewUrlBarModel(urlBarModelState: URLBarModelState) : URLBarModel {
     override fun replaceLocationBarText(newValue: String) {}
     override fun onLocationBarTextChanged(newValue: TextFieldValue) {}
     override fun acceptAutocompleteSuggestion() {}
-    override fun requestFocus() {}
+    override fun showZeroQuery(focusUrlBar: Boolean) {}
     override fun clearFocus() {}
 }

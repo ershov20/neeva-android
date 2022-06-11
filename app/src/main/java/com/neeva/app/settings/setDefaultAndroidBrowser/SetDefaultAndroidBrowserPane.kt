@@ -38,7 +38,7 @@ fun SetDefaultAndroidBrowserPane(
         settingsController = settingsController,
         fromWelcomeScreen = fromWelcomeScreen
     ) {
-        appNavModel.openLazyTab()
+        appNavModel.openLazyTab(false)
     }
 }
 

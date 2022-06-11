@@ -45,7 +45,7 @@ interface URLBarModel {
     fun acceptAutocompleteSuggestion()
 
     /** Requests focus on the URL bar for editing. */
-    fun requestFocus()
+    fun showZeroQuery(focusUrlBar: Boolean = true)
 
     /** Clears focus on the URL bar. */
     fun clearFocus()

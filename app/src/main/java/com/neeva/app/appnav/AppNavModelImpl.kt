@@ -131,11 +131,11 @@ class AppNavModelImpl(
         }
     }
 
-    override fun openLazyTab() {
+    override fun openLazyTab(focusUrlBar: Boolean) {
         // Ordering is important here because showing the browser clears the focus of the URL bar
         // while opening a lazy tab requests the focus on the URL bar.
         showBrowser(forceUserToStayInCardGrid = false)
-        webLayerModel.currentBrowser.openLazyTab()
+        webLayerModel.currentBrowser.openLazyTab(focusUrlBar)
     }
 
     override fun openUrl(url: Uri) {
@@ -150,7 +150,7 @@ class AppNavModelImpl(
     override fun openAndroidDefaultBrowserSettings(fromWelcomeScreen: Boolean) {
         safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
         if (fromWelcomeScreen) {
-            openLazyTab()
+            openLazyTab(false)
         }
     }
 

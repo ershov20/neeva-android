@@ -512,7 +512,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         // Opening a lazy tab should tell the URL bar to take focus so that the user can see zero
         // query and the other suggestions.
         browserWrapper.openLazyTab()
-        verify(urlBarModel).requestFocus()
+        verify(urlBarModel).showZeroQuery()
 
         // Load a URL without explicitly saying it should be in a new tab.
         browserWrapper.loadUrl(uri = expectedUri)
@@ -558,7 +558,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         // Opening a lazy tab should tell the URL bar to take focus so that the user can see zero
         // query and the other suggestions.
         browserWrapper.openLazyTab()
-        verify(urlBarModel).requestFocus()
+        verify(urlBarModel).showZeroQuery()
         urlBarModelIsEditing.value = true
 
         // Say that the URL bar lost focus.

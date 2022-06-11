@@ -77,6 +77,7 @@ fun AutocompleteTextField(
     onLoadUrl: () -> Unit,
     onAcceptAutocompleteSuggestion: () -> Unit,
     placeholderColor: Color,
+    focusUrlBar: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -209,7 +210,9 @@ fun AutocompleteTextField(
     }
 
     LaunchedEffect(true) {
-        focusRequester.requestFocus()
+        if (focusUrlBar) {
+            focusRequester.requestFocus()
+        }
     }
 }
 

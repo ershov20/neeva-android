@@ -83,7 +83,7 @@ interface BrowserWrapper {
      * Allows the user to use the URL bar and see suggestions without opening a tab until they
      * trigger a navigation.
      */
-    fun openLazyTab()
+    fun openLazyTab(focusUrlBar: Boolean = true)
 
     /** Returns true if the [Browser] is maintaining no tabs. */
     fun hasNoTabs(): Boolean

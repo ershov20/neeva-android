@@ -11,6 +11,9 @@ data class URLBarModelState(
     /** Whether or not the user is editing the URL bar and should be shown suggestions. */
     val isEditing: Boolean = false,
 
+    /** Zero Query with no focus */
+    val focusUrlBar: Boolean = true,
+
     /** Whether or not autocomplete suggestions should be allowed. */
     internal val isAutocompleteAllowed: Boolean = true,
 

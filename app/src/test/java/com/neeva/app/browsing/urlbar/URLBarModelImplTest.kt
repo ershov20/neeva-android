@@ -91,7 +91,7 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun onLocationBarTextChanged_withFocus_setsText() {
-        model.requestFocus()
+        model.showZeroQuery()
         expectThat(model.stateFlow.value.isEditing).isTrue()
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
@@ -102,7 +102,7 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun onLocationBarTextChanged_whenRemovingCharacterAndValidSuggestion_deletesSuggestion() {
-        model.requestFocus()
+        model.showZeroQuery()
         expectThat(model.stateFlow.value.isEditing).isTrue()
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
@@ -165,7 +165,7 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun onLocationBarTextChanged_whenRemovingCharacterAndNoSuggestion_acceptsTextChange() {
-        model.requestFocus()
+        model.showZeroQuery()
         expectThat(model.stateFlow.value.isEditing).isTrue()
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
@@ -195,7 +195,7 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun onLocationBarTextChanged_whenAddingCharacterAndValidSuggestion_keepsSameSuggestion() {
-        model.requestFocus()
+        model.showZeroQuery()
         expectThat(model.stateFlow.value.isEditing).isTrue()
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
@@ -257,7 +257,7 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun onLocationBarTextChanged_whenAddingCharacterAndInvalidSuggestion_removesSuggestion() {
-        model.requestFocus()
+        model.showZeroQuery()
         expectThat(model.stateFlow.value.isEditing).isTrue()
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
@@ -319,7 +319,7 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun onLocationBarTextChanged_whenOnlyCompositionChanges_stillAllowsAutocomplete() {
-        model.requestFocus()
+        model.showZeroQuery()
         expectThat(model.stateFlow.value.isEditing).isTrue()
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("")
@@ -367,7 +367,7 @@ class URLBarModelImplTest : BaseTest() {
             ).thenReturn(mockBitmap)
         }
 
-        model.requestFocus()
+        model.showZeroQuery()
         model.onLocationBarTextChanged(TextFieldValue("exam"))
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("exam")
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
@@ -392,7 +392,7 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun autocompleteSuggestionFlow_forSearchButGivenWrongSuggestion_removesAutocomplete() {
-        model.requestFocus()
+        model.showZeroQuery()
         model.onLocationBarTextChanged(TextFieldValue("exam"))
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("exam")
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
@@ -421,7 +421,7 @@ class URLBarModelImplTest : BaseTest() {
 
     @Test
     fun autocompleteSuggestionFlow_forSiteButGivenWrongSuggestion_removesAutocomplete() {
-        model.requestFocus()
+        model.showZeroQuery()
         model.onLocationBarTextChanged(TextFieldValue("example.com"))
         expectThat(model.stateFlow.value.textFieldValue.text).isEqualTo("example.com")
         expectThat(model.stateFlow.value.isAutocompleteAllowed).isTrue()
@@ -451,7 +451,7 @@ class URLBarModelImplTest : BaseTest() {
     @Test
     fun onFocusChanged() {
         // When the bar is focused, remove whatever text was being displayed.
-        model.onFocusChanged(true)
+        model.showZeroQuery()
         expectThat(urlBarModelText).isEqualTo("")
         expectThat(model.stateFlow.value.isEditing).isTrue()
 
@@ -459,7 +459,7 @@ class URLBarModelImplTest : BaseTest() {
         expectThat(urlBarModelText).isEqualTo("reddit.com/r/android")
 
         // When the bar is unfocused, it should return to showing the webpage domain.
-        model.onFocusChanged(false)
+        model.clearFocus()
         expectThat(model.stateFlow.value.isEditing).isFalse()
         expectThat(urlBarModelText).isEqualTo("")
     }

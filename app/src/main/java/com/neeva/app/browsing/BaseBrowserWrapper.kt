@@ -722,9 +722,9 @@ abstract class BaseBrowserWrapper internal constructor(
      * Allows the user to use the URL bar and see suggestions without opening a tab until they
      * trigger a navigation.
      */
-    override fun openLazyTab() {
+    override fun openLazyTab(focusUrlBar: Boolean) {
         _isLazyTabFlow.value = true
-        urlBarModel.requestFocus()
+        urlBarModel.showZeroQuery(focusUrlBar)
     }
 
     /** Returns true if the [Browser] is maintaining no tabs. */
