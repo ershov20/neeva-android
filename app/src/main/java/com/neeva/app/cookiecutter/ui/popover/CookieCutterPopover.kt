@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -40,24 +41,10 @@ fun CookieCutterPopover(
         onDismissRequest = cookieCutterPopoverModel::dismissPopover,
         properties = PopupProperties(focusable = true)
     ) {
-        Surface(
-            shape = RoundedCornerShape(
-                bottomStart = Dimensions.RADIUS_SMALL,
-                bottomEnd = Dimensions.RADIUS_SMALL
-            ),
-            shadowElevation = 2.dp,
-            modifier = modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(Dimensions.PADDING_LARGE)
-            ) {
-                CookieCutterPopoverContent(
-                    cookieCutterPopoverModel = cookieCutterPopoverModel
-                )
-            }
-        }
+        CookieCutterPopoverContent(
+            cookieCutterPopoverModel = cookieCutterPopoverModel,
+            modifier = modifier
+        )
     }
 }
 
@@ -75,27 +62,39 @@ private fun CookieCutterPopoverContent(
     val allowsTrackersFlow by trackersAllowList.getHostAllowsTrackersFlow(host).collectAsState(true)
     val cookieCutterEnabled = !allowsTrackersFlow
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        TrackingDataDisplay(
-            visible = cookieCutterEnabled,
-            cookieCutterPopoverModel = cookieCutterPopoverModel
-        )
-        // Cookie Cutter Popover Settings:
-        TrackingDataSurface {
-            Column {
-                CookieCutterPopoverSwitch(
-                    cookieCutterEnabled = cookieCutterEnabled,
-                    host = host,
-                    trackersAllowList = trackersAllowList,
-                    onSuccess = { cookieCutterPopoverModel.onReloadTab() }
-                )
+    Surface(
+        shape = RoundedCornerShape(Dimensions.RADIUS_SMALL),
+        shadowElevation = 2.dp,
+        modifier = modifier.widthIn(max = 480.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .padding(Dimensions.PADDING_LARGE)
+                .fillMaxWidth()
+        ) {
+            TrackingDataDisplay(
+                visible = cookieCutterEnabled,
+                cookieCutterPopoverModel = cookieCutterPopoverModel
+            )
 
-                Divider()
+            // Cookie Cutter Popover Settings:
+            TrackingDataSurface {
+                Column {
+                    CookieCutterPopoverSwitch(
+                        cookieCutterEnabled = cookieCutterEnabled,
+                        host = host,
+                        trackersAllowList = trackersAllowList,
+                        onSuccess = { cookieCutterPopoverModel.onReloadTab() }
+                    )
 
-                SettingsNavigationRow(
-                    primaryLabel = stringResource(R.string.cookie_cutter_settings),
-                    onClick = cookieCutterPopoverModel::openCookieCutterSettings
-                )
+                    Divider()
+
+                    SettingsNavigationRow(
+                        primaryLabel = stringResource(R.string.cookie_cutter_settings),
+                        onClick = cookieCutterPopoverModel::openCookieCutterSettings
+                    )
+                }
             }
         }
     }
@@ -105,9 +104,9 @@ private fun CookieCutterPopoverContent(
 @Preview("CookieCutterPopover 2x font scale", locale = "en", fontScale = 2.0f)
 @Preview("CookieCutterPopover RTL, 1x font scale", locale = "he")
 @Composable
-private fun CookieCutterPopoverPreview() {
+private fun CookieCutterPopoverContentPreview() {
     LightDarkPreviewContainer {
-        CookieCutterPopover(
+        CookieCutterPopoverContent(
             cookieCutterPopoverModel = PreviewCookieCutterPopoverModel(),
             modifier = Modifier.height(400.dp)
         )
