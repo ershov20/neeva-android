@@ -1,126 +1,35 @@
 package com.neeva.app.browsing.urlbar
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
-import com.neeva.app.cookiecutter.ui.icon.TrackingProtectionButton
-import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopover
-import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
+import com.neeva.app.browsing.ActiveTabModel
+import com.neeva.app.browsing.toolbar.PreviewBrowserToolbarModel
+import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
-fun URLBar(
-    cookieCutterPopoverModel: CookieCutterPopoverModel,
-    modifier: Modifier = Modifier,
-    endComposable: @Composable (modifier: Modifier) -> Unit
-) {
+fun URLBar(modifier: Modifier = Modifier) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
+    val isIncognito = browserToolbarModel.isIncognito
+
     val urlBarModel = browserToolbarModel.urlBarModel
     val urlBarModelState = urlBarModel.stateFlow.collectAsState()
     val isEditing = urlBarModelState.value.isEditing
     val focusUrlBar = urlBarModelState.value.focusUrlBar
 
-    val iconModifier = Modifier.padding(vertical = Dimensions.PADDING_TINY)
-
-    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
-        AnimatedVisibility(visible = !isEditing) {
-            UrlBarStartComposable(
-                isIncognito = browserToolbarModel.isIncognito,
-                cookieCutterPopoverModel = cookieCutterPopoverModel,
-                modifier = iconModifier
-            )
-        }
-
-        AnimatedVisibility(visible = isEditing) {
-            Spacer(Modifier.size(Dimensions.PADDING_LARGE))
-        }
-
-        UrlBarContainer(
-            isIncognito = browserToolbarModel.isIncognito,
-            modifier = Modifier.weight(1f)
-        ) { placeholderColor ->
-            val childModifier = Modifier
-                .fillMaxWidth()
-                .defaultMinSize(minHeight = 40.dp)
-
-            if (isEditing) {
-                AutocompleteTextField(
-                    textFieldValue = urlBarModelState.value.textFieldValue,
-                    suggestionText = urlBarModelState.value.autocompleteSuggestionText,
-                    faviconBitmap = urlBarModelState.value.faviconBitmap,
-                    placeholderColor = placeholderColor,
-                    onLocationEdited = { urlBarModel.onLocationBarTextChanged(it) },
-                    onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
-                    onLoadUrl = { browserToolbarModel.onLoadUrl(urlBarModelState.value) },
-                    onAcceptAutocompleteSuggestion = urlBarModel::acceptAutocompleteSuggestion,
-                    focusUrlBar = focusUrlBar,
-                    modifier = childModifier.then(
-                        if (isEditing) {
-                            Modifier.padding(start = Dimensions.PADDING_MEDIUM)
-                        } else {
-                            Modifier.padding(horizontal = Dimensions.PADDING_MEDIUM)
-                        }
-                    )
-                )
-            } else {
-                LocationLabel(
-                    placeholderColor = placeholderColor,
-                    modifier = childModifier.clickable { urlBarModel.showZeroQuery() }
-                )
-            }
-        }
-
-        AnimatedVisibility(visible = isEditing) {
-            Spacer(Modifier.size(Dimensions.PADDING_LARGE))
-        }
-
-        AnimatedVisibility(visible = !isEditing) {
-            endComposable(modifier = iconModifier)
-        }
-    }
-}
-
-@Composable
-fun UrlBarStartComposable(
-    isIncognito: Boolean,
-    cookieCutterPopoverModel: CookieCutterPopoverModel,
-    modifier: Modifier
-) {
-    TrackingProtectionButton(
-        showIncognitoBadge = isIncognito,
-        trackingDataFlow = cookieCutterPopoverModel.trackingDataFlow,
-        modifier = modifier,
-        onClick = cookieCutterPopoverModel::openPopover
-    )
-
-    if (cookieCutterPopoverModel.popoverVisible.value) {
-        CookieCutterPopover(
-            cookieCutterPopoverModel = cookieCutterPopoverModel
-        )
-    }
-}
-
-@Composable
-fun UrlBarContainer(
-    isIncognito: Boolean,
-    modifier: Modifier = Modifier,
-    content: @Composable (placeholderColor: Color) -> Unit
-) {
     val backgroundColor = if (isIncognito) {
         MaterialTheme.colorScheme.inverseSurface
     } else {
@@ -146,6 +55,75 @@ fun UrlBarContainer(
         tonalElevation = 2.dp,
         modifier = modifier.padding(vertical = Dimensions.PADDING_SMALL)
     ) {
-        content(placeholderColor)
+        val childModifier = Modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 40.dp)
+
+        if (isEditing) {
+            AutocompleteTextField(
+                textFieldValue = urlBarModelState.value.textFieldValue,
+                suggestionText = urlBarModelState.value.autocompleteSuggestionText,
+                faviconBitmap = urlBarModelState.value.faviconBitmap,
+                placeholderColor = placeholderColor,
+                onLocationEdited = { urlBarModel.onLocationBarTextChanged(it) },
+                onLocationReplaced = { urlBarModel.replaceLocationBarText(it) },
+                onLoadUrl = { browserToolbarModel.onLoadUrl(urlBarModelState.value) },
+                onAcceptAutocompleteSuggestion = urlBarModel::acceptAutocompleteSuggestion,
+                focusUrlBar = focusUrlBar,
+                modifier = childModifier
+            )
+        } else {
+            LocationLabel(
+                placeholderColor = placeholderColor,
+                modifier = childModifier.clickable { urlBarModel.showZeroQuery() }
+            )
+        }
+    }
+}
+
+@Preview(locale = "en")
+@Preview(locale = "en", fontScale = 2.0f)
+@Preview(locale = "he")
+@Composable
+fun URLBar_Preview_Editing() {
+    OneBooleanPreviewContainer { isIncognito ->
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
+                isIncognito = isIncognito,
+                displayedInfo = ActiveTabModel.DisplayedInfo(
+                    ActiveTabModel.DisplayMode.URL,
+                    displayedText = "website.url"
+                ),
+                urlBarModelStateValue = URLBarModelState(
+                    isEditing = true,
+                    textFieldValue = TextFieldValue("https://www.example.com")
+                )
+            )
+        ) {
+            URLBar()
+        }
+    }
+}
+
+@Preview(locale = "en")
+@Preview(locale = "en", fontScale = 2.0f)
+@Preview(locale = "he")
+@Composable
+fun URLBar_Preview_EditingPlaceholder() {
+    OneBooleanPreviewContainer { isIncognito ->
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
+                isIncognito = isIncognito,
+                displayedInfo = ActiveTabModel.DisplayedInfo(
+                    ActiveTabModel.DisplayMode.URL,
+                    displayedText = "website.url"
+                ),
+                urlBarModelStateValue = URLBarModelState(
+                    isEditing = true
+                )
+            )
+        ) {
+            URLBar()
+        }
     }
 }

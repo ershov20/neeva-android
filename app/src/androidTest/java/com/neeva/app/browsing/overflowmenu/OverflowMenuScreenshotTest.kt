@@ -34,11 +34,4 @@ class OverflowMenuScreenshotTest : BaseScreenshotTest() {
             OverflowMenuContentsPreviews().PreviewLight_ForwardEnabled_MobileSite()
         }
     }
-
-    @Test
-    fun lightTheme_ForwardEnabled_MobileSite_HideButtons_Test() {
-        runScreenshotTest {
-            OverflowMenuContentsPreviews().PreviewLight_ForwardEnabled_MobileSite_HideButtons()
-        }
-    }
 }

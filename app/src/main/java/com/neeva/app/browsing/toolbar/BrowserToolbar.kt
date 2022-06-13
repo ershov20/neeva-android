@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -35,6 +36,7 @@ import com.neeva.app.browsing.findinpage.FindInPageToolbar
 import com.neeva.app.browsing.findinpage.PreviewFindInPageModel
 import com.neeva.app.browsing.urlbar.URLBar
 import com.neeva.app.browsing.urlbar.URLBarModelState
+import com.neeva.app.cookiecutter.ui.icon.TrackingProtection
 import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
 import com.neeva.app.cookiecutter.ui.popover.PreviewCookieCutterPopoverModel
 import com.neeva.app.cookiecutter.ui.popover.rememberCookieCutterPopoverModel
@@ -116,7 +118,6 @@ fun BrowserToolbar(
                 enableShowDesktopSite
             ) {
                 createBrowserOverflowMenuData(
-                    isIconRowVisible = !browserToolbarModel.useSingleBrowserToolbar,
                     isForwardEnabled = isForwardEnabled,
                     isUpdateAvailableVisible = browserToolbarModel.isUpdateAvailable,
                     isDesktopUserAgentEnabled = isDesktopUserAgentEnabled,
@@ -125,57 +126,55 @@ fun BrowserToolbar(
             }
 
             Box {
-                if (browserToolbarModel.useSingleBrowserToolbar) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        AnimatedVisibility(visible = !isEditing) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
-
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AnimatedVisibility(visible = !isEditing) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (browserToolbarModel.useSingleBrowserToolbar) {
                                 BackButton(contentColorFor(MaterialTheme.colorScheme.background))
-
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
-
-                                ForwardButton(contentColorFor(MaterialTheme.colorScheme.background))
-
+                                ShareButton()
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
-
-                                RefreshButton()
                             }
-                        }
 
-                        URLBar(
-                            cookieCutterPopoverModel = cookieCutterPopoverModel,
-                            modifier = Modifier.weight(1.0f)
-                        ) { iconModifier ->
-                            ShareButton(modifier = iconModifier)
-                        }
+                            TrackingProtection(
+                                isIncognito = browserToolbarModel.isIncognito,
+                                cookieCutterPopoverModel = cookieCutterPopoverModel
+                            )
 
-                        AnimatedVisibility(visible = !isEditing) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                AddToSpaceButton()
-
-                                Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
-
-                                TabSwitcherButton()
-
-                                Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
-
-                                OverflowMenu(
-                                    overflowMenuData = overflowMenuData,
-                                    onMenuItem = browserToolbarModel::onMenuItem
-                                )
-
+                            if (browserToolbarModel.useSingleBrowserToolbar) {
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                             }
                         }
                     }
-                } else {
-                    URLBar(cookieCutterPopoverModel = cookieCutterPopoverModel) { iconModifier ->
-                        OverflowMenu(
-                            overflowMenuData = overflowMenuData,
-                            onMenuItem = browserToolbarModel::onMenuItem,
-                            modifier = iconModifier
-                        )
+
+                    // We need to apply padding if all of the controls are hidden to prevent the
+                    // URLBar from hitting the edge.  Normally, that padding is provided by the
+                    // buttons beside it.
+                    AnimatedVisibility(visible = isEditing) {
+                        Spacer(Modifier.size(Dimensions.PADDING_LARGE))
+                    }
+
+                    URLBar(modifier = Modifier.weight(1.0f))
+
+                    AnimatedVisibility(visible = isEditing) {
+                        Spacer(Modifier.size(Dimensions.PADDING_LARGE))
+                    }
+
+                    AnimatedVisibility(visible = !isEditing) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (browserToolbarModel.useSingleBrowserToolbar) {
+                                Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
+                                AddToSpaceButton()
+                                Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
+                                TabSwitcherButton()
+                                Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
+                            }
+
+                            OverflowMenu(
+                                overflowMenuData = overflowMenuData,
+                                onMenuItem = browserToolbarModel::onMenuItem
+                            )
+                        }
                     }
                 }
 
@@ -216,6 +215,13 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
 @Composable
 fun ToolbarPreview_Blank_Portrait() {
     ToolbarPreview_Blank(false)
+}
+
+@Preview("Pixel 2 landscape, 1x scale", widthDp = 731, heightDp = 390, locale = "en")
+@Preview("Pixel 2 landscape, 1x scale", widthDp = 731, heightDp = 390, locale = "he")
+@Composable
+fun ToolbarPreview_Blank_SingleToolbar() {
+    ToolbarPreview_Blank(true)
 }
 
 @Composable

@@ -93,15 +93,13 @@ class OverflowMenuContentsPreviews {
         darkTheme: Boolean,
         isUpdateAvailableVisible: Boolean,
         desktopUserAgentEnabled: Boolean,
-        isForwardEnabled: Boolean = true,
-        hideButtons: Boolean = false
+        isForwardEnabled: Boolean = true
     ) {
         NeevaTheme(useDarkTheme = darkTheme) {
             Surface(tonalElevation = 2.dp) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     OverflowMenuContents(
                         overflowMenuData = createBrowserOverflowMenuData(
-                            isIconRowVisible = !hideButtons,
                             isForwardEnabled = isForwardEnabled,
                             isUpdateAvailableVisible = isUpdateAvailableVisible,
                             isDesktopUserAgentEnabled = desktopUserAgentEnabled,
@@ -124,8 +122,7 @@ class OverflowMenuContentsPreviews {
             darkTheme = false,
             isForwardEnabled = true,
             isUpdateAvailableVisible = true,
-            desktopUserAgentEnabled = true,
-            hideButtons = false
+            desktopUserAgentEnabled = true
         )
     }
 
@@ -136,8 +133,7 @@ class OverflowMenuContentsPreviews {
             darkTheme = true,
             isForwardEnabled = true,
             isUpdateAvailableVisible = true,
-            desktopUserAgentEnabled = true,
-            hideButtons = false
+            desktopUserAgentEnabled = true
         )
     }
 
@@ -148,8 +144,7 @@ class OverflowMenuContentsPreviews {
             darkTheme = false,
             isForwardEnabled = false,
             isUpdateAvailableVisible = false,
-            desktopUserAgentEnabled = true,
-            hideButtons = false
+            desktopUserAgentEnabled = true
         )
     }
 
@@ -160,20 +155,7 @@ class OverflowMenuContentsPreviews {
             darkTheme = false,
             isForwardEnabled = true,
             isUpdateAvailableVisible = false,
-            desktopUserAgentEnabled = false,
-            hideButtons = false
-        )
-    }
-
-    @Preview(name = "PreviewLight_ForwardEnabled_MobileSite_HideButtons", locale = "en")
-    @Composable
-    fun PreviewLight_ForwardEnabled_MobileSite_HideButtons() {
-        DefaultPreview(
-            darkTheme = false,
-            isForwardEnabled = true,
-            isUpdateAvailableVisible = false,
-            desktopUserAgentEnabled = false,
-            hideButtons = true
+            desktopUserAgentEnabled = false
         )
     }
 }

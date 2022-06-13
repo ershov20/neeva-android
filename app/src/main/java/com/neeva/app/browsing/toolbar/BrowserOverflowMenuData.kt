@@ -11,34 +11,29 @@ import com.neeva.app.ui.widgets.RowActionIconParams
 
 /** Creates the overflow menu that is used when browsing the web. */
 fun createBrowserOverflowMenuData(
-    isIconRowVisible: Boolean,
     isForwardEnabled: Boolean,
     isUpdateAvailableVisible: Boolean,
     isDesktopUserAgentEnabled: Boolean,
     enableShowDesktopSite: Boolean = false
 ): OverflowMenuData {
-    val additionalIconItems = if (isIconRowVisible) {
-        listOf(
-            OverflowMenuIconRowItem(
-                id = OverflowMenuItemId.FORWARD,
-                labelId = R.string.toolbar_go_forward,
-                action = RowActionIconParams.ActionType.FORWARD,
-                enabled = isForwardEnabled
-            ),
-            OverflowMenuIconRowItem(
-                id = OverflowMenuItemId.RELOAD,
-                labelId = R.string.reload,
-                action = RowActionIconParams.ActionType.REFRESH
-            ),
-            OverflowMenuIconRowItem(
-                id = OverflowMenuItemId.SHOW_PAGE_INFO,
-                labelId = R.string.page_info,
-                action = RowActionIconParams.ActionType.SHOW_PAGE_INFO
-            )
+    val iconItems = listOf(
+        OverflowMenuIconRowItem(
+            id = OverflowMenuItemId.FORWARD,
+            labelId = R.string.toolbar_go_forward,
+            action = RowActionIconParams.ActionType.FORWARD,
+            enabled = isForwardEnabled
+        ),
+        OverflowMenuIconRowItem(
+            id = OverflowMenuItemId.RELOAD,
+            labelId = R.string.reload,
+            action = RowActionIconParams.ActionType.REFRESH
+        ),
+        OverflowMenuIconRowItem(
+            id = OverflowMenuItemId.SHOW_PAGE_INFO,
+            labelId = R.string.page_info,
+            action = RowActionIconParams.ActionType.SHOW_PAGE_INFO
         )
-    } else {
-        emptyList()
-    }
+    )
 
     val rowItems = mutableListOf<OverflowMenuItem>().apply {
         if (isUpdateAvailableVisible) {
@@ -82,7 +77,7 @@ fun createBrowserOverflowMenuData(
 
     return OverflowMenuData(
         isBadgeVisible = isUpdateAvailableVisible,
-        iconItems = additionalIconItems,
+        iconItems = iconItems,
         additionalRowItems = rowItems
     )
 }

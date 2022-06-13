@@ -86,7 +86,6 @@ private fun OverflowMenuPreview() {
             OverflowMenu(
                 overflowMenuData = createBrowserOverflowMenuData(
                     isUpdateAvailableVisible = isUpdateAvailableVisible,
-                    isIconRowVisible = true, // Not visible -- doesn't matter
                     isForwardEnabled = false, // Not visible -- doesn't matter
                     isDesktopUserAgentEnabled = false // Not visible -- doesn't matter
                 ),

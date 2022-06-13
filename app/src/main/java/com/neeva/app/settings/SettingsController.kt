@@ -341,7 +341,7 @@ val mockSettingsControllerImpl by lazy {
             return FakeSetDefaultAndroidBrowserManager()
         }
 
-        override fun openAndroidDefaultBrowserSettings(fromWelcomeScreen: Boolean) { }
+        override fun openAndroidDefaultBrowserSettings(shouldOpenLazyTabAfterward: Boolean) { }
 
         override fun isAdvancedSettingsAllowed(): Boolean { return true }
     }

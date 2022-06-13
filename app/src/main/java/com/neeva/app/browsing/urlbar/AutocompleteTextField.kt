@@ -86,6 +86,8 @@ fun AutocompleteTextField(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
     ) {
+        Spacer(Modifier.width(Dimensions.PADDING_MEDIUM))
+
         FaviconView(
             bitmap = faviconBitmap,
             drawContainer = false
