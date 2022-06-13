@@ -12,7 +12,7 @@ import com.neeva.app.zeroquery.RegularProfileZeroQuery
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun SuggestionPane(modifier: Modifier = Modifier) {
+fun SuggestionPane(modifier: Modifier = Modifier, isFirstRun: Boolean) {
     val historyManager = LocalEnvironment.current.historyManager
     val neevaConstants = LocalEnvironment.current.neevaConstants
 
@@ -71,6 +71,7 @@ fun SuggestionPane(modifier: Modifier = Modifier) {
             else -> {
                 RegularProfileZeroQuery(
                     urlBarModel = urlBarModel,
+                    isFirstRun = isFirstRun,
                     neevaConstants = neevaConstants
                 ) {
                     CurrentPageRow(browserWrapper)

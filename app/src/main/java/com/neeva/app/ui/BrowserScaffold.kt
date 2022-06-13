@@ -103,6 +103,7 @@ private fun BoxScope.BrowserOverlay(
     val toolbarConfiguration by toolbarConfigurationFlow.collectAsState()
     val urlBarModelState: URLBarModelState by urlBarModel.stateFlow.collectAsState()
     val isEditing = urlBarModelState.isEditing
+    val focusUrlBar = urlBarModelState.focusUrlBar
 
     val browserToolbarModel = remember(appNavModel, browserWrapper, toolbarConfiguration) {
         BrowserToolbarModelImpl(
@@ -148,7 +149,9 @@ private fun BoxScope.BrowserOverlay(
             val childModifier = Modifier.weight(1.0f).fillMaxWidth()
             when {
                 isEditing -> {
-                    SuggestionPane(modifier = childModifier)
+                    // Right now, the URL bar is unfocused
+                    // while showing Zero Query only for first run.
+                    SuggestionPane(modifier = childModifier, isFirstRun = !focusUrlBar)
                 }
 
                 shouldDisplayCrashedTab -> {
