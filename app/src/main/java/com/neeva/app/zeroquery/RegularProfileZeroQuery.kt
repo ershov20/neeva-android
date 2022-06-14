@@ -22,7 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -37,10 +37,7 @@ import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceRow
-import com.neeva.app.spaces.SpaceRowData
-import com.neeva.app.spaces.getThumbnailAsync
 import com.neeva.app.storage.entities.Site
-import com.neeva.app.storage.entities.Space
 import com.neeva.app.suggestions.QueryRowSuggestion
 import com.neeva.app.suggestions.QuerySuggestionRow
 import com.neeva.app.ui.layouts.GridLayout
@@ -64,7 +61,6 @@ fun RegularProfileZeroQuery(
     val browserWrapper = LocalBrowserWrapper.current
     val domainProvider = LocalEnvironment.current.domainProvider
     val appNavModel = LocalAppNavModel.current
-    val spaceStore = LocalEnvironment.current.spaceStore
     val settingsController = LocalSettingsController.current
     val neevaUser = LocalEnvironment.current.neevaUser
 
@@ -75,12 +71,11 @@ fun RegularProfileZeroQuery(
     val isSuggestedQueriesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedQueriesState)
     val isCommunitySpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.CommunitySpacesState)
     val isSpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SpacesState)
+    val spaces: List<SpacePlusBitmap> by zeroQueryModel.spaces.collectAsState()
+    val communitySpaces: List<SpaceRowPlusBitmap> by zeroQueryModel.communitySpaces.collectAsState()
+
     val isNativeSpacesEnabled =
         settingsController.getToggleState(SettingsToggle.DEBUG_NATIVE_SPACES)
-
-    val spaces: List<Space> by spaceStore.allSpacesFlow.collectAsState()
-    val communitySpaces: List<SpaceRowData>
-        by spaceStore.spacesFromCommunityFlow.collectAsState(emptyList())
 
     LazyColumn(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
         item {
@@ -148,54 +143,61 @@ fun RegularProfileZeroQuery(
             }
         }
 
-        if (neevaUser.isSignedOut() && communitySpaces.isNotEmpty()) {
-            item {
-                Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
-            }
-
-            collapsingSection(
-                label = R.string.community_spaces,
-                collapsingSectionState = isCommunitySpacesExpanded.value,
-                onUpdateCollapsingSectionState = {
-                    zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
+        if (neevaUser.isSignedOut()) {
+            if (communitySpaces.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
                 }
-            ) {
-                items(communitySpaces.take(5), key = { it.id }) {
-                    val thumbnail: ImageBitmap? by getThumbnailAsync(uri = it.thumbnail)
-                    SpaceRow(
-                        spaceName = it.name,
-                        isSpacePublic = it.isPublic,
-                        thumbnail = thumbnail,
-                        isCurrentUrlInSpace = null
-                    ) {
-                        if (isNativeSpacesEnabled.value) {
-                            appNavModel.showSpaceDetail(it.id)
-                        } else {
-                            appNavModel.openUrl(it.url())
+
+                collapsingSection(
+                    label = R.string.community_spaces,
+                    collapsingSectionState = isCommunitySpacesExpanded.value,
+                    onUpdateCollapsingSectionState = {
+                        zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
+                    }
+                ) {
+                    items(communitySpaces, key = { it.spaceRowData.id }) { data ->
+                        val spaceRowData = data.spaceRowData
+                        val thumbnail = data.bitmap
+                        SpaceRow(
+                            spaceName = spaceRowData.name,
+                            isSpacePublic = spaceRowData.isPublic,
+                            thumbnail = thumbnail?.asImageBitmap(),
+                            isCurrentUrlInSpace = null
+                        ) {
+                            if (isNativeSpacesEnabled.value) {
+                                appNavModel.showSpaceDetail(spaceRowData.id)
+                            } else {
+                                appNavModel.openUrl(spaceRowData.url())
+                            }
                         }
                     }
                 }
             }
-        }
-
-        if (!neevaUser.isSignedOut() && spaces.isNotEmpty()) {
-            item {
-                Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
-            }
-
-            collapsingSection(
-                label = R.string.spaces,
-                collapsingSectionState = isSpacesExpanded.value,
-                onUpdateCollapsingSectionState = {
-                    zeroQueryModel.advanceState(ZeroQueryPrefs.SpacesState)
+        } else {
+            if (spaces.isNotEmpty()) {
+                item {
+                    Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
                 }
-            ) {
-                items(spaces.subList(0, minOf(3, spaces.size))) { space ->
-                    SpaceRow(space = space, isCurrentUrlInSpace = null) {
-                        if (isNativeSpacesEnabled.value) {
-                            appNavModel.showSpaceDetail(space.id)
-                        } else {
-                            appNavModel.openUrl(space.url(neevaConstants))
+
+                collapsingSection(
+                    label = R.string.spaces,
+                    collapsingSectionState = isSpacesExpanded.value,
+                    onUpdateCollapsingSectionState = {
+                        zeroQueryModel.advanceState(ZeroQueryPrefs.SpacesState)
+                    }
+                ) {
+                    items(spaces, key = { it.space.id }) { spacePlusThumbnail ->
+                        SpaceRow(
+                            space = spacePlusThumbnail.space,
+                            thumbnail = spacePlusThumbnail.bitmap?.asImageBitmap(),
+                            isCurrentUrlInSpace = null
+                        ) {
+                            if (isNativeSpacesEnabled.value) {
+                                appNavModel.showSpaceDetail(spacePlusThumbnail.space.id)
+                            } else {
+                                appNavModel.openUrl(spacePlusThumbnail.space.url(neevaConstants))
+                            }
                         }
                     }
                 }

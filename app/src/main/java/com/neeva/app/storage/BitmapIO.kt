@@ -1,5 +1,6 @@
 package com.neeva.app.storage
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
@@ -9,12 +10,16 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.WorkerThread
+import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
 import androidx.core.net.toFile
+import coil.ImageLoader
+import coil.request.ImageRequest
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileNotFoundException
 import java.io.IOException
 import java.io.InputStream
@@ -100,6 +105,23 @@ object BitmapIO {
         } finally {
             bufferedStream?.closeQuietly()
             inputStream?.closeQuietly()
+        }
+    }
+
+    suspend fun loadBitmap(context: Context, uri: Uri?): Bitmap? {
+        return when {
+            uri == null -> null
+
+            uri.scheme == "file" -> {
+                loadBitmap(uri) { file -> FileInputStream(file) }
+            }
+
+            else -> {
+                ImageLoader(context)
+                    .execute(ImageRequest.Builder(context).data(uri.toString()).build())
+                    .drawable
+                    ?.toBitmap()
+            }
         }
     }
 }

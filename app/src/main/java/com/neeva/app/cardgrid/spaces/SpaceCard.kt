@@ -35,9 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
-import coil.ImageLoader
-import coil.request.ImageRequest
 import com.neeva.app.Dispatchers
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
@@ -49,7 +46,6 @@ import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.createSingleColorBitmap
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
-import java.io.FileInputStream
 import kotlinx.coroutines.withContext
 
 private const val MAX_SUBITEMS_TO_SHOW = 4
@@ -94,16 +90,7 @@ fun spaceThumbnailState(
                         shouldShowAdditionalItemCount(i, spaceItems.size)
                     }
                     ?.let {
-                        // if it is a file just load it, if not, fetch the Bitmap.
-                        if (it.scheme == "file") {
-                            BitmapIO.loadBitmap(it) { file ->
-                                FileInputStream(file)
-                            }
-                        } else {
-                            val loader = ImageLoader(context)
-                            val request = ImageRequest.Builder(context).data(it.toString()).build()
-                            loader.execute(request).drawable?.toBitmap()
-                        }
+                        BitmapIO.loadBitmap(context, it)
                     }
             }
             bitmaps.add(itemBitmap)

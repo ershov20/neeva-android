@@ -112,6 +112,18 @@ abstract class FaviconCache(
      * @return Favicon that corresponds to the given [siteUri], or null if none could be found.
      */
     suspend fun getFavicon(siteUri: Uri?, generate: Boolean): Bitmap? {
+        val cachedFavicon = getCachedFavicon(siteUri)
+        if (cachedFavicon != null) return cachedFavicon
+
+        // Create a favicon based off the URL and the first letter of the registered domain.
+        return if (generate) {
+            generateFavicon(siteUri)
+        } else {
+            null
+        }
+    }
+
+    suspend fun getCachedFavicon(siteUri: Uri?): Bitmap? {
         // Check if the bitmap is stored inside of WebLayer's cache.  The callback mechanism used by
         // WebLayer is normally asynchronous, but we force it to be a suspending function so
         // that the code flows logically.
@@ -131,20 +143,17 @@ abstract class FaviconCache(
 
         // If WebLayer doesn't know about it, check if we stored a suitable favicon ourselves.
         return withContext(dispatchers.io) {
-            val historyBitmap = getFaviconFromHistory(siteUri)
-            if (historyBitmap != null) return@withContext historyBitmap
-
-            // Create a favicon based off the URL and the first letter of the registered domain.
-            if (generate) {
-                siteUri
-                    ?.let {
-                        val registeredDomain = domainProvider.getRegisteredDomain(it)
-                        Uri.Builder().scheme(it.scheme).authority(registeredDomain).build()
-                    }.toBitmap()
-            } else {
-                null
-            }
+            getFaviconFromHistory(siteUri)
         }
+    }
+
+    suspend fun generateFavicon(siteUri: Uri?): Bitmap? = withContext(dispatchers.io) {
+        return@withContext siteUri
+            ?.let {
+                val registeredDomain = domainProvider.getRegisteredDomain(it)
+                Uri.Builder().scheme(it.scheme).authority(registeredDomain).build()
+            }
+            ?.toBitmap()
     }
 
     /** Returns a cached bitmap resulting from the user having visited the site previously. */
