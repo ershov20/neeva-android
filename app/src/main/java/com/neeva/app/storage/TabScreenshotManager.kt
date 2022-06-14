@@ -3,7 +3,6 @@ package com.neeva.app.storage
 import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
-import androidx.annotation.WorkerThread
 import com.neeva.app.Dispatchers
 import com.neeva.app.browsing.FileEncrypter
 import java.io.File
@@ -13,6 +12,7 @@ import java.io.InputStream
 import java.io.OutputStream
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -23,7 +23,7 @@ import org.chromium.weblayer.Tab
  * WebLayer and persisted into our cache directory.
  */
 abstract class TabScreenshotManager(
-    filesDir: File,
+    private val filesDir: Deferred<File>,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers
 ) {
@@ -49,10 +49,13 @@ abstract class TabScreenshotManager(
         }
     }
 
-    private val tabScreenshotDirectory = File(filesDir, DIRECTORY_TAB_SCREENSHOTS)
+    private suspend fun getTabScreenshotDirectory(): File {
+        return File(filesDir.await(), DIRECTORY_TAB_SCREENSHOTS)
+    }
 
-    fun getTabScreenshotFile(guid: String) = File(tabScreenshotDirectory, "tab_$guid.jpg")
-    fun getTabScreenshotFile(tab: Tab) = getTabScreenshotFile(tab.guid)
+    suspend fun getTabScreenshotFile(guid: String): File {
+        return File(getTabScreenshotDirectory(), "tab_$guid.jpg")
+    }
 
     /** Takes a screenshot of the given [tab]. */
     fun captureAndSaveScreenshot(tab: Tab?, onCompleted: () -> Unit = {}) {
@@ -91,7 +94,11 @@ abstract class TabScreenshotManager(
                 withContext(dispatchers.io) {
                     if (file.exists()) file.delete()
 
-                    BitmapIO.saveBitmap(tabScreenshotDirectory, file, ::getOutputStream) { stream ->
+                    BitmapIO.saveBitmap(
+                        getTabScreenshotDirectory(),
+                        file,
+                        ::getOutputStream
+                    ) { stream ->
                         thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, stream)
                     }
                 }
@@ -101,12 +108,11 @@ abstract class TabScreenshotManager(
         }
     }
 
-    @WorkerThread
-    fun cleanCacheDirectory(liveTabGuids: List<String>) {
+    suspend fun cleanCacheDirectory(liveTabGuids: List<String>) {
         val liveTabFiles = liveTabGuids.map { guid -> getTabScreenshotFile(guid) }
 
         try {
-            val dir = tabScreenshotDirectory
+            val dir = getTabScreenshotDirectory()
             if (!dir.exists()) return
 
             dir.listFiles()
@@ -117,8 +123,7 @@ abstract class TabScreenshotManager(
         }
     }
 
-    @WorkerThread
-    fun deleteScreenshot(tabId: String) {
+    suspend fun deleteScreenshot(tabId: String) {
         try {
             val file = getTabScreenshotFile(tabId)
             if (file.exists()) file.delete()
@@ -127,8 +132,7 @@ abstract class TabScreenshotManager(
         }
     }
 
-    @WorkerThread
-    fun restoreScreenshot(tabId: String): Bitmap? {
+    suspend fun restoreScreenshot(tabId: String): Bitmap? {
         val file = getTabScreenshotFile(tabId)
         return BitmapIO.loadBitmap(file, ::getInputStream)
     }
@@ -139,7 +143,7 @@ abstract class TabScreenshotManager(
 
 /** Caches unencrypted screenshots of tabs. */
 class RegularTabScreenshotManager(
-    filesDir: File,
+    filesDir: Deferred<File>,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers
 ) : TabScreenshotManager(filesDir, coroutineScope, dispatchers) {
@@ -150,7 +154,7 @@ class RegularTabScreenshotManager(
 /** Caches screenshots of tabs and encrypts them so that they can't be accessed by outside apps. */
 class IncognitoTabScreenshotManager(
     appContext: Context,
-    filesDir: File,
+    filesDir: Deferred<File>,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers
 ) : TabScreenshotManager(filesDir, coroutineScope, dispatchers) {

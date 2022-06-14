@@ -7,7 +7,10 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import java.io.File
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.chromium.weblayer.CaptureScreenShotCallback
@@ -37,7 +40,7 @@ class RegularTabScreenshotManagerTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    private lateinit var filesDir: File
+    private lateinit var filesDir: Deferred<File>
     private lateinit var tabScreenshotManager: TabScreenshotManager
     private lateinit var navigationController: NavigationController
 
@@ -45,7 +48,7 @@ class RegularTabScreenshotManagerTest : BaseTest() {
         super.setUp()
 
         val context: Context = ApplicationProvider.getApplicationContext()
-        filesDir = context.filesDir
+        filesDir = CompletableDeferred(context.filesDir)
 
         navigationController = mock {
             on { getNavigationListSize() } doReturn 1
@@ -63,7 +66,7 @@ class RegularTabScreenshotManagerTest : BaseTest() {
 
     override fun tearDown() {
         super.tearDown()
-        filesDir.deleteRecursively()
+        runBlocking { filesDir.await().deleteRecursively() }
     }
 
     @Test
@@ -95,7 +98,7 @@ class RegularTabScreenshotManagerTest : BaseTest() {
         // Restore the bitmap and confirm that the size is correct.  It'd be nice to actually
         // confirm that the pixel values match, but Robolectric's ShadowBitmaps don't seem to play
         // well with the Bitmap color accessors.
-        val restoredBitmap = tabScreenshotManager.restoreScreenshot(tab.guid)
+        val restoredBitmap = runBlocking { tabScreenshotManager.restoreScreenshot(tab.guid) }
         expectThat(restoredBitmap!!.width).isEqualTo(bitmap.width)
         expectThat(restoredBitmap.height).isEqualTo(bitmap.height)
     }
@@ -256,7 +259,8 @@ class RegularTabScreenshotManagerTest : BaseTest() {
         expectThat(tabScreenshotManager.getTabScreenshotFile(tabs[2]).exists()).isTrue()
 
         // Delete one of the tab screenshots.
-        tabScreenshotManager.deleteScreenshot(tabs[1].guid)
+        runBlocking { tabScreenshotManager.deleteScreenshot(tabs[1].guid) }
+
         expectThat(tabScreenshotManager.getTabScreenshotFile(tabs[0]).exists()).isTrue()
         expectThat(tabScreenshotManager.getTabScreenshotFile(tabs[1]).exists()).isFalse()
         expectThat(tabScreenshotManager.getTabScreenshotFile(tabs[2]).exists()).isTrue()
@@ -313,9 +317,15 @@ class RegularTabScreenshotManagerTest : BaseTest() {
         expectThat(tabScreenshotManager.getTabScreenshotFile(tabs[2]).exists()).isTrue()
 
         // Say that only one of the tabs is still alive.  Two of the screenshots should get purged.
-        tabScreenshotManager.cleanCacheDirectory(listOf(tabs[1].guid))
+        runBlocking { tabScreenshotManager.cleanCacheDirectory(listOf(tabs[1].guid)) }
         expectThat(tabScreenshotManager.getTabScreenshotFile(tabs[0]).exists()).isFalse()
         expectThat(tabScreenshotManager.getTabScreenshotFile(tabs[1]).exists()).isTrue()
         expectThat(tabScreenshotManager.getTabScreenshotFile(tabs[2]).exists()).isFalse()
+    }
+
+    private fun TabScreenshotManager.getTabScreenshotFile(tab: Tab): File {
+        return runBlocking {
+            getTabScreenshotFile(tab.guid)
+        }
     }
 }

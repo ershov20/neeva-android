@@ -687,7 +687,7 @@ abstract class BaseBrowserWrapper internal constructor(
         return browserFlow.setActiveTab(id)
     }
 
-    override fun restoreScreenshotOfTab(tabId: String): Bitmap? {
+    override suspend fun restoreScreenshotOfTab(tabId: String): Bitmap? {
         return tabScreenshotManager.restoreScreenshot(tabId)
     }
 

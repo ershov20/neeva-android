@@ -1,22 +1,20 @@
 package com.neeva.app.browsing
 
 import android.util.Log
-import java.io.File
+import com.neeva.app.storage.Directories
 
 /** Cleans out unnecessary files in the cache. */
-class CacheCleaner(private val cacheDir: File) {
+class CacheCleaner(private val directories: Directories) {
     companion object {
         val TAG = CacheCleaner::class.simpleName
     }
 
     suspend fun run() {
-        cleanupIncognito()
-    }
-
-    suspend fun cleanupIncognito() {
+        // Clean up the incognito files.
         try {
-            cacheDir
-                .listFiles { _, name -> name.startsWith(IncognitoBrowserWrapper.FOLDER_PREFIX) }
+            directories.cacheDirectory
+                .await()
+                .listFiles { _, name -> name.startsWith(IncognitoBrowserWrapper.FOLDER_NAME) }
                 ?.forEach { it.deleteRecursively() }
             Log.d(TAG, "Purged incognito data from cache")
         } catch (e: Exception) {

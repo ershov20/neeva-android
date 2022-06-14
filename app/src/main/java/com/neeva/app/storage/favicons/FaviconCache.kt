@@ -26,6 +26,8 @@ import java.nio.file.Files
 import java.security.MessageDigest
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Profile
 
@@ -38,7 +40,6 @@ import org.chromium.weblayer.Profile
  * by loading File URIs that point at the cached file.
  */
 abstract class FaviconCache(
-    filesDir: File,
     val domainProvider: DomainProvider,
     private val dispatchers: Dispatchers
 ) {
@@ -51,7 +52,11 @@ abstract class FaviconCache(
         fun getProfile(): Profile?
     }
 
-    private val faviconDirectory = File(filesDir, FAVICON_SUBDIRECTORY)
+    protected abstract val parentDirectory: Deferred<File>
+
+    private suspend fun getFaviconDirectory(): File {
+        return parentDirectory.await().resolve(FAVICON_SUBDIRECTORY)
+    }
 
     var profileProvider: ProfileProvider? = null
 
@@ -70,7 +75,7 @@ abstract class FaviconCache(
 
         // If the file exists, we can skip writing out the bitmap because the filename was based on
         // the bytes of the bitmap file that was written out.
-        val file = File(faviconDirectory, filename)
+        val file = File(getFaviconDirectory(), filename)
         try {
             if (file.exists()) {
                 return@withContext Favicon(
@@ -85,7 +90,7 @@ abstract class FaviconCache(
         }
 
         // Write the bitmap out to storage.
-        val bitmapFile = BitmapIO.saveBitmap(faviconDirectory, file, ::getOutputStream) {
+        val bitmapFile = BitmapIO.saveBitmap(getFaviconDirectory(), file, ::getOutputStream) {
             it.write(bitmapBytes)
         }
 
@@ -172,11 +177,13 @@ abstract class FaviconCache(
     @WorkerThread
     suspend fun pruneCacheDirectory(usedFavicons: List<String>) {
         try {
-            if (!faviconDirectory.exists()) return
+            getFaviconDirectory().let { directory ->
+                if (!directory.exists()) return
 
-            faviconDirectory.listFiles()
-                ?.filterNot { usedFavicons.contains(it.toUri().toString()) }
-                ?.forEach { it.delete() }
+                directory.listFiles()
+                    ?.filterNot { usedFavicons.contains(it.toUri().toString()) }
+                    ?.forEach { it.delete() }
+            }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to cleanup favicon directory", e)
         }
@@ -190,10 +197,12 @@ val mockFaviconCache: FaviconCache by lazy {
     }
 
     object : FaviconCache(
-        filesDir = Files.createTempDirectory(null).toFile(),
         domainProvider = domainProvider,
         dispatchers = previewDispatchers
     ) {
+        override val parentDirectory =
+            CompletableDeferred(Files.createTempDirectory(null).toFile())
+
         override suspend fun getFaviconFromHistory(siteUri: Uri?): Bitmap? = null
     }
 }

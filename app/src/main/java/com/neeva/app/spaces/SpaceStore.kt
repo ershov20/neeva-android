@@ -40,6 +40,7 @@ import com.neeva.app.UpdateSpaceEntityDisplayDataMutation
 import com.neeva.app.UpdateSpaceMutation
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.storage.BitmapIO
+import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
@@ -64,6 +65,7 @@ import com.neeva.app.userdata.NeevaUser
 import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -85,11 +87,12 @@ class SpaceStore(
     private val neevaConstants: NeevaConstants,
     private val snackbarModel: SnackbarModel,
     private val overlaySheetModel: OverlaySheetModel,
-    private val dispatchers: Dispatchers
+    private val dispatchers: Dispatchers,
+    directories: Directories
 ) {
     companion object {
         private val TAG = SpaceStore::class.simpleName
-        private const val DIRECTORY = "spaces"
+        private const val DIRECTORY_NAME = "spaces"
         private const val MAX_THUMBNAIL_SIZE = 300
         const val MAKER_COMMUNITY_SPACE_ID = "xlvaUJmdPRSrcqRHPEzVPuWf4RP74EyHvz5QvxLN"
     }
@@ -156,7 +159,7 @@ class SpaceStore(
         MutableStateFlow(emptyList())
 
     @VisibleForTesting
-    val thumbnailDirectory = File(appContext.cacheDir, DIRECTORY)
+    val spacesDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(DIRECTORY_NAME)
 
     private var isRefreshPending: Boolean = false
     private var cleanUpThumbnails: Boolean = true
@@ -259,7 +262,7 @@ class SpaceStore(
                 )
                 if (spaceData.thumbnail == null) {
                     spaceData.thumbnail = saveBitmap(
-                        directory = thumbnailDirectory.resolve(MAKER_COMMUNITY_SPACE_ID),
+                        directory = spacesDirectory.await().resolve(MAKER_COMMUNITY_SPACE_ID),
                         dispatchers = dispatchers,
                         id = spaceData.id,
                         bitmapString = it.spaceEntity.thumbnail
@@ -328,7 +331,7 @@ class SpaceStore(
                 .firstOrNull { space -> space.id == spaceID }
                 ?.let { space ->
                     space.thumbnail = saveBitmap(
-                        directory = thumbnailDirectory.resolve(space.id),
+                        directory = spacesDirectory.await().resolve(space.id),
                         dispatchers = dispatchers,
                         id = spaceID,
                         bitmapString = spaceQuery.space.thumbnail
@@ -350,7 +353,7 @@ class SpaceStore(
                 .mapNotNull { entityQuery ->
                     val thumbnailUri = entityQuery.spaceEntity?.thumbnail?.let {
                         saveBitmap(
-                            directory = thumbnailDirectory.resolve(spaceID),
+                            directory = spacesDirectory.await().resolve(spaceID),
                             dispatchers = dispatchers,
                             id = entityQuery.metadata!!.docID!!,
                             bitmapString = it
@@ -399,6 +402,7 @@ class SpaceStore(
 
     private suspend fun cleanupSpacesThumbnails() {
         val idList = dao.allSpaceIds()
+        val thumbnailDirectory = spacesDirectory.await()
         thumbnailDirectory
             .list { file, _ ->
                 file.isDirectory

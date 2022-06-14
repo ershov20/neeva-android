@@ -46,7 +46,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun thumbnailState(
     id: String,
-    screenshotProvider: (id: String) -> Bitmap?
+    screenshotProvider: suspend (id: String) -> Bitmap?
 ): State<Bitmap?> {
     // By keying this on [uri], we can avoid recompositions until the tab ID changes.
     return produceState<Bitmap?>(initialValue = null, key1 = id) {
@@ -60,7 +60,7 @@ fun TabCard(
     onSelect: () -> Unit,
     onClose: () -> Unit,
     faviconCache: FaviconCache,
-    screenshotProvider: (id: String) -> Bitmap?
+    screenshotProvider: suspend (id: String) -> Bitmap?
 ) {
     val thumbnail by thumbnailState(tabInfo.id, screenshotProvider)
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(tabInfo.url)

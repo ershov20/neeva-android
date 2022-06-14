@@ -11,11 +11,13 @@ import com.neeva.app.StartIncognitoMutation
 import com.neeva.app.cookiecutter.IncognitoTrackersAllowList
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.storage.Directories
 import com.neeva.app.storage.IncognitoTabScreenshotManager
 import com.neeva.app.storage.favicons.IncognitoFaviconCache
 import com.neeva.app.type.StartIncognitoInput
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
@@ -58,9 +60,10 @@ class IncognitoBrowserWrapper private constructor(
         apolloWrapper: ApolloWrapper,
         domainProvider: DomainProvider,
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
-        tempDirectory: File = appContext.cacheDir.resolve(FOLDER_PREFIX),
         neevaConstants: NeevaConstants,
-        settingsDataModel: SettingsDataModel
+        settingsDataModel: SettingsDataModel,
+        directories: Directories,
+        tempDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(FOLDER_NAME)
     ) : this(
         appContext = appContext,
         activityCallbackProvider = activityCallbackProvider,
@@ -91,7 +94,7 @@ class IncognitoBrowserWrapper private constructor(
         internal const val INCOGNITO_PROFILE_NAME = "incognito"
         private const val INCOGNITO_PERSISTENCE_ID = "incognito_persistence_id"
 
-        const val FOLDER_PREFIX = INCOGNITO_PROFILE_NAME
+        const val FOLDER_NAME = INCOGNITO_PROFILE_NAME
 
         /** Gets the incognito user profile from WebLayer. The Browser does not need to be alive. */
         fun getProfile(webLayer: WebLayer) = webLayer.getIncognitoProfile(INCOGNITO_PROFILE_NAME)

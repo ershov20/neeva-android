@@ -1,12 +1,11 @@
 package com.neeva.app.storage.favicons
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.Dispatchers
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.neeva.app.storage.Directories
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,11 +16,13 @@ import javax.inject.Singleton
  */
 @Singleton
 class RegularFaviconCache @Inject constructor(
-    @ApplicationContext appContext: Context,
     domainProvider: DomainProvider,
     private val historyManager: HistoryManager,
-    dispatchers: Dispatchers
-) : FaviconCache(appContext.cacheDir, domainProvider, dispatchers) {
+    dispatchers: Dispatchers,
+    directories: Directories
+) : FaviconCache(domainProvider, dispatchers) {
+    override val parentDirectory = directories.cacheDirectory
+
     override suspend fun getFaviconFromHistory(siteUri: Uri?): Bitmap? {
         val historyFavicon = siteUri?.let { historyManager.getFaviconFromHistory(it) }
         historyFavicon?.faviconURL?.let { fileUri ->

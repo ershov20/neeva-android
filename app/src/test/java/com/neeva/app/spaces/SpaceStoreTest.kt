@@ -1,7 +1,6 @@
 package com.neeva.app.spaces
 
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase.createInMemory
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.AddToSpaceMutation
@@ -14,6 +13,7 @@ import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
 import com.neeva.app.TestApolloWrapper
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.SnackbarModel
@@ -58,7 +58,7 @@ class SpaceStoreTest : BaseTest() {
     private lateinit var apolloWrapper: TestApolloWrapper
     private lateinit var spaceStore: SpaceStore
     private lateinit var file: File
-    private lateinit var testDispatcher: Dispatchers
+    private lateinit var dispatchers: Dispatchers
     private lateinit var neevaConstants: NeevaConstants
 
     override fun setUp() {
@@ -79,7 +79,7 @@ class SpaceStoreTest : BaseTest() {
             neevaUserToken = neevaUserToken
         )
         apolloWrapper = TestApolloWrapper(neevaUserToken = neevaUserToken)
-        testDispatcher = Dispatchers(
+        dispatchers = Dispatchers(
             main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
             io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
         )
@@ -93,7 +93,12 @@ class SpaceStoreTest : BaseTest() {
             neevaConstants = neevaConstants,
             snackbarModel = snackbarModel,
             overlaySheetModel = mock(),
-            dispatchers = testDispatcher
+            dispatchers = dispatchers,
+            directories = Directories(
+                context = context,
+                coroutineScope = coroutineScopeRule.scope,
+                dispatchers = dispatchers
+            )
         )
         file = context.cacheDir.resolve("space_store_test")
     }
@@ -135,7 +140,7 @@ class SpaceStoreTest : BaseTest() {
     @Test
     fun refresh_spaceThumbnailsWrittenToDiskAndCleanedUpOnce() =
         runTest(coroutineScopeRule.scope.testScheduler) {
-            val oldDirectory = File(spaceStore.thumbnailDirectory, "oldspaceID")
+            val oldDirectory = File(spaceStore.spacesDirectory.await(), "oldspaceID")
             oldDirectory.mkdirs()
 
             coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
@@ -149,7 +154,7 @@ class SpaceStoreTest : BaseTest() {
             coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
 
             val spaceID = SPACE_1.pageMetadata!!.pageID!!
-            val directory = File(spaceStore.thumbnailDirectory, spaceID)
+            val directory = File(spaceStore.spacesDirectory.await(), spaceID)
             val file = File(directory, spaceID)
             expectThat(directory.exists()).isTrue()
             expectThat(file.exists()).isTrue()

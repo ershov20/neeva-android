@@ -14,6 +14,7 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.ui.SnackbarModel
@@ -39,8 +40,8 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun provideCacheCleaner(@ApplicationContext context: Context): CacheCleaner {
-        return CacheCleaner(context.cacheDir)
+    fun provideCacheCleaner(directories: Directories): CacheCleaner {
+        return CacheCleaner(directories)
     }
 
     @Provides
@@ -144,7 +145,8 @@ object NeevaAppModule {
         neevaConstants: NeevaConstants,
         snackbarModel: SnackbarModel,
         overlaySheetModel: OverlaySheetModel,
-        dispatchers: Dispatchers
+        dispatchers: Dispatchers,
+        directories: Directories
     ): SpaceStore {
         return SpaceStore(
             appContext = context,
@@ -156,7 +158,8 @@ object NeevaAppModule {
             neevaConstants = neevaConstants,
             snackbarModel = snackbarModel,
             overlaySheetModel = overlaySheetModel,
-            dispatchers = dispatchers
+            dispatchers = dispatchers,
+            directories = directories
         )
     }
 
@@ -169,8 +172,8 @@ object NeevaAppModule {
     @Provides
     @Singleton
     fun providesNeevaConstants(settingsDataModel: SettingsDataModel): NeevaConstants {
-        // This is done during initialization so that the app consistently hits the same server during the app's lifetime.
-        // To use a different host, you will need to restart the app.
+        // This is done during initialization so that the app consistently hits the same server
+        // during the app's lifetime.  To use a different host, you will need to restart the app.
         val appHost = when {
             settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_M1_APP_HOST) -> {
                 "m1.neeva.com"
@@ -213,6 +216,7 @@ object NeevaAppModule {
         application: Application,
         apolloWrapper: AuthenticatedApolloWrapper,
         clientLogger: ClientLogger,
+        directories: Directories,
         dispatchers: Dispatchers,
         domainProvider: DomainProvider,
         historyDatabase: HistoryDatabase,
@@ -228,6 +232,7 @@ object NeevaAppModule {
             application = application,
             apolloWrapper = apolloWrapper,
             clientLogger = clientLogger,
+            directories = directories,
             dispatchers = dispatchers,
             domainProvider = domainProvider,
             historyManager = historyManager,

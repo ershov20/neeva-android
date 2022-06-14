@@ -10,6 +10,7 @@ import com.neeva.app.storage.entities.Favicon
 import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
+import kotlinx.coroutines.Deferred
 
 /**
  * Manages a set of favicons for sites visited while in incognito mode.
@@ -22,10 +23,10 @@ import java.io.OutputStream
  */
 class IncognitoFaviconCache(
     appContext: Context,
-    filesDir: File,
+    override val parentDirectory: Deferred<File>,
     domainProvider: DomainProvider,
     dispatchers: Dispatchers
-) : FaviconCache(filesDir, domainProvider, dispatchers) {
+) : FaviconCache(domainProvider, dispatchers) {
     private val encrypter: FileEncrypter = FileEncrypter(appContext)
     private val faviconMap = mutableMapOf<Int, Uri>()
 

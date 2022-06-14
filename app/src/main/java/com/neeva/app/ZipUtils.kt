@@ -51,6 +51,10 @@ object ZipUtils {
 
         // Make sure that the directory exists before we try to write to it.
         val outputEntryFile = File(outputDirectory, entry.name)
+        if (!outputEntryFile.canonicalPath.startsWith(outputDirectory.canonicalPath)) {
+            throw SecurityException()
+        }
+
         outputEntryFile.parentFile?.mkdirs()
 
         Log.d(TAG, "Unzipping: ${entry.name} to ${outputEntryFile.path}")

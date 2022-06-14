@@ -149,7 +149,7 @@ interface BrowserWrapper {
 
     // region: Screenshots
     fun takeScreenshotOfActiveTab(onCompleted: () -> Unit = {})
-    fun restoreScreenshotOfTab(tabId: String): Bitmap?
+    suspend fun restoreScreenshotOfTab(tabId: String): Bitmap?
     suspend fun allowScreenshots(allowScreenshots: Boolean)
     // endregion
 

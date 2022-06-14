@@ -9,6 +9,7 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.Directories
 import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.userdata.NeevaUser
@@ -19,6 +20,7 @@ class BrowserWrapperFactory(
     private val application: Application,
     private val apolloWrapper: AuthenticatedApolloWrapper,
     private val clientLogger: ClientLogger,
+    private val directories: Directories,
     private val dispatchers: Dispatchers,
     private val domainProvider: DomainProvider,
     private val historyManager: HistoryManager,
@@ -36,6 +38,7 @@ class BrowserWrapperFactory(
             apolloWrapper = apolloWrapper,
             clientLogger = clientLogger,
             coroutineScope = coroutineScope,
+            directories = directories,
             dispatchers = dispatchers,
             domainProvider = domainProvider,
             historyManager = historyManager,
@@ -55,6 +58,7 @@ class BrowserWrapperFactory(
         return IncognitoBrowserWrapper(
             appContext = application,
             coroutineScope = coroutineScope,
+            directories = directories,
             dispatchers = dispatchers,
             activityCallbackProvider = activityCallbackProvider,
             apolloWrapper = apolloWrapper,

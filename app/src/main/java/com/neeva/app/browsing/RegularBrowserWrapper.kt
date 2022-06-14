@@ -11,6 +11,7 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.storage.Directories
 import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.storage.favicons.RegularFaviconCache
@@ -34,6 +35,7 @@ class RegularBrowserWrapper(
     private val apolloWrapper: ApolloWrapper,
     clientLogger: ClientLogger,
     coroutineScope: CoroutineScope,
+    directories: Directories,
     dispatchers: Dispatchers,
     domainProvider: DomainProvider,
     historyManager: HistoryManager,
@@ -62,7 +64,7 @@ class RegularBrowserWrapper(
     spaceStore = spaceStore,
     historyManager = historyManager,
     tabScreenshotManager = RegularTabScreenshotManager(
-        filesDir = appContext.cacheDir,
+        filesDir = directories.cacheDirectory,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers
     ),

@@ -10,6 +10,7 @@ import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.storage.toByteArray
 import com.neeva.app.storage.toLetterBitmap
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -46,7 +47,7 @@ class IncognitoFaviconCacheTest {
 
         incognitoFaviconCache = IncognitoFaviconCache(
             appContext = context,
-            filesDir = filesDir,
+            parentDirectory = CompletableDeferred(filesDir),
             domainProvider = domainProvider,
             dispatchers = dispatchers
         )

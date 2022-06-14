@@ -55,7 +55,7 @@ fun TabGrid(
     onCloseTabs: (TabInfo) -> Unit,
     tabs: List<TabInfo>,
     faviconCache: FaviconCache,
-    screenshotProvider: (tabId: String) -> Bitmap?,
+    screenshotProvider: suspend (tabId: String) -> Bitmap?,
     modifier: Modifier = Modifier
 ) {
     CardGrid(
