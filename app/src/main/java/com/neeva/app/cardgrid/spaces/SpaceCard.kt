@@ -21,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
@@ -73,11 +74,13 @@ fun spaceThumbnailState(
     dispatchers: Dispatchers
 ): State<SpaceItemThumbnails> {
     val context = LocalContext.current.applicationContext
+    val spaceStoreState = LocalEnvironment.current.spaceStore.stateFlow.collectAsState()
 
     // By keying this on [spaceId], we can avoid recompositions until the spaceId changes.
     return produceState(
         initialValue = SpaceItemThumbnails(),
-        key1 = spaceId
+        key1 = spaceId,
+        key2 = spaceStoreState.value
     ) {
         val bitmaps = mutableListOf<Bitmap?>()
         val spaceItems = itemProvider(spaceId)
@@ -287,7 +290,9 @@ fun SpaceSubItem(
             index < numItems -> {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.fillMaxSize().background(ColorPalette.Brand.PolarVariant)
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(ColorPalette.Brand.PolarVariant)
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_bookmarks_black_24),
