@@ -156,14 +156,15 @@ fun EditSpaceDialog(
                 }
             )
         }
-    ) {
+    ) { paddingValues ->
         Surface(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier
+                .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            Column() {
+            Column {
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
                 if (mode == SpaceEditMode.ADDING_SPACE_ITEM) {
@@ -232,9 +233,32 @@ fun EditSpaceDialog(
     }
 }
 
-@Preview
+@Preview(locale = "en", fontScale = 1.0f)
+@Preview(locale = "en", fontScale = 2.0f)
 @Composable
-fun SpaceEditDialogPreview() {
+fun SpaceEditDialogPreview_Light() {
+    NeevaThemePreviewContainer(useDarkTheme = false) {
+        EditSpaceDialog(
+            SpaceItem(
+                "asjdahjfad",
+                "nEgvD5HST7e62eEmhf0kkxx4xnEuNHBeEXxbGcoo",
+                Uri.parse("https://example.com"),
+                "Facebook papers notes",
+                "Facebook likes to portray itself as a social media giant under" +
+                    " siege — locked in fierce competition with other companies",
+                null,
+                0,
+                SpaceEntityType.WEB
+            ),
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(locale = "en", fontScale = 1.0f)
+@Preview(locale = "en", fontScale = 2.0f)
+@Composable
+fun SpaceEditDialogPreview_Dark() {
     NeevaThemePreviewContainer(useDarkTheme = true) {
         EditSpaceDialog(
             SpaceItem(

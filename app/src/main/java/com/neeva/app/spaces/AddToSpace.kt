@@ -1,6 +1,5 @@
 package com.neeva.app.spaces
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -18,7 +17,6 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.ui.layouts.BaseRowLayout
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AddToSpaceUI(
     activeTabModel: ActiveTabModel,

@@ -5,6 +5,7 @@ import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -95,8 +96,12 @@ private fun HistoryUI(
             )
         },
         modifier = Modifier.fillMaxSize()
-    ) {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+    ) { paddingValues ->
+        LazyColumn(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
             item {
                 ClickableRow(
                     primaryLabel = stringResource(R.string.settings_clear_browsing_data),

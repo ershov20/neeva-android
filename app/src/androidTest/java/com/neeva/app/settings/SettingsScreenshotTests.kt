@@ -51,6 +51,4 @@ class SettingsScreenshotTests : BaseScreenshotTest() {
     fun setDefaultAndroidBrowserPreview_Dark() = runScreenshotTest {
         SettingsDefaultAndroidBrowser_Dark_Preview()
     }
-
-    // TODO(kobec): Add licenses when ready.
 }

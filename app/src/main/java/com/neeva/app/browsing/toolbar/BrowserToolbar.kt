@@ -36,7 +36,8 @@ import com.neeva.app.browsing.findinpage.FindInPageToolbar
 import com.neeva.app.browsing.findinpage.PreviewFindInPageModel
 import com.neeva.app.browsing.urlbar.URLBar
 import com.neeva.app.browsing.urlbar.URLBarModelState
-import com.neeva.app.cookiecutter.ui.icon.TrackingProtection
+import com.neeva.app.cookiecutter.ui.icon.TrackingProtectionButton
+import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopover
 import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
 import com.neeva.app.cookiecutter.ui.popover.PreviewCookieCutterPopoverModel
 import com.neeva.app.cookiecutter.ui.popover.rememberCookieCutterPopoverModel
@@ -136,9 +137,11 @@ fun BrowserToolbar(
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                             }
 
-                            TrackingProtection(
-                                isIncognito = browserToolbarModel.isIncognito,
-                                cookieCutterPopoverModel = cookieCutterPopoverModel
+                            TrackingProtectionButton(
+                                showIncognitoBadge = browserToolbarModel.isIncognito,
+                                trackingDataFlow = cookieCutterPopoverModel.trackingDataFlow,
+                                modifier = modifier,
+                                onClick = cookieCutterPopoverModel::openPopover
                             )
 
                             if (browserToolbarModel.useSingleBrowserToolbar) {
@@ -182,6 +185,13 @@ fun BrowserToolbar(
                     progressFlow = browserToolbarModel.tabProgressFlow,
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
+
+                if (cookieCutterPopoverModel.popoverVisible.value) {
+                    // The popover will be aligned to the top left of the enclosing Box.
+                    CookieCutterPopover(
+                        cookieCutterPopoverModel = cookieCutterPopoverModel
+                    )
+                }
             }
         }
     }

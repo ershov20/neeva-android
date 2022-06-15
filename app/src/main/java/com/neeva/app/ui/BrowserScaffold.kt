@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -114,19 +113,17 @@ private fun BoxScope.BrowserOverlay(
         )
     }
 
-    val showBottomBar by derivedStateOf {
-        when {
-            // The user is typing something.  Hide the bottom bar to give them more room.
-            toolbarConfiguration.isKeyboardOpen -> false
+    val showBottomBar = when {
+        // The user is typing something.  Hide the bottom bar to give them more room.
+        toolbarConfiguration.isKeyboardOpen -> false
 
-            // The user is in either Zero Query or in the suggestions pane.
-            isEditing -> false
+        // The user is in either Zero Query or in the suggestions pane.
+        isEditing -> false
 
-            // The user is in landscape.
-            browserToolbarModel.useSingleBrowserToolbar -> false
+        // The user is in landscape.
+        browserToolbarModel.useSingleBrowserToolbar -> false
 
-            else -> true
-        }
+        else -> true
     }
 
     CompositionLocalProvider(

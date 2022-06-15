@@ -1,9 +1,8 @@
 package com.neeva.app.cardgrid.spaces
 
 import android.net.Uri
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.lazy.LazyGridState
-import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -26,7 +25,6 @@ import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.previewCardGridTitles
 import com.neeva.app.ui.theme.NeevaTheme
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SpaceGrid(
     browserWrapper: BrowserWrapper,
@@ -60,7 +58,6 @@ fun SpaceGrid(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SpaceGrid(
     gridState: LazyGridState,
@@ -97,7 +94,6 @@ class SpacesGridPreviews : BooleanPreviewParameterProvider<SpacesGridPreviews.Pa
         darkTheme = booleanArray[0]
     )
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Preview("1x", locale = "en")
     @Preview("2x", locale = "en", fontScale = 2.0f)
     @Preview("RTL, 1x", locale = "he")

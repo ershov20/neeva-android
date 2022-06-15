@@ -6,26 +6,30 @@ task clean(type: Delete) {
 
 buildscript {
     ext {
-        accompanist_version = '0.24.1-alpha'
-        apollo_version = '3.1.0'
+        min_sdk_version = 28
+        target_sdk_version = 32
+
         androidx_activity_version = '1.4.0'
-        androidx_appcompat_version = '1.4.1'
+        androidx_appcompat_version = '1.4.2'
+        androidx_compose_version = '1.2.0-beta03'
+        androidx_lifecycle_version = '2.4.1'
+        androidx_navigation_compose_version = '2.4.2'
+        androidx_paging_version = '3.1.1'
         androidx_preference_version = '1.2.0'
+        androidx_room_version = '2.4.2'
+
+        accompanist_version = '0.24.10-beta'
+        apollo_version = '3.1.0'
         coil_version = '1.4.0'
-        compose_version = '1.1.1'
         dagger_version = '2.41'
-        google_android_material_version = '1.5.0'
+        google_android_material_version = '1.6.1'
         gradle_version = '7.2.0'
         kotlin_coroutines_version = '1.6.0'
-        kotlin_version = '1.6.10'
+        kotlin_version = '1.6.21'
         ktlint_version = '10.2.1'
-        lifecycle_version = '2.4.1'
         moshi_version = '1.13.0'
-        navigation_compose_version = '2.4.2'
-        paging_version = '3.1.0'
         play_services_auth_version = '20.2.0'
         play_services_version = '18.0.1'
-        room_version = '2.4.1'
         strikt_version = '0.34.1'
     }
 

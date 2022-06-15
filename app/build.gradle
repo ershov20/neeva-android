@@ -10,15 +10,15 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk target_sdk_version
 
     defaultConfig {
         applicationId "com.neeva.app"
         testApplicationId "com.neeva.app.test"
         namespace "com.neeva.app"
 
-        minSdk 28
-        targetSdk 31
+        minSdk min_sdk_version
+        targetSdk target_sdk_version
         versionCode 94
         versionName "0.70.0"
 
@@ -88,7 +88,7 @@ android {
         jvmTarget = '1.8'
         freeCompilerArgs = [
             // Needed for the experimental Compose functions
-            '-Xopt-in=kotlin.RequiresOptIn'
+            '-opt-in=kotlin.RequiresOptIn'
         ]
     }
 
@@ -97,7 +97,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion compose_version
+        kotlinCompilerExtensionVersion androidx_compose_version
     }
 
     apollo {
@@ -138,22 +138,22 @@ dependencies {
     implementation project(path: ':weblayer')
     implementation project(path: ':chromium:gen:org__chromium__weblayer__support')
 
-    implementation 'androidx.activity:activity-compose:1.4.0'
+    implementation "androidx.activity:activity-compose:$androidx_activity_version"
     implementation "androidx.activity:activity-ktx:$androidx_activity_version"
-    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation "androidx.appcompat:appcompat:$androidx_appcompat_version"
     implementation 'androidx.browser:browser:1.4.0'
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation "androidx.compose.animation:animation:$compose_version"
-    implementation "androidx.compose.material:material:$compose_version"
-    implementation "androidx.compose.material3:material3:1.0.0-alpha05"
-    implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.ui:ui-tooling:$compose_version"
-    implementation "androidx.compose.runtime:runtime:$compose_version"
-    implementation "androidx.compose.runtime:runtime-livedata:$compose_version"
-    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.0"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
-    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-    implementation "androidx.navigation:navigation-compose:$navigation_compose_version"
+    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation "androidx.compose.animation:animation:$androidx_compose_version"
+    implementation "androidx.compose.material:material:$androidx_compose_version"
+    implementation "androidx.compose.material3:material3:1.0.0-alpha13"
+    implementation "androidx.compose.ui:ui:$androidx_compose_version"
+    implementation "androidx.compose.ui:ui-tooling:$androidx_compose_version"
+    implementation "androidx.compose.runtime:runtime:$androidx_compose_version"
+    implementation "androidx.compose.runtime:runtime-livedata:$androidx_compose_version"
+    implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$androidx_lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:$androidx_lifecycle_version"
+    implementation "androidx.navigation:navigation-compose:$androidx_navigation_compose_version"
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
     implementation "androidx.preference:preference-ktx:$androidx_preference_version"
     implementation 'androidx.window:window:1.0.0'
@@ -171,7 +171,7 @@ dependencies {
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 
     testImplementation 'junit:junit:4.13.2'
-    testImplementation 'org.robolectric:robolectric:4.7.3'
+    testImplementation 'org.robolectric:robolectric:4.8.1'
     testImplementation "io.strikt:strikt-core:$strikt_version"
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
@@ -182,12 +182,12 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation 'androidx.test:runner:1.4.0'
     androidTestImplementation 'androidx.test:rules:1.4.0'
-    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$androidx_compose_version"
     androidTestUtil 'androidx.test:orchestrator:1.4.1'
 
     // Compose instrumentation testing requires we add the dependency to debugImplementation so that
     // the tests can start a ComponentActivity without crashing.
-    debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$androidx_compose_version"
 
     // Hilt
     kapt "com.google.dagger:hilt-compiler:$dagger_version"
@@ -204,20 +204,20 @@ dependencies {
     implementation "com.squareup.moshi:moshi:$moshi_version"
 
     // Room
-    annotationProcessor "androidx.room:room-compiler:$room_version"
-    kapt "androidx.room:room-compiler:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$androidx_room_version"
+    kapt "androidx.room:room-compiler:$androidx_room_version"
 
-    implementation "androidx.room:room-runtime:$room_version"
-    implementation "androidx.room:room-ktx:$room_version"
-    implementation "androidx.room:room-paging:$room_version"
+    implementation "androidx.room:room-runtime:$androidx_room_version"
+    implementation "androidx.room:room-ktx:$androidx_room_version"
+    implementation "androidx.room:room-paging:$androidx_room_version"
 
-    testImplementation "androidx.room:room-testing:$room_version"
-    androidTestImplementation "androidx.room:room-testing:$room_version"
+    testImplementation "androidx.room:room-testing:$androidx_room_version"
+    androidTestImplementation "androidx.room:room-testing:$androidx_room_version"
 
     // Paging
-    implementation "androidx.paging:paging-runtime-ktx:$paging_version"
-    testImplementation "androidx.paging:paging-common-ktx:$paging_version"
-    implementation "androidx.paging:paging-compose:1.0.0-alpha14"
+    implementation "androidx.paging:paging-runtime-ktx:$androidx_paging_version"
+    testImplementation "androidx.paging:paging-common-ktx:$androidx_paging_version"
+    implementation "androidx.paging:paging-compose:1.0.0-alpha15"
 }
 
 hilt {

@@ -16,31 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.neeva.app.R
 import com.neeva.app.cookiecutter.TrackingData
-import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopover
-import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import kotlinx.coroutines.flow.StateFlow
-
-@Composable
-fun TrackingProtection(
-    isIncognito: Boolean,
-    cookieCutterPopoverModel: CookieCutterPopoverModel,
-    modifier: Modifier = Modifier
-) {
-    TrackingProtectionButton(
-        showIncognitoBadge = isIncognito,
-        trackingDataFlow = cookieCutterPopoverModel.trackingDataFlow,
-        modifier = modifier,
-        onClick = cookieCutterPopoverModel::openPopover
-    )
-
-    if (cookieCutterPopoverModel.popoverVisible.value) {
-        CookieCutterPopover(
-            cookieCutterPopoverModel = cookieCutterPopoverModel
-        )
-    }
-}
 
 @Composable
 fun TrackingProtectionButton(

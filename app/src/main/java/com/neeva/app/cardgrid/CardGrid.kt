@@ -1,12 +1,11 @@
 package com.neeva.app.cardgrid
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyGridState
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -16,7 +15,6 @@ import kotlin.math.round
 internal val MINIMUM_CARD_WIDTH = 200.dp
 internal val MINIMUM_CARD_CONTENT_HEIGHT = 200.dp
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun <T> CardGrid(
     gridState: LazyGridState,
@@ -34,7 +32,7 @@ fun <T> CardGrid(
             emptyComposable()
         } else {
             LazyVerticalGrid(
-                cells = GridCells.Fixed(numCells),
+                columns = GridCells.Fixed(numCells),
                 state = gridState,
                 modifier = contentModifier
             ) {

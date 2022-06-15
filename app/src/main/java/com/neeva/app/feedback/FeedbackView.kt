@@ -106,6 +106,7 @@ fun FeedbackView(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .padding(it)
         ) {
             Column {
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))

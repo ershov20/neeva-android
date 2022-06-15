@@ -340,6 +340,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
             // Keep the WebLayer instance across Activity restarts so that the Browser doesn't get
             // deleted when the configuration changes (e.g. the screen is rotated in fullscreen).
+            @Suppress("DEPRECATION")
             it.retainInstance = true
         }
 

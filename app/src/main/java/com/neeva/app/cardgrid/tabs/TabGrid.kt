@@ -2,10 +2,9 @@ package com.neeva.app.cardgrid.tabs
 
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyGridState
-import androidx.compose.foundation.lazy.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.LazyGridState
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,7 +21,6 @@ import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.previewCardGridTitles
 import com.neeva.app.ui.theme.NeevaTheme
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TabGrid(
     browserWrapper: BrowserWrapper,
@@ -46,7 +44,6 @@ fun TabGrid(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TabGrid(
     isIncognito: Boolean,
@@ -85,7 +82,6 @@ class TabGridPreviews : BooleanPreviewParameterProvider<TabGridPreviews.Params>(
         isIncognito = booleanArray[1]
     )
 
-    @OptIn(ExperimentalFoundationApi::class)
     @Preview("1x", locale = "en")
     @Preview("2x", locale = "en", fontScale = 2.0f)
     @Preview("RTL, 1x", locale = "he")
