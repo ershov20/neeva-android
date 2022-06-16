@@ -2,10 +2,12 @@ package com.neeva.app
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import com.neeva.app.appnav.AppNav
@@ -58,6 +60,7 @@ val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("No v
 val LocalRegularProfileZeroQueryViewModel =
     compositionLocalOf<RegularProfileZeroQueryViewModel> { error("No value set") }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActivityUI(
     toolbarConfiguration: StateFlow<ToolbarConfiguration>,
@@ -67,22 +70,23 @@ fun ActivityUI(
     val overlaySheetModel = LocalEnvironment.current.overlaySheetModel
     val snackbarModel = LocalEnvironment.current.snackbarModel
 
-    Box {
-        AppNav(
-            toolbarConfiguration = toolbarConfiguration,
-            webLayerModel = webLayerModel,
-            appNavModel = appNavModel,
-            modifier = Modifier.fillMaxSize()
-        )
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarModel.snackbarHostState)
+        }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            AppNav(
+                toolbarConfiguration = toolbarConfiguration,
+                webLayerModel = webLayerModel,
+                appNavModel = appNavModel,
+                modifier = Modifier.fillMaxSize()
+            )
 
-        OverlaySheetHost(
-            hostState = overlaySheetModel.hostState,
-            onDismiss = overlaySheetModel::hideOverlaySheet
-        )
-
-        SnackbarHost(
-            hostState = snackbarModel.snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+            OverlaySheetHost(
+                hostState = overlaySheetModel.hostState,
+                onDismiss = overlaySheetModel::hideOverlaySheet
+            )
+        }
     }
 }

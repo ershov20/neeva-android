@@ -160,11 +160,10 @@ fun EditSpaceDialog(
         Surface(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier
-                .padding(paddingValues)
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            Column {
+            Column(modifier = Modifier.padding(paddingValues)) {
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
                 if (mode == SpaceEditMode.ADDING_SPACE_ITEM) {

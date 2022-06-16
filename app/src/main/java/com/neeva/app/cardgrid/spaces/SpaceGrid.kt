@@ -36,7 +36,7 @@ fun SpaceGrid(
     val spaceStore = LocalEnvironment.current.spaceStore
     val neevaUser = LocalEnvironment.current.neevaUser
     val spaces by spaceStore.allSpacesFlow.collectAsState(emptyList())
-    val gridState = LazyGridState()
+    val gridState = rememberLazyGridState()
 
     // TODO(dan.alcantara): Find a better place to trigger these refreshes.
     LaunchedEffect(true) {

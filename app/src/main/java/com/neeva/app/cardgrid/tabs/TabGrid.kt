@@ -27,10 +27,11 @@ fun TabGrid(
     cardsPaneModel: CardsPaneModel,
     modifier: Modifier = Modifier
 ) {
-    // Reset the scroll state of the LazyVerticalGrid every time the active tab changes.
+    // Scroll the user to the currently selected tab when they first navigate here, but don't
+    // update it if the user closes tabs while they're here.
     val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
     val activeTabIndex: Int = tabs.indexOfFirst { it.isSelected }.coerceAtLeast(0)
-    val gridState = LazyGridState(activeTabIndex)
+    val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = activeTabIndex)
 
     TabGrid(
         isIncognito = browserWrapper.isIncognito,
