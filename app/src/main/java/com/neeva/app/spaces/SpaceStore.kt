@@ -58,7 +58,7 @@ import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.type.UpdateSpaceEntityDisplayDataInput
 import com.neeva.app.type.UpdateSpaceInput
 import com.neeva.app.ui.NeevaTextField
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
@@ -85,7 +85,7 @@ class SpaceStore(
     private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
     private val neevaUser: NeevaUser,
     private val neevaConstants: NeevaConstants,
-    private val snackbarModel: SnackbarModel,
+    private val popupModel: PopupModel,
     private val overlaySheetModel: OverlaySheetModel,
     private val dispatchers: Dispatchers,
     directories: Directories
@@ -437,7 +437,7 @@ class SpaceStore(
 
         return@withContext response?.data?.entityId?.let {
             Log.i(TAG, "Added item to space with id=$it")
-            snackbarModel.show(appContext.getString(R.string.space_add_url, space.name))
+            popupModel.showSnackbar(appContext.getString(R.string.space_add_url, space.name))
             dao.upsert(
                 SpaceItem(
                     id = it,
@@ -452,7 +452,7 @@ class SpaceStore(
             true
         } ?: run {
             val errorString = appContext.getString(R.string.error_generic)
-            snackbarModel.show(errorString)
+            popupModel.showSnackbar(errorString)
             stateFlow.value = State.READY
             false
         }
@@ -534,14 +534,14 @@ class SpaceStore(
         return response?.data?.deleteSpaceResultByURL?.let {
             val successString = appContext.getString(R.string.space_remove_url, space.name)
             Log.i(TAG, successString)
-            snackbarModel.show(successString)
+            popupModel.showSnackbar(successString)
             val spaceItem = dao.getItemsFromSpace(spaceID).find { it.url == uri }
             spaceItem?.let { dao.deleteSpaceItem(it) }
             stateFlow.value = State.READY
             true
         } ?: run {
             val errorString = appContext.getString(R.string.error_generic)
-            snackbarModel.show(errorString)
+            popupModel.showSnackbar(errorString)
             stateFlow.value = State.READY
             false
         }
@@ -575,7 +575,7 @@ class SpaceStore(
                 dao.deleteSpace(space)
             } ?: run {
                 val errorString = appContext.getString(R.string.error_generic)
-                snackbarModel.show(errorString)
+                popupModel.showSnackbar(errorString)
             }
             stateFlow.value = State.READY
         }
@@ -589,11 +589,13 @@ class SpaceStore(
             )
 
             response?.data?.createSpace?.let {
-                snackbarModel.show(appContext.getString(R.string.space_create_success, spaceName))
+                popupModel.showSnackbar(
+                    appContext.getString(R.string.space_create_success, spaceName)
+                )
                 performRefresh()
             } ?: run {
                 val errorString = appContext.getString(R.string.error_generic)
-                snackbarModel.show(errorString)
+                popupModel.showSnackbar(errorString)
             }
         }
     }
@@ -629,7 +631,7 @@ class SpaceStore(
                 dao.upsert(space.copy(isPublic = !isPublic))
             } ?: run {
                 val errorString = appContext.getString(R.string.error_generic)
-                snackbarModel.show(errorString)
+                popupModel.showSnackbar(errorString)
             }
             stateFlow.value = State.READY
         }

@@ -15,7 +15,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.TestApolloWrapper
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.sharedprefs.SharedPreferencesModel
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -62,7 +62,7 @@ class FirstRunModelTest : BaseTest() {
             io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
         )
         val clientLogger = ClientLogger(apolloWrapper, sharedPreferencesModel, neevaConstants)
-        val snackbarModel = SnackbarModel(coroutineScopeRule.scope, testDispatcher)
+        val popupModel = PopupModel(coroutineScopeRule.scope, testDispatcher)
 
         val signInAccount = mock<GoogleSignInAccount> {
             on { idToken } doReturn "valid_token"
@@ -76,7 +76,7 @@ class FirstRunModelTest : BaseTest() {
             clientLogger = clientLogger,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = testDispatcher,
-            snackbarModel = snackbarModel,
+            popupModel = popupModel,
             googleSignInAccountProvider = { Tasks.forResult(signInAccount) }
         )
     }

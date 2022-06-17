@@ -6,7 +6,7 @@ import android.net.Uri
 import com.neeva.app.BuildConfig
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
@@ -23,7 +23,7 @@ import okio.ByteString.Companion.encodeUtf8
 object OktaSignUp {
     suspend fun createOktaAccount(
         activityContext: Context,
-        snackbarModel: SnackbarModel,
+        popupModel: PopupModel,
         neevaConstants: NeevaConstants,
         emailProvided: String,
         passwordProvided: String = "",
@@ -85,7 +85,7 @@ object OktaSignUp {
                     activityContext.getString(R.string.generic_signup_error)
                 }
             }
-            snackbarModel.show(errorMsg)
+            popupModel.showSnackbar(errorMsg)
         }
     }
 

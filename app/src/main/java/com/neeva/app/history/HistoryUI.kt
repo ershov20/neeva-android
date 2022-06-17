@@ -52,7 +52,7 @@ fun HistoryUI(
 ) {
     val domainProvider = LocalEnvironment.current.domainProvider
     val historyManager = LocalEnvironment.current.historyManager
-    val snackbarModel = LocalEnvironment.current.snackbarModel
+    val snackbarModel = LocalEnvironment.current.popupModel
     val context = LocalContext.current
 
     val allHistory = historyManager.getHistoryAfter(Date(0L)).collectAsLazyPagingItems()
@@ -64,7 +64,7 @@ fun HistoryUI(
         onOpenUrl = onOpenUrl,
         onDeleteVisit = { visitUID, siteLabel ->
             historyManager.markVisitForDeletion(visitUID, isMarkedForDeletion = true)
-            snackbarModel.show(
+            snackbarModel.showSnackbar(
                 message = context.getString(R.string.history_removed_visit, siteLabel),
                 actionLabel = context.getString(R.string.undo),
                 onActionPerformed = {

@@ -51,7 +51,7 @@ class ChildTabBehaviorTest : BaseBrowserTest() {
         // Open the link in a new child tab via the context menu.  The test website is just a link
         // that spans the entire page.
         longPressOnBrowserView()
-        selectItemFromContextMenu(R.string.menu_open_in_new_tab)
+        androidComposeRule.selectItemFromContextMenu(R.string.menu_open_in_new_tab)
         androidComposeRule.waitForIdle()
 
         // Wait until the new tab is created.
@@ -80,7 +80,7 @@ class ChildTabBehaviorTest : BaseBrowserTest() {
         // Open the link in a new child tab via the context menu.  The test website is just a link
         // that spans the entire page.
         longPressOnBrowserView()
-        selectItemFromContextMenu(R.string.menu_open_in_new_incognito_tab)
+        androidComposeRule.selectItemFromContextMenu(R.string.menu_open_in_new_incognito_tab)
         androidComposeRule.waitForIdle()
 
         // Wait until the new incognito tab is created.
@@ -120,7 +120,7 @@ class ChildTabBehaviorTest : BaseBrowserTest() {
         // Open the link in a new child tab via the context menu.  The test website is just a link
         // that spans the entire page.
         longPressOnBrowserView()
-        selectItemFromContextMenu(R.string.menu_open_in_new_tab)
+        androidComposeRule.selectItemFromContextMenu(R.string.menu_open_in_new_tab)
         androidComposeRule.waitForIdle()
 
         // Wait until the new tab is created.

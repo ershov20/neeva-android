@@ -17,7 +17,7 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.favicons.RegularFaviconCache
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
@@ -102,8 +102,8 @@ object NeevaAppModule {
     fun providesSnackbarModel(
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers
-    ): SnackbarModel {
-        return SnackbarModel(coroutineScope, dispatchers)
+    ): PopupModel {
+        return PopupModel(coroutineScope, dispatchers)
     }
 
     @Provides
@@ -143,7 +143,7 @@ object NeevaAppModule {
         authenticatedApolloWrapper: AuthenticatedApolloWrapper,
         neevaUser: NeevaUser,
         neevaConstants: NeevaConstants,
-        snackbarModel: SnackbarModel,
+        popupModel: PopupModel,
         overlaySheetModel: OverlaySheetModel,
         dispatchers: Dispatchers,
         directories: Directories
@@ -156,7 +156,7 @@ object NeevaAppModule {
             authenticatedApolloWrapper = authenticatedApolloWrapper,
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
-            snackbarModel = snackbarModel,
+            popupModel = popupModel,
             overlaySheetModel = overlaySheetModel,
             dispatchers = dispatchers,
             directories = directories
@@ -278,7 +278,7 @@ object NeevaAppModule {
         overlaySheetModel: OverlaySheetModel,
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
-        snackbarModel: SnackbarModel,
+        popupModel: PopupModel,
         spaceStore: SpaceStore
     ): LocalEnvironmentState {
         return LocalEnvironmentState(
@@ -292,7 +292,7 @@ object NeevaAppModule {
             overlaySheetModel = overlaySheetModel,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
-            snackbarModel = snackbarModel,
+            popupModel = popupModel,
             spaceStore = spaceStore
         )
     }

@@ -7,9 +7,7 @@ import androidx.test.espresso.ViewAction
 import androidx.test.espresso.action.GeneralClickAction
 import androidx.test.espresso.action.Press
 import androidx.test.espresso.action.Tap
-import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 
 /**
  * Perform the provided [tapType] on the center of the View via Espresso.
@@ -41,9 +39,4 @@ private fun pressOnCenterOfView(tapType: Tap): ViewAction {
 /** Long presses on the center of the View containing the WebLayer's Fragment. */
 fun longPressOnBrowserView() {
     onView(withId(R.id.weblayer_fragment_view_container)).perform(pressOnCenterOfView(Tap.LONG))
-}
-
-/** If the context menu is displayed, perform a click on the menu item with the given id. */
-fun selectItemFromContextMenu(itemStringResId: Int) {
-    onView(withText(itemStringResId)).perform(ViewActions.click())
 }

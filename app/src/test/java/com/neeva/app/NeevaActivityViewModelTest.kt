@@ -8,7 +8,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.spaces.SpaceStore
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -45,7 +45,7 @@ class NeevaActivityViewModelTest : BaseTest() {
 
     @Mock private lateinit var neevaActivity: NeevaActivity
     @Mock private lateinit var spaceStore: SpaceStore
-    @Mock private lateinit var snackbarModel: SnackbarModel
+    @Mock private lateinit var popupModel: PopupModel
 
     private lateinit var activeTabModel: ActiveTabModel
     private lateinit var browserWrapper: BrowserWrapper
@@ -93,7 +93,7 @@ class NeevaActivityViewModelTest : BaseTest() {
             pendingLaunchIntent = null,
             neevaUser = neevaUser,
             webLayerModel = webLayerModel,
-            snackbarModel = snackbarModel,
+            popupModel = popupModel,
             overlaySheetModel = overlaySheetModel,
             firstRunModel = firstRunModel,
             spaceStore = spaceStore,
@@ -128,7 +128,7 @@ class NeevaActivityViewModelTest : BaseTest() {
         expectThat(actualIntent.action).isEqualTo(expectedIntent.action)
         expectThat(actualIntent.data).isEqualTo(expectedIntent.data)
 
-        verify(snackbarModel, never()).show(any(), eq(null), any(), any(), any())
+        verify(popupModel, never()).showSnackbar(any(), eq(null), any(), any(), any())
         verify(neevaActivity).onBackPressed()
     }
 
@@ -149,7 +149,7 @@ class NeevaActivityViewModelTest : BaseTest() {
         expectThat(actualIntent.action).isEqualTo(expectedIntent.action)
         expectThat(actualIntent.data).isEqualTo(expectedIntent.data)
 
-        verify(snackbarModel, never()).show(any(), eq(null), any(), any(), any())
+        verify(popupModel, never()).showSnackbar(any(), eq(null), any(), any(), any())
         verify(neevaActivity).onBackPressed()
     }
 
@@ -172,7 +172,7 @@ class NeevaActivityViewModelTest : BaseTest() {
         expectThat(actualIntent.action).isEqualTo(expectedIntent.action)
         expectThat(actualIntent.data).isEqualTo(expectedIntent.data)
 
-        verify(snackbarModel, never()).show(any(), eq(null), any(), any(), any())
+        verify(popupModel, never()).showSnackbar(any(), eq(null), any(), any(), any())
         verify(neevaActivity, never()).onBackPressed()
     }
 
@@ -188,6 +188,6 @@ class NeevaActivityViewModelTest : BaseTest() {
         neevaActivityViewModel.fireExternalIntentForUri(neevaActivity, Uri.parse(uri), true)
 
         verify(neevaActivity, never()).startActivity(any())
-        verify(snackbarModel).show(any(), eq(null), any(), any(), any())
+        verify(popupModel).showSnackbar(any(), eq(null), any(), any(), any())
     }
 }

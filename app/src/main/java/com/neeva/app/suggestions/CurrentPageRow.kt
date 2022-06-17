@@ -17,13 +17,13 @@ import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.ui.LightDarkPreviewContainer
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
 
 @Composable
 fun CurrentPageRow(browserWrapper: BrowserWrapper) {
-    val snackbarModel: SnackbarModel = LocalEnvironment.current.snackbarModel
+    val popupModel: PopupModel = LocalEnvironment.current.popupModel
 
     val activeTabModel = browserWrapper.activeTabModel
     val faviconCache = browserWrapper.faviconCache
@@ -64,7 +64,7 @@ fun CurrentPageRow(browserWrapper: BrowserWrapper) {
                         it.apply {
                             setPrimaryClip(ClipData.newPlainText("address", currentURL.toString()))
                         }
-                        snackbarModel.show(message = context.getString(R.string.link_copied))
+                        popupModel.showSnackbar(message = context.getString(R.string.link_copied))
                         urlBarModel.clearFocus()
                     }
                 }

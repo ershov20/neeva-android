@@ -37,7 +37,7 @@ import com.neeva.app.appnav.AppNavModelImpl
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.BrowserWrapper
-import com.neeva.app.browsing.ContextMenuCreator
+import com.neeva.app.browsing.LinkContextMenu
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.cardgrid.CardsPaneModel
@@ -55,7 +55,7 @@ import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserM
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.removeViewFromParent
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
@@ -96,7 +96,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var overlaySheetModel: OverlaySheetModel
     @Inject internal lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
-    @Inject lateinit var snackbarModel: SnackbarModel
+    @Inject lateinit var popupModel: PopupModel
     @Inject lateinit var spaceStore: SpaceStore
 
     private val feedbackViewModel: FeedbackViewModel by viewModels()
@@ -109,7 +109,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             neevaUser,
             spaceStore,
             webLayerModel,
-            snackbarModel,
+            popupModel,
             overlaySheetModel,
             firstRunModel,
             dispatchers
@@ -146,7 +146,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers,
                         overlaySheetModel = overlaySheetModel,
-                        snackbarModel = snackbarModel,
+                        popupModel = popupModel,
                         spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
                         neevaConstants = neevaConstants
@@ -170,7 +170,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         onSignOut = activityViewModel::signOut,
                         setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
                         coroutineScope = lifecycleScope,
-                        snackbarModel = localEnvironmentState.snackbarModel,
+                        popupModel = localEnvironmentState.popupModel,
                         activityCallbackProvider = activityCallbackProvider,
                         onTrackingProtectionUpdate = webLayerModel::updateBrowsersCookieCutterConfig
                     )
@@ -531,19 +531,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
-        findViewById<View>(R.id.weblayer_fragment)?.apply {
-            // Need to use the NeevaActivity as the context because the WebLayer View doesn't have
-            // access to the correct resources.
-            setOnCreateContextMenuListener(
-                ContextMenuCreator(
-                    webLayerModel,
-                    contextMenuParams,
-                    tab,
-                    context
-                )
+        popupModel.showDialog {
+            LinkContextMenu(
+                webLayerModel,
+                contextMenuParams,
+                tab,
+                popupModel::hideDialog
             )
-
-            showContextMenu()
         }
     }
 

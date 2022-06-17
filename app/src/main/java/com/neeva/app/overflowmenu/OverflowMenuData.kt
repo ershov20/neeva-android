@@ -4,7 +4,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.neeva.app.R
-import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.menu.MenuIconItemData
+import com.neeva.app.ui.widgets.menu.MenuItemType
+import com.neeva.app.ui.widgets.menu.MenuRowData
 
 enum class OverflowMenuItemId {
     SETTINGS,
@@ -22,44 +24,42 @@ enum class OverflowMenuItemId {
     SEPARATOR
 }
 
-data class OverflowMenuIconRowItem(
-    val id: OverflowMenuItemId,
-    @StringRes val labelId: Int,
-    val action: RowActionIconParams.ActionType,
-    val enabled: Boolean = true
-)
-
-data class OverflowMenuItem(
-    val id: OverflowMenuItemId,
-    @StringRes val labelId: Int? = null,
-    @DrawableRes val imageResourceID: Int? = null,
-    val icon: ImageVector? = null,
-    val enabled: Boolean = true
+fun overflowMenuItem(
+    id: OverflowMenuItemId,
+    @StringRes labelId: Int? = null,
+    @DrawableRes imageResourceID: Int? = null,
+    icon: ImageVector? = null
+) = MenuRowData(
+    type = MenuItemType.ACTION,
+    id = id.ordinal,
+    labelId = labelId,
+    imageResourceID = imageResourceID,
+    icon = icon
 )
 
 class OverflowMenuData(
     val isBadgeVisible: Boolean = false,
-    val iconItems: List<OverflowMenuIconRowItem> = emptyList(),
-    additionalRowItems: List<OverflowMenuItem> = emptyList()
+    val iconItems: List<MenuIconItemData> = emptyList(),
+    additionalRowItems: List<MenuRowData> = emptyList()
 ) {
-    val rowItems: List<OverflowMenuItem> = additionalRowItems.plus(
-        mutableListOf(
-            OverflowMenuItem(
+    val rowItems: List<MenuRowData> = additionalRowItems.plus(
+        listOf(
+            overflowMenuItem(
                 id = OverflowMenuItemId.SUPPORT,
                 labelId = R.string.feedback,
                 imageResourceID = R.drawable.ic_help_outline_black_24
             ),
-            OverflowMenuItem(
+            overflowMenuItem(
                 id = OverflowMenuItemId.SETTINGS,
                 labelId = R.string.settings,
                 imageResourceID = R.drawable.ic_settings_black_24
             ),
-            OverflowMenuItem(
+            overflowMenuItem(
                 id = OverflowMenuItemId.HISTORY,
                 labelId = R.string.history,
                 imageResourceID = R.drawable.ic_baseline_history_24
             ),
-            OverflowMenuItem(
+            overflowMenuItem(
                 id = OverflowMenuItemId.DOWNLOADS,
                 labelId = R.string.downloads,
                 imageResourceID = R.drawable.ic_download_done_black_24

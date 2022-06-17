@@ -25,10 +25,11 @@ import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.overflowmenu.OverflowMenuData
-import com.neeva.app.overflowmenu.OverflowMenuItem
 import com.neeva.app.overflowmenu.OverflowMenuItemId
+import com.neeva.app.overflowmenu.overflowMenuItem
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.ConfirmationAlertDialog
+import com.neeva.app.ui.widgets.menu.MenuRowData
 
 @Composable
 fun CardsPaneToolbar(browserWrapper: BrowserWrapper) {
@@ -130,10 +131,10 @@ private fun CardsPaneToolbarAddButton(
 
 private fun createCardsPaneOverflowMenuData(selectedScreen: SelectedScreen) = OverflowMenuData(
     isBadgeVisible = false,
-    additionalRowItems = mutableListOf(
+    additionalRowItems = listOf(
         when (selectedScreen) {
             SelectedScreen.SPACES -> {
-                OverflowMenuItem(
+                overflowMenuItem(
                     id = OverflowMenuItemId.SPACES_WEBSITE,
                     labelId = R.string.spaces_edit,
                     imageResourceID = R.drawable.ic_public_black_24
@@ -141,13 +142,13 @@ private fun createCardsPaneOverflowMenuData(selectedScreen: SelectedScreen) = Ov
             }
 
             else -> {
-                OverflowMenuItem(
+                overflowMenuItem(
                     id = OverflowMenuItemId.CLOSE_ALL_TABS,
                     labelId = R.string.close_all_content_description,
                     icon = Icons.Outlined.Delete
                 )
             }
         },
-        OverflowMenuItem(id = OverflowMenuItemId.SEPARATOR)
+        MenuRowData.forSeparator()
     )
 )

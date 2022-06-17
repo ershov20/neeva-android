@@ -29,7 +29,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -58,7 +57,7 @@ fun ShareSpaceUIContainer(spaceID: String) {
     }
 
     val context = LocalContext.current
-    val snackbarModel = LocalEnvironment.current.snackbarModel
+    val snackbarModel = LocalEnvironment.current.popupModel
     val appNavModel = LocalAppNavModel.current
     val neevaConstants = LocalEnvironment.current.neevaConstants
     val spaceURL = space.value?.url(neevaConstants) ?: Uri.parse(neevaConstants.appSpacesURL)
@@ -73,7 +72,7 @@ fun ShareSpaceUIContainer(spaceID: String) {
                 context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText(space.value?.name, spaceURL.toString())
             clipboard.setPrimaryClip(clip)
-            snackbarModel.show(context.getString(R.string.copy_clipboard))
+            snackbarModel.showSnackbar(context.getString(R.string.copy_clipboard))
         },
         onMore = {
             space.value?.let { appNavModel.shareSpace(it) }

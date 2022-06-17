@@ -3,12 +3,20 @@ package com.neeva.app
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
@@ -24,7 +32,8 @@ import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.DialogState
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetHost
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
@@ -43,7 +52,7 @@ data class LocalEnvironmentState(
     val overlaySheetModel: OverlaySheetModel,
     val settingsDataModel: SettingsDataModel,
     val sharedPreferencesModel: SharedPreferencesModel,
-    val snackbarModel: SnackbarModel,
+    val popupModel: PopupModel,
     val spaceStore: SpaceStore,
 )
 
@@ -68,12 +77,13 @@ fun ActivityUI(
 ) {
     val appNavModel = LocalAppNavModel.current
     val overlaySheetModel = LocalEnvironment.current.overlaySheetModel
-    val snackbarModel = LocalEnvironment.current.snackbarModel
+    val popupModel = LocalEnvironment.current.popupModel
 
     Scaffold(
         snackbarHost = {
-            SnackbarHost(hostState = snackbarModel.snackbarHostState)
-        }
+            SnackbarHost(hostState = popupModel.snackbarHostState)
+        },
+        modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             AppNav(
@@ -87,6 +97,19 @@ fun ActivityUI(
                 hostState = overlaySheetModel.hostState,
                 onDismiss = overlaySheetModel::hideOverlaySheet
             )
+        }
+    }
+
+    val dialogState: DialogState? by popupModel.dialogState.collectAsState()
+    dialogState?.let {
+        Dialog(onDismissRequest = popupModel::hideDialog) {
+            Surface(
+                tonalElevation = 3.dp,
+                shape = RoundedCornerShape(4.dp),
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                it.content()
+            }
         }
     }
 }

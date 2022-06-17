@@ -16,7 +16,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.signup.PreviewModeSignUpPrompt
 import com.neeva.app.spaces.SpaceStore
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import java.net.URISyntaxException
@@ -52,7 +52,7 @@ class NeevaActivityViewModel(
     private val neevaUser: NeevaUser,
     private val spaceStore: SpaceStore,
     private val webLayerModel: WebLayerModel,
-    private val snackbarModel: SnackbarModel,
+    private val popupModel: PopupModel,
     private val overlaySheetModel: OverlaySheetModel,
     private val firstRunModel: FirstRunModel,
     private val dispatchers: Dispatchers,
@@ -121,7 +121,7 @@ class NeevaActivityViewModel(
         private val neevaUser: NeevaUser,
         private val spaceStore: SpaceStore,
         private val webLayerModel: WebLayerModel,
-        private val snackbarModel: SnackbarModel,
+        private val popupModel: PopupModel,
         private val overlaySheetModel: OverlaySheetModel,
         private val firstRunModel: FirstRunModel,
         private val dispatchers: Dispatchers
@@ -134,7 +134,7 @@ class NeevaActivityViewModel(
                     neevaUser = neevaUser,
                     spaceStore = spaceStore,
                     webLayerModel = webLayerModel,
-                    snackbarModel = snackbarModel,
+                    popupModel = popupModel,
                     overlaySheetModel = overlaySheetModel,
                     firstRunModel = firstRunModel,
                     dispatchers = dispatchers
@@ -188,7 +188,7 @@ class NeevaActivityViewModel(
             if (urlString.length > 100) {
                 urlString = "${urlString.take(100)}..."
             }
-            snackbarModel.show(activity.getString(R.string.error_url_failure, urlString))
+            popupModel.showSnackbar(activity.getString(R.string.error_url_failure, urlString))
         }
     }
 

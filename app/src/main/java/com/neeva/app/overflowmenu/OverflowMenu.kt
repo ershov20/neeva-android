@@ -30,10 +30,9 @@ import com.neeva.app.ui.OneBooleanPreviewContainer
 fun OverflowMenu(
     overflowMenuData: OverflowMenuData,
     onMenuItem: (menuItemId: OverflowMenuItemId) -> Unit,
-    isInitiallyExpanded: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(isInitiallyExpanded) }
+    var expanded by remember { mutableStateOf(false) }
     val showBadge = overflowMenuData.isBadgeVisible
 
     Box {
@@ -68,11 +67,10 @@ fun OverflowMenu(
             onDismissRequest = { expanded = false },
             modifier = Modifier.defaultMinSize(minWidth = 250.dp)
         ) {
-            OverflowMenuContents(
-                overflowMenuData = overflowMenuData,
-                onMenuItem = onMenuItem,
-                expandedMutator = { newState: Boolean -> expanded = newState }
-            )
+            OverflowMenuContents(overflowMenuData) { id ->
+                onMenuItem(id)
+                expanded = false
+            }
         }
     }
 }
@@ -89,8 +87,7 @@ private fun OverflowMenuPreview() {
                     isForwardEnabled = false, // Not visible -- doesn't matter
                     isDesktopUserAgentEnabled = false // Not visible -- doesn't matter
                 ),
-                onMenuItem = {},
-                isInitiallyExpanded = false
+                onMenuItem = {}
             )
         }
     }

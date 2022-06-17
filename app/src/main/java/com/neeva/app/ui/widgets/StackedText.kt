@@ -17,10 +17,12 @@ fun StackedText(
     primaryLabel: String,
     secondaryLabel: String? = null,
     maxLines: Int = 1,
+    secondaryMaxLines: Int = 1,
     showActualUrl: Boolean = false,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.alpha(getClickableAlpha(enabled))) {
+    Column(modifier = modifier.alpha(getClickableAlpha(enabled))) {
         Text(
             text = primaryLabel,
             style = MaterialTheme.typography.bodyLarge,
@@ -39,7 +41,7 @@ fun StackedText(
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    maxLines = secondaryMaxLines,
                     modifier = Modifier.fillMaxWidth()
                 )
             }

@@ -1,89 +1,26 @@
 package com.neeva.app.overflowmenu
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.browsing.toolbar.createBrowserOverflowMenuData
-import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.ui.theme.getClickableAlpha
-import com.neeva.app.ui.widgets.RowActionIconButton
-import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.menu.MenuContent
 
 @Composable
 fun OverflowMenuContents(
     overflowMenuData: OverflowMenuData,
-    onMenuItem: (OverflowMenuItemId) -> Unit,
-    expandedMutator: (Boolean) -> Unit,
+    onMenuItem: (OverflowMenuItemId) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        overflowMenuData.iconItems.forEach { data ->
-            RowActionIconButton(
-                RowActionIconParams(
-                    onTapAction = {
-                        expandedMutator(false)
-                        onMenuItem(data.id)
-                    },
-                    actionType = data.action,
-                    contentDescription = stringResource(id = data.labelId),
-                    enabled = data.enabled
-                )
-            )
-        }
-    }
-
-    overflowMenuData.rowItems.forEach { data ->
-        when (data.id) {
-            OverflowMenuItemId.SEPARATOR -> {
-                Box(modifier = Modifier.padding(Dimensions.PADDING_TINY)) {
-                    Spacer(
-                        modifier = Modifier
-                            .background(MaterialTheme.colorScheme.surfaceVariant)
-                            .height(1.dp)
-                            .fillMaxWidth()
-                    )
-                }
-            }
-
-            else -> {
-                val isEnabled = data.enabled
-                val alpha = getClickableAlpha(isEnabled)
-
-                DropdownMenuItem(
-                    leadingIcon = {
-                        OverflowMenuIcon(itemData = data)
-                    },
-                    text = {
-                        OverflowMenuText(data.labelId?.let { stringResource(id = it) } ?: "")
-                    },
-                    enabled = isEnabled,
-                    modifier = Modifier.alpha(alpha),
-                    onClick = {
-                        expandedMutator(false)
-                        onMenuItem(data.id)
-                    }
-                )
-            }
-        }
+    MenuContent(
+        menuRows = overflowMenuData.rowItems,
+        menuIconItems = overflowMenuData.iconItems
+    ) { id ->
+        onMenuItem(OverflowMenuItemId.values()[id])
     }
 }
 
@@ -96,7 +33,7 @@ class OverflowMenuContentsPreviews {
         isForwardEnabled: Boolean = true
     ) {
         NeevaTheme(useDarkTheme = darkTheme) {
-            Surface(tonalElevation = 2.dp) {
+            Surface(tonalElevation = 3.dp) {
                 Column(modifier = Modifier.fillMaxSize()) {
                     OverflowMenuContents(
                         overflowMenuData = createBrowserOverflowMenuData(
@@ -105,8 +42,7 @@ class OverflowMenuContentsPreviews {
                             isDesktopUserAgentEnabled = desktopUserAgentEnabled,
                             enableShowDesktopSite = true
                         ),
-                        onMenuItem = {},
-                        expandedMutator = {}
+                        onMenuItem = {}
                     )
                 }
             }

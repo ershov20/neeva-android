@@ -22,7 +22,7 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import javax.inject.Inject
@@ -43,7 +43,7 @@ class FirstRunModel internal constructor(
     private var clientLogger: ClientLogger,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
-    private val snackbarModel: SnackbarModel,
+    private val popupModel: PopupModel,
     private val googleSignInAccountProvider: GoogleSignInAccountProvider
 ) {
     @Inject
@@ -54,7 +54,7 @@ class FirstRunModel internal constructor(
         clientLogger: ClientLogger,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
-        snackbarModel: SnackbarModel
+        popupModel: PopupModel
     ) : this(
         sharedPreferencesModel = sharedPreferencesModel,
         neevaUserToken = neevaUserToken,
@@ -62,7 +62,7 @@ class FirstRunModel internal constructor(
         clientLogger = clientLogger,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
-        snackbarModel = snackbarModel,
+        popupModel = popupModel,
         googleSignInAccountProvider = GoogleSignInAccountProvider {
             GoogleSignIn.getSignedInAccountFromIntent(it)
         }
@@ -215,7 +215,7 @@ class FirstRunModel internal constructor(
             coroutineScope.launch(dispatchers.io) {
                 OktaSignUp.createOktaAccount(
                     activityContext = context,
-                    snackbarModel = snackbarModel,
+                    popupModel = popupModel,
                     neevaConstants = neevaConstants,
                     emailProvided = emailProvided,
                     passwordProvided = passwordProvided

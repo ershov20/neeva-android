@@ -16,7 +16,7 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.type.SpaceACLLevel
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
@@ -50,7 +50,7 @@ class SpaceStoreTest : BaseTest() {
     val coroutineScopeRule = CoroutineScopeRule()
 
     @Mock
-    private lateinit var snackbarModel: SnackbarModel
+    private lateinit var popupModel: PopupModel
 
     private lateinit var context: Context
     private lateinit var neevaUser: NeevaUser
@@ -91,7 +91,7 @@ class SpaceStoreTest : BaseTest() {
             authenticatedApolloWrapper = apolloWrapper,
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
-            snackbarModel = snackbarModel,
+            popupModel = popupModel,
             overlaySheetModel = mock(),
             dispatchers = dispatchers,
             directories = Directories(

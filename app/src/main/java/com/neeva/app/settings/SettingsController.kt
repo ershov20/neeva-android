@@ -12,7 +12,7 @@ import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.settings.clearBrowsing.TimeClearingOption
 import com.neeva.app.settings.setDefaultAndroidBrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 import java.util.Date
@@ -77,7 +77,7 @@ class SettingsControllerImpl(
     private val onSignOut: () -> Unit,
     private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
     private val coroutineScope: CoroutineScope,
-    private val snackbarModel: SnackbarModel,
+    private val popupModel: PopupModel,
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val onTrackingProtectionUpdate: () -> Unit
 ) : SettingsController {
@@ -123,14 +123,14 @@ class SettingsControllerImpl(
                 onTrackingProtectionUpdate()
             },
             SettingsToggle.DEBUG_M1_APP_HOST.key to {
-                snackbarModel.show("Restart for app host changes to take effect.")
+                popupModel.showSnackbar("Restart for app host changes to take effect.")
                 if (getToggleState(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST).value) {
                     getTogglePreferenceSetter(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST)
                         .invoke(false)
                 }
             },
             SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST.key to {
-                snackbarModel.show("Restart for app host changes to take effect.")
+                popupModel.showSnackbar("Restart for app host changes to take effect.")
                 if (getToggleState(SettingsToggle.DEBUG_M1_APP_HOST).value) {
                     getTogglePreferenceSetter(SettingsToggle.DEBUG_M1_APP_HOST)
                         .invoke(false)
@@ -268,7 +268,7 @@ class SettingsControllerImpl(
                 openUrl(uri = Uri.parse(possibleUrls[i % possibleUrls.size]), openViaIntent = false)
                 delay(msBetweenOpens)
                 if (i % 50 == 49) {
-                    snackbarModel.show("Opened ${i + 1}/$numTabs tabs")
+                    popupModel.showSnackbar("Opened ${i + 1}/$numTabs tabs")
                 }
             }
         }

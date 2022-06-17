@@ -12,6 +12,7 @@ import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.test.performTextInput
@@ -336,5 +337,13 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(condition: (
 /** Hits the system's back button on the UI thread. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.onBackPressed() {
     runOnUiThread { activity.onBackPressed() }
+    waitForIdle()
+}
+
+/** If the context menu is displayed, perform a click on the menu item with the given id. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.selectItemFromContextMenu(
+    itemStringResId: Int
+) {
+    onNodeWithText(getString(itemStringResId)).performClick()
     waitForIdle()
 }

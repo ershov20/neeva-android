@@ -25,7 +25,7 @@ import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
-import com.neeva.app.ui.SnackbarModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -44,7 +44,7 @@ class AppNavModelImpl(
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
     private val overlaySheetModel: OverlaySheetModel,
-    private val snackbarModel: SnackbarModel,
+    private val popupModel: PopupModel,
     private val spaceStore: SpaceStore,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
     private val neevaConstants: NeevaConstants,
@@ -167,7 +167,7 @@ class AppNavModelImpl(
         try {
             context.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
-            snackbarModel.show(context.getString(R.string.error_generic))
+            popupModel.showSnackbar(context.getString(R.string.error_generic))
             Log.e(TAG, "Failed to start Activity for $intent")
         }
     }

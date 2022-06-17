@@ -166,6 +166,13 @@ abstract class BaseScreenshotTest {
         * If you see "Backend Internal error: Exception during IR lowering", rebuild the
           project.  Android Studio _seems_ to be doing some caching somewhere that messes
           with Composable compilation and I haven't figured out why it's happening, yet.
+        
+        * If you have to produce many screenshots, you can TEMPORARILY comment out this line in the
+          app/build.gradle file:
+          
+          > testInstrumentationRunnerArguments clearPackageData: 'true'
+          
+          Make sure to put it back before submission or you will mess up all of the tests.
         """
     )
 }
