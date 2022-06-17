@@ -156,7 +156,14 @@ fun RegularProfileZeroQuery(
                         zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
                     }
                 ) {
-                    items(communitySpaces, key = { it.spaceRowData.id }) { data ->
+                    items(
+                        if (isFirstRun) {
+                            communitySpaces.take(3)
+                        } else {
+                            communitySpaces
+                        },
+                        key = { it.spaceRowData.id }
+                    ) { data ->
                         val spaceRowData = data.spaceRowData
                         val thumbnail = data.bitmap
                         SpaceRow(
