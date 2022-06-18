@@ -18,7 +18,6 @@ import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import dagger.Module
@@ -144,7 +143,6 @@ object NeevaAppModule {
         neevaUser: NeevaUser,
         neevaConstants: NeevaConstants,
         popupModel: PopupModel,
-        overlaySheetModel: OverlaySheetModel,
         dispatchers: Dispatchers,
         directories: Directories
     ): SpaceStore {
@@ -157,7 +155,6 @@ object NeevaAppModule {
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
             popupModel = popupModel,
-            overlaySheetModel = overlaySheetModel,
             dispatchers = dispatchers,
             directories = directories
         )
@@ -247,12 +244,6 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesOverlaySheetModel(): OverlaySheetModel {
-        return OverlaySheetModel()
-    }
-
-    @Provides
-    @Singleton
     fun providesSettingsDataModel(
         sharedPreferencesModel: SharedPreferencesModel
     ): SettingsDataModel {
@@ -275,7 +266,6 @@ object NeevaAppModule {
         historyManager: HistoryManager,
         neevaConstants: NeevaConstants,
         neevaUser: NeevaUser,
-        overlaySheetModel: OverlaySheetModel,
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
         popupModel: PopupModel,
@@ -289,7 +279,6 @@ object NeevaAppModule {
             historyManager = historyManager,
             neevaConstants = neevaConstants,
             neevaUser = neevaUser,
-            overlaySheetModel = overlaySheetModel,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
             popupModel = popupModel,

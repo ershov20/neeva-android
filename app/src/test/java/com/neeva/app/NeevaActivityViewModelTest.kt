@@ -9,7 +9,6 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,13 +44,12 @@ class NeevaActivityViewModelTest : BaseTest() {
 
     @Mock private lateinit var neevaActivity: NeevaActivity
     @Mock private lateinit var spaceStore: SpaceStore
-    @Mock private lateinit var popupModel: PopupModel
 
     private lateinit var activeTabModel: ActiveTabModel
     private lateinit var browserWrapper: BrowserWrapper
     private lateinit var firstRunModel: FirstRunModel
-    private lateinit var overlaySheetModel: OverlaySheetModel
     private lateinit var neevaUser: NeevaUser
+    private lateinit var popupModel: PopupModel
     private lateinit var webLayerModel: WebLayerModel
     private lateinit var neevaActivityViewModel: NeevaActivityViewModel
 
@@ -81,8 +79,8 @@ class NeevaActivityViewModelTest : BaseTest() {
             on { isSignedOut() } doReturn false
         }
 
-        overlaySheetModel = mock {
-            on { showOverlaySheet(any(), any()) } doAnswer {}
+        popupModel = mock {
+            on { showBottomSheet(any(), any()) } doAnswer {}
         }
 
         firstRunModel = mock {
@@ -94,7 +92,6 @@ class NeevaActivityViewModelTest : BaseTest() {
             neevaUser = neevaUser,
             webLayerModel = webLayerModel,
             popupModel = popupModel,
-            overlaySheetModel = overlaySheetModel,
             firstRunModel = firstRunModel,
             spaceStore = spaceStore,
             dispatchers = dispatchers,

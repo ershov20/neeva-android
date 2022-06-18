@@ -25,11 +25,11 @@ import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun SpacesIntro(
-    includeSpaceCard: Boolean = false
+    includeSpaceCard: Boolean = false,
+    dismissSheet: () -> Unit = {}
 ) {
     val appNavModel = LocalAppNavModel.current
     val spaceStore = LocalEnvironment.current.spaceStore
-    val overlaySheetModel = LocalEnvironment.current.overlaySheetModel
 
     Column(
         modifier = Modifier
@@ -47,7 +47,7 @@ fun SpacesIntro(
         }
         SpacesIntro {
             appNavModel.showSignInFlow()
-            overlaySheetModel.hideOverlaySheet()
+            dismissSheet()
         }
     }
 }

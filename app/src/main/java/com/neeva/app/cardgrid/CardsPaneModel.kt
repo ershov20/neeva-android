@@ -9,7 +9,7 @@ import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
-import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
+import com.neeva.app.ui.PopupModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -32,7 +32,7 @@ interface CardsPaneModel {
 class CardsPaneModelImpl(
     private val webLayerModel: WebLayerModel,
     private val appNavModel: AppNavModel,
-    private val overlaySheetModel: OverlaySheetModel,
+    private val popupModel: PopupModel,
     private val settingsDataModel: SettingsDataModel,
     coroutineScope: CoroutineScope
 ) : CardsPaneModel {

@@ -60,7 +60,6 @@ import com.neeva.app.type.UpdateSpaceInput
 import com.neeva.app.ui.NeevaTextField
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
 import java.io.FileOutputStream
@@ -86,7 +85,6 @@ class SpaceStore(
     private val neevaUser: NeevaUser,
     private val neevaConstants: NeevaConstants,
     private val popupModel: PopupModel,
-    private val overlaySheetModel: OverlaySheetModel,
     private val dispatchers: Dispatchers,
     directories: Directories
 ) {
@@ -638,7 +636,7 @@ class SpaceStore(
     }
 
     fun createSpace() {
-        overlaySheetModel.showOverlaySheet(titleResId = R.string.space_create) {
+        popupModel.showBottomSheet(titleResId = R.string.space_create) { onDismissRequested ->
             val spaceName = remember { mutableStateOf("") }
             val spaceStore = LocalEnvironment.current.spaceStore
 
@@ -655,7 +653,7 @@ class SpaceStore(
                     enabled = spaceName.value.isNotEmpty(),
                     onClick = {
                         spaceStore.createSpace(spaceName.value)
-                        overlaySheetModel.hideOverlaySheet()
+                        onDismissRequested()
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {

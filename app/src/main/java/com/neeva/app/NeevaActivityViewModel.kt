@@ -17,7 +17,6 @@ import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.signup.PreviewModeSignUpPrompt
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import java.net.URISyntaxException
 import kotlinx.coroutines.CoroutineScope
@@ -53,7 +52,6 @@ class NeevaActivityViewModel(
     private val spaceStore: SpaceStore,
     private val webLayerModel: WebLayerModel,
     private val popupModel: PopupModel,
-    private val overlaySheetModel: OverlaySheetModel,
     private val firstRunModel: FirstRunModel,
     private val dispatchers: Dispatchers,
     overrideCoroutineScope: CoroutineScope? = null
@@ -66,10 +64,10 @@ class NeevaActivityViewModel(
             .filter { firstRunModel.shouldShowPreviewPromptForSignedOutQuery() }
             .flowOn(dispatchers.io)
             .onEach {
-                overlaySheetModel.showOverlaySheet {
+                popupModel.showBottomSheet { onDismissRequested ->
                     PreviewModeSignUpPrompt(
                         query = it.displayedText,
-                        onDismiss = overlaySheetModel::hideOverlaySheet
+                        onDismiss = onDismissRequested
                     )
                 }
             }
@@ -122,7 +120,6 @@ class NeevaActivityViewModel(
         private val spaceStore: SpaceStore,
         private val webLayerModel: WebLayerModel,
         private val popupModel: PopupModel,
-        private val overlaySheetModel: OverlaySheetModel,
         private val firstRunModel: FirstRunModel,
         private val dispatchers: Dispatchers
     ) : ViewModelProvider.Factory {
@@ -135,7 +132,6 @@ class NeevaActivityViewModel(
                     spaceStore = spaceStore,
                     webLayerModel = webLayerModel,
                     popupModel = popupModel,
-                    overlaySheetModel = overlaySheetModel,
                     firstRunModel = firstRunModel,
                     dispatchers = dispatchers
                 ) as T

@@ -34,8 +34,7 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.DialogState
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.ui.widgets.overlay.OverlaySheetHost
-import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
+import com.neeva.app.ui.widgets.bottomsheetdialog.BottomSheetDialogHost
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import kotlinx.coroutines.flow.StateFlow
@@ -49,10 +48,9 @@ data class LocalEnvironmentState(
     val historyManager: HistoryManager,
     val neevaConstants: NeevaConstants,
     val neevaUser: NeevaUser,
-    val overlaySheetModel: OverlaySheetModel,
+    val popupModel: PopupModel,
     val settingsDataModel: SettingsDataModel,
     val sharedPreferencesModel: SharedPreferencesModel,
-    val popupModel: PopupModel,
     val spaceStore: SpaceStore,
 )
 
@@ -76,7 +74,6 @@ fun ActivityUI(
     webLayerModel: WebLayerModel
 ) {
     val appNavModel = LocalAppNavModel.current
-    val overlaySheetModel = LocalEnvironment.current.overlaySheetModel
     val popupModel = LocalEnvironment.current.popupModel
 
     Scaffold(
@@ -93,22 +90,19 @@ fun ActivityUI(
                 modifier = Modifier.fillMaxSize()
             )
 
-            OverlaySheetHost(
-                hostState = overlaySheetModel.hostState,
-                onDismiss = overlaySheetModel::hideOverlaySheet
-            )
+            BottomSheetDialogHost()
         }
     }
 
     val dialogState: DialogState? by popupModel.dialogState.collectAsState()
     dialogState?.let {
-        Dialog(onDismissRequest = popupModel::hideDialog) {
+        Dialog(onDismissRequest = popupModel::removeDialog) {
             Surface(
                 tonalElevation = 3.dp,
                 shape = RoundedCornerShape(4.dp),
                 modifier = Modifier.verticalScroll(rememberScrollState())
             ) {
-                it.content()
+                it.content(popupModel::removeDialog)
             }
         }
     }

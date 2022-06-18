@@ -26,7 +26,6 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +42,6 @@ class AppNavModelImpl(
     private val webLayerModel: WebLayerModel,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
-    private val overlaySheetModel: OverlaySheetModel,
     private val popupModel: PopupModel,
     private val spaceStore: SpaceStore,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
@@ -206,13 +204,15 @@ class AppNavModelImpl(
     }
 
     override fun showShareSpaceSheet(spaceID: String) {
-        overlaySheetModel.showOverlaySheet(titleResId = R.string.share_space_title) {
+        popupModel.showBottomSheet(titleResId = R.string.share_space_title) {
             ShareSpaceUIContainer(spaceID = spaceID)
         }
     }
 
     override fun showAddToSpace() {
-        overlaySheetModel.showOverlaySheet(titleResId = R.string.toolbar_save_to_space) {
+        popupModel.showBottomSheet(
+            titleResId = R.string.toolbar_save_to_space
+        ) { onDismissRequested ->
             val spaceStore = LocalEnvironment.current.spaceStore
             val browserWrapper = webLayerModel.currentBrowser
             val activeTabModel = browserWrapper.activeTabModel
@@ -221,9 +221,13 @@ class AppNavModelImpl(
                 spaceStore.refresh()
             }
 
-            AddToSpaceUI(activeTabModel, spaceStore) { space ->
+            AddToSpaceUI(
+                activeTabModel = activeTabModel,
+                spaceStore = spaceStore,
+                dismissSheet = onDismissRequested
+            ) { space ->
                 browserWrapper.modifySpace(space.id)
-                overlaySheetModel.hideOverlaySheet()
+                onDismissRequested()
             }
         }
     }

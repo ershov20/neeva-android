@@ -58,7 +58,6 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.removeViewFromParent
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.ui.widgets.overlay.OverlaySheetModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.widget.NeevaWidgetProvider
@@ -93,7 +92,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var localEnvironmentState: LocalEnvironmentState
     @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
-    @Inject lateinit var overlaySheetModel: OverlaySheetModel
     @Inject internal lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Inject lateinit var popupModel: PopupModel
@@ -110,7 +108,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             spaceStore,
             webLayerModel,
             popupModel,
-            overlaySheetModel,
             firstRunModel,
             dispatchers
         )
@@ -145,7 +142,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         webLayerModel = webLayerModel,
                         coroutineScope = lifecycleScope,
                         dispatchers = dispatchers,
-                        overlaySheetModel = overlaySheetModel,
                         popupModel = popupModel,
                         spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
@@ -156,7 +152,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     CardsPaneModelImpl(
                         webLayerModel = webLayerModel,
                         appNavModel = appNavModel!!,
-                        overlaySheetModel = overlaySheetModel,
+                        popupModel = popupModel,
                         settingsDataModel = localEnvironmentState.settingsDataModel,
                         coroutineScope = lifecycleScope
                     )
@@ -531,12 +527,12 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
-        popupModel.showDialog {
+        popupModel.showDialog { onDismissRequested ->
             LinkContextMenu(
-                webLayerModel,
-                contextMenuParams,
-                tab,
-                popupModel::hideDialog
+                webLayerModel = webLayerModel,
+                params = contextMenuParams,
+                tab = tab,
+                onDismissRequested = onDismissRequested
             )
         }
     }

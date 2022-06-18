@@ -21,13 +21,17 @@ import com.neeva.app.ui.layouts.BaseRowLayout
 fun AddToSpaceUI(
     activeTabModel: ActiveTabModel,
     spaceStore: SpaceStore,
+    dismissSheet: () -> Unit,
     spaceModifier: SpaceModifier
 ) {
     val spaces: List<Space> by spaceStore.editableSpacesFlow.collectAsState(emptyList())
     val neevaUser = LocalEnvironment.current.neevaUser
 
     if (neevaUser.isSignedOut()) {
-        SpacesIntro(includeSpaceCard = false)
+        SpacesIntro(
+            includeSpaceCard = false,
+            dismissSheet = dismissSheet
+        )
     } else {
         LazyColumn {
             item {

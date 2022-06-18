@@ -18,7 +18,7 @@ fun LinkContextMenu(
     webLayerModel: WebLayerModel,
     params: ContextMenuParams,
     tab: Tab,
-    onDismiss: () -> Unit
+    onDismissRequested: () -> Unit
 ) {
     val isCurrentTabIncognito: Boolean = webLayerModel.currentBrowser.isIncognito
 
@@ -67,7 +67,7 @@ fun LinkContextMenu(
 
     MenuContent(menuItems) { id ->
         if (tab.isDestroyed) {
-            onDismiss()
+            onDismissRequested()
             return@MenuContent
         }
 
@@ -121,6 +121,6 @@ fun LinkContextMenu(
             }
         }
 
-        onDismiss()
+        onDismissRequested()
     }
 }

@@ -92,7 +92,6 @@ class SpaceStoreTest : BaseTest() {
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
             popupModel = popupModel,
-            overlaySheetModel = mock(),
             dispatchers = dispatchers,
             directories = Directories(
                 context = context,
