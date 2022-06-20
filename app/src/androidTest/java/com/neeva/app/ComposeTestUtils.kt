@@ -7,9 +7,11 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.StringRes
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -248,6 +250,19 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNavDestinatio
     waitUntil(WAIT_TIMEOUT) {
         activity.appNavModel?.currentDestination?.value?.route == destination.route
     }
+}
+
+fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openOverflowMenuAndClickItem(
+    @StringRes labelId: Int
+) {
+    onNodeWithContentDescription(activity.resources.getString(R.string.toolbar_neeva_menu))
+        .performClick()
+
+    waitUntil(WAIT_TIMEOUT) {
+        onAllNodesWithText(getString(labelId)).fetchSemanticsNodes().isNotEmpty()
+    }
+
+    onNodeWithText(getString(labelId)).performClick()
 }
 
 /** Open the Card Grid by clicking on the Card Grid button from the bottom toolbar. */

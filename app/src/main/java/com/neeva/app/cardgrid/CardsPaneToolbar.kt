@@ -29,7 +29,7 @@ import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.overflowmenu.overflowMenuItem
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.ConfirmationAlertDialog
-import com.neeva.app.ui.widgets.menu.MenuRowData
+import com.neeva.app.ui.widgets.menu.MenuSeparator
 
 @Composable
 fun CardsPaneToolbar(browserWrapper: BrowserWrapper) {
@@ -149,6 +149,6 @@ private fun createCardsPaneOverflowMenuData(selectedScreen: SelectedScreen) = Ov
                 )
             }
         },
-        MenuRowData.forSeparator()
+        MenuSeparator
     )
 )

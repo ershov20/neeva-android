@@ -17,7 +17,7 @@ import com.neeva.app.ui.widgets.RowActionIconParams
 
 @Composable
 fun MenuContent(
-    menuRows: Collection<MenuRowData>,
+    menuRows: Collection<MenuRowItem>,
     menuIconItems: Collection<MenuIconItemData> = emptyList(),
     onMenuItem: (id: Int) -> Unit
 ) {
@@ -39,7 +39,7 @@ fun MenuContent(
         }
 
         menuRows.forEach {
-            MenuRow(data = it, onClick = onMenuItem)
+            it.Composed(onClick = onMenuItem)
         }
     }
 }
@@ -53,16 +53,16 @@ fun MenuContent_Light() {
         Surface {
             MenuContent(
                 menuRows = listOf(
-                    MenuRowData.forHeader(
+                    MenuHeader(
                         stringResource(R.string.debug_long_string_primary),
                         stringResource(R.string.debug_long_url)
                     ),
-                    MenuRowData.forSeparator(),
-                    MenuRowData.forAction(R.string.menu_open_in_new_tab),
-                    MenuRowData.forAction(R.string.menu_open_in_new_incognito_tab),
-                    MenuRowData.forAction(R.string.menu_copy_link_address),
-                    MenuRowData.forAction(R.string.menu_copy_link_text),
-                    MenuRowData.forAction(R.string.menu_download_link)
+                    MenuSeparator,
+                    MenuAction(R.string.menu_open_in_new_tab),
+                    MenuAction(R.string.menu_open_in_new_incognito_tab),
+                    MenuAction(R.string.menu_copy_link_address),
+                    MenuAction(R.string.menu_copy_link_text),
+                    MenuAction(R.string.menu_download_link)
                 )
             ) {}
         }
@@ -78,16 +78,16 @@ fun MenuContent_Dark() {
         Surface {
             MenuContent(
                 menuRows = listOf(
-                    MenuRowData.forHeader(
+                    MenuHeader(
                         stringResource(R.string.debug_long_string_primary),
                         stringResource(R.string.debug_long_url)
                     ),
-                    MenuRowData.forSeparator(),
-                    MenuRowData.forAction(R.string.menu_open_in_new_tab),
-                    MenuRowData.forAction(R.string.menu_open_in_new_incognito_tab),
-                    MenuRowData.forAction(R.string.menu_copy_link_address),
-                    MenuRowData.forAction(R.string.menu_copy_link_text),
-                    MenuRowData.forAction(R.string.menu_download_link)
+                    MenuSeparator,
+                    MenuAction(R.string.menu_open_in_new_tab),
+                    MenuAction(R.string.menu_open_in_new_incognito_tab),
+                    MenuAction(R.string.menu_copy_link_address),
+                    MenuAction(R.string.menu_copy_link_text),
+                    MenuAction(R.string.menu_download_link)
                 )
             ) {}
         }
@@ -103,13 +103,13 @@ fun MenuContent_OnlyTitle() {
         Surface {
             MenuContent(
                 menuRows = listOf(
-                    MenuRowData.forHeader(stringResource(R.string.debug_long_string_primary)),
-                    MenuRowData.forSeparator(),
-                    MenuRowData.forAction(R.string.menu_open_in_new_tab),
-                    MenuRowData.forAction(R.string.menu_open_in_new_incognito_tab),
-                    MenuRowData.forAction(R.string.menu_copy_link_address),
-                    MenuRowData.forAction(R.string.menu_copy_link_text),
-                    MenuRowData.forAction(R.string.menu_download_link)
+                    MenuHeader(stringResource(R.string.debug_long_string_primary)),
+                    MenuSeparator,
+                    MenuAction(R.string.menu_open_in_new_tab),
+                    MenuAction(R.string.menu_open_in_new_incognito_tab),
+                    MenuAction(R.string.menu_copy_link_address),
+                    MenuAction(R.string.menu_copy_link_text),
+                    MenuAction(R.string.menu_download_link)
                 )
             ) {}
         }
@@ -125,13 +125,13 @@ fun MenuContent_OnlyUrl() {
         Surface {
             MenuContent(
                 menuRows = listOf(
-                    MenuRowData.forHeader(null, stringResource(R.string.debug_long_url)),
-                    MenuRowData.forSeparator(),
-                    MenuRowData.forAction(R.string.menu_open_in_new_tab),
-                    MenuRowData.forAction(R.string.menu_open_in_new_incognito_tab),
-                    MenuRowData.forAction(R.string.menu_copy_link_address),
-                    MenuRowData.forAction(R.string.menu_copy_link_text),
-                    MenuRowData.forAction(R.string.menu_download_link)
+                    MenuHeader(null, stringResource(R.string.debug_long_url)),
+                    MenuSeparator,
+                    MenuAction(R.string.menu_open_in_new_tab),
+                    MenuAction(R.string.menu_open_in_new_incognito_tab),
+                    MenuAction(R.string.menu_copy_link_address),
+                    MenuAction(R.string.menu_copy_link_text),
+                    MenuAction(R.string.menu_download_link)
                 )
             ) {}
         }

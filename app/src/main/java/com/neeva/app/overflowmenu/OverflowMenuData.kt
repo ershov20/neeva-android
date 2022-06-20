@@ -4,9 +4,9 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.neeva.app.R
+import com.neeva.app.ui.widgets.menu.MenuAction
 import com.neeva.app.ui.widgets.menu.MenuIconItemData
-import com.neeva.app.ui.widgets.menu.MenuItemType
-import com.neeva.app.ui.widgets.menu.MenuRowData
+import com.neeva.app.ui.widgets.menu.MenuRowItem
 
 enum class OverflowMenuItemId {
     SETTINGS,
@@ -26,11 +26,10 @@ enum class OverflowMenuItemId {
 
 fun overflowMenuItem(
     id: OverflowMenuItemId,
-    @StringRes labelId: Int? = null,
+    @StringRes labelId: Int,
     @DrawableRes imageResourceID: Int? = null,
     icon: ImageVector? = null
-) = MenuRowData(
-    type = MenuItemType.ACTION,
+) = MenuAction(
     id = id.ordinal,
     labelId = labelId,
     imageResourceID = imageResourceID,
@@ -40,9 +39,9 @@ fun overflowMenuItem(
 class OverflowMenuData(
     val isBadgeVisible: Boolean = false,
     val iconItems: List<MenuIconItemData> = emptyList(),
-    additionalRowItems: List<MenuRowData> = emptyList()
+    additionalRowItems: List<MenuRowItem> = emptyList()
 ) {
-    val rowItems: List<MenuRowData> = additionalRowItems.plus(
+    val rowItems: List<MenuRowItem> = additionalRowItems.plus(
         listOf(
             overflowMenuItem(
                 id = OverflowMenuItemId.SUPPORT,

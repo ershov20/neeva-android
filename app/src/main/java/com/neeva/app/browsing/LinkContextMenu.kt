@@ -7,8 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.neeva.app.R
+import com.neeva.app.ui.widgets.menu.MenuAction
 import com.neeva.app.ui.widgets.menu.MenuContent
-import com.neeva.app.ui.widgets.menu.MenuRowData
+import com.neeva.app.ui.widgets.menu.MenuHeader
+import com.neeva.app.ui.widgets.menu.MenuRowItem
+import com.neeva.app.ui.widgets.menu.MenuSeparator
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 
@@ -29,25 +32,26 @@ fun LinkContextMenu(
     }
 
     val menuItems = remember(params, isCurrentTabIncognito, tab) {
-        mutableListOf<MenuRowData>().apply {
+        mutableListOf<MenuRowItem>().apply {
             val primaryLabel: String? = params.titleOrAltText
             val secondaryLabel: String? = params.linkUri?.toString()
             if (primaryLabel != null || secondaryLabel != null) {
-                add(MenuRowData.forHeader(primaryLabel, secondaryLabel))
-                add(MenuRowData.forSeparator())
+                val imageUrl = params.srcUri.takeIf { params.isImage && params.srcUri != null }
+                add(MenuHeader(primaryLabel, secondaryLabel, imageUrl))
+                add(MenuSeparator)
             }
 
             params.linkUri?.let {
                 if (!isCurrentTabIncognito) {
-                    add(MenuRowData.forAction(R.string.menu_open_in_new_tab))
+                    add(MenuAction(R.string.menu_open_in_new_tab))
                 }
 
-                add(MenuRowData.forAction(R.string.menu_open_in_new_incognito_tab))
-                add(MenuRowData.forAction(R.string.menu_copy_link_address))
+                add(MenuAction(R.string.menu_open_in_new_incognito_tab))
+                add(MenuAction(R.string.menu_copy_link_address))
             }
 
             params.linkText?.let {
-                add(MenuRowData.forAction(R.string.menu_copy_link_text))
+                add(MenuAction(R.string.menu_copy_link_text))
             }
 
             if (params.canDownload) {
@@ -59,7 +63,7 @@ fun LinkContextMenu(
                 }
 
                 downloadStringResource?.let { id ->
-                    add(MenuRowData.forAction(id))
+                    add(MenuAction(id))
                 }
             }
         }

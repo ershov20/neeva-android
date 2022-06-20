@@ -1,9 +1,7 @@
 package com.neeva.app.feedback
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
@@ -12,6 +10,7 @@ import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.openCardGrid
+import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNavDestination
 import org.junit.Rule
@@ -58,12 +57,7 @@ class FeedbackViewOpensAndClosesTest : BaseBrowserTest() {
     private fun navigateToSupportAndBack() {
         val resources = androidComposeRule.activity.resources
 
-        androidComposeRule
-            .onNodeWithContentDescription(resources.getString(R.string.toolbar_neeva_menu))
-            .performClick()
-        androidComposeRule
-            .onNodeWithContentDescription(resources.getString(R.string.feedback))
-            .performClick()
+        androidComposeRule.openOverflowMenuAndClickItem(R.string.feedback)
 
         // Wait for the Support screen to show up.
         androidComposeRule.waitForNavDestination(AppNavDestination.FEEDBACK)

@@ -8,7 +8,8 @@ import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.overflowmenu.overflowMenuItem
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.menu.MenuIconItemData
-import com.neeva.app.ui.widgets.menu.MenuRowData
+import com.neeva.app.ui.widgets.menu.MenuRowItem
+import com.neeva.app.ui.widgets.menu.MenuSeparator
 
 /** Creates the overflow menu that is used when browsing the web. */
 fun createBrowserOverflowMenuData(
@@ -36,7 +37,7 @@ fun createBrowserOverflowMenuData(
         )
     )
 
-    val rowItems = mutableListOf<MenuRowData>().apply {
+    val rowItems = mutableListOf<MenuRowItem>().apply {
         if (isUpdateAvailableVisible) {
             add(
                 overflowMenuItem(
@@ -73,7 +74,7 @@ fun createBrowserOverflowMenuData(
             )
         }
 
-        add(MenuRowData.forSeparator())
+        add(MenuSeparator)
     }
 
     return OverflowMenuData(

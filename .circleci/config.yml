@@ -7,7 +7,7 @@ version: 2.1
 # Declare the orbs you wish to use.
 # Android orb docs are available here:  https://circleci.com/developer/orbs/orb/circleci/android
 orbs:
-  android: circleci/android@2.0.0
+  android: circleci/android@2.0.3
 
 commands:
   bootstrap-checkout:
@@ -31,14 +31,16 @@ commands:
           name: Download Dependencies
           command: ./gradlew androidDependencies
 
-      - android/save-gradle-cache
-      - android/save-build-cache
-
       - run:
             name: Creating directory for artifacts
             command:
                 rm -rf artifacts;
                 mkdir -p artifacts
+
+  save-cache:
+    steps:
+      - android/save-gradle-cache
+      - android/save-build-cache
 
 jobs:
   run-ktlint:
@@ -50,6 +52,8 @@ jobs:
       - run:
           name: Running ktlint check.  If this fails, try running `./gradlew ktlintFormat` locally
           command: ./gradlew ktlintCheck
+
+      - save-cache
 
   run-unit-tests:
     docker:
@@ -66,6 +70,8 @@ jobs:
       - run:
           name: Saving lint results
           command: cp app/build/reports/lint-results-debug.html artifacts
+
+      - save-cache
 
       - store_artifacts:
           path: artifacts
@@ -91,8 +97,11 @@ jobs:
           additional-avd-args: -d "pixel_2"
           additional-emulator-args: -partition-size 2048
           post-emulator-launch-assemble-command: ./gradlew :app:assembleDebugAndroidTest
+          run-logcat: true
           system-image: system-images;android-28;default;x86_64
           test-command: ./gradlew :app:connectedDebugAndroidTest -i
+
+      - save-cache
 
       - run:
           name: Saving run info to artifacts
@@ -107,7 +116,5 @@ workflows:
   test-workflow:
     jobs:
       - run-ktlint
-
       - run-unit-tests
-
       - run-instrumented-tests
