@@ -20,7 +20,7 @@ buildscript {
 
         accompanist_version = '0.24.10-beta'
         apollo_version = '3.1.0'
-        coil_version = '1.4.0'
+        coil_version = '2.1.0'
         dagger_version = '2.41'
         google_android_material_version = '1.6.1'
         gradle_version = '7.2.0'

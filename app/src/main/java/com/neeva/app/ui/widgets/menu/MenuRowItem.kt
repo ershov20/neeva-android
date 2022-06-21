@@ -3,7 +3,6 @@ package com.neeva.app.ui.widgets.menu
 import android.net.Uri
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -19,28 +18,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toBitmap
-import coil.ImageLoader
-import coil.request.ImageRequest
+import coil.compose.AsyncImage
 import com.neeva.app.R
 import com.neeva.app.ui.theme.Dimensions
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 interface MenuRowItem {
     @Composable fun Composed(onClick: (id: Int) -> Unit)
@@ -57,22 +48,6 @@ data class MenuHeader(
 
     @Composable
     override fun Composed(onClick: (id: Int) -> Unit) {
-        val context = LocalContext.current
-        val bitmap = produceState<ImageBitmap?>(initialValue = null, imageUrl) {
-            if (imageUrl == null) {
-                value = null
-                return@produceState
-            }
-
-            withContext(Dispatchers.IO) {
-                value = ImageLoader(context)
-                    .execute(ImageRequest.Builder(context).data(imageUrl).build())
-                    .drawable
-                    ?.toBitmap()
-                    ?.asImageBitmap()
-            }
-        }
-
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -80,11 +55,11 @@ data class MenuHeader(
                 .defaultMinSize(minHeight = dimensionResource(R.dimen.min_touch_target_size))
                 .padding(vertical = Dimensions.PADDING_SMALL)
         ) {
-            bitmap.value?.let {
+            imageUrl?.let {
                 Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
 
-                Image(
-                    bitmap = it,
+                AsyncImage(
+                    model = it,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.size(32.dp)
