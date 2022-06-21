@@ -9,6 +9,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.StartIncognitoMutation
 import com.neeva.app.cookiecutter.IncognitoTrackersAllowList
+import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.storage.Directories
@@ -35,7 +36,8 @@ class IncognitoBrowserWrapper private constructor(
     neevaConstants: NeevaConstants,
     private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
     settingsDataModel: SettingsDataModel,
-    tabScreenshotManager: IncognitoTabScreenshotManager
+    tabScreenshotManager: IncognitoTabScreenshotManager,
+    scriptInjectionManager: ScriptInjectionManager
 ) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
@@ -50,7 +52,8 @@ class IncognitoBrowserWrapper private constructor(
     domainProvider = domainProvider,
     neevaConstants = neevaConstants,
     settingsDataModel = settingsDataModel,
-    trackerAllowList = IncognitoTrackersAllowList()
+    trackerAllowList = IncognitoTrackersAllowList(),
+    scriptInjectionManager = scriptInjectionManager
 ) {
     constructor(
         appContext: Context,
@@ -61,6 +64,7 @@ class IncognitoBrowserWrapper private constructor(
         domainProvider: DomainProvider,
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
         neevaConstants: NeevaConstants,
+        scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
         directories: Directories,
         tempDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(FOLDER_NAME)
@@ -79,6 +83,7 @@ class IncognitoBrowserWrapper private constructor(
         ),
         neevaConstants = neevaConstants,
         onRemovedFromHierarchy = onRemovedFromHierarchy,
+        scriptInjectionManager = scriptInjectionManager,
         settingsDataModel = settingsDataModel,
         tabScreenshotManager = IncognitoTabScreenshotManager(
             appContext = appContext,

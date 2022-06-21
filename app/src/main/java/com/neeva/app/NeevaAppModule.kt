@@ -6,6 +6,7 @@ import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.BrowserWrapperFactory
 import com.neeva.app.browsing.CacheCleaner
 import com.neeva.app.browsing.WebLayerFactory
+import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -53,6 +54,16 @@ object NeevaAppModule {
     @Singleton
     fun provideDomainProviderImpl(@ApplicationContext context: Context): DomainProviderImpl {
         return DomainProviderImpl(context)
+    }
+
+    @Provides
+    @Singleton
+    fun providesScriptInjectionManager(
+        @ApplicationContext context: Context,
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers
+    ): ScriptInjectionManager {
+        return ScriptInjectionManager(context, coroutineScope, dispatchers)
     }
 
     @Provides
@@ -221,8 +232,9 @@ object NeevaAppModule {
         neevaConstants: NeevaConstants,
         neevaUser: NeevaUser,
         regularFaviconCache: RegularFaviconCache,
+        scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
-        spaceStore: SpaceStore,
+        spaceStore: SpaceStore
     ): BrowserWrapperFactory {
         return BrowserWrapperFactory(
             activityCallbackProvider = activityCallbackProvider,
@@ -237,6 +249,7 @@ object NeevaAppModule {
             neevaConstants = neevaConstants,
             neevaUser = neevaUser,
             regularFaviconCache = regularFaviconCache,
+            scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
             spaceStore = spaceStore
         )

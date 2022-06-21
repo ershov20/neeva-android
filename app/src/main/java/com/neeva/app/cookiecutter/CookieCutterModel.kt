@@ -17,6 +17,7 @@ import org.chromium.weblayer.ContentFilterMode
 interface CookieCutterModel {
     val trackersAllowList: TrackersAllowList
     val trackingDataFlow: MutableStateFlow<TrackingData?>
+    val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
     val enableTrackingProtection: MutableState<Boolean>
 
     fun setUpTrackingProtection(manager: ContentFilterManager)
@@ -62,6 +63,7 @@ class CookieCutterModelImpl(
     private lateinit var contentFilterManager: ContentFilterManager
 
     override val trackingDataFlow = MutableStateFlow<TrackingData?>(null)
+    override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection = settingsDataModel
         .getToggleState(SettingsToggle.TRACKING_PROTECTION)
 
@@ -103,7 +105,8 @@ class CookieCutterModelImpl(
 class PreviewCookieCutterModel : CookieCutterModel {
     override val trackersAllowList = PreviewTrackersAllowList()
     override val trackingDataFlow: MutableStateFlow<TrackingData?> = MutableStateFlow(null)
+    override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection: MutableState<Boolean> = mutableStateOf(true)
-    override fun setUpTrackingProtection(manager: ContentFilterManager) { }
-    override fun updateTrackingProtectionConfiguration() { }
+    override fun setUpTrackingProtection(manager: ContentFilterManager) {}
+    override fun updateTrackingProtectionConfiguration() {}
 }

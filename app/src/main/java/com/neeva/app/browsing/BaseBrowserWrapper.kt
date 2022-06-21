@@ -21,6 +21,7 @@ import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.cookiecutter.CookieCutterModelImpl
+import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -76,6 +77,7 @@ abstract class BaseBrowserWrapper internal constructor(
     private val tabScreenshotManager: TabScreenshotManager,
     private val domainProvider: DomainProvider,
     protected val neevaConstants: NeevaConstants,
+    private val scriptInjectionManager: ScriptInjectionManager,
     private val settingsDataModel: SettingsDataModel,
     override val cookieCutterModel: CookieCutterModel
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
@@ -99,6 +101,7 @@ abstract class BaseBrowserWrapper internal constructor(
         tabScreenshotManager: TabScreenshotManager,
         domainProvider: DomainProvider,
         neevaConstants: NeevaConstants,
+        scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
         trackerAllowList: TrackersAllowList,
         tabList: TabList = TabList()
@@ -133,6 +136,7 @@ abstract class BaseBrowserWrapper internal constructor(
         tabScreenshotManager = tabScreenshotManager,
         domainProvider = domainProvider,
         neevaConstants = neevaConstants,
+        scriptInjectionManager = scriptInjectionManager,
         settingsDataModel = settingsDataModel,
         cookieCutterModel = CookieCutterModelImpl(
             trackerAllowList,
@@ -530,6 +534,8 @@ abstract class BaseBrowserWrapper internal constructor(
             if (settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)) {
                 cookieCutterModel.trackingDataFlow.value =
                     tabCookieCutterModel?.currentTrackingData()
+                cookieCutterModel.cookieNoticeBlockedFlow.value =
+                    tabCookieCutterModel?.cookieNoticeBlocked ?: false
             }
 
             if (tabCookieCutterModel?.reloadUponForeground == true) {
@@ -605,8 +611,10 @@ abstract class BaseBrowserWrapper internal constructor(
             registerNewTab = this::registerNewTab,
             fullscreenCallback = fullscreenCallback,
             trackingDataFlow = cookieCutterModel.trackingDataFlow,
+            cookieNoticeBlockedFlow = cookieCutterModel.cookieNoticeBlockedFlow,
             enableTrackingProtection = cookieCutterModel.enableTrackingProtection,
-            domainProvider = domainProvider
+            domainProvider = domainProvider,
+            scriptInjectionManager = scriptInjectionManager,
         )
     }
 

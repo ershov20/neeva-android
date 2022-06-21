@@ -134,6 +134,8 @@ android {
     }
 }
 
+tasks.preBuild.dependsOn ":scripts:buildScripts"
+
 dependencies {
     implementation project(path: ':weblayer')
     implementation project(path: ':chromium:gen:org__chromium__weblayer__support')

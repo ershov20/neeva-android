@@ -27,6 +27,7 @@ import strikt.assertions.isEqualTo
 class TabCookieCutterModelTest : BaseTest() {
     private lateinit var model: TabCookieCutterModel
     private lateinit var domainProviderImpl: DomainProviderImpl
+    private lateinit var cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
 
     @Mock
     private lateinit var browser: Browser
@@ -44,11 +45,13 @@ class TabCookieCutterModelTest : BaseTest() {
 //        }
 
         domainProviderImpl = DomainProviderImpl(RuntimeEnvironment.getApplication())
+        cookieNoticeBlockedFlow = MutableStateFlow(false)
 
         model = TabCookieCutterModel(
             browserFlow = MutableStateFlow(null),
             tabId = "tab guid 1",
             trackingDataFlow = MutableStateFlow(null),
+            cookieNoticeBlockedFlow = cookieNoticeBlockedFlow,
             enableTrackingProtection = mutableStateOf(true),
             domainProvider = domainProviderImpl
         )
@@ -56,6 +59,18 @@ class TabCookieCutterModelTest : BaseTest() {
 
     override fun tearDown() {
         super.tearDown()
+    }
+
+    @Test
+    fun testCookieNoticesInModel() {
+        // pretend we've blocked a cookie notice
+        model.cookieNoticeBlocked = true
+
+        // assert that the model's own state reflects this
+        expectThat(model.cookieNoticeBlocked).isEqualTo(true)
+
+        // but we're not the active tab, so make sure the state flow wasn't updated
+        expectThat(cookieNoticeBlockedFlow.value).isEqualTo(false)
     }
 
     @Test

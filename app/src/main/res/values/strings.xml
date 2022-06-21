@@ -245,7 +245,7 @@
     <string name="cookie_cutter_dismiss">Close Cookie Cutter popover</string>
 
     <string name="cookie_cutter_trackers">Trackers</string>
-    <string name="cookie_cutter_domains">Domains</string>
+    <string name="cookie_cutter_popups">Cookie popups</string>
     <string name="cookie_cutter_whos_tracking_you">Who\'s tracking you</string>
     <string name="cookie_cutter">Cookie Cutter</string>
     <string name="cookie_cutter_settings">Cookie Cutter settings</string>

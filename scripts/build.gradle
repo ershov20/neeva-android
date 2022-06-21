@@ -1,0 +1,39 @@
+defaultTasks 'buildScripts'
+task ensureYarn(type: Exec) {
+    commandLine "which", "yarn"
+    ignoreExitValue true
+    standardOutput OutputStream.nullOutputStream()
+    doLast {
+        if (executionResult.getOrNull().exitValue == 0) {
+            ext.setProperty("yarnPresent", true)
+        } else {
+            println "`yarn` binary not found. Using version controlled cookie cutter engine"
+        }
+    }
+}
+
+task installPackages(type: Exec) {
+    dependsOn tasks.ensureYarn
+    onlyIf {
+        return tasks.ensureYarn.hasProperty("yarnPresent")
+    }
+
+    workingDir '.'
+    commandLine "yarn", "install", "--no-progress"
+
+    inputs.file("package.json").withPropertyName("sources").withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.dir("node_modules").withPropertyName("outputs")
+}
+
+task buildScripts(type: Exec) {
+    dependsOn tasks.installPackages
+    onlyIf {
+        return tasks.ensureYarn.hasProperty("yarnPresent")
+    }
+
+    workingDir '.'
+    commandLine "yarn", "build"
+
+    inputs.files(fileTree("src")).withPropertyName("sources").withPathSensitivity(PathSensitivity.RELATIVE)
+    outputs.file("../app/src/main/assets/cookieCutterEngine.js").withPropertyName("outputs")
+}

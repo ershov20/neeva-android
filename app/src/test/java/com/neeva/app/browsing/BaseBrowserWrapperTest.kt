@@ -18,6 +18,7 @@ import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.cookiecutter.CookieCutterModel
+import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
@@ -93,6 +94,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var suggestionsModel: SuggestionsModel
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
+    @Mock private lateinit var scriptInjectionManager: ScriptInjectionManager
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
@@ -124,8 +126,8 @@ class BaseBrowserWrapperTest : BaseTest() {
         )
 
         profile = mock {
-            on { getContentFilterManager() } doReturn contentFilterManager
-            on { getCookieManager() } doReturn cookieManager
+            on { contentFilterManager } doReturn contentFilterManager
+            on { cookieManager } doReturn cookieManager
         }
 
         browserFragment = mock {
@@ -134,7 +136,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         browser = mock {
             on { setActiveTab(any()) } doAnswer { activeTab = it.arguments[0] as Tab }
-            on { getActiveTab() } doAnswer { activeTab }
+            on { activeTab } doAnswer { activeTab }
 
             on { createTab() } doAnswer {
                 createMockTab().also {
@@ -146,10 +148,10 @@ class BaseBrowserWrapperTest : BaseTest() {
                 }
             }
 
-            on { getProfile() } doReturn profile
-            on { getTabs() } doReturn mockTabs.toSet()
-            on { isDestroyed() } doReturn false
-            on { isRestoringPreviousState() } doReturn true
+            on { profile } doReturn profile
+            on { tabs } doReturn mockTabs.toSet()
+            on { isDestroyed } doReturn false
+            on { isRestoringPreviousState } doReturn true
 
             on { setTopView(any()) } doAnswer { attachViewToParent(it.arguments[0] as View) }
             on { setBottomView(any()) } doAnswer { attachViewToParent(it.arguments[0] as View) }
@@ -162,7 +164,10 @@ class BaseBrowserWrapperTest : BaseTest() {
         cookieCutterModel = mock {
             on { trackingDataFlow } doReturn MutableStateFlow(null)
             on { enableTrackingProtection } doReturn mutableStateOf(true)
+            on { cookieNoticeBlockedFlow } doReturn MutableStateFlow(false)
         }
+
+        scriptInjectionManager = mock()
 
         browserWrapper = object : BaseBrowserWrapper(
             isIncognito = false,
@@ -182,7 +187,8 @@ class BaseBrowserWrapperTest : BaseTest() {
             domainProvider = domainProvider,
             neevaConstants = neevaConstants,
             settingsDataModel = settingsDataModel,
-            cookieCutterModel = cookieCutterModel
+            cookieCutterModel = cookieCutterModel,
+            scriptInjectionManager = scriptInjectionManager
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment
@@ -215,9 +221,9 @@ class BaseBrowserWrapperTest : BaseTest() {
         val navigationController: NavigationController = mock()
         val faviconFetcher: FaviconFetcher = mock()
         val mockTab: Tab = mock {
-            on { getGuid() } doReturn "tab guid ${mockTabs.size}"
+            on { guid } doReturn "tab guid ${mockTabs.size}"
             on { getNavigationController() } doReturn navigationController
-            on { getBrowser() } doReturn browser
+            on { browser } doReturn browser
             on { createFaviconFetcher(any()) } doReturn faviconFetcher
         }
 

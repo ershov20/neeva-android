@@ -4,6 +4,7 @@ import android.app.Application
 import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -28,6 +29,7 @@ class BrowserWrapperFactory(
     private val neevaConstants: NeevaConstants,
     private val neevaUser: NeevaUser,
     private val regularFaviconCache: RegularFaviconCache,
+    private val scriptInjectionManager: ScriptInjectionManager,
     private val settingsDataModel: SettingsDataModel,
     private val spaceStore: SpaceStore
 ) {
@@ -46,6 +48,7 @@ class BrowserWrapperFactory(
             neevaConstants = neevaConstants,
             neevaUser = neevaUser,
             regularFaviconCache = regularFaviconCache,
+            scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
             spaceStore = spaceStore
         )
@@ -65,6 +68,7 @@ class BrowserWrapperFactory(
             domainProvider = domainProvider,
             onRemovedFromHierarchy = onRemovedFromHierarchy,
             neevaConstants = neevaConstants,
+            scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel
         )
     }

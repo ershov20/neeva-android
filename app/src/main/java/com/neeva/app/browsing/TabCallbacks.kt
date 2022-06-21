@@ -5,6 +5,9 @@ import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.State
 import com.neeva.app.browsing.TabInfo.TabOpenType
+import com.neeva.app.cookiecutter.CookieCutterCallbacks
+import com.neeva.app.cookiecutter.CookieCuttingPreferences
+import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.cookiecutter.TabCookieCutterModel
 import com.neeva.app.cookiecutter.TrackingData
 import com.neeva.app.history.HistoryManager
@@ -45,13 +48,16 @@ class TabCallbacks(
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
     trackingDataFlow: MutableStateFlow<TrackingData?>,
+    cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
     enableTrackingProtection: State<Boolean>,
-    domainProvider: DomainProvider
+    domainProvider: DomainProvider,
+    private val scriptInjectionManager: ScriptInjectionManager,
 ) {
     val tabCookieCutterModel = TabCookieCutterModel(
         browserFlow = browserFlow,
         tabId = tab.guid,
         trackingDataFlow = trackingDataFlow,
+        cookieNoticeBlockedFlow = cookieNoticeBlockedFlow,
         enableTrackingProtection = enableTrackingProtection,
         domainProvider = domainProvider
     )
@@ -117,7 +123,17 @@ class TabCallbacks(
             }
         }
 
-        override fun onNavigationCompleted(navigation: Navigation) = commitVisit(navigation)
+        override fun onNavigationCompleted(navigation: Navigation) {
+            // Make sure that we have a new js context before injecting,
+            // and that navigation isn't just from push/replaceState
+            // also make sure we're a scheme worth injecting into
+            val isHttp = navigation.uri.scheme == "http" || navigation.uri.scheme == "https"
+            if (!navigation.isSameDocument && isHttp) {
+                scriptInjectionManager.injectNavigationCompletedScripts(tab, tabCookieCutterModel)
+            }
+
+            commitVisit(navigation)
+        }
 
         override fun onNavigationFailed(navigation: Navigation) {
             // https://github.com/neevaco/neeva-android/issues/582
@@ -251,6 +267,26 @@ class TabCallbacks(
         }
     }
 
+    private val cookieCutterCallbacks = object : CookieCutterCallbacks() {
+        override fun onGetPreferences(): CookieCuttingPreferences {
+            // TODO: actually read/write cookie cutting preferences.
+            return CookieCuttingPreferences(false, false, false)
+        }
+
+        override fun onNoticeHandled() {
+            tabCookieCutterModel.cookieNoticeBlocked = true
+        }
+
+        override fun onIsFlagged(origin: String): Boolean {
+            // TODO: introduce site flagging to prevent reload loops
+            return false
+        }
+
+        override fun onLogProvider(providerId: String) {
+            // TODO: Log when a provider is matched
+        }
+    }
+
     init {
         tab.fullscreenCallback = fullscreenCallback
         tab.setErrorPageCallback(ErrorCallbackImpl(activityCallbackProvider))
@@ -258,6 +294,7 @@ class TabCallbacks(
         tab.navigationController.registerNavigationCallback(navigationCallback)
         tab.registerTabCallback(tabCallback)
         tab.setContentFilterCallback(contentFilterCallback)
+        scriptInjectionManager.initializeMessagePassing(tab, cookieCutterCallbacks)
     }
 
     fun unregisterCallbacks() {
@@ -271,6 +308,7 @@ class TabCallbacks(
         tab.setNewTabCallback(null)
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
         tab.unregisterTabCallback(tabCallback)
+        scriptInjectionManager.unregisterMessagePassing(tab)
         // TODO unregister content filter callback
         //  https://github.com/neevaco/neeva-android/issues/597
     }

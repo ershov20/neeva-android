@@ -6,6 +6,7 @@ import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.cookiecutter.RegularTrackersAllowList
+import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -43,6 +44,7 @@ class RegularBrowserWrapper(
     neevaConstants: NeevaConstants,
     private val neevaUser: NeevaUser,
     regularFaviconCache: RegularFaviconCache,
+    scriptInjectionManager: ScriptInjectionManager,
     settingsDataModel: SettingsDataModel,
     spaceStore: SpaceStore
 ) : BaseBrowserWrapper(
@@ -70,6 +72,7 @@ class RegularBrowserWrapper(
     ),
     domainProvider = domainProvider,
     neevaConstants = neevaConstants,
+    scriptInjectionManager = scriptInjectionManager,
     settingsDataModel = settingsDataModel,
     trackerAllowList = RegularTrackersAllowList(
         hostInfoDao = hostInfoDao,

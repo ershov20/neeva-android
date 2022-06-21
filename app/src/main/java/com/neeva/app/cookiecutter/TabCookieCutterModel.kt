@@ -52,11 +52,26 @@ class TabCookieCutterModel(
     private val browserFlow: StateFlow<Browser?>,
     private val tabId: String,
     private val trackingDataFlow: MutableStateFlow<TrackingData?>,
+    private val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
     private val enableTrackingProtection: State<Boolean>,
     val domainProvider: DomainProvider
 ) {
+    // set this to true to enable cookie cutter
+    val shouldInjectCookieEngine
+        get() = false
+
     /** When true, the tab will be reloaded when it becomes active tab. */
     var reloadUponForeground = false
+
+    var cookieNoticeBlocked = false
+        set(value) {
+            field = value
+
+            // if we're active, i.e. have the rights to update the main flow directly, then do so
+            if (browserFlow.getActiveTabId() == tabId) {
+                cookieNoticeBlockedFlow.value = value
+            }
+        }
 
     private var stats: Map<String, Int>? = null
         // TODO(kobec/chung): when darin fixes the stopFiltering() method, remove this get()
@@ -83,6 +98,7 @@ class TabCookieCutterModel(
 
     fun resetStat() {
         stats = null
+        cookieNoticeBlocked = false
     }
 
     fun updateStats(stats: Map<String, Int>?) {

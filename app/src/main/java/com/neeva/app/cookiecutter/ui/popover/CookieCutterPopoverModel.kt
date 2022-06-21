@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 /** Stores all controller and state logic needed in [CookieCutterPopover] UI. */
 interface CookieCutterPopoverModel {
     val trackingDataFlow: StateFlow<TrackingData?>?
+    val cookieNoticeBlocked: StateFlow<Boolean>?
     val trackersAllowList: TrackersAllowList
     val popoverVisible: MutableState<Boolean>
     val urlFlow: StateFlow<Uri>
@@ -41,6 +42,7 @@ fun rememberCookieCutterPopoverModel(
             appNavModel = appNavModel,
             popoverVisible = popoverVisible,
             trackingDataFlow = cookieCutterModel.trackingDataFlow,
+            cookieNoticeBlocked = cookieCutterModel.cookieNoticeBlockedFlow,
             trackersAllowList = cookieCutterModel.trackersAllowList,
             urlFlow = urlFlow,
             onReloadTab = reloadTab
@@ -52,6 +54,7 @@ class CookieCutterPopoverModelImpl(
     private val appNavModel: AppNavModel,
     override val popoverVisible: MutableState<Boolean>,
     override val trackingDataFlow: StateFlow<TrackingData?>?,
+    override val cookieNoticeBlocked: StateFlow<Boolean>?,
     override val trackersAllowList: TrackersAllowList,
     override val urlFlow: StateFlow<Uri>,
     override val onReloadTab: () -> Unit
@@ -84,13 +87,13 @@ class PreviewCookieCutterPopoverModel : CookieCutterPopoverModel {
                 )
             )
         )
-
+    override val cookieNoticeBlocked = MutableStateFlow(true)
     override val trackersAllowList = PreviewTrackersAllowList()
     override val popoverVisible = mutableStateOf(false)
     override val urlFlow: StateFlow<Uri> = MutableStateFlow(Uri.parse("www.neeva.com"))
     override val onReloadTab: () -> Unit = { }
 
-    override fun openCookieCutterSettings() { }
-    override fun openPopover() { }
-    override fun dismissPopover() { }
+    override fun openCookieCutterSettings() {}
+    override fun openPopover() {}
+    override fun dismissPopover() {}
 }

@@ -25,7 +25,7 @@ import com.neeva.app.ui.theme.Dimensions
 @Composable
 fun TrackingDataDisplay(visible: Boolean, cookieCutterPopoverModel: CookieCutterPopoverModel) {
     val trackingData = cookieCutterPopoverModel.trackingDataFlow?.collectAsState()?.value
-
+    val cookieNoticeBlocked = cookieCutterPopoverModel.cookieNoticeBlocked?.value ?: false
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn() + slideInVertically() + expandVertically(),
@@ -42,8 +42,8 @@ fun TrackingDataDisplay(visible: Boolean, cookieCutterPopoverModel: CookieCutter
                 Spacer(Modifier.size(Dimensions.PADDING_SMALL))
 
                 TrackingDataNumberBox(
-                    label = stringResource(id = R.string.cookie_cutter_domains),
-                    value = trackingData?.numDomains ?: 0,
+                    label = stringResource(id = R.string.cookie_cutter_popups),
+                    value = if (cookieNoticeBlocked) 1 else 0,
                     modifier = Modifier.weight(1f)
                 )
             }
