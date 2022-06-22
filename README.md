@@ -101,7 +101,7 @@ The directory structure is still in flux as we untangle and update how our brows
 
     * `urlbar` contains logic for implementing the URL bar at the top of the screen, including the autocomplete logic.
 
-* `chromium/` and `weblayer/` are directories with source and pre-compiled libs we include so that we can use WebLayer (until they release it publicly).
+* `weblayer/` and `weblayer_support/` are directories with source and pre-compiled libs we include so that we can use WebLayer (until they release it publicly).
 
 ## Code style
 We run both lint and ktlint checks.  If ktlint is failing for you, see 

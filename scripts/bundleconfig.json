@@ -1,0 +1,25 @@
+// See https://developer.android.com/studio/build/building-cmdline#bundleconfig
+// for more details on this file format.
+{
+  "compression": {
+    "uncompressedGlob": [
+      "**/*.bin",
+      "**/*.dat",
+      "**/*.pak"
+    ]
+  },
+  "optimizations": {
+    "splitsConfig": {
+      "splitDimension": [
+        {
+          "value": "SCREEN_DENSITY",
+          "negate": true
+        },
+        {
+          "value": "LANGUAGE",
+          "negate": true
+        }
+      ]
+    }
+  }
+}

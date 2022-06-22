@@ -7,4 +7,6 @@
     <dimen name="first_run_padding">24dp</dimen>
     <dimen name="sign_up_landing_padding_top">148dp</dimen>
     <dimen name="sign_up_with_other_padding_top">86dp</dimen>
+
+    <dimen name="min_touch_target_size">48dp</dimen>
 </resources>

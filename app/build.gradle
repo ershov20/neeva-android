@@ -59,7 +59,7 @@ android {
 
         release {
             minifyEnabled true
-            shrinkResources true
+            shrinkResources false  // TODO(darin): figure out how to re-enable this
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
 
@@ -132,13 +132,13 @@ android {
             assets.srcDirs += files("$projectDir/schemas".toString())
         }
     }
+    dynamicFeatures = [':weblayer_support']
 }
 
 tasks.preBuild.dependsOn ":scripts:buildScripts"
 
 dependencies {
     implementation project(path: ':weblayer')
-    implementation project(path: ':chromium:gen:org__chromium__weblayer__support')
 
     implementation "androidx.activity:activity-compose:$androidx_activity_version"
     implementation "androidx.activity:activity-ktx:$androidx_activity_version"
@@ -170,7 +170,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
+    // TODO(darin): Re-enable upon resolving incompatibility with WebLayerSupport.apk.
+    //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.8.1'

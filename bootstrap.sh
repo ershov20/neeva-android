@@ -11,12 +11,12 @@ fi
 git lfs install
 git lfs pull
 
-chromium_version=$(cat chromium/CURRENT_VERSION)
+snapshots_dir="weblayer_support/snapshots"
+chromium_version=$(cat $snapshots_dir/CURRENT_VERSION)
 if [ "x$1" = "x--for-ci" ]; then
-    release="release-$chromium_version-x64"
+    release="$chromium_version-x64"
 else
-    release=${1:-"release-$chromium_version"}
+    release=${1:-"$chromium_version-arm"}
 fi
-echo "Using chromium/$release"
-(cd chromium && ./make-projects.sh "$release")
-(cd weblayer && ./make-src.sh "../chromium/$release")
+echo "Using $snapshots_dir/$release"
+(cd weblayer && ./make-src.sh "../$snapshots_dir/$release")

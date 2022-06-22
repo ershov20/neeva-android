@@ -32,13 +32,13 @@ interface CookieCutterModel {
         TRACKER_COOKIE(
             R.string.blocking_strength_standard_description,
             R.string.blocking_strength_standard_title,
-            "assets/easyprivacy.proto",
+            "assets/easyprivacy.dat",
             ContentFilterMode.BLOCK_COOKIES
         ),
         TRACKER_REQUEST(
             R.string.blocking_strength_strict_description,
             R.string.blocking_strength_strict_title,
-            "assets/easyprivacy.proto",
+            "assets/easyprivacy.dat",
             ContentFilterMode.BLOCK_REQUESTS
         ),
         // TODO: enable this when CSS blocking is supported
