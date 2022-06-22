@@ -1,9 +1,7 @@
 package com.neeva.app.browsing.urlbar
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.view.KeyEvent
-import android.view.inputmethod.InputMethodManager
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -29,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +36,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.onPreviewKeyEvent
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -55,6 +51,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
+import com.neeva.app.ui.KeyboardFocusEffect
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.FaviconView
@@ -84,8 +81,6 @@ fun AutocompleteTextField(
     focusUrlBar: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    val focusRequester = remember { FocusRequester() }
-
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -140,6 +135,9 @@ fun AutocompleteTextField(
                 .weight(1f)
                 .height(IntrinsicSize.Min)
         ) {
+            val focusRequester = remember { FocusRequester() }
+            KeyboardFocusEffect(focusRequester.takeIf { focusUrlBar })
+
             // [BasicTextField]s don't have support for Material 3 colors, so we have to manually
             // provide them.
             BasicTextField(
@@ -213,24 +211,6 @@ fun AutocompleteTextField(
                     tint = LocalContentColor.current
                 )
             }
-        }
-    }
-
-    val view = LocalView.current
-    DisposableEffect(true) {
-        if (focusUrlBar) {
-            focusRequester.requestFocus()
-        }
-
-        // There's a strange bug with Compose that prevents the keyboard from being dismissed when
-        // the BasicTextField loses focus.  Although we can confirm that the control has lost focus,
-        // the keyboard stays visible after the Composable leaves the composition, and all attempts
-        // to use LocalSoftwareKeyboardController's hide() silently fail because Compose does not
-        // guarantee that hide() will actually do anything.  Asking the InputMethodManager directly
-        // to hide the keyboard seems to work, but I don't like not understanding why.
-        onDispose {
-            (view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager)
-                ?.hideSoftInputFromWindow(view.windowToken, 0)
         }
     }
 }

@@ -28,6 +28,7 @@ import com.neeva.app.overflowmenu.OverflowMenuData
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.overflowmenu.overflowMenuItem
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.spaces.CreateSpaceDialog
 import com.neeva.app.ui.ConfirmationAlertDialog
 import com.neeva.app.ui.widgets.menu.MenuSeparator
 
@@ -70,8 +71,8 @@ fun CardsPaneToolbar(browserWrapper: BrowserWrapper) {
 
             OverflowMenu(
                 overflowMenuData = overflowMenuData,
-                onMenuItem = {
-                    when (it) {
+                onMenuItem = { ordinal ->
+                    when (val id = OverflowMenuItemId.values()[ordinal]) {
                         OverflowMenuItemId.CLOSE_ALL_TABS -> {
                             if (requireConfirmationWhenCloseAllTabs) {
                                 showCloseAllTabsDialog.value = true
@@ -80,7 +81,7 @@ fun CardsPaneToolbar(browserWrapper: BrowserWrapper) {
                             }
                         }
 
-                        else -> appNavModel.onMenuItem(it)
+                        else -> appNavModel.onMenuItem(id)
                     }
                 }
             )
@@ -110,11 +111,12 @@ private fun CardsPaneToolbarAddButton(
     cardsPaneModel: CardsPaneModel,
     browserWrapper: BrowserWrapper
 ) {
-    val spaceStore = LocalEnvironment.current.spaceStore
+    val isCreateSpaceDialogVisible = remember { mutableStateOf(false) }
+
     IconButton(
         onClick = {
             when (cardsPaneModel.selectedScreen.value) {
-                SelectedScreen.SPACES -> spaceStore.createSpace()
+                SelectedScreen.SPACES -> { isCreateSpaceDialogVisible.value = true }
                 else -> cardsPaneModel.openLazyTab(browserWrapper)
             }
         }
@@ -127,6 +129,11 @@ private fun CardsPaneToolbarAddButton(
             }
         )
     }
+
+    CreateSpaceDialog(
+        isDialogVisible = isCreateSpaceDialogVisible,
+        onDismissRequested = { isCreateSpaceDialogVisible.value = false }
+    )
 }
 
 private fun createCardsPaneOverflowMenuData(selectedScreen: SelectedScreen) = OverflowMenuData(

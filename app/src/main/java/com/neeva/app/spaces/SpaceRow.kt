@@ -15,7 +15,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
@@ -32,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
-import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.ui.TwoBooleanPreviewContainer
@@ -70,10 +68,9 @@ data class SpaceRowData(
 @Composable
 fun SpaceRow(
     space: Space,
-    activeTabModel: ActiveTabModel,
+    spacesWithURL: List<String>,
     onClick: () -> Unit
 ) {
-    val spacesWithURL by activeTabModel.spacesContainingCurrentUrlFlow.collectAsState()
     SpaceRow(space, spacesWithURL.contains(space.id), onClick)
 }
 

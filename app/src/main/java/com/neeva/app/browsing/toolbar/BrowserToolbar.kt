@@ -42,6 +42,7 @@ import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
 import com.neeva.app.cookiecutter.ui.popover.PreviewCookieCutterPopoverModel
 import com.neeva.app.cookiecutter.ui.popover.rememberCookieCutterPopoverModel
 import com.neeva.app.overflowmenu.OverflowMenu
+import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
@@ -175,7 +176,9 @@ fun BrowserToolbar(
 
                             OverflowMenu(
                                 overflowMenuData = overflowMenuData,
-                                onMenuItem = browserToolbarModel::onMenuItem
+                                onMenuItem = {
+                                    browserToolbarModel.onMenuItem(OverflowMenuItemId.values()[it])
+                                }
                             )
                         }
                     }

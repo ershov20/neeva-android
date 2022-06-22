@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -35,6 +36,7 @@ fun NeevaTextField(
     text: String,
     onTextChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
+    color: Color = MaterialTheme.colorScheme.surface,
     placeholderText: String? = null,
     tonalElevation: Dp = 1.dp,
     singleLine: Boolean = false,
@@ -42,6 +44,7 @@ fun NeevaTextField(
     maxLines: Int = Int.MAX_VALUE,
 ) {
     Surface(
+        color = color,
         shape = RoundedCornerShape(Dimensions.RADIUS_LARGE),
         tonalElevation = tonalElevation,
         modifier = modifier

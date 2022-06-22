@@ -14,6 +14,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,7 +33,6 @@ import com.neeva.app.R
 import com.neeva.app.ui.AnimatedExpandShrink
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.NeevaSwitch
-import com.neeva.app.ui.NeevaTextField
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.theme.Dimensions
@@ -130,13 +130,12 @@ fun FeedbackView(
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
                 // Feedback text box
-                NeevaTextField(
-                    text = feedback.value,
-                    onTextChanged = { feedback.value = it },
-                    placeholderText = stringResource(
-                        R.string.submit_feedback_textfield_placeholder
-                    ),
-                    minLines = 4,
+                OutlinedTextField(
+                    value = feedback.value,
+                    onValueChange = { newValue -> feedback.value = newValue },
+                    placeholder = {
+                        Text(stringResource(R.string.submit_feedback_textfield_placeholder))
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = Dimensions.PADDING_LARGE)
@@ -152,9 +151,9 @@ fun FeedbackView(
                 )
 
                 AnimatedExpandShrink(isVisible = shareUrl.value) {
-                    NeevaTextField(
-                        text = urlToSend.value,
-                        onTextChanged = { urlToSend.value = it },
+                    OutlinedTextField(
+                        value = urlToSend.value,
+                        onValueChange = { urlToSend.value = it },
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()

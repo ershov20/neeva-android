@@ -10,7 +10,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,14 +23,13 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.SwipeToDismiss
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.ExitToApp
-import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.rememberDismissState
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
@@ -44,7 +42,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -56,6 +53,8 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
+import com.neeva.app.overflowmenu.OverflowMenu
+import com.neeva.app.overflowmenu.OverflowMenuData
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
@@ -66,6 +65,8 @@ import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.menu.MenuAction
+import com.neeva.app.ui.widgets.menu.MenuRowItem
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -255,20 +256,10 @@ fun SpaceDetailToolbar(
         }
     }
     val appNavModel = LocalAppNavModel.current
-    val showDescriptionsIcon = @Composable {
-        Icon(
-            painter = painterResource(
-                if (showDescriptions) {
-                    R.drawable.ic_hide_descriptions
-                } else {
-                    R.drawable.ic_show_descriptions
-                }
-            ),
-            contentDescription = stringResource(
-                id = R.string.space_detail_show_descriptions
-            ),
-            tint = MaterialTheme.colorScheme.onSurface
-        )
+    val showDescriptionsResourceId = if (showDescriptions) {
+        R.drawable.ic_hide_descriptions
+    } else {
+        R.drawable.ic_show_descriptions
     }
 
     SmallTopAppBar(
@@ -305,7 +296,6 @@ fun SpaceDetailToolbar(
             }
         },
         actions = {
-            var expanded by remember { mutableStateOf(false) }
             val onEditSpace = {
                 appNavModel.showEditSpaceDialog(
                     SpaceEditMode.EDITING_SPACE,
@@ -338,10 +328,15 @@ fun SpaceDetailToolbar(
             }
 
             if (!isTitleVisible) {
-                IconButton(
-                    onClick = toggleShowDescriptions,
-                    content = showDescriptionsIcon
-                )
+                IconButton(onClick = toggleShowDescriptions) {
+                    Icon(
+                        painter = painterResource(showDescriptionsResourceId),
+                        contentDescription = stringResource(
+                            id = R.string.space_detail_show_descriptions
+                        ),
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
 
             RowActionIconButton(
@@ -359,126 +354,56 @@ fun SpaceDetailToolbar(
                 )
             )
 
-            IconButton(onClick = { expanded = true }) {
-                Icon(
-                    imageVector = Icons.Default.MoreVert,
-                    contentDescription = stringResource(id = R.string.more),
-                    tint = MaterialTheme.colorScheme.onBackground
-                )
-            }
-
             url?.let { spaceUrl ->
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                    modifier = Modifier.defaultMinSize(minWidth = 250.dp)
-                ) {
-                    val isOwner = space.userACL == SpaceACLLevel.Owner
-                    val label = stringResource(
-                        id = if (isOwner) {
-                            R.string.delete
-                        } else {
-                            R.string.unfollow
-                        }
+                val menuItems = mutableListOf<MenuRowItem>()
+                val menuActions = mutableMapOf<Int, () -> Unit>()
+
+                val isOwner = space.userACL == SpaceACLLevel.Owner
+                val removeLabelId = if (isOwner) {
+                    R.string.delete
+                } else {
+                    R.string.unfollow
+                }
+
+                menuItems.add(MenuAction(id = removeLabelId, icon = Icons.Outlined.Delete))
+                menuActions[removeLabelId] = {
+                    showRemoveSpaceConfirmationDialog.value = true
+                }
+
+                menuItems.add(
+                    MenuAction(id = R.string.space_edit_on_web, icon = Icons.Outlined.ExitToApp)
+                )
+                menuActions[R.string.space_edit_on_web] = { appNavModel.openUrl(spaceUrl) }
+
+                if (canEdit && isTitleVisible) {
+                    menuItems.add(MenuAction(id = R.string.space_edit, icon = Icons.Outlined.Edit))
+                    menuActions[R.string.space_edit] = onEditSpace
+
+                    menuItems.add(
+                        MenuAction(id = R.string.space_add_space_item, icon = Icons.Outlined.Add)
                     )
+                    menuActions[R.string.space_add_space_item] = onAddToSpace
+                }
 
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = label,
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        },
-                        text = {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        },
-                        onClick = {
-                            showRemoveSpaceConfirmationDialog.value = true
-                        }
+                if (isTitleVisible) {
+                    menuItems.add(
+                        MenuAction(
+                            id = R.string.space_detail_show_descriptions,
+                            imageResourceID = showDescriptionsResourceId
+                        )
                     )
-
-                    DropdownMenuItem(
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.ExitToApp,
-                                contentDescription = stringResource(
-                                    id = R.string.space_edit_on_web
-                                ),
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        },
-                        text = {
-                            Text(
-                                text = stringResource(id = R.string.space_edit_on_web),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        },
-                        onClick = { appNavModel.openUrl(spaceUrl) }
-                    )
-
-                    if (canEdit && isTitleVisible) {
-                        DropdownMenuItem(
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = stringResource(
-                                        id = R.string.space_edit
-                                    ),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            text = {
-                                Text(
-                                    text = stringResource(id = R.string.space_edit),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                            },
-                            onClick = onEditSpace
-                        )
-
-                        DropdownMenuItem(
-                            leadingIcon = {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = stringResource(
-                                        id = R.string.space_add_space_item
-                                    ),
-                                    tint = MaterialTheme.colorScheme.onSurface
-                                )
-                            },
-                            text = {
-                                Text(
-                                    text = stringResource(id = R.string.space_add_space_item),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                            },
-                            onClick = onAddToSpace
-                        )
-                    }
-                    if (isTitleVisible) {
-                        DropdownMenuItem(
-                            leadingIcon = showDescriptionsIcon,
-                            text = {
-                                Text(
-                                    text = stringResource(
-                                        id = R.string.space_detail_show_descriptions
-                                    ),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                            },
-                            onClick = toggleShowDescriptions
-                        )
+                    menuActions[R.string.space_detail_show_descriptions] = {
+                        toggleShowDescriptions()
                     }
                 }
+
+                OverflowMenu(
+                    overflowMenuData = OverflowMenuData(
+                        additionalRowItems = menuItems,
+                        showDefaultItems = false
+                    ),
+                    onMenuItem = { id -> menuActions[id]?.invoke() }
+                )
             }
         },
     )

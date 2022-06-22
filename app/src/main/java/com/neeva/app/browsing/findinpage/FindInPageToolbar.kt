@@ -20,7 +20,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +31,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
+import com.neeva.app.ui.KeyboardFocusEffect
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -41,7 +41,6 @@ fun FindInPageToolbar(
     onUpdateQuery: (String?) -> Unit,
     onScrollToResult: (forward: Boolean) -> Unit
 ) {
-    val focusRequester = remember { FocusRequester() }
     val dismissLambda = {
         onUpdateQuery(null)
     }
@@ -55,6 +54,9 @@ fun FindInPageToolbar(
     }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
+        val focusRequester = remember { FocusRequester() }
+        KeyboardFocusEffect(focusRequester)
+
         Icon(
             Icons.Default.Search,
             contentDescription = null,
@@ -111,11 +113,6 @@ fun FindInPageToolbar(
                 contentDescription = stringResource(id = R.string.close)
             )
         }
-    }
-
-    // Focuses the TextField when the FindInPageUI appears
-    LaunchedEffect(true) {
-        focusRequester.requestFocus()
     }
 }
 

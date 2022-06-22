@@ -111,12 +111,10 @@ object MenuSeparator : MenuRowItem {
 
 data class MenuAction(
     val id: Int,
-    @StringRes internal val labelId: Int,
+    @StringRes internal val labelId: Int = id,
     internal val icon: ImageVector? = null,
     @DrawableRes internal val imageResourceID: Int? = null
 ) : MenuRowItem {
-    constructor(labelId: Int) : this(id = labelId, labelId = labelId)
-
     @Composable
     override fun Composed(onClick: (id: Int) -> Unit) {
         val label = stringResource(id = labelId)

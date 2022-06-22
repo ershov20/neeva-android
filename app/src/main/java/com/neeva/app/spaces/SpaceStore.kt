@@ -7,17 +7,6 @@ import android.net.Uri
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.AddSpacePublicACLMutation
@@ -32,7 +21,6 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.LeaveSpaceMutation
 import com.neeva.app.ListSpacesQuery
-import com.neeva.app.LocalEnvironment
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.UnauthenticatedApolloWrapper
@@ -57,9 +45,7 @@ import com.neeva.app.type.LeaveSpaceInput
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.type.UpdateSpaceEntityDisplayDataInput
 import com.neeva.app.type.UpdateSpaceInput
-import com.neeva.app.ui.NeevaTextField
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
 import java.io.FileOutputStream
@@ -632,36 +618,6 @@ class SpaceStore(
                 popupModel.showSnackbar(errorString)
             }
             stateFlow.value = State.READY
-        }
-    }
-
-    fun createSpace() {
-        popupModel.showBottomSheet(titleResId = R.string.space_create) { onDismissRequested ->
-            val spaceName = remember { mutableStateOf("") }
-            val spaceStore = LocalEnvironment.current.spaceStore
-
-            Column(modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)) {
-                NeevaTextField(
-                    text = spaceName.value,
-                    onTextChanged = { spaceName.value = it },
-                    placeholderText = stringResource(R.string.space_create_placeholder)
-                )
-
-                Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
-
-                Button(
-                    enabled = spaceName.value.isNotEmpty(),
-                    onClick = {
-                        spaceStore.createSpace(spaceName.value)
-                        onDismissRequested()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.save))
-                }
-
-                Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
-            }
         }
     }
 

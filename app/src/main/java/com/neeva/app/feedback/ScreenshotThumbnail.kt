@@ -2,18 +2,19 @@ package com.neeva.app.feedback
 
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.NeevaThemePreviewContainer
@@ -23,15 +24,20 @@ import com.neeva.app.ui.theme.Dimensions
 @Composable
 fun ScreenshotThumbnail(
     bitmap: Bitmap,
-    modifier: Modifier = Modifier,
-    tonalElevation: Dp = 1.dp
+    modifier: Modifier = Modifier
 ) {
     val it = bitmap.asImageBitmap()
 
     Surface(
-        shape = RoundedCornerShape(Dimensions.RADIUS_LARGE),
-        tonalElevation = tonalElevation,
-        modifier = modifier.fillMaxWidth()
+        color = MaterialTheme.colorScheme.background,
+        shape = RoundedCornerShape(Dimensions.RADIUS_TINY),
+        modifier = modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
+                shape = RoundedCornerShape(Dimensions.RADIUS_TINY)
+            )
     ) {
         Row(
             horizontalArrangement = Arrangement.Center

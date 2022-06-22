@@ -11,7 +11,7 @@ buildscript {
 
         androidx_activity_version = '1.4.0'
         androidx_appcompat_version = '1.4.2'
-        androidx_compose_version = '1.2.0-beta03'
+        androidx_compose_version = '1.2.0-rc01'
         androidx_lifecycle_version = '2.4.1'
         androidx_navigation_compose_version = '2.4.2'
         androidx_paging_version = '3.1.1'

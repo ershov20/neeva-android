@@ -14,13 +14,13 @@ import com.neeva.app.ui.widgets.menu.MenuContent
 @Composable
 fun OverflowMenuContents(
     overflowMenuData: OverflowMenuData,
-    onMenuItem: (OverflowMenuItemId) -> Unit
+    onMenuItem: (Int) -> Unit
 ) {
     MenuContent(
         menuRows = overflowMenuData.rowItems,
         menuIconItems = overflowMenuData.iconItems
     ) { id ->
-        onMenuItem(OverflowMenuItemId.values()[id])
+        onMenuItem(id)
     }
 }
 

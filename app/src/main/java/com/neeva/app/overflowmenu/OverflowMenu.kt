@@ -29,7 +29,7 @@ import com.neeva.app.ui.OneBooleanPreviewContainer
 @Composable
 fun OverflowMenu(
     overflowMenuData: OverflowMenuData,
-    onMenuItem: (menuItemId: OverflowMenuItemId) -> Unit,
+    onMenuItem: (menuItemId: Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }

@@ -9,7 +9,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
@@ -25,7 +28,16 @@ fun AddToSpaceUI(
     spaceModifier: SpaceModifier
 ) {
     val spaces: List<Space> by spaceStore.editableSpacesFlow.collectAsState(emptyList())
+    val spacesWithURL by activeTabModel.spacesContainingCurrentUrlFlow.collectAsState()
+    val displayedSpaces by remember {
+        derivedStateOf {
+            spaces.sortedByDescending { spacesWithURL.contains(it.id) }
+        }
+    }
+
     val neevaUser = LocalEnvironment.current.neevaUser
+
+    val isCreateSpaceDialogVisible = remember { mutableStateOf(false) }
 
     if (neevaUser.isSignedOut()) {
         SpacesIntro(
@@ -36,7 +48,7 @@ fun AddToSpaceUI(
         LazyColumn {
             item {
                 BaseRowLayout(
-                    onTapRow = spaceStore::createSpace,
+                    onTapRow = { isCreateSpaceDialogVisible.value = true },
                     startComposable = {
                         Icon(
                             imageVector = Icons.Default.Add,
@@ -45,18 +57,23 @@ fun AddToSpaceUI(
                     }
                 ) {
                     Text(
-                        text = stringResource(id = R.string.create_space),
+                        text = stringResource(id = R.string.space_create),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
 
-            items(spaces, key = { it.id }) {
-                SpaceRow(space = it, activeTabModel) {
+            items(displayedSpaces, key = { it.id }) {
+                SpaceRow(space = it, spacesWithURL = spacesWithURL) {
                     spaceModifier.addOrRemoveCurrentTabToSpace(it)
                 }
             }
         }
     }
+
+    CreateSpaceDialog(
+        isDialogVisible = isCreateSpaceDialogVisible,
+        onDismissRequested = { isCreateSpaceDialogVisible.value = false }
+    )
 }

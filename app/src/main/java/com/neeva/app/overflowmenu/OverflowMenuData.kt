@@ -39,30 +39,35 @@ fun overflowMenuItem(
 class OverflowMenuData(
     val isBadgeVisible: Boolean = false,
     val iconItems: List<MenuIconItemData> = emptyList(),
-    additionalRowItems: List<MenuRowItem> = emptyList()
+    additionalRowItems: List<MenuRowItem> = emptyList(),
+    showDefaultItems: Boolean = true
 ) {
     val rowItems: List<MenuRowItem> = additionalRowItems.plus(
-        listOf(
-            overflowMenuItem(
-                id = OverflowMenuItemId.SUPPORT,
-                labelId = R.string.feedback,
-                imageResourceID = R.drawable.ic_help_outline_black_24
-            ),
-            overflowMenuItem(
-                id = OverflowMenuItemId.SETTINGS,
-                labelId = R.string.settings,
-                imageResourceID = R.drawable.ic_settings_black_24
-            ),
-            overflowMenuItem(
-                id = OverflowMenuItemId.HISTORY,
-                labelId = R.string.history,
-                imageResourceID = R.drawable.ic_baseline_history_24
-            ),
-            overflowMenuItem(
-                id = OverflowMenuItemId.DOWNLOADS,
-                labelId = R.string.downloads,
-                imageResourceID = R.drawable.ic_download_done_black_24
+        if (showDefaultItems) {
+            listOf(
+                overflowMenuItem(
+                    id = OverflowMenuItemId.SUPPORT,
+                    labelId = R.string.feedback,
+                    imageResourceID = R.drawable.ic_help_outline_black_24
+                ),
+                overflowMenuItem(
+                    id = OverflowMenuItemId.SETTINGS,
+                    labelId = R.string.settings,
+                    imageResourceID = R.drawable.ic_settings_black_24
+                ),
+                overflowMenuItem(
+                    id = OverflowMenuItemId.HISTORY,
+                    labelId = R.string.history,
+                    imageResourceID = R.drawable.ic_baseline_history_24
+                ),
+                overflowMenuItem(
+                    id = OverflowMenuItemId.DOWNLOADS,
+                    labelId = R.string.downloads,
+                    imageResourceID = R.drawable.ic_download_done_black_24
+                )
             )
-        )
+        } else {
+            emptyList()
+        }
     )
 }
