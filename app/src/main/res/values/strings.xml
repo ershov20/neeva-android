@@ -209,6 +209,7 @@
     <string name="shown_as_owner">You will be shown as the owner of the Space</string>
     <string name="space_delete_confirmation">Are you sure you want to delete this Space?</string>
     <string name="space_unfollow_confirmation">Are you sure you want to unfollow this Space?</string>
+    <string name="space_open">Open Space</string>
 
     <string name="twitter_social_title">Twitter</string>
     <string name="linkedin_social_title">Linkedin</string>

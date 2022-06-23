@@ -83,7 +83,7 @@ private fun DefaultAccountImage(modifier: Modifier) {
 
 @Composable
 fun PictureUrlPainter(pictureURI: Uri?): Painter? {
-    if (pictureURI == null) {
+    if (pictureURI == null || pictureURI.toString().isEmpty()) {
         return null
     }
     return rememberImagePainter(

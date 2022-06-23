@@ -43,6 +43,7 @@ fun BaseRowLayout(
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(backgroundColor),
     applyVerticalPadding: Boolean = true,
+    verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     mainContent: @Composable () -> Unit
 ) {
     Surface(
@@ -78,7 +79,7 @@ fun BaseRowLayout(
             .fillMaxWidth()
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = verticalAlignment,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = if (applyVerticalPadding) Dimensions.PADDING_SMALL else 0.dp)

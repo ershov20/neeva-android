@@ -815,12 +815,13 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     /** Asynchronously adds or removes the active tab from the space with given [spaceID]. */
-    override fun modifySpace(spaceID: String) {
+    override fun modifySpace(spaceID: String, onOpenSpace: (String) -> Unit) {
         coroutineScope.launch(dispatchers.io) {
             spaceStore?.addOrRemoveFromSpace(
                 spaceID = spaceID,
                 url = activeTabModel.urlFlow.value,
-                title = activeTabModel.titleFlow.value
+                title = activeTabModel.titleFlow.value,
+                onOpenSpace = onOpenSpace
             ) ?: Log.e(TAG, "Cannot modify space in Incognito mode")
         }
     }

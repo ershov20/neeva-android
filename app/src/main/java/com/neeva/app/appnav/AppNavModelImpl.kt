@@ -226,7 +226,9 @@ class AppNavModelImpl(
                 spaceStore = spaceStore,
                 dismissSheet = onDismissRequested
             ) { space ->
-                browserWrapper.modifySpace(space.id)
+                browserWrapper.modifySpace(space.id) { spaceId ->
+                    showSpaceDetail(spaceId)
+                }
                 onDismissRequested()
             }
         }

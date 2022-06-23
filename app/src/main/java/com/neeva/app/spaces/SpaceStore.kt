@@ -373,14 +373,15 @@ class SpaceStore(
         spaceID: String,
         url: Uri,
         title: String,
-        description: String? = null
+        description: String? = null,
+        onOpenSpace: (String) -> Unit = {}
     ): Boolean = withContext(dispatchers.io) {
         val space = dao.getSpaceById(spaceID) ?: return@withContext false
 
         return@withContext if (contentURLsForSpace(space.id).contains(url)) {
             removeFromSpace(space, url)
         } else {
-            addToSpace(space, url, title, description)
+            addToSpace(space, url, title, description, onOpenSpace)
         }
     }
 
@@ -401,7 +402,8 @@ class SpaceStore(
         space: Space,
         url: Uri,
         title: String,
-        description: String? = null
+        description: String? = null,
+        onOpenSpace: (String) -> Unit = {}
     ): Boolean = withContext(dispatchers.io) {
         val spaceID = space.id
         stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
@@ -421,7 +423,11 @@ class SpaceStore(
 
         return@withContext response?.data?.entityId?.let {
             Log.i(TAG, "Added item to space with id=$it")
-            popupModel.showSnackbar(appContext.getString(R.string.space_add_url, space.name))
+            popupModel.showSnackbar(
+                message = appContext.getString(R.string.space_add_url, space.name),
+                actionLabel = appContext.getString(R.string.space_open),
+                onActionPerformed = { onOpenSpace(spaceID) }
+            )
             dao.upsert(
                 SpaceItem(
                     id = it,
@@ -565,7 +571,7 @@ class SpaceStore(
         }
     }
 
-    fun createSpace(spaceName: String) {
+    fun createSpace(spaceName: String, onOpenSpace: (String) -> Unit) {
         coroutineScope.launch(dispatchers.io) {
             val response = authenticatedApolloWrapper.performMutation(
                 CreateSpaceMutation(name = spaceName),
@@ -574,7 +580,9 @@ class SpaceStore(
 
             response?.data?.createSpace?.let {
                 popupModel.showSnackbar(
-                    appContext.getString(R.string.space_create_success, spaceName)
+                    message = appContext.getString(R.string.space_create_success, spaceName),
+                    actionLabel = appContext.getString(R.string.space_open),
+                    onActionPerformed = { onOpenSpace(it) }
                 )
                 performRefresh()
             } ?: run {

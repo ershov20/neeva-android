@@ -2,7 +2,6 @@ package com.neeva.app.spaces
 
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -13,7 +12,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -21,21 +19,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalEnvironment
-import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
 import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
-import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
@@ -48,14 +42,18 @@ fun SpaceItemDetail(
     val isRegularWebItem = !spaceItem.url?.toString().isNullOrEmpty()
 
     Surface(
-        Modifier.clickable {
-            spaceItem.url?.let {
-                if (it.toString().startsWith(neevaConstants.appSpacesURL)) {
-                    appNavModel.showSpaceDetail(it.pathSegments.last())
-                } else {
-                    appNavModel.openUrl(it)
+        if (isRegularWebItem) {
+            Modifier.clickable {
+                spaceItem.url?.let {
+                    if (it.toString().startsWith(neevaConstants.appSpacesURL)) {
+                        appNavModel.showSpaceDetail(it.pathSegments.last())
+                    } else {
+                        appNavModel.openUrl(it)
+                    }
                 }
             }
+        } else {
+            Modifier
         }
     ) {
         Column {
@@ -179,37 +177,32 @@ fun SpaceItemDetailMainContent(
     thumbnailUri: Uri?,
     isRegularWebItem: Boolean
 ) {
+    val painter = PictureUrlPainter(pictureURI = thumbnailUri)
+
     if (isRegularWebItem) {
-        BaseRowLayout(
-            backgroundColor = MaterialTheme.colorScheme.surface,
-            startComposable = {
-                val painter = PictureUrlPainter(pictureURI = thumbnailUri)
-                if (painter == null) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_bookmarks_black_24),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(72.dp)
-                            .background(
-                                color = ColorPalette.Brand.PolarVariant,
-                                shape = RoundedCornerShape(Dimensions.RADIUS_MEDIUM)
-                            )
-                            .padding(Dimensions.PADDING_LARGE),
-                        tint = Color.White
-                    )
-                } else {
+        if (painter == null || thumbnailUri.toString().isEmpty()) {
+            BaseRowLayout(
+                backgroundColor = MaterialTheme.colorScheme.surface,
+                mainContent = content
+            )
+        } else {
+            BaseRowLayout(
+                backgroundColor = MaterialTheme.colorScheme.surface,
+                startComposable = {
                     Image(
                         painter = painter,
                         contentScale = ContentScale.Crop,
                         contentDescription = null,
                         modifier = Modifier
+                            .padding(vertical = Dimensions.PADDING_LARGE)
                             .size(72.dp)
                             .clip(RoundedCornerShape(Dimensions.RADIUS_MEDIUM))
                     )
-                }
-            },
-            mainContent = content
-        )
+                },
+                verticalAlignment = Alignment.Top,
+                mainContent = content
+            )
+        }
     } else {
         BaseRowLayout(
             backgroundColor = MaterialTheme.colorScheme.surfaceVariant,

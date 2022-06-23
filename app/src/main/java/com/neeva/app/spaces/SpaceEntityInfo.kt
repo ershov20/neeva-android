@@ -4,6 +4,7 @@ import android.content.pm.ProviderInfo
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -153,7 +154,10 @@ fun ColumnScope.ProviderInfo(
     faviconBitmap: Bitmap?,
     domain: String?
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.PADDING_SMALL)
+    ) {
         FaviconView(
             bitmap = faviconBitmap,
             drawContainer = false
@@ -165,7 +169,6 @@ fun ColumnScope.ProviderInfo(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
-                .padding(start = Dimensions.PADDING_TINY)
                 .fillMaxWidth()
                 .padding(vertical = Dimensions.PADDING_MEDIUM)
         )
@@ -177,7 +180,9 @@ fun ColumnScope.NewsInfo(
     faviconURL: Uri?,
     providerName: String?
 ) {
-    Row {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.PADDING_SMALL)
+    ) {
         PictureUrlPainter(pictureURI = faviconURL)?.let {
             Image(
                 painter = it,

@@ -141,7 +141,7 @@ interface BrowserWrapper {
     suspend fun getReplacementUrl(uri: Uri) = uri
 
     /** Asynchronously adds or removes the active tab from the space with given [spaceID]. */
-    fun modifySpace(spaceID: String)
+    fun modifySpace(spaceID: String, onOpenSpace: (String) -> Unit)
 
     /** Dismisses any transient dialogs or popups that are covering the page. */
     fun dismissTransientUi(): Boolean

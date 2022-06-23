@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,19 +57,21 @@ fun SpaceHeader(
             showSingleLetterPictureIfAvailable = true,
             onClick = null
         )
-        Text(
-            text = space.description,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = Int.MAX_VALUE,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = Dimensions.PADDING_LARGE,
-                    vertical = Dimensions.PADDING_SMALL
-                )
-        )
+        if (space.description.isNotEmpty()) {
+            Text(
+                text = space.description,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
+                maxLines = Int.MAX_VALUE,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = Dimensions.PADDING_LARGE,
+                        vertical = Dimensions.PADDING_SMALL
+                    )
+            )
+        }
 
         SpaceHeaderStats(
             isPublic = space.isPublic,
@@ -99,7 +101,8 @@ fun SpaceHeaderStats(
         if (isPublic) {
             val followers = stringResource(R.string.space_detail_followers, numFollowers)
             Icon(
-                imageVector = Icons.Default.Face,
+                painterResource(id = R.drawable.ic_group),
+                modifier = Modifier.size(Dimensions.SIZE_ICON),
                 tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = followers
             )
