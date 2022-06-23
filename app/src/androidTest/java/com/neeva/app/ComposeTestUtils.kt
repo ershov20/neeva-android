@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.IdlingResource
+import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -200,7 +201,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: Str
 
 /** Enters a URL into the URL bar, assuming it is already visible. */
 fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(url: String) {
-    onNodeWithContentDescription(getString(R.string.url_bar_placeholder)).apply {
+    waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder)).apply {
         performTextInput(url)
         performKeyPress(
             androidx.compose.ui.input.key.KeyEvent(
@@ -361,13 +362,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.selectItemFromContex
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithContentDescription(
     description: String
 ) {
-    waitUntil(WAIT_TIMEOUT) {
-        onAllNodesWithContentDescription(description)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-    }
-
-    onNodeWithContentDescription(description).performClick()
+    waitForNodeWithContentDescription(description).performClick()
     waitForIdle()
 }
 
@@ -393,4 +388,17 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithTag(t
 
     onNodeWithTag(tag).performClick()
     waitForIdle()
+}
+
+/** Wait for a Composable to appear with the given [description], then return it. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithContentDescription(
+    description: String
+): SemanticsNodeInteraction {
+    waitUntil(WAIT_TIMEOUT) {
+        onAllNodesWithContentDescription(description)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+    return onNodeWithContentDescription(description)
 }
