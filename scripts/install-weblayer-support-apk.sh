@@ -15,4 +15,5 @@ fi
 snapshots_dir="$root_dir/weblayer_support/snapshots"
 version=$(cat $snapshots_dir/CURRENT_VERSION)
 
-exec $platform_tools_dir/adb install $snapshots_dir/$version-$arch/WebLayerSupport.apk
+echo "Installing WebLayerSupport.apk..."
+exec $platform_tools_dir/adb install -r $snapshots_dir/$version-$arch/WebLayerSupport.apk

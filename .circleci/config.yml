@@ -99,7 +99,7 @@ jobs:
           post-emulator-launch-assemble-command: ./gradlew :app:assembleDebugAndroidTest
           run-logcat: true
           system-image: system-images;android-28;default;x86_64
-          test-command: ./scripts/install-weblayer-support-apk.sh x64 && ./gradlew :app:connectedDebugAndroidTest -i
+          test-command: ./scripts/run-instrumented-tests.sh x64
 
       - save-cache
 

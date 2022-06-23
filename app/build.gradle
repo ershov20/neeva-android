@@ -22,6 +22,8 @@ android {
         versionCode 97
         versionName "0.70.3"
 
+        manifestPlaceholders = [isolatedSplits: true]
+
         vectorDrawables {
             useSupportLibrary true
         }
@@ -55,6 +57,10 @@ android {
         debug {
             applicationIdSuffix '.debug'
             versionNameSuffix '-DEBUG'
+
+            // Disable in debug mode to avoid interfering with instrumentation tests, which
+            // depend on inserting a split that cannot be isolated (in API 28 at least).
+            manifestPlaceholders = [isolatedSplits: false]
         }
 
         release {
