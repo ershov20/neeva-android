@@ -226,7 +226,7 @@ fun SegmentedPicker(
 @Preview("Incognito tabs selected LTR", locale = "en")
 @Preview("Incognito tabs selected RTL", locale = "he")
 @Composable
-internal fun SegmentedPickerPreview_Incognito() {
+fun SegmentedPickerPreview_Incognito() {
     LightDarkPreviewContainer {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.INCOGNITO_TABS) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
@@ -240,7 +240,7 @@ internal fun SegmentedPickerPreview_Incognito() {
 @Preview("Regular tabs selected LTR", locale = "en")
 @Preview("Regular tabs selected RTL", locale = "he")
 @Composable
-internal fun SegmentedPickerPreview_Regular() {
+fun SegmentedPickerPreview_Regular() {
     LightDarkPreviewContainer {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.REGULAR_TABS) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
@@ -254,7 +254,7 @@ internal fun SegmentedPickerPreview_Regular() {
 @Preview("Spaces selected LTR", locale = "en")
 @Preview("Spaces selected RTL", locale = "he")
 @Composable
-internal fun SegmentedPickerPreview_Spaces() {
+fun SegmentedPickerPreview_Spaces() {
     LightDarkPreviewContainer {
         val selectedScreen = remember { mutableStateOf(SelectedScreen.SPACES) }
         Box(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {

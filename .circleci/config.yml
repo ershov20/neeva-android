@@ -76,6 +76,37 @@ jobs:
       - store_artifacts:
           path: artifacts
 
+  run-screenshot-tests:
+    machine:
+      image: android:202102-01
+
+    resource_class: large
+
+    steps:
+      - bootstrap-checkout
+
+      - run:
+          name: Accept all licenses
+          command: yes | sdkmanager --licenses || exit 0
+
+      - run:
+          name: Update SDK manager
+          command: yes | sdkmanager --update || exit 0
+
+      - android/start-emulator-and-run-tests:
+          additional-avd-args: -d "pixel_2"
+          additional-emulator-args: -partition-size 2048
+          max-tries: 1
+          run-logcat: true
+          post-emulator-launch-assemble-command: ''
+          system-image: system-images;android-28;default;x86_64
+          test-command: ./scripts/run-instrumented-tests.sh x64 screenshotTests
+
+      - save-cache
+
+      - store_artifacts:
+          path: artifacts
+
   run-instrumented-tests:
     machine:
       image: android:202102-01
@@ -99,7 +130,7 @@ jobs:
           post-emulator-launch-assemble-command: ./gradlew :app:assembleDebugAndroidTest
           run-logcat: true
           system-image: system-images;android-28;default;x86_64
-          test-command: ./scripts/run-instrumented-tests.sh x64
+          test-command: ./scripts/run-instrumented-tests.sh x64 app
 
       - save-cache
 
@@ -118,3 +149,4 @@ workflows:
       - run-ktlint
       - run-unit-tests
       - run-instrumented-tests
+      - run-screenshot-tests

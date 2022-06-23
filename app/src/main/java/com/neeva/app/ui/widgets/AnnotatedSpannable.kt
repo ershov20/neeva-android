@@ -108,7 +108,7 @@ fun AnnotatedSpannable(
 
 @Preview
 @Composable
-internal fun AnnotatedSpannablePreview() {
+fun AnnotatedSpannablePreview() {
     val rawHtml = "This is a <b>TOTALLY</b> random <i>string</i> that <b><i>might</b></i> " +
         "have a <a href=\"https://www.example.com/\"><b>not</b> suspicious link</a> in it."
     LightDarkPreviewContainer {

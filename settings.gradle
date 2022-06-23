@@ -29,5 +29,6 @@ dependencyResolutionManagement {
 rootProject.name = "Neeva Search & Browser"
 include ':app'
 include ':scripts'
+include ':screenshotTests'
 include ':weblayer'
 include ':weblayer_support'

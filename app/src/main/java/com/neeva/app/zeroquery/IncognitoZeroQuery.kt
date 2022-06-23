@@ -117,7 +117,7 @@ fun IncognitoZeroQueryDisclaimer(
 @Preview(fontScale = 1.0f, locale = "en")
 @Preview(fontScale = 2.0f, locale = "en")
 @Composable
-internal fun IncognitoZeroQueryPreview_Light() {
+fun IncognitoZeroQueryPreview_Light() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
         IncognitoZeroQuery()
     }
@@ -125,7 +125,7 @@ internal fun IncognitoZeroQueryPreview_Light() {
 
 @Preview(fontScale = 1.0f, locale = "en")
 @Composable
-internal fun IncognitoZeroQueryPreview_Dark() {
+fun IncognitoZeroQueryPreview_Dark() {
     NeevaThemePreviewContainer(useDarkTheme = true) {
         IncognitoZeroQuery()
     }

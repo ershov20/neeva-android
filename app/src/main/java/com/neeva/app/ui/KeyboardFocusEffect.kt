@@ -9,7 +9,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalWindowInfo
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
 
 /**
  * Tries to dismiss the keyboard when the parent Composable is disposed.
@@ -23,9 +25,11 @@ fun KeyboardFocusEffect(focusRequester: FocusRequester?) {
     val windowInfo = LocalWindowInfo.current
     LaunchedEffect(windowInfo) {
         val flow: Flow<Boolean> = snapshotFlow { windowInfo.isWindowFocused }
-        flow.collect { isWindowFocused ->
-            if (isWindowFocused) {
-                focusRequester?.requestFocus()
+        withContext(Dispatchers.Main) {
+            flow.collect { isWindowFocused ->
+                if (isWindowFocused) {
+                    focusRequester?.requestFocus()
+                }
             }
         }
     }

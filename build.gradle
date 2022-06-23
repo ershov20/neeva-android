@@ -12,11 +12,15 @@ buildscript {
         androidx_activity_version = '1.4.0'
         androidx_appcompat_version = '1.4.2'
         androidx_compose_version = '1.2.0-rc01'
+        androidx_core_version = '1.8.0'
         androidx_lifecycle_version = '2.4.1'
         androidx_navigation_compose_version = '2.4.2'
         androidx_paging_version = '3.1.1'
         androidx_preference_version = '1.2.0'
         androidx_room_version = '2.4.2'
+
+        androidx_test_espresso_version = '3.4.0'
+        androidx_test_junit_version = '1.1.3'
 
         accompanist_version = '0.24.10-beta'
         apollo_version = '3.1.0'
@@ -24,6 +28,7 @@ buildscript {
         dagger_version = '2.41'
         google_android_material_version = '1.6.1'
         gradle_version = '7.2.0'
+        junit_version = '4.13.2'
         kotlin_coroutines_version = '1.6.0'
         kotlin_version = '1.6.21'
         ktlint_version = '10.2.1'
@@ -44,5 +49,17 @@ buildscript {
         classpath "com.google.android.gms:oss-licenses-plugin:0.10.5"
         classpath "com.google.dagger:hilt-android-gradle-plugin:$dagger_version"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+// Output the status of test runners to the log.
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
+        showCauses true
+        showExceptions true
+        showStackTraces true
     }
 }

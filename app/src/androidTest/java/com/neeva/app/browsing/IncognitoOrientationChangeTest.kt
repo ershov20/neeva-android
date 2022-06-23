@@ -2,9 +2,7 @@ package com.neeva.app.browsing
 
 import android.content.pm.ActivityInfo
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
@@ -13,6 +11,7 @@ import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.WAIT_TIMEOUT
 import com.neeva.app.appnav.AppNavDestination
+import com.neeva.app.clickOnNodeWithContentDescription
 import com.neeva.app.waitForActivityStartup
 import org.junit.Rule
 import org.junit.Test
@@ -38,10 +37,11 @@ class IncognitoOrientationChangeTest : BaseBrowserTest() {
         // Open the tab switcher.  Because a lot of things are changing under the hood and many
         // recompositions are happening, waitForIdle() ends up being flaky.  Instead, wait until we
         // know we've navigated to the correct screen by looking at the AppNavModel.
-        androidComposeRule
-            .onNodeWithContentDescription(resources.getString(R.string.toolbar_tab_switcher))
-            .performClick()
-        androidComposeRule.waitForIdle()
+        androidComposeRule.apply {
+            val tabSwitcherDescription = resources.getString(R.string.toolbar_tab_switcher)
+            clickOnNodeWithContentDescription(tabSwitcherDescription)
+        }
+
         androidComposeRule.waitUntil(WAIT_TIMEOUT) {
             val appNavModel = androidComposeRule.activity.appNavModel
             val currentRoute = appNavModel?.currentDestination?.value?.route
@@ -50,8 +50,7 @@ class IncognitoOrientationChangeTest : BaseBrowserTest() {
 
         // Switch to the Incognito screen.
         androidComposeRule
-            .onNodeWithContentDescription(resources.getString(R.string.incognito))
-            .performClick()
+            .clickOnNodeWithContentDescription(resources.getString(R.string.incognito))
 
         // Confirm that we're looking at an empty incognito TabGrid.
         androidComposeRule

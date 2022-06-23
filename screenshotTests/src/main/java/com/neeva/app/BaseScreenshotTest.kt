@@ -9,13 +9,13 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.storage.BitmapIO
+import kotlinx.coroutines.runBlocking
+import org.junit.Assert.fail
+import org.junit.Rule
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
 import kotlin.math.abs
-import kotlinx.coroutines.runBlocking
-import org.junit.Assert.fail
-import org.junit.Rule
 
 /**
  * Base class used to run screenshot comparison tests.

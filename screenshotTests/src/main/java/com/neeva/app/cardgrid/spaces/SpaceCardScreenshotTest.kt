@@ -12,9 +12,9 @@ class SpaceCardScreenshotTest : BaseScreenshotTest() {
     }
 
     @Test
-    fun shortTitleSelected() {
+    fun shortTitle() {
         runScreenshotTest {
-            TabCardPreview_ShortTitleSelected()
+            SpaceCardPreview_ShortTitle()
         }
     }
 }

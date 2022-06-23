@@ -11,6 +11,8 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -178,7 +180,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.loadUrlInCurrentTab(
         .isEqualTo(AppNavDestination.BROWSER.route)
 
     // Click on the URL bar and then type in the provided URL.
-    onNodeWithTag("LocationLabel").performClick()
+    clickOnNodeWithTag("LocationLabel")
     typeIntoUrlBar(url)
 }
 
@@ -191,8 +193,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: Str
     expectThat(activity.appNavModel!!.currentDestination.value!!.route)
         .isEqualTo(AppNavDestination.CARD_GRID.route)
 
-    onNodeWithContentDescription(getString(com.neeva.app.R.string.new_tab_content_description))
-        .performClick()
+    clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.new_tab_content_description))
     waitForNavDestination(AppNavDestination.BROWSER)
     typeIntoUrlBar(url)
 }
@@ -255,14 +256,8 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNavDestinatio
 fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openOverflowMenuAndClickItem(
     @StringRes labelId: Int
 ) {
-    onNodeWithContentDescription(activity.resources.getString(R.string.toolbar_neeva_menu))
-        .performClick()
-
-    waitUntil(WAIT_TIMEOUT) {
-        onAllNodesWithText(getString(labelId)).fetchSemanticsNodes().isNotEmpty()
-    }
-
-    onNodeWithText(getString(labelId)).performClick()
+    clickOnNodeWithContentDescription(activity.resources.getString(R.string.toolbar_neeva_menu))
+    clickOnNodeWithText(getString(labelId))
 }
 
 /** Open the Card Grid by clicking on the Card Grid button from the bottom toolbar. */
@@ -274,9 +269,9 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openCardGrid(
 
     when (activity.appNavModel?.currentDestination?.value?.route) {
         AppNavDestination.BROWSER.route -> {
-            // Click on the Card Grid button.
+            // Wait for the card grid button to be visible, then click it.
             val cardGridButtonDescription = getString(com.neeva.app.R.string.toolbar_tab_switcher)
-            onNodeWithContentDescription(cardGridButtonDescription).performClick()
+            clickOnNodeWithContentDescription(cardGridButtonDescription)
             waitForNavDestination(AppNavDestination.CARD_GRID)
         }
 
@@ -297,9 +292,9 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openCardGrid(
     // Click on the correct tab switcher button.
     val selectedScreen = activity.cardsPaneModel!!.selectedScreen.value
     if (incognito && selectedScreen != SelectedScreen.INCOGNITO_TABS) {
-        onNodeWithContentDescription(getString(com.neeva.app.R.string.incognito)).performClick()
+        clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.incognito))
     } else if (!incognito && selectedScreen != SelectedScreen.REGULAR_TABS) {
-        onNodeWithContentDescription(getString(com.neeva.app.R.string.tabs)).performClick()
+        clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.tabs))
     }
 
     // Wait for mode switch to kick in.
@@ -359,6 +354,43 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.onBackPressed() {
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.selectItemFromContextMenu(
     itemStringResId: Int
 ) {
-    onNodeWithText(getString(itemStringResId)).performClick()
+    clickOnNodeWithText(getString(itemStringResId))
+}
+
+/** Wait for a Composable to appear with the given content description, then click on it. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithContentDescription(
+    description: String
+) {
+    waitUntil(WAIT_TIMEOUT) {
+        onAllNodesWithContentDescription(description)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+    onNodeWithContentDescription(description).performClick()
+    waitForIdle()
+}
+
+/** Wait for a Composable to appear with the given text, then click on it. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithText(text: String) {
+    waitUntil(WAIT_TIMEOUT) {
+        onAllNodesWithText(text)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+    onNodeWithText(text).performClick()
+    waitForIdle()
+}
+
+/** Wait for a Composable to appear with the given tag, then click on it. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithTag(tag: String) {
+    waitUntil(WAIT_TIMEOUT) {
+        onAllNodesWithTag(tag)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+    onNodeWithTag(tag).performClick()
     waitForIdle()
 }

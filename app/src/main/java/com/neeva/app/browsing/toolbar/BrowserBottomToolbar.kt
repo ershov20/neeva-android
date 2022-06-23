@@ -82,7 +82,7 @@ fun BrowserBottomToolbar(
 @Preview("Default, LTR", locale = "en")
 @Preview("Default, RTL", locale = "he")
 @Composable
-internal fun BottomToolbarPreview_Regular() {
+fun BottomToolbarPreview_Regular() {
     OneBooleanPreviewContainer { isIncognito ->
         CompositionLocalProvider(LocalBrowserToolbarModel provides PreviewBrowserToolbarModel()) {
             BrowserBottomToolbar(isIncognito = isIncognito)
@@ -93,7 +93,7 @@ internal fun BottomToolbarPreview_Regular() {
 @Preview("Can go backward, LTR", locale = "en")
 @Preview("Can go backward, RTL", locale = "he")
 @Composable
-internal fun BottomToolbarPreview_CanGoBackward() {
+fun BottomToolbarPreview_CanGoBackward() {
     OneBooleanPreviewContainer { isIncognito ->
         CompositionLocalProvider(
             LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
@@ -111,7 +111,7 @@ internal fun BottomToolbarPreview_CanGoBackward() {
 @Preview("Space store has URL, LTR", locale = "en")
 @Preview("Space store has URL, RTL", locale = "he")
 @Composable
-internal fun BottomToolbarPreview_SpaceStoreHasUrl() {
+fun BottomToolbarPreview_SpaceStoreHasUrl() {
     OneBooleanPreviewContainer { isIncognito ->
         CompositionLocalProvider(
             LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
