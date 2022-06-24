@@ -365,9 +365,11 @@ fun SpaceDetailToolbar(
                     R.string.unfollow
                 }
 
-                menuItems.add(MenuAction(id = removeLabelId, icon = Icons.Outlined.Delete))
-                menuActions[removeLabelId] = {
-                    showRemoveSpaceConfirmationDialog.value = true
+                if (!space.isDefaultSpace) {
+                    menuItems.add(MenuAction(id = removeLabelId, icon = Icons.Outlined.Delete))
+                    menuActions[removeLabelId] = {
+                        showRemoveSpaceConfirmationDialog.value = true
+                    }
                 }
 
                 menuItems.add(

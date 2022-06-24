@@ -112,8 +112,12 @@ private fun CardsPaneToolbarAddButton(
     browserWrapper: BrowserWrapper
 ) {
     val isCreateSpaceDialogVisible = remember { mutableStateOf(false) }
+    val neevaUser = LocalEnvironment.current.neevaUser
+    val isCreateSpaceEnabled = !neevaUser.isSignedOut()
+    val isSpaces = cardsPaneModel.selectedScreen.value == SelectedScreen.SPACES
 
     IconButton(
+        enabled = !isSpaces || isCreateSpaceEnabled,
         onClick = {
             when (cardsPaneModel.selectedScreen.value) {
                 SelectedScreen.SPACES -> { isCreateSpaceDialogVisible.value = true }
@@ -138,24 +142,18 @@ private fun CardsPaneToolbarAddButton(
 
 private fun createCardsPaneOverflowMenuData(selectedScreen: SelectedScreen) = OverflowMenuData(
     isBadgeVisible = false,
-    additionalRowItems = listOf(
-        when (selectedScreen) {
-            SelectedScreen.SPACES -> {
-                overflowMenuItem(
-                    id = OverflowMenuItemId.SPACES_WEBSITE,
-                    labelId = R.string.spaces_edit,
-                    imageResourceID = R.drawable.ic_public_black_24
-                )
-            }
+    additionalRowItems = when (selectedScreen) {
+        SelectedScreen.SPACES -> emptyList()
 
-            else -> {
+        else -> {
+            listOf(
                 overflowMenuItem(
                     id = OverflowMenuItemId.CLOSE_ALL_TABS,
                     labelId = R.string.close_all_content_description,
                     icon = Icons.Outlined.Delete
-                )
-            }
-        },
-        MenuSeparator
-    )
+                ),
+                MenuSeparator
+            )
+        }
+    }
 )

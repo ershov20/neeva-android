@@ -119,7 +119,7 @@ enum class SettingsToggle(
     ),
     DEBUG_NATIVE_SPACES(
         primaryLabelId = R.string.settings_debug_native_spaces,
-        defaultValue = false,
+        defaultValue = true,
         isAdvancedSetting = true
     );
 
