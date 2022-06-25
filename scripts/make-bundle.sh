@@ -28,9 +28,10 @@ mkdir -p $out_dir
 make_archive_if_necessary() {
     src_apk=$1
     archive=$2
+    options=$3
 
     if [ $src_apk -nt "$archive.zip" ]; then
-        $scripts_dir/make-archive.sh $src_apk $archive
+        $scripts_dir/make-archive.sh $options $src_apk $archive
     else
         echo "Using cached $(basename $archive).zip"
     fi
@@ -38,7 +39,7 @@ make_archive_if_necessary() {
 
 make_archive_if_necessary $app_apk $out_dir/base
 make_archive_if_necessary $weblayer_support_apk $out_dir/weblayer_support
-make_archive_if_necessary $chromium_release_dir/WebLayerSupport.apk $out_dir/weblayer_support_impl
+make_archive_if_necessary $chromium_release_dir/WebLayerSupport.apk $out_dir/weblayer_support_impl --fast
 
 # Copy generated manifest over top the one from Chromium:
 tmpdir=$(mktemp -d -t $(basename $0)) || exit 1

@@ -1,12 +1,18 @@
 #!/bin/bash
 
-if [ $# != 2 ]; then
-    echo "$(basename $0) apk-path archive-path"
+if [ $# -lt 2 ]; then
+    echo "$(basename $0) [--fast] apk-path archive-path"
     exit 1
 fi
 
 scripts_dir=$(dirname $0)
 build_tools=$($scripts_dir/get-build-tools-path.sh || exit 1)
+
+fast_mode=0
+if [ "$1" = "--fast" ]; then
+    fast_mode=1
+    shift
+fi
 
 apk=$1
 apk_name=$(basename $apk)
@@ -67,35 +73,60 @@ zipinfo -1 $converted_apk > $file_list
 
 files_total=$(cat $file_list | wc -l)
 
-dex_files=$(cat $file_list | egrep '\.dex$')
-res_files=$(cat $file_list | egrep '^res/')
-lib_files=$(cat $file_list | egrep '^lib/')
-asset_files=$(cat $file_list | egrep '^assets/')
-other_files=$(cat $file_list | egrep -v '\.dex$|^res/|^lib/|^assets/|AndroidManifest.xml|resources.pb')
-
 echo "Building archive..."
 
-copy_from_zip_to_zip $converted_apk resources.pb $archive.zip . $tmpdir
-copy_from_zip_to_zip $converted_apk AndroidManifest.xml $archive.zip manifest $tmpdir
+if [ $fast_mode = 1 ]; then
+    unzipped_apk_dir="$converted_apk.unzipped"
 
-for file in $res_files; do
-    copy_from_zip_to_zip $converted_apk $file $archive.zip . $tmpdir
-done
+    echo -n "[ Fast mode ]"
 
-for file in $lib_files; do
-    copy_from_zip_to_zip $converted_apk $file $archive.zip . $tmpdir
-done
+    mkdir -p $unzipped_apk_dir/root
+    unzip $converted_apk -d $unzipped_apk_dir/root > /dev/null
 
-for file in $asset_files; do
-    copy_from_zip_to_zip $converted_apk $file $archive.zip . $tmpdir
-done
+    archive_zip_full_path="$(pwd)/$archive.zip"
 
-for file in $dex_files; do
-    copy_from_zip_to_zip $converted_apk $file $archive.zip dex $tmpdir
-done
+    mv $unzipped_apk_dir/root/assets $unzipped_apk_dir
+    mv $unzipped_apk_dir/root/lib $unzipped_apk_dir
+    mv $unzipped_apk_dir/root/res $unzipped_apk_dir
 
-for file in $other_files; do
-    copy_from_zip_to_zip $converted_apk $file $archive.zip root $tmpdir
-done
+    mkdir $unzipped_apk_dir/dex
+    mv $unzipped_apk_dir/root/*dex $unzipped_apk_dir/dex
+
+    mkdir $unzipped_apk_dir/manifest
+    mv $unzipped_apk_dir/root/AndroidManifest.xml $unzipped_apk_dir/manifest
+
+    mv $unzipped_apk_dir/root/resources.pb $unzipped_apk_dir
+
+    (cd $unzipped_apk_dir && zip -r $archive_zip_full_path . > /dev/null)
+else
+    dex_files=$(cat $file_list | egrep '\.dex$')
+    res_files=$(cat $file_list | egrep '^res/')
+    lib_files=$(cat $file_list | egrep '^lib/')
+    asset_files=$(cat $file_list | egrep '^assets/')
+    other_files=$(cat $file_list | egrep -v '\.dex$|^res/|^lib/|^assets/|AndroidManifest.xml|resources.pb')
+
+    copy_from_zip_to_zip $converted_apk resources.pb $archive.zip . $tmpdir
+    copy_from_zip_to_zip $converted_apk AndroidManifest.xml $archive.zip manifest $tmpdir
+
+    for file in $res_files; do
+        copy_from_zip_to_zip $converted_apk $file $archive.zip . $tmpdir
+    done
+
+    for file in $lib_files; do
+        copy_from_zip_to_zip $converted_apk $file $archive.zip . $tmpdir
+    done
+
+    for file in $asset_files; do
+        copy_from_zip_to_zip $converted_apk $file $archive.zip . $tmpdir
+    done
+
+    for file in $dex_files; do
+        copy_from_zip_to_zip $converted_apk $file $archive.zip dex $tmpdir
+    done
+
+    for file in $other_files; do
+        copy_from_zip_to_zip $converted_apk $file $archive.zip root $tmpdir
+    done
+fi
 
 echo ""
