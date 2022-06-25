@@ -30,7 +30,15 @@ you must run this command before opening Android Studio:
 
 `$ ./bootstrap.sh`
 
- Or do "File > Sync Project with Gradle Files" within Android Studio after running the above command.
+Or do "File > Sync Project with Gradle Files" within Android Studio after running the above command.
+
+You will also want to install `WebLayerSupport.apk` (from within
+`weblayer_support/snapshots/`) on your test device or simulator. This APK is
+needed for debug builds. It can be easily installed using this command:
+
+```
+$ scripts/install-weblayer-support-apk.sh
+```
 
 # Code style
 
@@ -126,3 +134,37 @@ cp gen/graphql/schema.json /PATH/TO/YOUR/NEEVA-ANDROID/CHECKOUT/app/src/main/gra
 ```
 
 Once that's updated, you can update the relevant `*.graphql` files in the your `neeva-android` checkout.
+
+# Building a release (or staging) version of the app
+
+A release version of the app includes `WebLayerSupport.apk` as a feature split
+within the Neeva app bundle (`neeva.aab`).
+
+Run `scripts/build-release.sh` to generate `build/release/neeva.aab`.
+
+Alternatively, within Android Studio, you can set the active Build Variant to
+`release` or `staging` and build the app from there. To then assemble
+`neeva.aab`, you can run this command:
+
+```
+$ scripts/make-bundle.sh release
+```
+
+Or,
+
+```
+$ scripts/make-bundle.sh staging
+```
+
+Then you can install the resulting app bundle to your device using the
+`scripts/install-apks.sh` command, like so:
+
+```
+$ scripts/install-apks.sh release
+```
+
+Or,
+
+```
+$ scripts/install-apks.sh staging
+```
