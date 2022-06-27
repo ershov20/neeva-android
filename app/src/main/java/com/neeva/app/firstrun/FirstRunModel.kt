@@ -89,6 +89,8 @@ class FirstRunModel internal constructor(
     /** Holds the [LaunchLoginIntentParams] for the latest login */
     private val intentParamFlow = MutableStateFlow<LaunchLoginIntentParams?>(null)
 
+    internal var shouldLogDefaultBrowserOnFirstRun: Boolean = false
+
     private fun authUri(
         signup: Boolean,
         provider: NeevaUser.SSOProvider,

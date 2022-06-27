@@ -61,7 +61,7 @@ interface SettingsController {
     fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager
 
     // Meant for system images lower than Android Q
-    fun openAndroidDefaultBrowserSettings(shouldOpenLazyTabAfterward: Boolean)
+    fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean)
     //endregion
 
     //region Debug Settings
@@ -199,8 +199,8 @@ class SettingsControllerImpl(
         return setDefaultAndroidBrowserManager
     }
 
-    override fun openAndroidDefaultBrowserSettings(shouldOpenLazyTabAfterward: Boolean) {
-        appNavModel.openAndroidDefaultBrowserSettings(shouldOpenLazyTabAfterward)
+    override fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean) {
+        appNavModel.openAndroidDefaultBrowserSettings(isFirstRun)
     }
 
     override fun isAdvancedSettingsAllowed(): Boolean {
@@ -341,7 +341,7 @@ val mockSettingsControllerImpl by lazy {
             return FakeSetDefaultAndroidBrowserManager()
         }
 
-        override fun openAndroidDefaultBrowserSettings(shouldOpenLazyTabAfterward: Boolean) { }
+        override fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean) { }
 
         override fun isAdvancedSettingsAllowed(): Boolean { return true }
     }

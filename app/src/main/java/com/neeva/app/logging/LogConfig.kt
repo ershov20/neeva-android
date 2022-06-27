@@ -33,7 +33,23 @@ class LogConfig {
         AUTH_SIGN_UP_WITH_MICROSOFT("AuthOptionsSignupWithMicrosoft", Category.FIRST_RUN),
         AUTH_CLOSE("AuthClose", Category.FIRST_RUN),
         FIRST_RUN_IMPRESSION("FirstRunImpression", Category.FIRST_RUN),
-        LOGIN_AFTER_FIRST_RUN("LoginAfterFirstRun", Category.FIRST_RUN)
+        LOGIN_AFTER_FIRST_RUN("LoginAfterFirstRun", Category.FIRST_RUN),
+        GET_STARTED_IN_WELCOME("GetStartedInWelcome", Category.FIRST_RUN),
+        DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_IMP(
+            "DefaultBrowserOnboardingInterstitialImp",
+            Category.FIRST_RUN
+        ),
+        DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_OPEN(
+            "DefaultBrowserOnboardingInterstitialOpen",
+            Category.FIRST_RUN
+        ),
+        DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_REMIND(
+            "DefaultBrowserOnboardingInterstitialRemind",
+            Category.FIRST_RUN
+        ),
+        SET_DEFAULT_BROWSER("SetDefaultBrowser", Category.FIRST_RUN),
+        SKIP_DEFAULT_BROWSER("SkipDefaultBrowser", Category.FIRST_RUN),
+        OPEN_DEFAULT_BROWSER_URL("OpenDefaultBrowserURL", Category.FIRST_RUN)
     }
 
     enum class Category(val categoryName: String) {

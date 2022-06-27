@@ -22,8 +22,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
+import com.neeva.app.LocalEnvironment
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.theme.ColorPalette
@@ -55,6 +57,7 @@ fun SetDefaultAndroidBrowserPane(
     showAsDialog: Boolean,
     showZeroQuery: () -> Unit
 ) {
+    val clientLogger = LocalEnvironment.current.clientLogger
     val setDefaultAndroidBrowserManager = settingsController.getSetDefaultAndroidBrowserManager()
     val isRoleManagerAvailable = setDefaultAndroidBrowserManager.isRoleManagerAvailable()
 
@@ -62,8 +65,18 @@ fun SetDefaultAndroidBrowserPane(
         mustOpenSettings = !isRoleManagerAvailable,
         showAsDialog = showAsDialog,
         onBackPressed = settingsController::onBackPressed,
-        onMaybeLater = showZeroQuery,
+        onMaybeLater = {
+            clientLogger.logCounter(
+                LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_REMIND,
+                null
+            )
+            showZeroQuery()
+        },
         onOpenSettings = {
+            clientLogger.logCounter(
+                LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_OPEN,
+                null
+            )
             if (showAsDialog && isRoleManagerAvailable) {
                 // If user is on the welcome screen and RoleManager is available, this
                 // button shows a dialog while navigating the browser to zero query. No

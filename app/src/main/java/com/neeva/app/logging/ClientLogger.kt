@@ -1,5 +1,6 @@
 package com.neeva.app.logging
 
+import android.util.Log
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.ApolloWrapper
 import com.neeva.app.BuildConfig
@@ -60,13 +61,25 @@ class ClientLogger(
             Optional.presentIfNotNull(mutableAttributes)
         )
         val clientLog = ClientLog(Optional.presentIfNotNull(clientLogCounter))
-        val logMutation = LogMutation(
-            ClientLogInput(
-                Optional.presentIfNotNull(clientLogBase),
-                listOf(clientLog)
-            )
-        )
 
-        apolloWrapper.performMutationAsync(mutation = logMutation, userMustBeLoggedIn = false) {}
+        if (BuildConfig.DEBUG) {
+            val attributes = mutableAttributes.map { "${it.key}: ${it.value}" }
+            Log.d(TAG, "${path.interactionName}: ${attributes.joinToString(separator = ",")}")
+        } else {
+            val logMutation = LogMutation(
+                ClientLogInput(
+                    Optional.presentIfNotNull(clientLogBase),
+                    listOf(clientLog)
+                )
+            )
+            apolloWrapper.performMutationAsync(
+                mutation = logMutation,
+                userMustBeLoggedIn = false
+            ) {}
+        }
+    }
+
+    companion object {
+        val TAG = ClientLogger::class.simpleName
     }
 }

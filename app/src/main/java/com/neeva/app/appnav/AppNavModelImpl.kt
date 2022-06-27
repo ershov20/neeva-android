@@ -18,6 +18,9 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.firstrun.FirstRunModel
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
 import com.neeva.app.spaces.ShareSpaceUIContainer
@@ -46,6 +49,8 @@ class AppNavModelImpl(
     private val spaceStore: SpaceStore,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
     private val neevaConstants: NeevaConstants,
+    private val clientLogger: ClientLogger,
+    private val firstRunModel: FirstRunModel
 ) : AppNavModel {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     override val currentDestination: StateFlow<NavDestination?>
@@ -145,9 +150,12 @@ class AppNavModelImpl(
         )
     }
 
-    override fun openAndroidDefaultBrowserSettings(shouldOpenLazyTab: Boolean) {
+    override fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean) {
         safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
-        if (shouldOpenLazyTab) {
+
+        // Show zero query for the first run
+        if (isFirstRun) {
+            firstRunModel.shouldLogDefaultBrowserOnFirstRun = true
             openLazyTab(focusUrlBar = false)
         }
     }
@@ -175,6 +183,10 @@ class AppNavModelImpl(
     override fun showCookieCutterSettings() = show(AppNavDestination.COOKIE_CUTTER_SETTINGS)
     override fun showDefaultBrowserSettings(fromWelcomeScreen: Boolean) {
         if (fromWelcomeScreen) {
+            clientLogger.logCounter(
+                LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_IMP,
+                null
+            )
             show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS_FROM_WELCOME)
         } else {
             show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)

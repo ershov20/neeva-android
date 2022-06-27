@@ -9,13 +9,16 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 
 @RequiresApi(Build.VERSION_CODES.Q)
 class NeevaRoleManager(
-    activity: AppCompatActivity
+    activity: AppCompatActivity,
+    clientLogger: ClientLogger
 ) : SetDefaultAndroidBrowserManager() {
     private val androidDefaultBrowserRequester =
-        activity.registerForActivityResult(DefaultAndroidBrowserRequester(this)) {}
+        activity.registerForActivityResult(DefaultAndroidBrowserRequester(this, clientLogger)) {}
 
     private val roleManager = activity.getSystemService(Context.ROLE_SERVICE) as RoleManager
 
@@ -43,7 +46,8 @@ class NeevaRoleManager(
 
 @RequiresApi(Build.VERSION_CODES.Q)
 internal class DefaultAndroidBrowserRequester(
-    private val neevaRoleManager: NeevaRoleManager
+    private val neevaRoleManager: NeevaRoleManager,
+    private val clientLogger: ClientLogger
 ) : ActivityResultContract<Void?, Boolean?>() {
 
     override fun createIntent(context: Context, input: Void?): Intent {
@@ -52,6 +56,11 @@ internal class DefaultAndroidBrowserRequester(
 
     override fun parseResult(resultCode: Int, intent: Intent?): Boolean? {
         neevaRoleManager.updateIsDefaultBrowser()
+        if (neevaRoleManager.isNeevaTheDefaultBrowser()) {
+            clientLogger.logCounter(LogConfig.Interaction.SET_DEFAULT_BROWSER, null)
+        } else {
+            clientLogger.logCounter(LogConfig.Interaction.SKIP_DEFAULT_BROWSER, null)
+        }
         return null
     }
 }

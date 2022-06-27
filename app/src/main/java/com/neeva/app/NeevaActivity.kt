@@ -145,7 +145,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         popupModel = popupModel,
                         spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
-                        neevaConstants = neevaConstants
+                        neevaConstants = neevaConstants,
+                        clientLogger = clientLogger,
+                        firstRunModel = firstRunModel
                     )
                 }
                 cardsPaneModel = remember(appNavModel) {
@@ -194,6 +196,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     if (firstRunModel.shouldShowFirstRun()) {
                         appNavModel?.showWelcome()
                         clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
+                        clientLogger.logCounter(LogConfig.Interaction.GET_STARTED_IN_WELCOME, null)
                         firstRunModel.firstRunDone()
                     }
 
@@ -203,7 +206,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
 
         setDefaultAndroidBrowserManager =
-            SetDefaultAndroidBrowserManager.create(this, neevaConstants)
+            SetDefaultAndroidBrowserManager.create(this, neevaConstants, clientLogger)
 
         lifecycleScope.launch {
             // Keep track of when the BrowserWrapper changes so that the Activity can attach their
@@ -270,6 +273,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         clientLogger.logCounter(LogConfig.Interaction.APP_ENTER_FOREGROUND, null)
         updateWidgets()
 
+        if (firstRunModel.shouldLogDefaultBrowserOnFirstRun) {
+            firstRunModel.shouldLogDefaultBrowserOnFirstRun = false
+            if (setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
+                clientLogger.logCounter(LogConfig.Interaction.SET_DEFAULT_BROWSER, null)
+            } else {
+                clientLogger.logCounter(LogConfig.Interaction.SKIP_DEFAULT_BROWSER, null)
+            }
+        }
+
         webLayerModel.currentBrowser.reregisterActiveTabIfNecessary()
     }
 
@@ -318,6 +330,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
             Intent.ACTION_VIEW -> {
                 webLayerModel.switchToProfile(useIncognito = false)
+
+                if (setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
+                    clientLogger.logCounter(LogConfig.Interaction.OPEN_DEFAULT_BROWSER_URL, null)
+                }
 
                 if (Uri.parse(intent.dataString).scheme == "neeva") {
                     NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
