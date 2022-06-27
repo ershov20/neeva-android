@@ -40,7 +40,8 @@ import strikt.assertions.isTrue
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class URLBarModelImplTest : BaseTest() {
-    @Rule @JvmField
+    @Rule
+    @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
     private lateinit var activeTabModel: ActiveTabModel
@@ -53,7 +54,8 @@ class URLBarModelImplTest : BaseTest() {
     private val urlBarModelText: String
         get() = model.stateFlow.value.userTypedInput
 
-    @Mock private lateinit var faviconCache: FaviconCache
+    @Mock
+    private lateinit var faviconCache: FaviconCache
 
     override fun setUp() {
         super.setUp()
@@ -561,5 +563,25 @@ class URLBarModelImplTest : BaseTest() {
             .isNull()
         expectThat(URLBarModelImpl.computeAutocompleteText(autocompleteSuggestion, "com"))
             .isNull()
+    }
+
+    @Test
+    fun matchesLocalhost() {
+        expectThat(URLBarModelImpl.matchesLocalhost("localhost")).isTrue()
+
+        expectThat(URLBarModelImpl.matchesLocalhost("localhost:8000")).isTrue()
+        expectThat(URLBarModelImpl.matchesLocalhost("localhost:asdf")).isFalse()
+        expectThat(URLBarModelImpl.matchesLocalhost("localhost:")).isFalse()
+
+        expectThat(URLBarModelImpl.matchesLocalhost("localhost:8000/index.html?thing"))
+        expectThat(URLBarModelImpl.matchesLocalhost("http://localhost:8000/index.html?thing"))
+            .isTrue()
+        expectThat(URLBarModelImpl.matchesLocalhost("https://localhost:8000/index.html?thing"))
+            .isFalse()
+
+        expectThat(URLBarModelImpl.matchesLocalhost("localhosts")).isFalse()
+        expectThat(URLBarModelImpl.matchesLocalhost("example.com")).isFalse()
+        expectThat(URLBarModelImpl.matchesLocalhost("ftp://localhost")).isFalse()
+        expectThat(URLBarModelImpl.matchesLocalhost("ftp://localhost:8000")).isFalse()
     }
 }

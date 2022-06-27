@@ -192,6 +192,10 @@ class URLBarModelImpl(
     }
 
     companion object {
+        internal fun matchesLocalhost(urlBarContents: String): Boolean {
+            return Regex("(http:(//)?)?localhost(:[0-9][0-9]*)?(/(.*)?)?").matches(urlBarContents)
+        }
+
         /**
          * Determines if what is in the URL bar is related to the [autocompletedSuggestion] via the
          * given [comparator].
@@ -254,9 +258,9 @@ class URLBarModelImpl(
                     )
                 }
 
-                else -> {
-                    urlBarContents.toSearchUri(neevaConstants)
-                }
+                matchesLocalhost(urlBarContents) -> Uri.parse(urlBarContents)
+
+                else -> urlBarContents.toSearchUri(neevaConstants)
             }
         }
 

@@ -239,6 +239,7 @@ fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(url: 
     registerIdlingResource(browserViewIdlingResource)
     waitForIdle()
     unregisterIdlingResource(browserViewIdlingResource)
+    waitForUrl(url)
 }
 
 /** Wait for the NavController to tell us the user is at a particular [AppNavDestination]. */
@@ -339,9 +340,30 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
 }
 
 /** Waits until the provided [condition] becomes true. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(condition: () -> Boolean) {
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(
+    condition: (activity: NeevaActivity) -> Boolean
+) {
     waitUntil(WAIT_TIMEOUT) {
-        condition()
+        condition(activity)
+    }
+}
+
+/**
+ * Waits until the provided [condition] stops throwing assertions.
+ *
+ * Can't seem to find a function in Compose that just tells you whether something is visible without
+ * having to throw an assertion, so work with it by catching the assertion.
+ */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForAssertion(
+    condition: (activity: NeevaActivity) -> Unit
+) {
+    waitFor {
+        try {
+            condition(activity)
+            true
+        } catch (e: java.lang.AssertionError) {
+            false
+        }
     }
 }
 
@@ -368,25 +390,13 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithConte
 
 /** Wait for a Composable to appear with the given text, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithText(text: String) {
-    waitUntil(WAIT_TIMEOUT) {
-        onAllNodesWithText(text)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-    }
-
-    onNodeWithText(text).performClick()
+    waitForNodeWithText(text).performClick()
     waitForIdle()
 }
 
 /** Wait for a Composable to appear with the given tag, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithTag(tag: String) {
-    waitUntil(WAIT_TIMEOUT) {
-        onAllNodesWithTag(tag)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-    }
-
-    onNodeWithTag(tag).performClick()
+    waitForNodeWithTag(tag).performClick()
     waitForIdle()
 }
 
@@ -401,4 +411,30 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithConte
     }
 
     return onNodeWithContentDescription(description)
+}
+
+/** Wait for a Composable to appear with the given tag, then click on it. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithTag(
+    tag: String
+): SemanticsNodeInteraction {
+    waitUntil(WAIT_TIMEOUT) {
+        onAllNodesWithTag(tag)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+    return onNodeWithTag(tag)
+}
+
+/** Wait for a Composable to appear with the given tag, then click on it. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithText(
+    text: String
+): SemanticsNodeInteraction {
+    waitUntil(WAIT_TIMEOUT) {
+        onAllNodesWithText(text)
+            .fetchSemanticsNodes()
+            .isNotEmpty()
+    }
+
+    return onNodeWithText(text)
 }
