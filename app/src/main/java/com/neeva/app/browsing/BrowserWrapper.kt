@@ -154,6 +154,8 @@ interface BrowserWrapper {
     // endregion
 
     fun reregisterActiveTabIfNecessary()
+
+    fun reloadAfterContentFilterAllowListUpdate()
 }
 
 class CookiePair(val key: String, val value: String)

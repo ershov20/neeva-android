@@ -87,6 +87,7 @@ class TabCookieCutterModel(
         }
         set(value) {
             field = value
+
             if (browserFlow.getActiveTabId() == tabId) {
                 trackingDataFlow.value = TrackingData.create(stats, domainProvider)
             }

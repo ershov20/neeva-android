@@ -277,16 +277,35 @@ abstract class BaseBrowserWrapper internal constructor(
 
     fun updateCookieCutterConfigAndRefreshTabs() {
         cookieCutterModel.updateTrackingProtectionConfiguration()
+        val activeTab = getActiveTab()
         tabList.forEach {
-            val activeTab = getActiveTab()
+            val tabCallbacks = tabCallbackMap[it] ?: return@forEach
             if (it == activeTab?.guid) {
-                activeTab.navigationController.reload()
-                // TODO(kobec/chung): remove resetStat when we add onContentFilterStatsStarted
-                tabCallbackMap[it]?.tabCookieCutterModel?.resetStat()
+                reloadAndUpdateStats(activeTab)
             } else {
-                tabCallbackMap[it]?.tabCookieCutterModel?.reloadUponForeground = true
+                tabCallbacks.tabCookieCutterModel.reloadUponForeground = true
             }
         }
+    }
+
+    override fun reloadAfterContentFilterAllowListUpdate() {
+        val activeTab = getActiveTab() ?: return
+        val activeTabDomain =
+            domainProvider.getRegisteredDomain(activeTab.currentDisplayUrl) ?: return
+        tabList.forEach {
+            val tabCallbacks = tabCallbackMap[it] ?: return@forEach
+            val domain = domainProvider.getRegisteredDomain(tabCallbacks.tab.currentDisplayUrl)
+            if (it == activeTab.guid) {
+                reloadAndUpdateStats(activeTab)
+            } else if (domain?.startsWith(activeTabDomain) == true) {
+                tabCallbacks.tabCookieCutterModel.reloadUponForeground = true
+            }
+        }
+    }
+
+    private fun reloadAndUpdateStats(tab: Tab) {
+        tab.navigationController.reload()
+        tabCallbackMap[tab.guid]?.tabCookieCutterModel?.updateStats(tab.contentFilterStats)
     }
 
     private val browserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
@@ -543,7 +562,7 @@ abstract class BaseBrowserWrapper internal constructor(
             }
 
             if (tabCookieCutterModel?.reloadUponForeground == true) {
-                tab.navigationController.reload()
+                reloadAndUpdateStats(tab)
                 tabCookieCutterModel.reloadUponForeground = false
             }
         }

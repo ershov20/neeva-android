@@ -110,8 +110,7 @@ class TabCallbacks(
         var visitToCommit: Visit? = null
 
         override fun onNavigationStarted(navigation: Navigation) {
-            // TODO(kobec/chung): remove resetStat when we add onContentFilterStatsStarted
-            tabCookieCutterModel.resetStat()
+            contentFilterCallback.onContentFilterStatsUpdated()
 
             tabList.updateIsCrashed(tab.guid, isCrashed = false)
 
@@ -231,8 +230,7 @@ class TabCallbacks(
         }
 
         override fun onVisibleUriChanged(uri: Uri) {
-            // TODO(kobec/chung): remove resetStat when we add onContentFilterStatsStarted
-            tabCookieCutterModel.resetStat()
+            contentFilterCallback.onContentFilterStatsUpdated()
             tabList.updateUrl(tab.guid, uri)
         }
 
@@ -307,6 +305,7 @@ class TabCallbacks(
         tab.setErrorPageCallback(null)
         tab.setNewTabCallback(null)
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
+        tab.setContentFilterCallback(null)
         tab.unregisterTabCallback(tabCallback)
         scriptInjectionManager.unregisterMessagePassing(tab)
         // TODO unregister content filter callback

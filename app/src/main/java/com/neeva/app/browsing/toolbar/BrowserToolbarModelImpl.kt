@@ -20,6 +20,8 @@ class BrowserToolbarModelImpl(
     override fun goBack() = browserWrapper.goBack()
     override fun goForward() = browserWrapper.goForward()
     override fun reload() = browserWrapper.reload()
+    override fun reloadAfterContentFilterAllowListUpdate() =
+        browserWrapper.reloadAfterContentFilterAllowListUpdate()
 
     override fun share() = appNavModel.shareCurrentPage()
     override fun onAddToSpace() = appNavModel.showAddToSpace()
@@ -69,6 +71,7 @@ internal class PreviewBrowserToolbarModel(
     override fun goBack() {}
     override fun goForward() {}
     override fun reload() {}
+    override fun reloadAfterContentFilterAllowListUpdate() {}
     override fun share() {}
     override fun onAddToSpace() {}
     override fun onMenuItem(id: OverflowMenuItemId) {}

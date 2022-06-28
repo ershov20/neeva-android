@@ -61,7 +61,7 @@ fun BrowserToolbarContainer(topOffset: Float) {
     val appNavModel = LocalAppNavModel.current
     val cookieCutterPopoverModel = rememberCookieCutterPopoverModel(
         appNavModel = appNavModel,
-        reloadTab = browserToolbarModel::reload,
+        reloadTab = browserToolbarModel::reloadAfterContentFilterAllowListUpdate,
         cookieCutterModel = browserToolbarModel.cookieCutterModel,
         urlFlow = urlFlow
     )

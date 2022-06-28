@@ -11,6 +11,7 @@ abstract class BrowserToolbarModel {
     abstract fun goBack()
     abstract fun goForward()
     abstract fun reload()
+    abstract fun reloadAfterContentFilterAllowListUpdate()
     abstract fun share()
     abstract fun onAddToSpace()
     abstract fun onMenuItem(id: OverflowMenuItemId)
