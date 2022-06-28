@@ -72,6 +72,7 @@
     <string name="history_this_week">This week</string>
     <string name="history_earlier">Earlier</string>
     <string name="history_removed_visit">Removed \"%1$s\" from history</string>
+    <string name="history_delete">Delete %1$s from history</string>
 
     <string name="email_label">Email</string>
     <string name="password_label">Password</string>

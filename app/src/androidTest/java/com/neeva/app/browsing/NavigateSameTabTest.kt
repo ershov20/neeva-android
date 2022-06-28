@@ -16,17 +16,17 @@ import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.expectTabListState
 import com.neeva.app.getString
 import com.neeva.app.loadUrlInCurrentTab
+import com.neeva.app.navigateViaUrlBar
 import com.neeva.app.onBackPressed
 import com.neeva.app.tapOnBrowserView
-import com.neeva.app.typeIntoUrlBar
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeWithContentDescription
+import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
@@ -49,8 +49,8 @@ class NavigateSameTabTest : BaseBrowserTest() {
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
+            waitForTitle("Page 1")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Page 1")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
@@ -62,8 +62,8 @@ class NavigateSameTabTest : BaseBrowserTest() {
 
             // Confirm that the URL represents the updated destination.
             waitForUrl("$testUrl?page_index=2")
+            waitForTitle("Page 2")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Page 2")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
@@ -72,8 +72,8 @@ class NavigateSameTabTest : BaseBrowserTest() {
             // After hitting back, you should be on the previous page and be able to hit forward.
             onBackPressed()
             waitForUrl(testUrl)
+            waitForTitle("Page 1")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Page 1")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isTrue()
             }
@@ -92,8 +92,8 @@ class NavigateSameTabTest : BaseBrowserTest() {
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
+            waitForTitle("Page 1")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Page 1")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
@@ -105,8 +105,8 @@ class NavigateSameTabTest : BaseBrowserTest() {
             waitForIdle()
 
             // Confirm that the URL represents the updated destination.
+            waitForTitle("Page 2")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Page 2")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
@@ -116,8 +116,8 @@ class NavigateSameTabTest : BaseBrowserTest() {
             // was created, you can't re-open the closed tab.
             onBackPressed()
             waitForUrl(testUrl)
+            waitForTitle("Page 1")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Page 1")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
@@ -136,8 +136,8 @@ class NavigateSameTabTest : BaseBrowserTest() {
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
+            waitForTitle("Page 1")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Page 1")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
@@ -158,9 +158,9 @@ class NavigateSameTabTest : BaseBrowserTest() {
             // Clear the URL and type in a different one.
             val newUrl = WebpageServingRule.urlFor("audio.html")
             onNodeWithContentDescription(getString(R.string.clear)).performClick()
-            typeIntoUrlBar(newUrl)
+            navigateViaUrlBar(newUrl)
+            waitForTitle("Audio controls test")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Audio controls test")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
@@ -169,8 +169,8 @@ class NavigateSameTabTest : BaseBrowserTest() {
             // After hitting back, you should be on the previous page and be able to hit forward.
             onBackPressed()
             waitForUrl(testUrl)
+            waitForTitle("Page 1")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Page 1")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isTrue()
             }

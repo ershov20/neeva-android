@@ -84,14 +84,18 @@ interface HistoryDao : SiteDao, VisitDao {
         """
         SELECT *
         FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
-        WHERE Site.siteURL LIKE '%'||:query||'%'
+        WHERE (Site.siteURL LIKE '%'||:query||'%' OR Site.title LIKE '%'||:query||'%') 
               AND NOT Visit.isMarkedForDeletion
         GROUP BY Site.siteUID
         ORDER BY COUNT(*) DESC
         LIMIT :limit
     """
     )
-    suspend fun getQuerySuggestions(query: String, limit: Int): List<Site>
+    /**
+     * Get the most frequently visited entries from history that match the given [query] in either
+     * the title or the site URL.
+     */
+    suspend fun getFrequentHistorySuggestions(query: String, limit: Int = 10): List<Site>
 
     @Query(
         """
@@ -104,11 +108,26 @@ interface HistoryDao : SiteDao, VisitDao {
         LIMIT :limit
     """
     )
-    /** Get query suggestions as a flow. By default, it gives 3 most recent search suggestions. */
-    fun getQuerySuggestionsFlow(
-        query: String,
-        limit: Int = 3
-    ): Flow<List<Site>>
+    /**
+     * Get the most recent URLs from history that match the given query.
+     *
+     * To get the most recently performed searches, pass in [neevaConstants.appSearchURL] as the
+     * query.
+     */
+    fun getRecentHistorySuggestionsFlow(query: String, limit: Int = 3): Flow<List<Site>>
+
+    @Query(
+        """
+        SELECT *
+        FROM Site INNER JOIN Visit ON Site.siteUID = Visit.visitedSiteUID
+        WHERE Site.siteURL LIKE '%'||:query||'%' 
+              AND NOT Visit.isMarkedForDeletion
+        GROUP BY Site.siteUID
+        ORDER BY timestamp DESC
+        LIMIT :limit
+    """
+    )
+    fun getRecentHistorySuggestions(query: String, limit: Int = 3): List<Site>
 
     @Transaction
     suspend fun upsert(

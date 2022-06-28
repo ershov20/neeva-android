@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.StateFlow
 fun TrackingProtectionButton(
     showIncognitoBadge: Boolean,
     trackingDataFlow: StateFlow<TrackingData?>?,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     // Putting collectAsState here so it does not cause unnecessary recompositions with the Popover
@@ -41,7 +41,7 @@ fun TrackingProtectionButton(
 fun TrackingProtectionButton(
     showIncognitoBadge: Boolean,
     trackersBlocked: Int,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     IconButton(

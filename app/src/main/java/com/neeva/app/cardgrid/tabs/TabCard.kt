@@ -83,6 +83,11 @@ fun TabCard(
                 BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
             } else {
                 null
+            },
+            modifier = if (tabInfo.isSelected) {
+                Modifier.semantics { testTag = "SelectedTabCard" }
+            } else {
+                Modifier
             }
         ) {
             Box {

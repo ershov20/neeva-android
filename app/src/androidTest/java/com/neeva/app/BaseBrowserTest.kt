@@ -3,6 +3,7 @@ package com.neeva.app
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.annotation.CallSuper
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Before
 import org.junit.Rule
@@ -13,7 +14,8 @@ abstract class BaseBrowserTest {
     val webpageServingRule = WebpageServingRule()
 
     @Before
-    fun setUp() {
+    @CallSuper
+    open fun setUp() {
         Handler(Looper.getMainLooper()).post {
             Toast.makeText(
                 InstrumentationRegistry.getInstrumentation().targetContext,

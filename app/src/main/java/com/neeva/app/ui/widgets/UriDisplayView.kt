@@ -9,12 +9,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.LightDarkPreviewContainer
 
-fun parseURLPath(path: String?): List<String> {
-    return if (path == null) {
-        emptyList()
-    } else {
-        path.split("/").filter { it.isNotEmpty() }
-    }
+fun parseURLPath(uri: Uri): Pair<String?, List<String>> {
+    val sanitizedAuthority = uri.authority?.replace("www.", "")
+    val pieces = uri.pathSegments ?: emptyList()
+    return Pair(sanitizedAuthority, pieces)
 }
 
 @Composable
@@ -22,20 +20,15 @@ fun UriDisplayView(
     uri: Uri,
     separator: String = "\u203A"
 ) {
-    val primary = remember(uri) {
-        uri.authority?.replace("www.", "")
-    }
-    val pieces = remember(uri) {
-        parseURLPath(uri.path)
-    }
+    val parts = remember(uri) { parseURLPath(uri) }
 
-    if (primary == null) return
-
-    SplitStringRow(
-        primary = primary,
-        secondaryPieces = pieces,
-        separator = separator
-    )
+    parts.first?.let { sanitizedAuthority ->
+        SplitStringRow(
+            primary = sanitizedAuthority,
+            secondaryPieces = parts.second,
+            separator = separator
+        )
+    }
 }
 
 @Preview("normal suggestion, 1x", locale = "en")

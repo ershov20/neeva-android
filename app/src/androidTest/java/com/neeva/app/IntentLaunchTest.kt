@@ -145,7 +145,7 @@ class IntentLaunchTest : BaseBrowserTest() {
             expectedNumIncognitoTabs = null
         )
 
-        androidComposeRule.typeIntoUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
+        androidComposeRule.navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
 
         // Wait until the other tab registers.
         androidComposeRule.waitForBrowserState(
@@ -189,7 +189,7 @@ class IntentLaunchTest : BaseBrowserTest() {
             expectedNumIncognitoTabs = null
         )
 
-        androidComposeRule.typeIntoUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
+        androidComposeRule.navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
 
         // Wait until the other tab registers.
         androidComposeRule.waitForBrowserState(
@@ -244,7 +244,7 @@ class IntentLaunchTest : BaseBrowserTest() {
             expectedNumIncognitoTabs = 1
         )
 
-        androidComposeRule.typeIntoUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
+        androidComposeRule.navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
 
         // Confirm we're currently NOT in incognito, with two regular tabs and one incognito tab.
         androidComposeRule.waitForBrowserState(

@@ -165,6 +165,11 @@ fun HistoryEntry(
     val navSuggestion = site.toNavSuggestion(domainProvider)
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
 
+    val contentDescription = stringResource(
+        R.string.history_delete,
+        sitePlusVisit.site.title ?: sitePlusVisit.site.siteURL
+    )
+
     NavSuggestionRow(
         iconParams = RowActionStartIconParams(faviconBitmap = faviconBitmap),
         primaryLabel = navSuggestion.label,
@@ -174,7 +179,8 @@ fun HistoryEntry(
             onTapAction = {
                 onDeleteVisit(sitePlusVisit.visit.visitUID, navSuggestion.label)
             },
-            actionType = RowActionIconParams.ActionType.DELETE
+            actionType = RowActionIconParams.ActionType.DELETE,
+            contentDescription = contentDescription
         )
     )
 }

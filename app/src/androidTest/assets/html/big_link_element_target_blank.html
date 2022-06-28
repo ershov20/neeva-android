@@ -2,64 +2,14 @@
 <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-        <!-- Ensure that the div containing the link spans the whole page. -->
-        <style type="text/css">
-            body {
-                font-family: sans-serif;
-                width: 100%;
-                height: 100%;
-                padding: 0px;
-                margin: 0px;
-            }
-
-            div#next_page_link_div {
-                position: fixed;
-                top: 0px;
-                left: 0px;
-                width: 100%;
-                height: 100%;
-
-                display: flex;
-                text-align: center;
-                align-items: center;
-                justify-content: center;
-            }
-        </style>
-
-        <script type="text/javascript">
-            colors = ["#ffcccc", "#ffffcc", "#ccffcc", "#ccffff", "#ccccff", "#ffccff"]
-
-            // Sets up the page so that clicking on it navigates to a page with a higher index.
-            function initialize() {
-                params = new window.URLSearchParams(window.location.search)
-
-                page_index_str = params.get("page_index")
-                if (page_index_str == null) page_index_str = "1"
-
-                page_index = parseInt(page_index_str)
-                color = colors[page_index % colors.length]
-
-                next_page_index = page_index + 1
-                next_page_link = "?page_index=" + next_page_index
-                next_page_link_text = "Link to page " + next_page_index
-
-                document.title = "Page " + page_index
-
-                document.body.style.background = color
-                document.querySelector("#next_page_link_element").href = next_page_link
-                document.querySelector("#next_page_link_text_element").innerText = next_page_link_text
-            }
-        </script>
-
-        <title>Page</title>
+        <link rel="stylesheet" href="style.css" />
+        <script type="text/javascript" src="link.js"></script>
     </head>
 
-    <body onload="initialize()">
+    <body>
         <a id="next_page_link_element" target="_blank">
-            <div id="next_page_link_div">
-                <div id="next_page_link_text_element"></div>
-            </div>
+            <div id="next_page_link_text_element"></div>
+            <script type="text/javascript">initializeLink()</script>
         </a>
     </body>
 </html>

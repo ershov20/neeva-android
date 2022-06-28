@@ -59,9 +59,9 @@ class HistoryManager(
     private val _historySuggestions = MutableStateFlow<List<NavSuggestion>>(emptyList())
     val historySuggestions: StateFlow<List<NavSuggestion>> = _historySuggestions
 
-    /** Provides the top 3 suggestions based on how often a user visited a site. */
+    /** Provides the top 3 search suggestions based on how often a user visited a site. */
     val suggestedQueries: Flow<List<QueryRowSuggestion>> = dao
-        .getQuerySuggestionsFlow(query = neevaConstants.appSearchURL)
+        .getRecentHistorySuggestionsFlow(query = neevaConstants.appSearchURL)
         .map { siteList ->
             siteList.mapNotNull { it.toSearchSuggest(neevaConstants) }.take(3)
         }
@@ -80,7 +80,7 @@ class HistoryManager(
     /** Updates the query that is being used to fetch history suggestions. */
     suspend fun updateSuggestionQuery(currentInput: String?) {
         val siteSuggestions = if (currentInput != null) {
-            dao.getQuerySuggestions(currentInput, limit = 10)
+            dao.getFrequentHistorySuggestions(currentInput, limit = 10)
         } else {
             emptyList()
         }

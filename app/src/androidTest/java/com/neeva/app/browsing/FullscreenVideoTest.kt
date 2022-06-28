@@ -16,12 +16,12 @@ import com.neeva.app.onBackPressed
 import com.neeva.app.tapOnBrowserView
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForAssertion
+import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import strikt.api.expectThat
-import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
@@ -45,8 +45,8 @@ class FullscreenVideoTest : BaseBrowserTest() {
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
+            waitForTitle("Fullscreen video test")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Fullscreen video test")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
@@ -64,8 +64,8 @@ class FullscreenVideoTest : BaseBrowserTest() {
             // After hitting back, you should still be on the same page, but not in fullscreen.
             onBackPressed()
             waitForUrl(testUrl)
+            waitForTitle("Fullscreen video test")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(titleFlow.value).isEqualTo("Fullscreen video test")
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }

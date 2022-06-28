@@ -141,7 +141,6 @@ fun BrowserToolbar(
                             TrackingProtectionButton(
                                 showIncognitoBadge = browserToolbarModel.isIncognito,
                                 trackingDataFlow = cookieCutterPopoverModel.trackingDataFlow,
-                                modifier = modifier,
                                 onClick = cookieCutterPopoverModel::openPopover
                             )
 

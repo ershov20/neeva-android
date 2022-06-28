@@ -88,10 +88,12 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForTabListState(
 
 /** Waits for the current tab to show that it has started loading the given URL. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForUrl(url: String) {
+    waitForIdle()
     waitFor { it.webLayerModel.currentBrowser.activeTabModel.urlFlow.value.toString() == url }
 }
 
 /** Waits for the current tab to show that it is displaying the correct title. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForTitle(title: String) {
+    waitForIdle()
     waitFor { it.webLayerModel.currentBrowser.activeTabModel.titleFlow.value == title }
 }

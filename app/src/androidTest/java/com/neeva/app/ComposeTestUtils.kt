@@ -95,10 +95,10 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForActivityStart
     // current web page.
     fun NeevaActivity.isBrowserLoadingIdle(): Boolean {
         val browsers = webLayerModel.browsersFlow.value
-        val loadingProgress = browsers.regularBrowserWrapper.activeTabModel.progressFlow.value
+        val loadingProgress = browsers.getCurrentBrowser().activeTabModel.progressFlow.value
 
         return when {
-            // Wait for the browser to finish loading whatever it's loading.
+            // Wait for the current browser to finish loading whatever it's loading.
             !(loadingProgress == 0 || loadingProgress == 100) -> {
                 Log.d(TAG, "Not idle -- Load in progress: $loadingProgress")
                 false
@@ -182,7 +182,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.loadUrlInCurrentTab(
 
     // Click on the URL bar and then type in the provided URL.
     clickOnNodeWithTag("LocationLabel")
-    typeIntoUrlBar(url)
+    navigateViaUrlBar(url)
 }
 
 /**
@@ -196,19 +196,25 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: Str
 
     clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.new_tab_content_description))
     waitForNavDestination(AppNavDestination.BROWSER)
-    typeIntoUrlBar(url)
+    navigateViaUrlBar(url)
 }
 
-/** Enters a URL into the URL bar, assuming it is already visible. */
-fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(url: String) {
-    waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder)).apply {
-        performTextInput(url)
-        performKeyPress(
+/** Enters text into the URL bar and hits enter, assuming it is already visible. */
+fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(text: String) {
+    waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder))
+        .performTextInput(text)
+}
+
+/** Enters text into the URL bar and hits enter, assuming it is already visible. */
+fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.navigateViaUrlBar(url: String) {
+    typeIntoUrlBar(url)
+
+    waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder))
+        .performKeyPress(
             androidx.compose.ui.input.key.KeyEvent(
                 NativeKeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER)
             )
         )
-    }
 
     val browserViewIdlingResource = object : IdlingResource {
         override val isIdleNow: Boolean get() {
@@ -263,7 +269,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openOverflowMe
 }
 
 /** Open the Card Grid by clicking on the Card Grid button from the bottom toolbar. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openCardGrid(
+fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
     incognito: Boolean,
     expectedSubscreen: SelectedScreen? = null
 ) {
@@ -272,7 +278,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openCardGrid(
     when (activity.appNavModel?.currentDestination?.value?.route) {
         AppNavDestination.BROWSER.route -> {
             // Wait for the card grid button to be visible, then click it.
-            val cardGridButtonDescription = getString(com.neeva.app.R.string.toolbar_tab_switcher)
+            val cardGridButtonDescription = getString(R.string.toolbar_tab_switcher)
             clickOnNodeWithContentDescription(cardGridButtonDescription)
             waitForNavDestination(AppNavDestination.CARD_GRID)
         }
@@ -294,9 +300,9 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openCardGrid(
     // Click on the correct tab switcher button.
     val selectedScreen = activity.cardsPaneModel!!.selectedScreen.value
     if (incognito && selectedScreen != SelectedScreen.INCOGNITO_TABS) {
-        clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.incognito))
+        clickOnNodeWithContentDescription(getString(R.string.incognito))
     } else if (!incognito && selectedScreen != SelectedScreen.REGULAR_TABS) {
-        clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.tabs))
+        clickOnNodeWithContentDescription(getString(R.string.tabs))
     }
 
     // Wait for mode switch to kick in.

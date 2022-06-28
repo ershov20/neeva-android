@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.storage.daos.HistoryDao
 import com.neeva.app.storage.entities.Visit
 import java.util.Date
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,7 +13,6 @@ import strikt.assertions.containsExactly
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HistoryDaoTest : HistoryDatabaseBaseTest() {
     private lateinit var sitesRepository: HistoryDao
@@ -85,6 +83,48 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
             expectThat(sitesAfter).hasSize(2)
             expectThat(sitesAfter.map { it.siteURL })
                 .containsExactly("https://www.a.com", "https://www.b.com")
+        }
+    }
+
+    @Test
+    fun getFrequentHistorySuggestions_byTitle() {
+        runBlocking {
+            addSitesIntoDatabase()
+            val sites = database.dao().getFrequentHistorySuggestions("Title")
+            expectThat(sites.map { it.siteURL })
+                .containsExactly("https://www.a.com", "https://www.b.com", "https://www.c.com")
+
+            // Delete some of the recorded Visits.
+            // There should still be 3 visits for www.a.com and 1 for www.b.com.
+            sitesRepository.deleteHistoryWithinTimeframe(Date(20001L), Date(50000L))
+            val sitesAfter = database.dao().getFrequentHistorySuggestions("Title")
+            expectThat(sitesAfter).hasSize(2)
+            expectThat(sitesAfter.map { it.siteURL })
+                .containsExactly("https://www.a.com", "https://www.b.com")
+        }
+    }
+
+    @Test
+    fun getFrequentHistorySuggestions_byUrl() {
+        runBlocking {
+            addSitesIntoDatabase()
+            expectThat(database.dao().getFrequentHistorySuggestions("com").map { it.siteURL })
+                .containsExactly("https://www.a.com", "https://www.b.com", "https://www.c.com")
+
+            expectThat(database.dao().getFrequentHistorySuggestions("c.com").map { it.siteURL })
+                .containsExactly("https://www.c.com")
+        }
+    }
+
+    @Test
+    fun getRecentHistorySuggestions() {
+        runBlocking {
+            addSitesIntoDatabase()
+            expectThat(database.dao().getRecentHistorySuggestions("com").map { it.siteURL })
+                .containsExactly("https://www.c.com", "https://www.b.com", "https://www.a.com")
+
+            expectThat(database.dao().getRecentHistorySuggestions("c.com").map { it.siteURL })
+                .containsExactly("https://www.c.com")
         }
     }
 }
