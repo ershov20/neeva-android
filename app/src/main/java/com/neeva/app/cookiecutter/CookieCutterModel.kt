@@ -79,6 +79,9 @@ class CookieCutterModelImpl(
     }
 
     override fun updateTrackingProtectionConfiguration() {
+        enableTrackingProtection.value =
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)
+
         if (enableTrackingProtection.value) {
             val blockingStrength = settingsDataModel.getCookieCutterStrength()
             contentFilterManager.setRulesFile(blockingStrength.blockingList)

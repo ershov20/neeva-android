@@ -87,8 +87,8 @@ class SettingsControllerImpl(
 
     override fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {
         return { newValue ->
-            getToggleChangedCallBackMap()[settingsToggle.key]?.invoke()
             settingsDataModel.getTogglePreferenceSetter(settingsToggle)(newValue)
+            getToggleChangedCallBackMap()[settingsToggle.key]?.invoke()
         }
     }
 
