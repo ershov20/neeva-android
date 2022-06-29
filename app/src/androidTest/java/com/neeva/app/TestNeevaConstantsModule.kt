@@ -14,7 +14,7 @@ import javax.inject.Singleton
 object TestNeevaConstantsModule {
     /**
      * Sends the user to localhost instead of out to the real Neeva site.  Cookies are still set on
-     * neeva.com to avoid WebLayer complaining about setting a cookie on localhost.
+     * neeva.com to avoid WebLayer complaining about setting a secure cookie on an http site.
      */
     val neevaConstants = object : NeevaConstants(
         appHost = "127.0.0.1:8000",
@@ -23,7 +23,6 @@ object TestNeevaConstantsModule {
         cookieURL = "https://neeva.com"
     ) {
         override val appHelpCenterURL = "http://127.0.0.1:8000/help.html"
-        override val homepageURL = "http://127.0.0.1:8000"
     }
 
     @Provides

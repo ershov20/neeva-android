@@ -31,7 +31,7 @@ open class NeevaConstants(
      * Returns the URL that should be loaded when going to the home page (e.g. from Zero Query or
      * on the first app open).
      */
-    open val homepageURL: String
+    val homepageURL: String
         get() {
             return if (NeevaBrowser.isBeingInstrumented()) {
                 // Stop the app from actively loading the real homepage to reduce flakiness.

@@ -5,8 +5,6 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
 import com.neeva.app.appnav.AppNavDestination
@@ -40,38 +38,40 @@ class IntentLaunchTest : BaseBrowserTest() {
     fun externalViewIntent_whileInBackground_opensNewRegularTab() {
         val firstIntent = createMainIntent()
         activityTestRule.launchActivity(firstIntent)
-        androidComposeRule.waitForActivityStartup()
 
-        // Confirm that we see one tab in the TabGrid.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(1)
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 1,
-            expectedNumIncognitoTabs = null
-        )
+        androidComposeRule.apply {
+            waitForActivityStartup()
 
-        // Navigate back to the browser.
-        androidComposeRule.runOnUiThread {
-            androidComposeRule.activity.onBackPressed()
+            // Confirm that we see one tab in the TabGrid.
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(1)
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 1,
+                expectedNumIncognitoTabs = null
+            )
+
+            // Navigate back to the browser.
+            onBackPressed()
+            androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
+
+            // Kick the user to the home screen to minimize our browser.
+            sendAppToBackground()
+
+            // Send the user back into the app with an external Intent.
+            val secondIntent = createViewIntent(WebpageServingRule.urlFor("?external_intent"))
+            InstrumentationRegistry.getInstrumentation().context.startActivity(secondIntent)
+
+            // Confirm that we see two tabs in the tab switcher.
+            waitForNavDestination(AppNavDestination.BROWSER)
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(2)
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 2,
+                expectedNumIncognitoTabs = null
+            )
         }
-        androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
-
-        // Kick the user to the home screen to minimize our browser.
-        androidComposeRule.sendAppToBackground()
-
-        // Send the user back into the app with an external Intent.
-        val secondIntent = createViewIntent(WebpageServingRule.urlFor("?external_intent"))
-        InstrumentationRegistry.getInstrumentation().context.startActivity(secondIntent)
-
-        // Confirm that we see two tabs in the tab switcher.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(2)
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 2,
-            expectedNumIncognitoTabs = null
-        )
 
         activityTestRule.finishActivity()
     }
@@ -79,44 +79,48 @@ class IntentLaunchTest : BaseBrowserTest() {
     @Test
     fun externalViewIntent_whileInIncognito_opensNewRegularTab() {
         activityTestRule.launchActivity(createMainIntent())
-        androidComposeRule.waitForActivityStartup()
 
-        // Confirm that we see one tab in the TabGrid.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(1)
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 1,
-            expectedNumIncognitoTabs = null
-        )
+        androidComposeRule.apply {
+            waitForActivityStartup()
 
-        // Open an incognito tab to force the user into Incognito mode.
-        androidComposeRule.openCardGrid(incognito = true)
-        androidComposeRule.openLazyTab(WebpageServingRule.urlFor("?incognito"))
+            // Confirm that we see one tab in the TabGrid.
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(1)
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 1,
+                expectedNumIncognitoTabs = null
+            )
 
-        // Wait for the incognito Browser tab count to be correct.
-        androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
-        androidComposeRule.waitForBrowserState(
-            isIncognito = true,
-            expectedNumRegularTabs = 1,
-            expectedNumIncognitoTabs = 1
-        )
+            // Open an incognito tab to force the user into Incognito mode.
+            openCardGrid(incognito = true)
+            openLazyTab(WebpageServingRule.urlFor("?incognito"))
 
-        // Kick the user to the home screen to minimize our browser.
-        androidComposeRule.sendAppToBackground()
+            // Wait for the incognito Browser tab count to be correct.
+            waitForNavDestination(AppNavDestination.BROWSER)
+            waitForBrowserState(
+                isIncognito = true,
+                expectedNumRegularTabs = 1,
+                expectedNumIncognitoTabs = 1
+            )
 
-        // Send the user back into the app with an external Intent.
-        InstrumentationRegistry.getInstrumentation().context
-            .startActivity(createViewIntent(WebpageServingRule.urlFor("?external_intent")))
+            // Kick the user to the home screen to minimize our browser.
+            sendAppToBackground()
 
-        // Confirm that we see two regular tabs in the tab switcher.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(2)
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 2,
-            expectedNumIncognitoTabs = 1
-        )
+            // Send the user back into the app with an external Intent.
+            InstrumentationRegistry.getInstrumentation().context
+                .startActivity(createViewIntent(WebpageServingRule.urlFor("?external_intent")))
+
+            // Confirm that we see two regular tabs in the tab switcher.
+            waitForNavDestination(AppNavDestination.BROWSER)
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(2)
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 2,
+                expectedNumIncognitoTabs = 1
+            )
+        }
 
         activityTestRule.finishActivity()
     }
@@ -124,34 +128,32 @@ class IntentLaunchTest : BaseBrowserTest() {
     @Test
     fun newTabIntent_fromColdStart_opensLazyTab() {
         activityTestRule.launchActivity(createLazyTabIntent())
-        androidComposeRule.waitForActivityStartup()
-        androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
 
-        // Confirm that the user is in the Browser in the Lazy Tab state.
-        androidComposeRule
-            .onNodeWithContentDescription(
-                androidComposeRule.getString(R.string.url_bar_placeholder)
+        androidComposeRule.apply {
+            waitForActivityStartup()
+            waitForNavDestination(AppNavDestination.BROWSER)
+
+            // Confirm that the user is in the Browser in the Lazy Tab state.
+            waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder))
+                .assertIsFocused()
+            waitForNodeWithText(getString(R.string.suggested_sites)).assertIsDisplayed()
+
+            // There should only be one tab until the user hits enter.
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 1,
+                expectedNumIncognitoTabs = null
             )
-            .assertIsFocused()
-        androidComposeRule
-            .onNodeWithText(androidComposeRule.getString(R.string.suggested_sites))
-            .assertIsDisplayed()
 
-        // There should only be one tab until the user hits enter.
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 1,
-            expectedNumIncognitoTabs = null
-        )
+            navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
 
-        androidComposeRule.navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
-
-        // Wait until the other tab registers.
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 2,
-            expectedNumIncognitoTabs = null
-        )
+            // Wait until the other tab registers.
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 2,
+                expectedNumIncognitoTabs = null
+            )
+        }
 
         activityTestRule.finishActivity()
     }
@@ -159,43 +161,44 @@ class IntentLaunchTest : BaseBrowserTest() {
     @Test
     fun newTabIntent_whileInBackground_opensLazyTab() {
         activityTestRule.launchActivity(createMainIntent())
-        androidComposeRule.waitForActivityStartup()
 
-        // Confirm that we see one tab in the TabGrid.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(1)
+        androidComposeRule.apply {
+            waitForActivityStartup()
 
-        // Kick the user to the home screen to minimize our browser.
-        androidComposeRule.sendAppToBackground()
+            // Confirm that we see one tab in the TabGrid.
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(1)
 
-        // Send the user back into the app with a lazy tab Intent.
-        InstrumentationRegistry.getInstrumentation().context.startActivity(createLazyTabIntent())
+            // Kick the user to the home screen to minimize our browser.
+            sendAppToBackground()
 
-        // Confirm that the user is in the Browser in the Lazy Tab state.
-        androidComposeRule
-            .onNodeWithContentDescription(
-                androidComposeRule.getString(R.string.url_bar_placeholder)
+            // Send the user back into the app with a lazy tab Intent.
+            InstrumentationRegistry.getInstrumentation().context.startActivity(
+                createLazyTabIntent()
             )
-            .assertIsFocused()
-        androidComposeRule
-            .onNodeWithText(androidComposeRule.getString(R.string.suggested_sites))
-            .assertIsDisplayed()
 
-        // There should only be one tab until the user hits enter.
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 1,
-            expectedNumIncognitoTabs = null
-        )
+            // Confirm that the user is in the Browser in the Lazy Tab state.
+            waitForNavDestination(AppNavDestination.BROWSER)
+            waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder))
+                .assertIsFocused()
+            waitForNodeWithText(getString(R.string.suggested_sites)).assertIsDisplayed()
 
-        androidComposeRule.navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
+            // There should only be one tab until the user hits enter.
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 1,
+                expectedNumIncognitoTabs = null
+            )
 
-        // Wait until the other tab registers.
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 2,
-            expectedNumIncognitoTabs = null
-        )
+            navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
+
+            // Wait until the other tab registers.
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 2,
+                expectedNumIncognitoTabs = null
+            )
+        }
 
         activityTestRule.finishActivity()
     }
@@ -203,54 +206,54 @@ class IntentLaunchTest : BaseBrowserTest() {
     @Test
     fun newTabIntent_whileIncognitoAndInBackground_opensLazyTab() {
         activityTestRule.launchActivity(createMainIntent())
-        androidComposeRule.waitForActivityStartup()
+        androidComposeRule.apply {
+            waitForActivityStartup()
 
-        // Confirm that we see one tab in the TabGrid.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(1)
+            // Confirm that we see one tab in the TabGrid.
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(1)
 
-        // Open an incognito tab to force the user into Incognito mode.
-        androidComposeRule.openCardGrid(incognito = true)
-        androidComposeRule.openLazyTab(WebpageServingRule.urlFor("?incognito"))
+            // Open an incognito tab to force the user into Incognito mode.
+            openCardGrid(incognito = true)
+            openLazyTab(WebpageServingRule.urlFor("?incognito"))
 
-        // Confirm that we're currently in incognito with one tab in each browser profile.
-        androidComposeRule.waitForBrowserState(
-            isIncognito = true,
-            expectedNumRegularTabs = 1,
-            expectedNumIncognitoTabs = 1
-        )
-
-        // Kick the user to the home screen to minimize our browser.
-        androidComposeRule.sendAppToBackground()
-
-        // Send the user back into the app with a lazy tab Intent.
-        InstrumentationRegistry.getInstrumentation().context.startActivity(createLazyTabIntent())
-
-        // Confirm that the user is in the Browser in the Lazy Tab state.
-        androidComposeRule
-            .onNodeWithContentDescription(
-                androidComposeRule.getString(R.string.url_bar_placeholder)
+            // Confirm that we're currently in incognito with one tab in each browser profile.
+            waitForBrowserState(
+                isIncognito = true,
+                expectedNumRegularTabs = 1,
+                expectedNumIncognitoTabs = 1
             )
-            .assertIsFocused()
-        androidComposeRule
-            .onNodeWithText(androidComposeRule.getString(R.string.suggested_sites))
-            .assertIsDisplayed()
 
-        // There should only be one tab until the user hits enter.
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 1,
-            expectedNumIncognitoTabs = 1
-        )
+            // Kick the user to the home screen to minimize our browser.
+            sendAppToBackground()
 
-        androidComposeRule.navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
+            // Send the user back into the app with a lazy tab Intent.
+            InstrumentationRegistry.getInstrumentation().context.startActivity(
+                createLazyTabIntent()
+            )
 
-        // Confirm we're currently NOT in incognito, with two regular tabs and one incognito tab.
-        androidComposeRule.waitForBrowserState(
-            isIncognito = false,
-            expectedNumRegularTabs = 2,
-            expectedNumIncognitoTabs = 1
-        )
+            // Confirm that the user is in the Browser in the Lazy Tab state.
+            waitForNavDestination(AppNavDestination.BROWSER)
+            waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder))
+                .assertIsFocused()
+            waitForNodeWithText(getString(R.string.suggested_sites)).assertIsDisplayed()
+
+            // There should only be one tab until the user hits enter.
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 1,
+                expectedNumIncognitoTabs = 1
+            )
+
+            navigateViaUrlBar(WebpageServingRule.urlFor("?lazily_created_tab"))
+
+            // Confirm we're currently NOT in incognito, with 2 regular tabs and 1 incognito tab.
+            waitForBrowserState(
+                isIncognito = false,
+                expectedNumRegularTabs = 2,
+                expectedNumIncognitoTabs = 1
+            )
+        }
 
         activityTestRule.finishActivity()
     }
@@ -258,15 +261,14 @@ class IntentLaunchTest : BaseBrowserTest() {
     @Test
     fun spacesIntent_fromColdStart_opensSpaces() {
         activityTestRule.launchActivity(createSpacesIntent())
-        androidComposeRule.waitForActivityStartup()
 
-        // Confirm that the user is in the Spaces CardGrid.
-        androidComposeRule.waitForCardGridScreen(SelectedScreen.SPACES)
+        androidComposeRule.apply {
+            waitForActivityStartup()
 
-        val createContentDescription =
-            activityTestRule.activity.resources.getString(R.string.space_create)
-        androidComposeRule.waitForIdle()
-        androidComposeRule.onNodeWithContentDescription(createContentDescription).assertExists()
+            // Confirm that the user is in the Spaces CardGrid.
+            waitForCardGridScreen(SelectedScreen.SPACES)
+            waitForNodeWithContentDescription(getString(R.string.space_create)).assertIsDisplayed()
+        }
 
         activityTestRule.finishActivity()
     }
@@ -274,32 +276,29 @@ class IntentLaunchTest : BaseBrowserTest() {
     @Test
     fun spacesIntent_whileInBackground_opensSpaces() {
         activityTestRule.launchActivity(createMainIntent())
-        androidComposeRule.waitForActivityStartup()
 
-        // Confirm that we see one tab in the TabGrid.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(1)
+        androidComposeRule.apply {
+            waitForActivityStartup()
 
-        // Navigate back to the browser.
-        androidComposeRule.runOnUiThread {
-            androidComposeRule.activity.onBackPressed()
+            // Confirm that we see one tab in the TabGrid.
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(1)
+
+            // Navigate back to the browser.
+            onBackPressed()
+            waitForNavDestination(AppNavDestination.BROWSER)
+
+            // Kick the user to the home screen to minimize our browser.
+            sendAppToBackground()
+
+            // Send the user back into the app with a Spaces Intent.  The user should end up on the
+            // Spaces screen of the CardGrid.
+            InstrumentationRegistry.getInstrumentation().context.startActivity(createSpacesIntent())
+
+            // Confirm that the user is in the Spaces CardGrid.
+            waitForCardGridScreen(SelectedScreen.SPACES)
+            waitForNodeWithContentDescription(getString(R.string.space_create)).assertIsDisplayed()
         }
-        androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
-
-        // Kick the user to the home screen to minimize our browser.
-        androidComposeRule.sendAppToBackground()
-
-        // Send the user back into the app with a Spaces Intent.  The user should end up on the
-        // Spaces screen of the CardGrid.
-        InstrumentationRegistry.getInstrumentation().context.startActivity(createSpacesIntent())
-
-        // Confirm that the user is in the Spaces CardGrid.
-        androidComposeRule.waitForCardGridScreen(SelectedScreen.SPACES)
-
-        val createContentDescription =
-            activityTestRule.activity.resources.getString(R.string.space_create)
-        androidComposeRule.waitForIdle()
-        androidComposeRule.onNodeWithContentDescription(createContentDescription).assertExists()
 
         activityTestRule.finishActivity()
     }

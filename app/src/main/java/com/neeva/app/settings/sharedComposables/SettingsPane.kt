@@ -8,6 +8,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsPaneDataInterface
@@ -29,7 +31,9 @@ fun SettingsPane(
             )
 
             LazyColumn(
-                modifier = Modifier.weight(1.0f)
+                modifier = Modifier
+                    .weight(1.0f)
+                    .semantics { testTag = "SettingsPaneItems" }
             ) {
                 paneData.data.forEach { groupData ->
                     item {

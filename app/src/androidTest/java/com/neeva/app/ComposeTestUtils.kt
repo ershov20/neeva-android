@@ -11,6 +11,7 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
@@ -168,7 +169,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.sendAppToBackground(
     InstrumentationRegistry.getInstrumentation().context.startActivity(
         createAndroidHomeIntent()
     )
-    waitUntil(WAIT_TIMEOUT) {
+    waitFor {
         activity.lifecycle.currentState == Lifecycle.State.CREATED
     }
 }
@@ -284,12 +285,8 @@ fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.navigateViaUrlBar(ur
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNavDestination(
     destination: AppNavDestination
 ) {
-    // Because a lot of things are changing under the hood and many recompositions are happening,
-    // waitForIdle() ends up being flaky.  To counter this, wait until we know we've navigated to
-    // the correct screen by looking at the AppNavModel.
-    waitForIdle()
-    waitUntil(WAIT_TIMEOUT) {
-        activity.appNavModel?.currentDestination?.value?.route == destination.route
+    waitFor {
+        it.appNavModel?.currentDestination?.value?.route == destination.route
     }
 }
 
@@ -338,8 +335,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
     }
 
     // Wait for mode switch to kick in.
-    waitForIdle()
-    waitUntil(WAIT_TIMEOUT) {
+    waitFor {
         val webLayerModel = activity.webLayerModel
         val browsers = webLayerModel.browsersFlow.value
         browsers.isCurrentlyIncognito == incognito
@@ -350,10 +346,10 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForCardGridScreen(
     expectedSubscreen: SelectedScreen
 ) {
-    waitUntil(WAIT_TIMEOUT) {
+    waitFor {
         activity.appNavModel?.currentDestination?.value?.route == AppNavDestination.CARD_GRID.route
     }
-    waitUntil(WAIT_TIMEOUT) {
+    waitFor {
         activity.cardsPaneModel?.selectedScreen?.value == expectedSubscreen
     }
 }
@@ -364,7 +360,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
     expectedNumRegularTabs: Int,
     expectedNumIncognitoTabs: Int?
 ) {
-    waitUntil(WAIT_TIMEOUT) {
+    waitFor {
         val browsers = activity.webLayerModel.browsersFlow.value
         val numRegularTabs = browsers.regularBrowserWrapper.orderedTabList.value.size
         val numIncognitoTabs = browsers.incognitoBrowserWrapper?.orderedTabList?.value?.size
@@ -377,13 +373,18 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
     }
 }
 
-/** Waits until the provided [condition] becomes true. */
+/**
+ * Waits until the provided [condition] becomes true.
+ *
+ * We have to poll because the [waitForIdle()] doesn't know how to wait for all the asynchronous
+ * Flows that the app is using to push data around and all the asynchronous work that is being done
+ * by WebLayer when the browser is doing things.
+ */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(
     condition: (activity: NeevaActivity) -> Boolean
 ) {
-    waitUntil(WAIT_TIMEOUT) {
-        condition(activity)
-    }
+    waitForIdle()
+    waitUntil(WAIT_TIMEOUT) { condition(activity) }
 }
 
 /**
@@ -422,19 +423,25 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.selectItemFromContex
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithContentDescription(
     description: String
 ) {
-    waitForNodeWithContentDescription(description).performClick()
+    waitForNodeWithContentDescription(description)
+        .assertHasClickAction()
+        .performClick()
     waitForIdle()
 }
 
 /** Wait for a Composable to appear with the given text, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithText(text: String) {
-    waitForNodeWithText(text).performClick()
+    waitForNodeWithText(text)
+        .assertHasClickAction()
+        .performClick()
     waitForIdle()
 }
 
 /** Wait for a Composable to appear with the given tag, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithTag(tag: String) {
-    waitForNodeWithTag(tag).performClick()
+    waitForNodeWithTag(tag)
+        .assertHasClickAction()
+        .performClick()
     waitForIdle()
 }
 
@@ -442,9 +449,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithTag(t
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithContentDescription(
     description: String
 ): SemanticsNodeInteraction {
-    waitForIdle()
-
-    waitUntil(WAIT_TIMEOUT) {
+    waitFor {
         onAllNodesWithContentDescription(description)
             .fetchSemanticsNodes()
             .isNotEmpty()
@@ -457,9 +462,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithConte
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithTag(
     tag: String
 ): SemanticsNodeInteraction {
-    waitForIdle()
-
-    waitUntil(WAIT_TIMEOUT) {
+    waitFor {
         onAllNodesWithTag(tag)
             .fetchSemanticsNodes()
             .isNotEmpty()
@@ -472,9 +475,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithTag(
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithText(
     text: String
 ): SemanticsNodeInteraction {
-    waitForIdle()
-
-    waitUntil(WAIT_TIMEOUT) {
+    waitFor {
         onAllNodesWithText(text)
             .fetchSemanticsNodes()
             .isNotEmpty()

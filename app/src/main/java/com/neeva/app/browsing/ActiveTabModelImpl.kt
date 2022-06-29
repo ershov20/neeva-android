@@ -169,6 +169,8 @@ class ActiveTabModelImpl(
         }
 
         override fun onNavigationFailed(navigation: Navigation) {
+            // WebLayer doesn't seem to send an updated progress value on a load timeout.
+            _progressFlow.value = 100
             updateNavigationInfo()
         }
 

@@ -123,3 +123,27 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesIn
     }
     expectTabListState(isIncognito = false, regularTabCount = 1)
 }
+
+/** Loads up a page that has a big clickable link that just navigates in the same tab. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesInNewTabs() {
+    val testUrl = WebpageServingRule.urlFor("big_link_element_target_blank.html")
+
+    // Load the test webpage up in the existing tab.
+    loadUrlInCurrentTab(testUrl)
+    waitForTitle("Page 1")
+
+    // Navigate a couple of times so that we can add entries into history.
+    tapOnBrowserView()
+    waitForUrl("$testUrl?page_index=2")
+    waitForTitle("Page 2")
+
+    tapOnBrowserView()
+    waitForUrl("$testUrl?page_index=3")
+    waitForTitle("Page 3")
+
+    activity.webLayerModel.currentBrowser.activeTabModel.apply {
+        // Can go back because hitting back will close the tab and send you back to the parent.
+        expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
+        expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+    }
+}
