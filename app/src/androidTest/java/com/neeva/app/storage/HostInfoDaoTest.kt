@@ -1,18 +1,17 @@
 package com.neeva.app.storage
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.storage.entities.HostInfo
+import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class HostInfoDaoTest : HistoryDatabaseBaseTest() {
     private lateinit var hostInfoRepository: HostInfoDao
 

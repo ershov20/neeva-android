@@ -28,7 +28,7 @@ android {
             useSupportLibrary true
         }
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.neeva.app.NeevaTestRunner"
 
         // Make the Android Test Orchestrator clear the app's state between test runs to avoid
         // having tests interfere with each other.

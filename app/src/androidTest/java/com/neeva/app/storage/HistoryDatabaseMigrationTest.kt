@@ -2,17 +2,17 @@ package com.neeva.app.storage
 
 import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.neeva.app.BaseHiltTest
 import com.neeva.app.storage.entities.SpaceEntityType
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-@RunWith(AndroidJUnit4::class)
-class HistoryDatabaseMigrationTest {
+@HiltAndroidTest
+class HistoryDatabaseMigrationTest : BaseHiltTest() {
     companion object {
         private const val TEST_DB_FILENAME = "migration-test"
     }

@@ -3,7 +3,6 @@ package com.neeva.app.browsing
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
@@ -17,12 +16,12 @@ import com.neeva.app.selectItemFromContextMenu
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForTabListState
 import com.neeva.app.waitForTitle
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 /** Tests long pressing on a link and opening new tabs via the context menu. */
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class LongPressChildTabBehaviorTest : BaseBrowserTest() {
     private val testUrl = WebpageServingRule.urlFor("big_link_element.html")
 

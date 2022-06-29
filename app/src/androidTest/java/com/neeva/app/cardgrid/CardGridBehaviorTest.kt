@@ -3,7 +3,6 @@ package com.neeva.app.cardgrid
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
@@ -15,11 +14,11 @@ import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNavDestination
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class CardGridBehaviorTest : BaseBrowserTest() {
     @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()
@@ -55,7 +54,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             .onNodeWithText(resources.getString(R.string.empty_regular_tabs_title))
             .assertExists()
 
-        // Open the settings page from the tab switcher.
+        // Open the settings.html page from the tab switcher.
         androidComposeRule.openOverflowMenuAndClickItem(R.string.settings)
         androidComposeRule.waitForNavDestination(AppNavDestination.SETTINGS)
 

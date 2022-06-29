@@ -68,12 +68,23 @@ class WebpageServingRule : TestRule {
                         try {
                             // Try to load the file up from the assets.
                             val assets = InstrumentationRegistry.getInstrumentation().context.assets
-                            val bytes = assets.open("html/$filename").buffered().use {
+                            val assetFiles = assets.list("html")
+
+                            val loadFilename = if (assetFiles?.any { it == filename } == true) {
+                                filename
+                            } else if (assetFiles?.any { it == "$filename.html" } == true) {
+                                Log.w(TAG, "Redirecting $filename -> $filename.html")
+                                "$filename.html"
+                            } else {
+                                throw FileNotFoundException()
+                            }
+
+                            val bytes = assets.open("html/$loadFilename").buffered().use {
                                 it.readBytes()
                             }
 
                             // Send the page if we found the file.
-                            val mimeType = URLConnection.guessContentTypeFromName(filename)
+                            val mimeType = URLConnection.guessContentTypeFromName(loadFilename)
                             val output =
                                 "HTTP/1.1 200 OK\r\n" +
                                     "Content-Type: ${mimeType}\r\n" +

@@ -2,10 +2,11 @@ package com.neeva.app.storage
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.neeva.app.BaseHiltTest
 import org.junit.After
 import org.junit.Before
 
-abstract class HistoryDatabaseBaseTest {
+abstract class HistoryDatabaseBaseTest : BaseHiltTest() {
     protected lateinit var database: HistoryDatabase
 
     @Before

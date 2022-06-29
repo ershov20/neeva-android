@@ -1,21 +1,22 @@
-package com.neeva.app
+package com.neeva.app.firstrun
 
 import android.content.ComponentName
 import android.content.Intent
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.neeva.app.BaseBrowserTest
+import com.neeva.app.NeevaActivity
+import com.neeva.app.NeevaConstants
 import com.neeva.app.appnav.AppNavDestination
-import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUserToken
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class FirstRunModelTest : BaseBrowserTest() {
     @Test
     fun skipFirstRunIfSharedPrefSet() {

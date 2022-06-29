@@ -3,8 +3,12 @@ package com.neeva.app
 import android.net.Uri
 import okhttp3.Cookie
 
-class NeevaConstants(val appHost: String = "neeva.com") {
-    val appURL: String = "https://$appHost/"
+open class NeevaConstants(
+    val appHost: String = "neeva.com",
+    val appURL: String = "https://$appHost/",
+    val cookieHost: String = appHost,
+    val cookieURL: String = "https://$cookieHost/"
+) {
     val appSearchURL: String = "${appURL}search"
     val appSpacesURL: String = "${appURL}spaces"
     val appConnectionsURL: String = "${appURL}connections"
@@ -18,7 +22,7 @@ class NeevaConstants(val appHost: String = "neeva.com") {
     val appTermsURL: String = "${appURL}terms"
 
     val appWelcomeToursURL: String = "$appURL#modal-hello"
-    val appHelpCenterURL: String = "https://help.$appHost/"
+    open val appHelpCenterURL: String = "https://help.$appHost/"
 
     val apolloURL: String = "${appURL}graphql"
     val createOktaAccountURL: String = "${appURL}login/create"
@@ -27,7 +31,7 @@ class NeevaConstants(val appHost: String = "neeva.com") {
      * Returns the URL that should be loaded when going to the home page (e.g. from Zero Query or
      * on the first app open).
      */
-    val homepageURL: String
+    open val homepageURL: String
         get() {
             return if (NeevaBrowser.isBeingInstrumented()) {
                 // Stop the app from actively loading the real homepage to reduce flakiness.
@@ -46,14 +50,15 @@ class NeevaConstants(val appHost: String = "neeva.com") {
     val browserTypeCookie = Cookie.Builder()
         .name("BrowserType")
         .secure()
-        .domain(appHost)
+        .domain(cookieHost)
         .expiresAt(Long.MAX_VALUE)
         .value("neeva-android")
         .build()
+
     val browserVersionCookie = Cookie.Builder()
         .name("BrowserVersion")
         .secure()
-        .domain(appHost)
+        .domain(cookieHost)
         .expiresAt(Long.MAX_VALUE)
         .value(BuildConfig.VERSION_NAME)
         .build()

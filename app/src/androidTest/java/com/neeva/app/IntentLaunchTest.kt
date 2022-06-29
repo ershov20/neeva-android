@@ -7,17 +7,16 @@ import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.ActivityTestRule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.cardgrid.SelectedScreen
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 @SuppressWarnings("deprecation")
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class IntentLaunchTest : BaseBrowserTest() {
     // We need to use a deprecated class because we're manually firing different Intents to start
     // our Activity, which ActivityScenarioRule doesn't seem to support (it ends up fully killing

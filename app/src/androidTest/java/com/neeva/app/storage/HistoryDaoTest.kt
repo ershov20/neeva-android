@@ -1,19 +1,18 @@
 package com.neeva.app.storage
 
 import android.net.Uri
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.storage.daos.HistoryDao
 import com.neeva.app.storage.entities.Visit
+import dagger.hilt.android.testing.HiltAndroidTest
 import java.util.Date
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class HistoryDaoTest : HistoryDatabaseBaseTest() {
     private lateinit var sitesRepository: HistoryDao
 

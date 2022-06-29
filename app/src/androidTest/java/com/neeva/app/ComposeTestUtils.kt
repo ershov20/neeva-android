@@ -11,6 +11,8 @@ import androidx.annotation.StringRes
 import androidx.compose.ui.input.key.NativeKeyEvent
 import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -171,6 +173,13 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.sendAppToBackground(
     }
 }
 
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnUrlBar() {
+    clickOnNodeWithTag("LocationLabel")
+    waitForNodeWithTag("AutocompleteTextField").assertIsDisplayed()
+    waitForNodeWithContentDescription(getString(com.neeva.app.R.string.url_bar_placeholder))
+        .assertTextEquals(getString(com.neeva.app.R.string.url_bar_placeholder))
+}
+
 /**
  * Navigates the user to a new website on the current tab.
  *
@@ -181,7 +190,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.loadUrlInCurrentTab(
         .isEqualTo(AppNavDestination.BROWSER.route)
 
     // Click on the URL bar and then type in the provided URL.
-    clickOnNodeWithTag("LocationLabel")
+    clickOnUrlBar()
     navigateViaUrlBar(url)
 }
 
@@ -199,15 +208,38 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: Str
     navigateViaUrlBar(url)
 }
 
-/** Enters text into the URL bar and hits enter, assuming it is already visible. */
+/** Clears text from the URL bar, assuming it is already visible and has text in it. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clearUrlBar() {
+    clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.clear))
+    waitFor {
+        it.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.userTypedInput.isEmpty()
+    }
+    waitForAssertion {
+        onNodeWithTag("AutocompleteTextField")
+            .assertTextEquals(getString(com.neeva.app.R.string.url_bar_placeholder))
+    }
+}
+
+/** Enters text into the URL bar, assuming it is already visible. */
 fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(text: String) {
-    waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder))
-        .performTextInput(text)
+    waitForNodeWithTag("AutocompleteTextField").performTextInput(text)
+
+    // Wait for the UrlBarModel to acknowledge that the text has made it through.
+    waitFor {
+        it.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.userTypedInput == text
+    }
 }
 
 /** Enters text into the URL bar and hits enter, assuming it is already visible. */
 fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.navigateViaUrlBar(url: String) {
     typeIntoUrlBar(url)
+
+    waitFor {
+        val actualUrl =
+            it.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.uriToLoad.toString()
+        if (actualUrl != url) Log.w(TAG, "Not matching yet: $actualUrl != $url")
+        actualUrl == url
+    }
 
     waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder))
         .performKeyPress(
@@ -410,6 +442,8 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithTag(t
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithContentDescription(
     description: String
 ): SemanticsNodeInteraction {
+    waitForIdle()
+
     waitUntil(WAIT_TIMEOUT) {
         onAllNodesWithContentDescription(description)
             .fetchSemanticsNodes()
@@ -423,6 +457,8 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithConte
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithTag(
     tag: String
 ): SemanticsNodeInteraction {
+    waitForIdle()
+
     waitUntil(WAIT_TIMEOUT) {
         onAllNodesWithTag(tag)
             .fetchSemanticsNodes()
@@ -436,6 +472,8 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithTag(
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithText(
     text: String
 ): SemanticsNodeInteraction {
+    waitForIdle()
+
     waitUntil(WAIT_TIMEOUT) {
         onAllNodesWithText(text)
             .fetchSemanticsNodes()

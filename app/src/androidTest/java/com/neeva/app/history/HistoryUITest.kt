@@ -15,24 +15,23 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
+import com.neeva.app.TestNeevaConstantsModule
 import com.neeva.app.WebpageServingRule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.clickOnNodeWithContentDescription
-import com.neeva.app.clickOnNodeWithTag
 import com.neeva.app.clickOnNodeWithText
+import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectTabListState
 import com.neeva.app.getString
-import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.onBackPressed
 import com.neeva.app.openCardGrid
 import com.neeva.app.openOverflowMenuAndClickItem
-import com.neeva.app.tapOnBrowserView
 import com.neeva.app.typeIntoUrlBar
+import com.neeva.app.visitMultipleSitesInSameTab
 import com.neeva.app.waitFor
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForAssertion
@@ -41,15 +40,14 @@ import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isFalse
-import strikt.assertions.isTrue
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class HistoryUITest : BaseBrowserTest() {
     private val testUrl = WebpageServingRule.urlFor("big_link_element.html")
 
@@ -58,33 +56,6 @@ class HistoryUITest : BaseBrowserTest() {
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
-
-    private fun visitMultipleSites() {
-        androidComposeRule.apply {
-            // Load the test webpage up in the existing tab.
-            loadUrlInCurrentTab(testUrl)
-            waitForTitle("Page 1")
-
-            // Navigate a couple of times so that we can add entries into history.
-            tapOnBrowserView()
-            waitForUrl("$testUrl?page_index=2")
-            waitForTitle("Page 2")
-
-            tapOnBrowserView()
-            waitForUrl("$testUrl?page_index=3")
-            waitForTitle("Page 3")
-
-            tapOnBrowserView()
-            waitForUrl("$testUrl?page_index=4")
-            waitForTitle("Page 4")
-
-            activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
-                expectThat(navigationInfoFlow.value.canGoForward).isFalse()
-            }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
-        }
-    }
 
     @Before
     override fun setUp() {
@@ -99,14 +70,13 @@ class HistoryUITest : BaseBrowserTest() {
     @Test
     fun deleteItemFromHistory() {
         androidComposeRule.apply {
-            visitMultipleSites()
+            visitMultipleSitesInSameTab()
 
             // Open up history.
             openOverflowMenuAndClickItem(R.string.history)
             val page1Node = waitForNodeWithText("Page 1").assertIsDisplayed()
             val page2Node = waitForNodeWithText("Page 2").assertIsDisplayed()
             val page3Node = waitForNodeWithText("Page 3").assertIsDisplayed()
-            val page4Node = waitForNodeWithText("Page 4").assertIsDisplayed()
 
             // Delete some items from history.
             clickOnNodeWithContentDescription(
@@ -117,7 +87,6 @@ class HistoryUITest : BaseBrowserTest() {
             )
 
             page2Node.assertIsDisplayed()
-            page4Node.assertIsDisplayed()
             waitForNodeToDisappear(page1Node)
             waitForNodeToDisappear(page3Node)
         }
@@ -151,14 +120,13 @@ class HistoryUITest : BaseBrowserTest() {
     @Test
     fun visitUrlFromHistory() {
         androidComposeRule.apply {
-            visitMultipleSites()
+            visitMultipleSitesInSameTab()
 
             // Open up history.
             openOverflowMenuAndClickItem(R.string.history)
             waitForNodeWithText("Page 1").assertIsDisplayed()
             waitForNodeWithText("Page 2").assertIsDisplayed()
             waitForNodeWithText("Page 3").assertIsDisplayed()
-            waitForNodeWithText("Page 4").assertIsDisplayed()
 
             // Click on one of the items in history.  It should create a new tab for that URL.
             waitForNodeWithText("Page 1").performClick()
@@ -186,7 +154,7 @@ class HistoryUITest : BaseBrowserTest() {
 
             waitForAssertion {
                 onAllNodesWithTag("TabCard", useUnmergedTree = true)
-                    .filter(hasAnyDescendant(hasText("Page 4")))
+                    .filter(hasAnyDescendant(hasText("Page 3")))
                     .assertCountEquals(1)
                     .onFirst()
                     .assertIsDisplayed()
@@ -197,14 +165,13 @@ class HistoryUITest : BaseBrowserTest() {
     @Test
     fun clearAllHistory() {
         androidComposeRule.apply {
-            visitMultipleSites()
+            visitMultipleSitesInSameTab()
 
             // Open up history.
             openOverflowMenuAndClickItem(R.string.history)
             waitForNodeWithText("Page 1").assertIsDisplayed()
             waitForNodeWithText("Page 2").assertIsDisplayed()
             waitForNodeWithText("Page 3").assertIsDisplayed()
-            waitForNodeWithText("Page 4").assertIsDisplayed()
 
             // Clear the user's history.
             clickOnNodeWithText(getString(R.string.settings_clear_browsing_data))
@@ -219,7 +186,6 @@ class HistoryUITest : BaseBrowserTest() {
             waitForAssertion { onNodeWithText("Page 1").assertDoesNotExist() }
             waitForAssertion { onNodeWithText("Page 2").assertDoesNotExist() }
             waitForAssertion { onNodeWithText("Page 3").assertDoesNotExist() }
-            waitForAssertion { onNodeWithText("Page 4").assertDoesNotExist() }
 
             // Go back to the browser.
             onBackPressed()
@@ -230,13 +196,13 @@ class HistoryUITest : BaseBrowserTest() {
     @Test
     fun clearAllHistoryRemovesSuggestions() {
         androidComposeRule.apply {
-            visitMultipleSites()
+            visitMultipleSitesInSameTab()
 
             // Confirm that all the visited sites show up as suggestions when we type into the URL
             // bar.  Because the keyboard is visible, and because SuggestionPane is a LazyColumn, we
             // can't assert that all the nodes are in the Composition and resort to just checking
             // for a few.
-            clickOnNodeWithTag("LocationLabel")
+            clickOnUrlBar()
             typeIntoUrlBar("Page")
             val suggestionListNode = waitForNodeWithTag("SuggestionList").assertIsDisplayed()
             waitForNodeWithText(getString(R.string.history)).assertIsDisplayed()
@@ -264,11 +230,30 @@ class HistoryUITest : BaseBrowserTest() {
 
             // Because history is cleared, there are no suggestions to show the user and they should
             // be stuck on the Zero Query page.
-            clickOnNodeWithTag("LocationLabel")
+            clickOnUrlBar()
             typeIntoUrlBar("Page")
             onNodeWithTag("SuggestionList").assertDoesNotExist()
             onNodeWithText(getString(R.string.history)).assertDoesNotExist()
             waitForNodeWithText(getString(R.string.suggested_sites)).assertIsDisplayed()
+        }
+    }
+
+    @Test
+    fun manageNeevaMemory() {
+        androidComposeRule.apply {
+            // Open up the history UI.
+            openOverflowMenuAndClickItem(R.string.history)
+            waitForNavDestination(AppNavDestination.HISTORY)
+
+            // Open the Clear Browsing Data screen.
+            clickOnNodeWithText(getString(R.string.settings_clear_browsing_data))
+            waitForNavDestination(AppNavDestination.CLEAR_BROWSING_SETTINGS)
+
+            // Click on "Manage Neeva Memory".  It should open a new tab to load the Neeva URL.
+            clickOnNodeWithText(getString(R.string.settings_manage_neeva_memory))
+            waitForNavDestination(AppNavDestination.BROWSER)
+            waitForUrl(TestNeevaConstantsModule.neevaConstants.appManageMemory)
+            expectTabListState(isIncognito = false, regularTabCount = 2)
         }
     }
 }

@@ -3,7 +3,6 @@ package com.neeva.app.browsing
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.SkipFirstRunRule
@@ -13,11 +12,11 @@ import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForTabListState
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class LongPressLinkTest : BaseBrowserTest() {
     @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()

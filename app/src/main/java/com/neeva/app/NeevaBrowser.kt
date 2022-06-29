@@ -5,7 +5,7 @@ import android.os.StrictMode
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class NeevaBrowser : Application() {
+open class NeevaBrowser : Application() {
     override fun onCreate() {
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(

@@ -1,7 +1,6 @@
 package com.neeva.app.storage
 
 import android.net.Uri
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.storage.daos.SpaceDao
 import com.neeva.app.storage.entities.Space
@@ -9,9 +8,9 @@ import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.storage.entities.spaceItem
 import com.neeva.app.type.SpaceACLLevel
+import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.hasSize
@@ -19,7 +18,7 @@ import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class SpaceDaoTest : HistoryDatabaseBaseTest() {
     private lateinit var spacesRepository: SpaceDao
 

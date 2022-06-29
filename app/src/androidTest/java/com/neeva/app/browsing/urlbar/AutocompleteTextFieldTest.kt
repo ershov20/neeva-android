@@ -10,14 +10,17 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.test.platform.app.InstrumentationRegistry
+import com.neeva.app.BaseHiltTest
 import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isTrue
 
-class AutocompleteTextFieldTest {
+@HiltAndroidTest
+class AutocompleteTextFieldTest : BaseHiltTest() {
     @get:Rule
     val composeTestRule = createComposeRule()
 

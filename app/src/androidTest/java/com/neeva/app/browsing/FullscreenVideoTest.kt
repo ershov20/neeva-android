@@ -5,7 +5,6 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.SkipFirstRunRule
@@ -18,14 +17,14 @@ import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForAssertion
 import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class FullscreenVideoTest : BaseBrowserTest() {
     @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()

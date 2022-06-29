@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css" />
+        <title>Settings page</title>
+    </head>
+
+    <body>
+        <div id="container">
+            <p id="location">Settings: </p>
+
+            <script type="text/javascript">
+                document.querySelector("p#location").innerText += window.location.hash
+            </script>
+        </div>
+    </body>
+</html>

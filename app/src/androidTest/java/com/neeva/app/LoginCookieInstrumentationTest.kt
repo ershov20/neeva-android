@@ -1,34 +1,32 @@
 package com.neeva.app
+
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNullOrEmpty
 
-@OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
-class LoginCookieInstrumentationTest {
+@HiltAndroidTest
+class LoginCookieInstrumentationTest : BaseHiltTest() {
     private lateinit var neevaConstants: NeevaConstants
     private lateinit var neevaUserToken: NeevaUserToken
     private lateinit var neevaUser: NeevaUser
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
 
     private fun setUpLoggedInUser(context: Context) {
-        neevaConstants = NeevaConstants()
+        neevaConstants = TestNeevaConstantsModule.neevaConstants
         sharedPreferencesModel = SharedPreferencesModel(context)
         neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
         neevaUserToken.setToken("myToken")
@@ -65,10 +63,8 @@ class LoginCookieInstrumentationTest {
             activity.webLayerModel.currentBrowser
                 .getCookiePairs(Uri.parse(neevaConstants.appURL)) {
                     expectThat(
-                        it.find {
-                            cookiePair ->
-                            cookiePair.key == neevaConstants.loginCookie
-                        }?.value
+                        it.find { cookiePair -> cookiePair.key == neevaConstants.loginCookie }
+                            ?.value
                     ).isEqualTo("myToken")
                 }
             expectThat(activity.neevaUser.neevaUserToken.getToken()).isEqualTo("myToken")

@@ -14,6 +14,8 @@ import org.junit.rules.TestRule
 import strikt.api.expectThat
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
+import strikt.assertions.isTrue
 
 /**
  * Perform a long press on the center of the Browser.
@@ -96,4 +98,28 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForUrl(url: Stri
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForTitle(title: String) {
     waitForIdle()
     waitFor { it.webLayerModel.currentBrowser.activeTabModel.titleFlow.value == title }
+}
+
+/** Loads up a page that has a big clickable link that just navigates in the same tab. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesInSameTab() {
+    val testUrl = WebpageServingRule.urlFor("big_link_element.html")
+
+    // Load the test webpage up in the existing tab.
+    loadUrlInCurrentTab(testUrl)
+    waitForTitle("Page 1")
+
+    // Navigate a couple of times so that we can add entries into history.
+    tapOnBrowserView()
+    waitForUrl("$testUrl?page_index=2")
+    waitForTitle("Page 2")
+
+    tapOnBrowserView()
+    waitForUrl("$testUrl?page_index=3")
+    waitForTitle("Page 3")
+
+    activity.webLayerModel.currentBrowser.activeTabModel.apply {
+        expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
+        expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+    }
+    expectTabListState(isIncognito = false, regularTabCount = 1)
 }

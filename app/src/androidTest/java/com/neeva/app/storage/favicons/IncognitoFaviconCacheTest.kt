@@ -4,26 +4,26 @@ import android.content.Context
 import android.graphics.Color
 import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.neeva.app.BaseHiltTest
 import com.neeva.app.Dispatchers
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.storage.toByteArray
 import com.neeva.app.storage.toLetterBitmap
+import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
-class IncognitoFaviconCacheTest {
+@HiltAndroidTest
+class IncognitoFaviconCacheTest : BaseHiltTest() {
     private lateinit var context: Context
     private lateinit var domainProvider: DomainProvider
     private lateinit var dispatchers: Dispatchers

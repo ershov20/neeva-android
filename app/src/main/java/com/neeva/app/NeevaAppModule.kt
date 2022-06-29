@@ -31,6 +31,32 @@ import kotlinx.coroutines.CoroutineScope
 
 @Module
 @InstallIn(SingletonComponent::class)
+object NeevaConstantsModule {
+    @Provides
+    @Singleton
+    fun providesNeevaConstants(settingsDataModel: SettingsDataModel): NeevaConstants {
+        // This is done during initialization so that the app consistently hits the same server
+        // during the app's lifetime.  To use a different host, you will need to restart the app.
+        val appHost = when {
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_M1_APP_HOST) -> {
+                "m1.neeva.com"
+            }
+
+            settingsDataModel
+                .getSettingsToggleValue(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST) -> {
+                "local.neeva.dev"
+            }
+
+            else -> {
+                "neeva.com"
+            }
+        }
+        return NeevaConstants(appHost = appHost)
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
 object NeevaAppModule {
     @Provides
     @Singleton
@@ -175,28 +201,6 @@ object NeevaAppModule {
     @Singleton
     fun providesSharedPreferences(@ApplicationContext context: Context): SharedPreferencesModel {
         return SharedPreferencesModel(context)
-    }
-
-    @Provides
-    @Singleton
-    fun providesNeevaConstants(settingsDataModel: SettingsDataModel): NeevaConstants {
-        // This is done during initialization so that the app consistently hits the same server
-        // during the app's lifetime.  To use a different host, you will need to restart the app.
-        val appHost = when {
-            settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_M1_APP_HOST) -> {
-                "m1.neeva.com"
-            }
-
-            settingsDataModel
-                .getSettingsToggleValue(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST) -> {
-                "local.neeva.dev"
-            }
-
-            else -> {
-                "neeva.com"
-            }
-        }
-        return NeevaConstants(appHost = appHost)
     }
 
     @Provides

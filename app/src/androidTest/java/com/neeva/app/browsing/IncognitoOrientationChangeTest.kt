@@ -3,7 +3,6 @@ package com.neeva.app.browsing
 import android.content.pm.ActivityInfo
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
@@ -12,11 +11,11 @@ import com.neeva.app.getString
 import com.neeva.app.openCardGrid
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeWithText
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class IncognitoOrientationChangeTest : BaseBrowserTest() {
     @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()

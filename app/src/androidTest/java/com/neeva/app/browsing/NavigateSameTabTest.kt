@@ -3,16 +3,15 @@ package com.neeva.app.browsing
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.WebpageServingRule
-import com.neeva.app.clickOnNodeWithTag
+import com.neeva.app.clearUrlBar
 import com.neeva.app.clickOnNodeWithText
+import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectTabListState
 import com.neeva.app.getString
 import com.neeva.app.loadUrlInCurrentTab
@@ -23,14 +22,14 @@ import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeWithContentDescription
 import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class NavigateSameTabTest : BaseBrowserTest() {
     @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()
@@ -145,9 +144,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
 
             // Click on the URL bar to bring up the search bar.  It should be showing the
             // placeholder text.
-            clickOnNodeWithTag("LocationLabel")
-            waitForNodeWithContentDescription(getString(R.string.url_bar_placeholder))
-                .assertTextEquals(getString(R.string.url_bar_placeholder))
+            clickOnUrlBar()
             onNodeWithContentDescription(getString(R.string.clear)).assertDoesNotExist()
 
             // Clicking to edit the URL should copy in the current URL.
@@ -157,7 +154,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
 
             // Clear the URL and type in a different one.
             val newUrl = WebpageServingRule.urlFor("audio.html")
-            onNodeWithContentDescription(getString(R.string.clear)).performClick()
+            clearUrlBar()
             navigateViaUrlBar(newUrl)
             waitForTitle("Audio controls test")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {

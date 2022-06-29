@@ -1,13 +1,12 @@
 package com.neeva.app.storage
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.storage.daos.VisitDao
 import com.neeva.app.storage.entities.Visit
+import dagger.hilt.android.testing.HiltAndroidTest
 import java.util.Date
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.contains
 import strikt.assertions.doesNotContain
@@ -15,7 +14,7 @@ import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class VisitDaoTest : HistoryDatabaseBaseTest() {
     private lateinit var visitDao: VisitDao
 

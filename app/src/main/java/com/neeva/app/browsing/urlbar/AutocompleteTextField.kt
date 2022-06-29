@@ -39,6 +39,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
@@ -161,7 +162,10 @@ fun AutocompleteTextField(
                         }
                     }
                     .fillMaxWidth()
-                    .semantics { contentDescription = placeholderText },
+                    .semantics {
+                        contentDescription = placeholderText
+                        testTag = "AutocompleteTextField"
+                    },
                 singleLine = true,
                 visualTransformation = visualTransformation,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(

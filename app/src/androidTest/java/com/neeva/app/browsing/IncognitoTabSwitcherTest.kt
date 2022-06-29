@@ -4,7 +4,6 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
@@ -14,12 +13,12 @@ import com.neeva.app.createNeevaActivityAndroidComposeTestRule
 import com.neeva.app.openCardGrid
 import com.neeva.app.openLazyTab
 import com.neeva.app.waitForActivityStartup
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 @SuppressWarnings("deprecation")
-@RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class IncognitoTabSwitcherTest : BaseBrowserTest() {
     @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()

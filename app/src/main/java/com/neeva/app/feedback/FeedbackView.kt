@@ -39,7 +39,6 @@ import com.neeva.app.ui.theme.Dimensions
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FeedbackView(currentURLFlow: StateFlow<Uri>) {
     val feedbackViewModel = LocalFeedbackViewModel.current

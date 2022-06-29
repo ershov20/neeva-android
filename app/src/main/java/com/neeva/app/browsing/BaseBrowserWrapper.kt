@@ -516,12 +516,12 @@ abstract class BaseBrowserWrapper internal constructor(
 
         // Let Neeva know that it's serving an Android client.
         browser.profile.cookieManager.setCookie(
-            Uri.parse(neevaConstants.appURL),
+            Uri.parse(neevaConstants.cookieURL),
             neevaConstants.browserTypeCookie.toString(),
             null
         )
         browser.profile.cookieManager.setCookie(
-            Uri.parse(neevaConstants.appURL),
+            Uri.parse(neevaConstants.cookieURL),
             neevaConstants.browserVersionCookie.toString(),
             null
         )
