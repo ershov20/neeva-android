@@ -90,7 +90,7 @@ fun NavGraphBuilder.signInFlowNavGraph() {
             val signInFlowNavModel = rememberSignInFlowNavModel()
             SignUpLandingContainer(
                 launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
-                openInCustomTabs = firstRunModel.openInCustomTabs(LocalContext.current),
+                onOpenUrl = firstRunModel.openInCustomTabs(LocalContext.current),
                 onClose = firstRunModel.getOnCloseOnboarding(signInFlowNavModel::exitSignInFlow),
                 navigateToSignIn = signInFlowNavModel::navigateToSignIn,
                 showSignUpWithOther = signInFlowNavModel::navigateToSignUpWithOther

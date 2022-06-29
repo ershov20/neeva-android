@@ -28,7 +28,7 @@ import com.neeva.app.userdata.NeevaUser
 @Composable
 fun SignUpLandingContainer(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    openInCustomTabs: (Uri) -> Unit,
+    onOpenUrl: (Uri) -> Unit,
     onClose: () -> Unit,
     navigateToSignIn: () -> Unit,
     showSignUpWithOther: () -> Unit
@@ -37,7 +37,7 @@ fun SignUpLandingContainer(
 
     SignUpLandingContainer(
         launchLoginIntent = launchLoginIntent,
-        openInCustomTabs = openInCustomTabs,
+        onOpenUrl = onOpenUrl,
         onClose = onClose,
         navigateToSignIn = navigateToSignIn,
         showSignUpWithOther = showSignUpWithOther,
@@ -48,7 +48,7 @@ fun SignUpLandingContainer(
 @Composable
 fun SignUpLandingContainer(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    openInCustomTabs: (Uri) -> Unit,
+    onOpenUrl: (Uri) -> Unit,
     onClose: () -> Unit,
     navigateToSignIn: () -> Unit,
     showSignUpWithOther: () -> Unit,
@@ -60,7 +60,7 @@ fun SignUpLandingContainer(
     ) { modifier ->
         SignUpLandingScreen(
             launchLoginIntent = launchLoginIntent,
-            openInCustomTabs = openInCustomTabs,
+            onOpenUrl = onOpenUrl,
             showSignUpWithOther = showSignUpWithOther,
             neevaConstants = neevaConstants,
             modifier = modifier
@@ -71,7 +71,7 @@ fun SignUpLandingContainer(
 @Composable
 fun SignUpLandingScreen(
     launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    openInCustomTabs: (Uri) -> Unit,
+    onOpenUrl: (Uri) -> Unit,
     showSignUpWithOther: () -> Unit,
     neevaConstants: NeevaConstants,
     primaryLabelString: String = stringResource(id = R.string.first_run_intro),
@@ -107,7 +107,7 @@ fun SignUpLandingScreen(
         Spacer(modifier = Modifier.height(38.dp))
 
         AcknowledgementText(
-            openInCustomTabs = openInCustomTabs,
+            onOpenURL = onOpenUrl,
             appTermsURL = neevaConstants.appTermsURL,
             appPrivacyURL = neevaConstants.appPrivacyURL
         )
@@ -123,7 +123,7 @@ fun SignUpLanding_Light_Preview() {
     NeevaTheme {
         SignUpLandingContainer(
             launchLoginIntent = {},
-            openInCustomTabs = {},
+            onOpenUrl = {},
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
@@ -139,7 +139,7 @@ fun SignUpLanding_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         SignUpLandingContainer(
             launchLoginIntent = {},
-            openInCustomTabs = {},
+            onOpenUrl = {},
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
@@ -155,7 +155,7 @@ fun SignUpLanding_Landscape_Preview() {
     NeevaTheme {
         SignUpLandingContainer(
             launchLoginIntent = {},
-            openInCustomTabs = {},
+            onOpenUrl = {},
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},
@@ -171,7 +171,7 @@ fun SignUpLanding_Dark_Landscape_Preview() {
     NeevaTheme(useDarkTheme = true) {
         SignUpLandingContainer(
             launchLoginIntent = {},
-            openInCustomTabs = {},
+            onOpenUrl = {},
             onClose = {},
             navigateToSignIn = {},
             showSignUpWithOther = {},

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -132,7 +131,7 @@ fun BrowserToolbar(
                     AnimatedVisibility(visible = !isEditing) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (browserToolbarModel.useSingleBrowserToolbar) {
-                                BackButton(contentColorFor(MaterialTheme.colorScheme.background))
+                                BackButton()
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                                 ShareButton()
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
@@ -212,7 +211,6 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
                 )
             )
         ) {
-
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 enableShowDesktopSite = true,
@@ -227,13 +225,6 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
 @Composable
 fun ToolbarPreview_Blank_Portrait() {
     ToolbarPreview_Blank(false)
-}
-
-@Preview("Pixel 2 landscape, 1x scale", widthDp = 731, heightDp = 390, locale = "en")
-@Preview("Pixel 2 landscape, 1x scale", widthDp = 731, heightDp = 390, locale = "he")
-@Composable
-fun ToolbarPreview_Blank_SingleToolbar() {
-    ToolbarPreview_Blank(true)
 }
 
 @Composable

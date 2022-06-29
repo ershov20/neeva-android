@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import androidx.compose.ui.tooling.preview.Preview
 
 /** Creates a bitmap that looks like a checkerboard. */
 fun createSingleColorBitmap(isPortrait: Boolean, color: Int): Bitmap {
@@ -61,3 +62,13 @@ val previewCardGridTitles by lazy {
         "Drink more Ovaltine"
     )
 }
+
+@Preview(locale = "en")
+@Preview(locale = "en", fontScale = 2.0f)
+@Preview(locale = "he")
+annotation class PortraitPreviews
+
+@Preview(widthDp = 731, heightDp = 390, locale = "en")
+@Preview(widthDp = 731, heightDp = 390, locale = "en", fontScale = 2.0f)
+@Preview(widthDp = 731, heightDp = 390, locale = "he")
+annotation class LandscapePreviews

@@ -18,10 +18,6 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-        // Make the Android Test Orchestrator clear the app's state between test runs to avoid
-        // having tests interfere with each other.
-        testInstrumentationRunnerArguments clearPackageData: 'true'
-
         testOptions {
             // If using the orchestrator, you MUST include the androidTestUtil line that
             // declares it as a dependency.

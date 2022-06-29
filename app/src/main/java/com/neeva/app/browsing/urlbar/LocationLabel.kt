@@ -71,7 +71,7 @@ fun LocationLabel(
         mode = displayInfo.mode,
         displayedText = displayInfo.displayedText,
         placeholderColor = placeholderColor,
-        modifier = modifier
+        modifier = modifier.semantics { testTag = "LocationLabel" }
     )
 }
 
@@ -86,8 +86,7 @@ fun LocationLabelContent(
     Row(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = Dimensions.PADDING_MEDIUM)
-            .semantics { testTag = "LocationLabel" },
+            .padding(horizontal = Dimensions.PADDING_MEDIUM),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {

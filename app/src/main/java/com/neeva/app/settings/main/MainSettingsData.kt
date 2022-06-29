@@ -52,11 +52,6 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    settingsToggle = SettingsToggle.BLOCK_POP_UP_WINDOWS,
-                    enabled = false
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE,
                 )
             )

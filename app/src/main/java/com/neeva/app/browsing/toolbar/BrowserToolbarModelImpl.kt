@@ -55,12 +55,12 @@ class BrowserToolbarModelImpl(
     override val cookieCutterModel get() = browserWrapper.cookieCutterModel
 }
 
-/** Empty [BrowserToolbarModel] that doesn't do anything. */
+/** Empty [BrowserToolbarModel] that just provides state data. */
 internal class PreviewBrowserToolbarModel(
+    override val isIncognito: Boolean,
     navigationInfo: ActiveTabModel.NavigationInfo = ActiveTabModel.NavigationInfo(),
     spaceStoreHasUrl: Boolean = false,
     override val useSingleBrowserToolbar: Boolean = false,
-    override val isIncognito: Boolean = false,
     override val isUpdateAvailable: Boolean = false,
     val urlBarModelStateValue: URLBarModelState = URLBarModelState(),
     val tabProgressValue: Int = 100,

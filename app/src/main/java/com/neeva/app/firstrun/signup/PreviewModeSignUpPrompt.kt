@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
 import com.neeva.app.firstrun.LocalFirstRunModel
@@ -17,6 +18,7 @@ fun PreviewModeSignUpPrompt(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val appNavModel = LocalAppNavModel.current
     val firstRunModel = LocalFirstRunModel.current
     val signInFlowNavModel = rememberSignInFlowNavModel()
     val neevaConstants = LocalEnvironment.current.neevaConstants
@@ -26,7 +28,10 @@ fun PreviewModeSignUpPrompt(
             firstRunModel.getLaunchLoginIntent(context).invoke(it)
             onDismiss()
         },
-        openInCustomTabs = firstRunModel.openInCustomTabs(context),
+        onOpenUrl = {
+            appNavModel.openUrl(it)
+            onDismiss()
+        },
         showSignUpWithOther = {
             signInFlowNavModel.navigateToSignUpWithOther()
             onDismiss()

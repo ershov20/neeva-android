@@ -195,4 +195,4 @@ fun mapComposeColorToResource(color: Color): Int = when (color) {
 }
 
 /** Determines the alpha value to use when rendering controls that can be disabled. */
-fun getClickableAlpha(isEnabled: Boolean): Float = if (isEnabled) 1.0f else 0.25f
+fun getClickableAlpha(isEnabled: Boolean): Float = if (isEnabled) 1.0f else 0.38f

@@ -41,6 +41,7 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
+            waitForTitle("Page 1")
             expectTabListState(isIncognito = false, regularTabCount = 1)
 
             // Open the link in a new child tab via the context menu.  The test website is just a link
@@ -66,6 +67,7 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
+            waitForTitle("Page 1")
             expectTabListState(isIncognito = false, regularTabCount = 1)
 
             // Open the link in a new child tab via the context menu.  The test website is just a link
@@ -101,6 +103,7 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
         androidComposeRule.apply {
             waitForActivityStartup()
             loadUrlInCurrentTab(testUrl)
+            waitForTitle("Page 1")
 
             // Open the link in a new child tab via the context menu.  The test website is just a link
             // that spans the entire page.

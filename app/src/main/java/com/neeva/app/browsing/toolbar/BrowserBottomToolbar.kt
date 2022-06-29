@@ -7,20 +7,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 
 /** Contains all the controls available to the user in the bottom toolbar. */
 @Composable
@@ -60,7 +59,6 @@ fun BrowserBottomToolbar(
             modifier = Modifier.fillMaxSize()
         ) {
             BackButton(
-                color = contentColorFor(backgroundColor),
                 modifier = Modifier.weight(1.0f)
             )
 
@@ -79,19 +77,19 @@ fun BrowserBottomToolbar(
     }
 }
 
-@Preview("Default, LTR", locale = "en")
-@Preview("Default, RTL", locale = "he")
+@PortraitPreviews
 @Composable
 fun BottomToolbarPreview_Regular() {
     OneBooleanPreviewContainer { isIncognito ->
-        CompositionLocalProvider(LocalBrowserToolbarModel provides PreviewBrowserToolbarModel()) {
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(isIncognito = isIncognito)
+        ) {
             BrowserBottomToolbar(isIncognito = isIncognito)
         }
     }
 }
 
-@Preview("Can go backward, LTR", locale = "en")
-@Preview("Can go backward, RTL", locale = "he")
+@PortraitPreviews
 @Composable
 fun BottomToolbarPreview_CanGoBackward() {
     OneBooleanPreviewContainer { isIncognito ->
@@ -100,7 +98,8 @@ fun BottomToolbarPreview_CanGoBackward() {
                 navigationInfo = ActiveTabModel.NavigationInfo(
                     canGoBackward = true
                 ),
-                spaceStoreHasUrl = false
+                spaceStoreHasUrl = false,
+                isIncognito = isIncognito
             )
         ) {
             BrowserBottomToolbar(isIncognito = isIncognito)
@@ -108,17 +107,15 @@ fun BottomToolbarPreview_CanGoBackward() {
     }
 }
 
-@Preview("Space store has URL, LTR", locale = "en")
-@Preview("Space store has URL, RTL", locale = "he")
+@PortraitPreviews
 @Composable
 fun BottomToolbarPreview_SpaceStoreHasUrl() {
     OneBooleanPreviewContainer { isIncognito ->
         CompositionLocalProvider(
             LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
-                navigationInfo = ActiveTabModel.NavigationInfo(
-                    canGoBackward = false
-                ),
-                spaceStoreHasUrl = true
+                navigationInfo = ActiveTabModel.NavigationInfo(canGoBackward = false),
+                spaceStoreHasUrl = true,
+                isIncognito = isIncognito
             )
         ) {
             BrowserBottomToolbar(isIncognito = isIncognito)

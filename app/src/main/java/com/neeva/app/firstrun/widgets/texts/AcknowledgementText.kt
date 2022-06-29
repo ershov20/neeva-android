@@ -20,7 +20,7 @@ import com.neeva.app.ui.widgets.AnnotatedSpannable
 fun AcknowledgementText(
     appTermsURL: String,
     appPrivacyURL: String,
-    openInCustomTabs: (Uri) -> Unit
+    onOpenURL: (Uri) -> Unit
 ) {
     AnnotatedSpannable(
         rawHtml = stringResource(R.string.acknowledge_agreement, appTermsURL, appPrivacyURL),
@@ -37,7 +37,7 @@ fun AcknowledgementText(
             start = offset,
             end = offset
         ).firstOrNull()?.let {
-            openInCustomTabs(Uri.parse(it.item))
+            onOpenURL(Uri.parse(it.item))
             return@AnnotatedSpannable
         }
 
@@ -46,7 +46,7 @@ fun AcknowledgementText(
             start = offset,
             end = offset
         ).firstOrNull()?.let {
-            openInCustomTabs(Uri.parse(it.item))
+            onOpenURL(Uri.parse(it.item))
             return@AnnotatedSpannable
         }
     }
