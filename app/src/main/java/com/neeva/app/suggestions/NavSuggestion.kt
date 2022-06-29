@@ -16,7 +16,7 @@ import com.neeva.app.ui.widgets.RowActionStartIconParams
 fun NavSuggestion(
     faviconCache: FaviconCache,
     onOpenUrl: (Uri) -> Unit,
-    onLogSuggestionTap: ((SuggestionType, Int?) -> Unit)? = null,
+    onLogSuggestionTap: ((SuggestionType) -> Unit)? = null,
     navSuggestion: NavSuggestion
 ) {
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
@@ -32,7 +32,7 @@ fun NavSuggestion(
 fun NavSuggestion(
     faviconBitmap: Bitmap?,
     onOpenUrl: (Uri) -> Unit,
-    onLogSuggestionTap: ((SuggestionType, Int?) -> Unit)? = null,
+    onLogSuggestionTap: ((SuggestionType) -> Unit)? = null,
     navSuggestion: NavSuggestion
 ) {
     NavSuggestionRow(
@@ -42,7 +42,7 @@ fun NavSuggestion(
         primaryLabel = navSuggestion.label,
         onTapRow = {
             onOpenUrl(navSuggestion.url)
-            onLogSuggestionTap?.invoke(navSuggestion.type, navSuggestion.position)
+            onLogSuggestionTap?.invoke(navSuggestion.type)
         },
         secondaryLabel = navSuggestion.secondaryLabel
     )

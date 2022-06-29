@@ -27,7 +27,7 @@ fun SuggestionList(
     faviconCache: FaviconCache,
     onOpenUrl: (Uri) -> Unit,
     onEditUrl: (String) -> Unit,
-    onLogSuggestionTap: ((SuggestionType, Int?) -> Unit)? = null
+    onLogSuggestionTap: ((SuggestionType) -> Unit)? = null
 ) {
     LazyColumn(
         modifier = Modifier

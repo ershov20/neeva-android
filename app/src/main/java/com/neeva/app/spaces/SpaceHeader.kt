@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.settings.profile.ProfileRow
-import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
+import com.neeva.app.settings.profile.pictureUrlPainter
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.OneBooleanPreviewContainer
@@ -53,7 +53,7 @@ fun SpaceHeader(
         ProfileRow(
             primaryLabel = space.ownerName,
             secondaryLabel = null,
-            painter = PictureUrlPainter(pictureURI = space.ownerPictureURL),
+            painter = pictureUrlPainter(pictureURI = space.ownerPictureURL),
             showSingleLetterPictureIfAvailable = true,
             onClick = null
         )

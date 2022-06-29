@@ -9,12 +9,12 @@ fun QuerySuggestionRow(
     suggestion: QueryRowSuggestion,
     onLoadUrl: (Uri) -> Unit,
     onEditUrl: (() -> Unit)? = null,
-    onLogSuggestionTap: ((SuggestionType, Int) -> Unit)? = null
+    onLogSuggestionTap: ((SuggestionType) -> Unit)? = null
 ) {
     val onTapRow = {
         onLoadUrl(suggestion.url)
         if (onLogSuggestionTap != null) {
-            onLogSuggestionTap(SuggestionType.QUERY_SUGGESTION, 0)
+            onLogSuggestionTap(SuggestionType.QUERY_SUGGESTION)
         }
     }
 

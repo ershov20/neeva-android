@@ -10,8 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.neeva.app.ui.theme.Dimensions
 
 data class RowActionStartIconParams(
@@ -27,9 +29,11 @@ fun RowActionStartIcon(params: RowActionStartIconParams) {
     when {
         !params.imageURL.isNullOrBlank() -> {
             Image(
-                painter = rememberImagePainter(
-                    data = params.imageURL,
-                    builder = { crossfade(true) }
+                painter = rememberAsyncImagePainter(
+                    ImageRequest.Builder(LocalContext.current)
+                        .data(data = params.imageURL)
+                        .apply(block = { crossfade(true) })
+                        .build()
                 ),
                 contentDescription = null,
                 modifier = Modifier

@@ -63,8 +63,8 @@ class ClientLogger(
         val clientLog = ClientLog(Optional.presentIfNotNull(clientLogCounter))
 
         if (BuildConfig.DEBUG) {
-            val attributes = mutableAttributes.map { "${it.key}: ${it.value}" }
-            Log.d(TAG, "${path.interactionName}: ${attributes.joinToString(separator = ",")}")
+            val attributeMap = mutableAttributes.map { "${it.key}: ${it.value}" }
+            Log.d(TAG, "${path.interactionName}: ${attributeMap.joinToString(separator = ",")}")
         } else {
             val logMutation = LogMutation(
                 ClientLogInput(

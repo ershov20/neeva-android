@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -13,6 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.viewinterop.AndroidView
@@ -143,7 +145,18 @@ private fun BoxScope.BrowserOverlay(
             // The Column will grow to take all the available space when suggestions (e.g.) are
             // shown.  Otherwise, the Column will wrap only the toolbar's height.  This allows a gap
             // for the Composable containing the WebLayer's Fragment's View.
-            val childModifier = Modifier.weight(1.0f).fillMaxWidth()
+            val childModifier = Modifier
+                .weight(1.0f)
+                .fillMaxWidth()
+                .then(
+                    if (showBottomBar) {
+                        // If the bottom bar is visible, add some padding so that the contents of
+                        // the Child view don't get hidden behind it.
+                        Modifier.padding(bottom = dimensionResource(R.dimen.bottom_toolbar_height))
+                    } else {
+                        Modifier
+                    }
+                )
             when {
                 isEditing -> {
                     // Right now, the URL bar is unfocused
@@ -160,6 +173,7 @@ private fun BoxScope.BrowserOverlay(
             }
         }
 
+        // This sits outside of the Column so TalkBack can focus the WebLayer's Fragment's View.
         if (showBottomBar) {
             BrowserBottomToolbar(
                 bottomOffset = toolbarConfiguration.bottomControlOffset,

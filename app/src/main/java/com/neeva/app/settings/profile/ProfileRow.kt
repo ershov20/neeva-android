@@ -6,10 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import coil.annotation.ExperimentalCoilApi
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
-import com.neeva.app.settings.sharedComposables.subcomponents.ProfileImage
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.LightDarkPreviewContainer
@@ -53,7 +50,7 @@ fun ProfileRowContainer(
             ProfileRow(
                 primaryLabel = userData.displayName,
                 secondaryLabel = userData.email,
-                painter = PictureUrlPainter(pictureURI = userData.pictureURI),
+                painter = pictureUrlPainter(pictureURI = userData.pictureURI),
                 showSingleLetterPictureIfAvailable = true,
                 onClick = onClick
             )
@@ -61,7 +58,6 @@ fun ProfileRowContainer(
     }
 }
 
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ProfileRow(
     primaryLabel: String?,

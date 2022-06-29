@@ -40,8 +40,8 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalEnvironment
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
-import com.neeva.app.settings.sharedComposables.subcomponents.ProfileImage
+import com.neeva.app.settings.profile.ProfileImage
+import com.neeva.app.settings.profile.pictureUrlPainter
 import com.neeva.app.ui.NeevaSwitch
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
@@ -130,7 +130,7 @@ fun ShareSpaceUI(
                         ) {
                             ProfileImage(
                                 displayName = ownerDisplayName,
-                                painter = PictureUrlPainter(pictureURI = ownerPictureURL),
+                                painter = pictureUrlPainter(pictureURI = ownerPictureURL),
                                 circlePicture = true,
                                 showSingleLetterPictureIfAvailable = true
                             )

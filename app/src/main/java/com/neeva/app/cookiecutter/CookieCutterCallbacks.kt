@@ -56,7 +56,7 @@ abstract class CookieCutterCallbacks : WebMessageCallback() {
             MESSAGE_NOTICE_HANDLED -> onNoticeHandled()
             MESSAGE_GET_PREFERENCES -> handleGetPreferences(replyProxy)
             MESSAGE_GET_IS_FLAGGED -> handleIsFlagged(replyProxy)
-            MESSAGE_STARTED -> null
+            MESSAGE_STARTED -> {}
             else -> Log.w(
                 TAG,
                 "Unexpected message from Cookie Cutter engine: ${plainMessage?.type}"

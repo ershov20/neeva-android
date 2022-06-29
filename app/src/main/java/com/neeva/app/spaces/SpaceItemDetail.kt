@@ -25,7 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalEnvironment
-import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
+import com.neeva.app.settings.profile.pictureUrlPainter
 import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.OneBooleanPreviewContainer
@@ -104,7 +104,7 @@ fun SpaceItemDetail(
 fun ColumnScope.SpaceItemDetailImageContent(
     spaceItem: SpaceItem
 ) {
-    PictureUrlPainter(pictureURI = spaceItem.url)?.let {
+    pictureUrlPainter(pictureURI = spaceItem.url)?.let {
         Image(
             painter = it,
             contentScale = ContentScale.Fit,
@@ -177,7 +177,7 @@ fun SpaceItemDetailMainContent(
     thumbnailUri: Uri?,
     isRegularWebItem: Boolean
 ) {
-    val painter = PictureUrlPainter(pictureURI = thumbnailUri)
+    val painter = pictureUrlPainter(pictureURI = thumbnailUri)
 
     if (isRegularWebItem) {
         if (painter == null || thumbnailUri.toString().isEmpty()) {

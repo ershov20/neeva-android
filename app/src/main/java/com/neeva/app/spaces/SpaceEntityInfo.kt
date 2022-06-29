@@ -25,7 +25,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalEnvironment
-import com.neeva.app.settings.sharedComposables.subcomponents.PictureUrlPainter
+import com.neeva.app.settings.profile.pictureUrlPainter
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
@@ -183,7 +183,7 @@ fun ColumnScope.NewsInfo(
     Row(
         horizontalArrangement = Arrangement.spacedBy(Dimensions.PADDING_SMALL)
     ) {
-        PictureUrlPainter(pictureURI = faviconURL)?.let {
+        pictureUrlPainter(pictureURI = faviconURL)?.let {
             Image(
                 painter = it,
                 contentDescription = null,

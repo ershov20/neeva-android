@@ -144,7 +144,7 @@ class SuggestionsModel(
         )
     }
 
-    fun logSuggestionTap(type: SuggestionType, position: Int?) {
+    fun logSuggestionTap(type: SuggestionType) {
         val interactionType = when (type) {
             SuggestionType.QUERY_SUGGESTION -> LogConfig.Interaction.QUERY_SUGGESTION
             SuggestionType.AUTOCOMPLETE_SUGGESTION -> LogConfig.Interaction.AUTOCOMPLETE_SUGGESTION

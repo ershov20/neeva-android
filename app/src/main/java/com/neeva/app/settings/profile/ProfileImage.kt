@@ -1,4 +1,4 @@
-package com.neeva.app.settings.sharedComposables.subcomponents
+package com.neeva.app.settings.profile
 
 import android.net.Uri
 import androidx.compose.foundation.Image
@@ -18,8 +18,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import coil.compose.rememberImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.neeva.app.R
 import com.neeva.app.settings.sharedComposables.SettingsUIConstants
 import com.neeva.app.storage.toLetterBitmap
@@ -82,12 +84,14 @@ private fun DefaultAccountImage(modifier: Modifier) {
 }
 
 @Composable
-fun PictureUrlPainter(pictureURI: Uri?): Painter? {
+fun pictureUrlPainter(pictureURI: Uri?): Painter? {
     if (pictureURI == null || pictureURI.toString().isEmpty()) {
         return null
     }
-    return rememberImagePainter(
-        data = pictureURI,
-        builder = { crossfade(true) }
+    return rememberAsyncImagePainter(
+        ImageRequest.Builder(LocalContext.current)
+            .data(data = pictureURI)
+            .apply(block = { crossfade(true) })
+            .build()
     )
 }
