@@ -9,6 +9,7 @@ import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.WebpageServingRule
+import com.neeva.app.assertionToBoolean
 import com.neeva.app.expectTabListState
 import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.onBackPressed
@@ -52,11 +53,10 @@ class FullscreenVideoTest : BaseBrowserTest() {
             expectTabListState(isIncognito = false, regularTabCount = 1)
 
             // Click on the page, which should will make the video play in fullscreen.
-            tapOnBrowserView()
-            waitForIdle()
-
-            waitForAssertion {
-                onNodeWithTag("LocationLabel").assertIsNotDisplayed()
+            tapOnBrowserView {
+                assertionToBoolean {
+                    onNodeWithTag("LocationLabel").assertIsNotDisplayed()
+                }
             }
             expectThat(activity.webLayerModel.currentBrowser.isFullscreen()).isTrue()
 

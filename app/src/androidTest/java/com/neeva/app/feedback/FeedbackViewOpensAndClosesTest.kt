@@ -8,6 +8,8 @@ import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.appnav.AppNavDestination
+import com.neeva.app.getString
+import com.neeva.app.onBackPressed
 import com.neeva.app.openCardGrid
 import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.waitForActivityStartup
@@ -27,50 +29,44 @@ class FeedbackViewOpensAndClosesTest : BaseBrowserTest() {
     @Test
     fun opensAndClosesSupportSuccessfully_fromBrowser() {
         // https://github.com/neevaco/neeva-android/pull/604
-        val scenario = androidComposeRule.activityRule.scenario
+        androidComposeRule.apply {
+            activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+            waitForActivityStartup()
 
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        androidComposeRule.waitForActivityStartup()
-
-        navigateToSupportAndBack()
-
-        androidComposeRule.waitForNavDestination(AppNavDestination.BROWSER)
+            navigateToSupportAndBack()
+            waitForNavDestination(AppNavDestination.BROWSER)
+        }
     }
 
     @Test
     fun opensAndClosesSupportSuccessfully_fromCardGrid() {
         // https://github.com/neevaco/neeva-android/issues/639
-        val scenario = androidComposeRule.activityRule.scenario
+        androidComposeRule.apply {
+            activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+            waitForActivityStartup()
 
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        androidComposeRule.waitForActivityStartup()
+            // Go to the CardGrid before trying to go to Support.
+            openCardGrid(incognito = false)
 
-        // Go to the CardGrid before trying to go to Support.
-        androidComposeRule.openCardGrid(incognito = false)
-
-        navigateToSupportAndBack()
-
-        androidComposeRule.waitForNavDestination(AppNavDestination.CARD_GRID)
+            navigateToSupportAndBack()
+            waitForNavDestination(AppNavDestination.CARD_GRID)
+        }
     }
 
     private fun navigateToSupportAndBack() {
-        val resources = androidComposeRule.activity.resources
+        androidComposeRule.apply {
+            openOverflowMenuAndClickItem(R.string.feedback)
 
-        androidComposeRule.openOverflowMenuAndClickItem(R.string.feedback)
+            // Wait for the Support screen to show up.
+            waitForNavDestination(AppNavDestination.FEEDBACK)
+            onNodeWithText(getString(R.string.submit_feedback_help_center_title)).assertExists()
+            waitForIdle()
 
-        // Wait for the Support screen to show up.
-        androidComposeRule.waitForNavDestination(AppNavDestination.FEEDBACK)
-        androidComposeRule
-            .onNodeWithText(resources.getString(R.string.submit_feedback_help_center_title))
-            .assertExists()
-        androidComposeRule.waitForIdle()
+            // Go back to the previous screen.
+            onBackPressed()
 
-        // Go back to the previous screen.
-        androidComposeRule.runOnUiThread {
-            androidComposeRule.activity.onBackPressed()
+            // Ideally, we would check if the embeddability mode is set back to the original value,
+            // but WebLayer doesn't expose that.
         }
-
-        // Ideally, we would check if the embeddability mode is set back to the original value, but
-        // WebLayer doesn't expose that.
     }
 }

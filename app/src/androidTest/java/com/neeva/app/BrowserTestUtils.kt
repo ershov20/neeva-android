@@ -2,8 +2,8 @@ package com.neeva.app
 
 import android.view.InputDevice
 import android.view.MotionEvent
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.performClick
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.GeneralClickAction
 import androidx.test.espresso.action.GeneralLocation
@@ -48,8 +48,20 @@ fun longPressOnBrowserView() {
  * Trying to click on the center of the Browser using Espresso does nothing, for some reason.  Doing
  * a click via Compose's performClick DOES, though, and I don't get why.
  */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.tapOnBrowserView() {
-    waitForNodeWithTag("WebLayerContainer").performClick()
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.tapOnBrowserView(
+    expectedCondition: () -> Boolean
+) {
+    flakyClickOnNode(hasTestTag("WebLayerContainer")) {
+        expectedCondition()
+    }
+}
+
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnBrowserAndWaitForUrlToLoad(
+    url: String
+) {
+    tapOnBrowserView {
+        activity.webLayerModel.currentBrowser.activeTabModel.urlFlow.value.toString() == url
+    }
 }
 
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.expectTabListState(
@@ -109,12 +121,10 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesIn
     waitForTitle("Page 1")
 
     // Navigate a couple of times so that we can add entries into history.
-    tapOnBrowserView()
-    waitForUrl("$testUrl?page_index=2")
+    clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=2")
     waitForTitle("Page 2")
 
-    tapOnBrowserView()
-    waitForUrl("$testUrl?page_index=3")
+    clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=3")
     waitForTitle("Page 3")
 
     activity.webLayerModel.currentBrowser.activeTabModel.apply {
@@ -133,12 +143,10 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesIn
     waitForTitle("Page 1")
 
     // Navigate a couple of times so that we can add entries into history.
-    tapOnBrowserView()
-    waitForUrl("$testUrl?page_index=2")
+    clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=2")
     waitForTitle("Page 2")
 
-    tapOnBrowserView()
-    waitForUrl("$testUrl?page_index=3")
+    clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=3")
     waitForTitle("Page 3")
 
     activity.webLayerModel.currentBrowser.activeTabModel.apply {

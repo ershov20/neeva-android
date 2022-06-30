@@ -9,23 +9,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.compose.ui.input.key.NativeKeyEvent
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.IdlingResource
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
-import androidx.compose.ui.test.onAllNodesWithContentDescription
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.Lifecycle
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.cardgrid.SelectedScreen
@@ -83,15 +82,6 @@ fun createViewIntent(url: String) = Intent()
         )
     )
 
-fun createNeevaActivityAndroidComposeTestRule(intent: Intent) = AndroidComposeTestRule(
-    activityRule = ActivityScenarioRule<NeevaActivity>(intent),
-    activityProvider = { rule ->
-        var activity: NeevaActivity? = null
-        rule.scenario.onActivity { activity = it }
-        activity!!
-    }
-)
-
 /** Tries to wait for when the NeevaActivity can start to be interacted with. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForActivityStartup() {
     // Permanently register an IdlingResource that waits for the browser to finish loading its
@@ -104,11 +94,6 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForActivityStart
             // Wait for the current browser to finish loading whatever it's loading.
             !(loadingProgress == 0 || loadingProgress == 100) -> {
                 Log.d(TAG, "Not idle -- Load in progress: $loadingProgress")
-                false
-            }
-
-            !firstComposeCompleted.isCompleted -> {
-                Log.d(TAG, "Not idle -- First compose not completed")
                 false
             }
 
@@ -147,6 +132,11 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForActivityStart
                 false
             }
 
+            !firstComposeCompleted.isCompleted -> {
+                Log.d(TAG, "Not idle -- First compose not completed")
+                false
+            }
+
             else -> true
         }
     }
@@ -175,8 +165,11 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.sendAppToBackground(
 }
 
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnUrlBar() {
-    clickOnNodeWithTag("LocationLabel")
-    waitForNodeWithTag("AutocompleteTextField").assertIsDisplayed()
+    flakyClickOnNode(hasTestTag("LocationLabel")) {
+        assertionToBoolean {
+            waitForMatchingNode(hasTestTag("AutocompleteTextField")).assertIsDisplayed()
+        }
+    }
     waitForNodeWithContentDescription(getString(com.neeva.app.R.string.url_bar_placeholder))
         .assertTextEquals(getString(com.neeva.app.R.string.url_bar_placeholder))
 }
@@ -211,9 +204,8 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: Str
 
 /** Clears text from the URL bar, assuming it is already visible and has text in it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clearUrlBar() {
-    clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.clear))
-    waitFor {
-        it.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.userTypedInput.isEmpty()
+    flakyClickOnNode(hasContentDescription(getString(com.neeva.app.R.string.clear))) {
+        activity.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.userTypedInput.isEmpty()
     }
     waitForAssertion {
         onNodeWithTag("AutocompleteTextField")
@@ -285,7 +277,7 @@ fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.navigateViaUrlBar(ur
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNavDestination(
     destination: AppNavDestination
 ) {
-    waitFor {
+    waitFor("Navigating to $destination") {
         it.appNavModel?.currentDestination?.value?.route == destination.route
     }
 }
@@ -293,7 +285,11 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNavDestinatio
 fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openOverflowMenuAndClickItem(
     @StringRes labelId: Int
 ) {
-    clickOnNodeWithContentDescription(activity.resources.getString(R.string.toolbar_neeva_menu))
+    flakyClickOnNode(hasContentDescription(getString(R.string.toolbar_neeva_menu))) {
+        assertionToBoolean {
+            waitForMatchingNode(hasText(getString(labelId)))
+        }
+    }
     clickOnNodeWithText(getString(labelId))
 }
 
@@ -307,9 +303,9 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
     when (activity.appNavModel?.currentDestination?.value?.route) {
         AppNavDestination.BROWSER.route -> {
             // Wait for the card grid button to be visible, then click it.
-            val cardGridButtonDescription = getString(R.string.toolbar_tab_switcher)
-            clickOnNodeWithContentDescription(cardGridButtonDescription)
-            waitForNavDestination(AppNavDestination.CARD_GRID)
+            flakyClickOnNode(hasContentDescription(getString(R.string.toolbar_tab_switcher))) {
+                assertionToBoolean { waitForNavDestination(AppNavDestination.CARD_GRID) }
+            }
         }
 
         AppNavDestination.CARD_GRID.route -> {
@@ -346,9 +342,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForCardGridScreen(
     expectedSubscreen: SelectedScreen
 ) {
-    waitFor {
-        activity.appNavModel?.currentDestination?.value?.route == AppNavDestination.CARD_GRID.route
-    }
+    waitForNavDestination(AppNavDestination.CARD_GRID)
     waitFor {
         activity.cardsPaneModel?.selectedScreen?.value == expectedSubscreen
     }
@@ -380,11 +374,22 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
  * Flows that the app is using to push data around and all the asynchronous work that is being done
  * by WebLayer when the browser is doing things.
  */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(
-    condition: (activity: NeevaActivity) -> Boolean
+inline fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(
+    message: String? = null,
+    crossinline condition: (activity: NeevaActivity) -> Boolean
 ) {
     waitForIdle()
-    waitUntil(WAIT_TIMEOUT) { condition(activity) }
+    try {
+        waitUntil(WAIT_TIMEOUT) {
+            condition(activity)
+        }
+    } catch (e: ComposeTimeoutException) {
+        if (message != null) {
+            throw ComposeTimeoutException(message)
+        } else {
+            throw e
+        }
+    }
 }
 
 /**
@@ -393,16 +398,12 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(
  * Can't seem to find a function in Compose that just tells you whether something is visible without
  * having to throw an assertion, so work with it by catching the assertion.
  */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForAssertion(
-    condition: (activity: NeevaActivity) -> Unit
+inline fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForAssertion(
+    message: String? = null,
+    crossinline condition: (activity: NeevaActivity) -> Unit
 ) {
-    waitFor {
-        try {
-            condition(activity)
-            true
-        } catch (e: java.lang.AssertionError) {
-            false
-        }
+    waitFor(message) {
+        assertionToBoolean { condition(activity) }
     }
 }
 
@@ -423,63 +424,66 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.selectItemFromContex
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithContentDescription(
     description: String
 ) {
-    waitForNodeWithContentDescription(description)
-        .assertHasClickAction()
-        .performClick()
+    waitForNodeWithContentDescription(description).assertHasClickAction().performClick()
     waitForIdle()
 }
 
 /** Wait for a Composable to appear with the given text, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithText(text: String) {
-    waitForNodeWithText(text)
-        .assertHasClickAction()
-        .performClick()
-    waitForIdle()
-}
-
-/** Wait for a Composable to appear with the given tag, then click on it. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithTag(tag: String) {
-    waitForNodeWithTag(tag)
-        .assertHasClickAction()
-        .performClick()
+    waitForNodeWithText(text).assertHasClickAction().performClick()
     waitForIdle()
 }
 
 /** Wait for a Composable to appear with the given [description], then return it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithContentDescription(
     description: String
-): SemanticsNodeInteraction {
-    waitFor {
-        onAllNodesWithContentDescription(description)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-    }
-
-    return onNodeWithContentDescription(description)
-}
+) = waitForMatchingNode(hasContentDescription(description))
 
 /** Wait for a Composable to appear with the given tag, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithTag(
     tag: String
-): SemanticsNodeInteraction {
-    waitFor {
-        onAllNodesWithTag(tag)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-    }
+) = waitForMatchingNode(hasTestTag(tag))
 
-    return onNodeWithTag(tag)
-}
-
-/** Wait for a Composable to appear with the given tag, then click on it. */
+/** Wait for a Composable to appear with the given text, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithText(
     text: String
-): SemanticsNodeInteraction {
-    waitFor {
-        onAllNodesWithText(text)
-            .fetchSemanticsNodes()
-            .isNotEmpty()
-    }
+) = waitForMatchingNode(hasText(text))
 
-    return onNodeWithText(text)
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForMatchingNode(
+    matcher: SemanticsMatcher
+): SemanticsNodeInteraction {
+    var node: SemanticsNodeInteraction? = null
+    waitForAssertion("Failed waiting for ${matcher.description}") {
+        node = onNode(matcher).assertExists()
+    }
+    return node!!
+}
+
+/**
+ * Sometimes clicking doesn't actually have an effect, resulting in the whole test failing.  Try
+ * sending the click again if the first attempt fails.
+ *
+ * TODO(dan.alcantara): Figure out how to reliably test that clicks happened.
+ */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.flakyClickOnNode(
+    matcher: SemanticsMatcher,
+    expectedCondition: () -> Boolean
+) {
+    try {
+        waitForMatchingNode(matcher).performClick()
+        waitFor { expectedCondition() }
+    } catch (e: ComposeTimeoutException) {
+        Log.e(TAG, "Failed to click using '${matcher.description}'.  Trying again.")
+        waitForMatchingNode(matcher).performClick()
+        waitFor("Failed to click using '${matcher.description}'") { expectedCondition() }
+    }
+}
+
+inline fun assertionToBoolean(assertion: () -> Unit): Boolean {
+    return try {
+        assertion()
+        true
+    } catch (e: AssertionError) {
+        false
+    }
 }

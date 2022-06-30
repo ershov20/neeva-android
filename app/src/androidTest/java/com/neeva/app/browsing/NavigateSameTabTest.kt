@@ -10,6 +10,7 @@ import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.WebpageServingRule
 import com.neeva.app.clearUrlBar
+import com.neeva.app.clickOnBrowserAndWaitForUrlToLoad
 import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectTabListState
@@ -17,7 +18,6 @@ import com.neeva.app.getString
 import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.navigateViaUrlBar
 import com.neeva.app.onBackPressed
-import com.neeva.app.tapOnBrowserView
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeWithContentDescription
 import com.neeva.app.waitForTitle
@@ -56,11 +56,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
             expectTabListState(isIncognito = false, regularTabCount = 1)
 
             // Click on the page, which should load a URL in the current tab.
-            tapOnBrowserView()
-            waitForIdle()
-
-            // Confirm that the URL represents the updated destination.
-            waitForUrl("$testUrl?page_index=2")
+            clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=2")
             waitForTitle("Page 2")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
@@ -99,8 +95,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
             expectTabListState(isIncognito = false, regularTabCount = 1)
 
             // Click on the page, which should load a URL in a new tab because it's set the target.
-            tapOnBrowserView()
-            waitForUrl("$testUrl?page_index=2")
+            clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=2")
             waitForIdle()
 
             // Confirm that the URL represents the updated destination.

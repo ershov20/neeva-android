@@ -3,18 +3,18 @@ package com.neeva.app.browsing
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
+import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.WebpageServingRule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.clickOnNodeWithText
-import com.neeva.app.createMainIntent
-import com.neeva.app.createNeevaActivityAndroidComposeTestRule
 import com.neeva.app.expectTabListState
 import com.neeva.app.getString
 import com.neeva.app.onBackPressed
@@ -39,7 +39,7 @@ class TabSwitcherTest : BaseBrowserTest() {
     val skipFirstRunRule = SkipFirstRunRule()
 
     @get:Rule(order = 10000)
-    val androidComposeRule = createNeevaActivityAndroidComposeTestRule(createMainIntent())
+    val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
 
     override fun setUp() {
         super.setUp()

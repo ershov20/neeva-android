@@ -1,15 +1,16 @@
 package com.neeva.app.browsing
 
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
+import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.WebpageServingRule
-import com.neeva.app.createMainIntent
-import com.neeva.app.createNeevaActivityAndroidComposeTestRule
+import com.neeva.app.getString
 import com.neeva.app.openCardGrid
 import com.neeva.app.openLazyTab
 import com.neeva.app.waitForActivityStartup
@@ -24,39 +25,34 @@ class IncognitoTabSwitcherTest : BaseBrowserTest() {
     val skipFirstRunRule = SkipFirstRunRule()
 
     @get:Rule(order = 10000)
-    val androidComposeRule = createNeevaActivityAndroidComposeTestRule(createMainIntent())
+    val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
 
     @Test
     fun incognitoLazyTab_createsNewIncognitoTab() {
-        val scenario = androidComposeRule.activityRule.scenario
-        val resources = androidComposeRule.activity.resources
+        androidComposeRule.apply {
+            activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+            waitForActivityStartup()
 
-        scenario.moveToState(Lifecycle.State.RESUMED)
-        androidComposeRule.waitForActivityStartup()
+            // Create a new tab to nowhere in particular.
+            openCardGrid(incognito = false)
+            openLazyTab(WebpageServingRule.urlFor("?regular"))
 
-        // Create a new tab to nowhere in particular.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.openLazyTab(WebpageServingRule.urlFor("?regular"))
+            // Confirm that we see two regular tabs.
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(2)
 
-        // Confirm that we see two regular tabs.
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(2)
+            // Switch to the Incognito screen and confirm that we see an empty incognito grid.
+            openCardGrid(incognito = true)
+            onNodeWithText(getString(R.string.empty_incognito_tabs_title)).assertExists()
 
-        // Switch to the Incognito screen and confirm that we see an empty incognito grid.
-        androidComposeRule.openCardGrid(incognito = true)
-        androidComposeRule
-            .onNodeWithText(resources.getString(R.string.empty_incognito_tabs_title))
-            .assertExists()
+            // Open a lazy new tab to nowhere in particular.
+            openLazyTab(WebpageServingRule.urlFor("?incognito"))
 
-        // Open a lazy new tab to nowhere in particular.
-        androidComposeRule.openLazyTab(WebpageServingRule.urlFor("?incognito"))
-
-        // Confirm that we have one incognito tab and two regular tabs.
-        androidComposeRule.openCardGrid(incognito = true)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(1)
-        androidComposeRule.openCardGrid(incognito = false)
-        androidComposeRule.onAllNodesWithTag("TabCard").assertCountEquals(2)
-
-        scenario.close()
+            // Confirm that we have one incognito tab and two regular tabs.
+            openCardGrid(incognito = true)
+            onAllNodesWithTag("TabCard").assertCountEquals(1)
+            openCardGrid(incognito = false)
+            onAllNodesWithTag("TabCard").assertCountEquals(2)
+        }
     }
 }
