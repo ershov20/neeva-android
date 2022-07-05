@@ -1,22 +1,38 @@
 package com.neeva.app.ui
 
 import android.widget.FrameLayout
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.min
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.LocalAppNavModel
@@ -32,6 +48,9 @@ import com.neeva.app.browsing.toolbar.BrowserToolbarContainer
 import com.neeva.app.browsing.toolbar.BrowserToolbarModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.suggestions.SuggestionPane
+import com.neeva.app.ui.theme.ColorPalette
+import com.neeva.app.ui.theme.Dimensions
+import java.lang.Float.min
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -43,6 +62,7 @@ fun BrowserScaffold(
     val browserWrapper = browsers.getCurrentBrowser()
     Box(modifier = Modifier.fillMaxSize()) {
         WebLayerContainer(browserWrapper)
+        PullToRefreshBox(browserWrapper)
         BrowserOverlay(toolbarConfigurationFlow, browserWrapper)
     }
 }
@@ -89,6 +109,68 @@ private fun WebLayerContainer(browserWrapper: BrowserWrapper) {
     )
 }
 
+@Composable
+fun PullToRefreshBox(browserWrapper: BrowserWrapper) {
+    val verticalOverscroll by browserWrapper.activeTabModel.verticalOverscrollFlow.collectAsState()
+    val shouldDisplayPullToRefresh by remember {
+        derivedStateOf {
+            verticalOverscroll < 0
+        }
+    }
+
+    if (shouldDisplayPullToRefresh) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .offset(
+                    x = 0.dp,
+                    y = min(-(verticalOverscroll / 10).dp, Dimensions.SIZE_TOUCH_TARGET * 2.5f)
+                )
+        ) {
+
+            Spacer(modifier = Modifier.weight(1.0f))
+
+            Surface(
+                color = ColorPalette.Brand.Blue,
+                modifier = Modifier
+                    .size(Dimensions.SIZE_TOUCH_TARGET)
+                    .rotate(min(-verticalOverscroll / 5, 480f)),
+                shape = CircleShape,
+                shadowElevation = 4.dp
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Icon(
+                        modifier = Modifier
+                            .padding(Dimensions.PADDING_MEDIUM)
+                            .size(Dimensions.SIZE_ICON),
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+
+                    Surface(
+                        color = Color.Transparent,
+                        modifier = Modifier
+                            .padding(Dimensions.PADDING_MEDIUM)
+                            .size(Dimensions.SIZE_ICON)
+                    ) {
+                        Canvas(modifier = Modifier.fillMaxSize()) {
+                            drawArc(
+                                color = ColorPalette.Brand.Blue,
+                                min(-verticalOverscroll / 2.5f, 360f),
+                                360f - min(-verticalOverscroll / 2.5f, 360f),
+                                true,
+                            )
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1.0f))
+        }
+    }
+}
+
 /** Full sized views that cover the browser, sandwiched between the toolbars. */
 @Composable
 private fun BoxScope.BrowserOverlay(
@@ -132,7 +214,11 @@ private fun BoxScope.BrowserOverlay(
         LocalBrowserToolbarModel provides browserToolbarModel,
         LocalBrowserWrapper provides browserWrapper
     ) {
-        Column(modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+        ) {
             // Make sure that the top toolbar is visible if the user is editing the URL.
             BrowserToolbarContainer(
                 topOffset = if (isEditing) {
@@ -177,7 +263,9 @@ private fun BoxScope.BrowserOverlay(
         if (showBottomBar) {
             BrowserBottomToolbar(
                 bottomOffset = toolbarConfiguration.bottomControlOffset,
-                modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
             )
         }
     }

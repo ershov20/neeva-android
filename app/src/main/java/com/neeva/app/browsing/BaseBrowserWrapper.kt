@@ -792,6 +792,7 @@ abstract class BaseBrowserWrapper internal constructor(
     override fun goForward() = _activeTabModelImpl.goForward()
     override fun reload() = _activeTabModelImpl.reload()
     override fun toggleViewDesktopSite() = _activeTabModelImpl.toggleViewDesktopSite()
+    override fun resetOverscroll(action: Int) = _activeTabModelImpl.resetOverscroll(action)
 
     /**
      * Start a load of the given [uri].

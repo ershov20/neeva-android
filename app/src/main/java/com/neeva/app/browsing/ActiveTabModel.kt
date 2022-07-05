@@ -27,6 +27,9 @@ interface ActiveTabModel {
     /** Tracks the URL displayed for the active tab. */
     val urlFlow: StateFlow<Uri>
 
+    /** Tracks the vertical overscroll on the current tab. */
+    val verticalOverscrollFlow: StateFlow<Float>
+
     /** Tracks whether current URL is in any of the user's Spaces. */
     val isCurrentUrlInSpaceFlow: StateFlow<Boolean>
 

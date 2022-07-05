@@ -103,6 +103,8 @@ interface BrowserWrapper {
 
     fun toggleViewDesktopSite()
 
+    fun resetOverscroll(action: Int)
+
     fun showFindInPage()
     fun showPageInfo()
 

@@ -1,10 +1,12 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import android.view.MotionEvent
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
+import kotlin.math.abs
 import kotlin.math.roundToInt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,6 +19,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import org.chromium.weblayer.Navigation
 import org.chromium.weblayer.NavigationCallback
+import org.chromium.weblayer.ScrollNotificationType
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
 
@@ -32,6 +35,11 @@ class ActiveTabModelImpl(
     private val tabScreenshotManager: TabScreenshotManager,
     private val tabList: TabList
 ) : ActiveTabModel {
+
+    companion object {
+        private const val RELOAD_THRESHOLD_FOR_OVERSCROLL = 750
+    }
+
     private val _urlFlow = MutableStateFlow(Uri.EMPTY)
     override val urlFlow: StateFlow<Uri> = _urlFlow
 
@@ -75,6 +83,11 @@ class ActiveTabModelImpl(
     private val _trackersFlow = MutableStateFlow(0)
     override val trackersFlow: StateFlow<Int>
         get() = _trackersFlow
+
+    private val _verticalOverscrollFlow = MutableStateFlow(0f)
+    override val verticalOverscrollFlow: StateFlow<Float> = _verticalOverscrollFlow
+
+    private val _isGestureActive = MutableStateFlow(false)
 
     internal fun onActiveTabChanged(newActiveTab: Tab?) {
         val previousTab = activeTab
@@ -153,6 +166,23 @@ class ActiveTabModelImpl(
         override fun onTitleUpdated(title: String) {
             _titleFlow.value = title
         }
+
+        override fun onScrollNotification(notificationType: Int, currentScrollRatio: Float) {
+            if (notificationType == ScrollNotificationType.DIRECTION_CHANGED_DOWN) {
+                _verticalOverscrollFlow.value = 0f
+            }
+        }
+
+        override fun onVerticalOverscroll(accumulatedOverscrollY: Float) {
+            // Since overscroll events fire independent of the touch handling system, we sometimes
+            // get a race that sends one last overscroll even after an UP event. To avoid,
+            // continuing the overscroll gesture, we only update overscroll if there is an active
+            // gesture.
+
+            if (_isGestureActive.value) {
+                _verticalOverscrollFlow.value = accumulatedOverscrollY
+            }
+        }
     }
 
     private val selectedTabNavigationCallback = object : NavigationCallback() {
@@ -201,6 +231,19 @@ class ActiveTabModelImpl(
             it.isDesktopUserAgentEnabled = !it.isDesktopUserAgentEnabled
             updateNavigationInfo()
         }
+    }
+
+    fun resetOverscroll(action: Int) {
+        when (action) {
+            MotionEvent.ACTION_DOWN -> _isGestureActive.value = true
+            MotionEvent.ACTION_UP -> _isGestureActive.value = false
+        }
+
+        if (abs(verticalOverscrollFlow.value) > RELOAD_THRESHOLD_FOR_OVERSCROLL) {
+            reload()
+        }
+
+        _verticalOverscrollFlow.value = 0f
     }
 
     private fun updateNavigationInfo() {

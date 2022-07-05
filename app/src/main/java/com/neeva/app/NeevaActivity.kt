@@ -9,6 +9,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.activity.result.contract.ActivityResultContracts
@@ -247,6 +248,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     override fun onPause() {
         webLayerModel.currentBrowser.takeScreenshotOfActiveTab()
         super.onPause()
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        val result = super.dispatchTouchEvent(ev)
+        if (ev?.action == MotionEvent.ACTION_UP || ev?.action == MotionEvent.ACTION_DOWN) {
+            webLayerModel.currentBrowser.resetOverscroll(ev.action)
+        }
+        return result
     }
 
     private fun showBrowser() = appNavModel?.showBrowser()
