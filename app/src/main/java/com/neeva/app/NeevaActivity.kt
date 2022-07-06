@@ -32,6 +32,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.appnav.AppNavModelImpl
@@ -46,9 +47,10 @@ import com.neeva.app.cardgrid.CardsPaneModelImpl
 import com.neeva.app.cardgrid.SelectedScreen
 import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.firstrun.FirstRunModel
-import com.neeva.app.firstrun.LocalFirstRunModel
+import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
+import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
@@ -88,9 +90,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
+    @Inject lateinit var domainProvider: DomainProvider
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var historyDatabase: HistoryDatabase
-    @Inject lateinit var localEnvironmentState: LocalEnvironmentState
+    @Inject lateinit var historyManager: HistoryManager
     @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
     @Inject internal lateinit var settingsDataModel: SettingsDataModel
@@ -156,20 +159,20 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         webLayerModel = webLayerModel,
                         appNavModel = appNavModel!!,
                         popupModel = popupModel,
-                        settingsDataModel = localEnvironmentState.settingsDataModel,
+                        settingsDataModel = settingsDataModel,
                         coroutineScope = lifecycleScope
                     )
                 }
                 val settingsControllerImpl = remember(appNavModel) {
                     SettingsControllerImpl(
                         appNavModel = appNavModel!!,
-                        settingsDataModel = localEnvironmentState.settingsDataModel,
-                        neevaUser = localEnvironmentState.neevaUser,
+                        settingsDataModel = settingsDataModel,
+                        neevaUser = neevaUser,
                         webLayerModel = webLayerModel,
                         onSignOut = activityViewModel::signOut,
                         setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
                         coroutineScope = lifecycleScope,
-                        popupModel = localEnvironmentState.popupModel,
+                        popupModel = popupModel,
                         activityCallbackProvider = activityCallbackProvider,
                         onTrackingProtectionUpdate = webLayerModel::updateBrowsersCookieCutterConfig
                     )
@@ -179,11 +182,20 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     CompositionLocalProvider(
                         LocalAppNavModel provides appNavModel!!,
                         LocalCardsPaneModel provides cardsPaneModel!!,
-                        LocalEnvironment provides localEnvironmentState,
+                        LocalClientLogger provides clientLogger,
+                        LocalDispatchers provides dispatchers,
+                        LocalDomainProvider provides domainProvider,
                         LocalFeedbackViewModel provides feedbackViewModel,
                         LocalFirstRunModel provides firstRunModel,
+                        LocalHistoryManager provides historyManager,
                         LocalNavHostController provides navController,
+                        LocalNeevaConstants provides neevaConstants,
+                        LocalNeevaUser provides neevaUser,
+                        LocalPopupModel provides popupModel,
                         LocalSettingsController provides settingsControllerImpl,
+                        LocalSettingsDataModel provides settingsDataModel,
+                        LocalSharedPreferencesModel provides sharedPreferencesModel,
+                        LocalSpaceStore provides spaceStore,
                         LocalRegularProfileZeroQueryViewModel provides zeroQueryViewModel
                     ) {
                         ActivityUI(

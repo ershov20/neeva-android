@@ -11,7 +11,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
-import com.neeva.app.TestApolloWrapper
+import com.neeva.app.apollo.TestApolloWrapper
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase

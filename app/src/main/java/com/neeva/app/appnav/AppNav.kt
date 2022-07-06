@@ -7,7 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.LocalSettingsController
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.WebLayerModel
@@ -38,7 +38,7 @@ fun AppNav(
     modifier: Modifier
 ) {
     val settingsControllerImpl = LocalSettingsController.current
-    val neevaConstants = LocalEnvironment.current.neevaConstants
+    val neevaConstants = LocalNeevaConstants.current
 
     AnimatedNavHost(
         navController = appNavModel.navController,

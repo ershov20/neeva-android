@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.getClickableAlpha
@@ -59,7 +58,7 @@ fun NeevaSwitch(
         switchLabelContent = {
             StackedText(
                 primaryLabel = primaryLabel, secondaryLabel = secondaryLabel,
-                maxLines = 2,
+                primaryMaxLines = 2,
                 enabled = enabled
             )
         },
@@ -69,18 +68,31 @@ fun NeevaSwitch(
     )
 }
 
-@Preview("NeevaSwitch LTR 1x font scale", locale = "en")
-@Preview("NeevaSwitch LTR 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("NeevaSwitch RTL 1x font scale", locale = "he")
+@PortraitPreviews
 @Composable
-fun NeevaSwitchPreview() {
-    TwoBooleanPreviewContainer { isChecked, isEnabled ->
+fun NeevaSwitchPreviewEnabled() {
+    OneBooleanPreviewContainer { isChecked ->
         val isCheckedState = remember { mutableStateOf(isChecked) }
         NeevaSwitch(
             primaryLabel = "Some random setting that the user can toggle",
             isChecked = isCheckedState.value,
             onCheckedChange = { isCheckedState.value = it },
-            enabled = isEnabled,
+            enabled = true,
+            secondaryLabel = "Some secondary label of the setting toggle."
+        )
+    }
+}
+
+@PortraitPreviews
+@Composable
+fun NeevaSwitchPreviewDisabled() {
+    OneBooleanPreviewContainer { isChecked ->
+        val isCheckedState = remember { mutableStateOf(isChecked) }
+        NeevaSwitch(
+            primaryLabel = "Some random setting that the user can toggle",
+            isChecked = isCheckedState.value,
+            onCheckedChange = { isCheckedState.value = it },
+            enabled = false,
             secondaryLabel = "Some secondary label of the setting toggle."
         )
     }

@@ -3,6 +3,7 @@ package com.neeva.app.spaces
 import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -11,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -22,14 +24,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalSpaceStore
 import com.neeva.app.R
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.FullScreenDialogTopBar
-import com.neeva.app.ui.NeevaTextField
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import kotlinx.coroutines.launch
@@ -50,7 +52,7 @@ fun EditSpaceDialog(
     id: String?
 ) {
     val appNavModel = LocalAppNavModel.current
-    val spaceStore = LocalEnvironment.current.spaceStore
+    val spaceStore = LocalSpaceStore.current
     val editSpaceInfo = produceState<EditSpaceInfo?>(initialValue = null, mode, id) {
         value = spaceStore.getEditSpaceInfo(
             mode = mode,
@@ -176,9 +178,9 @@ fun EditSpaceDialog(
 
                     Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
-                    NeevaTextField(
-                        text = url.value,
-                        onTextChanged = { url.value = it },
+                    OutlinedTextField(
+                        value = url.value,
+                        onValueChange = { url.value = it },
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -197,9 +199,9 @@ fun EditSpaceDialog(
 
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
-                NeevaTextField(
-                    text = title.value,
-                    onTextChanged = { title.value = it },
+                OutlinedTextField(
+                    value = title.value,
+                    onValueChange = { title.value = it },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -217,12 +219,12 @@ fun EditSpaceDialog(
 
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
-                NeevaTextField(
-                    text = description.value,
-                    onTextChanged = { description.value = it },
-                    minLines = 4,
+                OutlinedTextField(
+                    value = description.value,
+                    onValueChange = { description.value = it },
                     modifier = Modifier
                         .fillMaxWidth()
+                        .defaultMinSize(minHeight = 48.dp * 4)
                         .padding(horizontal = Dimensions.PADDING_LARGE)
                 )
 

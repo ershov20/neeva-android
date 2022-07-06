@@ -11,7 +11,6 @@ import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.AddSpacePublicACLMutation
 import com.neeva.app.AddToSpaceMutation
-import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.BatchDeleteSpaceResultMutation
 import com.neeva.app.CreateSpaceMutation
 import com.neeva.app.DeleteSpaceMutation
@@ -23,9 +22,10 @@ import com.neeva.app.LeaveSpaceMutation
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
-import com.neeva.app.UnauthenticatedApolloWrapper
 import com.neeva.app.UpdateSpaceEntityDisplayDataMutation
 import com.neeva.app.UpdateSpaceMutation
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.Directories

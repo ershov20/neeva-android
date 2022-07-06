@@ -11,19 +11,19 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalPopupModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
 
 @Composable
 fun CurrentPageRow(browserWrapper: BrowserWrapper) {
-    val popupModel: PopupModel = LocalEnvironment.current.popupModel
+    val popupModel: PopupModel = LocalPopupModel.current
 
     val activeTabModel = browserWrapper.activeTabModel
     val faviconCache = browserWrapper.faviconCache
@@ -107,9 +107,7 @@ fun CurrentPageRow(
     )
 }
 
-@Preview("CurrentPageRow, 1x font scale", locale = "en")
-@Preview("CurrentPageRow, 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("CurrentPageRow, RTL", locale = "he")
+@PortraitPreviews
 @Composable
 fun CurrentPageRowPreview() {
     LightDarkPreviewContainer {

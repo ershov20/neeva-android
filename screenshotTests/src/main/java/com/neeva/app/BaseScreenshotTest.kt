@@ -137,30 +137,17 @@ abstract class BaseScreenshotTest {
         """
         $failureMessage
 
-        If you need to add or update an existing golden image:
+        If you need to add or update the golden images:
         1. Make sure that you have the command line tools installed:
            https://developer.android.com/studio/command-line/sdkmanager
 
-        2. Create an emulator using the same commands CircleCI uses (only needs to be done once):
-           Intel Macbook:
-             sdkmanager "system-images;android-28;default;x86_64"
-             echo "no" | avdmanager --verbose create avd -n "CircleCI" -k "system-images;android-28;default;x86_64" -d "pixel_2"
+        2. Create and start the emulator CircleCI uses:
+           scripts/create-emulator.sh
 
-           M1 Macbook:
-             sdkmanager "system-images;android-28;default;arm64-v8a"
-             echo "no" | avdmanager --verbose create avd -n "CircleCI" -k "system-images;android-28;default;arm64-v8a" -d "pixel_2"
-
-        3. Actually start the emulator:
-           emulator -avd "CircleCI" -no-audio -no-boot-anim -verbose -no-snapshot -gpu swiftshader_indirect -partition-size 2048
-
-        3. Run the test by itself by right clicking on the test function in Android Studio.
-           If you don't, the bitmap will be deleted by the test runner before the next test.
-
-        4. Run this script to copy the file off of the emulator and into the golden directory:
-           cd neeva-android
-           ./pull_new_golden_screenshots.sh
-
-        5. Re-run the test again and make sure it passes.
+        3. Run this script to run the screenshot tests and update the screenshots in your checkout:
+           scripts/pull-new-golden-screenshots.sh
+        
+        4. Confirm that the new screenshots look correct before uploading them.
 
         Troubleshooting:
         * If you see "Backend Internal error: Exception during IR lowering", rebuild the

@@ -3,7 +3,7 @@
     <string name="app_name">Neeva</string>
     <string name="neeva_search">Neeva Search</string>
     <string name="company_name">Neeva</string>
-    <string name="edit_current_url">Edit current URL</string>
+    <string name="edit_current_url">Edit current address</string>
     <string name="edit_current_search">Edit current search</string>
     <string name="edit_content_description">Edit</string>
     <string name="refine_content_description">Refine</string>

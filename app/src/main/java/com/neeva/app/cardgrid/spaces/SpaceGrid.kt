@@ -11,7 +11,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.Dispatchers
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalDispatchers
+import com.neeva.app.LocalNeevaUser
+import com.neeva.app.LocalSpaceStore
 import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.cardgrid.CardGrid
@@ -29,12 +31,12 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SpaceGrid(
     browserWrapper: BrowserWrapper,
     cardsPaneModel: CardsPaneModel,
-    dispatchers: Dispatchers = LocalEnvironment.current.dispatchers,
+    dispatchers: Dispatchers = LocalDispatchers.current,
     neevaConstants: NeevaConstants,
     modifier: Modifier = Modifier
 ) {
-    val spaceStore = LocalEnvironment.current.spaceStore
-    val neevaUser = LocalEnvironment.current.neevaUser
+    val spaceStore = LocalSpaceStore.current
+    val neevaUser = LocalNeevaUser.current
     val spaces by spaceStore.allSpacesFlow.collectAsState(emptyList())
     val gridState = rememberLazyGridState()
 

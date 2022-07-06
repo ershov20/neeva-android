@@ -8,9 +8,9 @@ import android.view.Window
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
-import com.neeva.app.AuthenticatedApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.SendFeedbackMutation
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.storage.scaleDownMaintainingAspectRatio
 import com.neeva.app.storage.toBase64String

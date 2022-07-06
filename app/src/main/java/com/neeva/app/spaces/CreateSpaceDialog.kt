@@ -17,7 +17,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalSpaceStore
 import com.neeva.app.R
 import com.neeva.app.ui.KeyboardFocusEffect
 
@@ -28,7 +28,7 @@ fun CreateSpaceDialog(
 ) {
     if (!isDialogVisible.value) return
 
-    val spaceStore = LocalEnvironment.current.spaceStore
+    val spaceStore = LocalSpaceStore.current
     val appNavModel = LocalAppNavModel.current
     val spaceName = remember { mutableStateOf("") }
     val isPrimaryButtonEnabled = remember { mutableStateOf(false) }

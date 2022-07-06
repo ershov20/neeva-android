@@ -14,7 +14,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalNeevaUser
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.storage.entities.Space
@@ -35,7 +35,7 @@ fun AddToSpaceUI(
         }
     }
 
-    val neevaUser = LocalEnvironment.current.neevaUser
+    val neevaUser = LocalNeevaUser.current
 
     val isCreateSpaceDialogVisible = remember { mutableStateOf(false) }
 

@@ -1,4 +1,4 @@
-package com.neeva.app
+package com.neeva.app.apollo
 
 import android.util.Log
 import androidx.annotation.CallSuper
@@ -8,6 +8,10 @@ import com.apollographql.apollo3.api.Mutation
 import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.exception.ApolloException
 import com.apollographql.apollo3.network.okHttpClient
+import com.neeva.app.BuildConfig
+import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaBrowser
+import com.neeva.app.NeevaConstants
 import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -18,14 +22,14 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 
-/** Authenticated version of [ApolloWrapper] that sends the user token */
+/** Authenticated version of [BaseApolloWrapper] that sends the user token */
 open class AuthenticatedApolloWrapper(
     private val neevaUserToken: NeevaUserToken,
     neevaConstants: NeevaConstants,
     _apolloClient: ApolloClient? = null,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers
-) : ApolloWrapper(
+) : BaseApolloWrapper(
     _apolloClient = _apolloClient,
     coroutineScope = coroutineScope,
     dispatchers = dispatchers,
@@ -47,7 +51,7 @@ open class AuthenticatedApolloWrapper(
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
         if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
-            Log.i(TAG, "Could not perform mutation because user was not logged in: $mutation")
+            Log.w(TAG, "Could not perform mutation because user was not logged in: $mutation")
             return null
         }
         return super.performMutation(mutation, userMustBeLoggedIn)
@@ -58,20 +62,24 @@ open class AuthenticatedApolloWrapper(
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
         if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
-            Log.i(TAG, "Could not perform query because user was not logged in: $query")
+            Log.w(TAG, "Could not perform query because user was not logged in: $query")
             return null
         }
         return super.performQuery(query, userMustBeLoggedIn)
     }
+
+    companion object {
+        private const val TAG = "AuthenticatedApolloWrapper"
+    }
 }
 
-/** Unauthenticated version of [ApolloWrapper] that only send browser cookies and no user token */
+/** Unauthenticated version of [BaseApolloWrapper] that only send browser cookies and no user token */
 open class UnauthenticatedApolloWrapper(
     _apolloClient: ApolloClient? = null,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
     neevaConstants: NeevaConstants
-) : ApolloWrapper(
+) : BaseApolloWrapper(
     _apolloClient = _apolloClient,
     coroutineScope = coroutineScope,
     dispatchers = dispatchers,
@@ -82,7 +90,7 @@ open class UnauthenticatedApolloWrapper(
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
         if (userMustBeLoggedIn) {
-            Log.i(TAG, "Could not perform mutation, it requires logged in user: $mutation")
+            Log.w(TAG, "Could not perform mutation, it requires logged in user: $mutation")
             return null
         }
         return super.performMutation(mutation, userMustBeLoggedIn)
@@ -93,20 +101,24 @@ open class UnauthenticatedApolloWrapper(
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
         if (userMustBeLoggedIn) {
-            Log.i(TAG, "Could not perform query, it requires logged in user: $query")
+            Log.w(TAG, "Could not perform query, it requires logged in user: $query")
             return null
         }
         return super.performQuery(query, userMustBeLoggedIn)
     }
+
+    companion object {
+        private const val TAG = "UnauthenticatedApolloWrapper"
+    }
 }
 
 /** Manages an Apollo client that can be used to fire queries and mutations at the Neeva backend. */
-abstract class ApolloWrapper(
+abstract class BaseApolloWrapper(
     _apolloClient: ApolloClient? = null,
     val coroutineScope: CoroutineScope,
     val dispatchers: Dispatchers,
     val neevaConstants: NeevaConstants
-) : CookieJar, Interceptor {
+) : CookieJar, Interceptor, ApolloWrapper {
     val apolloClient: ApolloClient = _apolloClient ?: createApolloClient()
 
     private fun createApolloClient(): ApolloClient {
@@ -137,7 +149,7 @@ abstract class ApolloWrapper(
         mutableListOf(neevaConstants.browserTypeCookie, neevaConstants.browserVersionCookie)
 
     @CallSuper
-    open suspend fun <D : Query.Data> performQuery(
+    override suspend fun <D : Query.Data> performQuery(
         query: Query<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
@@ -161,7 +173,7 @@ abstract class ApolloWrapper(
         }
     }
 
-    open fun <D : Mutation.Data> performMutationAsync(
+    override fun <D : Mutation.Data> performMutationAsync(
         mutation: Mutation<D>,
         userMustBeLoggedIn: Boolean,
         callback: (ApolloResponse<D>?) -> Unit
@@ -173,7 +185,7 @@ abstract class ApolloWrapper(
     }
 
     @CallSuper
-    open suspend fun <D : Mutation.Data> performMutation(
+    override suspend fun <D : Mutation.Data> performMutation(
         mutation: Mutation<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
@@ -198,6 +210,6 @@ abstract class ApolloWrapper(
     }
 
     companion object {
-        val TAG = ApolloWrapper::class.simpleName
+        private const val TAG = "BaseApolloWrapper"
     }
 }

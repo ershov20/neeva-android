@@ -20,7 +20,8 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalCardsPaneModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalNeevaUser
+import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.overflowmenu.OverflowMenu
@@ -36,7 +37,7 @@ import com.neeva.app.ui.widgets.menu.MenuSeparator
 fun CardsPaneToolbar(browserWrapper: BrowserWrapper) {
     val appNavModel = LocalAppNavModel.current
     val cardsPaneModel = LocalCardsPaneModel.current
-    val settingsDataModel = LocalEnvironment.current.settingsDataModel
+    val settingsDataModel = LocalSettingsDataModel.current
 
     val requireConfirmationWhenCloseAllTabs =
         settingsDataModel.getSettingsToggleValue(SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE)
@@ -112,7 +113,7 @@ private fun CardsPaneToolbarAddButton(
     browserWrapper: BrowserWrapper
 ) {
     val isCreateSpaceDialogVisible = remember { mutableStateOf(false) }
-    val neevaUser = LocalEnvironment.current.neevaUser
+    val neevaUser = LocalNeevaUser.current
     val isCreateSpaceEnabled = !neevaUser.isSignedOut()
     val isSpaces = cardsPaneModel.selectedScreen.value == SelectedScreen.SPACES
 

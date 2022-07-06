@@ -1,8 +1,8 @@
 package com.neeva.app.userdata
 
 import android.net.Uri
-import com.neeva.app.ApolloWrapper
 import com.neeva.app.UserInfoQuery
+import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.type.SubscriptionType
 
 data class NeevaUserData(

@@ -18,14 +18,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.settings.profile.ProfileRow
 import com.neeva.app.settings.profile.pictureUrlPainter
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.type.SpaceACLLevel
+import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.OneBooleanPreviewContainer
-import com.neeva.app.ui.TwoBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
@@ -148,44 +148,41 @@ fun SpaceHeaderStats(
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
-fun SpaceHeaderStatsPreview() {
-    TwoBooleanPreviewContainer { isOwner, isPublic ->
-        SpaceHeaderStats(isPublic = isPublic, numFollowers = 50, numViews = 100, isOwner = isOwner)
+fun SpaceHeaderStatsPreview_IsOwner() {
+    OneBooleanPreviewContainer { isPublic ->
+        SpaceHeaderStats(isPublic = isPublic, numFollowers = 50, numViews = 100, isOwner = true)
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
-fun SpaceHeaderPreview() {
-    OneBooleanPreviewContainer(useDarkTheme = false) { isOwner ->
-        SpaceHeader(
-            Space(
-                id = "c5rgtmtdv9enb8j1gv60",
-                name = "Facebook Papers",
-                description = "Facebook knows, in acute detail, that its platforms are riddled" +
-                    "with flaws but hasn’t fixed them. - WSJ",
-                lastModifiedTs = "2022-02-10T22:08:01Z",
-                thumbnail = null,
-                resultCount = 1,
-                isDefaultSpace = true,
-                isShared = true,
-                isPublic = false,
-                userACL = if (isOwner) SpaceACLLevel.Owner else SpaceACLLevel.PublicView,
-                ownerName = "Scott Galloway",
-                ownerPictureURL = null,
-                numViews = 100,
-                numFollowers = 25
-            )
-        )
+fun SpaceHeaderStatsPreview_NotOwner() {
+    OneBooleanPreviewContainer { isPublic ->
+        SpaceHeaderStats(isPublic = isPublic, numFollowers = 50, numViews = 100, isOwner = false)
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
-fun SpaceHeaderPreviewDark() {
-    OneBooleanPreviewContainer(useDarkTheme = true) { isOwner ->
+fun SpaceHeaderPreviewLight_NotOwner() = SpaceHeaderPreview(useDarkTheme = false, isOwner = false)
+
+@PortraitPreviews
+@Composable
+fun SpaceHeaderPreviewLight_IsOwner() = SpaceHeaderPreview(useDarkTheme = false, isOwner = true)
+
+@PortraitPreviews
+@Composable
+fun SpaceHeaderPreviewDark_NotOwner() = SpaceHeaderPreview(useDarkTheme = true, isOwner = false)
+
+@PortraitPreviews
+@Composable
+fun SpaceHeaderPreviewDark_IsOwner() = SpaceHeaderPreview(useDarkTheme = true, isOwner = true)
+
+@Composable
+private fun SpaceHeaderPreview(useDarkTheme: Boolean, isOwner: Boolean) {
+    NeevaThemePreviewContainer(useDarkTheme = useDarkTheme) {
         SpaceHeader(
             Space(
                 id = "c5rgtmtdv9enb8j1gv60",

@@ -35,20 +35,22 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalNeevaConstants
+import com.neeva.app.LocalPopupModel
+import com.neeva.app.LocalSpaceStore
 import com.neeva.app.R
 import com.neeva.app.settings.profile.ProfileImage
 import com.neeva.app.settings.profile.pictureUrlPainter
 import com.neeva.app.ui.NeevaSwitch
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun ShareSpaceUIContainer(spaceID: String) {
-    val spaceStore = LocalEnvironment.current.spaceStore
+    val spaceStore = LocalSpaceStore.current
     val spaceStoreState = spaceStore.stateFlow.collectAsState()
     val space = remember(spaceStoreState.value) {
         derivedStateOf {
@@ -57,9 +59,9 @@ fun ShareSpaceUIContainer(spaceID: String) {
     }
 
     val context = LocalContext.current
-    val snackbarModel = LocalEnvironment.current.popupModel
+    val snackbarModel = LocalPopupModel.current
     val appNavModel = LocalAppNavModel.current
-    val neevaConstants = LocalEnvironment.current.neevaConstants
+    val neevaConstants = LocalNeevaConstants.current
     val spaceURL = space.value?.url(neevaConstants) ?: Uri.parse(neevaConstants.appSpacesURL)
 
     ShareSpaceUI(
@@ -93,7 +95,7 @@ fun ShareSpaceUI(
     onMore: () -> Unit = {},
     onTogglePublic: (Boolean) -> Unit = {}
 ) {
-    Column() {
+    Column {
         NeevaSwitch(
             primaryLabel = stringResource(id = R.string.enable_link),
             secondaryLabel = stringResource(id = R.string.enable_link_subtitle),
@@ -272,9 +274,9 @@ fun SocialShareButton(
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
-fun ShareSpaceUIPreview() {
+fun ShareSpaceUIPreviewLight() {
     OneBooleanPreviewContainer(useDarkTheme = false) { isSpacePublic ->
         ShareSpaceUI(
             isSpacePublic = isSpacePublic,
@@ -285,7 +287,7 @@ fun ShareSpaceUIPreview() {
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
 fun ShareSpaceUIPreviewDark() {
     OneBooleanPreviewContainer(useDarkTheme = true) { isSpacePublic ->

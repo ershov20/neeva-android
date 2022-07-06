@@ -9,7 +9,6 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
-import androidx.compose.runtime.compositionLocalOf
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -349,5 +348,3 @@ data class LaunchLoginIntentParams(
     val passwordProvided: String? = null,
     val resultLauncher: ActivityResultLauncher<Intent>
 )
-
-val LocalFirstRunModel = compositionLocalOf<FirstRunModel> { error("No value set") }

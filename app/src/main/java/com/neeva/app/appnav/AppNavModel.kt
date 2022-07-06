@@ -1,5 +1,6 @@
 package com.neeva.app.appnav
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.navigation.NavDestination
@@ -8,6 +9,7 @@ import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /** Handles navigation between different screens, both internally and to external destinations. */
@@ -62,4 +64,38 @@ interface AppNavModel {
     fun shareSpace(space: Space)
 
     fun onMenuItem(id: OverflowMenuItemId)
+}
+
+class PreviewAppNavModel(context: Context) : AppNavModel {
+    override val currentDestination: StateFlow<NavDestination?> = MutableStateFlow(null)
+    override val navController: NavHostController = NavHostController(context)
+
+    override fun popBackStack() {}
+    override fun openLazyTab(focusUrlBar: Boolean) {}
+    override fun openUrl(url: Uri) {}
+    override fun showBrowser(forceUserToStayInCardGrid: Boolean) {}
+    override fun showCardGrid() {}
+    override fun showClearBrowsingSettings() {}
+    override fun showCookieCutterSettings() {}
+    override fun showDefaultBrowserSettings(fromWelcomeScreen: Boolean) {}
+    override fun showFeedback() {}
+    override fun showHelp() {}
+    override fun showHistory() {}
+    override fun showLicenses() {}
+    override fun showLocalFeatureFlagsPane() {}
+    override fun showProfileSettings() {}
+    override fun showSettings() {}
+    override fun showSpaceDetail(spaceID: String) { }
+    override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {}
+    override fun showShareSpaceSheet(spaceID: String) {}
+    override fun showWelcome() {}
+    override fun showSignInFlow() {}
+    override fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean) {}
+    override fun showAdditionalLicenses() {}
+    override fun openUrlViaIntent(uri: Uri) {}
+    override fun safeStartActivityForIntent(intent: Intent) {}
+    override fun showAddToSpace() {}
+    override fun shareCurrentPage() {}
+    override fun shareSpace(space: Space) {}
+    override fun onMenuItem(id: OverflowMenuItemId) {}
 }

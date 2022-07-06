@@ -1,15 +1,8 @@
 package com.neeva.app.spaces
 
-import android.graphics.Bitmap
 import android.net.Uri
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.storage.entities.Space
-import java.io.File
-
-/** Saves the given [Bitmap] as thumbnail to the given directory. */
-fun interface ThumbnailSaver {
-    suspend fun saveThumbnail(id: String, bitmap: Bitmap?): File?
-}
 
 /**
  * Converts the data provided in the Apollo response into a [Space].

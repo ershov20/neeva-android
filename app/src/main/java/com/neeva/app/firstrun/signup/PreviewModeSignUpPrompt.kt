@@ -6,9 +6,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalFirstRunModel
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.R
-import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.firstrun.rememberSignInFlowNavModel
 import com.neeva.app.ui.theme.Dimensions
 
@@ -21,7 +21,7 @@ fun PreviewModeSignUpPrompt(
     val appNavModel = LocalAppNavModel.current
     val firstRunModel = LocalFirstRunModel.current
     val signInFlowNavModel = rememberSignInFlowNavModel()
-    val neevaConstants = LocalEnvironment.current.neevaConstants
+    val neevaConstants = LocalNeevaConstants.current
 
     SignUpLandingScreen(
         launchLoginIntent = {

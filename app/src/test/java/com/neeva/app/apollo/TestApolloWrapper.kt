@@ -1,10 +1,12 @@
-package com.neeva.app
+package com.neeva.app.apollo
 
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Mutation
 import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.network.okHttpClient
+import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor

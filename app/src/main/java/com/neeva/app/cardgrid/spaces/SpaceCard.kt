@@ -36,7 +36,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.Dispatchers
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalDispatchers
+import com.neeva.app.LocalSpaceStore
 import com.neeva.app.R
 import com.neeva.app.cardgrid.Card
 import com.neeva.app.storage.BitmapIO
@@ -70,7 +71,7 @@ fun spaceThumbnailState(
     dispatchers: Dispatchers
 ): State<SpaceItemThumbnails> {
     val context = LocalContext.current.applicationContext
-    val spaceStoreState = LocalEnvironment.current.spaceStore.stateFlow.collectAsState()
+    val spaceStoreState = LocalSpaceStore.current.stateFlow.collectAsState()
 
     // By keying this on [spaceId], we can avoid recompositions until the spaceId changes.
     return produceState(
@@ -107,7 +108,7 @@ fun SpaceCard(
     isSpacePublic: Boolean,
     onSelect: () -> Unit,
     itemProvider: suspend (spaceId: String) -> List<SpaceItem>,
-    dispatchers: Dispatchers = LocalEnvironment.current.dispatchers
+    dispatchers: Dispatchers = LocalDispatchers.current
 ) {
     val spaceItemThumbnails by spaceThumbnailState(
         spaceId,

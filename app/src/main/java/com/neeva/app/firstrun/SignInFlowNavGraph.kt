@@ -11,7 +11,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.navigation
 import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalClientLogger
+import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.LocalNavHostController
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
@@ -67,11 +68,11 @@ class SignInFlowNavModel(
 @Composable
 fun rememberSignInFlowNavModel(): SignInFlowNavModel {
     val appNavModel = LocalAppNavModel.current
-    val localEnvironment = LocalEnvironment.current
+    val clientLogger = LocalClientLogger.current
     val navController = LocalNavHostController.current
 
-    return remember(appNavModel, localEnvironment, navController) {
-        SignInFlowNavModel(appNavModel, localEnvironment.clientLogger, navController)
+    return remember(appNavModel, clientLogger, navController) {
+        SignInFlowNavModel(appNavModel, clientLogger, navController)
     }
 }
 

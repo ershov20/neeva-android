@@ -12,6 +12,7 @@ import androidx.core.net.toUri
 import com.neeva.app.Dispatchers
 import com.neeva.app.previewDispatchers
 import com.neeva.app.publicsuffixlist.DomainProvider
+import com.neeva.app.publicsuffixlist.previewDomainProvider
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
@@ -192,12 +193,8 @@ abstract class FaviconCache(
 
 /** Favicon cache used for Composable previews.  Doesn't actually provide favicons. */
 val mockFaviconCache: FaviconCache by lazy {
-    val domainProvider = { uri: Uri? ->
-        uri?.authority?.split(".")?.takeLast(2)?.joinToString(".")
-    }
-
     object : FaviconCache(
-        domainProvider = domainProvider,
+        domainProvider = previewDomainProvider,
         dispatchers = previewDispatchers
     ) {
         override val parentDirectory =

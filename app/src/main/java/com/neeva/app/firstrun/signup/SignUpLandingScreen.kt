@@ -12,7 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
@@ -33,7 +33,7 @@ fun SignUpLandingContainer(
     navigateToSignIn: () -> Unit,
     showSignUpWithOther: () -> Unit
 ) {
-    val neevaConstants: NeevaConstants = LocalEnvironment.current.neevaConstants
+    val neevaConstants: NeevaConstants = LocalNeevaConstants.current
 
     SignUpLandingContainer(
         launchLoginIntent = launchLoginIntent,

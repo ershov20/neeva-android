@@ -2,10 +2,10 @@ package com.neeva.app.logging
 
 import android.util.Log
 import com.apollographql.apollo3.api.Optional
-import com.neeva.app.ApolloWrapper
 import com.neeva.app.BuildConfig
 import com.neeva.app.LogMutation
 import com.neeva.app.NeevaConstants
+import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.ClientLog
 import com.neeva.app.type.ClientLogBase

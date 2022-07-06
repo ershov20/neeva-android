@@ -29,7 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalDispatchers
 import com.neeva.app.R
 import com.neeva.app.storage.BitmapIO
 import com.neeva.app.storage.entities.Space
@@ -45,7 +45,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun getThumbnailAsync(uri: Uri?): State<ImageBitmap?> {
     val context = LocalContext.current
-    val dispatchers = LocalEnvironment.current.dispatchers
+    val dispatchers = LocalDispatchers.current
     // By keying this on [uri], we can avoid recompositions until [uri] changes.  This avoids
     // infinite loops of recompositions that can be triggered via [Flow.collectAsState()].
     return produceState<ImageBitmap?>(initialValue = null, uri) {

@@ -2,9 +2,9 @@ package com.neeva.app.browsing
 
 import android.content.Context
 import android.net.Uri
-import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
+import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.cookiecutter.RegularTrackersAllowList
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager

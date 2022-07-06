@@ -13,7 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 import com.neeva.app.Dispatchers
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalSpaceStore
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
@@ -225,7 +225,7 @@ class AppNavModelImpl(
         popupModel.showBottomSheet(
             titleResId = R.string.toolbar_save_to_space
         ) { onDismissRequested ->
-            val spaceStore = LocalEnvironment.current.spaceStore
+            val spaceStore = LocalSpaceStore.current
             val browserWrapper = webLayerModel.currentBrowser
             val activeTabModel = browserWrapper.activeTabModel
 

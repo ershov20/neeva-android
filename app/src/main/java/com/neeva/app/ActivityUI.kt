@@ -25,6 +25,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.toolbar.BrowserToolbarModel
 import com.neeva.app.cardgrid.CardsPaneModel
 import com.neeva.app.feedback.FeedbackViewModel
+import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -39,33 +40,28 @@ import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import kotlinx.coroutines.flow.StateFlow
 
-/** Classes that should be passed around the entire Composable hierarchy. */
-data class LocalEnvironmentState(
-    val apolloWrapper: ApolloWrapper,
-    val clientLogger: ClientLogger,
-    val dispatchers: Dispatchers,
-    val domainProvider: DomainProvider,
-    val historyManager: HistoryManager,
-    val neevaConstants: NeevaConstants,
-    val neevaUser: NeevaUser,
-    val popupModel: PopupModel,
-    val settingsDataModel: SettingsDataModel,
-    val sharedPreferencesModel: SharedPreferencesModel,
-    val spaceStore: SpaceStore,
-)
-
-val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("No value set") }
-val LocalBrowserToolbarModel = compositionLocalOf<BrowserToolbarModel> { error("No value set") }
-val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("No value set") }
-val LocalCardsPaneModel = compositionLocalOf<CardsPaneModel> { error("No value set") }
-val LocalEnvironment = compositionLocalOf<LocalEnvironmentState> { error("No value set") }
+val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("Not set") }
+val LocalBrowserToolbarModel = compositionLocalOf<BrowserToolbarModel> { error("Not set") }
+val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("Not set") }
+val LocalCardsPaneModel = compositionLocalOf<CardsPaneModel> { error("Not set") }
+val LocalClientLogger = compositionLocalOf<ClientLogger> { error("Not set") }
+val LocalDispatchers = compositionLocalOf<Dispatchers> { error("Not set") }
+val LocalDomainProvider = compositionLocalOf<DomainProvider> { error("Not set") }
+val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("Not set") }
+val LocalFirstRunModel = compositionLocalOf<FirstRunModel> { error("Not set") }
+val LocalHistoryManager = compositionLocalOf<HistoryManager> { error("Not set") }
 val LocalIsDarkTheme = compositionLocalOf { false }
-val LocalNavHostController = compositionLocalOf<NavHostController> { error("No value set") }
-val LocalSettingsController = compositionLocalOf<SettingsController> { error("No value set") }
-
-val LocalFeedbackViewModel = compositionLocalOf<FeedbackViewModel> { error("No value set") }
-val LocalRegularProfileZeroQueryViewModel =
-    compositionLocalOf<RegularProfileZeroQueryViewModel> { error("No value set") }
+val LocalNavHostController = compositionLocalOf<NavHostController> { error("Not set") }
+val LocalNeevaConstants = compositionLocalOf<NeevaConstants> { error("Not set") }
+val LocalNeevaUser = compositionLocalOf<NeevaUser> { error("Not set") }
+val LocalPopupModel = compositionLocalOf<PopupModel> { error("Not set") }
+val LocalRegularProfileZeroQueryViewModel = compositionLocalOf<RegularProfileZeroQueryViewModel> {
+    error("Not set")
+}
+val LocalSettingsController = compositionLocalOf<SettingsController> { error("Not set") }
+val LocalSettingsDataModel = compositionLocalOf<SettingsDataModel> { error("Not set") }
+val LocalSharedPreferencesModel = compositionLocalOf<SharedPreferencesModel> { error("Not set") }
+val LocalSpaceStore = compositionLocalOf<SpaceStore> { error("Not set") }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,7 +70,7 @@ fun ActivityUI(
     webLayerModel: WebLayerModel
 ) {
     val appNavModel = LocalAppNavModel.current
-    val popupModel = LocalEnvironment.current.popupModel
+    val popupModel = LocalPopupModel.current
 
     Scaffold(
         snackbarHost = {

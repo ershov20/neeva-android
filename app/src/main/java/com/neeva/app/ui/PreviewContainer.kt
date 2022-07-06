@@ -10,11 +10,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import com.apollographql.apollo3.api.ApolloResponse
+import com.apollographql.apollo3.api.Mutation
+import com.apollographql.apollo3.api.Query
+import com.neeva.app.LocalAppNavModel
+import com.neeva.app.LocalClientLogger
+import com.neeva.app.LocalDispatchers
+import com.neeva.app.LocalDomainProvider
+import com.neeva.app.LocalNavHostController
+import com.neeva.app.LocalNeevaConstants
+import com.neeva.app.LocalNeevaUser
+import com.neeva.app.LocalPopupModel
+import com.neeva.app.LocalSharedPreferencesModel
+import com.neeva.app.NeevaConstants
+import com.neeva.app.apollo.ApolloWrapper
+import com.neeva.app.appnav.PreviewAppNavModel
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.previewDispatchers
+import com.neeva.app.publicsuffixlist.previewDomainProvider
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserData
+import com.neeva.app.userdata.NeevaUserToken
 
 /**
  * Show a bunch of previews for the same Composable in a Column to reduce the number of previews has
@@ -40,9 +66,7 @@ fun PreviewContainer(
         }
     }
 
-    Column(
-        modifier = Modifier.wrapContentHeight(unbounded = true)
-    ) {
+    Column(modifier = Modifier.wrapContentHeight(unbounded = true)) {
         values.forEach { params ->
             Column(modifier = Modifier.wrapContentHeight(unbounded = true)) {
                 if (useDarkTheme == null) {
@@ -94,14 +118,66 @@ fun LightDarkPreviewContainer(content: @Composable () -> Unit) {
 
 @Composable
 fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () -> Unit) {
-    NeevaTheme(useDarkTheme = useDarkTheme) {
-        Box(
-            modifier = Modifier
-                .background(Color.Magenta)
-                .padding(Dimensions.PADDING_SMALL)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            content()
+    val coroutineScope = rememberCoroutineScope()
+    val previewSharedPreferencesModel = SharedPreferencesModel(LocalContext.current)
+    val previewNeevaConstants = NeevaConstants()
+    val previewNeevaUser = NeevaUser(
+        data = NeevaUserData(),
+        neevaUserToken = NeevaUserToken(previewSharedPreferencesModel, previewNeevaConstants)
+    )
+    val previewClientLogger = ClientLogger(
+        apolloWrapper = object : ApolloWrapper {
+            override suspend fun <D : Query.Data> performQuery(
+                query: Query<D>,
+                userMustBeLoggedIn: Boolean
+            ): ApolloResponse<D>? {
+                TODO("Not yet implemented")
+            }
+
+            override fun <D : Mutation.Data> performMutationAsync(
+                mutation: Mutation<D>,
+                userMustBeLoggedIn: Boolean,
+                callback: (ApolloResponse<D>?) -> Unit
+            ) {
+                TODO("Not yet implemented")
+            }
+
+            override suspend fun <D : Mutation.Data> performMutation(
+                mutation: Mutation<D>,
+                userMustBeLoggedIn: Boolean
+            ): ApolloResponse<D>? {
+                TODO("Not yet implemented")
+            }
+        },
+        sharedPreferencesModel = previewSharedPreferencesModel,
+        neevaConstants = previewNeevaConstants
+    )
+
+    // Provide classes that have no material impact on the Composable previews.  These can still be
+    // overridden by previews that need specific state to be displayed.
+    CompositionLocalProvider(
+        LocalAppNavModel provides PreviewAppNavModel(LocalContext.current),
+        LocalClientLogger provides previewClientLogger,
+        LocalDispatchers provides previewDispatchers,
+        LocalDomainProvider provides previewDomainProvider,
+        LocalNeevaConstants provides previewNeevaConstants,
+        LocalNeevaUser provides previewNeevaUser,
+        LocalPopupModel provides PopupModel(
+            coroutineScope = coroutineScope,
+            dispatchers = previewDispatchers
+        ),
+        LocalNavHostController provides NavHostController(LocalContext.current),
+        LocalSharedPreferencesModel provides previewSharedPreferencesModel
+    ) {
+        NeevaTheme(useDarkTheme = useDarkTheme) {
+            Box(
+                modifier = Modifier
+                    .background(Color.Magenta)
+                    .padding(Dimensions.PADDING_SMALL)
+                    .background(MaterialTheme.colorScheme.background)
+            ) {
+                content()
+            }
         }
     }
 }

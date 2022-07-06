@@ -23,12 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalDomainProvider
 import com.neeva.app.settings.profile.pictureUrlPainter
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
@@ -55,7 +55,7 @@ fun ColumnScope.SpaceEntityInfo(spaceItem: SpaceItem) {
 
 @Composable
 fun ColumnScope.RecipeOrProductInfo(spaceItem: SpaceItem) {
-    val domainProvider = LocalEnvironment.current.domainProvider
+    val domainProvider = LocalDomainProvider.current
     val faviconBitmap = spaceItem.url?.toBitmap()
     val domain = domainProvider.getRegisteredDomain(spaceItem.url)
 
@@ -204,7 +204,7 @@ fun ColumnScope.NewsInfo(
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
 fun SpaceEntityRecipeInfoPreview() {
     TwoBooleanPreviewContainer { isStarsNull, isTotalTimeNull ->
@@ -229,7 +229,7 @@ fun SpaceEntityRecipeInfoPreview() {
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
 fun SpaceEntityProductInfoPreview() {
     TwoBooleanPreviewContainer { isStarsNull, isPriceNull ->

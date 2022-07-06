@@ -4,12 +4,12 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalPopupModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BottomSheetDialogHost() {
-    val popupModel = LocalEnvironment.current.popupModel
+    val popupModel = LocalPopupModel.current
     val bottomSheetDialogHostState by popupModel.bottomSheetDialogState.collectAsState()
 
     bottomSheetDialogHostState?.let { hostState ->

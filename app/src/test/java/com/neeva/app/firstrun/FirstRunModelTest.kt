@@ -12,7 +12,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.TestApolloWrapper
+import com.neeva.app.apollo.TestApolloWrapper
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel

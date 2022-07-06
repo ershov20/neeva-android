@@ -2,11 +2,11 @@ package com.neeva.app.suggestions
 
 import android.net.Uri
 import android.util.Log
-import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.SuggestionsQuery
+import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger

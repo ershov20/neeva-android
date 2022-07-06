@@ -21,14 +21,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.settings.profile.pictureUrlPainter
 import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
 
@@ -38,7 +38,7 @@ fun SpaceItemDetail(
     showDescriptions: Boolean = false
 ) {
     val appNavModel = LocalAppNavModel.current
-    val neevaConstants = LocalEnvironment.current.neevaConstants
+    val neevaConstants = LocalNeevaConstants.current
     val isRegularWebItem = !spaceItem.url?.toString().isNullOrEmpty()
 
     Surface(
@@ -211,10 +211,17 @@ fun SpaceItemDetailMainContent(
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
-fun SpaceItemPreview() {
-    OneBooleanPreviewContainer { showDescriptions ->
+fun SpaceItemPreviewLight() = SpaceItemPreview(useDarkTheme = false)
+
+@PortraitPreviews
+@Composable
+fun SpaceItemPreviewDark() = SpaceItemPreview(useDarkTheme = true)
+
+@Composable
+private fun SpaceItemPreview(useDarkTheme: Boolean) {
+    OneBooleanPreviewContainer(useDarkTheme = useDarkTheme) { showDescriptions ->
         SpaceItemDetail(
             SpaceItem(
                 "asjdahjfad",
@@ -230,10 +237,17 @@ fun SpaceItemPreview() {
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
-fun SpaceSectionHeaderPreview() {
-    OneBooleanPreviewContainer { isDescriptionEmpty ->
+fun SpaceSectionHeaderPreviewLight() = SpaceSectionHeaderPreview(useDarkTheme = false)
+
+@PortraitPreviews
+@Composable
+fun SpaceSectionHeaderPreviewDark() = SpaceSectionHeaderPreview(useDarkTheme = true)
+
+@Composable
+private fun SpaceSectionHeaderPreview(useDarkTheme: Boolean) {
+    OneBooleanPreviewContainer(useDarkTheme = useDarkTheme) { isDescriptionEmpty ->
         SpaceItemDetail(
             SpaceItem(
                 "asjdahjfad",

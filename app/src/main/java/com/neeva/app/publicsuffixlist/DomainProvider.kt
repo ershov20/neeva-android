@@ -9,3 +9,9 @@ import android.net.Uri
 fun interface DomainProvider {
     fun getRegisteredDomain(uri: Uri?): String?
 }
+
+val previewDomainProvider: DomainProvider by lazy {
+    return@lazy DomainProvider { uri ->
+        uri?.authority?.split(".")?.takeLast(2)?.joinToString(".")
+    }
+}

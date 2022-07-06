@@ -2,6 +2,8 @@ package com.neeva.app
 
 import android.app.Application
 import android.content.Context
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.BrowserWrapperFactory
 import com.neeva.app.browsing.CacheCleaner
@@ -271,35 +273,5 @@ object NeevaAppModule {
     @Singleton
     fun providesWebLayerFactory(@ApplicationContext appContext: Context): WebLayerFactory {
         return WebLayerFactory(appContext)
-    }
-
-    @Provides
-    @Singleton
-    fun providesLocalEnvironment(
-        apolloWrapper: AuthenticatedApolloWrapper,
-        clientLogger: ClientLogger,
-        dispatchers: Dispatchers,
-        domainProvider: DomainProvider,
-        historyManager: HistoryManager,
-        neevaConstants: NeevaConstants,
-        neevaUser: NeevaUser,
-        settingsDataModel: SettingsDataModel,
-        sharedPreferencesModel: SharedPreferencesModel,
-        popupModel: PopupModel,
-        spaceStore: SpaceStore
-    ): LocalEnvironmentState {
-        return LocalEnvironmentState(
-            apolloWrapper = apolloWrapper,
-            clientLogger = clientLogger,
-            dispatchers = dispatchers,
-            domainProvider = domainProvider,
-            historyManager = historyManager,
-            neevaConstants = neevaConstants,
-            neevaUser = neevaUser,
-            settingsDataModel = settingsDataModel,
-            sharedPreferencesModel = sharedPreferencesModel,
-            popupModel = popupModel,
-            spaceStore = spaceStore
-        )
     }
 }

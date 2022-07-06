@@ -22,7 +22,9 @@ import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalDomainProvider
+import com.neeva.app.LocalHistoryManager
+import com.neeva.app.LocalPopupModel
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.daos.SitePlusVisit
@@ -50,9 +52,9 @@ fun HistoryUI(
     onOpenUrl: (Uri) -> Unit,
     faviconCache: FaviconCache
 ) {
-    val domainProvider = LocalEnvironment.current.domainProvider
-    val historyManager = LocalEnvironment.current.historyManager
-    val snackbarModel = LocalEnvironment.current.popupModel
+    val domainProvider = LocalDomainProvider.current
+    val historyManager = LocalHistoryManager.current
+    val snackbarModel = LocalPopupModel.current
     val context = LocalContext.current
 
     val allHistory = historyManager.getHistoryAfter(Date(0L)).collectAsLazyPagingItems()

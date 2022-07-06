@@ -30,7 +30,8 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalDomainProvider
+import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalRegularProfileZeroQueryViewModel
 import com.neeva.app.LocalSettingsController
 import com.neeva.app.NeevaConstants
@@ -61,10 +62,10 @@ fun RegularProfileZeroQuery(
     topContent: @Composable () -> Unit = {},
 ) {
     val browserWrapper = LocalBrowserWrapper.current
-    val domainProvider = LocalEnvironment.current.domainProvider
+    val domainProvider = LocalDomainProvider.current
     val appNavModel = LocalAppNavModel.current
     val settingsController = LocalSettingsController.current
-    val neevaUser = LocalEnvironment.current.neevaUser
+    val neevaUser = LocalNeevaUser.current
 
     val zeroQueryModel = LocalRegularProfileZeroQueryViewModel.current
     val suggestedSearchesWithDefaults by zeroQueryModel.suggestedSearches.collectAsState()

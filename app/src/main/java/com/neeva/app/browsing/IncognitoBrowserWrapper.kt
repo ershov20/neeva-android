@@ -4,10 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.apollographql.apollo3.api.Optional
-import com.neeva.app.ApolloWrapper
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.StartIncognitoMutation
+import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.cookiecutter.IncognitoTrackersAllowList
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.publicsuffixlist.DomainProvider

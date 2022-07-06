@@ -9,14 +9,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
+import com.neeva.app.R
+import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.getClickableAlpha
 
 @Composable
 fun StackedText(
     primaryLabel: String,
     secondaryLabel: String? = null,
-    maxLines: Int = 1,
+    primaryTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    secondaryTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    primaryMaxLines: Int = 1,
     secondaryMaxLines: Int = 1,
     showActualUrl: Boolean = false,
     enabled: Boolean = true,
@@ -25,9 +32,9 @@ fun StackedText(
     Column(modifier = modifier.alpha(getClickableAlpha(enabled))) {
         Text(
             text = primaryLabel,
-            style = MaterialTheme.typography.bodyLarge,
+            style = primaryTextStyle,
             color = MaterialTheme.colorScheme.onBackground,
-            maxLines = maxLines,
+            maxLines = primaryMaxLines,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth()
         )
@@ -39,12 +46,24 @@ fun StackedText(
                 Text(
                     text = secondaryLabel,
                     overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = secondaryTextStyle,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = secondaryMaxLines,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
         }
+    }
+}
+
+@PortraitPreviews
+@Composable
+fun StackedTextPreview() {
+    OneBooleanPreviewContainer { hasSecondaryLabel ->
+        StackedText(
+            primaryLabel = stringResource(R.string.debug_short_string_primary),
+            secondaryLabel =
+            stringResource(R.string.debug_long_string_secondary).takeIf { hasSecondaryLabel }
+        )
     }
 }

@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.neeva.app.LocalCardsPaneModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.browsing.WebLayerModel
 
 enum class SelectedScreen {
@@ -22,7 +22,7 @@ fun CardsPane(webLayerModel: WebLayerModel) {
     val cardsPaneModel = LocalCardsPaneModel.current
     val currentBrowsers by webLayerModel.browsersFlow.collectAsState()
     val currentBrowser = currentBrowsers.getCurrentBrowser()
-    val neevaConstants = LocalEnvironment.current.neevaConstants
+    val neevaConstants = LocalNeevaConstants.current
 
     Surface(
         color = MaterialTheme.colorScheme.background,

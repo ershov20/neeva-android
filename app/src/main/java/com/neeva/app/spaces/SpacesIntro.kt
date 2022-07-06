@@ -13,14 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
 import com.neeva.app.LocalIsDarkTheme
+import com.neeva.app.LocalSpaceStore
 import com.neeva.app.R
 import com.neeva.app.cardgrid.spaces.SpaceCard
 import com.neeva.app.firstrun.widgets.buttons.NeevaOnboardingButton
 import com.neeva.app.ui.NeevaThemePreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
@@ -29,7 +29,7 @@ fun SpacesIntro(
     dismissSheet: () -> Unit = {}
 ) {
     val appNavModel = LocalAppNavModel.current
-    val spaceStore = LocalEnvironment.current.spaceStore
+    val spaceStore = LocalSpaceStore.current
 
     Column(
         modifier = Modifier
@@ -93,7 +93,7 @@ fun SpacesIntro(onClick: () -> Unit = {}) {
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
 fun SpacesIntroPreviewLight() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
@@ -101,7 +101,7 @@ fun SpacesIntroPreviewLight() {
     }
 }
 
-@Preview
+@PortraitPreviews
 @Composable
 fun SpacesIntroPreviewDark() {
     NeevaThemePreviewContainer(useDarkTheme = true) {

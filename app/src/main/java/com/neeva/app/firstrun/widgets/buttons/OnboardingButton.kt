@@ -27,10 +27,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
+import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
-import com.neeva.app.firstrun.LocalFirstRunModel
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.getClickableAlpha

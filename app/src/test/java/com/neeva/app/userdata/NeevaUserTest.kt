@@ -7,7 +7,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.TestApolloWrapper
+import com.neeva.app.apollo.TestApolloWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi

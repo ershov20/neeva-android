@@ -9,7 +9,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,7 +31,6 @@ import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.rememberDismissState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SmallTopAppBar
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -47,11 +45,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalNeevaConstants
+import com.neeva.app.LocalSharedPreferencesModel
+import com.neeva.app.LocalSpaceStore
 import com.neeva.app.R
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.overflowmenu.OverflowMenuData
@@ -60,18 +58,21 @@ import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.ConfirmationAlertDialog
+import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.StackedText
 import com.neeva.app.ui.widgets.menu.MenuAction
 import com.neeva.app.ui.widgets.menu.MenuRowItem
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun SpaceDetail(spaceID: String?) {
-    val spaceStore = LocalEnvironment.current.spaceStore
+    val spaceStore = LocalSpaceStore.current
     val spaces = spaceStore.allSpacesFlow.collectAsState()
     val spaceStoreState = spaceStore.stateFlow.collectAsState()
     val fetchedSpace = spaceStore.fetchedSpaceFlow.collectAsState(initial = null)
@@ -85,7 +86,7 @@ fun SpaceDetail(spaceID: String?) {
         spaceStoreState = spaceStoreState.value,
         spaceID = spaceID
     )
-    val sharedPrefs = LocalEnvironment.current.sharedPreferencesModel
+    val sharedPrefs = LocalSharedPreferencesModel.current
     val showDescriptions = remember {
         mutableStateOf(
             sharedPrefs.getValue(
@@ -247,7 +248,7 @@ fun SpaceDetailToolbar(
     showRemoveSpaceConfirmationDialog: MutableState<Boolean>,
     toggleShowDescriptions: () -> Unit
 ) {
-    val neevaConstants = LocalEnvironment.current.neevaConstants
+    val neevaConstants = LocalNeevaConstants.current
     val url = space?.url(neevaConstants = neevaConstants)
     val canEdit = space?.userACL == SpaceACLLevel.Edit || space?.userACL == SpaceACLLevel.Owner
     val isTitleVisible by remember {
@@ -277,22 +278,12 @@ fun SpaceDetailToolbar(
                 enter = fadeIn(),
                 exit = fadeOut()
             ) {
-                Column {
-                    Text(
-                        text = space?.name ?: "",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = space?.ownerName ?: "",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
+                StackedText(
+                    primaryLabel = space?.name ?: "",
+                    secondaryLabel = space?.ownerName?.takeIf { it.isNotBlank() },
+                    primaryTextStyle = MaterialTheme.typography.titleSmall,
+                    secondaryTextStyle = MaterialTheme.typography.bodySmall
+                )
             }
         },
         actions = {
@@ -418,7 +409,7 @@ fun getSpaceContentsAsync(
     spaceStoreState: SpaceStore.State,
     spaceID: String?
 ): State<List<SpaceItem>?> {
-    val spaceStore = LocalEnvironment.current.spaceStore
+    val spaceStore = LocalSpaceStore.current
     return produceState<List<SpaceItem>?>(
         initialValue = null,
         spaceID,
@@ -430,14 +421,79 @@ fun getSpaceContentsAsync(
     }
 }
 
-@Preview
+@LandscapePreviews
+@PortraitPreviews
 @Composable
 fun SpaceDetailToolbarPreview() {
     OneBooleanPreviewContainer { showDescriptions ->
         val dialogState = remember { mutableStateOf(false) }
         SpaceDetailToolbar(
+            rememberLazyListState(initialFirstVisibleItemIndex = 1),
+            space = Space(
+                id = "unused",
+                name = "Space name",
+                lastModifiedTs = "Last modified",
+                thumbnail = null,
+                resultCount = 5,
+                isDefaultSpace = false,
+                isShared = false,
+                isPublic = false,
+                ownerName = "Name of the owner",
+                userACL = SpaceACLLevel.Owner
+            ),
+            showDescriptions = showDescriptions,
+            showRemoveSpaceConfirmationDialog = dialogState,
+            toggleShowDescriptions = {}
+        )
+    }
+}
+
+@LandscapePreviews
+@PortraitPreviews
+@Composable
+fun SpaceDetailToolbarPreviewNoOwner() {
+    OneBooleanPreviewContainer { showDescriptions ->
+        val dialogState = remember { mutableStateOf(false) }
+        SpaceDetailToolbar(
+            rememberLazyListState(initialFirstVisibleItemIndex = 1),
+            space = Space(
+                id = "unused",
+                name = "Space name",
+                lastModifiedTs = "Last modified",
+                thumbnail = null,
+                resultCount = 5,
+                isDefaultSpace = false,
+                isShared = false,
+                isPublic = false,
+                userACL = SpaceACLLevel.Owner
+            ),
+            showDescriptions = showDescriptions,
+            showRemoveSpaceConfirmationDialog = dialogState,
+            toggleShowDescriptions = {}
+        )
+    }
+}
+
+@LandscapePreviews
+@PortraitPreviews
+@Composable
+fun SpaceDetailToolbarPreviewNoTitle() {
+    OneBooleanPreviewContainer { showDescriptions ->
+        val dialogState = remember { mutableStateOf(false) }
+        SpaceDetailToolbar(
             rememberLazyListState(),
-            space = null,
+            space = Space(
+                id = "unused",
+                name = "Space name",
+                lastModifiedTs = "Last modified",
+                thumbnail = null,
+                resultCount = 5,
+                isDefaultSpace = false,
+                isShared = false,
+                isPublic = false,
+                ownerName = "Name of the owner",
+                userACL = SpaceACLLevel.Owner
+            ),
             showDescriptions = showDescriptions,
             showRemoveSpaceConfirmationDialog = dialogState,
             toggleShowDescriptions = {}

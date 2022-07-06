@@ -27,7 +27,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.findinpage.FindInPageModel
@@ -54,7 +54,7 @@ fun BrowserToolbarContainer(topOffset: Float) {
 
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
 
-    val enableShowDesktopSite = LocalEnvironment.current.settingsDataModel
+    val enableShowDesktopSite = LocalSettingsDataModel.current
         .getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
 
     val appNavModel = LocalAppNavModel.current

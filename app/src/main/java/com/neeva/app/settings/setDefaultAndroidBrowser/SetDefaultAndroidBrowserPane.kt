@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalEnvironment
+import com.neeva.app.LocalClientLogger
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
 import com.neeva.app.logging.LogConfig
@@ -57,7 +57,7 @@ fun SetDefaultAndroidBrowserPane(
     showAsDialog: Boolean,
     showZeroQuery: () -> Unit
 ) {
-    val clientLogger = LocalEnvironment.current.clientLogger
+    val clientLogger = LocalClientLogger.current
     val setDefaultAndroidBrowserManager = settingsController.getSetDefaultAndroidBrowserManager()
     val isRoleManagerAvailable = setDefaultAndroidBrowserManager.isRoleManagerAvailable()
 

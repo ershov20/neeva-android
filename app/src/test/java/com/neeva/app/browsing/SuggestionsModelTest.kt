@@ -6,7 +6,7 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.SuggestionsQuery
-import com.neeva.app.TestApolloWrapper
+import com.neeva.app.apollo.TestApolloWrapper
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
