@@ -46,11 +46,17 @@ tmpdir=$(mktemp -d -t $(basename $0)) || exit 1
 unzip $out_dir/weblayer_support.zip manifest/AndroidManifest.xml -d $tmpdir > /dev/null
 (cd $tmpdir && zip -r $out_dir_abs_path/weblayer_support_impl.zip . > /dev/null)
 
+mapping_file="$root_dir/app/build/outputs/mapping/$mode/mapping.txt"
+if [ -f $mapping_file ]; then
+    metadata_arg="--metadata-file=com.android.tools.build.obfuscation/proguard.map:$mapping_file"
+fi
+
 echo "Building build/$mode/neeva.aab..."
 $scripts_dir/bundletool.sh build-bundle \
     --modules=$out_dir/base.zip,$out_dir/weblayer_support_impl.zip \
     --output=$out_bundle \
-    --config=$scripts_dir/bundleconfig.json
+    --config=$scripts_dir/bundleconfig.json \
+    $metadata_arg
 
 echo "Building build/$mode/neeva.apks..."
 $scripts_dir/bundletool.sh build-apks --bundle=$out_bundle --output=$out_apks --overwrite
