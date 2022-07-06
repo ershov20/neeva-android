@@ -258,6 +258,15 @@
 
     <string name="chromium">Chromium</string>
 
+    <string name="neevascope">NeevaScope</string>
+    <string name="cheatsheet_info">
+        Tap on the Neeva logo to see information related to the website you\'re visiting.
+    </string>
+    <string name="cheatsheet_intro">
+        From related content to reviews, NeevaScope is your guide to the web!
+    </string>
+    <string name="cheatsheet_got_it">Got it!</string>
+
     <!-- Debug settings -->
     <string name="settings_debug_local" translatable="false">Advanced</string>
     <string name="settings_debug_local_feature_flags" translatable="false">Developer settings</string>
