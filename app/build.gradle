@@ -183,6 +183,7 @@ dependencies {
 
     testImplementation "junit:junit:$junit_version"
     testImplementation 'org.robolectric:robolectric:4.8.1'
+    testImplementation "io.mockk:mockk:1.12.4"
     testImplementation "io.strikt:strikt-core:$strikt_version"
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"

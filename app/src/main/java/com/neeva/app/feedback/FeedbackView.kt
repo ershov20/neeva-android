@@ -26,14 +26,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalFeedbackViewModel
+import com.neeva.app.LocalPopupModel
 import com.neeva.app.R
 import com.neeva.app.ui.AnimatedExpandShrink
 import com.neeva.app.ui.FullScreenDialogTopBar
+import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.NeevaSwitch
 import com.neeva.app.ui.NeevaThemePreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.theme.Dimensions
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,13 +43,16 @@ import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun FeedbackView(currentURLFlow: StateFlow<Uri>) {
-    val feedbackViewModel = LocalFeedbackViewModel.current
     val appNavModel = LocalAppNavModel.current
+    val feedbackViewModel = LocalFeedbackViewModel.current
+    val popupModel = LocalPopupModel.current
 
     val onDismiss = {
         appNavModel.popBackStack()
         feedbackViewModel.removeScreenshot()
     }
+
+    val acknowledgementString = stringResource(R.string.submit_feedback_acknowledgement)
 
     FeedbackView(
         currentURLFlow = currentURLFlow,
@@ -59,6 +64,8 @@ fun FeedbackView(currentURLFlow: StateFlow<Uri>) {
                 url = url,
                 screenshot = feedbackViewModel.screenshot?.takeIf { sendScreenshot }
             )
+
+            popupModel.showSnackbar(acknowledgementString)
 
             onDismiss()
         },
@@ -183,9 +190,8 @@ fun FeedbackView(
     }
 }
 
-@Preview("FeedbackView LTR 1x font scale, light", locale = "en")
-@Preview("FeedbackView LTR 2x font scale, light", locale = "en", fontScale = 2.0f)
-@Preview("FeedbackView RTL 1x font scale, light", locale = "he")
+@PortraitPreviews
+@LandscapePreviews
 @Composable
 fun FeedbackViewPreview_LightTheme() {
     val bitmap = createCheckerboardBitmap(false)
@@ -203,9 +209,8 @@ fun FeedbackViewPreview_LightTheme() {
     }
 }
 
-@Preview("FeedbackView LTR 1x font scale, dark", locale = "en")
-@Preview("FeedbackView LTR 2x font scale, dark", locale = "en", fontScale = 2.0f)
-@Preview("FeedbackView RTL 1x font scale, dark", locale = "he")
+@PortraitPreviews
+@LandscapePreviews
 @Composable
 fun FeedbackViewPreview_DarkTheme() {
     val bitmap = createCheckerboardBitmap(false)

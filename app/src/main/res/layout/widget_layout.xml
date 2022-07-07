@@ -2,76 +2,71 @@
 
 <!-- Used by the home screen widget.  This file must use classes that are supported by RemoteViews,
      so we purposefully ignore any Android Studio complaints about using AppCompat tags. -->
-<FrameLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_widget"
+    android:orientation="horizontal"
+    android:layout_gravity="center_vertical"
+    android:padding="12dp"
+    android:gravity="center_vertical" >
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_widget"
+        android:id="@+id/search_box"
+        android:background="@drawable/bg_widget_controls"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
         android:orientation="horizontal"
-        android:layout_gravity="center_vertical"
-        android:padding="12dp"
-        android:gravity="center_vertical" >
+        android:layout_weight="1">
 
-        <LinearLayout
-            android:id="@+id/search_box"
-            android:background="@drawable/bg_widget_controls"
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="16dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_neeva_logo" />
+
+        <TextView
             android:layout_width="0dp"
             android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:layout_weight="1">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="16dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_neeva_logo" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:textSize="16sp"
-                android:textColor="@color/widget_search_text"
-                android:text="@string/widget_search_neeva"
-                android:gravity="center_vertical"
-                android:layout_gravity="center_vertical"
-                android:paddingHorizontal="12dp"
-                android:maxLines="1"
-                android:ellipsize="end"
-                tools:ignore="NestedWeights" />
-
-        </LinearLayout>
-
-        <ImageView
-            android:id="@+id/spaces"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="14dp"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/ic_bookmarks_black_24"
-            android:tint="@color/widget_icon_tint"
-            android:background="@drawable/bg_widget_controls"
-            android:contentDescription="@string/spaces"
-            tools:ignore="UseAppTint" />
-
-        <ImageView
-            android:id="@+id/home"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:padding="14dp"
-            android:layout_marginStart="8dp"
-            android:src="@drawable/ic_house"
-            android:contentDescription="@string/home"
-            android:tint="@color/widget_icon_tint"
-            android:background="@drawable/bg_widget_controls"
-            tools:ignore="UseAppTint" />
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/widget_search_text"
+            android:text="@string/widget_search_neeva"
+            android:gravity="center_vertical"
+            android:layout_gravity="center_vertical"
+            android:paddingHorizontal="12dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            tools:ignore="NestedWeights" />
 
     </LinearLayout>
-</FrameLayout>
+
+    <ImageView
+        android:id="@+id/spaces"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="14dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_bookmarks_black_24"
+        android:tint="@color/widget_icon_tint"
+        android:background="@drawable/bg_widget_controls"
+        android:contentDescription="@string/spaces"
+        tools:ignore="UseAppTint" />
+
+    <ImageView
+        android:id="@+id/home"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:padding="14dp"
+        android:layout_marginStart="8dp"
+        android:src="@drawable/ic_house"
+        android:contentDescription="@string/home"
+        android:tint="@color/widget_icon_tint"
+        android:background="@drawable/bg_widget_controls"
+        tools:ignore="UseAppTint" />
+
+</LinearLayout>

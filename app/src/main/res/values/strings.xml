@@ -12,8 +12,6 @@
     <string name="cancel">Cancel</string>
     <string name="close">Close</string>
     <string name="undo">Undo</string>
-    <string name="done">Done</string>
-    <string name="remove">Remove</string>
     <string name="more">More</string>
     <string name="maybe_later">Maybe later</string>
 
@@ -44,14 +42,9 @@
     <string name="spaces">Spaces</string>
     <string name="tabs">Tabs</string>
     <string name="page_info">Page Info</string>string>
-    <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="unfollow">Unfollow</string>
 
-    <string name="spaces_edit">Edit spaces</string>
-
-    <string name="open_new_tab">Open new tab</string>
-    <string name="open_new_incognito_tab">Open new incognito tab</string>
     <string name="find_in_page">Find in page</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
@@ -67,10 +60,6 @@
     <string name="toolbar_tab_switcher">Manage your tabs</string>
     <string name="toolbar_neeva_menu">Open main menu</string>
 
-    <string name="history_today">Today</string>
-    <string name="history_yesterday">Yesterday</string>
-    <string name="history_this_week">This week</string>
-    <string name="history_earlier">Earlier</string>
     <string name="history_removed_visit">Removed \"%1$s\" from history</string>
     <string name="history_delete">Delete %1$s from history</string>
 
@@ -126,7 +115,6 @@
     <string name="settings_licenses">Licenses</string>
     <string name="settings_additional_licenses">Additional licenses</string>
     <string name="settings_terms">Terms</string>
-    <string name="privacy_policy">Privacy Policy</string>
     <string name="settings_sign_in_to_join_neeva">Sign In or Join Neeva</string>
     <string name="settings_signed_into_neeva_with">Signed in to Neeva with</string>
     <string name="settings_sign_out">Sign out</string>
@@ -136,7 +124,6 @@
     <string name="settings_browsing_history">Browsing history</string>
     <string name="settings_cache">Cache</string>
     <string name="settings_cookies_primary">Cookies</string>
-    <string name="settings_downloaded_files">Downloaded Files</string>
     <string name="settings_data_in_neeva_memory">Data In Neeva memory</string>
     <string name="settings_manage_neeva_memory">Manage Neeva memory</string>
     <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
@@ -166,11 +153,9 @@
     <string name="submit_feedback_help_center_link">Visit our help center!</string>
     <string name="submit_feedback_share_screenshot">Share screenshot</string>
     <string name="submit_feedback_share_screenshot_preview">Screenshot that will be shared with Neeva</string>
-    <string name="submit_feedback_remove_screenshot">Remove</string>
-    <string name="submit_feedback_upload_screenshot">Upload</string>
     <string name="submit_feedback_view_share_url">Share URL</string>
     <string name="submit_feedback_textfield_placeholder">Please share your questions, issues, or feature requests. Your feedback helps us improve Neeva!</string>
-    <string name="edit_feedback_url">Edit URL</string>
+    <string name="submit_feedback_acknowledgement">Sent. Thanks for your feedback!</string>
 
     <string name="tab_crashed_title">Uh oh!</string>
     <string name="tab_crashed_body">Something went wrong while displaying this web page</string>
@@ -220,15 +205,11 @@
     <string name="error_generic">Something went wrong</string>
     <string name="error_url_failure">Could not open \"%1$s\"</string>
 
-    <string name="navigate_to_profile">Navigate to Profile</string>
     <string name="switch_default_browser_title">Make Neeva your default browser</string>
     <string name="switch_default_browser_promo">Block invasive trackers across the Web.\nOpen links safely with blazing fast browsing and peace of mind.</string>
 
     <string name="switch_default_browser_follow_3_steps">Follow these 3 easy steps:</string>
-    <string name="switch_default_browser_instructions">
-        1. Go to Settings\n\n
-        2. Tap Browser App\n\n
-        3. Select Neeva</string>
+    <string name="switch_default_browser_instructions">1. Go to Settings\n\n2. Tap Browser App\n\n3. Select Neeva</string>
     <string name="go_to_settings">Go to Settings</string>
 
     <string name="menu_download_image">Download image</string>
@@ -248,7 +229,6 @@
     <string name="mobile_site">Mobile site</string>
 
     <string name="badge_image_text">%1$s+</string>
-    <string name="cookie_cutter_dismiss">Close Cookie Cutter popover</string>
 
     <string name="cookie_cutter_trackers">Trackers</string>
     <string name="cookie_cutter_popups">Cookie popups</string>

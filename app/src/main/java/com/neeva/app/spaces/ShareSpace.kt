@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,6 +35,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
@@ -219,7 +221,7 @@ fun SocialShareRow(
 }
 
 @Composable
-fun SocialShareButton(
+fun RowScope.SocialShareButton(
     name: String,
     iconResourceID: Int? = null,
     colorFilter: ColorFilter? = null,
@@ -228,7 +230,8 @@ fun SocialShareButton(
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(Dimensions.PADDING_TINY),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.weight(1.0f)
     ) {
         Surface(
             color = MaterialTheme.colorScheme.surface,
@@ -269,7 +272,9 @@ fun SocialShareButton(
             text = name,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
+            textAlign = TextAlign.Center,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
         )
     }
 }

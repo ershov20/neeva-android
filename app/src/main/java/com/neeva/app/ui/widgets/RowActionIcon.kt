@@ -1,5 +1,6 @@
 package com.neeva.app.ui.widgets
 
+import android.content.Context
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -17,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -45,6 +47,18 @@ data class RowActionIconParams(
         SHARE,
         SHOW_PAGE_INFO
     }
+
+    fun getContentDescriptionString(context: Context): String? {
+        if (contentDescription != null) return contentDescription
+
+        return when (actionType) {
+            ActionType.EDIT -> context.getString(R.string.edit_content_description)
+            ActionType.REFINE -> context.getString(R.string.refine_content_description)
+            ActionType.REFRESH -> context.getString(R.string.reload)
+
+            else -> null
+        }
+    }
 }
 
 @Composable
@@ -58,7 +72,7 @@ fun RowActionIconButton(iconParams: RowActionIconParams) {
         ) {
             RowActionIcon(
                 actionType = iconParams.actionType,
-                contentDescription = iconParams.contentDescription,
+                contentDescription = iconParams.getContentDescriptionString(LocalContext.current),
                 size = iconParams.size
             )
         }

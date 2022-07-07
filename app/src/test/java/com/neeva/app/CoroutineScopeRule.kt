@@ -2,6 +2,7 @@ package com.neeva.app
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -25,11 +26,16 @@ import org.junit.runners.model.Statement
 class CoroutineScopeRule : TestRule {
     val scope: TestScope = TestScope()
 
-    override fun apply(base: Statement?, description: Description?): Statement {
+    val dispatchers = Dispatchers(
+        main = StandardTestDispatcher(scope.testScheduler),
+        io = StandardTestDispatcher(scope.testScheduler)
+    )
+
+    override fun apply(base: Statement, description: Description): Statement {
         return object : Statement() {
             override fun evaluate() {
                 try {
-                    base?.evaluate()
+                    base.evaluate()
                 } finally {
                     scope.cancel()
                 }

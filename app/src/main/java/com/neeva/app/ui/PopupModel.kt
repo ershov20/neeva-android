@@ -10,13 +10,32 @@ import androidx.compose.runtime.Composable
 import com.neeva.app.Dispatchers
 import com.neeva.app.ui.widgets.bottomsheetdialog.BottomSheetDialogStates
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 data class DialogState(
     val content: @Composable (dismiss: () -> Unit) -> Unit
 )
+
+data class SnackbarCallbacks(
+    val onActionPerformed: () -> Unit = {},
+    val onDismissed: () -> Unit = {}
+) {
+    private var shouldFireCallback: Boolean = true
+
+    fun fireCallback(result: SnackbarResult) {
+        if (!shouldFireCallback) return
+        shouldFireCallback = false
+
+        when (result) {
+            SnackbarResult.ActionPerformed -> onActionPerformed()
+            SnackbarResult.Dismissed -> onDismissed()
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterialApi::class)
 data class BottomSheetDialogHostState(
@@ -34,9 +53,11 @@ data class BottomSheetDialogHostState(
 @OptIn(ExperimentalMaterialApi::class)
 class PopupModel(
     private val coroutineScope: CoroutineScope,
-    private val dispatchers: Dispatchers
-) {
+    private val dispatchers: Dispatchers,
     val snackbarHostState: SnackbarHostState = SnackbarHostState()
+) {
+    private var currentSnackbarJob: Job? = null
+    private var currentSnackbarCallbacks: SnackbarCallbacks? = null
 
     private val _dialogState = MutableStateFlow<DialogState?>(null)
     val dialogState: StateFlow<DialogState?> get() = _dialogState
@@ -52,7 +73,18 @@ class PopupModel(
         onActionPerformed: () -> Unit = {},
         onDismissed: () -> Unit = {}
     ) {
-        coroutineScope.launch(dispatchers.main) {
+        // Cancel any previously shown Snackbars instead of letting them queue up.
+        currentSnackbarJob
+            ?.takeIf { it.isActive }
+            ?.let {
+                it.cancel()
+                currentSnackbarCallbacks?.fireCallback(SnackbarResult.Dismissed)
+            }
+
+        // Show the new Snackbar.
+        val newSnackbarCallbacks = SnackbarCallbacks(onActionPerformed, onDismissed)
+        currentSnackbarCallbacks = newSnackbarCallbacks
+        currentSnackbarJob = coroutineScope.launch(dispatchers.main) {
             val result = snackbarHostState.showSnackbar(
                 message = message,
                 actionLabel = actionLabel,
@@ -60,9 +92,10 @@ class PopupModel(
                 duration = duration
             )
 
-            when (result) {
-                SnackbarResult.ActionPerformed -> onActionPerformed()
-                SnackbarResult.Dismissed -> onDismissed()
+            // Make sure that the correct callbacks are being fired.
+            if (isActive && currentSnackbarCallbacks == newSnackbarCallbacks) {
+                currentSnackbarCallbacks?.fireCallback(result)
+                currentSnackbarCallbacks = null
             }
         }
     }

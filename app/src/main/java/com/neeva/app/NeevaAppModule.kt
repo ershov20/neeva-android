@@ -137,7 +137,7 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesSnackbarModel(
+    fun providesPopupModel(
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers
     ): PopupModel {

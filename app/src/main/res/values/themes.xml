@@ -13,7 +13,7 @@
         <!-- Status bar color. -->
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:statusBarColor" tools:targetApi="l">@color/md_theme_light_surface</item>
+        <item name="android:statusBarColor">@color/md_theme_light_surface</item>
         <item name="android:navigationBarColor">@color/md_theme_light_surface</item>
     </style>
 

@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-
-    <!-- Used to signal that we're missing a color mapping somewhere. -->
-    <color name="resource_error">#ffff00ff</color>
-
     <!-- Derived colors.  If you change any of the parent colors, you must update these, as well.
          For example, "Surface 2" is equivalent to "Surface" with a tonal elevation of "2", which is
          tinted by some percentage of the Primary color.
