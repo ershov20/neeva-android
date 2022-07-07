@@ -3,7 +3,6 @@ package com.neeva.app.browsing
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
-import androidx.compose.runtime.State
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.cookiecutter.CookieCutterCallbacks
 import com.neeva.app.cookiecutter.CookieCuttingPreferences
@@ -49,7 +48,6 @@ class TabCallbacks(
     fullscreenCallback: FullscreenCallback,
     trackingDataFlow: MutableStateFlow<TrackingData?>,
     cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
-    enableTrackingProtection: State<Boolean>,
     domainProvider: DomainProvider,
     private val scriptInjectionManager: ScriptInjectionManager,
 ) {
@@ -58,7 +56,6 @@ class TabCallbacks(
         tabId = tab.guid,
         trackingDataFlow = trackingDataFlow,
         cookieNoticeBlockedFlow = cookieNoticeBlockedFlow,
-        enableTrackingProtection = enableTrackingProtection,
         domainProvider = domainProvider
     )
 

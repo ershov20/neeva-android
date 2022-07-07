@@ -635,7 +635,6 @@ abstract class BaseBrowserWrapper internal constructor(
             fullscreenCallback = fullscreenCallback,
             trackingDataFlow = cookieCutterModel.trackingDataFlow,
             cookieNoticeBlockedFlow = cookieCutterModel.cookieNoticeBlockedFlow,
-            enableTrackingProtection = cookieCutterModel.enableTrackingProtection,
             domainProvider = domainProvider,
             scriptInjectionManager = scriptInjectionManager,
         )

@@ -1,7 +1,6 @@
 package com.neeva.app.cookiecutter
 
 import android.net.Uri
-import androidx.compose.runtime.State
 import com.neeva.app.browsing.getActiveTabId
 import com.neeva.app.cookiecutter.TrackingEntity.Companion.trackingEntityForHost
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -53,7 +52,6 @@ class TabCookieCutterModel(
     private val tabId: String,
     private val trackingDataFlow: MutableStateFlow<TrackingData?>,
     private val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
-    private val enableTrackingProtection: State<Boolean>,
     val domainProvider: DomainProvider
 ) {
     // set this to true to enable cookie cutter
@@ -74,17 +72,6 @@ class TabCookieCutterModel(
         }
 
     private var stats: Map<String, Int>? = null
-        // TODO(kobec/chung): when darin fixes the stopFiltering() method, remove this get()
-        get() {
-            // Because ContentFilterManager.stopFiltering() doesn't stop
-            // onContentFilterStatsUpdated() from being called, we need to return null when the
-            // Tracking Protection toggle is disabled.
-            return if (enableTrackingProtection.value) {
-                field
-            } else {
-                null
-            }
-        }
         set(value) {
             field = value
 
