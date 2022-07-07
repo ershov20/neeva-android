@@ -9,3 +9,4 @@ symbol_level = 1
 is_official_build = true
 proprietary_codecs=true
 ffmpeg_branding="Chrome"
+cc_wrapper = "ccache"
