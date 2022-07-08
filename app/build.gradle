@@ -19,8 +19,8 @@ android {
 
         minSdk min_sdk_version
         targetSdk target_sdk_version
-        versionCode 103
-        versionName "0.73.0"
+        versionCode 104
+        versionName "0.73.1"
 
         manifestPlaceholders = [isolatedSplits: true]
 
