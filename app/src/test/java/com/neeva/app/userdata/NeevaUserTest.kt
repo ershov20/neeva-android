@@ -7,7 +7,8 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.apollo.TestApolloWrapper
+import com.neeva.app.UserInfoQuery
+import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,7 +33,7 @@ class NeevaUserTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    private lateinit var apolloWrapper: TestApolloWrapper
+    private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
     private lateinit var dispatchers: Dispatchers
     private lateinit var mockWebLayerModel: WebLayerModel
     private lateinit var neevaConstants: NeevaConstants
@@ -48,7 +49,10 @@ class NeevaUserTest : BaseTest() {
         neevaConstants = NeevaConstants()
         setUpLoggedInUser(ApplicationProvider.getApplicationContext())
         setUpMockWeblayerModel()
-        apolloWrapper = TestApolloWrapper(neevaUserToken = neevaUserToken)
+        apolloWrapper = TestAuthenticatedApolloWrapper(
+            neevaUserToken = neevaUserToken,
+            neevaConstants = neevaConstants
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
     }
 
@@ -103,7 +107,7 @@ class NeevaUserTest : BaseTest() {
 
     @Test
     fun fetch_goodResponse_setsUser() {
-        apolloWrapper.addResponse(FETCH_RESPONSE)
+        apolloWrapper.registerTestResponse(UserInfoQuery(), USER_RESPONSE)
         coroutineScopeRule.scope.advanceUntilIdle()
         runBlocking {
             neevaUser.fetch(apolloWrapper)
@@ -121,21 +125,19 @@ class NeevaUserTest : BaseTest() {
     }
 
     companion object {
-        val FETCH_RESPONSE = """
-            {
-                "data": {
-                    "user": {
-                        "id":"response_id",
-                        "profile": {
-                            "displayName": "response_displayName",
-                            "email": "response_email",
-                            "pictureURL": "response_pictureUrl"
-                        },
-                        "flags": [],
-                        "featureFlags": []
-                    }
-                }
-            }
-        """.trimIndent()
+        val USER_RESPONSE = UserInfoQuery.Data(
+            user = UserInfoQuery.User(
+                id = "response_id",
+                profile = UserInfoQuery.Profile(
+                    displayName = "response_displayName",
+                    email = "response_email",
+                    pictureURL = "response_pictureUrl"
+                ),
+                flags = emptyList(),
+                featureFlags = emptyList(),
+                authProvider = null,
+                subscriptionType = null
+            )
+        )
     }
 }

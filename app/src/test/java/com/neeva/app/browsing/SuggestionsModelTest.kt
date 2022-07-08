@@ -6,7 +6,7 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.SuggestionsQuery
-import com.neeva.app.apollo.TestApolloWrapper
+import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -19,6 +19,7 @@ import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.suggestions.toQueryRowSuggestion
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
+import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive
@@ -54,11 +55,12 @@ class SuggestionsModelTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    private lateinit var apolloWrapper: TestApolloWrapper
+    private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
     private lateinit var clientLogger: ClientLogger
     private lateinit var historyManager: HistoryManager
     private lateinit var model: SuggestionsModel
-    private val neevaConstants = NeevaConstants()
+    private lateinit var neevaConstants: NeevaConstants
+    private lateinit var neevaUserToken: NeevaUserToken
     private lateinit var siteSuggestions: MutableStateFlow<List<NavSuggestion>>
     private lateinit var urlBarIsEditing: MutableStateFlow<Boolean>
     private lateinit var urlBarText: MutableStateFlow<TextFieldValue>
@@ -79,7 +81,9 @@ class SuggestionsModelTest : BaseTest() {
         historyManager = mock()
         Mockito.`when`(historyManager.historySuggestions).thenReturn(siteSuggestions)
 
-        apolloWrapper = TestApolloWrapper()
+        neevaConstants = NeevaConstants()
+        neevaUserToken = mock()
+        apolloWrapper = TestAuthenticatedApolloWrapper(neevaUserToken, neevaConstants)
 
         val settingsDataModel = mock<SettingsDataModel> {
             on {
@@ -136,7 +140,10 @@ class SuggestionsModelTest : BaseTest() {
 
     @Test
     fun onUrlBarChanged_withEmptyString_doesNoQuery() {
-        apolloWrapper.addResponse(FULL_RESPONSE)
+        apolloWrapper.registerTestResponse(
+            SuggestionsQuery(query = ""),
+            FULL_RESPONSE_DATA
+        )
 
         coroutineScopeRule.scope.advanceUntilIdle()
         runBlocking {
@@ -148,7 +155,10 @@ class SuggestionsModelTest : BaseTest() {
 
     @Test
     fun onUrlBarChanged_withNonEmptyString_firesRequestAndProcessesResult() {
-        apolloWrapper.addResponse(FULL_RESPONSE)
+        apolloWrapper.registerTestResponse(
+            SuggestionsQuery(query = "query text"),
+            FULL_RESPONSE_DATA
+        )
 
         // Set the autocomplete suggestion.
         siteSuggestions.value = listOf(
@@ -265,177 +275,166 @@ class SuggestionsModelTest : BaseTest() {
     }
 
     companion object {
-        val FULL_RESPONSE = """{
-            "data":{
-                "suggest":{
-                    "querySuggestion":[
-                        {
-                            "type":"Standard",
-                            "suggestedQuery":"reddit",
-                            "boldSpan":[
-                                {
-                                    "startInclusive":0,
-                                    "endExclusive":5
-                                }
-                            ],
-                            "source":"Bing",
-                            "annotation":{
-                                "annotationType":null,
-                                "description":null,
-                                "imageURL":null,
-                                "stockInfo":null,
-                                "dictionaryInfo":null
-                            }
-                        },
-                        {
-                            "type":"Standard",
-                            "suggestedQuery":"reddit nfl streams",
-                            "boldSpan":[
-                                {
-                                    "startInclusive":0,
-                                    "endExclusive":5
-                                }
-                            ],
-                            "source":"Bing",
-                            "annotation":{
-                                "annotationType":null,
-                                "description":null,
-                                "imageURL":null,
-                                "stockInfo":null,
-                                "dictionaryInfo":null
-                            }
-                        },
-                        {
-                            "type":"Standard",
-                            "suggestedQuery":"reddit news",
-                            "boldSpan":[
-                                {
-                                    "startInclusive":0,
-                                    "endExclusive":5
-                                }
-                            ],
-                            "source":"Bing",
-                            "annotation":{
-                                "annotationType":null,
-                                "description":null,
-                                "imageURL":null,
-                                "stockInfo":null,
-                                "dictionaryInfo":null
-                            }
-                        },
-                        {
-                            "type":"Standard",
-                            "suggestedQuery":"reddit.com",
-                            "boldSpan":[
-                                {
-                                    "startInclusive":0,
-                                    "endExclusive":5
-                                }
-                            ],
-                            "source":"Bing",
-                            "annotation":{
-                                "annotationType":null,
-                                "description":null,
-                                "imageURL":null,
-                                "stockInfo":null,
-                                "dictionaryInfo":null
-                            }
-                        },
-                        {
-                            "type":"Standard",
-                            "suggestedQuery":"reddit cfb",
-                            "boldSpan":[
-                                {
-                                    "startInclusive":0,
-                                    "endExclusive":5
-                                }
-                            ],
-                            "source":"Bing",
-                            "annotation":{
-                                "annotationType":null,
-                                "description":null,
-                                "imageURL":null,
-                                "stockInfo":null,
-                                "dictionaryInfo":null
-                            }
-                        }
-                    ],
-                    "urlSuggestion":[
-                        {
-                            "icon":{
-                                "labels":null
-                            },
-                            "suggestedURL":"https://www.reddit.com/",
-                            "title":"https://www.reddit.com/",
-                            "author":"",
-                            "timestamp":null,
-                            "subtitle":"reddit: the front page of the internet",
-                            "sourceQueryIndex":0,
-                            "boldSpan":[
-                                {
-                                    "startInclusive":12,
-                                    "endExclusive":17
-                                }
-                            ]
-                        },
-                        {
-                            "icon":{
-                                "labels":null
-                            },
-                            "suggestedURL":"https://nflthursday.com/reddit-nfl-streams/",
-                            "title":"https://nflthursday.com/reddit-nfl-streams/",
-                            "author":"",
-                            "timestamp":null,
-                            "subtitle":"Reddit NFL streams is banned - How to watch this weeks ...",
-                            "sourceQueryIndex":1,
-                            "boldSpan":[
-                                {
-                                    "startInclusive":24,
-                                    "endExclusive":29
-                                }
-                            ]
-                        },
-                        {
-                            "icon":{
-                                "labels":null
-                            },
-                            "suggestedURL":"https://www.reddit.com/r/news/",
-                            "title":"https://www.reddit.com/r/news/",
-                            "author":"",
-                            "timestamp":null,
-                            "subtitle":"News - reddit",
-                            "sourceQueryIndex":2,
-                            "boldSpan":[
-                                {
-                                    "startInclusive":12,
-                                    "endExclusive":17
-                                }
-                            ]
-                        },
-                        {
-                            "icon":{
-                                "labels":null
-                            },
-                            "suggestedURL":"https://www.reddit.com/r/cfb",
-                            "title":"https://www.reddit.com/r/cfb",
-                            "author":"",
-                            "timestamp":null,
-                            "subtitle":"r/CFB - Reddit",
-                            "sourceQueryIndex":4,
-                            "boldSpan":[
-                                {
-                                    "startInclusive":12,
-                                    "endExclusive":17
-                                }
-                            ]
-                        }
-                    ],
-                    "lenseSuggestion":null,
-                    "bangSuggestion":null,
-                    "activeLensBangInfo":null
-                }
-            }
-        }
-        """.trimIndent()
+        val FULL_RESPONSE_DATA = SuggestionsQuery.Data(
+            suggest = SuggestionsQuery.Suggest(
+                querySuggestion = listOf(
+                    SuggestionsQuery.QuerySuggestion(
+                        type = QuerySuggestionType.Standard,
+                        suggestedQuery = "reddit",
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan(
+                                startInclusive = 0,
+                                endExclusive = 5
+                            )
+                        ),
+                        source = QuerySuggestionSource.Bing,
+                        annotation = SuggestionsQuery.Annotation(
+                            annotationType = null,
+                            description = null,
+                            imageURL = null,
+                            stockInfo = null,
+                            dictionaryInfo = null
+                        )
+                    ),
+                    SuggestionsQuery.QuerySuggestion(
+                        type = QuerySuggestionType.Standard,
+                        suggestedQuery = "reddit nfl streams",
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan(
+                                startInclusive = 0,
+                                endExclusive = 5
+                            )
+                        ),
+                        source = QuerySuggestionSource.Bing,
+                        annotation = SuggestionsQuery.Annotation(
+                            annotationType = null,
+                            description = null,
+                            imageURL = null,
+                            stockInfo = null,
+                            dictionaryInfo = null
+                        )
+                    ),
+                    SuggestionsQuery.QuerySuggestion(
+                        type = QuerySuggestionType.Standard,
+                        suggestedQuery = "reddit news",
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan(
+                                startInclusive = 0,
+                                endExclusive = 5
+                            )
+                        ),
+                        source = QuerySuggestionSource.Bing,
+                        annotation = SuggestionsQuery.Annotation(
+                            annotationType = null,
+                            description = null,
+                            imageURL = null,
+                            stockInfo = null,
+                            dictionaryInfo = null
+                        )
+                    ),
+                    SuggestionsQuery.QuerySuggestion(
+                        type = QuerySuggestionType.Standard,
+                        suggestedQuery = "reddit.com",
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan(
+                                startInclusive = 0,
+                                endExclusive = 5
+                            )
+                        ),
+                        source = QuerySuggestionSource.Bing,
+                        annotation = SuggestionsQuery.Annotation(
+                            annotationType = null,
+                            description = null,
+                            imageURL = null,
+                            stockInfo = null,
+                            dictionaryInfo = null
+                        )
+                    ),
+                    SuggestionsQuery.QuerySuggestion(
+                        type = QuerySuggestionType.Standard,
+                        suggestedQuery = "reddit cfb",
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan(
+                                startInclusive = 0,
+                                endExclusive = 5
+                            )
+                        ),
+                        source = QuerySuggestionSource.Bing,
+                        annotation = SuggestionsQuery.Annotation(
+                            annotationType = null,
+                            description = null,
+                            imageURL = null,
+                            stockInfo = null,
+                            dictionaryInfo = null
+                        )
+                    )
+                ),
+                urlSuggestion = listOf(
+                    SuggestionsQuery.UrlSuggestion(
+                        icon = SuggestionsQuery.Icon(labels = null),
+                        suggestedURL = "https://www.reddit.com/",
+                        title = "https://www.reddit.com/",
+                        author = "",
+                        timestamp = null,
+                        subtitle = "reddit: the front page of the internet",
+                        sourceQueryIndex = 0,
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan1(
+                                startInclusive = 12,
+                                endExclusive = 17
+                            )
+                        )
+                    ),
+                    SuggestionsQuery.UrlSuggestion(
+                        icon = SuggestionsQuery.Icon(labels = null),
+                        suggestedURL = "https://nflthursday.com/reddit-nfl-streams/",
+                        title = "https://nflthursday.com/reddit-nfl-streams/",
+                        author = "",
+                        timestamp = null,
+                        subtitle = "Reddit NFL streams is banned - How to watch this weeks ...",
+                        sourceQueryIndex = 1,
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan1(
+                                startInclusive = 24,
+                                endExclusive = 29
+                            )
+                        )
+                    ),
+                    SuggestionsQuery.UrlSuggestion(
+                        icon = SuggestionsQuery.Icon(labels = null),
+                        suggestedURL = "https://www.reddit.com/r/news/",
+                        title = "https://www.reddit.com/r/news/",
+                        author = "",
+                        timestamp = null,
+                        subtitle = "News - reddit",
+                        sourceQueryIndex = 2,
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan1(
+                                startInclusive = 12,
+                                endExclusive = 17
+                            )
+                        )
+                    ),
+                    SuggestionsQuery.UrlSuggestion(
+                        icon = SuggestionsQuery.Icon(labels = null),
+                        suggestedURL = "https://www.reddit.com/r/cfb",
+                        title = "https://www.reddit.com/r/cfb",
+                        author = "",
+                        timestamp = null,
+                        subtitle = "r/CFB - Reddit",
+                        sourceQueryIndex = 4,
+                        boldSpan = listOf(
+                            SuggestionsQuery.BoldSpan1(
+                                startInclusive = 12,
+                                endExclusive = 17
+                            )
+                        )
+                    )
+                ),
+                lenseSuggestion = null,
+                bangSuggestion = null,
+                activeLensBangInfo = null
+            )
+        )
     }
 }

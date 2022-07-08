@@ -11,7 +11,7 @@ import com.google.android.gms.tasks.Tasks
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.NeevaConstants
-import com.neeva.app.apollo.TestApolloWrapper
+import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
@@ -39,7 +39,7 @@ class FirstRunModelTest : BaseTest() {
 
     private lateinit var context: Context
     private lateinit var firstRunModel: FirstRunModel
-    private lateinit var apolloWrapper: TestApolloWrapper
+    private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
 
     override fun setUp() {
         super.setUp()
@@ -53,7 +53,10 @@ class FirstRunModelTest : BaseTest() {
             neevaConstants = neevaConstants
         )
 
-        apolloWrapper = TestApolloWrapper(neevaUserToken = neevaUserToken)
+        apolloWrapper = TestAuthenticatedApolloWrapper(
+            neevaUserToken = neevaUserToken,
+            neevaConstants = neevaConstants
+        )
         val clientLogger = ClientLogger(
             apolloWrapper,
             coroutineScopeRule.scope,
@@ -78,11 +81,6 @@ class FirstRunModelTest : BaseTest() {
             popupModel = popupModel,
             googleSignInAccountProvider = { Tasks.forResult(signInAccount) }
         )
-    }
-
-    override fun tearDown() {
-        apolloWrapper.tearDown()
-        super.tearDown()
     }
 
     @Test fun handleLoginActivityResult_onSuccessCalledWithValidResult() =

@@ -398,6 +398,22 @@ class SpaceStore(
             }
     }
 
+    internal fun createAddToSpaceMutation(
+        space: Space,
+        url: Uri,
+        title: String,
+        description: String? = null
+    ) = AddToSpaceMutation(
+        input = AddSpaceResultByURLInput(
+            spaceID = space.id,
+            url = url.toString(),
+            title = title,
+            data = description?.let { Optional.presentIfNotNull(it) }
+                ?: Optional.Absent,
+            mediaType = Optional.presentIfNotNull("text/plain")
+        )
+    )
+
     suspend fun addToSpace(
         space: Space,
         url: Uri,
@@ -408,16 +424,7 @@ class SpaceStore(
         val spaceID = space.id
         stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
         val response = authenticatedApolloWrapper.performMutation(
-            AddToSpaceMutation(
-                input = AddSpaceResultByURLInput(
-                    spaceID = spaceID,
-                    url = url.toString(),
-                    title = title,
-                    data = description?.let { Optional.presentIfNotNull(it) }
-                        ?: Optional.Absent,
-                    mediaType = Optional.presentIfNotNull("text/plain")
-                )
-            ),
+            createAddToSpaceMutation(space, url, title, description),
             userMustBeLoggedIn = true
         )
 
@@ -508,16 +515,21 @@ class SpaceStore(
         }
     }
 
+    internal fun createDeleteSpaceResultByURLMutation(
+        space: Space,
+        uri: Uri
+    ) = DeleteSpaceResultByURLMutation(
+        input = DeleteSpaceResultByURLInput(
+            spaceID = space.id,
+            url = uri.toString(),
+        )
+    )
+
     suspend fun removeFromSpace(space: Space, uri: Uri): Boolean {
         val spaceID = space.id
         stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
         val response = authenticatedApolloWrapper.performMutation(
-            DeleteSpaceResultByURLMutation(
-                input = DeleteSpaceResultByURLInput(
-                    spaceID = spaceID,
-                    url = uri.toString(),
-                )
-            ),
+            createDeleteSpaceResultByURLMutation(space, uri),
             userMustBeLoggedIn = true
         )
 
