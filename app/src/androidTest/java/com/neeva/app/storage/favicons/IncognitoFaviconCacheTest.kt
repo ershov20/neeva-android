@@ -15,7 +15,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
-import org.junit.Before
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -29,8 +28,8 @@ class IncognitoFaviconCacheTest : BaseHiltTest() {
     private lateinit var dispatchers: Dispatchers
     private lateinit var incognitoFaviconCache: IncognitoFaviconCache
 
-    @Before
-    fun setUp() {
+    override fun setUp() {
+        super.setUp()
         context = ApplicationProvider.getApplicationContext()
         val filesDir = context.cacheDir
 

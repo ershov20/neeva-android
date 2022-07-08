@@ -30,32 +30,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-
-@Module
-@InstallIn(SingletonComponent::class)
-object NeevaConstantsModule {
-    @Provides
-    @Singleton
-    fun providesNeevaConstants(settingsDataModel: SettingsDataModel): NeevaConstants {
-        // This is done during initialization so that the app consistently hits the same server
-        // during the app's lifetime.  To use a different host, you will need to restart the app.
-        val appHost = when {
-            settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_M1_APP_HOST) -> {
-                "m1.neeva.com"
-            }
-
-            settingsDataModel
-                .getSettingsToggleValue(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST) -> {
-                "local.neeva.dev"
-            }
-
-            else -> {
-                "neeva.com"
-            }
-        }
-        return NeevaConstants(appHost = appHost)
-    }
-}
+import kotlinx.coroutines.SupervisorJob
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -70,6 +45,21 @@ object NeevaAppModule {
     @Singleton
     fun provideCacheCleaner(directories: Directories): CacheCleaner {
         return CacheCleaner(directories)
+    }
+
+    @Provides
+    @Singleton
+    fun provideCoroutineScope(dispatchers: Dispatchers): CoroutineScope {
+        return CoroutineScope(SupervisorJob() + dispatchers.main)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDispatchers(): Dispatchers {
+        return Dispatchers(
+            main = kotlinx.coroutines.Dispatchers.Main.immediate,
+            io = kotlinx.coroutines.Dispatchers.IO,
+        )
     }
 
     @Provides
@@ -96,43 +86,20 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesAuthenticatedApolloWrapper(
-        neevaUserToken: NeevaUserToken,
-        neevaConstants: NeevaConstants,
-        coroutineScope: CoroutineScope,
-        dispatchers: Dispatchers
-    ): AuthenticatedApolloWrapper {
-        return AuthenticatedApolloWrapper(
-            neevaUserToken = neevaUserToken,
-            neevaConstants = neevaConstants,
-            coroutineScope = coroutineScope,
-            dispatchers = dispatchers
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun providesUnauthenticatedApolloWrapper(
-        neevaConstants: NeevaConstants,
-        coroutineScope: CoroutineScope,
-        dispatchers: Dispatchers
-    ): UnauthenticatedApolloWrapper {
-        return UnauthenticatedApolloWrapper(
-            _apolloClient = null,
-            coroutineScope = coroutineScope,
-            dispatchers = dispatchers,
-            neevaConstants = neevaConstants
-        )
-    }
-
-    @Provides
-    @Singleton
     fun providesClientLogger(
         apolloWrapper: AuthenticatedApolloWrapper,
-        sharedPreferencesModel: SharedPreferencesModel,
-        neevaConstants: NeevaConstants
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+        neevaConstants: NeevaConstants,
+        sharedPreferencesModel: SharedPreferencesModel
     ): ClientLogger {
-        return ClientLogger(apolloWrapper, sharedPreferencesModel, neevaConstants)
+        return ClientLogger(
+            apolloWrapper,
+            coroutineScope,
+            dispatchers,
+            neevaConstants,
+            sharedPreferencesModel
+        )
     }
 
     @Provides
@@ -142,15 +109,6 @@ object NeevaAppModule {
         dispatchers: Dispatchers
     ): PopupModel {
         return PopupModel(coroutineScope, dispatchers)
-    }
-
-    @Provides
-    @Singleton
-    fun providesDatabase(
-        @ApplicationContext context: Context,
-        sharedPreferencesModel: SharedPreferencesModel
-    ): HistoryDatabase {
-        return HistoryDatabase.create(context, sharedPreferencesModel)
     }
 
     @Provides
@@ -273,5 +231,70 @@ object NeevaAppModule {
     @Singleton
     fun providesWebLayerFactory(@ApplicationContext appContext: Context): WebLayerFactory {
         return WebLayerFactory(appContext)
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+class DatabaseModule {
+    @Provides
+    @Singleton
+    fun providesDatabase(
+        @ApplicationContext context: Context,
+        sharedPreferencesModel: SharedPreferencesModel
+    ): HistoryDatabase {
+        return HistoryDatabase.create(context, sharedPreferencesModel)
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+object NeevaConstantsModule {
+    @Provides
+    @Singleton
+    fun providesNeevaConstants(settingsDataModel: SettingsDataModel): NeevaConstants {
+        // This is done during initialization so that the app consistently hits the same server
+        // during the app's lifetime.  To use a different host, you will need to restart the app.
+        val appHost = when {
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_M1_APP_HOST) -> {
+                "m1.neeva.com"
+            }
+
+            settingsDataModel
+                .getSettingsToggleValue(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST) -> {
+                "local.neeva.dev"
+            }
+
+            else -> {
+                "neeva.com"
+            }
+        }
+        return NeevaConstants(appHost = appHost)
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+class ApolloModule {
+    @Provides
+    @Singleton
+    fun providesAuthenticatedApolloWrapper(
+        neevaUserToken: NeevaUserToken,
+        neevaConstants: NeevaConstants
+    ): AuthenticatedApolloWrapper {
+        return AuthenticatedApolloWrapper(
+            neevaUserToken = neevaUserToken,
+            neevaConstants = neevaConstants
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun providesUnauthenticatedApolloWrapper(
+        neevaConstants: NeevaConstants
+    ): UnauthenticatedApolloWrapper {
+        return UnauthenticatedApolloWrapper(
+            neevaConstants = neevaConstants
+        )
     }
 }

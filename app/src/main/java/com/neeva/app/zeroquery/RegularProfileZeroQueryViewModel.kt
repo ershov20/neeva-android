@@ -83,7 +83,7 @@ class RegularProfileZeroQueryViewModel @Inject constructor(
                         index = 0,
                         element = SuggestedSite(
                             site = Site(
-                                siteURL = neevaConstants.homepageURL,
+                                siteURL = neevaConstants.appURL,
                                 title = homeLabel,
                                 largestFavicon = null
                             ),

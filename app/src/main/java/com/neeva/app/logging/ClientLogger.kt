@@ -3,9 +3,10 @@ package com.neeva.app.logging
 import android.util.Log
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.BuildConfig
+import com.neeva.app.Dispatchers
 import com.neeva.app.LogMutation
 import com.neeva.app.NeevaConstants
-import com.neeva.app.apollo.ApolloWrapper
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.ClientLog
 import com.neeva.app.type.ClientLogBase
@@ -13,6 +14,8 @@ import com.neeva.app.type.ClientLogCounter
 import com.neeva.app.type.ClientLogCounterAttribute
 import com.neeva.app.type.ClientLogEnvironment
 import com.neeva.app.type.ClientLogInput
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 enum class ClientLoggerStatus {
     ENABLED,
@@ -20,9 +23,11 @@ enum class ClientLoggerStatus {
 }
 
 class ClientLogger(
-    private val apolloWrapper: ApolloWrapper,
-    private val sharedPreferencesModel: SharedPreferencesModel,
-    private val neevaConstants: NeevaConstants
+    private val apolloWrapper: AuthenticatedApolloWrapper,
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers,
+    private val neevaConstants: NeevaConstants,
+    private val sharedPreferencesModel: SharedPreferencesModel
 ) {
     private val env: ClientLogEnvironment =
         if (BuildConfig.DEBUG) ClientLogEnvironment.Dev else ClientLogEnvironment.Prod
@@ -72,10 +77,13 @@ class ClientLogger(
                     listOf(clientLog)
                 )
             )
-            apolloWrapper.performMutationAsync(
-                mutation = logMutation,
-                userMustBeLoggedIn = false
-            ) {}
+
+            coroutineScope.launch(dispatchers.io) {
+                apolloWrapper.performMutation(
+                    mutation = logMutation,
+                    userMustBeLoggedIn = false
+                )
+            }
         }
     }
 

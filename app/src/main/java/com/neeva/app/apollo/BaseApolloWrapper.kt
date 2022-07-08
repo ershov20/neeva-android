@@ -2,186 +2,26 @@ package com.neeva.app.apollo
 
 import android.util.Log
 import androidx.annotation.CallSuper
-import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.ApolloCall
 import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Mutation
+import com.apollographql.apollo3.api.Operation
 import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.exception.ApolloException
-import com.apollographql.apollo3.network.okHttpClient
-import com.neeva.app.BuildConfig
-import com.neeva.app.Dispatchers
-import com.neeva.app.NeevaBrowser
-import com.neeva.app.NeevaConstants
-import com.neeva.app.userdata.NeevaUserToken
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import okhttp3.Cookie
-import okhttp3.CookieJar
-import okhttp3.HttpUrl
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Response
-
-/** Authenticated version of [BaseApolloWrapper] that sends the user token */
-open class AuthenticatedApolloWrapper(
-    private val neevaUserToken: NeevaUserToken,
-    neevaConstants: NeevaConstants,
-    _apolloClient: ApolloClient? = null,
-    coroutineScope: CoroutineScope,
-    dispatchers: Dispatchers
-) : BaseApolloWrapper(
-    _apolloClient = _apolloClient,
-    coroutineScope = coroutineScope,
-    dispatchers = dispatchers,
-    neevaConstants = neevaConstants
-) {
-    override fun loadForRequest(url: HttpUrl): MutableList<Cookie> {
-        val cookies = super.loadForRequest(url)
-        val token = neevaUserToken.getToken()
-        if (token.isNotEmpty()) {
-            val authCookie = Cookie.Builder().name(neevaConstants.loginCookie).secure()
-                .domain(neevaConstants.appHost).expiresAt(Long.MAX_VALUE).value(token).build()
-            cookies.add(authCookie)
-        }
-        return cookies
-    }
-
-    override suspend fun <D : Mutation.Data> performMutation(
-        mutation: Mutation<D>,
-        userMustBeLoggedIn: Boolean
-    ): ApolloResponse<D>? {
-        if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
-            Log.w(TAG, "Could not perform mutation because user was not logged in: $mutation")
-            return null
-        }
-        return super.performMutation(mutation, userMustBeLoggedIn)
-    }
-
-    override suspend fun <D : Query.Data> performQuery(
-        query: Query<D>,
-        userMustBeLoggedIn: Boolean
-    ): ApolloResponse<D>? {
-        if (userMustBeLoggedIn && neevaUserToken.getToken().isEmpty()) {
-            Log.w(TAG, "Could not perform query because user was not logged in: $query")
-            return null
-        }
-        return super.performQuery(query, userMustBeLoggedIn)
-    }
-
-    companion object {
-        private const val TAG = "AuthenticatedApolloWrapper"
-    }
-}
-
-/** Unauthenticated version of [BaseApolloWrapper] that only send browser cookies and no user token */
-open class UnauthenticatedApolloWrapper(
-    _apolloClient: ApolloClient? = null,
-    coroutineScope: CoroutineScope,
-    dispatchers: Dispatchers,
-    neevaConstants: NeevaConstants
-) : BaseApolloWrapper(
-    _apolloClient = _apolloClient,
-    coroutineScope = coroutineScope,
-    dispatchers = dispatchers,
-    neevaConstants = neevaConstants
-) {
-    override suspend fun <D : Mutation.Data> performMutation(
-        mutation: Mutation<D>,
-        userMustBeLoggedIn: Boolean
-    ): ApolloResponse<D>? {
-        if (userMustBeLoggedIn) {
-            Log.w(TAG, "Could not perform mutation, it requires logged in user: $mutation")
-            return null
-        }
-        return super.performMutation(mutation, userMustBeLoggedIn)
-    }
-
-    override suspend fun <D : Query.Data> performQuery(
-        query: Query<D>,
-        userMustBeLoggedIn: Boolean
-    ): ApolloResponse<D>? {
-        if (userMustBeLoggedIn) {
-            Log.w(TAG, "Could not perform query, it requires logged in user: $query")
-            return null
-        }
-        return super.performQuery(query, userMustBeLoggedIn)
-    }
-
-    companion object {
-        private const val TAG = "UnauthenticatedApolloWrapper"
-    }
-}
 
 /** Manages an Apollo client that can be used to fire queries and mutations at the Neeva backend. */
 abstract class BaseApolloWrapper(
-    _apolloClient: ApolloClient? = null,
-    val coroutineScope: CoroutineScope,
-    val dispatchers: Dispatchers,
-    val neevaConstants: NeevaConstants
-) : CookieJar, Interceptor, ApolloWrapper {
-    val apolloClient: ApolloClient = _apolloClient ?: createApolloClient()
-
-    private fun createApolloClient(): ApolloClient {
-        return ApolloClient.Builder()
-            .serverUrl(neevaConstants.apolloURL)
-            .okHttpClient(
-                OkHttpClient.Builder()
-                    .addInterceptor(this)
-                    .cookieJar(this)
-                    .build()
-            )
-            .build()
-    }
-
-    override fun intercept(chain: Interceptor.Chain): Response {
-        val request = chain.request().newBuilder()
-            .addHeader("User-Agent", "NeevaBrowserAndroid")
-            .addHeader("X-Neeva-Client-ID", neevaConstants.browserIdentifier)
-            .addHeader("X-Neeva-Client-Version", BuildConfig.VERSION_NAME)
-            .build()
-        return chain.proceed(request)
-    }
-
-    override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {}
-
-    @CallSuper
-    override fun loadForRequest(url: HttpUrl) =
-        mutableListOf(neevaConstants.browserTypeCookie, neevaConstants.browserVersionCookie)
+    internal val apolloClientWrapper: ApolloClientWrapper
+) : ApolloWrapper {
+    /** Returns whether or not the operation is allowed to be performed. */
+    abstract fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean
 
     @CallSuper
     override suspend fun <D : Query.Data> performQuery(
         query: Query<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
-        if (NeevaBrowser.isBeingInstrumented()) {
-            Log.w(TAG, "Skipping query because app is being instrumented")
-            return null
-        }
-
-        return try {
-            val response = apolloClient.query(query).execute()
-            if (response.hasErrors()) {
-                Log.e(TAG, "Query response had errors: $query")
-                response.errors?.forEach { Log.e(TAG, "\tError: ${it.message}") }
-                null
-            } else {
-                response
-            }
-        } catch (e: ApolloException) {
-            Log.e(TAG, "Could not perform network request", e)
-            null
-        }
-    }
-
-    override fun <D : Mutation.Data> performMutationAsync(
-        mutation: Mutation<D>,
-        userMustBeLoggedIn: Boolean,
-        callback: (ApolloResponse<D>?) -> Unit
-    ) {
-        coroutineScope.launch(dispatchers.io) {
-            val response = performMutation(mutation, userMustBeLoggedIn)
-            callback(response)
-        }
+        return performOperation(apolloClientWrapper.query(query), userMustBeLoggedIn)
     }
 
     @CallSuper
@@ -189,22 +29,32 @@ abstract class BaseApolloWrapper(
         mutation: Mutation<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponse<D>? {
-        if (NeevaBrowser.isBeingInstrumented()) {
-            Log.w(TAG, "Skipping mutation because app is being instrumented")
+        return performOperation(apolloClientWrapper.mutation(mutation), userMustBeLoggedIn)
+    }
+
+    private suspend fun <D : Operation.Data> performOperation(
+        call: ApolloCall<D>,
+        userMustBeLoggedIn: Boolean
+    ): ApolloResponse<D>? {
+        if (!mayPerformOperation(userMustBeLoggedIn)) {
+            Log.w(TAG, "Not allowed to perform operation: ${call.operation}")
             return null
         }
 
         return try {
-            val response = apolloClient.mutation(mutation).execute()
+            val response = call.execute()
             if (response.hasErrors()) {
-                Log.e(TAG, "Mutation response had errors: $mutation")
+                Log.e(TAG, "Response had errors: ${call.operation}")
                 response.errors?.forEach { Log.e(TAG, "\tError: ${it.message}") }
                 null
             } else {
                 response
             }
+        } catch (e: IllegalStateException) {
+            Log.e(TAG, "Could not perform operation", e)
+            null
         } catch (e: ApolloException) {
-            Log.e(TAG, "Could not perform network request", e)
+            Log.e(TAG, "Could not perform operation", e)
             null
         }
     }

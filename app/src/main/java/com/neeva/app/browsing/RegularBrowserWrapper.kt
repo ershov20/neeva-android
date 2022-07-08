@@ -155,6 +155,6 @@ class RegularBrowserWrapper(
 
     override fun onBlankTabCreated(tab: Tab) {
         // Direct the tab to go to the home page instead of leaving it on `about:blank`.
-        tab.navigationController.navigate(Uri.parse(neevaConstants.homepageURL))
+        tab.navigationController.navigate(Uri.parse(neevaConstants.appURL))
     }
 }

@@ -141,25 +141,21 @@ abstract class BaseScreenshotTest {
         1. Make sure that you have the command line tools installed:
            https://developer.android.com/studio/command-line/sdkmanager
 
-        2. Create and start the emulator CircleCI uses:
+        2. Kill any existing emulators you have running.
+
+        3. Create and start the emulator CircleCI uses:
            scripts/create-emulator.sh
 
-        3. Run this script to run the screenshot tests and update the screenshots in your checkout:
+        4. In a separate terminal, run this script to run the screenshot tests and update the
+           screenshots in your checkout:
            scripts/pull-new-golden-screenshots.sh
         
-        4. Confirm that the new screenshots look correct before uploading them.
+        5. Confirm that the new screenshots look correct before uploading them.
 
         Troubleshooting:
         * If you see "Backend Internal error: Exception during IR lowering", rebuild the
           project.  Android Studio _seems_ to be doing some caching somewhere that messes
           with Composable compilation and I haven't figured out why it's happening, yet.
-        
-        * If you have to produce many screenshots, you can TEMPORARILY comment out this line in the
-          app/build.gradle file:
-          
-          > testInstrumentationRunnerArguments clearPackageData: 'true'
-          
-          Make sure to put it back before submission or you will mess up all of the tests.
         """
     )
 }

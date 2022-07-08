@@ -17,9 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.apollographql.apollo3.api.ApolloResponse
-import com.apollographql.apollo3.api.Mutation
-import com.apollographql.apollo3.api.Query
+import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalClientLogger
 import com.neeva.app.LocalDispatchers
@@ -30,7 +28,8 @@ import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalPopupModel
 import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.NeevaConstants
-import com.neeva.app.apollo.ApolloWrapper
+import com.neeva.app.apollo.ApolloClientWrapper
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.PreviewAppNavModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.previewDispatchers
@@ -121,36 +120,26 @@ fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () ->
     val coroutineScope = rememberCoroutineScope()
     val previewSharedPreferencesModel = SharedPreferencesModel(LocalContext.current)
     val previewNeevaConstants = NeevaConstants()
+    val previewNeevaUserToken = NeevaUserToken(previewSharedPreferencesModel, previewNeevaConstants)
     val previewNeevaUser = NeevaUser(
         data = NeevaUserData(),
-        neevaUserToken = NeevaUserToken(previewSharedPreferencesModel, previewNeevaConstants)
+        neevaUserToken = previewNeevaUserToken
     )
+
+    val previewApolloWrapper = object : AuthenticatedApolloWrapper(
+        neevaUserToken = previewNeevaUserToken,
+        neevaConstants = previewNeevaConstants,
+        apolloClientWrapper = object : ApolloClientWrapper {
+            override fun apolloClient(): ApolloClient { TODO("Not implemented") }
+        }
+    ) {}
+
     val previewClientLogger = ClientLogger(
-        apolloWrapper = object : ApolloWrapper {
-            override suspend fun <D : Query.Data> performQuery(
-                query: Query<D>,
-                userMustBeLoggedIn: Boolean
-            ): ApolloResponse<D>? {
-                TODO("Not yet implemented")
-            }
-
-            override fun <D : Mutation.Data> performMutationAsync(
-                mutation: Mutation<D>,
-                userMustBeLoggedIn: Boolean,
-                callback: (ApolloResponse<D>?) -> Unit
-            ) {
-                TODO("Not yet implemented")
-            }
-
-            override suspend fun <D : Mutation.Data> performMutation(
-                mutation: Mutation<D>,
-                userMustBeLoggedIn: Boolean
-            ): ApolloResponse<D>? {
-                TODO("Not yet implemented")
-            }
-        },
-        sharedPreferencesModel = previewSharedPreferencesModel,
-        neevaConstants = previewNeevaConstants
+        apolloWrapper = previewApolloWrapper,
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers,
+        neevaConstants = previewNeevaConstants,
+        sharedPreferencesModel = previewSharedPreferencesModel
     )
 
     // Provide classes that have no material impact on the Composable previews.  These can still be

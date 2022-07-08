@@ -101,7 +101,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var popupModel: PopupModel
     @Inject lateinit var spaceStore: SpaceStore
 
-    private val feedbackViewModel: FeedbackViewModel by viewModels()
+    internal val feedbackViewModel: FeedbackViewModel by viewModels()
     internal val webLayerModel: WebLayerModel by viewModels()
     private val zeroQueryViewModel: RegularProfileZeroQueryViewModel by viewModels()
 

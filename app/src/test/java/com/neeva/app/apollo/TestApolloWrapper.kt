@@ -5,10 +5,8 @@ import com.apollographql.apollo3.api.ApolloResponse
 import com.apollographql.apollo3.api.Mutation
 import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.network.okHttpClient
-import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.userdata.NeevaUserToken
-import kotlinx.coroutines.CoroutineScope
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
@@ -20,23 +18,24 @@ import strikt.api.expectThat
 import strikt.assertions.isEmpty
 
 class TestApolloWrapper(
-    serverUrl: String = "https://fake.url",
     private val testInterceptor: TestInterceptor = TestInterceptor(),
     neevaUserToken: NeevaUserToken = mock(),
     neevaConstants: NeevaConstants = NeevaConstants()
 ) : AuthenticatedApolloWrapper(
     neevaUserToken = neevaUserToken,
     neevaConstants = neevaConstants,
-    _apolloClient = ApolloClient.Builder()
-        .serverUrl(serverUrl)
-        .okHttpClient(
-            OkHttpClient.Builder()
-                .addInterceptor(testInterceptor)
-                .build()
-        )
-        .build(),
-    coroutineScope = mock<CoroutineScope>(),
-    dispatchers = mock<Dispatchers>()
+    apolloClientWrapper = object : ApolloClientWrapper {
+        val apolloClient = ApolloClient.Builder()
+            .serverUrl("https://fake.url")
+            .okHttpClient(
+                OkHttpClient.Builder()
+                    .addInterceptor(testInterceptor)
+                    .build()
+            )
+            .build()
+
+        override fun apolloClient() = apolloClient
+    }
 ) {
     val performedQueries = mutableListOf<Any>()
     val performedMutations = mutableListOf<Any>()

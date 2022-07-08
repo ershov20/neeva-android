@@ -33,38 +33,44 @@ class FeedbackViewModel @Inject constructor(
     companion object {
         /** Used to cap screenshot sizes and prevent sending unreasonably large images. */
         private const val MAX_SCREENSHOT_SIZE = 1500
+
+        internal fun createMutation(
+            user: NeevaUser,
+            userFeedback: String,
+            url: String?,
+            screenshot: Bitmap?
+        ): SendFeedbackMutation {
+            val source = if (user.isSignedOut()) {
+                FeedbackSource.AndroidAppLoggedOut
+            } else {
+                FeedbackSource.AndroidApp
+            }
+
+            val feedback = StringBuilder(userFeedback)
+                .apply { if (url != null) append("\n\nCurrent URL: $url") }
+                .toString()
+
+            val input = SendFeedbackV2Input(
+                feedback = Optional.presentIfNotNull(feedback),
+                source = Optional.presentIfNotNull(source),
+                shareResults = Optional.presentIfNotNull(true),
+                userProvidedEmail = Optional.presentIfNotNull(user.data.email),
+                screenshot = Optional.presentIfNotNull(
+                    screenshot?.toBase64String()
+                )
+            )
+
+            return SendFeedbackMutation(input = input)
+        }
     }
 
-    var screenshot: Bitmap? = null
+    internal var screenshot: Bitmap? = null
 
-    fun submitFeedback(
-        userFeedback: String,
-        url: String?,
-        screenshot: Bitmap?
-    ) {
-        val source = if (user.isSignedOut()) {
-            FeedbackSource.AndroidAppLoggedOut
-        } else {
-            FeedbackSource.AndroidApp
-        }
-
-        val feedback = StringBuilder(userFeedback)
-            .apply { if (url != null) append("\n\nCurrent URL: $url") }
-            .toString()
-
-        val input = SendFeedbackV2Input(
-            feedback = Optional.presentIfNotNull(feedback),
-            source = Optional.presentIfNotNull(source),
-            shareResults = Optional.presentIfNotNull(true),
-            userProvidedEmail = Optional.presentIfNotNull(user.data.email),
-            screenshot = Optional.presentIfNotNull(
-                screenshot?.toBase64String()
-            )
-        )
+    fun submitFeedback(userFeedback: String, url: String?, screenshot: Bitmap?) {
+        val sendFeedbackMutation = createMutation(user, userFeedback, url, screenshot)
 
         viewModelScope.launch {
             withContext(dispatchers.io) {
-                val sendFeedbackMutation = SendFeedbackMutation(input = input)
                 apolloWrapper.performMutation(
                     mutation = sendFeedbackMutation,
                     userMustBeLoggedIn = false

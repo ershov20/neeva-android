@@ -25,6 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextDecoration
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalFeedbackViewModel
@@ -164,6 +166,7 @@ fun FeedbackView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = Dimensions.PADDING_LARGE)
+                            .semantics { testTag = "Feedback URL" }
                     )
                 }
 

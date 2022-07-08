@@ -10,7 +10,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Tasks
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
-import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.TestApolloWrapper
 import com.neeva.app.logging.ClientLogger
@@ -18,7 +17,6 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -42,7 +40,6 @@ class FirstRunModelTest : BaseTest() {
     private lateinit var context: Context
     private lateinit var firstRunModel: FirstRunModel
     private lateinit var apolloWrapper: TestApolloWrapper
-    private lateinit var testDispatcher: Dispatchers
 
     override fun setUp() {
         super.setUp()
@@ -57,12 +54,14 @@ class FirstRunModelTest : BaseTest() {
         )
 
         apolloWrapper = TestApolloWrapper(neevaUserToken = neevaUserToken)
-        testDispatcher = Dispatchers(
-            main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
-            io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
+        val clientLogger = ClientLogger(
+            apolloWrapper,
+            coroutineScopeRule.scope,
+            coroutineScopeRule.dispatchers,
+            neevaConstants,
+            sharedPreferencesModel
         )
-        val clientLogger = ClientLogger(apolloWrapper, sharedPreferencesModel, neevaConstants)
-        val popupModel = PopupModel(coroutineScopeRule.scope, testDispatcher)
+        val popupModel = PopupModel(coroutineScopeRule.scope, coroutineScopeRule.dispatchers)
 
         val signInAccount = mock<GoogleSignInAccount> {
             on { idToken } doReturn "valid_token"
@@ -75,7 +74,7 @@ class FirstRunModelTest : BaseTest() {
             neevaConstants = neevaConstants,
             clientLogger = clientLogger,
             coroutineScope = coroutineScopeRule.scope,
-            dispatchers = testDispatcher,
+            dispatchers = coroutineScopeRule.dispatchers,
             popupModel = popupModel,
             googleSignInAccountProvider = { Tasks.forResult(signInAccount) }
         )

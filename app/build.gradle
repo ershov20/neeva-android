@@ -181,13 +181,14 @@ dependencies {
     // TODO(darin): Re-enable upon resolving incompatibility with WebLayerSupport.apk.
     //debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.9.1'
 
-    testImplementation "junit:junit:$junit_version"
-    testImplementation 'org.robolectric:robolectric:4.8.1'
     testImplementation "io.mockk:mockk:1.12.4"
     testImplementation "io.strikt:strikt-core:$strikt_version"
+    testImplementation "junit:junit:$junit_version"
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
+    testImplementation 'org.robolectric:robolectric:4.8.1'
 
+    androidTestImplementation "com.apollographql.apollo3:apollo-testing-support:$apollo_version"
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
     androidTestImplementation "io.strikt:strikt-core:$strikt_version"
     androidTestImplementation "androidx.test.ext:junit:$androidx_test_junit_version"
