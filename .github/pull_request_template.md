@@ -1,6 +1,6 @@
-_General description of what your PR does, written in a way that someone six
+General description of what your PR does, written in a way that someone six
 months from now could understand what you were doing when tracking down a bug
-or attempting to add new functionality_
+or attempting to add new functionality
 
 * More details about the changes
 * Even more details about the changes
@@ -8,10 +8,15 @@ or attempting to add new functionality_
 
 ## Checklists
 
+### Pointers to help with review
+* Figma link (if this is a UI change)
+* Link to where the change is discussed (e.g. meeting notes, design docs)
+
 ### How was this tested?
 - [ ] I tested this manually
 - [ ] I added automated tests
-- [ ] Existing automated tests are enough to cover my changes
+- [ ] Existing automated tests cover some of my changes
+- [ ] Existing automated tests cover all of my changes
 
 ### Manual test cases
 If manually tested, describe the different scenarios you followed to ensure
