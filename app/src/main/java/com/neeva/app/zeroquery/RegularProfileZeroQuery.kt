@@ -70,10 +70,12 @@ fun RegularProfileZeroQuery(
     val zeroQueryModel = LocalRegularProfileZeroQueryViewModel.current
     val suggestedSearchesWithDefaults by zeroQueryModel.suggestedSearches.collectAsState()
     val suggestedSitesPlusHome by zeroQueryModel.suggestedSites.collectAsState()
+
     val isSuggestedSitesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedSitesState)
     val isSuggestedQueriesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedQueriesState)
     val isCommunitySpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.CommunitySpacesState)
     val isSpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SpacesState)
+
     val spaces: List<SpacePlusBitmap> by zeroQueryModel.spaces.collectAsState()
     val communitySpaces: List<SpaceRowPlusBitmap> by zeroQueryModel.communitySpaces.collectAsState()
 

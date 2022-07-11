@@ -247,6 +247,10 @@
     </string>
     <string name="cheatsheet_got_it">Got it!</string>
 
+    <string name="section_collapse">Collapse section: %1$s</string>
+    <string name="section_expand">Expand section: %1$s</string>
+    <string name="section_fully_expand">Fully expand section: %1$s</string>
+
     <!-- Debug settings -->
     <string name="settings_debug_local" translatable="false">Advanced</string>
     <string name="settings_debug_local_feature_flags" translatable="false">Developer settings</string>

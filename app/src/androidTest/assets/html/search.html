@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="style.css" />
+
+        <script type="text/javascript">
+            params = new window.URLSearchParams(window.location.search)
+            query_string = params.get("q")
+        </script>
+
+        <title>Search result page</title>
+    </head>
+
+    <body>
+        <div id="container">
+            <p id="result_string"></p>
+
+            <script type="text/javascript">
+                document.querySelector("#result_string").innerText = "Results for " + query_string
+            </script>
+        </div>
+    </body>
+</html>

@@ -56,6 +56,7 @@ fun CollapsingThreeStateHeader(
 
     CollapsingHeader(
         state = state,
+        allowCompactState = true,
         label = label,
         chevronResourceId = chevronResourceId,
         onClick = onClick
@@ -70,6 +71,7 @@ fun CollapsingTwoStateHeader(
 ) {
     CollapsingHeader(
         state = state,
+        allowCompactState = false,
         label = label,
         chevronResourceId = R.drawable.ic_baseline_keyboard_arrow_up_24,
         onClick = onClick
@@ -79,6 +81,7 @@ fun CollapsingTwoStateHeader(
 @Composable
 private fun CollapsingHeader(
     state: CollapsingSectionState,
+    allowCompactState: Boolean,
     label: String,
     chevronResourceId: Int,
     onClick: () -> Unit
@@ -95,6 +98,15 @@ private fun CollapsingHeader(
         }
     }
 
+    val contentDescription = stringResource(
+        when (state.next(allowCompactState)) {
+            CollapsingSectionState.COLLAPSED -> R.string.section_collapse
+            CollapsingSectionState.COMPACT -> R.string.section_expand
+            CollapsingSectionState.EXPANDED -> R.string.section_fully_expand
+        },
+        label
+    )
+
     BaseRowLayout(
         onTapRow = onClick,
         backgroundColor = MaterialTheme.colorScheme.background,
@@ -104,7 +116,7 @@ private fun CollapsingHeader(
             IconButton(onClick = onClick) {
                 Icon(
                     painter = painterResource(chevronResourceId),
-                    contentDescription = null,
+                    contentDescription = contentDescription,
                     modifier = Modifier.rotate(rotation.value)
                 )
             }

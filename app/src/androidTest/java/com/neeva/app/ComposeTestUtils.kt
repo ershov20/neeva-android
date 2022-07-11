@@ -15,6 +15,7 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
@@ -368,6 +369,31 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
 }
 
 /**
+ * Wait for the given node to disappear.  We have to check for both of these conditions because
+ * it seems to be racy.
+ */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeToDisappear(
+    node: SemanticsNodeInteraction
+) {
+    waitFor {
+        val doesNotExist = try {
+            node.assertDoesNotExist()
+            true
+        } catch (e: AssertionError) {
+            false
+        }
+
+        val isNotDisplayed = try {
+            node.assertIsNotDisplayed()
+            true
+        } catch (e: AssertionError) {
+            false
+        }
+        doesNotExist || isNotDisplayed
+    }
+}
+
+/**
  * Waits until the provided [condition] becomes true.
  *
  * We have to poll because the [waitForIdle()] doesn't know how to wait for all the asynchronous
@@ -390,6 +416,11 @@ inline fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitFor(
             throw e
         }
     }
+}
+
+/** "Freezes" an instrumentation test so that you can examine the app's state. */
+inline fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.freezeTest() {
+    waitUntil(TimeUnit.HOURS.toMillis(1)) { false }
 }
 
 /**

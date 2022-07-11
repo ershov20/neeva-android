@@ -31,6 +31,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
@@ -69,7 +70,7 @@ class RegularProfileZeroQueryViewModel @Inject constructor(
     fun advanceState(preferenceKey: CollapsingSectionStateSharedPref) =
         collapsingSectionStateModel.advanceState(preferenceKey)
 
-    val suggestedSites: StateFlow<List<SuggestedSite>> =
+    private val suggestedSitesWithoutIcons: StateFlow<List<SuggestedSite>> =
         historyManager.suggestedSites
             .mapLatest { suggestedSites ->
                 // Produce the list of sites that the user has visited the most.
@@ -109,9 +110,15 @@ class RegularProfileZeroQueryViewModel @Inject constructor(
                         }
                     }
                 }
+
                 updatedList.take(NUM_SUGGESTED_SITES)
             }
             .distinctUntilChanged()
+            .flowOn(dispatchers.io)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    private val suggestedSitesWithIcons: StateFlow<List<SuggestedSite>> =
+        suggestedSitesWithoutIcons
             .mapLatest { updatedList ->
                 // Grab all the favicons required to display them whenever the list changes.
                 updatedList.map { suggestedSite ->
@@ -135,6 +142,19 @@ class RegularProfileZeroQueryViewModel @Inject constructor(
                     // We can't get an image; just generate one.
                     suggestedSite.copy(bitmap = regularFaviconCache.generateFavicon(siteUri))
                 }
+            }
+            .distinctUntilChanged()
+            .flowOn(dispatchers.io)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    /** Maintains a list of suggested sites to display to the user. */
+    val suggestedSites: StateFlow<List<SuggestedSite>> =
+        suggestedSitesWithoutIcons
+            .combine(suggestedSitesWithIcons) { rawList, listWIthIcons ->
+                // Prioritize displaying the list that has favicons over the raw list.  This handles
+                // situations where we have a list of sites ready to display, but the user is on a
+                // slow network connection that makes it difficult to fetch the favicons.
+                listWIthIcons.ifEmpty { rawList }
             }
             .distinctUntilChanged()
             .flowOn(dispatchers.io)

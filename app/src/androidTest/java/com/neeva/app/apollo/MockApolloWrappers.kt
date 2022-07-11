@@ -10,7 +10,6 @@ import com.apollographql.apollo3.testing.MapTestNetworkTransport
 import com.apollographql.apollo3.testing.registerTestResponse
 import com.neeva.app.NeevaConstants
 import com.neeva.app.userdata.NeevaUserToken
-import javax.inject.Inject
 
 @OptIn(ApolloExperimental::class)
 class TestApolloClientWrapper : ApolloClientWrapper {
@@ -34,7 +33,7 @@ class TestApolloClientWrapper : ApolloClientWrapper {
 }
 
 @OptIn(ApolloExperimental::class)
-class TestAuthenticatedApolloWrapper @Inject constructor(
+class TestAuthenticatedApolloWrapper(
     neevaUserToken: NeevaUserToken,
     neevaConstants: NeevaConstants
 ) : AuthenticatedApolloWrapper(
@@ -51,7 +50,7 @@ class TestAuthenticatedApolloWrapper @Inject constructor(
 }
 
 @OptIn(ApolloExperimental::class)
-class TestUnauthenticatedApolloWrapper @Inject constructor(
+class TestUnauthenticatedApolloWrapper(
     neevaConstants: NeevaConstants
 ) : UnauthenticatedApolloWrapper(
     neevaConstants = neevaConstants,

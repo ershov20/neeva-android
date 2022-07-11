@@ -1,9 +1,7 @@
 package com.neeva.app.history
 
-import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
@@ -32,10 +30,10 @@ import com.neeva.app.openCardGrid
 import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.typeIntoUrlBar
 import com.neeva.app.visitMultipleSitesInSameTab
-import com.neeva.app.waitFor
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForAssertion
 import com.neeva.app.waitForNavDestination
+import com.neeva.app.waitForNodeToDisappear
 import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForTitle
@@ -89,31 +87,6 @@ class HistoryUITest : BaseBrowserTest() {
             page2Node.assertIsDisplayed()
             waitForNodeToDisappear(page1Node)
             waitForNodeToDisappear(page3Node)
-        }
-    }
-
-    /**
-     * Wait for the given node to disappear.  We have to check for both of these conditions because
-     * it seems to be racy.
-     */
-    private fun waitForNodeToDisappear(node: SemanticsNodeInteraction) {
-        androidComposeRule.apply {
-            waitFor {
-                val doesNotExist = try {
-                    node.assertDoesNotExist()
-                    true
-                } catch (e: AssertionError) {
-                    false
-                }
-
-                val isNotDisplayed = try {
-                    node.assertIsNotDisplayed()
-                    true
-                } catch (e: AssertionError) {
-                    false
-                }
-                doesNotExist || isNotDisplayed
-            }
         }
     }
 

@@ -7,7 +7,7 @@ import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.app.apollo.TestUnauthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.storage.HistoryDatabase
-import dagger.Binds
+import com.neeva.app.userdata.NeevaUserToken
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
@@ -45,18 +45,26 @@ object TestNeevaConstantsModule {
     components = [SingletonComponent::class],
     replaces = [ApolloModule::class]
 )
-abstract class TestApolloModule {
-    @Binds
+class TestApolloModule {
+    @Provides
     @Singleton
-    abstract fun providesAuthenticatedApolloWrapper(
-        testApolloWrapper: TestAuthenticatedApolloWrapper
-    ): AuthenticatedApolloWrapper
+    fun providesAuthenticatedApolloWrapper(
+        neevaUserToken: NeevaUserToken,
+        neevaConstants: NeevaConstants
+    ): AuthenticatedApolloWrapper {
+        return TestAuthenticatedApolloWrapper(
+            neevaUserToken = neevaUserToken,
+            neevaConstants = neevaConstants
+        )
+    }
 
-    @Binds
+    @Provides
     @Singleton
-    abstract fun providesUnauthenticatedApolloWrapper(
-        testApolloWrapper: TestUnauthenticatedApolloWrapper
-    ): UnauthenticatedApolloWrapper
+    fun providesUnauthenticatedApolloWrapper(
+        neevaConstants: NeevaConstants
+    ): UnauthenticatedApolloWrapper {
+        return TestUnauthenticatedApolloWrapper(neevaConstants = neevaConstants)
+    }
 }
 
 @Module
