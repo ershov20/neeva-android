@@ -12,7 +12,6 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
-import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
@@ -21,6 +20,7 @@ import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher

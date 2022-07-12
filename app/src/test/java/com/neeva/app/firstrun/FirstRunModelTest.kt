@@ -11,11 +11,11 @@ import com.google.android.gms.tasks.Tasks
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.NeevaConstants
-import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule

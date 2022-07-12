@@ -105,6 +105,7 @@
     <string name="settings_close_incognito_tabs">Close incognito tabs</string>
     <string name="settings_when_leaving_incognito_mode">When leaving incognito mode</string>
     <string name="tracking_protection">Tracking protection</string>
+    <string name="tracking_protection_incognito_content_description">Incognito tracking protection</string>
     <string name="settings_privacy_policy">Privacy policy</string>
     <string name="settings_support">Support</string>
     <string name="settings_welcome_tours">Welcome tours</string>

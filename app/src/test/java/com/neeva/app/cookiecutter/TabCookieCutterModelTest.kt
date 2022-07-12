@@ -2,15 +2,11 @@ package com.neeva.app.cookiecutter
 
 import com.neeva.app.BaseTest
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.chromium.weblayer.Browser
-import org.chromium.weblayer.FaviconFetcher
-import org.chromium.weblayer.NavigationController
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
@@ -22,7 +18,6 @@ import strikt.assertions.isEqualTo
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
-@OptIn(ExperimentalCoroutinesApi::class)
 class TabCookieCutterModelTest : BaseTest() {
     private lateinit var model: TabCookieCutterModel
     private lateinit var domainProviderImpl: DomainProviderImpl
@@ -33,16 +28,6 @@ class TabCookieCutterModelTest : BaseTest() {
 
     override fun setUp() {
         super.setUp()
-        val navigationController: NavigationController = mock()
-        val faviconFetcher: FaviconFetcher = mock()
-
-//        val mockTab: Tab = mock {
-//            on { getGuid() } doReturn "tab guid 1"
-//            on { getNavigationController() } doReturn navigationController
-//            on { getBrowser() } doReturn browser
-//            on { createFaviconFetcher(any()) } doReturn faviconFetcher
-//        }
-
         domainProviderImpl = DomainProviderImpl(RuntimeEnvironment.getApplication())
         cookieNoticeBlockedFlow = MutableStateFlow(false)
 
@@ -83,12 +68,12 @@ class TabCookieCutterModelTest : BaseTest() {
         val trackingData = model.currentTrackingData()
         expectThat(trackingData.numTrackers).isEqualTo(6)
         expectThat(trackingData.numDomains).isEqualTo(3)
-        expectThat(trackingData.trackingEntities?.size).isEqualTo(3)
+        expectThat(trackingData.trackingEntities.size).isEqualTo(3)
 
         model.resetStat()
         val emptyTrackingData = model.currentTrackingData()
         expectThat(emptyTrackingData.numTrackers).isEqualTo(0)
         expectThat(emptyTrackingData.numDomains).isEqualTo(0)
-        expectThat(emptyTrackingData.trackingEntities?.size).isEqualTo(0)
+        expectThat(emptyTrackingData.trackingEntities.size).isEqualTo(0)
     }
 }

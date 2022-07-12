@@ -9,6 +9,7 @@ import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.WebpageServingRule
 import com.neeva.app.expectTabListState
+import com.neeva.app.getString
 import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.onBackPressed
@@ -33,9 +34,8 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
 
     @Test
     fun createRegularChildTab() {
-        val scenario = androidComposeRule.activityRule.scenario
-        scenario.moveToState(Lifecycle.State.RESUMED)
         androidComposeRule.apply {
+            activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
             expectTabListState(isIncognito = false, regularTabCount = 1)
 
@@ -57,11 +57,8 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
 
     @Test
     fun createIncognitoChildTab() {
-        val scenario = androidComposeRule.activityRule.scenario
-        val resources = androidComposeRule.activity.resources
-
-        scenario.moveToState(Lifecycle.State.RESUMED)
         androidComposeRule.apply {
+            activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
             expectTabListState(isIncognito = false, regularTabCount = 1)
 
@@ -83,7 +80,9 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
                 expectedRegularTabCount = 1
             )
             waitForTitle("Page 2")
-            onNodeWithContentDescription(resources.getString(R.string.incognito)).assertExists()
+            onNodeWithContentDescription(
+                getString(R.string.tracking_protection_incognito_content_description)
+            ).assertExists()
 
             // Make sure we've still only got one regular profile tab open.
             expectTabListState(
@@ -96,11 +95,9 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
 
     @Test
     fun closingChildTabReturnsToParent() {
-        val scenario = androidComposeRule.activityRule.scenario
-
         // Load the test webpage up in the existing tab.
-        scenario.moveToState(Lifecycle.State.RESUMED)
         androidComposeRule.apply {
+            activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
             loadUrlInCurrentTab(testUrl)
             waitForTitle("Page 1")

@@ -11,7 +11,7 @@ import com.apollographql.apollo3.exception.ApolloException
 
 /** Manages an Apollo client that can be used to fire queries and mutations at the Neeva backend. */
 abstract class BaseApolloWrapper(
-    internal val apolloClientWrapper: ApolloClientWrapper
+    private val apolloClientWrapper: ApolloClientWrapper
 ) : ApolloWrapper {
     /** Returns whether or not the operation is allowed to be performed. */
     abstract fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean

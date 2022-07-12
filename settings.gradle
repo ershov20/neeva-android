@@ -30,5 +30,6 @@ rootProject.name = "Neeva Search & Browser"
 include ':app'
 include ':scripts'
 include ':screenshotTests'
+include ':testCommon'
 include ':weblayer'
 include ':weblayer_support'

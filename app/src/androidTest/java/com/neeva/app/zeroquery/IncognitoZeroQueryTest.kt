@@ -56,7 +56,7 @@ class IncognitoZeroQueryTest : BaseBrowserTest() {
     }
 
     @Test
-    fun hasNoSuggestions() {
+    fun hasNoSuggestionsFromRegularProfile() {
         androidComposeRule.apply {
             visitMultipleSitesInSameTab()
 

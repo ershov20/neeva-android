@@ -76,6 +76,7 @@ android {
             applicationIdSuffix '.staging'
             versionNameSuffix '-STAGING'
             signingConfig signingConfigs.debug
+            matchingFallbacks = ['release', 'debug']
         }
     }
 
@@ -95,7 +96,7 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
         freeCompilerArgs = [
-            // Needed for the experimental Compose functions
+            // Needed for the experimental features that use the @OptIn annotation
             '-opt-in=kotlin.RequiresOptIn'
         ]
     }
@@ -147,6 +148,8 @@ tasks.preBuild.dependsOn ":scripts:buildScripts"
 
 dependencies {
     implementation project(path: ':weblayer')
+    testImplementation project(path: ':testCommon')
+    androidTestImplementation project(path: ':testCommon')
 
     implementation "androidx.activity:activity-compose:$androidx_activity_version"
     implementation "androidx.activity:activity-ktx:$androidx_activity_version"

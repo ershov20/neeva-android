@@ -64,7 +64,9 @@ fun TrackingProtectionButton(
             if (showIncognitoBadge) {
                 Icon(
                     painter = painterResource(R.drawable.ic_incognito),
-                    contentDescription = stringResource(R.string.incognito),
+                    contentDescription = stringResource(
+                        R.string.tracking_protection_incognito_content_description
+                    ),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = iconModifier
                 )

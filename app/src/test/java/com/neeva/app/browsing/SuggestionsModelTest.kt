@@ -6,7 +6,6 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.SuggestionsQuery
-import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -20,6 +19,7 @@ import com.neeva.app.suggestions.toQueryRowSuggestion
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.isActive

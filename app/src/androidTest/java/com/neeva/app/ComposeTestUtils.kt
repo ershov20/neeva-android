@@ -2,6 +2,7 @@ package com.neeva.app
 
 import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.net.Uri
 import android.util.Log
 import android.view.KeyEvent
@@ -194,11 +195,11 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.loadUrlInCurrentTab(
  *
  * Assumes that the user is viewing the regular or incognito TabGrid.
  */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.openLazyTab(url: String) {
+fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openLazyTab(url: String) {
     expectThat(activity.appNavModel!!.currentDestination.value!!.route)
         .isEqualTo(AppNavDestination.CARD_GRID.route)
 
-    clickOnNodeWithContentDescription(getString(com.neeva.app.R.string.new_tab_content_description))
+    clickOnNodeWithContentDescription(getString(R.string.new_tab_content_description))
     waitForNavDestination(AppNavDestination.BROWSER)
     navigateViaUrlBar(url)
 }
@@ -244,10 +245,12 @@ fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.navigateViaUrlBar(ur
 
     val browserViewIdlingResource = object : IdlingResource {
         override val isIdleNow: Boolean get() {
-            val bottomToolbarPlaceholderHeight = activity
+            val bottomToolbarHeight = activity
                 .findViewById<View>(R.id.browser_bottom_toolbar_placeholder)
                 ?.layoutParams
                 ?.height
+            val isLandscape =
+                activity.requestedOrientation == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 
             return when {
                 // Wait until the URL bar state updates enough for the user to see the browser
@@ -257,9 +260,10 @@ fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.navigateViaUrlBar(ur
                     false
                 }
 
-                // Wait until the bottom toolbar becomes visible again after the keyboard goes away.
-                bottomToolbarPlaceholderHeight == null || bottomToolbarPlaceholderHeight == 0 -> {
-                    Log.d(TAG, "Waiting for bottom toolbar after keyboard dismissal")
+                // If we're not in landscape, wait until the bottom toolbar becomes visible again
+                // after the keyboard goes away.
+                !isLandscape && (bottomToolbarHeight == null || bottomToolbarHeight == 0) -> {
+                    Log.d(TAG, "Waiting for bottom toolbar to appear after keyboard dismissal")
                     false
                 }
 

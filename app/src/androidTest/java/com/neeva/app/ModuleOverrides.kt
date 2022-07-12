@@ -3,11 +3,11 @@ package com.neeva.app
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
-import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
-import com.neeva.app.apollo.TestUnauthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
+import com.neeva.testcommon.apollo.TestUnauthenticatedApolloWrapper
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent

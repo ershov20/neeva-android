@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
@@ -53,6 +55,7 @@ fun BrowserBottomToolbar(
         modifier = modifier
             .fillMaxWidth()
             .height(dimensionResource(id = R.dimen.bottom_toolbar_height))
+            .semantics { testTag = "BrowserBottomToolbar" }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

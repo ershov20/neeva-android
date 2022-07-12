@@ -8,9 +8,9 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.UserInfoQuery
-import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher

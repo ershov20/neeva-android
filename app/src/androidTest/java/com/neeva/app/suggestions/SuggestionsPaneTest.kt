@@ -1,10 +1,13 @@
 package com.neeva.app.suggestions
 
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.lifecycle.Lifecycle
@@ -16,24 +19,35 @@ import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.SuggestionsQuery
 import com.neeva.app.WebpageServingRule
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
-import com.neeva.app.apollo.TestAuthenticatedApolloWrapper
+import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.browsing.toSearchUri
+import com.neeva.app.clickOnNodeWithContentDescription
+import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectTabListState
 import com.neeva.app.getString
+import com.neeva.app.navigateViaUrlBar
+import com.neeva.app.onBackPressed
+import com.neeva.app.openCardGrid
+import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.typeIntoUrlBar
 import com.neeva.app.visitMultipleSitesInSameTab
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForMatchingNode
+import com.neeva.app.waitForNavDestination
 import com.neeva.app.waitForNodeWithTag
+import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForUrl
+import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 
 @HiltAndroidTest
 class SuggestionsPaneTest : BaseBrowserTest() {
@@ -68,6 +82,78 @@ class SuggestionsPaneTest : BaseBrowserTest() {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
             expectTabListState(isIncognito = false, regularTabCount = 1)
+        }
+    }
+
+    @Test
+    fun hidesSuggestionsWhenDisabled() {
+        androidComposeRule.apply {
+            // Turn the "Show search suggestions" setting off.
+            openOverflowMenuAndClickItem(R.string.settings)
+            waitForNavDestination(AppNavDestination.SETTINGS)
+            waitForNodeWithTag("SettingsPaneItems").performScrollToNode(
+                hasText(getString(R.string.settings_show_search_search_suggestions))
+            )
+            clickOnNodeWithText(getString(R.string.settings_show_search_search_suggestions))
+            onBackPressed()
+            waitForNavDestination(AppNavDestination.BROWSER)
+
+            visitMultipleSitesInSameTab()
+            clickOnUrlBar()
+            typeIntoUrlBar("Page")
+
+            waitForNodeWithTag("SuggestionList").apply {
+                // Confirm that the history suggestions exist.
+                performScrollToNode(hasText(getString(R.string.history)))
+                performScrollToNode(hasText("Page 1"))
+                performScrollToNode(hasText("Page 2"))
+                performScrollToNode(hasText("Page 3"))
+            }
+
+            // Confirm that there are no search suggestions.
+            onNodeWithText(getString(R.string.neeva_search)).assertDoesNotExist()
+            onNodeWithText("Sports Page").assertDoesNotExist()
+            onNodeWithText("Sports Page homepage").assertDoesNotExist()
+            onNodeWithText("Front Page News").assertDoesNotExist()
+            onNodeWithText("Front Page News Result 1").assertDoesNotExist()
+            onNodeWithText("Front Page News Result 2").assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun hidesSuggestionsWhenIncognito() {
+        val initialIncognitoUrl = WebpageServingRule.urlFor("big_link_element.html")
+
+        androidComposeRule.apply {
+            // Open a lazy Incognito tab.
+            openCardGrid(incognito = true)
+            clickOnNodeWithContentDescription(getString(R.string.new_tab_content_description))
+            waitForNavDestination(AppNavDestination.BROWSER)
+
+            // Confirm we see Incognito's Zero Query page.
+            waitForNodeWithText(getString(R.string.incognito_zero_query_title))
+
+            // Navigate somewhere with the currently open URL bar.
+            navigateViaUrlBar(initialIncognitoUrl)
+
+            val apolloMutationsBefore =
+                testAuthenticatedApolloWrapper.testApolloClientWrapper.performedOperations.toList()
+
+            // Start a new query.
+            clickOnUrlBar()
+            typeIntoUrlBar("Page")
+
+            // Confirm no new Apollo operations were performed.
+            val apolloMutationsAfter =
+                testAuthenticatedApolloWrapper.testApolloClientWrapper.performedOperations.toList()
+            expectThat(apolloMutationsAfter).isEqualTo(apolloMutationsBefore)
+
+            // Confirm we still see Incognito's Zero Query page with no suggestions.
+            waitForNodeWithText(getString(R.string.incognito_zero_query_title))
+            onNodeWithTag("SuggestionList").assertDoesNotExist()
+
+            // Confirm that we have the option to edit the current address.
+            waitForNodeWithText(getString(R.string.edit_current_url)).assertIsDisplayed()
         }
     }
 

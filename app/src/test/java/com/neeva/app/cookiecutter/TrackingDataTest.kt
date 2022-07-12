@@ -116,9 +116,9 @@ class TrackingDataTest : BaseTest() {
         expectThat(testWhoIsTrackingYouTrackingData.trackingEntities.size).isEqualTo(5)
 
         val whoIsTrackingYouHosts = testWhoIsTrackingYouTrackingData.whoIsTrackingYouHosts()
-        expectThat(whoIsTrackingYouHosts?.size).isEqualTo(3)
-        expectThat(whoIsTrackingYouHosts?.contains(TrackingEntity.GOOGLE)).isTrue()
-        expectThat(whoIsTrackingYouHosts?.contains(TrackingEntity.FACEBOOK)).isTrue()
-        expectThat(whoIsTrackingYouHosts?.contains(TrackingEntity.TWITTER)).isTrue()
+        expectThat(whoIsTrackingYouHosts.size).isEqualTo(3)
+        expectThat(whoIsTrackingYouHosts.contains(TrackingEntity.GOOGLE)).isTrue()
+        expectThat(whoIsTrackingYouHosts.contains(TrackingEntity.FACEBOOK)).isTrue()
+        expectThat(whoIsTrackingYouHosts.contains(TrackingEntity.TWITTER)).isTrue()
     }
 }

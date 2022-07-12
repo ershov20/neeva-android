@@ -6,20 +6,19 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.rule.ActivityTestRule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.cardgrid.SelectedScreen
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
 
-@SuppressWarnings("deprecation")
 @HiltAndroidTest
 class IntentLaunchTest : BaseBrowserTest() {
     // We need to use a deprecated class because we're manually firing different Intents to start
     // our Activity, which ActivityScenarioRule doesn't seem to support (it ends up fully killing
     // the original Activity creating a new one whenever we fire another Intent).
-    private val activityTestRule = ActivityTestRule(
+    @Suppress("DEPRECATION")
+    private val activityTestRule = androidx.test.rule.ActivityTestRule(
         NeevaActivity::class.java,
         false,
         false

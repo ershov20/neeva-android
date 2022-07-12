@@ -1,4 +1,4 @@
-package com.neeva.app.apollo
+package com.neeva.testcommon.apollo
 
 import com.apollographql.apollo3.ApolloCall
 import com.apollographql.apollo3.ApolloClient
@@ -9,6 +9,9 @@ import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.testing.MapTestNetworkTransport
 import com.apollographql.apollo3.testing.registerTestResponse
 import com.neeva.app.NeevaConstants
+import com.neeva.app.apollo.ApolloClientWrapper
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.userdata.NeevaUserToken
 
 @OptIn(ApolloExperimental::class)
@@ -35,28 +38,27 @@ class TestApolloClientWrapper : ApolloClientWrapper {
 @OptIn(ApolloExperimental::class)
 class TestAuthenticatedApolloWrapper(
     neevaUserToken: NeevaUserToken,
-    neevaConstants: NeevaConstants
+    neevaConstants: NeevaConstants,
+    val testApolloClientWrapper: TestApolloClientWrapper = TestApolloClientWrapper()
 ) : AuthenticatedApolloWrapper(
     neevaUserToken = neevaUserToken,
     neevaConstants = neevaConstants,
-    apolloClientWrapper = TestApolloClientWrapper()
+    apolloClientWrapper = testApolloClientWrapper
 ) {
-    val testApolloClientWrapper: TestApolloClientWrapper
-        get() { return apolloClientWrapper as TestApolloClientWrapper }
-
     fun <D : Operation.Data> registerTestResponse(operation: Operation<D>, response: D?) {
-        apolloClientWrapper.apolloClient().registerTestResponse(operation, response)
+        testApolloClientWrapper.apolloClient().registerTestResponse(operation, response)
     }
 }
 
 @OptIn(ApolloExperimental::class)
 class TestUnauthenticatedApolloWrapper(
-    neevaConstants: NeevaConstants
+    neevaConstants: NeevaConstants,
+    val testApolloClientWrapper: TestApolloClientWrapper = TestApolloClientWrapper()
 ) : UnauthenticatedApolloWrapper(
     neevaConstants = neevaConstants,
-    apolloClientWrapper = TestApolloClientWrapper()
+    apolloClientWrapper = testApolloClientWrapper
 ) {
     fun <D : Operation.Data> registerTestResponse(operation: Operation<D>, response: D?) {
-        apolloClientWrapper.apolloClient().registerTestResponse(operation, response)
+        testApolloClientWrapper.apolloClient().registerTestResponse(operation, response)
     }
 }

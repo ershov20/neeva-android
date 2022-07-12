@@ -58,7 +58,9 @@ class AddToSpaceButtonTest : BaseBrowserTest() {
     fun regularProfile_withoutSigningIn_showsPreview() {
         androidComposeRule.apply {
             // Make sure that we're still in regular mode.
-            onNodeWithContentDescription(getString(R.string.incognito)).assertDoesNotExist()
+            onNodeWithContentDescription(
+                getString(R.string.tracking_protection_incognito_content_description)
+            ).assertDoesNotExist()
 
             // Clicking on the "Add to Space" button should show the intro bottom sheet.
             onNodeWithContentDescription(getString(R.string.toolbar_save_to_space)).apply {
@@ -88,7 +90,11 @@ class AddToSpaceButtonTest : BaseBrowserTest() {
                 expectedRegularTabCount = 1
             )
             waitForTitle("Page 2")
-            onNodeWithContentDescription(getString(R.string.incognito)).assertExists()
+
+            // Makre sure we're in incognito.
+            onNodeWithContentDescription(
+                getString(R.string.tracking_protection_incognito_content_description)
+            ).assertExists()
 
             // Confirm that the add to space button is disabled.  Clicking should do nothing.
             onNodeWithContentDescription(getString(R.string.toolbar_save_to_space)).apply {
