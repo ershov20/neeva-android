@@ -247,6 +247,7 @@
         From related content to reviews, NeevaScope is your guide to the web!
     </string>
     <string name="cheatsheet_got_it">Got it!</string>
+    <string name="cheatsheet_loading">Your NeevaScope is coming into focus...</string>
 
     <string name="section_collapse">Collapse section: %1$s</string>
     <string name="section_expand">Expand section: %1$s</string>
