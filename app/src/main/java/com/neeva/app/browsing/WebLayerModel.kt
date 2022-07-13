@@ -257,7 +257,7 @@ class WebLayerModel internal constructor(
                 activityCallbackProvider.get()?.getWebLayerFragment(isIncognito = true) != null
 
             if ((incognitoFragmentExists && shouldDestroyIncognitoOnSwitch()) ||
-                newValue.incognitoBrowserWrapper?.hasNoTabs() == true
+                newValue.incognitoBrowserWrapper?.hasNoTabs(ignoreClosingTabs = true) == true
             ) {
                 coroutineScope.launch {
                     webLayer.value?.let { cleanUpIncognito(it) }

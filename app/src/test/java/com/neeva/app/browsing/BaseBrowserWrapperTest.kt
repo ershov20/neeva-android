@@ -59,7 +59,9 @@ import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
 import strikt.assertions.isNull
+import strikt.assertions.isTrue
 
 @RunWith(RobolectricTestRunner::class)
 @Config(manifest = Config.NONE)
@@ -135,21 +137,23 @@ class BaseBrowserWrapperTest : BaseTest() {
         }
 
         browser = mock {
-            on { setActiveTab(any()) } doAnswer { activeTab = it.arguments[0] as Tab }
+            on { setActiveTab(any()) } doAnswer {
+                activeTab = it.arguments[0] as Tab
+                getTabListCallback().onActiveTabChanged(activeTab)
+            }
+
             on { activeTab } doAnswer { activeTab }
 
             on { createTab() } doAnswer {
                 createMockTab().also {
                     // WebLayer synchronously fires the `onTabAdded` callback before returning the
                     // new Tab.
-                    val tabListCallbackCaptor = argumentCaptor<TabListCallback>()
-                    verify(browser).registerTabListCallback(tabListCallbackCaptor.capture())
-                    tabListCallbackCaptor.lastValue.onTabAdded(it)
+                    getTabListCallback().onTabAdded(it)
                 }
             }
 
             on { profile } doReturn profile
-            on { tabs } doReturn mockTabs.toSet()
+            on { tabs } doAnswer { mockTabs.toSet() }
             on { isDestroyed } doReturn false
             on { isRestoringPreviousState } doReturn true
 
@@ -211,6 +215,12 @@ class BaseBrowserWrapperTest : BaseTest() {
                 wasBlankTabCreated = true
             }
         }
+    }
+
+    private fun getTabListCallback(): TabListCallback {
+        val tabListCallbackCaptor = argumentCaptor<TabListCallback>()
+        verify(browser).registerTabListCallback(tabListCallbackCaptor.capture())
+        return tabListCallbackCaptor.lastValue
     }
 
     private fun attachViewToParent(view: View) {
@@ -444,9 +454,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         // Fire the callback and say that the Browser finished adding a tab.  The BrowserWrapper
         // should see that a tab is pending and open the URL to it.
-        val tabListCallbackCaptor = argumentCaptor<TabListCallback>()
-        verify(browser).registerTabListCallback(tabListCallbackCaptor.capture())
-        tabListCallbackCaptor.lastValue.onTabAdded(tab)
+        getTabListCallback().onTabAdded(tab)
 
         // Check that the tab's properties were saved.
         val tabInfoList = browserWrapper.orderedTabList.value.filter { it.id == tab.guid }
@@ -473,15 +481,13 @@ class BaseBrowserWrapperTest : BaseTest() {
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // The Browser should have been asked to create a new tab.
-        val tabListCallbackCaptor = argumentCaptor<TabListCallback>()
         verify(activeTabModelImpl, never()).loadUrlInActiveTab(any(), any())
         verify(browser, times(2)).createTab()
-        verify(browser).registerTabListCallback(tabListCallbackCaptor.capture())
 
         // Fire the callback and say that the Browser finished adding a tab.  The BrowserWrapper
         // should see that a tab is pending and open the URL to it.
         val tab: Tab = mockTabs.last()
-        tabListCallbackCaptor.lastValue.onTabAdded(tab)
+        getTabListCallback().onTabAdded(tab)
         val urlCaptor = argumentCaptor<Uri>()
         val navigateParamsCaptor = argumentCaptor<NavigateParams>()
         verify(tab.navigationController).navigate(
@@ -539,9 +545,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         // Fire the callback and say that the Browser finished adding a tab.  The BrowserWrapper
         // should see that a tab is pending and open the URL to it.
-        val tabListCallbackCaptor = argumentCaptor<TabListCallback>()
-        verify(browser).registerTabListCallback(tabListCallbackCaptor.capture())
-        tabListCallbackCaptor.lastValue.onTabAdded(tab)
+        getTabListCallback().onTabAdded(tab)
 
         // Check that the tab's properties were saved.
         val tabInfoList = browserWrapper.orderedTabList.value.filter { it.id == tab.guid }
@@ -580,5 +584,85 @@ class BaseBrowserWrapperTest : BaseTest() {
         expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore)
         verify(activeTabModelImpl).loadUrlInActiveTab(eq(expectedUri), any())
         verify(browser, times(1)).createTab()
+    }
+
+    @Test
+    fun startClosingTab_afterCancel_restoresTab() {
+        createAndAttachBrowser()
+        completeBrowserRestoration()
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        // Say that the user has an active tab.
+        val numTabsBefore = browserWrapper.orderedTabList.value.size
+        val tab = mockTabs.last()
+        browser.setActiveTab(tab)
+
+        // Start closing the active tab.
+        browserWrapper.startClosingTab(tab.guid)
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(numTabsBefore)
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = true)).isTrue()
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = false)).isFalse()
+
+        // Canceling the tab closure should bring the tab back.
+        browserWrapper.cancelClosingTab(tab.guid)
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(numTabsBefore)
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = true)).isFalse()
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = false)).isFalse()
+    }
+
+    @Test
+    fun startClosingTab_thenCloseTab() {
+        createAndAttachBrowser()
+        completeBrowserRestoration()
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        // Say that the user has an active tab.
+        val numTabsBefore = browserWrapper.orderedTabList.value.size
+        val tab = mockTabs.last()
+        browser.setActiveTab(tab)
+
+        // Start closing the active tab.
+        browserWrapper.startClosingTab(tab.guid)
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(numTabsBefore)
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = true)).isTrue()
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = false)).isFalse()
+
+        // Actually close it.
+        browserWrapper.closeTab(tab.guid)
+
+        // Confirm that the Tab was told to close, then fire the callback saying it was removed.
+        verify(tab).dispatchBeforeUnloadAndClose()
+        mockTabs.remove(tab)
+        getTabListCallback().onTabRemoved(tab)
+
+        // Confirm that everything is gone.
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(0)
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = true)).isTrue()
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = false)).isTrue()
+    }
+
+    @Test
+    fun closeTab() {
+        createAndAttachBrowser()
+        completeBrowserRestoration()
+        coroutineScopeRule.scope.advanceUntilIdle()
+
+        // Say that the user has an active tab.
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+        val tab = mockTabs.last()
+        browser.setActiveTab(tab)
+
+        // Close the tab.
+        browserWrapper.closeTab(tab.guid)
+
+        // Confirm that the Tab was told to close, then fire the callback saying it was removed.
+        verify(tab).dispatchBeforeUnloadAndClose()
+        mockTabs.remove(tab)
+        getTabListCallback().onTabRemoved(tab)
+
+        // Confirm that everything is gone.
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(0)
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = true)).isTrue()
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = false)).isTrue()
     }
 }

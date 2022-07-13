@@ -156,6 +156,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
                 cardsPaneModel = remember(appNavModel) {
                     CardsPaneModelImpl(
+                        context = context,
                         webLayerModel = webLayerModel,
                         appNavModel = appNavModel!!,
                         popupModel = popupModel,
@@ -258,6 +259,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun onPause() {
+        popupModel.dismissSnackbar()
         webLayerModel.currentBrowser.takeScreenshotOfActiveTab()
         super.onPause()
     }

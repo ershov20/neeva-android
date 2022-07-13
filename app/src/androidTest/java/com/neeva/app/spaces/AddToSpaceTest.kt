@@ -28,12 +28,12 @@ import com.neeva.app.selectItemFromContextMenu
 import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.waitFor
 import com.neeva.app.waitForActivityStartup
+import com.neeva.app.waitForBrowserState
 import com.neeva.app.waitForNode
 import com.neeva.app.waitForNodeToDisappear
 import com.neeva.app.waitForNodeWithContentDescription
 import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
-import com.neeva.app.waitForTabListState
 import com.neeva.app.waitForTitle
 import com.neeva.testcommon.WebpageServingRule
 import com.neeva.testcommon.apollo.MockListSpacesQueryData
@@ -231,10 +231,10 @@ class AddToSpaceTest : BaseBrowserTest() {
             waitForIdle()
 
             // Wait until the new incognito tab is created.
-            waitForTabListState(
+            waitForBrowserState(
                 isIncognito = true,
-                expectedIncognitoTabCount = 1,
-                expectedRegularTabCount = 1
+                expectedNumIncognitoTabs = 1,
+                expectedNumRegularTabs = 1
             )
             waitForTitle("Page 2")
 

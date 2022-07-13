@@ -2,18 +2,16 @@ package com.neeva.app.browsing
 
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollToNode
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.appnav.AppNavDestination
-import com.neeva.app.clickOnNodeWithText
+import com.neeva.app.enableCloseAllIncognitoTabsSetting
 import com.neeva.app.expectTabListState
 import com.neeva.app.getString
 import com.neeva.app.onBackPressed
@@ -25,7 +23,6 @@ import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForAssertion
 import com.neeva.app.waitForBrowserState
 import com.neeva.app.waitForNavDestination
-import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
 import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -232,15 +229,7 @@ class TabSwitcherTest : BaseBrowserTest() {
     @Test
     fun switchingOutOfIncognito_withSetting_closesTabs() {
         androidComposeRule.apply {
-            // Turn the "close all tabs when leaving Incognito" setting on.
-            openOverflowMenuAndClickItem(R.string.settings)
-            waitForNavDestination(AppNavDestination.SETTINGS)
-            waitForNodeWithTag("SettingsPaneItems").performScrollToNode(
-                hasText(getString(R.string.settings_when_leaving_incognito_mode))
-            )
-            clickOnNodeWithText(getString(R.string.settings_when_leaving_incognito_mode))
-            onBackPressed()
-            waitForNavDestination(AppNavDestination.BROWSER)
+            enableCloseAllIncognitoTabsSetting()
 
             openCardGrid(incognito = true)
             openLazyTab(WebpageServingRule.urlFor("index.html"))

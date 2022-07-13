@@ -1,10 +1,8 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import org.chromium.weblayer.Tab
 
 /**
@@ -17,9 +15,21 @@ class TabList {
 
     private val _orderedTabList = MutableStateFlow<List<TabInfo>>(emptyList())
     val orderedTabList: StateFlow<List<TabInfo>> = _orderedTabList
-    val hasNoTabsFlow: Flow<Boolean> = _orderedTabList.map { it.isEmpty() }
 
-    fun hasNoTabs(): Boolean = tabs.isEmpty()
+    /**
+     * Returns true if there are no open tabs in the list.
+     *
+     * @param ignoreClosingTabs If true, any tabs that are being closed are treated as already gone.
+     */
+    fun hasNoTabs(ignoreClosingTabs: Boolean): Boolean {
+        val filteredList = if (ignoreClosingTabs) {
+            tabs.filterNot { tabInfoMap[it]?.isClosing == true }
+        } else {
+            tabs
+        }
+        return filteredList.isEmpty()
+    }
+
     fun indexOf(id: String) = tabs.indexOf(id)
     fun getTabInfo(id: String) = tabInfoMap[id]
 
@@ -88,15 +98,28 @@ class TabList {
             }
     }
 
+    fun updateIsClosing(tabId: String, newIsClosing: Boolean) {
+        tabInfoMap[tabId]
+            ?.takeUnless { it.isClosing == newIsClosing }
+            ?.let { existingInfo ->
+                tabInfoMap[tabId] = existingInfo.copy(isClosing = newIsClosing)
+                updateFlow()
+            }
+    }
+
     fun updateParentInfo(tab: Tab, parentTabId: String?, tabOpenType: TabInfo.TabOpenType) {
-        setPersistedInfo(
-            tab = tab,
-            newData = TabInfo.PersistedData(
-                parentTabId = parentTabId,
-                openType = tabOpenType
-            ),
-            persist = true
-        )
+        if (tab.isDestroyed) return
+
+        tabInfoMap[tab.guid]?.let { existingTabInfo ->
+            setPersistedInfo(
+                tab = tab,
+                newData = existingTabInfo.data.copy(
+                    parentTabId = parentTabId,
+                    openType = tabOpenType
+                ),
+                persist = true
+            )
+        }
     }
 
     internal fun setPersistedInfo(tab: Tab, newData: TabInfo.PersistedData, persist: Boolean) {

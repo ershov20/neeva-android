@@ -1,14 +1,11 @@
 package com.neeva.app.history
 
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasAnyDescendant
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -23,6 +20,7 @@ import com.neeva.app.clickOnNodeWithContentDescription
 import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectTabListState
+import com.neeva.app.getSelectedTabNode
 import com.neeva.app.getString
 import com.neeva.app.onBackPressed
 import com.neeva.app.openCardGrid
@@ -114,22 +112,11 @@ class HistoryUITest : BaseBrowserTest() {
             openCardGrid(false)
 
             // The tab should be selected in the card grid.
-            waitForAssertion {
-                // If we don't use an unmerged tree, then the containers all get collapsed and
-                // we can't find the selected tag.
-                onAllNodesWithTag("TabCard", useUnmergedTree = true)
-                    .filter(hasAnyDescendant(hasTestTag("SelectedTabCard")))
-                    .filter(hasAnyDescendant(hasText("Page 1")))
-                    .assertCountEquals(1)
-                    .onFirst()
-                    .assertIsDisplayed()
-            }
+            getSelectedTabNode(title = "Page 1").assertIsDisplayed()
 
             waitForAssertion {
                 onAllNodesWithTag("TabCard", useUnmergedTree = true)
-                    .filter(hasAnyDescendant(hasText("Page 3")))
-                    .assertCountEquals(1)
-                    .onFirst()
+                    .filterToOne(hasAnyDescendant(hasText("Page 3")))
                     .assertIsDisplayed()
             }
         }

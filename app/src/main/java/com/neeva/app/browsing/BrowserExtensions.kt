@@ -30,7 +30,7 @@ fun StateFlow<Browser?>.takeIfAlive(): Browser? {
 }
 
 fun StateFlow<Browser?>.getActiveTab(): Tab? {
-    return takeIfAlive()?.activeTab
+    return takeIfAlive()?.activeTab?.takeUnless { it.isDestroyed }
 }
 
 fun StateFlow<Browser?>.getActiveTabId(): String? {

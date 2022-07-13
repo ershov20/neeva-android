@@ -14,7 +14,7 @@ import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.onBackPressed
 import com.neeva.app.selectItemFromContextMenu
 import com.neeva.app.waitForActivityStartup
-import com.neeva.app.waitForTabListState
+import com.neeva.app.waitForBrowserState
 import com.neeva.app.waitForTitle
 import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -51,7 +51,7 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
             waitForIdle()
 
             // Wait for the second tab to be created.
-            waitForTabListState(isIncognito = false, expectedRegularTabCount = 2)
+            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 2)
         }
     }
 
@@ -74,10 +74,10 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
             waitForIdle()
 
             // Wait until the new incognito tab is created.
-            waitForTabListState(
+            waitForBrowserState(
                 isIncognito = true,
-                expectedIncognitoTabCount = 1,
-                expectedRegularTabCount = 1
+                expectedNumIncognitoTabs = 1,
+                expectedNumRegularTabs = 1
             )
             waitForTitle("Page 2")
             onNodeWithContentDescription(
@@ -109,14 +109,14 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
             waitForIdle()
 
             // Wait until the new tab is created.
-            waitForTabListState(isIncognito = false, expectedRegularTabCount = 2)
+            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 2)
             waitForTitle("Page 2")
 
             // Hit system back to close the tab.  We should end up back on the parent tab.
             onBackPressed()
 
             // We should be back on the parent tab.
-            waitForTabListState(isIncognito = false, expectedRegularTabCount = 1)
+            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 1)
             waitForTitle("Page 1")
         }
     }

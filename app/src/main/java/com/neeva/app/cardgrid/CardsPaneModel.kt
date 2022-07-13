@@ -1,8 +1,10 @@
 package com.neeva.app.cardgrid
 
+import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
@@ -30,6 +32,7 @@ interface CardsPaneModel {
 }
 
 class CardsPaneModelImpl(
+    private val context: Context,
     private val webLayerModel: WebLayerModel,
     private val appNavModel: AppNavModel,
     private val popupModel: PopupModel,
@@ -108,7 +111,17 @@ class CardsPaneModelImpl(
     }
 
     override fun closeTab(browserWrapper: BrowserWrapper, tab: TabInfo) {
-        browserWrapper.closeTab(tab.id)
+        browserWrapper.startClosingTab(tab.id)
+        popupModel.showSnackbar(
+            message = context.getString(R.string.tab_closed, tab.title),
+            actionLabel = context.getString(R.string.undo),
+            onActionPerformed = {
+                browserWrapper.cancelClosingTab(tab.id)
+            },
+            onDismissed = {
+                browserWrapper.closeTab(tab.id)
+            }
+        )
     }
 
     override fun openLazyTab(browserWrapper: BrowserWrapper) {

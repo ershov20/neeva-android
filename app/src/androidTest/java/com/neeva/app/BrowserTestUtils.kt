@@ -2,14 +2,23 @@ package com.neeva.app
 
 import android.view.InputDevice
 import android.view.MotionEvent
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.filterToOne
+import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.GeneralClickAction
 import androidx.test.espresso.action.GeneralLocation
 import androidx.test.espresso.action.Press
 import androidx.test.espresso.action.Tap
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.neeva.app.appnav.AppNavDestination
 import com.neeva.testcommon.WebpageServingRule
 import org.junit.rules.TestRule
 import strikt.api.expectThat
@@ -81,21 +90,20 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.expectTabListState(
     }
 }
 
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForTabListState(
+/** Waits for the user to be in the correct profile and with the correct number of tabs. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
     isIncognito: Boolean,
-    expectedIncognitoTabCount: Int = 0,
-    expectedRegularTabCount: Int = 0
+    expectedNumRegularTabs: Int = 0,
+    expectedNumIncognitoTabs: Int? = null
 ) {
     waitFor {
-        val browsers = it.webLayerModel.browsersFlow.value
-        val incognitoTabCount =
-            (browsers.incognitoBrowserWrapper?.orderedTabList?.value ?: emptyList()).size
-        val regularTabCount = browsers.regularBrowserWrapper.orderedTabList.value.size
-
-        return@waitFor when {
-            it.webLayerModel.currentBrowser.isIncognito != isIncognito -> false
-            incognitoTabCount != expectedIncognitoTabCount -> false
-            regularTabCount != expectedRegularTabCount -> false
+        val browsers = activity.webLayerModel.browsersFlow.value
+        val numRegularTabs = browsers.regularBrowserWrapper.orderedTabList.value.size
+        val numIncognitoTabs = browsers.incognitoBrowserWrapper?.orderedTabList?.value?.size
+        when {
+            numRegularTabs != expectedNumRegularTabs -> false
+            numIncognitoTabs != expectedNumIncognitoTabs -> false
+            browsers.isCurrentlyIncognito != isIncognito -> false
             else -> true
         }
     }
@@ -155,4 +163,50 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesIn
         expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
         expectThat(navigationInfoFlow.value.canGoForward).isFalse()
     }
+}
+
+/** Returns the node representing the tab with the given [title]. */
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.getSelectedTabNode(
+    title: String
+): SemanticsNodeInteraction {
+    var node: SemanticsNodeInteraction? = null
+    waitForAssertion {
+        // Use an unmerged tree to ensure that we can find the "SelectedTabCard" tag.
+        // If we don't use an unmerged tree, then the containers all get collapsed and only the
+        // ancestor's "TabCard" tag is kept in the tree.
+        node = onAllNodesWithTag("TabCard", useUnmergedTree = true)
+            .filterToOne(
+                hasAnyDescendant(hasTestTag("SelectedTabCard"))
+                    .and(hasAnyDescendant(hasText(title)))
+            )
+    }
+
+    return node!!
+}
+
+/** Turn the "close all tabs when leaving Incognito" setting on. */
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.enableCloseAllIncognitoTabsSetting() {
+    openOverflowMenuAndClickItem(R.string.settings)
+    waitForNavDestination(AppNavDestination.SETTINGS)
+    waitForNodeWithTag("SettingsPaneItems").performScrollToNode(
+        hasText(getString(R.string.settings_when_leaving_incognito_mode))
+    )
+    clickOnNodeWithText(getString(R.string.settings_when_leaving_incognito_mode))
+    onBackPressed()
+    waitForNavDestination(AppNavDestination.BROWSER)
+}
+
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.closeActiveTabFromTabGrid() {
+    val activeTabTitle =
+        activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value
+    getSelectedTabNode(activeTabTitle).assertIsDisplayed()
+    waitForNodeWithContentDescription(activity.getString(R.string.tab_close, activeTabTitle))
+        .performClick()
+
+    // Confirm that the TabCard representing the tab disappears.
+    waitForNodeToDisappear(onNode(hasText(activeTabTitle)))
+
+    // Confirm that the snackbar shows up.
+    val closeSnackbarText = activity.getString(R.string.tab_closed, activeTabTitle)
+    waitForNodeWithText(closeSnackbarText).assertIsDisplayed()
 }

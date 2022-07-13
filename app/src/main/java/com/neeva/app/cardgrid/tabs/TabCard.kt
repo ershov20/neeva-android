@@ -108,7 +108,9 @@ fun TabCard(
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_baseline_close_24),
-                        contentDescription = stringResource(R.string.close),
+                        contentDescription = stringResource(
+                            R.string.tab_close, tabInfo.title ?: ""
+                        ),
                         contentScale = ContentScale.Inside,
                         colorFilter = ColorFilter.tint(Color.White)
                     )

@@ -9,13 +9,9 @@ data class TabInfo(
     val title: String?,
     val isSelected: Boolean,
     val isCrashed: Boolean = false,
+    val isClosing: Boolean = false,
     val data: PersistedData = PersistedData(null, TabOpenType.DEFAULT)
 ) {
-    companion object {
-        const val KEY_PARENT_TAB_ID = "PARENT_TAB_ID"
-        const val KEY_OPEN_TYPE = "OPEN_TYPE"
-    }
-
     enum class TabOpenType {
         DEFAULT,
         CHILD_TAB,
@@ -27,6 +23,11 @@ data class TabInfo(
         val parentTabId: String? = null,
         val openType: TabOpenType = TabOpenType.DEFAULT
     ) {
+        companion object {
+            const val KEY_PARENT_TAB_ID = "PARENT_TAB_ID"
+            const val KEY_OPEN_TYPE = "OPEN_TYPE"
+        }
+
         constructor(map: Map<String, String>) : this(
             parentTabId = map[KEY_PARENT_TAB_ID],
             openType = TabOpenType.values()

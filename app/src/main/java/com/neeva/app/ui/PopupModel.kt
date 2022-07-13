@@ -66,6 +66,15 @@ class PopupModel(
     val bottomSheetDialogState: StateFlow<BottomSheetDialogHostState?>
         get() = _bottomSheetDialogState
 
+    fun dismissSnackbar() {
+        currentSnackbarJob
+            ?.takeIf { it.isActive }
+            ?.let {
+                it.cancel()
+                currentSnackbarCallbacks?.fireCallback(SnackbarResult.Dismissed)
+            }
+    }
+
     fun showSnackbar(
         message: String,
         actionLabel: String? = null,
@@ -74,12 +83,7 @@ class PopupModel(
         onDismissed: () -> Unit = {}
     ) {
         // Cancel any previously shown Snackbars instead of letting them queue up.
-        currentSnackbarJob
-            ?.takeIf { it.isActive }
-            ?.let {
-                it.cancel()
-                currentSnackbarCallbacks?.fireCallback(SnackbarResult.Dismissed)
-            }
+        dismissSnackbar()
 
         // Show the new Snackbar.
         val newSnackbarCallbacks = SnackbarCallbacks(onActionPerformed, onDismissed)

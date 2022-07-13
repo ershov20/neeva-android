@@ -76,6 +76,8 @@ interface BrowserWrapper {
     suspend fun waitUntilBrowserIsReady(): Boolean
 
     fun selectTab(id: String): Boolean
+    fun startClosingTab(id: String)
+    fun cancelClosingTab(id: String)
     fun closeTab(id: String)
     fun closeAllTabs()
 
@@ -85,9 +87,13 @@ interface BrowserWrapper {
      */
     fun openLazyTab(focusUrlBar: Boolean = true)
 
-    /** Returns true if the [Browser] is maintaining no tabs. */
-    fun hasNoTabs(): Boolean
-    fun hasNoTabsFlow(): Flow<Boolean>
+    /**
+     * Returns true if the [Browser] is maintaining no tabs.
+     *
+     * @param ignoreClosingTabs If true, any tabs that are in the process of being closed are
+     * treated as not existing.
+     */
+    fun hasNoTabs(ignoreClosingTabs: Boolean = false): Boolean
 
     /** Returns true if the user should be forced to go to the card grid. */
     fun userMustBeShownCardGrid(): Boolean

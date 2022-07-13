@@ -9,8 +9,8 @@ import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.waitForActivityStartup
+import com.neeva.app.waitForBrowserState
 import com.neeva.app.waitForNodeWithText
-import com.neeva.app.waitForTabListState
 import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
@@ -31,7 +31,7 @@ class LongPressLinkTest : BaseBrowserTest() {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
             waitForActivityStartup()
-            waitForTabListState(isIncognito = false, expectedRegularTabCount = 1)
+            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 1)
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(imageLinkUrl)
@@ -51,7 +51,7 @@ class LongPressLinkTest : BaseBrowserTest() {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
 
             waitForActivityStartup()
-            waitForTabListState(isIncognito = false, expectedRegularTabCount = 1)
+            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 1)
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(linkUrl)

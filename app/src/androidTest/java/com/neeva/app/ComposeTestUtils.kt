@@ -104,7 +104,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForActivityStart
     }
     registerIdlingResource(
         object : IdlingResource {
-            override val isIdleNow get() = activity.isBrowserLoadingIdle()
+            override val isIdleNow get() = activity.isDestroyed || activity.isBrowserLoadingIdle()
         }
     )
 
@@ -327,6 +327,12 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
         expectThat(activity.cardsPaneModel!!.selectedScreen.value).isEqualTo(expectedSubscreen)
     }
 
+    switchProfileOnCardGrid(incognito)
+}
+
+fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.switchProfileOnCardGrid(
+    incognito: Boolean
+) {
     // Click on the correct tab switcher button.
     val selectedScreen = activity.cardsPaneModel!!.selectedScreen.value
     if (incognito && selectedScreen != SelectedScreen.INCOGNITO_TABS) {
@@ -350,25 +356,6 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForCardGridScree
     waitForNavDestination(AppNavDestination.CARD_GRID)
     waitFor {
         activity.cardsPaneModel?.selectedScreen?.value == expectedSubscreen
-    }
-}
-
-/** Waits for the user to be in the correct profile and with the correct number of tabs. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
-    isIncognito: Boolean,
-    expectedNumRegularTabs: Int,
-    expectedNumIncognitoTabs: Int?
-) {
-    waitFor {
-        val browsers = activity.webLayerModel.browsersFlow.value
-        val numRegularTabs = browsers.regularBrowserWrapper.orderedTabList.value.size
-        val numIncognitoTabs = browsers.incognitoBrowserWrapper?.orderedTabList?.value?.size
-        when {
-            numRegularTabs != expectedNumRegularTabs -> false
-            numIncognitoTabs != expectedNumIncognitoTabs -> false
-            browsers.isCurrentlyIncognito != isIncognito -> false
-            else -> true
-        }
     }
 }
 

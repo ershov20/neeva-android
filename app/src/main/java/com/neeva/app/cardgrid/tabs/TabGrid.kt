@@ -7,7 +7,9 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -33,12 +35,18 @@ fun TabGrid(
     val activeTabIndex: Int = tabs.indexOfFirst { it.isSelected }.coerceAtLeast(0)
     val gridState = rememberLazyGridState(initialFirstVisibleItemIndex = activeTabIndex)
 
+    val visibleTabs = remember {
+        derivedStateOf {
+            tabs.filterNot { it.isClosing }
+        }
+    }
+
     TabGrid(
         isIncognito = browserWrapper.isIncognito,
         gridState = gridState,
         onSelectTab = { tabInfo -> cardsPaneModel.selectTab(browserWrapper, tabInfo) },
         onCloseTabs = { tabInfo -> cardsPaneModel.closeTab(browserWrapper, tabInfo) },
-        tabs = tabs,
+        tabs = visibleTabs.value,
         faviconCache = browserWrapper.faviconCache,
         screenshotProvider = browserWrapper::restoreScreenshotOfTab,
         modifier = modifier

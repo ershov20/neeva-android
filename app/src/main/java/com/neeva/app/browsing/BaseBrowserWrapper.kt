@@ -193,7 +193,11 @@ abstract class BaseBrowserWrapper internal constructor(
         faviconCache.profileProvider = FaviconCache.ProfileProvider { getProfile() }
 
         userMustStayInCardGridFlow = orderedTabList
-            .combine(_isLazyTabFlow) { tabs, isLazyTab -> tabs.isEmpty() && !isLazyTab }
+            .combine(_isLazyTabFlow) { tabs, isLazyTab ->
+                // If the user has no open tabs (explicitly ignoring tabs being closed), keep them
+                // in the card grid instead of sending them back out to the browser.
+                tabs.filterNot { it.isClosing }.isEmpty() && !isLazyTab
+            }
             .stateIn(coroutineScope, SharingStarted.Eagerly, false)
 
         coroutineScope.launch {
@@ -226,7 +230,7 @@ abstract class BaseBrowserWrapper internal constructor(
             }
 
             // Remove the tab from our local state.
-            val newIndex = (tabList.indexOf(tabId) - 1).coerceAtLeast(0)
+            val tabIndex = tabList.indexOf(tabId)
             val tabInfo = tabList.remove(tabId)
 
             // If the active tab is a child of the removed tab, update it so that we have the
@@ -237,19 +241,10 @@ abstract class BaseBrowserWrapper internal constructor(
             // gets destroyed.
             unregisterTabCallbacks(tabId)
 
-            // If the closed tab was the active tab, mark a different tab as active.
-            browser?.let {
-                if (it.activeTab != null) return
-
-                val parentTabId = tabInfo?.data?.parentTabId
-                if (browserFlow.setActiveTab(parentTabId)) {
-                    return@let
-                }
-
-                val newIndexTabId = orderedTabList.value.getOrNull(newIndex)?.id
-                if (browserFlow.setActiveTab(newIndexTabId)) {
-                    return@let
-                }
+            // If there is currently no tab marked as active, pick a new one.
+            val activeTab = getActiveTab()
+            if (activeTab == null) {
+                setNextActiveTab(tabInfo, tabIndex)
             }
         }
 
@@ -706,6 +701,36 @@ abstract class BaseBrowserWrapper internal constructor(
         registerTabCallbacks(tab)
     }
 
+    private fun setNextActiveTab(closedTabInfo: TabInfo?, closedTabIndex: Int) {
+        // Send the user back to the tab's parent.
+        val parentTabId = closedTabInfo?.data?.parentTabId
+        if (browserFlow.setActiveTab(parentTabId)) {
+            return
+        }
+
+        // Pick the tab immediately before the closed one.
+        val newIndex = (closedTabIndex - 1).coerceAtLeast(0)
+        val newIndexTabId = orderedTabList.value.getOrNull(newIndex)?.id
+        if (browserFlow.setActiveTab(newIndexTabId)) {
+            return
+        }
+    }
+
+    override fun startClosingTab(id: String) {
+        val tabIndex = tabList.indexOf(id)
+        val tabInfo = tabList.getTabInfo(id)
+        tabList.updateIsClosing(tabId = id, newIsClosing = true)
+
+        // If the tab being closed is the active tab, mark a different tab as active.
+        if (getActiveTab()?.guid == id) {
+            setNextActiveTab(tabInfo, tabIndex)
+        }
+    }
+
+    override fun cancelClosingTab(id: String) {
+        tabList.updateIsClosing(id, newIsClosing = false)
+    }
+
     override fun closeTab(id: String) {
         getTab(id)?.dispatchBeforeUnloadAndClose()
     }
@@ -759,11 +784,12 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     /** Returns true if the [Browser] is maintaining no tabs. */
-    override fun hasNoTabs(): Boolean = tabList.hasNoTabs()
-    override fun hasNoTabsFlow(): Flow<Boolean> = tabList.hasNoTabsFlow
+    override fun hasNoTabs(ignoreClosingTabs: Boolean): Boolean {
+        return tabList.hasNoTabs(ignoreClosingTabs)
+    }
 
     /** Returns true if the user should be forced to go to the card grid. */
-    override fun userMustBeShownCardGrid(): Boolean = tabList.hasNoTabs() && !_isLazyTabFlow.value
+    override fun userMustBeShownCardGrid(): Boolean = userMustStayInCardGridFlow.value
 
     override fun isFullscreen(): Boolean = fullscreenCallback.isFullscreen()
     override fun exitFullscreen(): Boolean = fullscreenCallback.exitFullscreen()

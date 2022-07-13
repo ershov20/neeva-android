@@ -130,7 +130,7 @@ class BrowserRestoreCallbackImplTest {
             // Create a set of Tabs that the Browser will be managing and returning to callers.
             tabs.clear()
             inactiveTabIds.forEach { tabId ->
-                val dataMap = mapOf(TabInfo.KEY_PARENT_TAB_ID to "parent of tabId")
+                val dataMap = mapOf(TabInfo.PersistedData.KEY_PARENT_TAB_ID to "parent of tabId")
                 tabs.add(
                     mock {
                         on { getGuid() } doReturn(tabId)

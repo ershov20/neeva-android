@@ -20,6 +20,9 @@
     <string name="reload">Reload</string>
     <string name="search">Search</string>
 
+    <string name="tab_close">Close tab \"%1$s\"</string>
+    <string name="tab_closed">Closed \"%1$s\"</string>
+
     <string name="new_tab_content_description">Create new tab</string>
     <string name="close_all_content_description">Close all tabs</string>
     <string name="update_available">Update available</string>
