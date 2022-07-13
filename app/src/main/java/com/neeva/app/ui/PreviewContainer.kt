@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.apollographql.apollo3.ApolloClient
 import com.neeva.app.LocalAppNavModel
+import com.neeva.app.LocalChromiumVersion
 import com.neeva.app.LocalClientLogger
 import com.neeva.app.LocalDispatchers
 import com.neeva.app.LocalDomainProvider
@@ -147,6 +148,7 @@ fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () ->
     CompositionLocalProvider(
         LocalAppNavModel provides PreviewAppNavModel(LocalContext.current),
         LocalClientLogger provides previewClientLogger,
+        LocalChromiumVersion provides "XXX.XXX.XXX.XXX",
         LocalDispatchers provides previewDispatchers,
         LocalDomainProvider provides previewDomainProvider,
         LocalNeevaConstants provides previewNeevaConstants,

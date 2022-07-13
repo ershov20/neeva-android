@@ -114,7 +114,8 @@
     <string name="settings_welcome_tours">Welcome tours</string>
     <string name="settings_help_center">Help center</string>
     <string name="settings_about">About</string>
-    <string name="settings_neeva_browser_version">Neeva Browser %s</string>
+    <string name="settings_neeva_browser_version">Neeva version %s</string>
+    <string name="settings_chromium_version">Chromium version %s</string>
     <string name="settings_play_store_page">Check for updates</string>
     <string name="settings_licenses">Licenses</string>
     <string name="settings_additional_licenses">Additional licenses</string>

@@ -74,6 +74,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
+import org.chromium.weblayer.WebLayer
 
 @AndroidEntryPoint
 class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
@@ -183,6 +184,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     CompositionLocalProvider(
                         LocalAppNavModel provides appNavModel!!,
                         LocalCardsPaneModel provides cardsPaneModel!!,
+                        LocalChromiumVersion provides WebLayer.getSupportedFullVersion(context),
                         LocalClientLogger provides clientLogger,
                         LocalDispatchers provides dispatchers,
                         LocalDomainProvider provides domainProvider,

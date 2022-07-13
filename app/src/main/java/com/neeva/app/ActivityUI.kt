@@ -44,6 +44,7 @@ val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("Not set") }
 val LocalBrowserToolbarModel = compositionLocalOf<BrowserToolbarModel> { error("Not set") }
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("Not set") }
 val LocalCardsPaneModel = compositionLocalOf<CardsPaneModel> { error("Not set") }
+val LocalChromiumVersion = compositionLocalOf { "" }
 val LocalClientLogger = compositionLocalOf<ClientLogger> { error("Not set") }
 val LocalDispatchers = compositionLocalOf<Dispatchers> { error("Not set") }
 val LocalDomainProvider = compositionLocalOf<DomainProvider> { error("Not set") }

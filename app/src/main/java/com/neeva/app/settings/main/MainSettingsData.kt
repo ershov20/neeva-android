@@ -99,6 +99,7 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
                     primaryLabelId = R.string.settings_neeva_browser_version,
+                    secondaryLabelId = R.string.settings_chromium_version,
                     openUrlViaIntent = true
                 ),
                 SettingsRowData(

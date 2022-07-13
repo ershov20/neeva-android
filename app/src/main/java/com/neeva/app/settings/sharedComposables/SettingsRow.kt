@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
+import com.neeva.app.LocalChromiumVersion
 import com.neeva.app.R
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.settings.SettingsController
@@ -34,9 +35,13 @@ private fun getSettingsRowDataValues(
     // if there was no primaryLabelId set,
     // screenshot tests and developers will see that their new SettingsRow has no label
     var primaryLabel = rowData.primaryLabelId?.let { stringResource(it) } ?: ""
-    val secondaryLabel = rowData.secondaryLabelId?.let { stringResource(it) }
+    var secondaryLabel = rowData.secondaryLabelId?.let { stringResource(it) }
     if (rowData.primaryLabelId == R.string.settings_neeva_browser_version) {
         primaryLabel = stringResource(rowData.primaryLabelId, BuildConfig.VERSION_NAME)
+        secondaryLabel = stringResource(
+            R.string.settings_chromium_version,
+            LocalChromiumVersion.current
+        )
     }
     return SettingsRowDataValues(primaryLabel, secondaryLabel)
 }
