@@ -15,6 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.R
@@ -68,13 +70,16 @@ fun AddToSpaceButton(modifier: Modifier = Modifier) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
     val spaceStoreHasUrl by browserToolbarModel.spaceStoreHasUrlFlow.collectAsState()
     val isIncognito = browserToolbarModel.isIncognito
+    val shouldDisplayFilled = !isIncognito && spaceStoreHasUrl
 
     IconButton(
         enabled = !isIncognito,
         onClick = browserToolbarModel::onAddToSpace,
-        modifier = modifier
+        modifier = modifier.semantics {
+            testTag = "IS IN SPACE".takeIf { shouldDisplayFilled } ?: "NOT IN SPACE"
+        }
     ) {
-        val resourceId = if (!isIncognito && spaceStoreHasUrl) {
+        val resourceId = if (shouldDisplayFilled) {
             R.drawable.ic_baseline_bookmark_24
         } else {
             R.drawable.ic_baseline_bookmark_border_24

@@ -18,7 +18,6 @@ import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.TestNeevaConstantsModule
-import com.neeva.app.WebpageServingRule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.clickOnNodeWithContentDescription
 import com.neeva.app.clickOnNodeWithText
@@ -38,6 +37,7 @@ import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
+import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
 import org.junit.Rule

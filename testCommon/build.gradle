@@ -37,6 +37,8 @@ android {
 dependencies {
     implementation project(path: ':app')
 
+    implementation "androidx.test.ext:junit:$androidx_test_junit_version"
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
     implementation "com.apollographql.apollo3:apollo-testing-support:$apollo_version"
+    implementation "junit:junit:$junit_version"
 }

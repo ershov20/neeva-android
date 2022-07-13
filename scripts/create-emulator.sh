@@ -9,9 +9,9 @@ else
 fi
 
 sdkmanager "system-images;android-28;default;$ARCH"
-echo "no" | avdmanager --verbose create avd -n "CircleCI" -k "system-images;android-28;default;$ARCH" -d "pixel_2"
+echo "no" | avdmanager --verbose create avd -n "Pixel2Avd" -k "system-images;android-28;default;$ARCH" -d "pixel_2"
 
 # Allow the developer's PC keyboard to work on the emulator.
-perl -p -i -e "s/hw\.keyboard = false/hw.keyboard = true/g" ~/.android/avd/CircleCI.avd/hardware-qemu.ini
+perl -p -i -e "s/hw\.keyboard = false/hw.keyboard = true/g" ~/.android/avd/Pixel2Avd.avd/hardware-qemu.ini
 
-emulator -avd "CircleCI" -no-audio -no-boot-anim -verbose -no-snapshot -gpu swiftshader_indirect -partition-size 2048
+emulator -avd "Pixel2Avd" -no-audio -no-boot-anim -verbose -no-snapshot -gpu swiftshader_indirect -partition-size 2048

@@ -10,6 +10,7 @@ import androidx.test.espresso.action.GeneralLocation
 import androidx.test.espresso.action.Press
 import androidx.test.espresso.action.Tap
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.neeva.testcommon.WebpageServingRule
 import org.junit.rules.TestRule
 import strikt.api.expectThat
 import strikt.assertions.hasSize

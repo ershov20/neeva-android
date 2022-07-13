@@ -2,17 +2,19 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import com.neeva.app.GetSpacesDataQuery
+import com.neeva.app.spaces.toSpace
 import com.neeva.app.storage.daos.SpaceDao
-import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.storage.entities.spaceItem
-import com.neeva.app.type.SpaceACLLevel
+import com.neeva.testcommon.apollo.MockListSpacesQueryData
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
+import strikt.assertions.containsExactly
+import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.hasSize
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
@@ -20,6 +22,14 @@ import strikt.assertions.isNotNull
 
 @HiltAndroidTest
 class SpaceDaoTest : HistoryDatabaseBaseTest() {
+    companion object {
+        private val SPACE_1 = MockListSpacesQueryData.SPACE_1.toSpace("user id 1")!!
+        private val SPACE_2 = MockListSpacesQueryData.SPACE_2.toSpace("user id 2")!!
+        private val SPACE_1_ITEM_1 = MockListSpacesQueryData.SPACE_1_ITEM_1.spaceItem(SPACE_1.id)!!
+        private val SPACE_2_ITEM_1 = MockListSpacesQueryData.SPACE_2_ITEM_1.spaceItem(SPACE_2.id)!!
+        private val SPACE_2_ITEM_2 = MockListSpacesQueryData.SPACE_2_ITEM_2.spaceItem(SPACE_2.id)!!
+    }
+
     private lateinit var spacesRepository: SpaceDao
 
     override fun setUp() {
@@ -31,40 +41,9 @@ class SpaceDaoTest : HistoryDatabaseBaseTest() {
         // Setup: Add entries into the database.
         spacesRepository.upsert(SPACE_1)
         spacesRepository.upsert(SPACE_2)
-
-        spacesRepository.upsert(
-            SpaceItem(
-                "asjdahjfad",
-                "nEgvD5HST7e62eEmhf0kkxx4xnEuNHBeEXxbGcoo",
-                Uri.parse("https://example.com"),
-                "Example",
-                null,
-                null,
-                itemIndex = 0
-            )
-        )
-        spacesRepository.upsert(
-            SpaceItem(
-                "ksjkjkdadkma",
-                "nEgvD5HST7e62eEmhf0kkxx4xnEuNHBeEXxbGcoo",
-                Uri.parse("https://android.com"),
-                "Android",
-                null,
-                null,
-                itemIndex = 1
-            )
-        )
-        spacesRepository.upsert(
-            SpaceItem(
-                "sdsfgaskals",
-                "c5rgtmtdv9enb8j1gv60",
-                Uri.parse("https://android.com"),
-                "Android",
-                null,
-                null,
-                itemIndex = 0
-            )
-        )
+        spacesRepository.upsert(SPACE_1_ITEM_1)
+        spacesRepository.upsert(SPACE_2_ITEM_1)
+        spacesRepository.upsert(SPACE_2_ITEM_2)
     }
 
     @Test
@@ -90,10 +69,43 @@ class SpaceDaoTest : HistoryDatabaseBaseTest() {
         runBlocking {
             addSpacesIntoDatabase()
 
-            val spaceIDs = database.spaceDao()
+            database.spaceDao()
                 .getSpaceIDsWithURL(Uri.parse("https://android.com"))
-            expectThat(spaceIDs).hasSize(2)
-            expectThat(spaceIDs).contains(SPACE_1.id, SPACE_2.id)
+                .apply { expectThat(this).isEmpty() }
+
+            // Insert the item into one of the Spaces.
+            spacesRepository.upsert(
+                SpaceItem(
+                    "first instance",
+                    SPACE_2.id,
+                    Uri.parse("https://android.com"),
+                    "Android",
+                    null,
+                    null,
+                    itemIndex = 0
+                )
+            )
+
+            database.spaceDao()
+                .getSpaceIDsWithURL(Uri.parse("https://android.com"))
+                .apply { expectThat(this).containsExactly(SPACE_2.id) }
+
+            // Insert an item with the same URL into another Space.
+            spacesRepository.upsert(
+                SpaceItem(
+                    "second instance",
+                    SPACE_1.id,
+                    Uri.parse("https://android.com"),
+                    "Android",
+                    null,
+                    null,
+                    itemIndex = 0
+                )
+            )
+
+            database.spaceDao()
+                .getSpaceIDsWithURL(Uri.parse("https://android.com"))
+                .apply { expectThat(this).containsExactlyInAnyOrder(SPACE_1.id, SPACE_2.id) }
         }
     }
 
@@ -119,31 +131,6 @@ class SpaceDaoTest : HistoryDatabaseBaseTest() {
             space2Items = database.spaceDao().getItemsFromSpace(SPACE_2.id)
             expectThat(space2Items).isEmpty()
         }
-    }
-
-    companion object {
-        private val SPACE_1 = Space(
-            id = "c5rgtmtdv9enb8j1gv60",
-            name = "Saved For Later",
-            lastModifiedTs = "2022-02-10T22:08:01Z",
-            thumbnail = null,
-            resultCount = 1,
-            isDefaultSpace = true,
-            isShared = true,
-            isPublic = false,
-            userACL = SpaceACLLevel.Owner
-        )
-        private val SPACE_2 = Space(
-            id = "nEgvD5HST7e62eEmhf0kkxx4xnEuNHBeEXxbGcoo",
-            name = "Jetpack Compose",
-            lastModifiedTs = "2022-02-10T02:10:38Z",
-            thumbnail = null,
-            resultCount = 2,
-            isDefaultSpace = false,
-            isShared = false,
-            isPublic = true,
-            userACL = SpaceACLLevel.PublicView
-        )
     }
 
     @Test

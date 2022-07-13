@@ -169,7 +169,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.sendAppToBackground(
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnUrlBar() {
     flakyClickOnNode(hasTestTag("LocationLabel")) {
         assertionToBoolean {
-            waitForMatchingNode(hasTestTag("AutocompleteTextField")).assertIsDisplayed()
+            waitForNode(hasTestTag("AutocompleteTextField")).assertIsDisplayed()
         }
     }
     waitForNodeWithContentDescription(getString(com.neeva.app.R.string.url_bar_placeholder))
@@ -292,7 +292,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openOverflowMe
 ) {
     flakyClickOnNode(hasContentDescription(getString(R.string.toolbar_neeva_menu))) {
         assertionToBoolean {
-            waitForMatchingNode(hasText(getString(labelId)))
+            waitForNode(hasText(getString(labelId)))
         }
     }
     clickOnNodeWithText(getString(labelId))
@@ -472,19 +472,19 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnNodeWithText(
 /** Wait for a Composable to appear with the given [description], then return it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithContentDescription(
     description: String
-) = waitForMatchingNode(hasContentDescription(description))
+) = waitForNode(hasContentDescription(description))
 
 /** Wait for a Composable to appear with the given tag, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithTag(
     tag: String
-) = waitForMatchingNode(hasTestTag(tag))
+) = waitForNode(hasTestTag(tag))
 
 /** Wait for a Composable to appear with the given text, then click on it. */
 fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNodeWithText(
     text: String
-) = waitForMatchingNode(hasText(text))
+) = waitForNode(hasText(text))
 
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForMatchingNode(
+fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNode(
     matcher: SemanticsMatcher
 ): SemanticsNodeInteraction {
     var node: SemanticsNodeInteraction? = null
@@ -505,11 +505,11 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.flakyClickOnNode(
     expectedCondition: () -> Boolean
 ) {
     try {
-        waitForMatchingNode(matcher).performClick()
+        waitForNode(matcher).performClick()
         waitFor { expectedCondition() }
     } catch (e: ComposeTimeoutException) {
         Log.e(TAG, "Failed to click using '${matcher.description}'.  Trying again.")
-        waitForMatchingNode(matcher).performClick()
+        waitForNode(matcher).performClick()
         waitFor("Failed to click using '${matcher.description}'") { expectedCondition() }
     }
 }

@@ -163,9 +163,9 @@ fun SpaceRow(
                             }
                         ),
                         contentDescription = if (isCurrentUrlInSpace == true) {
-                            stringResource(id = R.string.space_contains_page)
+                            stringResource(id = R.string.space_remove_url_from_space, spaceName)
                         } else {
-                            stringResource(id = R.string.space_not_contain_page)
+                            stringResource(id = R.string.space_add_url_to_space, spaceName)
                         },
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )

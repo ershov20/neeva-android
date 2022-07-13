@@ -6,12 +6,12 @@ import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.SkipFirstRunRule
-import com.neeva.app.WebpageServingRule
 import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForTabListState
+import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test

@@ -79,6 +79,32 @@ class SpaceStore(
         private const val DIRECTORY_NAME = "spaces"
         private const val MAX_THUMBNAIL_SIZE = 300
         const val MAKER_COMMUNITY_SPACE_ID = "xlvaUJmdPRSrcqRHPEzVPuWf4RP74EyHvz5QvxLN"
+
+        fun createAddToSpaceMutation(
+            space: Space,
+            url: Uri,
+            title: String,
+            description: String? = null
+        ) = AddToSpaceMutation(
+            input = AddSpaceResultByURLInput(
+                spaceID = space.id,
+                url = url.toString(),
+                title = title,
+                data = description?.let { Optional.presentIfNotNull(it) }
+                    ?: Optional.Absent,
+                mediaType = Optional.presentIfNotNull("text/plain")
+            )
+        )
+
+        fun createDeleteSpaceResultByURLMutation(
+            space: Space,
+            uri: Uri
+        ) = DeleteSpaceResultByURLMutation(
+            input = DeleteSpaceResultByURLInput(
+                spaceID = space.id,
+                url = uri.toString(),
+            )
+        )
     }
 
     enum class State {
@@ -398,22 +424,6 @@ class SpaceStore(
             }
     }
 
-    internal fun createAddToSpaceMutation(
-        space: Space,
-        url: Uri,
-        title: String,
-        description: String? = null
-    ) = AddToSpaceMutation(
-        input = AddSpaceResultByURLInput(
-            spaceID = space.id,
-            url = url.toString(),
-            title = title,
-            data = description?.let { Optional.presentIfNotNull(it) }
-                ?: Optional.Absent,
-            mediaType = Optional.presentIfNotNull("text/plain")
-        )
-    )
-
     suspend fun addToSpace(
         space: Space,
         url: Uri,
@@ -431,7 +441,7 @@ class SpaceStore(
         return@withContext response?.data?.entityId?.let {
             Log.i(TAG, "Added item to space with id=$it")
             popupModel.showSnackbar(
-                message = appContext.getString(R.string.space_add_url, space.name),
+                message = appContext.getString(R.string.space_added_url_to_space, space.name),
                 actionLabel = appContext.getString(R.string.space_open),
                 onActionPerformed = { onOpenSpace(spaceID) }
             )
@@ -515,16 +525,6 @@ class SpaceStore(
         }
     }
 
-    internal fun createDeleteSpaceResultByURLMutation(
-        space: Space,
-        uri: Uri
-    ) = DeleteSpaceResultByURLMutation(
-        input = DeleteSpaceResultByURLInput(
-            spaceID = space.id,
-            url = uri.toString(),
-        )
-    )
-
     suspend fun removeFromSpace(space: Space, uri: Uri): Boolean {
         val spaceID = space.id
         stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
@@ -534,7 +534,8 @@ class SpaceStore(
         )
 
         return response?.data?.deleteSpaceResultByURL?.let {
-            val successString = appContext.getString(R.string.space_remove_url, space.name)
+            val successString =
+                appContext.getString(R.string.space_removed_url_from_space, space.name)
             Log.i(TAG, successString)
             popupModel.showSnackbar(successString)
             val spaceItem = dao.getItemsFromSpace(spaceID).find { it.url == uri }

@@ -17,7 +17,6 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.SuggestionsQuery
-import com.neeva.app.WebpageServingRule
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.browsing.toSearchUri
@@ -35,11 +34,12 @@ import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.typeIntoUrlBar
 import com.neeva.app.visitMultipleSitesInSameTab
 import com.neeva.app.waitForActivityStartup
-import com.neeva.app.waitForMatchingNode
 import com.neeva.app.waitForNavDestination
+import com.neeva.app.waitForNode
 import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForUrl
+import com.neeva.testcommon.WebpageServingRule
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
@@ -196,7 +196,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
             }
 
             // Click on the "refine" button so that the text pops into the URL bar.
-            waitForMatchingNode(
+            waitForNode(
                 hasContentDescription(getString(R.string.refine_content_description))
                     .and(hasAnyAncestor(hasText("Sports Page")))
             ).performClick()
@@ -227,7 +227,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
             }
 
             // Click on the query suggestion and confirm that we navigated to the search page.
-            waitForMatchingNode(hasText("Sports Page")).performClick()
+            waitForNode(hasText("Sports Page")).performClick()
             waitForUrl("Sports Page".toSearchUri(neevaConstants).toString())
             waitForNodeWithTag("LocationLabel").assertTextEquals("Sports Page")
         }
@@ -247,7 +247,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
             }
 
             // Click on the site suggestion and confirm that we navigated to the page directly.
-            waitForMatchingNode(hasText("Sports Page homepage")).performClick()
+            waitForNode(hasText("Sports Page homepage")).performClick()
             waitForUrl(resultUrl)
         }
     }

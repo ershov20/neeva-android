@@ -9,11 +9,11 @@ import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
-import com.neeva.app.WebpageServingRule
 import com.neeva.app.getString
 import com.neeva.app.openCardGrid
 import com.neeva.app.openLazyTab
 import com.neeva.app.waitForActivityStartup
+import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test

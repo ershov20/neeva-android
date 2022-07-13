@@ -8,7 +8,6 @@ import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
-import com.neeva.app.WebpageServingRule
 import com.neeva.app.clearUrlBar
 import com.neeva.app.clickOnBrowserAndWaitForUrlToLoad
 import com.neeva.app.clickOnNodeWithText
@@ -22,6 +21,7 @@ import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeWithContentDescription
 import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
+import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test

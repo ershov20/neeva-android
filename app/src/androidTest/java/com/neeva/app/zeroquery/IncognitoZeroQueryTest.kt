@@ -10,7 +10,6 @@ import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
-import com.neeva.app.WebpageServingRule
 import com.neeva.app.clearUrlBar
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectTabListState
@@ -27,6 +26,7 @@ import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
+import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
 import org.junit.Rule

@@ -161,10 +161,10 @@
     <string name="tab_crashed_title">Uh oh!</string>
     <string name="tab_crashed_body">Something went wrong while displaying this web page</string>
 
-    <string name="space_contains_page">Space contains the current page</string>
-    <string name="space_not_contain_page">Space doesn\'t contain the current page</string>
-    <string name="space_add_url">Added site to \"%1s\"</string>
-    <string name="space_remove_url">Removed site from \"%1s\"</string>'
+    <string name="space_add_url_to_space">Add site to \"%1s\"</string>
+    <string name="space_remove_url_from_space">Remove site from \"%1s\"</string>
+    <string name="space_added_url_to_space">Added site to \"%1s\"</string>
+    <string name="space_removed_url_from_space">Removed site from \"%1s\"</string>'
     <string name="space_additional_count">+%1d</string>
     <string name="space_create">Create a Space</string>
     <string name="space_create_placeholder">Space name</string>

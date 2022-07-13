@@ -1,4 +1,4 @@
-package com.neeva.app
+package com.neeva.testcommon
 
 import android.net.Uri
 import android.util.Log

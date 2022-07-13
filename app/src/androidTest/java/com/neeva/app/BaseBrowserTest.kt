@@ -4,6 +4,7 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.test.platform.app.InstrumentationRegistry
+import com.neeva.testcommon.WebpageServingRule
 import org.junit.Rule
 
 /** Base class for tests that need to be served with fake webpages. */
