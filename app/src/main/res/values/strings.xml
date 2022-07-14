@@ -272,6 +272,7 @@
     <string name="settings_debug_m1_apphost" translatable="false">Enable using the m1.neeva.com app host</string>
     <string name="settings_debug_local_neeva_dev_apphost" translatable="false">Enable using the local.neeva.dev app host</string>
     <string name="settings_debug_native_spaces" translatable="false">Enable native Spaces detail UI</string>
+    <string name="settings_debug_neevascope" translatable="false">Enable NeevaScope button</string>
 
     <string name="web_layer_support_title">WebLayerSupport</string>
     <string name="web_layer_package" translatable="false">com.neeva.app</string>

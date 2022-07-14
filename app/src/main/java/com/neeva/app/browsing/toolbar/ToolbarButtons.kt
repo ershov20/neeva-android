@@ -13,15 +13,16 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.R
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.TwoBooleanPreviewContainer
+import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun BackButton(
@@ -60,7 +61,22 @@ fun ShareButton(modifier: Modifier = Modifier) {
         Icon(
             Icons.Default.Share,
             contentDescription = stringResource(id = R.string.share),
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(Dimensions.SIZE_ICON_TOOLBAR)
+        )
+    }
+}
+
+@Composable
+fun NeevaScopeButton(modifier: Modifier = Modifier) {
+    IconButton(
+        onClick = {},
+        modifier = modifier
+    ) {
+        Icon(
+            painter = painterResource(id = R.drawable.ic_neeva_logo),
+            contentDescription = stringResource(id = R.string.neevascope),
+            modifier = Modifier.size(Dimensions.SIZE_ICON_TOOLBAR),
+            tint = Color.Unspecified
         )
     }
 }

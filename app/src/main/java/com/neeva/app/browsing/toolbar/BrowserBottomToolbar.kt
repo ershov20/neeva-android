@@ -18,8 +18,10 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
+import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 
@@ -30,9 +32,12 @@ fun BrowserBottomToolbar(
     modifier: Modifier = Modifier
 ) {
     val browserWrapper = LocalBrowserWrapper.current
+    val settingsDataModel = LocalSettingsDataModel.current
     val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
     BrowserBottomToolbar(
         isIncognito = browserWrapper.isIncognito,
+        isNeevascopeEnabled = settingsDataModel
+            .getSettingsToggleValue(SettingsToggle.DEBUG_NEEVASCOPE),
         modifier = modifier.offset(y = bottomOffsetDp)
     )
 }
@@ -40,6 +45,7 @@ fun BrowserBottomToolbar(
 @Composable
 fun BrowserBottomToolbar(
     isIncognito: Boolean,
+    isNeevascopeEnabled: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val backgroundColor = if (isIncognito) {
@@ -69,6 +75,12 @@ fun BrowserBottomToolbar(
                 modifier = Modifier.weight(1.0f)
             )
 
+            if (isNeevascopeEnabled) {
+                NeevaScopeButton(
+                    modifier = Modifier.weight(1.0f)
+                )
+            }
+
             AddToSpaceButton(
                 modifier = Modifier.weight(1.0f)
             )
@@ -88,6 +100,18 @@ fun BottomToolbarPreview_Regular() {
             LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(isIncognito = isIncognito)
         ) {
             BrowserBottomToolbar(isIncognito = isIncognito)
+        }
+    }
+}
+
+@PortraitPreviews
+@Composable
+fun BottomToolbarPreview_NeevascopeEnabled() {
+    OneBooleanPreviewContainer { isIncognito ->
+        CompositionLocalProvider(
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(isIncognito = isIncognito)
+        ) {
+            BrowserBottomToolbar(isIncognito = isIncognito, isNeevascopeEnabled = true)
         }
     }
 }
