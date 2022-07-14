@@ -1,0 +1,77 @@
+query CheatsheetInfo($input: String!, $title: String!) {
+  getCheatsheetInfo(input: $input, title: $title) {
+    MemorizedQuery
+    BacklinkURL {
+        URL
+        Title
+        Domain
+        Snippet
+        Forum {
+            url
+            source
+            domain
+            score
+            date
+            title
+            body
+            percentUpvoted
+            numComments
+            comments {
+                url
+                score
+                date
+                body
+            }
+        }
+    }
+  }
+}
+
+query Search($query: String!) {
+  search(q: $query, source: NeevaScope) {
+    resultGroup {
+      result {
+        __typename
+        title
+        appIcon {
+          labels
+        }
+        actionURL
+        snippet
+        typeSpecific {
+          __typename
+          ... on Web {
+              web {
+                favIconURL
+                displayUrl
+                publicationDate
+                structuredUrl {
+                  paths
+                  hostname
+                }
+                highlightedSnippet {
+                  segments {
+                    text
+                    isHighlighted
+                  }
+                }
+              }
+          }
+          ... on RelatedSearches {
+              relatedSearches {
+                entries {
+                  searchText
+                  displayText {
+                    segments {
+                      isHighlighted
+                      text
+                    }
+                  }
+                }
+              }
+            }
+        }
+      }
+    }
+  }
+}
