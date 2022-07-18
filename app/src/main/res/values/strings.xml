@@ -192,7 +192,7 @@
     <string name="tab_switcher_no_incognito_tabs">Create and manage incognito tabs</string>
 
     <!-- [Tab switcher] Tells the user that tapping on the + button will create a new tab for them. -->
-    <string name="tab_switcher_create_tab_hint">Tap + below to create a new tab</string>
+    <string name="tab_switcher_create_tab_hint">Tap + to create a new tab</string>
 
 
 
