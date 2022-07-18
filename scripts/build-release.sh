@@ -1,26 +1,44 @@
 #!/bin/sh
 
+export CREATE_BRANCH=false
+export SKIP_PROMPT=true
+export BROWSER_PLATFORM=android
+
+ANDROID_SCRIPTS_DIR=$(dirname $0)
+SHARED_SCRIPTS_DIR=$NEEVA_REPO/client/browser/scripts/
+
+. $SHARED_SCRIPTS_DIR/git-util.sh
+. $SHARED_SCRIPTS_DIR/version-util.sh
+
+CLEAN_BUILD=1
+while getopts "bpnh" option; do
+  case $option in
+    b) # create branch
+       CREATE_BRANCH=true
+       ;;
+    p) # prompt on every build step
+       SKIP_PROMPT=false
+       ;;
+    n) # no clean option
+       echo "Not cleaning build"
+       CLEAN_BUILD=0
+       ;;
+    h) # help option
+       echo "Usage: $(basename $0) [options]"
+       echo ""
+       echo "  -b    Create branch cut."
+       echo "  -h    Print this message."
+       echo "  -n    Don't do a clean build. Useful for debugging subsequent steps."
+       echo "  -p    More prompts for each build step."
+       exit 0
+  esac
+done
+
 root_dir="$(dirname $0)/.."
 
 pushd $root_dir > /dev/null
 
-clean_build=1
-while [ $# -gt 0 ]; do
-    if [ $1 = "--no-clean" ]; then
-        echo "Not cleaning build"
-        clean_build=0
-    fi
-    if [ $1 = "--help" ]; then
-        echo "Usage: $(basename $0) [options]"
-        echo ""
-        echo "  --no-clean    Don't do a clean build. Useful for debugging subsequent steps."
-        echo "  --help        Print this message."
-        exit 0
-    fi
-    shift
-done
-
-if [ $clean_build = 1 ]; then
+if [ $CLEAN_BUILD = 1 ]; then
     ./gradlew clean task || exit 1
 fi
 
@@ -39,3 +57,27 @@ if [ -n "$NEEVA_KEYSTORE_PATH" ]; then
 else
     echo "Warning: NEEVA_KEYSTORE_PATH not set in the environment; neeva.aab unsigned."
 fi
+
+# Confirm uploading build to app store
+$SHARED_SCRIPTS_DIR/confirm-upload-binary.sh
+
+# Generate tag for build
+$SHARED_SCRIPTS_DIR/tag-release.sh
+
+if $CREATE_BRANCH; then
+  $SHARED_SCRIPTS_DIR/branch-release.sh
+fi
+
+read -r -p "Bump up the version for next build? [Y/n] " response
+if [[ "$response" =~ ^([nN][oO]?)$ ]]
+then
+  continue
+else
+  if $CREATE_BRANCH; then
+    $SHARED_SCRIPTS_DIR/prepare-for-next-release.sh
+    # switch back to main for preparing next version
+    git checkout main
+  fi
+  $SHARED_SCRIPTS_DIR/prepare-for-next-release.sh
+fi
+
