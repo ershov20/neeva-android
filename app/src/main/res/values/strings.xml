@@ -229,7 +229,7 @@
 
     <!-- [Spaces] Indicates how many people have viewed the given Space. -->
     <plurals name="space_detail_views">
-        <item quantity="one">%d Views</item>
+        <item quantity="one">%d View</item>
         <item quantity="other">%d Views</item>
     </plurals>
 
