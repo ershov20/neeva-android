@@ -34,7 +34,7 @@ class IncognitoOrientationChangeTest : BaseBrowserTest() {
             openCardGrid(incognito = true)
 
             // Confirm that we're looking at an empty incognito TabGrid.
-            waitForNodeWithText(getString(R.string.empty_incognito_tabs_title)).assertExists()
+            waitForNodeWithText(getString(R.string.tab_switcher_no_incognito_tabs)).assertExists()
 
             // Rotate the screen, which normally triggers the crash.
             activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE

@@ -268,7 +268,7 @@ fun SpaceSubItem(
                 ) {
                     Text(
                         stringResource(
-                            R.string.space_additional_count,
+                            R.string.additional_count,
                             numItems - (MAX_SUBITEMS_TO_SHOW - 1)
                         )
                     )

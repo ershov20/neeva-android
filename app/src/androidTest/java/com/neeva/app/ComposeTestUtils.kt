@@ -199,7 +199,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openLazyTab(ur
     expectThat(activity.appNavModel!!.currentDestination.value!!.route)
         .isEqualTo(AppNavDestination.CARD_GRID.route)
 
-    clickOnNodeWithContentDescription(getString(R.string.new_tab_content_description))
+    clickOnNodeWithContentDescription(getString(R.string.create_new_tab_a11y))
     waitForNavDestination(AppNavDestination.BROWSER)
     navigateViaUrlBar(url)
 }
@@ -290,7 +290,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNavDestinatio
 fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openOverflowMenuAndClickItem(
     @StringRes labelId: Int
 ) {
-    flakyClickOnNode(hasContentDescription(getString(R.string.toolbar_neeva_menu))) {
+    flakyClickOnNode(hasContentDescription(getString(R.string.toolbar_menu))) {
         assertionToBoolean {
             waitForNode(hasText(getString(labelId)))
         }
@@ -308,7 +308,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
     when (activity.appNavModel?.currentDestination?.value?.route) {
         AppNavDestination.BROWSER.route -> {
             // Wait for the card grid button to be visible, then click it.
-            flakyClickOnNode(hasContentDescription(getString(R.string.toolbar_tab_switcher))) {
+            flakyClickOnNode(hasContentDescription(getString(R.string.toolbar_tabs_and_spaces))) {
                 assertionToBoolean { waitForNavDestination(AppNavDestination.CARD_GRID) }
             }
         }
@@ -336,9 +336,9 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.switchProfileO
     // Click on the correct tab switcher button.
     val selectedScreen = activity.cardsPaneModel!!.selectedScreen.value
     if (incognito && selectedScreen != SelectedScreen.INCOGNITO_TABS) {
-        clickOnNodeWithContentDescription(getString(R.string.incognito))
+        clickOnNodeWithContentDescription(getString(R.string.view_incognito_tabs))
     } else if (!incognito && selectedScreen != SelectedScreen.REGULAR_TABS) {
-        clickOnNodeWithContentDescription(getString(R.string.tabs))
+        clickOnNodeWithContentDescription(getString(R.string.view_regular_tabs))
     }
 
     // Wait for mode switch to kick in.

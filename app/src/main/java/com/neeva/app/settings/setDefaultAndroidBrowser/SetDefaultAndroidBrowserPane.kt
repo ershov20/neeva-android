@@ -151,10 +151,10 @@ fun SetDefaultAndroidBrowserPane(
                     InstructionsForAndroidSettings()
                 }
 
-                val resourceId = if (mustOpenSettings) {
+                val buttonResource = if (mustOpenSettings) {
                     R.string.go_to_settings
                 } else {
-                    R.string.set_neeva_as_default_browser
+                    R.string.switch_default_browser_title_confirm_button
                 }
 
                 Column(
@@ -164,7 +164,7 @@ fun SetDefaultAndroidBrowserPane(
                     Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
 
                     FilledButton(
-                        text = stringResource(id = resourceId),
+                        text = stringResource(id = buttonResource),
                         onClick = onOpenSettings
                     )
 

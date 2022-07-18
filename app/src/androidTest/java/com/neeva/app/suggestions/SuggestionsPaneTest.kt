@@ -127,7 +127,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
         androidComposeRule.apply {
             // Open a lazy Incognito tab.
             openCardGrid(incognito = true)
-            clickOnNodeWithContentDescription(getString(R.string.new_tab_content_description))
+            clickOnNodeWithContentDescription(getString(R.string.create_new_tab_a11y))
             waitForNavDestination(AppNavDestination.BROWSER)
 
             // Confirm we see Incognito's Zero Query page.
@@ -196,8 +196,12 @@ class SuggestionsPaneTest : BaseBrowserTest() {
             }
 
             // Click on the "refine" button so that the text pops into the URL bar.
+            val contentDescription = activity.getString(
+                R.string.edit_suggested_query,
+                "Sports Page"
+            )
             waitForNode(
-                hasContentDescription(getString(R.string.refine_content_description))
+                hasContentDescription(contentDescription)
                     .and(hasAnyAncestor(hasText("Sports Page")))
             ).performClick()
             waitForNodeWithTag("AutocompleteTextField").assertTextEquals("Sports Page")

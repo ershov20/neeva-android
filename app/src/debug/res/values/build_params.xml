@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Neeva (debug)</string>
+    <bool name="flag_profiling_enabled" translatable="false">true</bool>
     <string name="web_layer_package" translatable="false">org.chromium.weblayer.support</string>
 </resources>

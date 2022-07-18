@@ -130,7 +130,7 @@ private fun CardsPaneToolbarAddButton(
             Icons.Default.Add,
             contentDescription = when (cardsPaneModel.selectedScreen.value) {
                 SelectedScreen.SPACES -> stringResource(R.string.space_create)
-                else -> stringResource(R.string.new_tab_content_description)
+                else -> stringResource(R.string.create_new_tab_a11y)
             }
         )
     }
@@ -150,7 +150,7 @@ private fun createCardsPaneOverflowMenuData(selectedScreen: SelectedScreen) = Ov
             listOf(
                 overflowMenuItem(
                     id = OverflowMenuItemId.CLOSE_ALL_TABS,
-                    labelId = R.string.close_all_content_description,
+                    labelId = R.string.menu_close_all_tabs,
                     icon = Icons.Outlined.Delete
                 ),
                 MenuSeparator

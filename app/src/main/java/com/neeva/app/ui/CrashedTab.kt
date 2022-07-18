@@ -85,7 +85,7 @@ fun CrashedTab(
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = stringResource(id = R.string.tab_crashed_title),
+                    text = stringResource(id = R.string.uh_oh),
                     textAlign = TextAlign.Start,
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -93,7 +93,7 @@ fun CrashedTab(
                 )
 
                 Text(
-                    text = stringResource(id = R.string.tab_crashed_body),
+                    text = stringResource(id = R.string.error_tab_crashed),
                     textAlign = TextAlign.Start,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,

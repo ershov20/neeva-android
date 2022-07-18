@@ -2,6 +2,7 @@ package com.neeva.app.suggestions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.theme.NeevaTheme
@@ -25,7 +26,8 @@ fun QueryNavSuggestionRow(
         actionIconParams = onEditUrl?.let {
             RowActionIconParams(
                 onTapAction = onEditUrl,
-                actionType = RowActionIconParams.ActionType.REFINE
+                actionType = RowActionIconParams.ActionType.REFINE,
+                contentDescription = stringResource(R.string.edit_suggested_query, query)
             )
         },
         iconParams = RowActionStartIconParams(

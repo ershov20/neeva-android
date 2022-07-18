@@ -33,14 +33,14 @@ fun TabGridEmptyState(
         } else {
             R.drawable.ic_empty_incognito_tabs_light
         }
-        emptyStringId = R.string.empty_incognito_tabs_title
+        emptyStringId = R.string.tab_switcher_no_incognito_tabs
     } else {
         emptyLogoId = if (isNeevaThemeUsingDarkColors) {
             R.drawable.ic_empty_regular_tabs_dark
         } else {
             R.drawable.ic_empty_regular_tabs_light
         }
-        emptyStringId = R.string.empty_regular_tabs_title
+        emptyStringId = R.string.tab_switcher_no_tabs
     }
 
     Box(
@@ -66,7 +66,7 @@ fun TabGridEmptyState(
             )
 
             Text(
-                text = stringResource(R.string.empty_tab_hint),
+                text = stringResource(R.string.tab_switcher_create_tab_hint),
                 style = MaterialTheme.typography.labelLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onBackground,

@@ -189,9 +189,9 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.enableCloseAllInco
     openOverflowMenuAndClickItem(R.string.settings)
     waitForNavDestination(AppNavDestination.SETTINGS)
     waitForNodeWithTag("SettingsPaneItems").performScrollToNode(
-        hasText(getString(R.string.settings_when_leaving_incognito_mode))
+        hasText(getString(R.string.settings_close_incognito_when_switching_body))
     )
-    clickOnNodeWithText(getString(R.string.settings_when_leaving_incognito_mode))
+    clickOnNodeWithText(getString(R.string.settings_close_incognito_when_switching_body))
     onBackPressed()
     waitForNavDestination(AppNavDestination.BROWSER)
 }
@@ -200,13 +200,13 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.closeActiveTabFrom
     val activeTabTitle =
         activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value
     getSelectedTabNode(activeTabTitle).assertIsDisplayed()
-    waitForNodeWithContentDescription(activity.getString(R.string.tab_close, activeTabTitle))
+    waitForNodeWithContentDescription(activity.getString(R.string.close_tab, activeTabTitle))
         .performClick()
 
     // Confirm that the TabCard representing the tab disappears.
     waitForNodeToDisappear(onNode(hasText(activeTabTitle)))
 
     // Confirm that the snackbar shows up.
-    val closeSnackbarText = activity.getString(R.string.tab_closed, activeTabTitle)
+    val closeSnackbarText = activity.getString(R.string.closed_tab, activeTabTitle)
     waitForNodeWithText(closeSnackbarText).assertIsDisplayed()
 }

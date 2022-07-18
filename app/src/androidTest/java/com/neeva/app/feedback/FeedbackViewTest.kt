@@ -151,7 +151,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             )
 
             // Click the button to submit feedback.
-            waitForNodeWithText(getString(R.string.submit_feedback)).performClick()
+            waitForNodeWithText(getString(R.string.send)).performClick()
 
             // Confirm that the acknowledgement snackbar appeared.
             waitForNodeWithText(getString(R.string.submit_feedback_acknowledgement))
@@ -192,7 +192,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             )
 
             // Click the button to submit feedback.
-            waitForNodeWithText(getString(R.string.submit_feedback)).performClick()
+            waitForNodeWithText(getString(R.string.send)).performClick()
 
             // Confirm that the acknowledgement snackbar appeared.
             waitForNodeWithText(getString(R.string.submit_feedback_acknowledgement))
@@ -237,7 +237,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             )
 
             // Click the button to submit feedback.
-            waitForNodeWithText(getString(R.string.submit_feedback)).performClick()
+            waitForNodeWithText(getString(R.string.send)).performClick()
 
             // Confirm that the acknowledgement snackbar appeared.
             waitForNodeWithText(getString(R.string.submit_feedback_acknowledgement))
@@ -279,7 +279,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             )
 
             // Click the button to submit feedback.
-            waitForNodeWithText(getString(R.string.submit_feedback)).performClick()
+            waitForNodeWithText(getString(R.string.send)).performClick()
 
             // Confirm that the acknowledgement snackbar appeared.
             waitForNodeWithText(getString(R.string.submit_feedback_acknowledgement))

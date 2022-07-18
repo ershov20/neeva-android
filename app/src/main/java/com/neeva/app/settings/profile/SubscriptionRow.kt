@@ -12,11 +12,11 @@ fun SubscriptionRow(
     openUrl: () -> Unit
 ) {
     val subscriptionString = when (subscriptionType) {
-        SubscriptionType.Basic -> stringResource(id = R.string.subscription_basic)
+        SubscriptionType.Basic -> stringResource(id = R.string.subscription_type_basic)
 
-        SubscriptionType.Premium -> stringResource(id = R.string.subscription_premium)
+        SubscriptionType.Premium -> stringResource(id = R.string.subscription_type_premium)
 
-        else -> stringResource(id = R.string.subscription_unknown)
+        else -> stringResource(id = R.string.subscription_type_unknown)
     }
     SettingsLinkRow(
         label = subscriptionString,

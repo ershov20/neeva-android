@@ -138,12 +138,12 @@ fun CheatsheetInfoBody() {
         modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
     ) {
         Text(
-            text = stringResource(id = R.string.cheatsheet_info),
+            text = stringResource(id = R.string.neevascope_intro_title),
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
         Text(
-            text = stringResource(id = R.string.cheatsheet_intro),
+            text = stringResource(id = R.string.neevascope_intro_body),
             style = MaterialTheme.typography.bodyLarge
         )
     }
@@ -162,7 +162,7 @@ fun CheatsheetInfoButton(
             .fillMaxWidth()
     ) {
         Text(
-            text = stringResource(id = R.string.cheatsheet_got_it),
+            text = stringResource(id = R.string.neevascope_got_it),
             style = MaterialTheme.typography.labelLarge
         )
     }

@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -89,6 +90,8 @@ fun SpaceHeaderStats(
     numViews: Int,
     isOwner: Boolean
 ) {
+    val resources = LocalContext.current.resources
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,16 +102,18 @@ fun SpaceHeaderStats(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (isPublic) {
-            val followers = stringResource(R.string.space_detail_followers, numFollowers)
             Icon(
                 painterResource(id = R.drawable.ic_group),
                 modifier = Modifier.size(Dimensions.SIZE_ICON),
                 tint = MaterialTheme.colorScheme.onBackground,
-                contentDescription = followers
+                contentDescription = null
             )
-
             Text(
-                text = followers,
+                text = resources.getQuantityString(
+                    R.plurals.space_detail_followers,
+                    numFollowers,
+                    numFollowers
+                ),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(start = Dimensions.PADDING_SMALL)
@@ -117,15 +122,18 @@ fun SpaceHeaderStats(
             Spacer(modifier = Modifier.weight(1.0f))
 
             if (isOwner) {
-                val views = stringResource(R.string.space_detail_views, numViews)
                 Icon(
                     painter = painterResource(id = R.drawable.ic_visibility_24),
                     tint = MaterialTheme.colorScheme.onBackground,
-                    contentDescription = views
+                    contentDescription = null
                 )
 
                 Text(
-                    text = views,
+                    text = resources.getQuantityString(
+                        R.plurals.space_detail_views,
+                        numViews,
+                        numViews
+                    ),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.padding(start = Dimensions.PADDING_SMALL)

@@ -27,7 +27,7 @@ fun ClearBrowsingDialog(
                 confirmAction(timeClearingOption!!)
             }
         },
-        dismissStringId = R.string.cancel,
+        dismissStringId = android.R.string.cancel,
         dismissAction = dismissAction
     )
 }

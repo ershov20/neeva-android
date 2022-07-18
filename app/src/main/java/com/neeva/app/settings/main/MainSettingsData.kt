@@ -16,7 +16,7 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
     override val shouldShowUserName: Boolean = false
     override val data = listOf(
         SettingsGroupData(
-            R.string.company_name,
+            R.string.neeva,
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.PROFILE,
@@ -69,7 +69,7 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                 ),
                 SettingsRowData(
                     type = SettingsRowType.NAVIGATION,
-                    primaryLabelId = R.string.settings_cookie_cutter
+                    primaryLabelId = R.string.cookie_cutter
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,

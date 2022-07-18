@@ -76,10 +76,10 @@ class HistoryUITest : BaseBrowserTest() {
 
             // Delete some items from history.
             clickOnNodeWithContentDescription(
-                activity.resources.getString(R.string.history_delete, "Page 1")
+                activity.resources.getString(R.string.history_remove_visit, "Page 1")
             )
             clickOnNodeWithContentDescription(
-                activity.resources.getString(R.string.history_delete, "Page 3")
+                activity.resources.getString(R.string.history_remove_visit, "Page 3")
             )
 
             page2Node.assertIsDisplayed()

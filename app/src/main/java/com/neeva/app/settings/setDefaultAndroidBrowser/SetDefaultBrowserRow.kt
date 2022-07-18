@@ -22,17 +22,16 @@ fun SetDefaultBrowserRow(
     if (setDefaultAndroidBrowserManager.isDefaultBrowser.value) {
         SettingsLabelRow(
             primaryLabel = stringResource(id = R.string.settings_default_browser),
-            secondaryLabel = stringResource(id = R.string.company_name)
-        )
-    } else if (setDefaultAndroidBrowserManager.isRoleManagerAvailable()) {
-        SettingsNavigationRow(
-            primaryLabel = stringResource(id = R.string.set_neeva_as_default_browser),
-            onClick = { setDefaultAndroidBrowserManager.requestToBeDefaultBrowser() }
+            secondaryLabel = stringResource(id = R.string.neeva)
         )
     } else {
         SettingsNavigationRow(
-            primaryLabel = stringResource(id = R.string.set_neeva_as_default_browser),
-            onClick = navigateToPane
+            primaryLabel = stringResource(id = R.string.switch_default_browser_title),
+            onClick = if (setDefaultAndroidBrowserManager.isRoleManagerAvailable()) {
+                setDefaultAndroidBrowserManager::requestToBeDefaultBrowser
+            } else {
+                navigateToPane
+            }
         )
     }
 }

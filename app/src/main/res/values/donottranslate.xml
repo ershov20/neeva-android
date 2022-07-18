@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Branded strings -->
+    <string name="chromium">Chromium</string>
+    <string name="facebook">Facebook</string>
+    <string name="linkedin">LinkedIn</string>
+    <string name="neeva">Neeva</string>
+    <string name="twitter">Twitter</string>
+
+    <!-- Debug settings -->
+    <string name="settings_debug_local">Advanced</string>
+    <string name="settings_debug_local_feature_flags">Developer settings</string>
+    <string name="settings_debug_flags">Flags</string>
+    <string name="settings_debug_actions">Actions</string>
+    <string name="settings_debug_enable_incognito_screenshots">Enable screenshots while in Incognito</string>
+    <string name="settings_debug_enable_show_desktop_site">Enable Show Desktop Site in Overflow Menu</string>
+    <string name="settings_debug_open_50_tabs">Open 50 tabs</string>
+    <string name="settings_debug_open_500_tabs">Open 500 tabs</string>
+    <string name="settings_debug_export_database">Export history database</string>
+    <string name="settings_debug_import_database">Import history database</string>
+    <string name="settings_debug_import_database_description">Destroys your existing database</string>
+    <string name="settings_debug_m1_apphost">Point the app at m1.neeva.com</string>
+    <string name="settings_debug_local_neeva_dev_apphost">Point the app at local.neeva.dev</string>
+    <string name="settings_debug_native_spaces">Enable native Spaces detail UI</string>
+    <string name="settings_debug_neevascope">Enable NeevaScope button</string>
+
+    <!-- Debug strings for Previews -->
+    <string name="debug_short_url">www.url.com</string>
+    <string name="debug_long_url">www.url.com/path/to/nowhere/in/particular</string>
+    <string name="debug_short_string_primary">Short primary string</string>
+    <string name="debug_short_string_secondary">Short secondary string</string>
+    <string name="debug_long_string_primary">String that is a really long string and stuff and extends for a while</string>
+    <string name="debug_long_string_secondary">Secondary string that is also a really long string and stuff and extends for a while</string>
+    <string name="debug_short_action">save</string>
+
+    <!-- Settings required for WebLayer to work correctly. -->
+    <string name="web_layer_support_title">WebLayerSupport</string>
+</resources>

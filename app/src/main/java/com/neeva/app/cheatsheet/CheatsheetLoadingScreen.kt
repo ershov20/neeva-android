@@ -40,7 +40,7 @@ fun CheatsheetLoadingScreen() {
             Spacer(Modifier.padding(Dimensions.PADDING_LARGE))
 
             Text(
-                text = stringResource(id = R.string.cheatsheet_loading),
+                text = stringResource(id = R.string.neevascope_loading),
                 style = MaterialTheme.typography.titleLarge,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(Dimensions.PADDING_LARGE)

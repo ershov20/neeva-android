@@ -96,7 +96,7 @@ fun SignUpLandingScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        OnboardingButton(text = stringResource(id = R.string.other_sign_up_options)) {
+        OnboardingButton(text = stringResource(id = R.string.sign_up_other_options)) {
             showSignUpWithOther()
         }
 

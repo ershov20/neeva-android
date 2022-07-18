@@ -42,7 +42,7 @@ fun createBrowserOverflowMenuData(
             add(
                 overflowMenuItem(
                     id = OverflowMenuItemId.UPDATE,
-                    labelId = R.string.update_available,
+                    labelId = R.string.menu_update_available,
                     icon = Icons.Default.Warning
                 )
             )
@@ -61,13 +61,13 @@ fun createBrowserOverflowMenuData(
                 if (isDesktopUserAgentEnabled) {
                     overflowMenuItem(
                         id = OverflowMenuItemId.TOGGLE_DESKTOP_SITE,
-                        labelId = R.string.mobile_site,
+                        labelId = R.string.menu_mobile_site,
                         imageResourceID = R.drawable.ic_mobile
                     )
                 } else {
                     overflowMenuItem(
                         id = OverflowMenuItemId.TOGGLE_DESKTOP_SITE,
-                        labelId = R.string.desktop_site,
+                        labelId = R.string.menu_desktop_site,
                         imageResourceID = R.drawable.ic_desktop
                     )
                 }

@@ -56,7 +56,7 @@ class TabSwitcherTest : BaseBrowserTest() {
             expectTabListState(isIncognito = false, regularTabCount = 3)
 
             // Close all tabs from the menu.
-            openOverflowMenuAndClickItem(R.string.close_all_content_description)
+            openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
 
             // Confirm the tab closure.
             waitForAssertion {
@@ -79,7 +79,7 @@ class TabSwitcherTest : BaseBrowserTest() {
             expectTabListState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
 
             // Close all tabs from the menu.
-            openOverflowMenuAndClickItem(R.string.close_all_content_description)
+            openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
 
             // Confirm the tab closure.
             waitForAssertion {
@@ -95,7 +95,8 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Turn the setting on.
             openOverflowMenuAndClickItem(R.string.settings)
             waitForNavDestination(AppNavDestination.SETTINGS)
-            waitForNodeWithText(getString(R.string.settings_when_closing_all_tabs)).performClick()
+            waitForNodeWithText(getString(R.string.settings_confirm_close_all_tabs_body))
+                .performClick()
             onBackPressed()
             waitForNavDestination(AppNavDestination.BROWSER)
 
@@ -106,7 +107,7 @@ class TabSwitcherTest : BaseBrowserTest() {
             expectTabListState(isIncognito = false, regularTabCount = 3)
 
             // The dialog should appear and no tabs should be closed.
-            openOverflowMenuAndClickItem(R.string.close_all_content_description)
+            openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
             expectTabListState(isIncognito = false, regularTabCount = 3)
 
             // Confirm the tab closure.
@@ -124,7 +125,8 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Turn the setting on.
             openOverflowMenuAndClickItem(R.string.settings)
             waitForNavDestination(AppNavDestination.SETTINGS)
-            waitForNodeWithText(getString(R.string.settings_when_closing_all_tabs)).performClick()
+            waitForNodeWithText(getString(R.string.settings_confirm_close_all_tabs_body))
+                .performClick()
             onBackPressed()
             waitForNavDestination(AppNavDestination.BROWSER)
 
@@ -137,7 +139,7 @@ class TabSwitcherTest : BaseBrowserTest() {
             expectTabListState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
 
             // The dialog should appear and no tabs should be closed.
-            openOverflowMenuAndClickItem(R.string.close_all_content_description)
+            openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
             expectTabListState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
 
             // Confirm the tab closure.
@@ -155,7 +157,8 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Turn the setting on.
             openOverflowMenuAndClickItem(R.string.settings)
             waitForNavDestination(AppNavDestination.SETTINGS)
-            waitForNodeWithText(getString(R.string.settings_when_closing_all_tabs)).performClick()
+            waitForNodeWithText(getString(R.string.settings_confirm_close_all_tabs_body))
+                .performClick()
             onBackPressed()
             waitForNavDestination(AppNavDestination.BROWSER)
 
@@ -166,7 +169,7 @@ class TabSwitcherTest : BaseBrowserTest() {
             expectTabListState(isIncognito = false, regularTabCount = 3)
 
             // The dialog should appear and no tabs should be closed.
-            openOverflowMenuAndClickItem(R.string.close_all_content_description)
+            openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
             expectTabListState(isIncognito = false, regularTabCount = 3)
 
             // Cancel the tab closure.  The tabs should stick around.
@@ -191,10 +194,10 @@ class TabSwitcherTest : BaseBrowserTest() {
 
             // Close all regular profile tabs from the menu.
             openCardGrid(incognito = false)
-            openOverflowMenuAndClickItem(R.string.close_all_content_description)
+            openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
 
             // Confirm the tab closure.
-            waitForNodeWithText(getString(R.string.empty_regular_tabs_title)).assertIsDisplayed()
+            waitForNodeWithText(getString(R.string.tab_switcher_no_tabs)).assertIsDisplayed()
             expectTabListState(isIncognito = false, incognitoTabCount = 1, regularTabCount = 0)
 
             // Swap over to incognito and confirm the tab is still there.
@@ -252,7 +255,8 @@ class TabSwitcherTest : BaseBrowserTest() {
             // The Incognito tab grid should be empty.
             openCardGrid(incognito = true)
             onAllNodesWithTag("TabCard").assertCountEquals(0)
-            waitForNodeWithText(getString(R.string.empty_incognito_tabs_title)).assertIsDisplayed()
+            waitForNodeWithText(getString(R.string.tab_switcher_no_incognito_tabs))
+                .assertIsDisplayed()
             expectTabListState(isIncognito = true, incognitoTabCount = 0, regularTabCount = 1)
         }
     }

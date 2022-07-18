@@ -62,7 +62,7 @@ class OverflowMenuData(
                 ),
                 overflowMenuItem(
                     id = OverflowMenuItemId.DOWNLOADS,
-                    labelId = R.string.downloads,
+                    labelId = R.string.menu_downloads,
                     imageResourceID = R.drawable.ic_download_done_black_24
                 )
             )

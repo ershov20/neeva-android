@@ -33,7 +33,7 @@ private fun BadgeImage(number: Int, maxNumber: Int, modifier: Modifier) {
     val text = if (number in 0..maxNumber) {
         number.toString()
     } else {
-        stringResource(id = R.string.badge_image_text, maxNumber)
+        stringResource(id = R.string.cookie_cutter_too_many_items, maxNumber)
     }
     val height = 16.dp
     val width = when {

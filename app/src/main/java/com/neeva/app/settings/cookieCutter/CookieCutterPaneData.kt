@@ -10,7 +10,7 @@ import com.neeva.app.settings.SettingsToggle
 
 class CookieCutterPaneData : SettingsPaneDataInterface {
     @StringRes
-    override val topAppBarTitleResId: Int = R.string.settings_cookie_cutter
+    override val topAppBarTitleResId: Int = R.string.cookie_cutter
     override val shouldShowUserName: Boolean = false
     override val data = listOf(
         SettingsGroupData(

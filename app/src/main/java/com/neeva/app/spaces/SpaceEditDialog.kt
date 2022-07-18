@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalSpaceStore
@@ -33,6 +32,7 @@ import com.neeva.app.storage.entities.SpaceEntityType
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.NeevaThemePreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 import kotlinx.coroutines.launch
 
@@ -116,13 +116,13 @@ fun EditSpaceDialog(
                 onBackPressed = onDismiss,
                 buttonTitle = when (mode) {
                     SpaceEditMode.EDITING_SPACE ->
-                        stringResource(id = R.string.space_edit_dialog_update_action)
+                        stringResource(id = R.string.update)
 
                     SpaceEditMode.EDITING_SPACE_ITEM ->
-                        stringResource(id = R.string.space_edit_dialog_update_action)
+                        stringResource(id = R.string.update)
 
                     SpaceEditMode.ADDING_SPACE_ITEM ->
-                        stringResource(id = R.string.space_edit_dialog_add_action)
+                        stringResource(id = R.string.add)
                 },
                 onButtonPressed = {
                     coroutineScope.launch {
@@ -170,7 +170,7 @@ fun EditSpaceDialog(
 
                 if (mode == SpaceEditMode.ADDING_SPACE_ITEM) {
                     Text(
-                        text = stringResource(id = R.string.space_edit_dialog_url),
+                        text = stringResource(id = R.string.url),
                         style = MaterialTheme.typography.titleSmall,
                         modifier = Modifier
                             .padding(horizontal = Dimensions.PADDING_LARGE)
@@ -191,7 +191,7 @@ fun EditSpaceDialog(
                 }
 
                 Text(
-                    text = stringResource(id = R.string.space_edit_dialog_title),
+                    text = stringResource(id = R.string.title),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier
                         .padding(horizontal = Dimensions.PADDING_LARGE)
@@ -211,7 +211,7 @@ fun EditSpaceDialog(
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
                 Text(
-                    text = stringResource(id = R.string.space_edit_dialog_description),
+                    text = stringResource(id = R.string.description),
                     style = MaterialTheme.typography.titleSmall,
                     modifier = Modifier
                         .padding(horizontal = Dimensions.PADDING_LARGE)
@@ -234,8 +234,7 @@ fun EditSpaceDialog(
     }
 }
 
-@Preview(locale = "en", fontScale = 1.0f)
-@Preview(locale = "en", fontScale = 2.0f)
+@PortraitPreviews
 @Composable
 fun SpaceEditDialogPreview_Light() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
@@ -256,8 +255,29 @@ fun SpaceEditDialogPreview_Light() {
     }
 }
 
-@Preview(locale = "en", fontScale = 1.0f)
-@Preview(locale = "en", fontScale = 2.0f)
+@PortraitPreviews
+@Composable
+fun SpaceEditDialogPreview_AddItem_Light() {
+    NeevaThemePreviewContainer(useDarkTheme = false) {
+        EditSpaceDialog(
+            SpaceItem(
+                "asjdahjfad",
+                "nEgvD5HST7e62eEmhf0kkxx4xnEuNHBeEXxbGcoo",
+                Uri.parse("https://example.com"),
+                "Facebook papers notes",
+                "Facebook likes to portray itself as a social media giant under" +
+                    " siege — locked in fierce competition with other companies",
+                null,
+                0,
+                SpaceEntityType.WEB
+            ),
+            mode = SpaceEditMode.ADDING_SPACE_ITEM,
+            onDismiss = {}
+        )
+    }
+}
+
+@PortraitPreviews
 @Composable
 fun SpaceEditDialogPreview_Dark() {
     NeevaThemePreviewContainer(useDarkTheme = true) {

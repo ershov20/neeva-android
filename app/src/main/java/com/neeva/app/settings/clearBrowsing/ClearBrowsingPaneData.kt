@@ -16,7 +16,7 @@ class ClearBrowsingPaneData(neevaConstants: NeevaConstants) : SettingsPaneDataIn
     override val shouldShowUserName: Boolean = false
     override val data = listOf(
         SettingsGroupData(
-            R.string.settings_data_on_this_device,
+            R.string.clear_browsing_data_on_this_device,
             timeClearingOptionToggles
         ),
         SettingsGroupData(

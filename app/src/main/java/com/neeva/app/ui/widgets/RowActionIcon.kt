@@ -52,8 +52,7 @@ data class RowActionIconParams(
         if (contentDescription != null) return contentDescription
 
         return when (actionType) {
-            ActionType.EDIT -> context.getString(R.string.edit_content_description)
-            ActionType.REFINE -> context.getString(R.string.refine_content_description)
+            ActionType.REFINE -> context.getString(R.string.refine)
             ActionType.REFRESH -> context.getString(R.string.reload)
 
             else -> null

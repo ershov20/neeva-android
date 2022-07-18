@@ -136,6 +136,6 @@ fun TabSwitcherButton(modifier: Modifier = Modifier) {
         onClick = browserToolbarModel::onTabSwitcher,
         modifier = modifier
     ) {
-        TabSwitcherIcon(contentDescription = stringResource(R.string.toolbar_tab_switcher))
+        TabSwitcherIcon(contentDescription = stringResource(R.string.toolbar_tabs_and_spaces))
     }
 }

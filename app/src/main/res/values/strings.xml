@@ -1,279 +1,241 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="app_name">Neeva</string>
-    <string name="neeva_search">Neeva Search</string>
-    <string name="company_name">Neeva</string>
-    <string name="edit_current_url">Edit current address</string>
-    <string name="edit_current_search">Edit current search</string>
-    <string name="edit_content_description">Edit</string>
-    <string name="refine_content_description">Refine</string>
-    <string name="link_copied">Link copied</string>
+<!-- When adding new strings:
+     1. Find a section grouping that the new string can fit in.
 
-    <string name="cancel">Cancel</string>
+     2. Make sure to check this page to avoid formatting issues:
+        https://help.smartling.com/hc/en-us/articles/360008000573-Android-XML
+
+     3. Do not add a newline after the opening <string> tag.
+
+     4. Add a comment describing how the string is used for translations.  All comments that precede
+        a string are provided as a hint for the translators.
+-->
+<!-- smartling.instruction_comments_enabled = on -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- [General][Button] Triggers adding something to the currently displayed list.  e.g. adding a new item to a Space. -->
+    <string name="add">Add</string>
+
+    <!-- [General] Indicates that there are more items that we are not displaying.  e.g. "+5" is equivalent to "5 more". -->
+    <string name="additional_count">+%1d</string>
+
+    <!-- [General][Button][a11y] Removes all of a user's input from the attached widget. -->
+    <string name="clear">Clear</string>
+
+    <!-- [General][Snackbar] Indicates that something has been copied to the clipboard. -->
+    <string name="copied_to_clipboard">Copied to clipboard</string>
+
+    <!-- [General][Button] Copies the web page link to the clipboard. -->
+    <string name="copy_link">Copy link</string>
+
+    <!-- [General][a11y] Triggers the closing of a dialog or a tab. -->
     <string name="close">Close</string>
-    <string name="undo">Undo</string>
-    <string name="more">More</string>
+
+    <!-- [General] Indicates that something will be deleted. -->
+    <string name="delete">Delete</string>
+
+    <!-- [General] Label for a text field that allows the user to enter a description for something they are creating. -->
+    <string name="description">Description</string>
+
+    <!-- [General][Dialog] Dismisses the current dialog being presented to the user. -->
     <string name="maybe_later">Maybe later</string>
 
-    <string name="clear">Clear</string>
-    <string name="confirm">Confirm</string>
-    <string name="reload">Reload</string>
-    <string name="search">Search</string>
+    <!-- [General][Button] Triggers showing more items. -->
+    <string name="more">More</string>
 
-    <string name="tab_close">Close tab \"%1$s\"</string>
-    <string name="tab_closed">Closed \"%1$s\"</string>
-
-    <string name="new_tab_content_description">Create new tab</string>
-    <string name="close_all_content_description">Close all tabs</string>
-    <string name="update_available">Update available</string>
-    <string name="close_all_regular_tabs">Close all tabs?</string>
-    <string name="close_all_incognito_tabs">Close all incognito tabs?</string>
-
-    <string name="url_bar_placeholder">Search or enter address</string>
-    <string name="url_bar_accept_autocomplete">Accept suggestion: %1$s</string>
-
-    <string name="share">Share</string>
-    <string name="downloads">Downloads</string>
-    <string name="feedback">Support</string>
-    <string name="history">History</string>
-    <string name="home">Home</string>
-    <string name="incognito">Incognito</string>
-    <string name="suggested_sites">Suggested sites</string>
-    <string name="community_spaces">From the Neeva Community</string>
-    <string name="searches">Searches</string>
-    <string name="settings">Settings</string>
-    <string name="spaces">Spaces</string>
-    <string name="tabs">Tabs</string>
-    <string name="page_info">Page Info</string>string>
-    <string name="delete">Delete</string>
-    <string name="unfollow">Unfollow</string>
-
-    <string name="find_in_page">Find in page</string>
+    <!-- [General][Button][a11y] Moves to the next page or item. -->
     <string name="next">Next</string>
-    <string name="previous">Previous</string>
-    <string name="find_in_page_index">%1$d/%2$d</string>>
 
-    <string name="empty_regular_tabs_title">Create and manage tabs</string>
-    <string name="empty_incognito_tabs_title">Create and manage Incognito tabs</string>
-    <string name="empty_tab_hint">Tap + below to create a new tab</string>
-
-    <string name="toolbar_go_back">Back</string>
-    <string name="toolbar_go_forward">Forward</string>
-    <string name="toolbar_save_to_space">Save to Space</string>
-    <string name="toolbar_tab_switcher">Manage your tabs</string>
-    <string name="toolbar_neeva_menu">Open main menu</string>
-
-    <string name="history_removed_visit">Removed \"%1$s\" from history</string>
-    <string name="history_delete">Delete %1$s from history</string>
-
-    <string name="email_label">Email</string>
-    <string name="password_label">Password</string>
-    <string name="dont_have_account">Don\'t have an account?</string>
-    <string name="sign_up">Sign up</string>
-    <string name="already_have_account">Already have an account?</string>
-    <string name="sign_in">Sign in</string>
-    <string name="sign_up_with_google">Sign up with Google</string>
-    <string name="sign_up_with_microsoft">Sign up with Microsoft</string>
-    <string name="sign_up_with_okta">Create Neeva account</string>
-    <string name="sign_in_with_google">Sign in with Google</string>
-    <string name="sign_in_with_microsoft">Sign in with Microsoft</string>
-    <string name="sign_in_with_okta">Continue</string>
-    <string name="other_sign_up_options">Other sign-up options</string>
-    <string name="first_run_intro">Welcome to Neeva</string>
-    <string name="first_run_ad_free">The first ad-free, private search engine</string>
-    <string name="get_started">Get started</string>
-    <string name="first_run_create_your_free_account">Create your free Neeva account</string>
-    <string name="send_me_product_and_privacy_tips">Send me product &amp; privacy tips</string>
-    <string name="acknowledge_agreement"><![CDATA[By creating your Neeva account you acknowledge Neeva\'s <a href="%1$s">Terms of Service</a> and <a href="%2$s">Privacy Policy</a>]]></string>
+    <!-- [General] Used to separate two options in the UI. -->
     <string name="or">or</string>
-    <string name="used_email_error">This email is associated with an existing Neeva account</string>
-    <string name="invalid_email_error">Invalid email used to register</string>
-    <string name="invalid_request_error">Invalid name and/or password</string>
-    <string name="invalid_token_error">Token has already been used</string>
-    <string name="generic_signup_error">Account creation unsuccessful</string>
-    <string name="preview_overlay_prompt">See results for \"%1s\"</string>
 
-    <string name="settings_account_settings">Account settings</string>
-    <string name="settings_connected_apps">Connected apps</string>
-    <string name="settings_invite_friends">Invite friends</string>
-    <string name="settings_general">General</string>
-    <string name="set_neeva_as_default_browser">Switch your default browser</string>
-    <string name="settings_default_browser">Default browser</string>
-    <string name="settings_show_search_search_suggestions">Show search suggestions</string>
-    <string name="settings_block_pop_up_windows">Block pop-up windows</string>
-    <string name="settings_require_confirmation">Require confirmation</string>
-    <string name="settings_when_closing_all_tabs">When closing all tabs</string>
-    <string name="settings_privacy">Privacy</string>
-    <string name="settings_clear_browsing_data">Clear browsing data</string>
-    <string name="settings_close_incognito_tabs">Close incognito tabs</string>
-    <string name="settings_when_leaving_incognito_mode">When leaving incognito mode</string>
-    <string name="tracking_protection">Tracking protection</string>
-    <string name="tracking_protection_incognito_content_description">Incognito tracking protection</string>
-    <string name="settings_privacy_policy">Privacy policy</string>
-    <string name="settings_support">Support</string>
-    <string name="settings_welcome_tours">Welcome tours</string>
-    <string name="settings_help_center">Help center</string>
-    <string name="settings_about">About</string>
-    <string name="settings_neeva_browser_version">Neeva version %s</string>
-    <string name="settings_chromium_version">Chromium version %s</string>
-    <string name="settings_play_store_page">Check for updates</string>
-    <string name="settings_licenses">Licenses</string>
-    <string name="settings_additional_licenses">Additional licenses</string>
-    <string name="settings_terms">Terms</string>
-    <string name="settings_sign_in_to_join_neeva">Sign In or Join Neeva</string>
-    <string name="settings_signed_into_neeva_with">Signed in to Neeva with</string>
-    <string name="settings_sign_out">Sign out</string>
-    <string name="settings_data_on_this_device">Data on this device</string>
-    <string name="settings_clear_selected_data_on_device">Clear selected data on this device</string>
-    <string name="settings_clear_downloaded_files">Clear downloaded files</string>
-    <string name="settings_browsing_history">Browsing history</string>
-    <string name="settings_cache">Cache</string>
-    <string name="settings_cookies_primary">Cookies</string>
-    <string name="settings_data_in_neeva_memory">Data In Neeva memory</string>
-    <string name="settings_manage_neeva_memory">Manage Neeva memory</string>
-    <string name="settings_selected_data_cleared_success">Selected data cleared successfully</string>
-    <string name="settings_cookies_secondary">Clearing it will sign you out of most sites</string>
-    <string name="settings_membership_status">Membership status</string>
-    <string name="settings_cookie_cutter">Cookie Cutter</string>
-    <string name="settings_trackers">Trackers</string>
+    <!-- [General][Button][a11y] Moves to the previous item. -->
+    <string name="previous">Previous</string>
 
-    <string name="blocking_strength_standard_title">Standard</string>
-    <string name="blocking_strength_strict_title">Strict</string>
-    <string name="blocking_strength_standard_description">Tracker cookies only</string>
-    <string name="blocking_strength_strict_description">Tracker request</string>
+    <!-- [General][a11y] When clicked, copies the associated text into the URL bar for editing. -->
+    <string name="refine">Refine</string>
 
-    <string name="clear_browsing_dialog_text">The items you selected will be deleted. It cannot be undone.</string>
-    <string name="clear_browsing_clear_data">Clear data</string>
-    <string name="clear_browsing_last_hour">Last hour</string>
-    <string name="clear_browsing_today">Last 24 hours</string>
-    <string name="clear_browsing_today_and_yesterday">Last 48 hours</string>
-    <string name="clear_browsing_everything">All time</string>
+    <!-- [General][a11y] Triggers the reload of a web page or other content. -->
+    <string name="reload">Reload</string>
 
-    <string name="incognito_zero_query_title">You are incognito</string>
-    <string name="incognito_zero_query_body"><![CDATA[Neeva <b>won\'t save</b> any of your personal activity like searches, clicks, or browsing.\n\nSearch privately, knowing that other people who use this device won\'t see your activity if you close your incognito tabs.]]></string>
-    <string name="incognito_zero_query_footer"><![CDATA[Your activity <b>might still be visible</b> to your internet service provider, school, or employer.]]></string>
+    <!-- [General][Button] Triggers sending the user's input somewhere (e.g. submitting feedback). -->
+    <string name="send">Send</string>
 
-    <string name="submit_feedback">Send</string>
-    <string name="submit_feedback_help_center_title">Need help or want instant answers to FAQs?</string>
-    <string name="submit_feedback_help_center_link">Visit our help center!</string>
-    <string name="submit_feedback_share_screenshot">Share screenshot</string>
-    <string name="submit_feedback_share_screenshot_preview">Screenshot that will be shared with Neeva</string>
-    <string name="submit_feedback_view_share_url">Share URL</string>
-    <string name="submit_feedback_textfield_placeholder">Please share your questions, issues, or feature requests. Your feedback helps us improve Neeva!</string>
-    <string name="submit_feedback_acknowledgement">Sent. Thanks for your feedback!</string>
+    <!-- [General][a11y] Triggers sharing something with another person or app. -->
+    <string name="share">Share</string>
 
-    <string name="tab_crashed_title">Uh oh!</string>
-    <string name="tab_crashed_body">Something went wrong while displaying this web page</string>
+    <!-- [General] Label for a text field that allows the user to enter a title for something they are creating. -->
+    <string name="title">Title</string>
 
-    <string name="space_add_url_to_space">Add site to \"%1s\"</string>
-    <string name="space_remove_url_from_space">Remove site from \"%1s\"</string>
-    <string name="space_added_url_to_space">Added site to \"%1s\"</string>
-    <string name="space_removed_url_from_space">Removed site from \"%1s\"</string>'
-    <string name="space_additional_count">+%1d</string>
-    <string name="space_create">Create a Space</string>
-    <string name="space_create_placeholder">Space name</string>
-    <string name="space_create_success">Created \"%1s\"</string>
-    <string name="space_edit">Edit Space</string>
-    <string name="space_add_space_item">Add Space Item</string>
-    <string name="space_edit_on_web">Edit on Web</string>
-    <string name="space_edit_dialog_url">URL</string>
-    <string name="space_edit_dialog_title">Title</string>
-    <string name="space_edit_dialog_description">Description</string>
-    <string name="edit_space_header">Edit Space</string>
-    <string name="edit_space_item_header">Edit Space Item</string>
-    <string name="add_space_item_header">Add Space Item</string>
-    <string name="space_edit_dialog_add_action">Add</string>
-    <string name="space_edit_dialog_update_action">Update</string>
-    <string name="space_detail_views">%1d Views</string>
-    <string name="space_detail_followers">%1d Followers</string>
-    <string name="space_stats_private">Only visible to you and people you shared with</string>
-    <string name="space_detail_show_descriptions">Show descriptions</string>
-    <string name="space_intro_title">Kill the clutter</string>
-    <string name="space_intro_body">
-        Save and share content instantly. Stay organized by adding images, websites and documents to a Space today.
-    </string>
-    <string name="space_intro_cta">Sign up to get started</string>
-    <string name="share_space_title">Share Space</string>
-    <string name="copy_clipboard">Copied to clipboard</string>
-    <string name="enable_link">Enable sharable link</string>
-    <string name="enable_link_subtitle">Anyone with the link can view</string>
-    <string name="shown_as_owner">You will be shown as the owner of the Space</string>
-    <string name="space_delete_confirmation">Are you sure you want to delete this Space?</string>
-    <string name="space_unfollow_confirmation">Are you sure you want to unfollow this Space?</string>
-    <string name="space_open">Open Space</string>
+    <!-- [General] Generic string saying something went wrong.  Would be used similarly to "Oops!". -->
+    <string name="uh_oh">Uh oh!</string>
 
-    <string name="twitter_social_title">Twitter</string>
-    <string name="linkedin_social_title">Linkedin</string>
-    <string name="facebook_social_title">Facebook</string>
-    <string name="copy_link_social_title">Copy link</string>
+    <!-- [General][Button] Provides the user an opportunity to undo something they did. -->
+    <string name="undo">Undo</string>
 
+    <!-- [General][Button] Triggers updating something they are currently viewing or editing. -->
+    <string name="update">Update</string>
+
+    <!-- [General] Label for a widget that allows the user to type in a URL. -->
+    <string name="url">URL</string>
+    <!-- [Error] Error message displayed when we don't have a better one to show the user. -->
     <string name="error_generic">Something went wrong</string>
+
+    <!-- [Error] Displayed when the tab crashed and we can't display the web page anymore. -->
+    <string name="error_tab_crashed">Something went wrong while displaying this web page</string>
+
+    <!-- [Error] Tells the user that we failed to open an app for the given URL. -->
     <string name="error_url_failure">Could not open \"%1$s\"</string>
 
+
+
+    <!-- [URL Bar][Button] Clicking this will replace the user's current URL with the one being suggested. -->
+    <string name="url_bar_accept_autocomplete">Accept suggestion: %1$s</string>
+
+    <!-- [URL bar][Button] Allows the user to edit the current web page's URL and navigate somewhere else. -->
+    <string name="edit_current_url">Edit current address</string>
+
+    <!-- [URL bar][Button] Allows the user to edit their current search query. -->
+    <string name="edit_current_search">Edit current search</string>
+
+    <!-- [Suggestions][a11y] Tells the user that clicking this button will allow them to refine a query suggestion -->
+    <string name="edit_suggested_query">Edit suggested search query: \"%1$s\"</string>
+
+    <!-- [URL bar][Button] Displayed when the URL bar is empty.  Tells the user they can perform a search or type in a URL to navigate to. -->
+    <string name="url_bar_placeholder">Search or enter address</string>
+
+    <!-- [URL bar][a11y] Indicates that the user is on a Neeva search results page.
+         [Suggestions] Section header for search results and suggestions from Neeva. -->
+    <string name="neeva_search">Neeva Search</string>
+
+
+
+    <!-- [Tab switcher][a11y] Clicking this will create a new tab -->
+    <string name="create_new_tab_a11y">Create new tab</string>
+
+    <!-- [Dialog] Asks the user if they want to close all of their tabs. -->
+    <string name="close_all_regular_tabs">Close all tabs?</string>
+
+    <!-- [Dialog] Asks the user if they want to close all of their incognito tabs. -->
+    <string name="close_all_incognito_tabs">Close all incognito tabs?</string>
+
+    <!-- [Tab switcher][a11y] Clicking this will close the tab with the given title -->
+    <string name="close_tab">Close tab \"%1$s\"</string>
+
+    <!-- [Snackbar] Tells the user that they closed the tab with the given title. -->
+    <string name="closed_tab">Closed tab \"%1$s\"</string>
+
+    <!-- [Menu item] Indicates that there is an update available for the app. -->
+    <string name="menu_update_available">Update available</string>
+
+    <!-- [Menu item] Closes all of the user's tabs. -->
+    <string name="menu_close_all_tabs">Close all tabs</string>
+
+    <!-- [Menu item] Sends the user to the Downloads page. -->
+    <string name="menu_downloads">Downloads</string>
+
+    <!-- [Menu item][Header] Displayed as a menu item and a page header.  Sends the user to the Support page. -->
+    <string name="feedback">Support</string>
+
+    <!-- [Menu item][Header] Sends the user to view their browsing history. -->
+    <string name="history">History</string>
+
+    <!-- [Menu item][Header] Sends the user to the Settings page. -->
+    <string name="settings">Settings</string>
+
+    <!-- [Menu item] Shows the user information about the current web page. -->
+    <string name="page_info">Page Info</string>
+
+    <!-- [Menu item] Tries to display the desktop version of the current web page. -->
+    <string name="menu_desktop_site">Desktop site</string>
+
+    <!-- [Menu item] Tries to display the mobile version of the current web page. -->
+    <string name="menu_mobile_site">Mobile site</string>
+
+    <!-- [Menu item] Displays the widget that allows the user to find specific text on the current web page. -->
+    <string name="find_in_page">Find in page</string>
+
+
+
+    <!-- [Context menu item] Downloads the image that triggered the context menu. -->
+    <string name="menu_download_image">Download image</string>
+
+    <!-- [Context menu item] Downloads the video that triggered the context menu. -->
+    <string name="menu_download_video">Download video</string>
+
+    <!-- [Context menu item] Downloads the file that triggered the context menu. -->
+    <string name="menu_download_link">Download link</string>
+
+    <!-- [Context menu item] Opens the long-pressed link in a new tab. -->
+    <string name="menu_open_in_new_tab">Open in new tab</string>
+
+    <!-- [Context menu item] Opens the long-pressed link in a new incognito tab. -->
+    <string name="menu_open_in_new_incognito_tab">Open in new incognito tab</string>
+
+    <!-- [Context menu item] Copies the URL for the link that triggered the context menu. -->
+    <string name="menu_copy_link_address">Copy link address</string>
+
+    <!-- [Context menu item] Copies the text of the link that triggered the context menu. -->
+    <string name="menu_copy_link_text">Copy link text</string>
+
+
+
+    <!-- [Tab switcher][a11y] Sends the user to view their non-incognito tabs. -->
+    <string name="view_regular_tabs">View your tabs</string>
+
+    <!-- [Tab switcher][a11y] Sends the user into incognito browsing mode. -->
+    <string name="view_incognito_tabs">View your incognito tabs</string>
+
+    <!-- [Tab switcher] Displayed when the user has no tabs open. -->
+    <string name="tab_switcher_no_tabs">Create and manage tabs</string>
+
+    <!-- [Tab switcher] Displayed when the user has no incognito tabs open. -->
+    <string name="tab_switcher_no_incognito_tabs">Create and manage incognito tabs</string>
+
+    <!-- [Tab switcher] Tells the user that tapping on the + button will create a new tab for them. -->
+    <string name="tab_switcher_create_tab_hint">Tap + below to create a new tab</string>
+
+
+
+    <!-- [Incognito] Tells the user that they have entered incognito mode. -->
+    <string name="incognito_zero_query_title">You are incognito</string>
+
+    <!-- [Incognito] Describes how the browser will behave in incognito mode. -->
+    <string name="incognito_zero_query_body"><![CDATA[Neeva <b>won\'t save</b> any of your personal activity like searches, clicks, or browsing.\n\nSearch privately, knowing that other people who use this device won\'t see your activity if you close your incognito tabs.]]></string>
+
+    <!-- [Incognito] Disclaimer text indicating the limits of incognito mode. -->
+    <string name="incognito_zero_query_footer"><![CDATA[Your activity <b>might still be visible</b> to your internet service provider, school, or employer.]]></string>
+
+
+
+    <!-- [Dialog] Suggests that the user switch their default browser to Neeva. -->
     <string name="switch_default_browser_title">Make Neeva your default browser</string>
+
+    <!-- [Dialog] Confirmation button for switching your default browser. -->
+    <string name="switch_default_browser_title_confirm_button">Switch your default browser</string>
+
+    <!-- [Dialog] Tells the user why they should switch their default browser to Neeva. -->
     <string name="switch_default_browser_promo">Block invasive trackers across the Web.\nOpen links safely with blazing fast browsing and peace of mind.</string>
 
+    <!-- [Dialog] Heading for steps to follow in order to switch their default browser. -->
     <string name="switch_default_browser_follow_3_steps">Follow these 3 easy steps:</string>
-    <string name="switch_default_browser_instructions">1. Go to Settings\n\n2. Tap Browser App\n\n3. Select Neeva</string>
+
+    <!-- [Dialog] Detailed steps to follow in order to switch their default browser. -->
+    <string name="switch_default_browser_instructions">1. Go to Settings\n\n2. Tap \"Browser app\"\n\n3. Select Neeva</string>
+
+    <!-- [Dialog][Button] Sends the user to the Android device's settings to set their default browser. -->
     <string name="go_to_settings">Go to Settings</string>
 
-    <string name="menu_download_image">Download image</string>
-    <string name="menu_download_video">Download video</string>
-    <string name="menu_download_link">Download link</string>
-    <string name="menu_open_in_new_tab">Open in new tab</string>
-    <string name="menu_open_in_new_incognito_tab">Open in new incognito tab</string>
-    <string name="menu_copy_link_address">Copy link address</string>
-    <string name="menu_copy_link_text">Copy link text</string>
-    <string name="subscription_basic">Free Basic</string>
-    <string name="subscription_premium">Premium</string>
-    <string name="subscription_unknown">Unknown</string>
-    <string name="widget_description">Quick actions</string>
-    <string name="widget_search_neeva">Search Neeva</string>
-    <string name="weak_password">Weak password</string>
-    <string name="desktop_site">Desktop site</string>
-    <string name="mobile_site">Mobile site</string>
 
-    <string name="badge_image_text">%1$s+</string>
 
-    <string name="cookie_cutter_trackers">Trackers</string>
-    <string name="cookie_cutter_popups">Cookie popups</string>
-    <string name="cookie_cutter_whos_tracking_you">Who\'s tracking you</string>
-    <string name="cookie_cutter">Cookie Cutter</string>
-    <string name="cookie_cutter_settings">Cookie Cutter settings</string>
+    <!-- [Spaces] Indicates how many people have viewed the given Space. -->
+    <plurals name="space_detail_views">
+        <item quantity="one">%d Views</item>
+        <item quantity="other">%d Views</item>
+    </plurals>
 
-    <string name="chromium">Chromium</string>
-
-    <string name="neevascope">NeevaScope</string>
-    <string name="cheatsheet_info">
-        Tap on the Neeva logo to see information related to the website you\'re visiting.
-    </string>
-    <string name="cheatsheet_intro">
-        From related content to reviews, NeevaScope is your guide to the web!
-    </string>
-    <string name="cheatsheet_got_it">Got it!</string>
-    <string name="cheatsheet_loading">Your NeevaScope is coming into focus...</string>
-
-    <string name="section_collapse">Collapse section: %1$s</string>
-    <string name="section_expand">Expand section: %1$s</string>
-    <string name="section_fully_expand">Fully expand section: %1$s</string>
-
-    <!-- Debug settings -->
-    <string name="settings_debug_local" translatable="false">Advanced</string>
-    <string name="settings_debug_local_feature_flags" translatable="false">Developer settings</string>
-    <string name="settings_debug_flags" translatable="false">Flags</string>
-    <string name="settings_debug_actions" translatable="false">Actions</string>
-    <string name="settings_debug_enable_incognito_screenshots" translatable="false">Enable screenshots while in Incognito</string>
-    <string name="settings_debug_enable_show_desktop_site" translatable="false">Enable Show Desktop Site in Overflow Menu</string>
-    <string name="settings_debug_open_50_tabs" translatable="false">Open 50 tabs</string>
-    <string name="settings_debug_open_500_tabs" translatable="false">Open 500 tabs</string>
-    <string name="settings_debug_export_database" translatable="false">Export history database</string>
-    <string name="settings_debug_import_database" translatable="false">Import history database</string>
-    <string name="settings_debug_import_database_description" translatable="false">Destroys your existing database</string>
-    <string name="settings_debug_m1_apphost" translatable="false">Enable using the m1.neeva.com app host</string>
-    <string name="settings_debug_local_neeva_dev_apphost" translatable="false">Enable using the local.neeva.dev app host</string>
-    <string name="settings_debug_native_spaces" translatable="false">Enable native Spaces detail UI</string>
-    <string name="settings_debug_neevascope" translatable="false">Enable NeevaScope button</string>
-
-    <string name="web_layer_support_title">WebLayerSupport</string>
-    <string name="web_layer_package" translatable="false">com.neeva.app</string>
+    <!-- [Spaces] Indicates how many people are following the given Space. -->
+    <plurals name="space_detail_followers">
+        <item quantity="one">%d Follower</item>
+        <item quantity="other">%d Followers</item>
+    </plurals>
 </resources>

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Neeva</string>
     <bool name="flag_profiling_enabled" translatable="false">false</bool>
+    <string name="web_layer_package" translatable="false">com.neeva.app</string>
 </resources>

@@ -113,7 +113,7 @@ class CardsPaneModelImpl(
     override fun closeTab(browserWrapper: BrowserWrapper, tab: TabInfo) {
         browserWrapper.startClosingTab(tab.id)
         popupModel.showSnackbar(
-            message = context.getString(R.string.tab_closed, tab.title),
+            message = context.getString(R.string.closed_tab, tab.title),
             actionLabel = context.getString(R.string.undo),
             onActionPerformed = {
                 browserWrapper.cancelClosingTab(tab.id)

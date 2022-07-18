@@ -55,18 +55,14 @@ enum class SettingsToggle(
         primaryLabelId = R.string.settings_show_search_search_suggestions,
         defaultValue = true
     ),
-    BLOCK_POP_UP_WINDOWS(
-        primaryLabelId = R.string.settings_block_pop_up_windows,
-        defaultValue = false
-    ),
     REQUIRE_CONFIRMATION_ON_TAB_CLOSE(
-        primaryLabelId = R.string.settings_require_confirmation,
-        secondaryLabelId = R.string.settings_when_closing_all_tabs,
+        primaryLabelId = R.string.settings_confirm_close_all_tabs_title,
+        secondaryLabelId = R.string.settings_confirm_close_all_tabs_body,
         defaultValue = false
     ),
     CLOSE_INCOGNITO_TABS(
-        primaryLabelId = R.string.settings_close_incognito_tabs,
-        secondaryLabelId = R.string.settings_when_leaving_incognito_mode,
+        primaryLabelId = R.string.settings_close_incognito_when_switching_title,
+        secondaryLabelId = R.string.settings_close_incognito_when_switching_body,
         defaultValue = false
     ),
     TRACKING_PROTECTION(

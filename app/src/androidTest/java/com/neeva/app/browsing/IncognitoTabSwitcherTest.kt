@@ -43,7 +43,7 @@ class IncognitoTabSwitcherTest : BaseBrowserTest() {
 
             // Switch to the Incognito screen and confirm that we see an empty incognito grid.
             openCardGrid(incognito = true)
-            onNodeWithText(getString(R.string.empty_incognito_tabs_title)).assertExists()
+            onNodeWithText(getString(R.string.tab_switcher_no_incognito_tabs)).assertExists()
 
             // Open a lazy new tab to nowhere in particular.
             openLazyTab(WebpageServingRule.urlFor("?incognito"))

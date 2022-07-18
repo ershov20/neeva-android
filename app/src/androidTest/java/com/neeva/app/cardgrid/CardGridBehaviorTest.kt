@@ -62,7 +62,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
         androidComposeRule.apply {
             // Close all the user's tabs.
             openCardGrid(incognito = false)
-            openOverflowMenuAndClickItem(R.string.close_all_content_description)
+            openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
 
             // Confirm that we're looking at an empty regular TabGrid.
             waitForBrowserState(
@@ -70,7 +70,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
                 expectedNumRegularTabs = 0,
                 expectedNumIncognitoTabs = null
             )
-            onNodeWithText(getString(R.string.empty_regular_tabs_title)).assertExists()
+            onNodeWithText(getString(R.string.tab_switcher_no_tabs)).assertExists()
 
             // Open the settings page from the tab switcher.
             openOverflowMenuAndClickItem(R.string.settings)
@@ -81,7 +81,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
 
             // Confirm that we're still at the TabGrid.
             waitForNavDestination(AppNavDestination.CARD_GRID)
-            onNodeWithText(getString(R.string.empty_regular_tabs_title)).assertExists()
+            onNodeWithText(getString(R.string.tab_switcher_no_tabs)).assertExists()
         }
     }
 
@@ -96,7 +96,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             closeActiveTabFromTabGrid()
 
             // We should show the empty state.
-            waitForNodeWithText(getString(R.string.empty_regular_tabs_title)).assertIsDisplayed()
+            waitForNodeWithText(getString(R.string.tab_switcher_no_tabs)).assertIsDisplayed()
 
             // Hitting back will kill the app because they can't use go back to
             // AppNavDestination.Browser without a tab to view.
@@ -142,7 +142,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
                 activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value
             expectThat(secondActiveTabTitle).isNotEqualTo(firstActiveTabTitle)
             waitForNodeWithContentDescription(
-                activity.getString(R.string.tab_close, secondActiveTabTitle)
+                activity.getString(R.string.close_tab, secondActiveTabTitle)
             ).assertIsDisplayed()
             onAllNodesWithTag("TabCard").assertCountEquals(2)
 
@@ -152,7 +152,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
 
             // Wait for the snackbar to go away and confirm that it results in the third tab getting
             // closed.
-            val closeSnackbarText = activity.getString(R.string.tab_closed, firstActiveTabTitle)
+            val closeSnackbarText = activity.getString(R.string.closed_tab, firstActiveTabTitle)
             waitForNodeToDisappear(onNodeWithText(closeSnackbarText))
             waitForBrowserState(
                 isIncognito = false,
@@ -214,7 +214,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
                 activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value
             expectThat(secondActiveTabTitle).isNotEqualTo(firstActiveTabTitle)
             waitForNodeWithContentDescription(
-                activity.getString(R.string.tab_close, secondActiveTabTitle)
+                activity.getString(R.string.close_tab, secondActiveTabTitle)
             ).assertIsDisplayed()
 
             // Undo the tab closure.
@@ -243,7 +243,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             closeActiveTabFromTabGrid()
 
             // Close all the remaining tabs via the menu.
-            openOverflowMenuAndClickItem(R.string.close_all_content_description)
+            openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 0)
             onAllNodesWithTag("TabCard").assertCountEquals(0)
 

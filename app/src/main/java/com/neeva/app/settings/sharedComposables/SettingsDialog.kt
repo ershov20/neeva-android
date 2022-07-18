@@ -135,9 +135,9 @@ class SettingsDialogPreviews :
                 textId = R.string.debug_long_string_primary,
                 radioOptions = radioOptions,
                 selectedOptionIndex = selectedOption,
-                confirmStringId = R.string.confirm,
+                confirmStringId = android.R.string.ok,
                 confirmAction = { run {} },
-                dismissStringId = R.string.cancel,
+                dismissStringId = android.R.string.cancel,
                 dismissAction = {}
             )
         }

@@ -64,7 +64,9 @@ fun CurrentPageRow(browserWrapper: BrowserWrapper) {
                         it.apply {
                             setPrimaryClip(ClipData.newPlainText("address", currentURL.toString()))
                         }
-                        popupModel.showSnackbar(message = context.getString(R.string.link_copied))
+                        popupModel.showSnackbar(
+                            message = context.getString(R.string.copied_to_clipboard)
+                        )
                         urlBarModel.clearFocus()
                     }
                 }
@@ -100,7 +102,7 @@ fun CurrentPageRow(
             RowActionIconParams(
                 onTapAction = it,
                 actionType = RowActionIconParams.ActionType.COPY,
-                contentDescription = stringResource(R.string.menu_copy_link_address)
+                contentDescription = stringResource(R.string.copy_link)
             )
         },
         showActualUrlInSecondaryLabel = true

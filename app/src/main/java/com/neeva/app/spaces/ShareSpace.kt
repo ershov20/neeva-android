@@ -76,7 +76,7 @@ fun ShareSpaceUIContainer(spaceID: String) {
                 context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText(space.value?.name, spaceURL.toString())
             clipboard.setPrimaryClip(clip)
-            snackbarModel.showSnackbar(context.getString(R.string.copy_clipboard))
+            snackbarModel.showSnackbar(context.getString(R.string.copied_to_clipboard))
         },
         onMore = {
             space.value?.let { appNavModel.shareSpace(it) }
@@ -173,7 +173,7 @@ fun SocialShareRow(
     ) {
         val appNavModel = LocalAppNavModel.current
         SocialShareButton(
-            name = stringResource(id = R.string.twitter_social_title),
+            name = stringResource(id = R.string.twitter),
             iconResourceID = R.drawable.twitter_logo_blue
         ) {
             val intent = Intent(
@@ -184,7 +184,7 @@ fun SocialShareRow(
         }
 
         SocialShareButton(
-            name = stringResource(id = R.string.linkedin_social_title),
+            name = stringResource(id = R.string.linkedin),
             iconResourceID = R.drawable.linkedin_logo
         ) {
             val intent = Intent(
@@ -195,7 +195,7 @@ fun SocialShareRow(
         }
 
         SocialShareButton(
-            name = stringResource(id = R.string.facebook_social_title),
+            name = stringResource(id = R.string.facebook),
             iconResourceID = R.drawable.facebook_logo
         ) {
             val intent = Intent(
@@ -206,7 +206,7 @@ fun SocialShareRow(
         }
 
         SocialShareButton(
-            name = stringResource(id = R.string.copy_link_social_title),
+            name = stringResource(id = R.string.copy_link),
             iconResourceID = R.drawable.ic_link,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
             onClick = onCopyLink

@@ -104,7 +104,7 @@ fun LocationLabelContent(
             ActiveTabModel.DisplayMode.QUERY -> {
                 Icon(
                     painter = painterResource(R.drawable.ic_baseline_search_24),
-                    contentDescription = stringResource(R.string.search),
+                    contentDescription = stringResource(R.string.neeva_search),
                     modifier = Modifier
                         .padding(end = Dimensions.PADDING_SMALL)
                         .size(Dimensions.SIZE_ICON_SMALL)

@@ -168,7 +168,7 @@ fun HistoryEntry(
     val faviconBitmap: Bitmap? by faviconCache.getFaviconAsync(navSuggestion.url)
 
     val contentDescription = stringResource(
-        R.string.history_delete,
+        R.string.history_remove_visit,
         sitePlusVisit.site.title ?: sitePlusVisit.site.siteURL
     )
 

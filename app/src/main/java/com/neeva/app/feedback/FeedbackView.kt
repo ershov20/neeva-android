@@ -98,7 +98,7 @@ fun FeedbackView(
             FullScreenDialogTopBar(
                 title = stringResource(R.string.feedback),
                 onBackPressed = onDismiss,
-                buttonTitle = stringResource(R.string.submit_feedback),
+                buttonTitle = stringResource(R.string.send),
                 onButtonPressed = {
                     onSubmitFeedback(
                         feedback.value,

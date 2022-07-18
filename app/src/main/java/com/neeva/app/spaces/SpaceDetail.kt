@@ -306,14 +306,16 @@ fun SpaceDetailToolbar(
                 RowActionIconButton(
                     iconParams = RowActionIconParams(
                         onTapAction = onAddToSpace,
-                        actionType = RowActionIconParams.ActionType.ADD
+                        actionType = RowActionIconParams.ActionType.ADD,
+                        contentDescription = stringResource(R.string.space_add_space_item)
                     )
                 )
 
                 RowActionIconButton(
                     iconParams = RowActionIconParams(
                         onTapAction = onEditSpace,
-                        actionType = RowActionIconParams.ActionType.EDIT
+                        actionType = RowActionIconParams.ActionType.EDIT,
+                        contentDescription = stringResource(R.string.space_edit)
                     )
                 )
             }

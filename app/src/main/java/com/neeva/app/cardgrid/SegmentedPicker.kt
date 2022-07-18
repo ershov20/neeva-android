@@ -171,7 +171,7 @@ fun SegmentedPicker(
                 ) {
                     Icon(
                         painter = painterResource(R.drawable.ic_incognito),
-                        contentDescription = stringResource(R.string.incognito)
+                        contentDescription = stringResource(R.string.view_incognito_tabs)
                     )
                 }
             }
@@ -192,7 +192,7 @@ fun SegmentedPicker(
                             onSwitchScreen(SelectedScreen.REGULAR_TABS)
                         }
                 ) {
-                    TabSwitcherIcon(contentDescription = stringResource(R.string.tabs))
+                    TabSwitcherIcon(contentDescription = stringResource(R.string.view_regular_tabs))
                 }
             }
 
