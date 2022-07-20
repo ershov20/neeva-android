@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- When adding new strings:
+     1. Find a section grouping that the new string can fit in.
+
+     2. Make sure to check this page to avoid formatting issues:
+        https://help.smartling.com/hc/en-us/articles/360008000573-Android-XML
+
+     3. Do not add a newline after the opening <string> tag.
+
+     4. Add a comment describing how the string is used for translations.  All comments that precede
+        a string are provided as a hint for the translators.
+-->
+<!-- smartling.instruction_comments_enabled = on -->
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- [General][Button] Triggers adding something to the currently displayed list.  e.g. adding a new item to a Space. -->
+    <string name="add">Ajouter</string>
+
+    <!-- [General] Indicates that there are more items that we are not displaying.  e.g. "+5" is equivalent to "5 more". -->
+    <string name="additional_count">%1$1d de plus</string>
+
+    <!-- [General][Button][a11y] Removes all of a user's input from the attached widget. -->
+    <string name="clear">Effacer</string>
+
+    <!-- [General][Snackbar] Indicates that something has been copied to the clipboard. -->
+    <string name="copied_to_clipboard">Copié dans le presse-papiers</string>
+
+    <!-- [General][Button] Copies the web page link to the clipboard. -->
+    <string name="copy_link">Copier le lien</string>
+
+    <!-- [General][a11y] Triggers the closing of a dialog or a tab. -->
+    <string name="close">Fermer</string>
+
+    <!-- [General] Indicates that something will be deleted. -->
+    <string name="delete">Supprimer</string>
+
+    <!-- [General] Label for a text field that allows the user to enter a description for something they are creating. -->
+    <string name="description">Description</string>
+
+    <!-- [General][Dialog] Dismisses the current dialog being presented to the user. -->
+    <string name="maybe_later">Peut-être plus tard</string>
+
+    <!-- [General][Button] Triggers showing more items. -->
+    <string name="more">plus</string>
+
+    <!-- [General][Button][a11y] Moves to the next page or item. -->
+    <string name="next">Suivant</string>
+
+    <!-- [General] Used to separate two options in the UI. -->
+    <string name="or">ou</string>
+
+    <!-- [General][Button][a11y] Moves to the previous item. -->
+    <string name="previous">Précédent</string>
+
+    <!-- [General][a11y] When clicked, copies the associated text into the URL bar for editing. -->
+    <string name="refine">Affiner</string>
+
+    <!-- [General][a11y] Triggers the reload of a web page or other content. -->
+    <string name="reload">Recharger</string>
+
+    <!-- [General][Button] Triggers sending the user's input somewhere (e.g. submitting feedback). -->
+    <string name="send">Envoyer</string>
+
+    <!-- [General][a11y] Triggers sharing something with another person or app. -->
+    <string name="share">Partager</string>
+
+    <!-- [General] Label for a text field that allows the user to enter a title for something they are creating. -->
+    <string name="title">Titre</string>
+
+    <!-- [General] Generic string saying something went wrong.  Would be used similarly to "Oops!". -->
+    <string name="uh_oh">Mince alors !</string>
+
+    <!-- [General][Button] Provides the user an opportunity to undo something they did. -->
+    <string name="undo">Annuler</string>
+
+    <!-- [General][Button] Triggers updating something they are currently viewing or editing. -->
+    <string name="update">Mettre à jour</string>
+
+    <!-- [General] Label for a widget that allows the user to type in a URL. -->
+    <string name="url">URL</string>
+    <!-- [Error] Error message displayed when we don't have a better one to show the user. -->
+    <string name="error_generic">Une erreur s\'est produite</string>
+
+    <!-- [Error] Displayed when the tab crashed and we can't display the web page anymore. -->
+    <string name="error_tab_crashed">Une erreur s\'est produite lors de l\'affichage de cette page Web</string>
+
+    <!-- [Error] Tells the user that we failed to open an app for the given URL. -->
+    <string name="error_url_failure">Impossible d\'ouvrir « %1$s »</string>
+
+
+
+    <!-- [URL Bar][Button] Clicking this will replace the user's current URL with the one being suggested. -->
+    <string name="url_bar_accept_autocomplete">Accepter la suggestion : %1$s</string>
+
+    <!-- [URL bar][Button] Allows the user to edit the current web page's URL and navigate somewhere else. -->
+    <string name="edit_current_url">Modifier l\'adresse actuelle</string>
+
+    <!-- [URL bar][Button] Allows the user to edit their current search query. -->
+    <string name="edit_current_search">Modifier la recherche en cours</string>
+
+    <!-- [Suggestions][a11y] Tells the user that clicking this button will allow them to refine a query suggestion -->
+    <string name="edit_suggested_query">Modifier la recherche suggérée : « %1$s »</string>
+
+    <!-- [URL bar][Button] Displayed when the URL bar is empty.  Tells the user they can perform a search or type in a URL to navigate to. -->
+    <string name="url_bar_placeholder">Rechercher ou saisir une adresse</string>
+
+    <!-- [URL bar][a11y] Indicates that the user is on a Neeva search results page.
+         [Suggestions] Section header for search results and suggestions from Neeva. -->
+    <string name="neeva_search">Recherche Neeva</string>
+
+
+
+    <!-- [Tab switcher][a11y] Clicking this will create a new tab -->
+    <string name="create_new_tab_a11y">Nouvel onglet</string>
+
+    <!-- [Dialog] Asks the user if they want to close all of their tabs. -->
+    <string name="close_all_regular_tabs">Fermer tous les onglets ?</string>
+
+    <!-- [Dialog] Asks the user if they want to close all of their incognito tabs. -->
+    <string name="close_all_incognito_tabs">Fermer tous les onglets de navigation privée ?</string>
+
+    <!-- [Tab switcher][a11y] Clicking this will close the tab with the given title -->
+    <string name="close_tab">Fermer l\'onglet « %1$s »</string>
+
+    <!-- [Snackbar] Tells the user that they closed the tab with the given title. -->
+    <string name="closed_tab">Onglet « %1$s » fermé</string>
+
+    <!-- [Menu item] Indicates that there is an update available for the app. -->
+    <string name="menu_update_available">Mise à jour disponible</string>
+
+    <!-- [Menu item] Closes all of the user's tabs. -->
+    <string name="menu_close_all_tabs">Fermer tous les onglets</string>
+
+    <!-- [Menu item] Sends the user to the Downloads page. -->
+    <string name="menu_downloads">Téléchargements</string>
+
+    <!-- [Menu item][Header] Displayed as a menu item and a page header.  Sends the user to the Support page. -->
+    <string name="feedback">Assistance</string>
+
+    <!-- [Menu item][Header] Sends the user to view their browsing history. -->
+    <string name="history">Historique</string>
+
+    <!-- [Menu item][Header] Sends the user to the Settings page. -->
+    <string name="settings">Paramètres</string>
+
+    <!-- [Menu item] Shows the user information about the current web page. -->
+    <string name="page_info">Informations sur la page</string>
+
+    <!-- [Menu item] Tries to display the desktop version of the current web page. -->
+    <string name="menu_desktop_site">Version ordinateur</string>
+
+    <!-- [Menu item] Tries to display the mobile version of the current web page. -->
+    <string name="menu_mobile_site">Version mobile</string>
+
+    <!-- [Menu item] Displays the widget that allows the user to find specific text on the current web page. -->
+    <string name="find_in_page">Rechercher dans la page</string>
+
+
+
+    <!-- [Context menu item] Downloads the image that triggered the context menu. -->
+    <string name="menu_download_image">Télécharger l\'image</string>
+
+    <!-- [Context menu item] Downloads the video that triggered the context menu. -->
+    <string name="menu_download_video">Télécharger la vidéo</string>
+
+    <!-- [Context menu item] Downloads the file that triggered the context menu. -->
+    <string name="menu_download_link">Télécharger la cible du lien</string>
+
+    <!-- [Context menu item] Opens the long-pressed link in a new tab. -->
+    <string name="menu_open_in_new_tab">Ouvrir dans un nouvel onglet</string>
+
+    <!-- [Context menu item] Opens the long-pressed link in a new incognito tab. -->
+    <string name="menu_open_in_new_incognito_tab">Ouvrir dans un nouvel onglet de navigation privée</string>
+
+    <!-- [Context menu item] Copies the URL for the link that triggered the context menu. -->
+    <string name="menu_copy_link_address">Copier l\'adresse du lien</string>
+
+    <!-- [Context menu item] Copies the text of the link that triggered the context menu. -->
+    <string name="menu_copy_link_text">Copier le texte du lien</string>
+
+
+
+    <!-- [Tab switcher][a11y] Sends the user to view their non-incognito tabs. -->
+    <string name="view_regular_tabs">Afficher vos onglets</string>
+
+    <!-- [Tab switcher][a11y] Sends the user into incognito browsing mode. -->
+    <string name="view_incognito_tabs">Afficher vos onglets de navigation privée</string>
+
+    <!-- [Tab switcher] Displayed when the user has no tabs open. -->
+    <string name="tab_switcher_no_tabs">Ouvrez et gérez des onglets</string>
+
+    <!-- [Tab switcher] Displayed when the user has no incognito tabs open. -->
+    <string name="tab_switcher_no_incognito_tabs">Ouvrez et gérez des onglets de navigation privée</string>
+
+    <!-- [Tab switcher] Tells the user that tapping on the + button will create a new tab for them. -->
+    <string name="tab_switcher_create_tab_hint">Appuyez sur + ci-dessous pour ouvrir un nouvel onglet</string>
+
+
+
+    <!-- [Incognito] Tells the user that they have entered incognito mode. -->
+    <string name="incognito_zero_query_title">Vous êtes en mode privé</string>
+
+    <!-- [Incognito] Describes how the browser will behave in incognito mode. -->
+    <string name="incognito_zero_query_body"><![CDATA[Neeva <b>n\'enregistre pas</b> la moindre de vos activités personnelles, telles que les recherches, les clics ou la navigation.\n\nEffectuez des recherches en toute discrétion ; les autres personnes qui utilisent cet appareil ne pourront pas connaître votre activité après la fermeture de vos onglets privés.]]></string>
+
+    <!-- [Incognito] Disclaimer text indicating the limits of incognito mode. -->
+    <string name="incognito_zero_query_footer"><![CDATA[Il se peut que votre activité <b>soit encore visible</b> pour votre fournisseur d\'accès internet, votre école ou votre employeur.]]></string>
+
+
+
+    <!-- [Dialog] Suggests that the user switch their default browser to Neeva. -->
+    <string name="switch_default_browser_title">Faites de Neeva votre navigateur par défaut</string>
+
+    <!-- [Dialog] Confirmation button for switching your default browser. -->
+    <string name="switch_default_browser_title_confirm_button">Changer de navigateur par défaut</string>
+
+    <!-- [Dialog] Tells the user why they should switch their default browser to Neeva. -->
+    <string name="switch_default_browser_promo">Bloquez les traqueurs invasifs sur le Web.\nOuvrez des liens en toute sécurité grâce à une navigation ultra rapide et totalement sereine.</string>
+
+    <!-- [Dialog] Heading for steps to follow in order to switch their default browser. -->
+    <string name="switch_default_browser_follow_3_steps">Suivez ces 3 étapes faciles :</string>
+
+    <!-- [Dialog] Detailed steps to follow in order to switch their default browser. -->
+    <string name="switch_default_browser_instructions">1. Appuyez ci-dessous pour accéder aux paramètres des applications par défaut\n\n2. Appuyez sur « Appli de navigateur »\n\n3. Sélectionnez Neeva</string>
+
+    <!-- [Dialog][Button] Sends the user to the Android device's settings to set their default browser. -->
+    <string name="go_to_settings">Accédez aux Paramètres</string>
+
+
+
+    <!-- [Spaces] Indicates how many people have viewed the given Space. -->
+    <plurals name="space_detail_views">
+        <item quantity="one">%1$d vue</item>
+        <item quantity="many">%1$d vues</item>
+        <item quantity="other">%1$d vues</item>
+    </plurals>
+
+    <!-- [Spaces] Indicates how many people are following the given Space. -->
+    <plurals name="space_detail_followers">
+        <item quantity="one">%1$d abonné</item>
+        <item quantity="many">%1$d abonnés</item>
+        <item quantity="other">%1$d abonnés</item>
+    </plurals>
+</resources>
