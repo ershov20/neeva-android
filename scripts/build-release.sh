@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -z ${NEEVA_REPO} ]; then
+  echo 'Set $NEEVA_REPO to point to your neeva main repository'
+  exit 1
+fi
+
 export CREATE_BRANCH=false
 export SKIP_PROMPT=true
 export BROWSER_PLATFORM=android
@@ -54,6 +59,9 @@ if [ -n "$NEEVA_KEYSTORE_PATH" ]; then
     fi
     echo "Signing release with key0 from $NEEVA_KEYSTORE_PATH"
     jarsigner -keystore "$NEEVA_KEYSTORE_PATH" $storepass_arg build/release/neeva.aab key0
+
+    # open the build directory in Finder
+    open build/release
 else
     echo "Warning: NEEVA_KEYSTORE_PATH not set in the environment; neeva.aab unsigned."
 fi
