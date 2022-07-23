@@ -173,7 +173,11 @@ fun AutocompleteTextField(
                 ),
                 keyboardOptions = KeyboardOptions(
                     capitalization = KeyboardCapitalization.None,
-                    keyboardType = KeyboardType.Text,
+                    keyboardType = if (textFieldValue.text.contains(' ')) {
+                        KeyboardType.Text
+                    } else {
+                        KeyboardType.Uri
+                    },
                     imeAction = ImeAction.Go,
                     autoCorrect = false
                 ),
