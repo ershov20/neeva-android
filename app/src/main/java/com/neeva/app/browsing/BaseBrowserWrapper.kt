@@ -628,8 +628,7 @@ abstract class BaseBrowserWrapper internal constructor(
             activityCallbackProvider = activityCallbackProvider,
             registerNewTab = this::registerNewTab,
             fullscreenCallback = fullscreenCallback,
-            trackingDataFlow = cookieCutterModel.trackingDataFlow,
-            cookieNoticeBlockedFlow = cookieCutterModel.cookieNoticeBlockedFlow,
+            cookieCutterModel = cookieCutterModel,
             domainProvider = domainProvider,
             scriptInjectionManager = scriptInjectionManager,
         )

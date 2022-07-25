@@ -35,6 +35,7 @@ enum class AppNavDestination(
     ),
     LOCAL_FEATURE_FLAGS_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     COOKIE_CUTTER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
+    COOKIE_PREFERENCES(parent = COOKIE_CUTTER_SETTINGS, slidesOutToward = SlideDirection.End),
     LICENSES(parent = SETTINGS, slidesOutToward = SlideDirection.End);
 
     val route: String = this.name

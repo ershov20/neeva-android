@@ -18,7 +18,8 @@ import com.neeva.app.firstrun.signInFlowNavGraph
 import com.neeva.app.history.HistoryContainer
 import com.neeva.app.settings.LicensesPane
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
-import com.neeva.app.settings.clearBrowsing.CookieCutterPane
+import com.neeva.app.settings.cookiecutter.CookieCutterPane
+import com.neeva.app.settings.cookiecutter.CookiePreferencesPane
 import com.neeva.app.settings.featureFlags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.settings.profile.ProfileSettingsPane
@@ -81,7 +82,14 @@ fun AppNav(
         }
 
         composable(AppNavDestination.COOKIE_CUTTER_SETTINGS.route) {
-            CookieCutterPane(settingsController = settingsControllerImpl)
+            CookieCutterPane(
+                settingsController = settingsControllerImpl,
+                neevaConstants = neevaConstants
+            )
+        }
+
+        composable(AppNavDestination.COOKIE_PREFERENCES.route) {
+            CookiePreferencesPane(settingsController = settingsControllerImpl)
         }
 
         composable(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS.route) {

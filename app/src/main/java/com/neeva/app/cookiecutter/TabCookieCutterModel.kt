@@ -1,6 +1,7 @@
 package com.neeva.app.cookiecutter
 
 import android.net.Uri
+import androidx.compose.runtime.State
 import com.neeva.app.browsing.getActiveTabId
 import com.neeva.app.cookiecutter.TrackingEntity.Companion.trackingEntityForHost
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -51,12 +52,12 @@ class TabCookieCutterModel(
     private val browserFlow: StateFlow<Browser?>,
     private val tabId: String,
     private val trackingDataFlow: MutableStateFlow<TrackingData?>,
+    private val enableCookieNoticeSuppression: State<Boolean>,
     private val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
     val domainProvider: DomainProvider
 ) {
-    // set this to true to enable cookie cutter
     val shouldInjectCookieEngine
-        get() = false
+        get() = enableCookieNoticeSuppression.value
 
     /** When true, the tab will be reloaded when it becomes active tab. */
     var reloadUponForeground = false

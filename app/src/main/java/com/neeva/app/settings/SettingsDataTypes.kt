@@ -36,13 +36,16 @@ data class SettingsRowData(
 
 enum class SettingsRowType {
     LINK,
+    TEXT,
     TOGGLE,
     NAVIGATION,
     PROFILE,
     BUTTON,
     CLEAR_DATA_BUTTON,
     SUBSCRIPTION,
-    COOKIE_CUTTER_BLOCKING_STRENGTH
+    COOKIE_CUTTER_BLOCKING_STRENGTH,
+    COOKIE_CUTTER_NOTICE_SELECTION,
+    COOKIE_PREFERENCE_SELECTION,
 }
 
 enum class SettingsToggle(
@@ -120,6 +123,11 @@ enum class SettingsToggle(
     ),
     DEBUG_NEEVASCOPE(
         primaryLabelId = R.string.settings_debug_neevascope,
+        defaultValue = false,
+        isAdvancedSetting = true
+    ),
+    DEBUG_COOKIE_NOTICES(
+        primaryLabelId = R.string.settings_debug_cookie_notices,
         defaultValue = false,
         isAdvancedSetting = true
     );

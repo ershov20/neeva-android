@@ -5,17 +5,16 @@ import android.net.Uri
 import android.util.Log
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.cookiecutter.CookieCutterCallbacks
+import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.cookiecutter.CookieCuttingPreferences
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.cookiecutter.TabCookieCutterModel
-import com.neeva.app.cookiecutter.TrackingData
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
@@ -46,16 +45,16 @@ class TabCallbacks(
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
-    trackingDataFlow: MutableStateFlow<TrackingData?>,
-    cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
+    private val cookieCutterModel: CookieCutterModel,
     domainProvider: DomainProvider,
     private val scriptInjectionManager: ScriptInjectionManager,
 ) {
     val tabCookieCutterModel = TabCookieCutterModel(
         browserFlow = browserFlow,
         tabId = tab.guid,
-        trackingDataFlow = trackingDataFlow,
-        cookieNoticeBlockedFlow = cookieNoticeBlockedFlow,
+        trackingDataFlow = cookieCutterModel.trackingDataFlow,
+        enableCookieNoticeSuppression = cookieCutterModel.enableCookieNoticeSuppression,
+        cookieNoticeBlockedFlow = cookieCutterModel.cookieNoticeBlockedFlow,
         domainProvider = domainProvider
     )
 
@@ -107,7 +106,9 @@ class TabCallbacks(
         var visitToCommit: Visit? = null
 
         override fun onNavigationStarted(navigation: Navigation) {
+            // reset cookie cutter
             contentFilterCallback.onContentFilterStatsUpdated()
+            tabCookieCutterModel.cookieNoticeBlocked = false
 
             tabList.updateIsCrashed(tab.guid, isCrashed = false)
 
@@ -264,8 +265,9 @@ class TabCallbacks(
 
     private val cookieCutterCallbacks = object : CookieCutterCallbacks() {
         override fun onGetPreferences(): CookieCuttingPreferences {
-            // TODO: actually read/write cookie cutting preferences.
-            return CookieCuttingPreferences(false, false, false)
+            return CookieCuttingPreferences.fromSet(
+                cookieCutterModel.cookieCuttingPreferences.value
+            )
         }
 
         override fun onNoticeHandled() {

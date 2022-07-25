@@ -28,9 +28,11 @@ object TestNeevaConstantsModule {
         appHost = "127.0.0.1:8000",
         appURL = "http://127.0.0.1:8000/",
         cookieHost = "neeva.com",
-        cookieURL = "https://neeva.com"
+        cookieURL = "https://neeva.com",
+        appHelpCenterURL = "http://127.0.0.1:8000/help.html"
     ) {
-        override val appHelpCenterURL = "http://127.0.0.1:8000/help.html"
+        // no local equivalent for cookie cutter url, but this should suffice for testing
+        override val cookieCutterLearnMoreUrl = "http://127.0.0.1:8000/help.html"
     }
 
     @Provides

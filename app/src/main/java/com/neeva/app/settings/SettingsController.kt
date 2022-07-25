@@ -16,6 +16,7 @@ import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 import java.util.Date
+import java.util.EnumSet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -55,6 +56,10 @@ interface SettingsController {
     //region Cookie Cutter Data
     fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength
     fun setCookieCutterStrength(strength: CookieCutterModel.BlockingStrength)
+    fun getCookieNoticeSelection(): CookieCutterModel.CookieNoticeSelection
+    fun setCookieNoticeSelection(selection: CookieCutterModel.CookieNoticeSelection)
+    fun getCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies>
+    fun setCookieNoticePreferences(preferences: Set<CookieCutterModel.CookieNoticeCookies>)
     //endregion
 
     //region Set Default Android Browser
@@ -216,6 +221,48 @@ class SettingsControllerImpl(
         onTrackingProtectionUpdate()
     }
 
+    override fun getCookieNoticeSelection(): CookieCutterModel.CookieNoticeSelection {
+        return if (getCookieNoticePreferences().isEmpty())
+            CookieCutterModel.CookieNoticeSelection.DECLINE_COOKIES
+        else CookieCutterModel.CookieNoticeSelection.ACCEPT_COOKIES
+    }
+
+    override fun setCookieNoticeSelection(selection: CookieCutterModel.CookieNoticeSelection) {
+        when (selection) {
+            CookieCutterModel.CookieNoticeSelection.ACCEPT_COOKIES -> {
+                // only set cookie notices this way if we are switching from DECLINE_COOKIES
+                // otherwise, keep the user's existing preferences and just show the preferences
+                // pane
+                if (
+                    getCookieNoticeSelection() ===
+                    CookieCutterModel.CookieNoticeSelection.DECLINE_COOKIES
+                ) {
+                    setCookieNoticePreferences(
+                        EnumSet.allOf(CookieCutterModel.CookieNoticeCookies::class.java)
+                    )
+                }
+
+                // prompt for more settings
+                appNavModel.showCookiePreferences()
+            }
+            CookieCutterModel.CookieNoticeSelection.DECLINE_COOKIES -> {
+                setCookieNoticePreferences(
+                    EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
+                )
+            }
+        }
+    }
+
+    override fun getCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies> {
+        return settingsDataModel.getCookieNoticePreferences()
+    }
+
+    override fun setCookieNoticePreferences(
+        preferences: Set<CookieCutterModel.CookieNoticeCookies>
+    ) {
+        settingsDataModel.setCookieNoticePreferences(preferences)
+    }
+
     private fun toggleIsAdvancedSettingsAllowed() {
         settingsDataModel.toggleIsAdvancedSettingsAllowed()
     }
@@ -330,6 +377,20 @@ val mockSettingsControllerImpl by lazy {
 
         override fun setCookieCutterStrength(
             strength: CookieCutterModel.BlockingStrength
+        ) {}
+
+        override fun getCookieNoticeSelection(): CookieCutterModel.CookieNoticeSelection {
+            return CookieCutterModel.CookieNoticeSelection.DECLINE_COOKIES
+        }
+
+        override fun setCookieNoticeSelection(selection: CookieCutterModel.CookieNoticeSelection) {}
+
+        override fun getCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies> {
+            return EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
+        }
+
+        override fun setCookieNoticePreferences(
+            preferences: Set<CookieCutterModel.CookieNoticeCookies>
         ) {}
 
         override fun clearBrowsingData(

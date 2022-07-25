@@ -181,6 +181,7 @@ class AppNavModelImpl(
     override fun showCardGrid() = show(AppNavDestination.CARD_GRID)
     override fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     override fun showCookieCutterSettings() = show(AppNavDestination.COOKIE_CUTTER_SETTINGS)
+    override fun showCookiePreferences() = show(AppNavDestination.COOKIE_PREFERENCES)
     override fun showDefaultBrowserSettings(fromWelcomeScreen: Boolean) {
         if (fromWelcomeScreen) {
             clientLogger.logCounter(

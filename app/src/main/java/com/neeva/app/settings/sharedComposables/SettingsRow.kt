@@ -1,7 +1,11 @@
 package com.neeva.app.settings.sharedComposables
 
 import android.net.Uri
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
@@ -17,11 +21,14 @@ import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.profile.ProfileRowContainer
 import com.neeva.app.settings.profile.SubscriptionRow
 import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultBrowserRow
+import com.neeva.app.settings.sharedComposables.subcomponents.CheckBoxGroup
+import com.neeva.app.settings.sharedComposables.subcomponents.CheckBoxItem
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsNavigationRow
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.NeevaSwitch
+import com.neeva.app.ui.theme.Dimensions
 
 data class SettingsRowDataValues(
     val primaryLabel: String,
@@ -72,6 +79,18 @@ fun SettingsRow(
                     openUrl = { settingsController.openUrl(rowData.url, rowData.openUrlViaIntent) }
                 )
             }
+        }
+
+        SettingsRowType.TEXT -> {
+            Text(
+                rowDataValues.primaryLabel,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(
+                    vertical = Dimensions.PADDING_TINY,
+                    horizontal = Dimensions.PADDING_LARGE
+                )
+            )
         }
 
         SettingsRowType.TOGGLE -> {
@@ -147,6 +166,38 @@ fun SettingsRow(
                 onSelect = { index ->
                     val blockingStrength = CookieCutterModel.BlockingStrength.values()[index]
                     settingsController.setCookieCutterStrength(blockingStrength)
+                }
+            )
+        }
+
+        SettingsRowType.COOKIE_CUTTER_NOTICE_SELECTION -> {
+            RadioButtonGroup(
+                CookieCutterModel.CookieNoticeSelection.values().map {
+                    stringResource(it.title)
+                },
+                settingsController.getCookieNoticeSelection().ordinal,
+                onSelect = { index ->
+                    val selection = CookieCutterModel.CookieNoticeSelection.values()[index]
+                    settingsController.setCookieNoticeSelection(selection)
+                }
+            )
+        }
+
+        SettingsRowType.COOKIE_PREFERENCE_SELECTION -> {
+            CheckBoxGroup(
+                checkBoxOptions = CookieCutterModel.CookieNoticeCookies.values().map {
+                    CheckBoxItem(it.title, it.description)
+                },
+                selectedOptionsIndex = settingsController.getCookieNoticePreferences()
+                    .map { it.ordinal }.toSet(),
+                onCheckedChange = { index, checked ->
+                    val newSet = settingsController.getCookieNoticePreferences().toMutableSet()
+                    if (checked) {
+                        newSet.add(CookieCutterModel.CookieNoticeCookies.values()[index])
+                    } else {
+                        newSet.remove(CookieCutterModel.CookieNoticeCookies.values()[index])
+                    }
+                    settingsController.setCookieNoticePreferences(newSet)
                 }
             )
         }

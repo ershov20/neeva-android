@@ -1,5 +1,6 @@
 package com.neeva.app.cookiecutter
 
+import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.BaseTest
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,7 @@ class TabCookieCutterModelTest : BaseTest() {
             tabId = "tab guid 1",
             trackingDataFlow = MutableStateFlow(null),
             cookieNoticeBlockedFlow = cookieNoticeBlockedFlow,
+            enableCookieNoticeSuppression = mutableStateOf(true),
             domainProvider = domainProviderImpl
         )
     }

@@ -26,6 +26,7 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
+import java.util.EnumSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -169,6 +170,10 @@ class BaseBrowserWrapperTest : BaseTest() {
             on { trackingDataFlow } doReturn MutableStateFlow(null)
             on { enableTrackingProtection } doReturn mutableStateOf(true)
             on { cookieNoticeBlockedFlow } doReturn MutableStateFlow(false)
+            on { cookieCuttingPreferences } doReturn mutableStateOf(
+                EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
+            )
+            on { enableCookieNoticeSuppression } doReturn mutableStateOf(true)
         }
 
         scriptInjectionManager = mock()

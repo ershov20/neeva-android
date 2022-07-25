@@ -2,6 +2,7 @@ package com.neeva.app.cookiecutter
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.Dispatchers
 import com.neeva.app.R
@@ -19,6 +20,8 @@ interface CookieCutterModel {
     val trackingDataFlow: MutableStateFlow<TrackingData?>
     val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
     val enableTrackingProtection: MutableState<Boolean>
+    val enableCookieNoticeSuppression: MutableState<Boolean>
+    val cookieCuttingPreferences: State<Set<CookieNoticeCookies>>
 
     fun setUpTrackingProtection(manager: ContentFilterManager)
     fun updateTrackingProtectionConfiguration()
@@ -49,8 +52,38 @@ interface CookieCutterModel {
         // )
     }
 
+    enum class CookieNoticeSelection(
+        @StringRes val title: Int
+    ) {
+        DECLINE_COOKIES(
+            R.string.cookie_notice_decline_title
+        ),
+        ACCEPT_COOKIES(
+            R.string.cookie_notice_accept_title
+        )
+    }
+
+    enum class CookieNoticeCookies(
+        @StringRes val title: Int,
+        @StringRes val description: Int
+    ) {
+        MARKETING(
+            R.string.cookie_marketing_title,
+            R.string.cookie_marketing_description
+        ),
+        ANALYTICS(
+            R.string.cookie_analytics_title,
+            R.string.cookie_analytics_description
+        ),
+        SOCIAL(
+            R.string.cookie_social_title,
+            R.string.cookie_social_description
+        )
+    }
+
     companion object {
         const val BLOCKING_STRENGTH_SHARED_PREF_KEY = "BLOCKING_STRENGTH"
+        const val COOKIE_NOTICE_PREFERENCES_SHARED_PREF_KEY = "COOKIE_NOTICE_PREFERENCES"
     }
 }
 
@@ -66,6 +99,9 @@ class CookieCutterModelImpl(
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection = settingsDataModel
         .getToggleState(SettingsToggle.TRACKING_PROTECTION)
+    override val enableCookieNoticeSuppression = settingsDataModel
+        .getToggleState(SettingsToggle.DEBUG_COOKIE_NOTICES)
+    override val cookieCuttingPreferences = settingsDataModel.cookieNoticePreferences
 
     override fun setUpTrackingProtection(manager: ContentFilterManager) {
         contentFilterManager = manager
@@ -110,6 +146,9 @@ class PreviewCookieCutterModel : CookieCutterModel {
     override val trackingDataFlow: MutableStateFlow<TrackingData?> = MutableStateFlow(null)
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection: MutableState<Boolean> = mutableStateOf(true)
+    override val enableCookieNoticeSuppression: MutableState<Boolean> = mutableStateOf(true)
+    override val cookieCuttingPreferences =
+        mutableStateOf(emptySet<CookieCutterModel.CookieNoticeCookies>())
     override fun setUpTrackingProtection(manager: ContentFilterManager) {}
     override fun updateTrackingProtectionConfiguration() {}
 }

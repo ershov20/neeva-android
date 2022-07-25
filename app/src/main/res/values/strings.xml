@@ -36,6 +36,9 @@
     <!-- [General] Label for a text field that allows the user to enter a description for something they are creating. -->
     <string name="description">Description</string>
 
+    <!-- [General] Label for a link that takes the user to a page to learn more about a feature -->
+    <string name="learn_more">Learn more</string>
+
     <!-- [General][Dialog] Dismisses the current dialog being presented to the user. -->
     <string name="maybe_later">Maybe later</string>
 
@@ -514,7 +517,25 @@
     <string name="blocking_strength_standard_description">Tracker cookies only</string>
     <string name="blocking_strength_strict_description">Tracker request</string>
 
+    <!-- [Settings][Header] Groups together settings related to hiding cookie popups on websites -->
+    <string name="settings_cookie_notices">Cookie popups</string>
+    <string name="cookie_notice_accept_title">Accept non-essential cookies</string>
+    <string name="cookie_notice_decline_title">Decline non-essential cookies</string>
 
+    <!-- [Settings][Header] Groups together settings related to which non-essential cookies the user would like to enable on websites -->
+    <string name="settings_cookie_preferences">Non-essential cookies</string>
+    <string name="cookie_analytics_title">Analytics cookies</string>
+    <string name="cookie_analytics_description">Collects information about your visits and actions on a site</string>
+    <string name="cookie_marketing_title">Marketing cookies</string>
+    <string name="cookie_marketing_description">Tracks your online activity for advertising purposes</string>
+    <string name="cookie_social_title">Social cookies</string>
+    <string name="cookie_social_description">Personalization and social media features from third party providers</string>
+
+    <!-- [Settings] Disclaimer noting that if the app cannot individually choose whether to accept certain cookies, then all cookies will be accepted on that site -->
+    <string name="cookie_cutting_individual_disclaimer">If a site does not support selecting these options individually, then all non-essential cookies for the site will be accepted.</string>
+
+    <!-- [Settings] Disclaimer noting that essential cookies are mandatory and cannot be blocked by the app -->
+    <string name="cookie_cutting_essential_disclaimer">Essential cookies are used by sites to remember things like your login information and preferences. These cookies cannot be blocked by Cookie Cutter.</string>
 
     <!-- [Clear browsing data][Header] Groups options for clearing data on this device. -->
     <string name="clear_browsing_data_on_this_device">Data on this device</string>

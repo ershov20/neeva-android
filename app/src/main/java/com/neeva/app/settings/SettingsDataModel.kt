@@ -7,6 +7,7 @@ import com.neeva.app.settings.clearBrowsing.TimeClearingOption
 import com.neeva.app.settings.clearBrowsing.TimeClearingOptionsConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import java.util.EnumSet
 
 /**
  * A data model for getting any Settings-related state ([SettingsToggle] or [TimeClearingOption]).
@@ -31,6 +32,8 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     private val selectedTimeClearingOptionIndex = mutableStateOf(
         getSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, 0)
     )
+
+    val cookieNoticePreferences = mutableStateOf(loadCookieNoticePreferences())
 
     init {
         SettingsToggle.values().forEach {
@@ -69,6 +72,41 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     fun setCookieCutterStrength(strength: CookieCutterModel.BlockingStrength) {
         setSharedPrefValue(CookieCutterModel.BLOCKING_STRENGTH_SHARED_PREF_KEY, strength.name)
         cookieCutterMode.value = strength
+    }
+
+    fun getCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies> {
+        return cookieNoticePreferences.value
+    }
+
+    private fun loadCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies> {
+        // first get the serialized value
+        val serialized = getSharedPrefValue(
+            CookieCutterModel.COOKIE_NOTICE_PREFERENCES_SHARED_PREF_KEY,
+            ""
+        )
+
+        // then deserialize and convert it to an enumset
+        val list = serialized.split(";")
+            .filter { it.isNotEmpty() }
+            .map {
+                CookieCutterModel.CookieNoticeCookies.values()[it.toInt()]
+            }
+
+        // copyOf throws if called with an empty list
+        return if (list.isEmpty()) {
+            EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
+        } else {
+            EnumSet.copyOf(list)
+        }
+    }
+
+    fun setCookieNoticePreferences(selection: Set<CookieCutterModel.CookieNoticeCookies>) {
+        cookieNoticePreferences.value = selection
+
+        // serialize the selected cookies into a single value
+        val serialized = selection.joinToString(";") { it.ordinal.toString() }
+
+        setSharedPrefValue(CookieCutterModel.COOKIE_NOTICE_PREFERENCES_SHARED_PREF_KEY, serialized)
     }
 
     fun getTimeClearingOptionIndex(): MutableState<Int> {

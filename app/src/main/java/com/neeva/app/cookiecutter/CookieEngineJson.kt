@@ -10,4 +10,14 @@ data class CookieCuttingPreferences(
     val analytics: Boolean,
     val marketing: Boolean,
     val social: Boolean
-)
+) {
+    companion object {
+        fun fromSet(prefs: Set<CookieCutterModel.CookieNoticeCookies>): CookieCuttingPreferences {
+            return CookieCuttingPreferences(
+                prefs.contains(CookieCutterModel.CookieNoticeCookies.ANALYTICS),
+                prefs.contains(CookieCutterModel.CookieNoticeCookies.MARKETING),
+                prefs.contains(CookieCutterModel.CookieNoticeCookies.SOCIAL)
+            )
+        }
+    }
+}
