@@ -183,6 +183,7 @@ class TabCallbacks(
         private fun commitVisit(navigation: Navigation) {
             // Try to avoid recording visits to history when we are revisiting the same page.
             val shouldRecordVisit = when {
+                navigation.uri.scheme == "about" -> false
                 visitToCommit == null -> false
                 isIncognito -> false
                 navigation.isSameDocument -> false
@@ -206,6 +207,18 @@ class TabCallbacks(
                     }
                 }
                 visitToCommit = null
+            }
+        }
+    }
+
+    /** Prunes recorded SAYT queries associated with navigation entries that no longer exist. */
+    private val searchNavigationCallback = object : NavigationCallback() {
+        override fun onNavigationCompleted(navigation: Navigation) = pruneQueryList()
+        override fun onNavigationFailed(navigation: Navigation) = pruneQueryList()
+
+        private fun pruneQueryList() {
+            tab.takeUnless { it.isDestroyed }?.let {
+                tabList.pruneQueries(tab.guid, tab.navigationController)
             }
         }
     }
@@ -289,6 +302,7 @@ class TabCallbacks(
         tab.setErrorPageCallback(ErrorCallbackImpl(activityCallbackProvider))
         tab.setNewTabCallback(newTabCallback)
         tab.navigationController.registerNavigationCallback(navigationCallback)
+        tab.navigationController.registerNavigationCallback(searchNavigationCallback)
         tab.registerTabCallback(tabCallback)
         tab.setContentFilterCallback(contentFilterCallback)
         scriptInjectionManager.initializeMessagePassing(tab, cookieCutterCallbacks)
@@ -304,6 +318,7 @@ class TabCallbacks(
         tab.setErrorPageCallback(null)
         tab.setNewTabCallback(null)
         tab.navigationController.unregisterNavigationCallback(navigationCallback)
+        tab.navigationController.unregisterNavigationCallback(searchNavigationCallback)
         tab.setContentFilterCallback(null)
         tab.unregisterTabCallback(tabCallback)
         scriptInjectionManager.unregisterMessagePassing(tab)

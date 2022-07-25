@@ -124,11 +124,6 @@ class ActiveTabModelImpl(
         activeTab?.navigationController?.reload()
     }
 
-    /** Don't call this directly.  Instead, use [BrowserWrapper.loadUrl]. */
-    internal fun loadUrlInActiveTab(uri: Uri, stayInApp: Boolean = true) {
-        activeTab?.navigate(uri, stayInApp)
-    }
-
     private fun updateUrl(uri: Uri) {
         val isNeevaHomepage = uri.toString() == neevaConstants.appURL
         val isNeevaSearch = uri.toString().startsWith(neevaConstants.appSearchURL)
@@ -209,20 +204,31 @@ class ActiveTabModelImpl(
         }
     }
 
-    fun goBack() {
-        if (activeTab?.navigationController?.canGoBack() == true) {
-            activeTab?.navigationController?.goBack()
-            updateNavigationInfo()
-        } else if (tabList.isParentTabInList(activeTab?.guid)) {
-            activeTab?.dispatchBeforeUnloadAndClose()
-            updateNavigationInfo()
+    fun goBack(
+        onNavigatedBack: (uri: Uri) -> Unit,
+        onCloseTab: (tabGuid: String) -> Unit
+    ) {
+        if (!navigationInfoFlow.value.canGoBackward) return
+
+        activeTab?.let { activeTab ->
+            if (activeTab.navigationController.canGoBack()) {
+                val currentUri = activeTab.currentDisplayUrl ?: Uri.EMPTY
+                activeTab.navigationController.goBack()
+                onNavigatedBack(currentUri)
+            } else if (tabList.isParentTabInList(activeTab.guid)) {
+                onCloseTab(activeTab.guid)
+            }
         }
     }
 
     fun goForward() {
-        if (activeTab?.navigationController?.canGoForward() == true) {
-            activeTab?.navigationController?.goForward()
-            updateNavigationInfo()
+        // We explicitly don't re-show SAYT if the user is navigating forward because we hide the
+        // forward button when the suggestions are displayed.  That'd make it impossible to actually
+        // navigate forward past SAYT to the website they previously visited.
+        activeTab?.let { activeTab ->
+            if (activeTab.navigationController.canGoForward()) {
+                activeTab.navigationController.goForward()
+            }
         }
     }
 

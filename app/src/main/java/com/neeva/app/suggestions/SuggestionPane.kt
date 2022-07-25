@@ -55,7 +55,12 @@ fun SuggestionPane(modifier: Modifier = Modifier, isFirstRun: Boolean) {
                     queryNavSuggestions = queryNavSuggestions,
                     historySuggestions = historySuggestions,
                     faviconCache = faviconCache,
-                    onOpenUrl = browserWrapper::loadUrl,
+                    onOpenUrl = {
+                        browserWrapper.loadUrl(
+                            uri = it,
+                            searchQuery = urlBarModel.stateFlow.value.userTypedInput
+                        )
+                    },
                     onEditUrl = {
                         urlBarModel.replaceLocationBarText(it)
                     },

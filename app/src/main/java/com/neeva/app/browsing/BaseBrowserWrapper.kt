@@ -53,6 +53,9 @@ import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserEmbeddabilityMode
 import org.chromium.weblayer.BrowserRestoreCallback
+import org.chromium.weblayer.NavigateParams
+import org.chromium.weblayer.Navigation
+import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NewTabType
 import org.chromium.weblayer.OpenUrlCallback
 import org.chromium.weblayer.PageInfoDisplayOptions
@@ -491,7 +494,8 @@ abstract class BaseBrowserWrapper internal constructor(
                     uri = Uri.parse(neevaConstants.appURL),
                     parentTabId = null,
                     isViaIntent = false,
-                    stayInApp = true
+                    stayInApp = true,
+                    searchQuery = null
                 )
             },
             afterRestoreCompleted = { isBrowserReady.complete(true) }
@@ -671,7 +675,8 @@ abstract class BaseBrowserWrapper internal constructor(
         uri: Uri,
         parentTabId: String?,
         isViaIntent: Boolean,
-        stayInApp: Boolean
+        stayInApp: Boolean,
+        searchQuery: String?
     ) {
         browser?.let {
             val tabOpenType = when {
@@ -681,7 +686,7 @@ abstract class BaseBrowserWrapper internal constructor(
             }
 
             val newTab = it.createTab()
-            newTab.navigate(uri, stayInApp)
+            navigateTab(newTab, uri, stayInApp, searchQuery)
 
             // onTabAdded should have been called by this point, allowing us to store the extra
             // information about the Tab.
@@ -731,7 +736,15 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     override fun closeTab(id: String) {
-        getTab(id)?.dispatchBeforeUnloadAndClose()
+        val tabIndex = tabList.indexOf(id)
+        val tabInfo = tabList.getTabInfo(id)
+
+        getTab(id)?.let {
+            it.dispatchBeforeUnloadAndClose()
+            if (getActiveTab()?.guid == it.guid) {
+                setNextActiveTab(tabInfo, tabIndex)
+            }
+        }
     }
 
     override fun closeAllTabs() {
@@ -812,11 +825,30 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     // region: Active tab operations
-    override fun goBack() = _activeTabModelImpl.goBack()
+    override fun goBack() {
+        _activeTabModelImpl.goBack(
+            onNavigatedBack = ::showSearchResultsAgainIfNecessary,
+            onCloseTab = ::closeTab
+        )
+    }
+
     override fun goForward() = _activeTabModelImpl.goForward()
     override fun reload() = _activeTabModelImpl.reload()
     override fun toggleViewDesktopSite() = _activeTabModelImpl.toggleViewDesktopSite()
     override fun resetOverscroll(action: Int) = _activeTabModelImpl.resetOverscroll(action)
+
+    /** If a navigation was originally triggered by a query, show the results again. */
+    private fun showSearchResultsAgainIfNecessary(uri: Uri) {
+        browserFlow.getActiveTab()?.let { tab ->
+            tabList.getTabInfo(tab.guid)?.searchQueryMap
+                ?.get(tab.navigationController.navigationListCurrentIndex + 1)
+                ?.takeIf { it.navigationEntryUri == uri }
+                ?.let { entry ->
+                    urlBarModel.showZeroQuery(false)
+                    urlBarModel.replaceLocationBarText(entry.searchQuery)
+                }
+        }
+    }
 
     /**
      * Start a load of the given [uri].
@@ -834,6 +866,7 @@ abstract class BaseBrowserWrapper internal constructor(
         isViaIntent: Boolean,
         parentTabId: String?,
         stayInApp: Boolean,
+        searchQuery: String?,
         onLoadStarted: () -> Unit
     ) = coroutineScope.launch {
         // If you try to load a URL in a new tab before restoration has completed, the Browser may
@@ -848,14 +881,21 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         if (inNewTab || getActiveTab() == null) {
+            // TODO(dan.alcantara): Save the searchQuery when createOrSwitchTab behavior is in.
             createTabWithUri(
                 uri = urlToLoad,
                 parentTabId = parentTabId,
                 isViaIntent = isViaIntent,
-                stayInApp = stayInApp
+                stayInApp = stayInApp,
+                searchQuery = null
             )
         } else {
-            _activeTabModelImpl.loadUrlInActiveTab(urlToLoad, stayInApp)
+            navigateTab(
+                tab = _activeTabModelImpl.activeTab,
+                uri = urlToLoad,
+                stayInApp = stayInApp,
+                searchQuery = searchQuery
+            )
         }
 
         urlBarModel.clearFocus()
@@ -922,6 +962,61 @@ abstract class BaseBrowserWrapper internal constructor(
 
     private fun getActiveTab(): Tab? = browserFlow.getActiveTab()
     private fun getTab(id: String?): Tab? = browserFlow.getTab(id)
+
+    /**
+     * Navigates the Tab to the given URL.
+     *
+     * If [searchQuery] is non-null, we associate it with the navigation to allow us to
+     * re-show it when the user tries to navigate backward or forward to a SAYT result.
+     */
+    private fun navigateTab(
+        tab: Tab?,
+        uri: Uri,
+        stayInApp: Boolean,
+        searchQuery: String? = null
+    ) {
+        if (tab == null || tab.isDestroyed) return
+
+        val navigateParams = NavigateParams.Builder()
+            .apply {
+                // Disable intent processing for websites that would send the browser to other apps.
+                if (stayInApp && (uri.scheme == "https" || uri.scheme == "http")) {
+                    disableIntentProcessing()
+                }
+            }
+            .build()
+
+        if (searchQuery != null) {
+            val queryCallback = object : NavigationCallback() {
+                override fun onNavigationCompleted(navigation: Navigation) {
+                    if (tab.isDestroyed) return
+                    unregisterCallback(navigation.uri)
+                }
+
+                override fun onNavigationFailed(navigation: Navigation) {
+                    if (tab.isDestroyed) return
+                    unregisterCallback(navigation.uri)
+                }
+
+                private fun unregisterCallback(uri: Uri) {
+                    tabList.updateQueryNavigation(
+                        tabId = tab.guid,
+                        navigationEntryIndex = tab.navigationController.navigationListCurrentIndex,
+                        navigationEntryUri = uri,
+                        searchQuery = searchQuery
+                    )
+
+                    tab.takeUnless { it.isDestroyed }
+                        ?.navigationController
+                        ?.unregisterNavigationCallback(this)
+                }
+            }
+
+            tab.navigationController.registerNavigationCallback(queryCallback)
+        }
+
+        tab.navigationController.navigate(uri, navigateParams)
+    }
 
     companion object {
         private const val TAG = "BrowserWrapper"

@@ -48,5 +48,6 @@ interface ActiveTabModel {
     /** Tracks what should be displayed to the user in the URL bar. */
     val displayedInfoFlow: StateFlow<DisplayedInfo>
 
+    /** Tracks how many web tracker scripts were blocked on the current page. */
     val trackersFlow: StateFlow<Int>
 }

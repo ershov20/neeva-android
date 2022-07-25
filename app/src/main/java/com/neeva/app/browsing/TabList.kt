@@ -3,6 +3,7 @@ package com.neeva.app.browsing
 import android.net.Uri
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
 
 /**
@@ -54,6 +55,45 @@ class TabList {
         val childInfo = tabInfoMap.remove(tabId)
         updateFlow()
         return childInfo
+    }
+
+    /** Records the query that triggered a navigation via Search As You Type. */
+    fun updateQueryNavigation(
+        tabId: String,
+        navigationEntryIndex: Int,
+        navigationEntryUri: Uri,
+        searchQuery: String?
+    ) {
+        tabInfoMap[tabId]?.let { existingInfo ->
+            val newQueryMap = existingInfo.searchQueryMap.toMutableMap()
+            if (searchQuery != null) {
+                newQueryMap[navigationEntryIndex] = SearchNavigationInfo(
+                    navigationEntryIndex = navigationEntryIndex,
+                    navigationEntryUri = navigationEntryUri,
+                    searchQuery = searchQuery
+                )
+            } else {
+                newQueryMap.remove(navigationEntryIndex)
+            }
+
+            tabInfoMap[tabId] = existingInfo.copy(searchQueryMap = newQueryMap)
+            updateFlow()
+        }
+    }
+
+    /** Removes any recorded search queries that correspond to Navigations that no longer exist. */
+    fun pruneQueries(tabId: String, navigationController: NavigationController) {
+        tabInfoMap[tabId]?.let { existingInfo ->
+            val navigationListSize = navigationController.navigationListSize
+            val newQueryMap = existingInfo.searchQueryMap
+                .filter { it.key < navigationListSize }
+                .filter {
+                    val expectedUri = navigationController.getNavigationEntryDisplayUri(it.key)
+                    it.value.navigationEntryUri == expectedUri
+                }
+
+            tabInfoMap[tabId] = existingInfo.copy(searchQueryMap = newQueryMap)
+        }
     }
 
     fun updatedSelectedTab(selectedTabId: String?) {

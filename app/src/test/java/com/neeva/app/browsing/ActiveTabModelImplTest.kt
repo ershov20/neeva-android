@@ -10,7 +10,6 @@ import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.storage.TabScreenshotManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
@@ -21,10 +20,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -46,6 +43,8 @@ class ActiveTabModelImplTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
+    @Mock private lateinit var onCloseTab: (String) -> Unit
+    @Mock private lateinit var onShowSearchResults: (Uri) -> Unit
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
 
     private lateinit var model: ActiveTabModelImpl
@@ -54,7 +53,7 @@ class ActiveTabModelImplTest : BaseTest() {
     private lateinit var neevaHomepageTab: MockTabHarness
     private lateinit var neevaSearchTab: MockTabHarness
     private lateinit var neevaSpacesTab: MockTabHarness
-    lateinit var tabList: TabList
+    private lateinit var tabList: TabList
 
     @Before
     override fun setUp() {
@@ -311,15 +310,15 @@ class ActiveTabModelImplTest : BaseTest() {
         )
         model.onActiveTabChanged(harness.tab)
 
-        model.goBack()
+        model.goBack(onNavigatedBack = onShowSearchResults, onCloseTab = onCloseTab)
         verify(harness.navigationController, never()).goBack()
-        verify(harness.tab, never()).dispatchBeforeUnloadAndClose()
+        verify(onCloseTab, never()).invoke(any())
 
         // Say that the user navigated somewhere and we can now go backward.
         harness.canGoBack = true
         harness.navigationCallbacks.first().onNavigationCompleted(mock())
 
-        model.goBack()
+        model.goBack(onShowSearchResults, onCloseTab)
         verify(harness.navigationController, times(1)).goBack()
     }
 
@@ -346,12 +345,12 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
-        model.goBack()
+        model.goBack(onNavigatedBack = onShowSearchResults, onCloseTab = onCloseTab)
 
         // Even though there are no navigations on this tab, because it is a child we should have
         // closed it.
         verify(childTabHarness.navigationController, never()).goBack()
-        verify(childTabHarness.tab).dispatchBeforeUnloadAndClose()
+        verify(onCloseTab).invoke(any())
     }
 
     @Test
@@ -384,11 +383,11 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
 
         // Hit "back" on the child tab.
-        model.goBack()
+        model.goBack(onNavigatedBack = onShowSearchResults, onCloseTab = onCloseTab)
 
         // Nothing should happen.
         verify(childTabHarness.navigationController, never()).goBack()
-        verify(childTabHarness.tab, never()).dispatchBeforeUnloadAndClose()
+        verify(onCloseTab, never()).invoke(any())
     }
 
     @Test
@@ -411,25 +410,6 @@ class ActiveTabModelImplTest : BaseTest() {
 
         model.goForward()
         verify(harness.navigationController, times(1)).goForward()
-    }
-
-    @Test
-    fun loadUrl() {
-        // Set the tab.
-        val harness = MockTabHarness(
-            currentTitle = "Title",
-            currentUri = Uri.parse("https://www.site.com/"),
-            canGoBack = false,
-            canGoForward = false
-        )
-        model.onActiveTabChanged(harness.tab)
-
-        val uri = Uri.parse("https://www.reddit.com")
-        model.loadUrlInActiveTab(uri)
-
-        val navigateParamsCaptor = argumentCaptor<NavigateParams>()
-        verify(harness.navigationController).navigate(eq(uri), navigateParamsCaptor.capture())
-        expectThat(navigateParamsCaptor.lastValue.isIntentProcessingDisabled).isTrue()
     }
 
     private var nextMockTabId: Int = 0

@@ -139,6 +139,7 @@ interface BrowserWrapper {
         isViaIntent: Boolean = false,
         parentTabId: String? = null,
         stayInApp: Boolean = true,
+        searchQuery: String? = null,
         onLoadStarted: () -> Unit = {}
     ): Job
 

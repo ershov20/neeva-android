@@ -2,6 +2,7 @@ package com.neeva.app.browsing
 
 import android.net.Uri
 import com.neeva.app.BaseTest
+import com.neeva.app.createMockNavigationController
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
@@ -236,6 +237,89 @@ class TabListTest : BaseTest() {
 
         tabList.remove(firstTab.guid)
         expectThat(tabList.isParentTabInList(secondTab.guid)).isFalse()
+    }
+
+    @Test
+    fun updateQueryNavigation() {
+        tabList.add(firstTab)
+        tabList.add(secondTab)
+
+        tabList.updateQueryNavigation(
+            tabId = firstTab.guid,
+            navigationEntryIndex = 5,
+            navigationEntryUri = Uri.parse("http://www.query1.com"),
+            searchQuery = "query 1"
+        )
+
+        tabList.updateQueryNavigation(
+            tabId = firstTab.guid,
+            navigationEntryIndex = 8,
+            navigationEntryUri = Uri.parse("http://www.query2.com"),
+            searchQuery = "query 2"
+        )
+
+        // Confirm that multiple queries are recorded.
+        tabList.getTabInfo(firstTab.guid)!!.searchQueryMap.apply {
+            expectThat(this).hasSize(2)
+            expectThat(this[1]).isNull()
+
+            expectThat(this[5]).isEqualTo(
+                SearchNavigationInfo(
+                    navigationEntryIndex = 5,
+                    navigationEntryUri = Uri.parse("http://www.query1.com"),
+                    searchQuery = "query 1"
+                )
+            )
+
+            expectThat(this[8]).isEqualTo(
+                SearchNavigationInfo(
+                    navigationEntryIndex = 8,
+                    navigationEntryUri = Uri.parse("http://www.query2.com"),
+                    searchQuery = "query 2"
+                )
+            )
+        }
+
+        // Say that the navigation history is now missing the URI that triggered query 2.
+        val navigationController = createMockNavigationController()
+        navigationController.navigate(Uri.parse("https://0.com"))
+        navigationController.navigate(Uri.parse("https://1.com"))
+        navigationController.navigate(Uri.parse("https://2.com"))
+        navigationController.navigate(Uri.parse("https://3.com"))
+        navigationController.navigate(Uri.parse("https://4.com"))
+        navigationController.navigate(Uri.parse("http://www.query1.com"))
+        tabList.pruneQueries(firstTab.guid, navigationController)
+
+        // The second query should be wiped out.
+        tabList.getTabInfo(firstTab.guid)!!.searchQueryMap.apply {
+            expectThat(this).hasSize(1)
+            expectThat(this[1]).isNull()
+
+            expectThat(this[5]).isEqualTo(
+                SearchNavigationInfo(
+                    navigationEntryIndex = 5,
+                    navigationEntryUri = Uri.parse("http://www.query1.com"),
+                    searchQuery = "query 1"
+                )
+            )
+
+            expectThat(this[8]).isNull()
+        }
+
+        // Say that the navigation history now has a different URI than was recorded for the query.
+        val secondController = createMockNavigationController()
+        secondController.navigate(Uri.parse("https://0.com"))
+        secondController.navigate(Uri.parse("https://1.com"))
+        secondController.navigate(Uri.parse("https://2.com"))
+        secondController.navigate(Uri.parse("https://3.com"))
+        secondController.navigate(Uri.parse("https://4.com"))
+        secondController.navigate(Uri.parse("https://5.com"))
+        tabList.pruneQueries(firstTab.guid, secondController)
+
+        // The queries should all be gone.
+        tabList.getTabInfo(firstTab.guid)!!.searchQueryMap.apply {
+            expectThat(this).isEmpty()
+        }
     }
 
     @Test
