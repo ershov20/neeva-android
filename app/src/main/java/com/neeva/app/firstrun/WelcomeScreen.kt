@@ -21,21 +21,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
 import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
-import com.neeva.app.settings.SettingsController
-import com.neeva.app.settings.mockSettingsControllerImpl
+import com.neeva.app.ui.LandscapePreviews
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun WelcomeScreen(
-    settingsController: SettingsController,
+    onShowDefaultBrowserSettings: () -> Unit
 ) {
     val backgroundColor = if (LocalIsDarkTheme.current) {
         MaterialTheme.colorScheme.background
@@ -43,7 +42,10 @@ fun WelcomeScreen(
         ColorPalette.Brand.Offwhite
     }
 
-    Surface(color = backgroundColor) {
+    Surface(
+        color = backgroundColor,
+        modifier = Modifier.fillMaxSize()
+    ) {
         BoxWithConstraints {
             if (constraints.maxWidth > constraints.maxHeight) {
                 // Landscape
@@ -74,7 +76,7 @@ fun WelcomeScreen(
 
                         Spacer(modifier = Modifier.height(28.dp))
 
-                        WelcomeScreenGetStartedButton(settingsController)
+                        WelcomeScreenGetStartedButton(onShowDefaultBrowserSettings)
                     }
                 }
             } else {
@@ -104,7 +106,7 @@ fun WelcomeScreen(
 
                     Spacer(modifier = Modifier.height(28.dp))
 
-                    WelcomeScreenGetStartedButton(settingsController)
+                    WelcomeScreenGetStartedButton(onShowDefaultBrowserSettings)
                 }
             }
         }
@@ -112,36 +114,27 @@ fun WelcomeScreen(
 }
 
 @Composable
-fun WelcomeScreenGetStartedButton(
-    settingsController: SettingsController,
-) {
+fun WelcomeScreenGetStartedButton(onShowDefaultBrowserSettings: () -> Unit) {
     OnboardingButton(
         text = stringResource(id = R.string.get_started),
-        onClick = settingsController
-            .getOnClickMap(true)[R.string.settings_default_browser]!!
+        onClick = onShowDefaultBrowserSettings
     )
 }
 
-@Preview("1x scale", locale = "en")
-@Preview("2x font size", locale = "en", fontScale = 2.0f)
-@Preview("Pixel 2 landscape, 1x scale", widthDp = 731, heightDp = 390, locale = "en")
+@PortraitPreviews
+@LandscapePreviews
 @Composable
 fun WelcomeScreen_Light_Preview() {
     NeevaTheme {
-        WelcomeScreen(
-            mockSettingsControllerImpl,
-        )
+        WelcomeScreen {}
     }
 }
 
-@Preview("Dark 1x scale", locale = "en")
-@Preview("Dark 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("Pixel 2 landscape, 1x scale", widthDp = 731, heightDp = 390, locale = "en")
+@PortraitPreviews
+@LandscapePreviews
 @Composable
 fun WelcomeScreen_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        WelcomeScreen(
-            mockSettingsControllerImpl,
-        )
+        WelcomeScreen {}
     }
 }

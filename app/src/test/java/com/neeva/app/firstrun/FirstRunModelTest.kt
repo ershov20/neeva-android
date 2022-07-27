@@ -6,6 +6,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResult
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.tasks.Tasks
 import com.neeva.app.BaseTest
@@ -23,14 +24,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 class FirstRunModelTest : BaseTest() {
     @Rule
@@ -83,7 +83,8 @@ class FirstRunModelTest : BaseTest() {
         )
     }
 
-    @Test fun handleLoginActivityResult_onSuccessCalledWithValidResult() =
+    @Test
+    fun handleLoginActivityResult_onSuccessCalledWithValidResult() =
         runTest(coroutineScopeRule.scope.testScheduler) {
             // Mock a GoogleSignInAccount that will return valid results for success and set it.
             val intent = Intent()
@@ -102,7 +103,8 @@ class FirstRunModelTest : BaseTest() {
             expectThat(onSuccessCalled).isTrue()
         }
 
-    @Test fun handleLoginActivityResult_failedResultDoesntCallOnSuccess() =
+    @Test
+    fun handleLoginActivityResult_failedResultDoesntCallOnSuccess() =
         runTest(coroutineScopeRule.scope.testScheduler) {
             val activityResult = mock<ActivityResult> {
                 on { resultCode } doReturn Activity.RESULT_CANCELED

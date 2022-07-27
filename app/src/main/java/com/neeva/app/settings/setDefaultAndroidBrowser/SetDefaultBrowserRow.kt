@@ -27,10 +27,14 @@ fun SetDefaultBrowserRow(
     } else {
         SettingsNavigationRow(
             primaryLabel = stringResource(id = R.string.switch_default_browser_title),
-            onClick = if (setDefaultAndroidBrowserManager.isRoleManagerAvailable()) {
-                setDefaultAndroidBrowserManager::requestToBeDefaultBrowser
-            } else {
-                navigateToPane
+            onClick = {
+                if (setDefaultAndroidBrowserManager.isRoleManagerAvailable()) {
+                    setDefaultAndroidBrowserManager.requestToBeDefaultBrowser {
+                        // Do nothing when the dialog closes because we're staying on Settings.
+                    }
+                } else {
+                    navigateToPane()
+                }
             }
         )
     }

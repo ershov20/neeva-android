@@ -1,6 +1,7 @@
 package com.neeva.app.cookiecutter
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,7 +9,6 @@ import org.chromium.weblayer.Browser
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -17,7 +17,7 @@ import strikt.assertions.isEqualTo
 /**
  * Tests that the TabCookieCutterModel updates the stats properly
  */
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 class TabCookieCutterModelTest : BaseTest() {
     private lateinit var model: TabCookieCutterModel

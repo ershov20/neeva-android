@@ -1,5 +1,6 @@
 package com.neeva.app.cookiecutter
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,13 +16,12 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
-import org.robolectric.RobolectricTestRunner
 import strikt.api.expectThat
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class IncognitoTrackersAllowListTest : BaseTest() {
     @Rule
     @JvmField

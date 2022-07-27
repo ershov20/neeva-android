@@ -3,6 +3,7 @@ package com.neeva.app
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
@@ -29,12 +30,11 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
 class NeevaActivityViewModelTest : BaseTest() {

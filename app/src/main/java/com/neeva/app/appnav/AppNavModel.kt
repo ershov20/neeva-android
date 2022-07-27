@@ -28,7 +28,7 @@ interface AppNavModel {
     fun showClearBrowsingSettings()
     fun showCookieCutterSettings()
     fun showCookiePreferences()
-    fun showDefaultBrowserSettings(fromWelcomeScreen: Boolean)
+    fun showDefaultBrowserSettings()
     fun showFeedback()
     fun showHelp()
     fun showHistory()
@@ -39,13 +39,11 @@ interface AppNavModel {
     fun showSpaceDetail(spaceID: String)
     fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?)
     fun showShareSpaceSheet(spaceID: String)
-
-    fun showWelcome()
     fun showSignInFlow()
     // endregion
 
     // region External screens
-    fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean)
+    fun openAndroidDefaultBrowserSettings()
     fun showAdditionalLicenses()
 
     fun openUrlViaIntent(uri: Uri)
@@ -79,7 +77,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showClearBrowsingSettings() {}
     override fun showCookieCutterSettings() {}
     override fun showCookiePreferences() {}
-    override fun showDefaultBrowserSettings(fromWelcomeScreen: Boolean) {}
+    override fun showDefaultBrowserSettings() {}
     override fun showFeedback() {}
     override fun showHelp() {}
     override fun showHistory() {}
@@ -90,9 +88,8 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showSpaceDetail(spaceID: String) { }
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {}
     override fun showShareSpaceSheet(spaceID: String) {}
-    override fun showWelcome() {}
     override fun showSignInFlow() {}
-    override fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean) {}
+    override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}
     override fun openUrlViaIntent(uri: Uri) {}
     override fun safeStartActivityForIntent(intent: Intent) {}

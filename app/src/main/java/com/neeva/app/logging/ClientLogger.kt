@@ -22,6 +22,7 @@ enum class ClientLoggerStatus {
     DISABLED
 }
 
+/** TODO(dan.alcantara): Disallow logging until the user has finished First Run. */
 class ClientLogger(
     private val apolloWrapper: AuthenticatedApolloWrapper,
     private val coroutineScope: CoroutineScope,

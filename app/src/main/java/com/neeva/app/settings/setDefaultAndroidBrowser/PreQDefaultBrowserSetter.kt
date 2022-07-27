@@ -36,5 +36,5 @@ class PreQDefaultBrowserSetter(
         return false
     }
 
-    override fun requestToBeDefaultBrowser() {}
+    override fun requestToBeDefaultBrowser(callback: () -> Unit) {}
 }

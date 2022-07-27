@@ -15,7 +15,7 @@ class SkipFirstRunRule : TestRule {
             override fun evaluate() {
                 val context = ApplicationProvider.getApplicationContext<Application>()
                 val sharedPreferencesModel = SharedPreferencesModel(context)
-                FirstRunModel.firstRunDone(sharedPreferencesModel)
+                FirstRunModel.setFirstRunDone(sharedPreferencesModel)
 
                 base?.evaluate()
             }

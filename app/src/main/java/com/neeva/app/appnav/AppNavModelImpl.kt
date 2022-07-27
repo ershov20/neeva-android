@@ -18,9 +18,6 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.firstrun.FirstRunModel
-import com.neeva.app.logging.ClientLogger
-import com.neeva.app.logging.LogConfig
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
 import com.neeva.app.spaces.ShareSpaceUIContainer
@@ -48,9 +45,7 @@ class AppNavModelImpl(
     private val popupModel: PopupModel,
     private val spaceStore: SpaceStore,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
-    private val neevaConstants: NeevaConstants,
-    private val clientLogger: ClientLogger,
-    private val firstRunModel: FirstRunModel
+    private val neevaConstants: NeevaConstants
 ) : AppNavModel {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     override val currentDestination: StateFlow<NavDestination?>
@@ -150,14 +145,8 @@ class AppNavModelImpl(
         )
     }
 
-    override fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean) {
+    override fun openAndroidDefaultBrowserSettings() {
         safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
-
-        // Show zero query for the first run
-        if (isFirstRun) {
-            firstRunModel.shouldLogDefaultBrowserOnFirstRun = true
-            openLazyTab(focusUrlBar = false)
-        }
     }
 
     override fun showAdditionalLicenses() {
@@ -182,26 +171,12 @@ class AppNavModelImpl(
     override fun showClearBrowsingSettings() = show(AppNavDestination.CLEAR_BROWSING_SETTINGS)
     override fun showCookieCutterSettings() = show(AppNavDestination.COOKIE_CUTTER_SETTINGS)
     override fun showCookiePreferences() = show(AppNavDestination.COOKIE_PREFERENCES)
-    override fun showDefaultBrowserSettings(fromWelcomeScreen: Boolean) {
-        if (fromWelcomeScreen) {
-            clientLogger.logCounter(
-                LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_IMP,
-                null
-            )
-            show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS_FROM_WELCOME)
-        } else {
-            show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
-        }
-    }
+    override fun showDefaultBrowserSettings() = show(AppNavDestination.SET_DEFAULT_BROWSER_SETTINGS)
 
     override fun showLicenses() = show(AppNavDestination.LICENSES)
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showSettings() = show(AppNavDestination.SETTINGS)
-
-    override fun showWelcome() {
-        show(AppNavDestination.WELCOME)
-    }
 
     override fun showSpaceDetail(spaceID: String) {
         // We still set the detailedSpaceIDFlow value in case we need to fetch the Space.

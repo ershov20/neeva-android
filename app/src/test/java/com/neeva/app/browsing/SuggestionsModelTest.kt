@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
@@ -34,7 +35,6 @@ import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
@@ -47,7 +47,7 @@ import strikt.assertions.isTrue
  * Tests that the [SuggestionsModel] triggers network queries for suggestions via Apollo and that
  * it processes them correctly.
  */
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
 class SuggestionsModelTest : BaseTest() {

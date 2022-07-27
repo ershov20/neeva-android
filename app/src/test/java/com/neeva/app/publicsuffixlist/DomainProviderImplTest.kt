@@ -1,6 +1,7 @@
 package com.neeva.app.publicsuffixlist
 
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.LoadingState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -8,12 +9,11 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class DomainProviderImplTest : BaseTest() {
     private lateinit var domainProviderImpl: DomainProviderImpl
 

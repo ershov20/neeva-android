@@ -83,8 +83,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         private const val TAG_REGULAR_PROFILE = "FRAGMENT_TAG_REGULAR_PROFILE"
         private const val TAG_INCOGNITO_PROFILE = "FRAGMENT_TAG_INCOGNITO_PROFILE"
 
+        /** Creates a lazy tab for the regular browser profile. */
         const val ACTION_NEW_TAB = "ACTION_NEW_TAB"
+
+        /** Sends the user directly to the SpaceGrid. */
         const val ACTION_SHOW_SPACES = "ACTION_SHOW_SPACES"
+
+        /** Sends the user directly into the Zero Query page without the keyboard up. */
+        const val ACTION_ZERO_QUERY = "ACTION_ZERO_QUERY"
     }
 
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
@@ -150,9 +156,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         popupModel = popupModel,
                         spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
-                        neevaConstants = neevaConstants,
-                        clientLogger = clientLogger,
-                        firstRunModel = firstRunModel
+                        neevaConstants = neevaConstants
                     )
                 }
                 cardsPaneModel = remember(appNavModel) {
@@ -209,13 +213,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
 
                 LaunchedEffect(true) {
-                    if (firstRunModel.shouldShowFirstRun()) {
-                        appNavModel?.showWelcome()
-                        clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
-                        clientLogger.logCounter(LogConfig.Interaction.GET_STARTED_IN_WELCOME, null)
-                        firstRunModel.firstRunDone()
-                    }
-
                     firstComposeCompleted.complete(true)
                 }
             }
@@ -297,16 +294,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         activityViewModel.checkForUpdates(this)
         clientLogger.logCounter(LogConfig.Interaction.APP_ENTER_FOREGROUND, null)
         updateWidgets()
-
-        if (firstRunModel.shouldLogDefaultBrowserOnFirstRun) {
-            firstRunModel.shouldLogDefaultBrowserOnFirstRun = false
-            if (setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
-                clientLogger.logCounter(LogConfig.Interaction.SET_DEFAULT_BROWSER, null)
-            } else {
-                clientLogger.logCounter(LogConfig.Interaction.SKIP_DEFAULT_BROWSER, null)
-            }
-        }
-
         webLayerModel.currentBrowser.reregisterActiveTabIfNecessary()
     }
 
@@ -340,6 +327,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     webLayerModel.switchToProfile(useIncognito = false)
                     webLayerModel.currentBrowser.waitUntilBrowserIsReady()
                     appNavModel?.openLazyTab()
+                }
+            }
+
+            ACTION_ZERO_QUERY -> {
+                lifecycleScope.launch {
+                    webLayerModel.switchToProfile(useIncognito = false)
+                    webLayerModel.currentBrowser.waitUntilBrowserIsReady()
+                    appNavModel?.openLazyTab(focusUrlBar = false)
                 }
             }
 
@@ -562,7 +557,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     override fun bringToForeground() {
         showBrowser()
 
-        val intent = Intent(this, NeevaActivity::class.java)
+        val intent = Intent(this, this@NeevaActivity::class.java)
         intent.action = Intent.ACTION_MAIN
         startActivity(intent)
     }

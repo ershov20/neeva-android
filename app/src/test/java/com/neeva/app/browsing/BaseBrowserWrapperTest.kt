@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.NeevaConstants
@@ -54,7 +55,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.robolectric.RobolectricTestRunner
 import strikt.api.expectThat
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
@@ -63,7 +63,7 @@ import strikt.assertions.isNotEqualTo
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
 class BaseBrowserWrapperTest : BaseTest() {
     @Rule

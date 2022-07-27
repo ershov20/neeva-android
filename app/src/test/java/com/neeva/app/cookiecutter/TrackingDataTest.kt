@@ -1,11 +1,11 @@
 package com.neeva.app.cookiecutter
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -15,7 +15,7 @@ import strikt.assertions.isTrue
 /**
  * Tests that the Tracking data creation working properly
  */
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
 class TrackingDataTest : BaseTest() {

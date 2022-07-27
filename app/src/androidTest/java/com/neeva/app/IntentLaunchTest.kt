@@ -12,6 +12,7 @@ import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 
 @HiltAndroidTest
 class IntentLaunchTest : BaseBrowserTest() {
@@ -20,7 +21,7 @@ class IntentLaunchTest : BaseBrowserTest() {
     // the original Activity creating a new one whenever we fire another Intent).
     @Suppress("DEPRECATION")
     private val activityTestRule = androidx.test.rule.ActivityTestRule(
-        NeevaActivity::class.java,
+        MainActivity::class.java,
         false,
         false
     )
@@ -28,10 +29,18 @@ class IntentLaunchTest : BaseBrowserTest() {
     @get:Rule
     val skipFirstRunRule = SkipFirstRunRule()
 
+    @get:Rule
+    val multiActivityTestRule = MultiActivityTestRule()
+
+    /**
+     * Rule that doesn't try to launch the Activity with the given activityRule.  It must be paired
+     * with a [MultiActivityTestRule] to allow the test to find the correct activity after it has
+     * launched.
+     */
     @get:Rule(order = 10000)
     val androidComposeRule = AndroidComposeTestRule(
-        activityRule = activityTestRule,
-        activityProvider = { it.activity }
+        activityRule = TestRule { base, _ -> base },
+        activityProvider = { multiActivityTestRule.getNeevaActivity()!! }
     )
 
     @Test

@@ -1,18 +1,18 @@
 package com.neeva.app.ui.widgets
 
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 
 @ExperimentalCoroutinesApi
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class UriDisplayViewTest : BaseTest() {
     @Test
     fun parseURLPath() {

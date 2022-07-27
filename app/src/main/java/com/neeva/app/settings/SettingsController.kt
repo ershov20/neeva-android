@@ -35,7 +35,7 @@ interface SettingsController {
     //endregion
 
     //region Main Settings
-    fun getOnClickMap(fromWelcomeScreen: Boolean): Map<Int, (() -> Unit)?>
+    fun getOnClickMap(): Map<Int, (() -> Unit)?>
     fun getOnDoubleClickMap(): Map<Int, (() -> Unit)?>
     fun getToggleChangedCallBackMap(): Map<String, (() -> Unit)?>
     //endregion
@@ -66,7 +66,7 @@ interface SettingsController {
     fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager
 
     // Meant for system images lower than Android Q
-    fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean)
+    fun openAndroidDefaultBrowserSettings()
     //endregion
 
     //region Debug Settings
@@ -109,9 +109,9 @@ class SettingsControllerImpl(
         }
     }
 
-    override fun getOnClickMap(fromWelcomeScreen: Boolean): Map<Int, (() -> Unit)?> {
+    override fun getOnClickMap(): Map<Int, (() -> Unit)?> {
         val resultMap = mutableMapOf<Int, (() -> Unit)?>()
-        resultMap.putAll(getNavOnClickMap(fromWelcomeScreen))
+        resultMap.putAll(getNavOnClickMap())
         resultMap.putAll(getButtonClicks())
         return resultMap
     }
@@ -144,13 +144,11 @@ class SettingsControllerImpl(
         )
     }
 
-    private fun getNavOnClickMap(fromWelcomeScreen: Boolean): Map<Int, (() -> Unit)?> {
+    private fun getNavOnClickMap(): Map<Int, (() -> Unit)?> {
         val navMap = mutableMapOf<Int, (() -> Unit)?>(
             R.string.settings_sign_in_to_join_neeva to { appNavModel.showProfileSettings() },
             R.string.settings_clear_browsing_data to { appNavModel.showClearBrowsingSettings() },
-            R.string.settings_default_browser to {
-                appNavModel.showDefaultBrowserSettings(fromWelcomeScreen)
-            },
+            R.string.settings_default_browser to { appNavModel.showDefaultBrowserSettings() },
             R.string.settings_debug_local_feature_flags to {
                 appNavModel.showLocalFeatureFlagsPane()
             },
@@ -204,8 +202,8 @@ class SettingsControllerImpl(
         return setDefaultAndroidBrowserManager
     }
 
-    override fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean) {
-        appNavModel.openAndroidDefaultBrowserSettings(isFirstRun)
+    override fun openAndroidDefaultBrowserSettings() {
+        appNavModel.openAndroidDefaultBrowserSettings()
     }
 
     override fun isAdvancedSettingsAllowed(): Boolean {
@@ -345,7 +343,7 @@ val mockSettingsControllerImpl by lazy {
 
         override fun openUrl(uri: Uri, openViaIntent: Boolean) {}
 
-        override fun getOnClickMap(fromWelcomeScreen: Boolean): Map<Int, (() -> Unit)?> {
+        override fun getOnClickMap(): Map<Int, (() -> Unit)?> {
             return mapOf(
                 R.string.settings_sign_in_to_join_neeva to { },
                 R.string.settings_sign_out to { },
@@ -402,7 +400,7 @@ val mockSettingsControllerImpl by lazy {
             return FakeSetDefaultAndroidBrowserManager()
         }
 
-        override fun openAndroidDefaultBrowserSettings(isFirstRun: Boolean) { }
+        override fun openAndroidDefaultBrowserSettings() { }
 
         override fun isAdvancedSettingsAllowed(): Boolean { return true }
     }

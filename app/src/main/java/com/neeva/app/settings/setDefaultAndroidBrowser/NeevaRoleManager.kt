@@ -11,6 +11,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
+import java.lang.ref.WeakReference
 
 @RequiresApi(Build.VERSION_CODES.Q)
 class NeevaRoleManager(
@@ -18,7 +19,12 @@ class NeevaRoleManager(
     clientLogger: ClientLogger
 ) : SetDefaultAndroidBrowserManager() {
     private val androidDefaultBrowserRequester =
-        activity.registerForActivityResult(DefaultAndroidBrowserRequester(this, clientLogger)) {}
+        activity.registerForActivityResult(DefaultAndroidBrowserRequester(this, clientLogger)) {
+            onResultAvailable()
+        }
+
+    /** Tracks the callback that will fire when the dialog closes. */
+    private var requestCallback: WeakReference<() -> Unit> = WeakReference(null)
 
     private val roleManager = activity.getSystemService(Context.ROLE_SERVICE) as RoleManager
 
@@ -33,14 +39,20 @@ class NeevaRoleManager(
         return true
     }
 
-    override fun requestToBeDefaultBrowser() {
+    override fun requestToBeDefaultBrowser(callback: () -> Unit) {
         if (roleManager.isRoleAvailable(RoleManager.ROLE_BROWSER)) {
+            requestCallback = WeakReference(callback)
             androidDefaultBrowserRequester.launch(null)
         }
     }
 
     internal fun makeRequestRoleIntent(): Intent {
         return roleManager.createRequestRoleIntent(RoleManager.ROLE_BROWSER)
+    }
+
+    private fun onResultAvailable() {
+        requestCallback.get()?.invoke()
+        requestCallback = WeakReference(null)
     }
 }
 

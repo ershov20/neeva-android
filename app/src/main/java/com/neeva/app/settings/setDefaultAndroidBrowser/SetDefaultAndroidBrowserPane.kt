@@ -25,6 +25,7 @@ import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalClientLogger
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
+import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.ui.FullScreenDialogTopBar
@@ -33,38 +34,43 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.FilledButton
 
-/**
- * If the user opened this Settings Pane, the phone we are running on has a
- * system image lower than Android Q. RoleManager dialog will be unavailable here.
- */
 @Composable
 fun SetDefaultAndroidBrowserPane(
-    settingsController: SettingsController,
-    showAsDialog: Boolean
+    settingsController: SettingsController
 ) {
     val appNavModel = LocalAppNavModel.current
+    val clientLogger = LocalClientLogger.current
+    val setDefaultAndroidBrowserManager = settingsController.getSetDefaultAndroidBrowserManager()
+
+    val showZeroQuery = { appNavModel.openLazyTab(false) }
 
     SetDefaultAndroidBrowserPane(
-        settingsController = settingsController,
-        showAsDialog = showAsDialog,
-        showZeroQuery = { appNavModel.openLazyTab(false) }
+        clientLogger = clientLogger,
+        onBackPressed = settingsController::onBackPressed,
+        openAndroidDefaultBrowserSettings = settingsController::openAndroidDefaultBrowserSettings,
+        setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
+        showAsDialog = false,
+        onActivityResultCallback = { showZeroQuery() },
+        showZeroQuery = showZeroQuery
     )
 }
 
 @Composable
 fun SetDefaultAndroidBrowserPane(
-    settingsController: SettingsController,
+    clientLogger: ClientLogger,
+    onBackPressed: () -> Unit,
+    openAndroidDefaultBrowserSettings: () -> Unit,
+    setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
     showAsDialog: Boolean,
+    onActivityResultCallback: () -> Unit,
     showZeroQuery: () -> Unit
 ) {
-    val clientLogger = LocalClientLogger.current
-    val setDefaultAndroidBrowserManager = settingsController.getSetDefaultAndroidBrowserManager()
     val isRoleManagerAvailable = setDefaultAndroidBrowserManager.isRoleManagerAvailable()
 
     SetDefaultAndroidBrowserPane(
         mustOpenSettings = !isRoleManagerAvailable,
         showAsDialog = showAsDialog,
-        onBackPressed = settingsController::onBackPressed,
+        onBackPressed = onBackPressed,
         onMaybeLater = {
             clientLogger.logCounter(
                 LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_REMIND,
@@ -77,15 +83,10 @@ fun SetDefaultAndroidBrowserPane(
                 LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_OPEN,
                 null
             )
-            if (showAsDialog && isRoleManagerAvailable) {
-                // If user is on the welcome screen and RoleManager is available, this
-                // button shows a dialog while navigating the browser to zero query. No
-                // matter the choice on the dialog, when the dialog is gone, the user
-                // lands on the zero query screen.
-                setDefaultAndroidBrowserManager.requestToBeDefaultBrowser()
-                showZeroQuery()
+            if (isRoleManagerAvailable) {
+                setDefaultAndroidBrowserManager.requestToBeDefaultBrowser(onActivityResultCallback)
             } else {
-                settingsController.openAndroidDefaultBrowserSettings(showAsDialog)
+                openAndroidDefaultBrowserSettings()
             }
         }
     )
@@ -204,7 +205,7 @@ fun InstructionsForAndroidSettings() {
             modifier = Modifier
                 .fillMaxWidth()
                 .border(
-                    width = 2.dp,
+                    width = 1.dp,
                     color = MaterialTheme.colorScheme.outline,
                     shape = RoundedCornerShape(Dimensions.RADIUS_LARGE)
                 )

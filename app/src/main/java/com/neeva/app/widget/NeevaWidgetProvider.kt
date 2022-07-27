@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.RemoteViews
+import com.neeva.app.MainActivity
 import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
@@ -38,14 +39,14 @@ class NeevaWidgetProvider : AppWidgetProvider() {
         ) {
             val urlBarIntent = createPendingIntent(
                 context,
-                Intent(context, NeevaActivity::class.java).setAction(NeevaActivity.ACTION_NEW_TAB)
+                Intent(context, MainActivity::class.java).setAction(NeevaActivity.ACTION_NEW_TAB)
             )
 
             val spacesIntent = createPendingIntent(
                 context,
                 Intent(
                     context,
-                    NeevaActivity::class.java
+                    MainActivity::class.java
                 ).setAction(NeevaActivity.ACTION_SHOW_SPACES)
             )
 

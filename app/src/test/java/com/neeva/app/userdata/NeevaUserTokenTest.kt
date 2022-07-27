@@ -2,6 +2,7 @@ package com.neeva.app.userdata
 
 import android.content.Intent
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.NeevaConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
@@ -13,14 +14,13 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 class NeevaUserTokenTest : BaseTest() {
     @Test

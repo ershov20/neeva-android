@@ -73,7 +73,7 @@ class FirstRunModel internal constructor(
             "892902198757-84tm1f14ne0pa6n3dmeehgeo5mk4mhl9.apps.googleusercontent.com"
         const val TAG = "FirstRunModel"
 
-        fun firstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
+        fun setFirstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
             sharedPreferencesModel.setValue(
                 SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.FirstRunDone, true
             )
@@ -87,8 +87,6 @@ class FirstRunModel internal constructor(
 
     /** Holds the [LaunchLoginIntentParams] for the latest login */
     private val intentParamFlow = MutableStateFlow<LaunchLoginIntentParams?>(null)
-
-    internal var shouldLogDefaultBrowserOnFirstRun: Boolean = false
 
     private fun authUri(
         signup: Boolean,
@@ -131,14 +129,28 @@ class FirstRunModel internal constructor(
         }
     }
 
-    fun shouldShowFirstRun(): Boolean {
-        return neevaUserToken.getToken().isEmpty() &&
-            !sharedPreferencesModel
-                .getValue(SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.FirstRunDone, false)
+    fun mustShowFirstRun(): Boolean {
+        val isFirstRunDone = sharedPreferencesModel.getValue(
+            SharedPrefFolder.FirstRun,
+            SharedPrefFolder.FirstRun.FirstRunDone,
+            false
+        )
+
+        // TODO(dan.alcantara): Add country checks.
+        return when {
+            // User has already signed in, so they must have finished First Run.
+            neevaUserToken.getToken().isNotEmpty() -> false
+
+            // SharedPreference has been set, so they must have gone through the FirstRunActivity.
+            isFirstRunDone -> false
+
+            // Show First Run.
+            else -> true
+        }
     }
 
-    fun firstRunDone() {
-        firstRunDone(sharedPreferencesModel)
+    fun setFirstRunDone() {
+        setFirstRunDone(sharedPreferencesModel)
     }
 
     fun shouldLogFirstLogin(): Boolean {

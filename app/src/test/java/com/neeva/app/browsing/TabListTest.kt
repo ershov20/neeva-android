@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.createMockNavigationController
 import org.chromium.weblayer.Browser
@@ -12,7 +13,6 @@ import org.mockito.Mockito.`when`
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.robolectric.RobolectricTestRunner
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
 import strikt.assertions.containsExactlyInAnyOrder
@@ -23,7 +23,7 @@ import strikt.assertions.isFalse
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class TabListTest : BaseTest() {
     private lateinit var tabList: TabList
 

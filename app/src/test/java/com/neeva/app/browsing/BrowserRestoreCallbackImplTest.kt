@@ -1,5 +1,6 @@
 package com.neeva.app.browsing
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
@@ -12,10 +13,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 class BrowserRestoreCallbackImplTest {
     @Test
