@@ -5,10 +5,12 @@ import android.net.Uri
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.ApolloWrapper
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.cookiecutter.RegularTrackersAllowList
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
+import com.neeva.app.neevascope.NeevascopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
@@ -17,6 +19,7 @@ import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -34,6 +37,7 @@ class RegularBrowserWrapper(
     appContext: Context,
     activityCallbackProvider: ActivityCallbackProvider,
     private val apolloWrapper: ApolloWrapper,
+    private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
     clientLogger: ClientLogger,
     coroutineScope: CoroutineScope,
     directories: Directories,
@@ -46,7 +50,8 @@ class RegularBrowserWrapper(
     regularFaviconCache: RegularFaviconCache,
     scriptInjectionManager: ScriptInjectionManager,
     settingsDataModel: SettingsDataModel,
-    spaceStore: SpaceStore
+    spaceStore: SpaceStore,
+    popupModel: PopupModel
 ) : BaseBrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -62,6 +67,13 @@ class RegularBrowserWrapper(
         neevaConstants = neevaConstants,
         clientLogger = clientLogger
     ),
+    neevascopeModel = NeevascopeModel(
+        apolloWrapper = authenticatedApolloWrapper,
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers
+    ),
+    popupModel = popupModel,
+    neevaUser = neevaUser,
     faviconCache = regularFaviconCache,
     spaceStore = spaceStore,
     historyManager = historyManager,

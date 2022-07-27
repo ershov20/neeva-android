@@ -31,7 +31,6 @@ query Search($query: String!) {
   search(q: $query, source: NeevaScope) {
     resultGroup {
       result {
-        __typename
         title
         appIcon {
           labels
@@ -39,7 +38,6 @@ query Search($query: String!) {
         actionURL
         snippet
         typeSpecific {
-          __typename
           ... on Web {
               web {
                 favIconURL

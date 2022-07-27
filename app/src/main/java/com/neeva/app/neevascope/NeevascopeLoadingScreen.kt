@@ -1,4 +1,4 @@
-package com.neeva.app.cheatsheet
+package com.neeva.app.neevascope
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -22,12 +22,12 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun CheatsheetLoadingScreen() {
+fun NeevascopeLoadingScreen() {
     Surface {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(Dimensions.PADDING_LARGE),
+                .padding(horizontal = Dimensions.PADDING_LARGE),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -52,17 +52,17 @@ fun CheatsheetLoadingScreen() {
 @PortraitPreviews
 @LandscapePreviews
 @Composable
-fun CheatSheetLoading_Preview() {
+fun NeevascopeLoading_Preview() {
     NeevaTheme {
-        CheatsheetLoadingScreen()
+        NeevascopeLoadingScreen()
     }
 }
 
 @PortraitPreviews
 @LandscapePreviews
 @Composable
-fun CheatSheetLoading_Dark_Preview() {
+fun NeevascopeLoading_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        CheatsheetLoadingScreen()
+        NeevascopeLoadingScreen()
     }
 }

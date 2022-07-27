@@ -21,12 +21,15 @@ import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.createMockNavigationController
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.neevascope.NeevascopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
+import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.NeevaUser
 import java.util.EnumSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -93,8 +96,11 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var settingsDataModel: SettingsDataModel
     @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var suggestionsModel: SuggestionsModel
+    @Mock private lateinit var neevascopeModel: NeevascopeModel
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
     @Mock private lateinit var scriptInjectionManager: ScriptInjectionManager
+    @Mock private lateinit var popupModel: PopupModel
+    @Mock private lateinit var neevaUser: NeevaUser
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
@@ -183,6 +189,9 @@ class BaseBrowserWrapperTest : BaseTest() {
             dispatchers = coroutineScopeRule.dispatchers,
             activityCallbackProvider = activityCallbackProvider,
             suggestionsModel = suggestionsModel,
+            neevascopeModel = neevascopeModel,
+            popupModel = popupModel,
+            neevaUser = neevaUser,
             faviconCache = faviconCache,
             spaceStore = spaceStore,
             tabList = tabList,

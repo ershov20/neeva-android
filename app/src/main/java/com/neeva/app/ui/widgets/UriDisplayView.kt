@@ -31,6 +31,19 @@ fun UriDisplayView(
     }
 }
 
+@Composable
+fun UriDisplayView(
+    hostname: String,
+    pathParts: List<String>?,
+    separator: String = "\u203A"
+) {
+    SplitStringRow(
+        primary = hostname,
+        secondaryPieces = pathParts ?: emptyList(),
+        separator = separator
+    )
+}
+
 @Preview("normal suggestion, 1x", locale = "en")
 @Preview("normal suggestion, 2x", locale = "en", fontScale = 2.0f)
 @Preview("normal suggestion, RTL, 1x", locale = "he")

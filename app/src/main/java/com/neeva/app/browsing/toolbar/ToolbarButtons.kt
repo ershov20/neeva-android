@@ -68,8 +68,10 @@ fun ShareButton(modifier: Modifier = Modifier) {
 
 @Composable
 fun NeevaScopeButton(modifier: Modifier = Modifier) {
+    val browserToolbarModel = LocalBrowserToolbarModel.current
+
     IconButton(
-        onClick = {},
+        onClick = browserToolbarModel::showNeevascope,
         modifier = modifier
     ) {
         Icon(

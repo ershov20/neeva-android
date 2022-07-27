@@ -646,4 +646,16 @@
     <!-- [NeevaScope][Colloquial] Tells the user that we are getting information about the current web page.
          This is a pun because the "NeevaScope" feature is like a "telescope". -->
     <string name="neevascope_loading">Your NeevaScope is coming into focus…</string>
+
+    <!-- [NeevaScope] Title of the NeevaScope related search. -->
+    <string name="neevascope_related_search">People also search</string>
+
+    <!-- [NeevaScope] Title of the NeevaScope support section. -->
+    <string name="neevascope_support_title">Support</string>
+
+    <!-- [NeevaScope] NeevaScope support section introduction.  -->
+    <string name="neevascope_support_body">Have questions or feedback for NeevaScope?</string>
+
+    <!-- [NeevaScope] NeevaScope feedback link.  -->
+    <string name="neevascope_contact_us">Contact us via Support</string>
 </resources>

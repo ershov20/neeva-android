@@ -8,6 +8,7 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder

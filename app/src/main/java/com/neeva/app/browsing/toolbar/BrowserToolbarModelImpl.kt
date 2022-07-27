@@ -22,6 +22,7 @@ class BrowserToolbarModelImpl(
     override fun reload() = browserWrapper.reload()
     override fun reloadAfterContentFilterAllowListUpdate() =
         browserWrapper.reloadAfterContentFilterAllowListUpdate()
+    override fun showNeevascope() = browserWrapper.showNeevascope()
 
     override fun share() = appNavModel.shareCurrentPage()
     override fun onAddToSpace() = appNavModel.showAddToSpace()
@@ -72,6 +73,7 @@ internal class PreviewBrowserToolbarModel(
     override fun reload() {}
     override fun reloadAfterContentFilterAllowListUpdate() {}
     override fun share() {}
+    override fun showNeevascope() {}
     override fun onAddToSpace() {}
     override fun onMenuItem(id: OverflowMenuItemId) {}
     override fun onTabSwitcher() {}

@@ -1,4 +1,4 @@
-package com.neeva.app.cheatsheet
+package com.neeva.app.neevascope
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Image
@@ -35,7 +35,7 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun CheatsheetInfoScreen(
+fun NeevascopeInfoScreen(
     onTapAction: () -> Unit
 ) {
     Surface {
@@ -64,15 +64,15 @@ fun CheatsheetInfoScreen(
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        CheatsheetInfoHeader()
+                        NeevascopeInfoHeader()
 
                         Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
 
-                        CheatsheetInfoBody()
+                        NeevascopeInfoBody()
 
                         Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
 
-                        CheatsheetInfoButton(
+                        NeevascopeInfoButton(
                             onTapAction = onTapAction,
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
@@ -83,14 +83,14 @@ fun CheatsheetInfoScreen(
                 // Portrait
                 Column(
                     modifier = Modifier
-                        .padding(Dimensions.PADDING_LARGE)
+                        .padding(horizontal = Dimensions.PADDING_LARGE)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    CheatsheetInfoHeader()
+                    NeevascopeInfoHeader()
 
                     Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
 
-                    CheatsheetInfoBody()
+                    NeevascopeInfoBody()
 
                     Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
 
@@ -102,7 +102,7 @@ fun CheatsheetInfoScreen(
                             .align(Alignment.CenterHorizontally)
                     )
 
-                    CheatsheetInfoButton(
+                    NeevascopeInfoButton(
                         onTapAction = onTapAction,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
@@ -113,7 +113,7 @@ fun CheatsheetInfoScreen(
 }
 
 @Composable
-fun CheatsheetInfoHeader() {
+fun NeevascopeInfoHeader() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
@@ -133,7 +133,7 @@ fun CheatsheetInfoHeader() {
 }
 
 @Composable
-fun CheatsheetInfoBody() {
+fun NeevascopeInfoBody() {
     Column(
         modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
     ) {
@@ -150,7 +150,7 @@ fun CheatsheetInfoBody() {
 }
 
 @Composable
-fun CheatsheetInfoButton(
+fun NeevascopeInfoButton(
     onTapAction: () -> Unit,
     modifier: Modifier
 ) {
@@ -168,12 +168,12 @@ fun CheatsheetInfoButton(
     }
 }
 
-@PortraitPreviews()
-@LandscapePreviews()
+@PortraitPreviews
+@LandscapePreviews
 @Composable
-fun CheatSheetInfo_Light_Preview() {
+fun NeevascopeInfo_Light_Preview() {
     NeevaTheme {
-        CheatsheetInfoScreen(
+        NeevascopeInfoScreen(
             onTapAction = {}
         )
     }
@@ -186,9 +186,9 @@ fun CheatSheetInfo_Light_Preview() {
     uiMode = UI_MODE_NIGHT_YES
 )
 @Composable
-fun CheatSheetInfo_Dark_Preview() {
+fun NeevascopeInfo_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        CheatsheetInfoScreen(
+        NeevascopeInfoScreen(
             onTapAction = {}
         )
     }

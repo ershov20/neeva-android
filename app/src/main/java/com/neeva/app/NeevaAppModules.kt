@@ -187,6 +187,8 @@ object NeevaAppModule {
         activityCallbackProvider: ActivityCallbackProvider,
         application: Application,
         apolloWrapper: AuthenticatedApolloWrapper,
+        authenticatedApolloWrapper: AuthenticatedApolloWrapper,
+        unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
         clientLogger: ClientLogger,
         directories: Directories,
         dispatchers: Dispatchers,
@@ -198,12 +200,15 @@ object NeevaAppModule {
         regularFaviconCache: RegularFaviconCache,
         scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
-        spaceStore: SpaceStore
+        spaceStore: SpaceStore,
+        popupModel: PopupModel
     ): BrowserWrapperFactory {
         return BrowserWrapperFactory(
             activityCallbackProvider = activityCallbackProvider,
             application = application,
             apolloWrapper = apolloWrapper,
+            authenticatedApolloWrapper = authenticatedApolloWrapper,
+            unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
             clientLogger = clientLogger,
             directories = directories,
             dispatchers = dispatchers,
@@ -215,7 +220,8 @@ object NeevaAppModule {
             regularFaviconCache = regularFaviconCache,
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
-            spaceStore = spaceStore
+            spaceStore = spaceStore,
+            popupModel = popupModel
         )
     }
 

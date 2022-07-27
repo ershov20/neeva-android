@@ -4,6 +4,7 @@ import android.app.Application
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
@@ -13,6 +14,7 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.storage.favicons.RegularFaviconCache
+import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
 
@@ -20,6 +22,8 @@ class BrowserWrapperFactory(
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val application: Application,
     private val apolloWrapper: AuthenticatedApolloWrapper,
+    private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
+    private val unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
     private val clientLogger: ClientLogger,
     private val directories: Directories,
     private val dispatchers: Dispatchers,
@@ -31,13 +35,15 @@ class BrowserWrapperFactory(
     private val regularFaviconCache: RegularFaviconCache,
     private val scriptInjectionManager: ScriptInjectionManager,
     private val settingsDataModel: SettingsDataModel,
-    private val spaceStore: SpaceStore
+    private val spaceStore: SpaceStore,
+    private val popupModel: PopupModel
 ) {
     fun createRegularBrowser(coroutineScope: CoroutineScope): RegularBrowserWrapper {
         return RegularBrowserWrapper(
             appContext = application,
             activityCallbackProvider = activityCallbackProvider,
             apolloWrapper = apolloWrapper,
+            authenticatedApolloWrapper = authenticatedApolloWrapper,
             clientLogger = clientLogger,
             coroutineScope = coroutineScope,
             directories = directories,
@@ -50,7 +56,8 @@ class BrowserWrapperFactory(
             regularFaviconCache = regularFaviconCache,
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
-            spaceStore = spaceStore
+            spaceStore = spaceStore,
+            popupModel = popupModel
         )
     }
 
@@ -64,12 +71,15 @@ class BrowserWrapperFactory(
             directories = directories,
             dispatchers = dispatchers,
             activityCallbackProvider = activityCallbackProvider,
-            apolloWrapper = apolloWrapper,
+            authenticatedApolloWrapper = apolloWrapper,
+            unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
             domainProvider = domainProvider,
             onRemovedFromHierarchy = onRemovedFromHierarchy,
             neevaConstants = neevaConstants,
             scriptInjectionManager = scriptInjectionManager,
-            settingsDataModel = settingsDataModel
+            settingsDataModel = settingsDataModel,
+            popupModel = popupModel,
+            neevaUser = neevaUser
         )
     }
 }

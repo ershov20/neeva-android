@@ -8,14 +8,18 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.StartIncognitoMutation
 import com.neeva.app.apollo.ApolloWrapper
+import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.cookiecutter.IncognitoTrackersAllowList
 import com.neeva.app.cookiecutter.ScriptInjectionManager
+import com.neeva.app.neevascope.NeevascopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.IncognitoTabScreenshotManager
 import com.neeva.app.storage.favicons.IncognitoFaviconCache
 import com.neeva.app.type.StartIncognitoInput
+import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.NeevaUser
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -28,7 +32,8 @@ import org.chromium.weblayer.WebLayer
 class IncognitoBrowserWrapper private constructor(
     appContext: Context,
     activityCallbackProvider: ActivityCallbackProvider,
-    private val apolloWrapper: ApolloWrapper,
+    private val authenticatedApolloWrapper: ApolloWrapper,
+    private val unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
     domainProvider: DomainProvider,
@@ -37,7 +42,9 @@ class IncognitoBrowserWrapper private constructor(
     private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
     settingsDataModel: SettingsDataModel,
     tabScreenshotManager: IncognitoTabScreenshotManager,
-    scriptInjectionManager: ScriptInjectionManager
+    scriptInjectionManager: ScriptInjectionManager,
+    popupModel: PopupModel,
+    neevaUser: NeevaUser
 ) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
@@ -45,6 +52,13 @@ class IncognitoBrowserWrapper private constructor(
     dispatchers = dispatchers,
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = null,
+    neevascopeModel = NeevascopeModel(
+        apolloWrapper = unauthenticatedApolloWrapper,
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers
+    ),
+    popupModel = popupModel,
+    neevaUser = neevaUser,
     faviconCache = incognitoFaviconCache,
     spaceStore = null,
     historyManager = null,
@@ -60,18 +74,22 @@ class IncognitoBrowserWrapper private constructor(
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
         activityCallbackProvider: ActivityCallbackProvider,
-        apolloWrapper: ApolloWrapper,
+        authenticatedApolloWrapper: ApolloWrapper,
+        unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
         domainProvider: DomainProvider,
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
         neevaConstants: NeevaConstants,
         scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
         directories: Directories,
-        tempDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(FOLDER_NAME)
+        tempDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(FOLDER_NAME),
+        popupModel: PopupModel,
+        neevaUser: NeevaUser
     ) : this(
         appContext = appContext,
         activityCallbackProvider = activityCallbackProvider,
-        apolloWrapper = apolloWrapper,
+        authenticatedApolloWrapper = authenticatedApolloWrapper,
+        unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
         domainProvider = domainProvider,
@@ -90,7 +108,9 @@ class IncognitoBrowserWrapper private constructor(
             filesDir = tempDirectory,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers
-        )
+        ),
+        popupModel = popupModel,
+        neevaUser = neevaUser
     )
 
     companion object {
@@ -155,7 +175,7 @@ class IncognitoBrowserWrapper private constructor(
                 .fragment(uri.fragment)
                 .build()
 
-            val response = apolloWrapper.performMutation(
+            val response = authenticatedApolloWrapper.performMutation(
                 mutation = StartIncognitoMutation(
                     StartIncognitoInput(
                         redirect = Optional.presentIfNotNull(toApi.toString())

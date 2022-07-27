@@ -7,6 +7,8 @@ import android.net.Uri
 import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -24,6 +26,10 @@ import com.neeva.app.cookiecutter.CookieCutterModelImpl
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.neevascope.NeevascopeInfoScreen
+import com.neeva.app.neevascope.NeevascopeLoadingScreen
+import com.neeva.app.neevascope.NeevascopeModel
+import com.neeva.app.neevascope.NeevascopeResultScreen
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
@@ -31,6 +37,8 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
+import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.NeevaUser
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableDeferred
@@ -70,6 +78,9 @@ abstract class BaseBrowserWrapper internal constructor(
     protected val dispatchers: Dispatchers,
     protected val activityCallbackProvider: ActivityCallbackProvider,
     override val suggestionsModel: SuggestionsModel?,
+    override val neevascopeModel: NeevascopeModel,
+    private val popupModel: PopupModel,
+    private val neevaUser: NeevaUser,
     final override val faviconCache: FaviconCache,
     protected val spaceStore: SpaceStore?,
     private val tabList: TabList,
@@ -98,6 +109,9 @@ abstract class BaseBrowserWrapper internal constructor(
         dispatchers: Dispatchers,
         activityCallbackProvider: ActivityCallbackProvider,
         suggestionsModel: SuggestionsModel?,
+        neevascopeModel: NeevascopeModel,
+        popupModel: PopupModel,
+        neevaUser: NeevaUser,
         faviconCache: FaviconCache,
         spaceStore: SpaceStore?,
         historyManager: HistoryManager?,
@@ -115,6 +129,9 @@ abstract class BaseBrowserWrapper internal constructor(
         dispatchers = dispatchers,
         activityCallbackProvider = activityCallbackProvider,
         suggestionsModel = suggestionsModel,
+        neevascopeModel = neevascopeModel,
+        popupModel = popupModel,
+        neevaUser = neevaUser,
         faviconCache = faviconCache,
         spaceStore = spaceStore,
         tabList = tabList,
@@ -959,6 +976,38 @@ abstract class BaseBrowserWrapper internal constructor(
 
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
     override suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
+
+    override fun showNeevascope() {
+        val isOnNeevaSearch =
+            activeTabModel.displayedInfoFlow.value.mode != ActiveTabModel.DisplayMode.URL
+
+        coroutineScope.launch {
+            activeTabModel.urlFlow.collectLatest { query ->
+                neevascopeModel.updateQuery(query.toString())
+            }
+        }
+
+        popupModel.showBottomSheet { onDismiss ->
+            val searchState by neevascopeModel.searchFlow.collectAsState()
+
+            when {
+                neevaUser.isSignedOut() || isOnNeevaSearch -> {
+                    NeevascopeInfoScreen(onTapAction = onDismiss)
+                }
+
+                searchState == null -> {
+                    NeevascopeLoadingScreen()
+                }
+
+                else -> {
+                    NeevascopeResultScreen(
+                        neevascopeModel = neevascopeModel,
+                        onDismiss = onDismiss
+                    )
+                }
+            }
+        }
+    }
 
     private fun getActiveTab(): Tab? = browserFlow.getActiveTab()
     private fun getTab(id: String?): Tab? = browserFlow.getTab(id)
