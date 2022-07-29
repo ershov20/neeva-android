@@ -11,7 +11,7 @@
         a string are provided as a hint for the translators.
 -->
 <!-- smartling.instruction_comments_enabled = on -->
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <!-- [General][Button] Triggers adding something to the currently displayed list.  e.g. adding a new item to a Space. -->
     <string name="add">Ajouter</string>
 
@@ -35,6 +35,9 @@
 
     <!-- [General] Label for a text field that allows the user to enter a description for something they are creating. -->
     <string name="description">Description</string>
+
+    <!-- [General] Label for a link that takes the user to a page to learn more about a feature -->
+    <string name="learn_more">En savoir plus</string>
 
     <!-- [General][Dialog] Dismisses the current dialog being presented to the user. -->
     <string name="maybe_later">Peut-être plus tard</string>
@@ -85,6 +88,37 @@
 
     <!-- [Error] Tells the user that we failed to open an app for the given URL. -->
     <string name="error_url_failure">Impossible d\'ouvrir « %1$s »</string>
+
+
+
+    <!-- [a11y] Clicking on this will collapse the section with the given title. -->
+    <string name="section_collapse">Réduire la section : %1$s</string>
+
+    <!-- [a11y] Clicking on this will display more items from the section with the given title. -->
+    <string name="section_expand">Développer la section : %1$s</string>
+
+    <!-- [a11y] Clicking on this will fully expand the section with the given title. -->
+    <string name="section_fully_expand">Développer entièrement la section : %1$s</string>
+
+
+
+    <!-- [Toolbar][a11y] Goes back a page in the tab's navigation history. -->
+    <string name="toolbar_go_back">Retour</string>
+
+    <!-- [Toolbar][a11y] Goes forward a page in the tab's navigation history. -->
+    <string name="toolbar_go_forward">Page suivante</string>
+
+    <!-- [Toolbar][a11y] Saves the current URL to one of the user's Spaces. -->
+    <string name="toolbar_save_to_space">Enregistrer dans l\'espace</string>
+
+    <!-- [Toolbar][a11y] Sends the user to view their tabs and Spaces. -->
+    <string name="toolbar_tabs_and_spaces">Gérer mes onglets et espaces</string>
+
+    <!-- [Toolbar][a11y] Opens the menu for the current screen. -->
+    <string name="toolbar_menu">Ouvrir le menu</string>
+
+    <!-- [Find in page] Says that the user is viewing a specific result.  E.g. "100/150" = "100 out of 150" -->
+    <string name="find_in_page_index">%1$d/%2$d</string>
 
 
 
@@ -192,7 +226,7 @@
     <string name="tab_switcher_no_incognito_tabs">Ouvrez et gérez des onglets de navigation privée</string>
 
     <!-- [Tab switcher] Tells the user that tapping on the + button will create a new tab for them. -->
-    <string name="tab_switcher_create_tab_hint">Appuyez sur + ci-dessous pour ouvrir un nouvel onglet</string>
+    <string name="tab_switcher_create_tab_hint">Appuyez sur + pour ouvrir un nouvel onglet</string>
 
 
 
@@ -226,18 +260,388 @@
     <string name="go_to_settings">Accédez aux Paramètres</string>
 
 
+    <!-- [Spaces][Button][a11y] Triggers adding the current web page to the Space with the given name. -->
+    <string name="space_add_url_to_space">Ajouter le site à « %1$1s »</string>
 
-    <!-- [Spaces] Indicates how many people have viewed the given Space. -->
-    <plurals name="space_detail_views">
+    <!-- [Spaces][Snackbar] Briefly appears to tell the user that the current web page was added to the Space with the given name. -->
+    <string name="space_added_url_to_space">Site ajouté à « %1$1s »</string>
+
+    <!-- [Spaces][Button][a11y] Triggers removal of the current web page from the Space with the given name. -->
+    <string name="space_remove_url_from_space">Supprimer le site de « %1$1s »</string>
+
+    <!-- [Spaces][Snackbar] Briefly appears to tell the user that the current web page was removed from the Space with the given name. -->
+    <string name="space_removed_url_from_space">Site supprimé de « %1$1s »</string>&apos;
+
+    <!-- [Spaces][Dialog] Header for the dialog used to create a new Space. -->
+    <string name="space_create">Créer un espace</string>
+
+    <!-- [Spaces] Appears in a text field that asks the user for the name of the new Space. -->
+    <string name="space_create_placeholder">Nom de l\'espace</string>
+
+    <!-- [Spaces][Snackbar] Briefly appears to tell the user that they successfully created a new space. -->
+    <string name="space_create_success">« %1$1s » créé</string>
+
+    <!-- [Spaces][a11y] Used on Button that allows the user to edit the Space that they're currently viewing. -->
+    <string name="space_edit">Modifier l\'espace</string>
+
+    <!-- [Spaces][Menu item][Button][a11y] Used on Button that allows the user to add an item to the Space that they're currently viewing.  Displayed as either a menu item (as text) or used for TalkBack on an icon button. -->
+    <string name="space_add_space_item">Ajouter un élément à l\'espace</string>
+
+    <!-- [Spaces][Menu item] Sends the user to the Neeva website to edit the current Space. -->
+    <string name="space_edit_on_web">Modifier sur le site</string>
+
+    <!-- [Spaces][Dialog] Title of a page that allows the user to edit data about the current Space. -->
+    <string name="edit_space_header">Modifier l\'espace</string>
+
+    <!-- [Spaces][Dialog] Title of a page that allows the user to edit an existing item from the current Space. -->
+    <string name="edit_space_item_header">Modifier l\'élément</string>
+
+    <!-- [Spaces][Dialog] Title of a page that allows the user to add a URL to the current Space. -->
+    <string name="add_space_item_header">Ajouter un élément à l\'espace</string>
+
+    <!-- [Spaces] Tells users that their Space is private. -->
+    <string name="space_stats_private">Uniquement visible par vous et les personnes avec qui vous partagez</string>
+
+    <!-- [Spaces][Menu item][a11y] Shows additional information about the items in the current Space.  Displayed either as text in a menu or provided as a TalkBack string on an icon button. -->
+    <string name="space_detail_show_descriptions">Afficher les descriptions</string>
+
+    <!-- [Spaces][Colloquial][Dialog] Promotional title for a dialog that encourages users to sign up for an account to be able to use the Spaces feature. -->
+    <string name="space_intro_title">Remettez de l\'ordre dans votre navigation</string>
+
+    <!-- [Spaces][Dialog] Promotional benefits of using Neeva Spaces. -->
+    <string name="space_intro_body">Enregistrez et partagez du contenu instantanément. Faites du tri en ajoutant des images, des sites Web et des documents à un espace dès aujourd\'hui.</string>
+
+    <!-- [Spaces][Button] Displayed on a button that sends the user to sign up for an account. -->
+    <string name="space_intro_cta">Inscrivez-vous pour commencer</string>
+
+    <string name="share_space_title">Partager l\'espace</string>
+
+    <!-- [Spaces][Toggle] Displayed on a toggle that allows users to share a link to view their Space. -->
+    <string name="enable_link">Activer le lien partageable</string>
+
+    <!-- [Spaces][Toggle] Displayed on a toggle that allows users to share a link to view their Space. -->
+    <string name="enable_link_subtitle">Toute personne disposant du lien peut le consulter</string>
+
+    <string name="shown_as_owner">Vous apparaîtrez comme le propriétaire de l\'espace</string>
+
+    <!-- [Spaces][Dialog] Asks if the user is sure that they want to delete the current Space. -->
+    <string name="space_delete_confirmation">Voulez-vous vraiment supprimer cet espace ?</string>
+
+    <!-- [Spaces][Dialog] Asks if the user is sure that they want to unfollow the current Space. -->
+    <string name="space_unfollow_confirmation">Voulez-vous vraiment vous désabonner de cet espace ?</string>
+
+    <!-- [Spaces][Snackbar][Button] Allows the user to view the contents of the given Space. -->
+    <string name="space_open">Ouvrir l\'espace</string>
+
+    <!-- [Spaces][Button] Allows the user to stop following another user's Space. -->
+    <string name="unfollow">Se désabonner</string>
+
+    <!-- [Spaces] Indicates how many people have viewed the given Space.  Expected to be an integer.-->
+    <plurals name="space_detail_views" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d vue</item>
-        <item quantity="many">%1$d vues</item>
         <item quantity="other">%1$d vues</item>
     </plurals>
 
-    <!-- [Spaces] Indicates how many people are following the given Space. -->
-    <plurals name="space_detail_followers">
+    <!-- [Spaces] Indicates how many people are following the given Space.  Expected to be an integer. -->
+    <plurals name="space_detail_followers" tools:ignore="MissingQuantity">
         <item quantity="one">%1$d abonné</item>
-        <item quantity="many">%1$d abonnés</item>
         <item quantity="other">%1$d abonnés</item>
     </plurals>
+
+    <!-- [History][Button][a11y] Clicking this will remove the site with the given title from their browsing history. -->
+    <string name="history_remove_visit">Supprimer « %1$s » de l\'historique</string>
+
+    <!-- [History][Snackbar] Tells the user that the site with the given title was removed from their browsing history. -->
+    <string name="history_removed_visit">« %1$s » supprimé de l\'historique</string>
+
+
+
+    <!-- [Zero query][Button] Sends the user to the homepage (https://www.neeva.com). -->
+    <string name="home">Accueil</string>
+
+    <!-- [Zero query] Section header for sites the user has frequently visited. -->
+    <string name="suggested_sites">Sites suggérés</string>
+
+    <!-- [Zero query] Section header for Spaces from Neeva community members. -->
+    <string name="community_spaces">Communauté Neeva</string>
+
+    <!-- [Zero query] Section header for searches the user has performed. -->
+    <string name="searches">Recherches</string>
+
+    <!-- [Zero query] Section header for the user's Spaces. -->
+    <string name="spaces">Espaces</string>
+
+
+
+    <!-- [First run] Message displayed when the user opens the app for the first time. -->
+    <string name="first_run_intro">Bienvenue chez Neeva</string>
+
+    <!-- [First run] Promotional text describing Neeva. -->
+    <string name="first_run_ad_free">le premier moteur de recherche privée sans publicité</string>
+
+    <!-- [First run][Button] Allows the user to move past the welcome screen. -->
+    <string name="get_started">Démarrer</string>
+
+    <!-- [Sign up] Header displayed when asking the user to create an account. -->
+    <string name="first_run_create_your_free_account">Créez votre compte Neeva gratuit</string>
+
+    <!-- [Sign up] Label for a text box that allows the user to input their email address. -->
+    <string name="email_label">E-mail</string>
+
+    <!-- [Sign up] Label for a text box that allows the user to input their password. -->
+    <string name="password_label">Mot de passe</string>
+
+    <!-- [Sign up] Displayed when creating an account and the password being typed by the user is too weak. -->
+    <string name="weak_password">Mot de passe faible</string>
+
+    <!-- [Sign up] Prompts users to do something to see search results for the given query. -->
+    <string name="preview_overlay_prompt">Voir les résultats pour « %1$1s »</string>
+
+    <!-- [Sign up][Button] Sends the user to the sign-in flow from the sign-up flow. -->
+    <string name="already_have_account">Vous avez déjà un compte ?</string>
+
+    <string name="sign_up">S\'inscrire</string>
+    <string name="sign_up_with_okta">Créer un compte Neeva</string>
+    <string name="sign_up_with_google">S\'inscrire avec Google</string>
+    <string name="sign_up_with_microsoft">S\'inscrire avec Microsoft</string>
+    <string name="sign_up_other_options">Autres options d\'inscription</string>
+
+    <!-- [Sign in][Button] Sends the user to the sign-up flow from the sign-in flow. -->
+    <string name="dont_have_account">Vous n\'avez pas de compte ?</string>
+
+    <string name="sign_in">Se connecter</string>
+    <string name="sign_in_with_google">Se connecter avec Google</string>
+    <string name="sign_in_with_microsoft">Se connecter avec Microsoft</string>
+    <string name="sign_in_with_okta">Continuer</string>
+
+    <!-- [Sign up][Button] Asks the user for permission to send them promotional materials. -->
+    <string name="send_me_product_and_privacy_tips">Recevoir des conseils sur les produits et la confidentialité</string>
+
+    <!-- [Sign up] Disclaimer text that tells the user that they must abide by the linked documents. -->
+    <string name="acknowledge_agreement"><![CDATA[En créant votre compte Neeva, vous acceptez les <a href=\"%1$s\">Conditions d\'utilisation</a> et la <a href=\"%2$s\">Politique de confidentialité</a> de Neeva]]></string>
+
+    <string name="used_email_error">Cette adresse e-mail est déjà associée à un compte Neeva</string>
+    <string name="invalid_email_error">Adresse e-mail non valide utilisée pour l\'inscription</string>
+    <string name="invalid_request_error">Nom et/ou mot de passe non valide</string>
+    <string name="invalid_token_error">Le jeton a déjà été utilisé</string>
+    <string name="generic_signup_error">Échec de la création du compte</string>
+
+
+
+    <!-- [Settings][Button] Sends the user to view their Account settings on neeva.com -->
+    <string name="settings_account_settings">Paramètres du compte</string>
+
+    <!-- [Settings][Button] Sends the user to view apps connected to their account on neeva.com -->
+    <string name="settings_connected_apps">Applications connectées</string>
+
+    <!-- [Settings][Button] Sends the user to a site for referrals. -->
+    <string name="settings_invite_friends">Inviter mes proches</string>
+
+    <!-- [Settings][Header] Header for general settings. -->
+    <string name="settings_general">Général</string>
+
+    <!-- [Settings] Indicates that the user has selected Neeva as their default browser. -->
+    <string name="settings_default_browser">Navigateur par défaut</string>
+
+    <!-- [Settings][Toggle] Whether or not the user wants the app to provide suggestions for what they've currently typed into the URL bar. -->
+    <string name="settings_show_search_search_suggestions">Afficher les suggestions de recherche</string>
+
+    <!-- [Settings][Toggle] Whether or not the user wants to be asked before closing all their tabs. -->
+    <string name="settings_confirm_close_all_tabs_title">Exiger une confirmation</string>
+
+    <!-- [Settings][Toggle] Whether or not the user wants to be asked before closing all their tabs. -->
+    <string name="settings_confirm_close_all_tabs_body">Lorsque vous fermez tous les onglets</string>
+
+    <!-- [Settings][Header] Header for privacy settings. -->
+    <string name="settings_privacy">Confidentialité</string>
+
+    <!-- [Settings][Button] Sends the user to a screen where they can clear their browsing data. -->
+    <string name="settings_clear_browsing_data">Effacer les données de navigation</string>
+
+    <!-- [Settings][Toggle] Part one of a toggle that will close all of a user's incognito tabs when they leave incognito mode. -->
+    <string name="settings_close_incognito_when_switching_title">Fermer les onglets de navigation privée</string>
+
+    <!-- [Settings][Toggle] Part two of a toggle that will close all of a user's incognito tabs when they leave incognito mode. -->
+    <string name="settings_close_incognito_when_switching_body">Lorsque vous quittez le mode privé</string>
+
+    <!-- [Settings][Toggle][a11y] Allows users to either enable or disable tracking protection, or show the Cookie Cutter popup. -->
+    <string name="tracking_protection">Blocage des traqueurs</string>
+
+    <!-- [Settings][a11y] Tells users that they are in incognito and allows them to show the Cookie Cutter popup. -->
+    <string name="tracking_protection_incognito_content_description">Blocage des traqueurs en mode privé</string>
+
+    <!-- [Settings][Button] Sends the user to view Neeva's privacy policy. -->
+    <string name="settings_privacy_policy">Politique de confidentialité</string>
+
+    <!-- [Settings][Header] Groups items related to getting help. -->
+    <string name="settings_support">Assistance</string>
+
+    <!-- [Settings][Button] Sends the user to the Neeva homepage to learn how to use the product. -->
+    <string name="settings_welcome_tours">Visites de bienvenue</string>
+
+    <!-- [Settings][Button] Sends the user to the Neeva help center. -->
+    <string name="settings_help_center">Centre d\'aide</string>
+
+    <!-- [Settings][Header] Groups together information about the app. -->
+    <string name="settings_about">À propos</string>
+    <string name="settings_neeva_browser_version">Neeva version %1$s</string>
+    <string name="settings_chromium_version">Chromium version %1$s</string>
+
+    <!-- [Settings][Button] Sends the user to the Play Store page to see if there is an update available for the app. -->
+    <string name="settings_play_store_page">Rechercher des mises à jour</string>
+
+    <!-- [Settings][Button] Sends the user view third-party licenses. -->
+    <string name="settings_licenses">Licences</string>
+
+    <!-- [Settings][Button] Sends the user view more third-party licenses. -->
+    <string name="settings_additional_licenses">Licences supplémentaires</string>
+
+    <!-- [Settings][Button] Sends the user view the terms and conditions for using Neeva. -->
+    <string name="settings_terms">Conditions d\'utilisation</string>
+
+    <!-- [Settings][Button] Sends the user a page where they can sign in or create a Neeva account. -->
+    <string name="settings_sign_in_to_join_neeva">Connectez-vous ou rejoignez Neeva</string>
+
+    <!-- [Settings] Label for a control that tells the user what account they're signed into the app with. -->
+    <string name="settings_signed_into_neeva_with">Connecté(e) à Neeva avec</string>
+
+    <!-- [Settings][Button] Logs the user out of the app. -->
+    <string name="settings_sign_out">Se déconnecter</string>
+
+    <!-- [Settings][Header] Groups together settings related to JavaScript tracking on web sites. -->
+    <string name="settings_trackers">Traqueurs</string>
+    <string name="blocking_strength_standard_title">Standard</string>
+    <string name="blocking_strength_strict_title">Stricts</string>
+    <string name="blocking_strength_standard_description">Cookies de suivi uniquement</string>
+    <string name="blocking_strength_strict_description">Demande de suivi</string>
+
+    <!-- [Settings][Header] Groups together settings related to hiding cookie popups on websites -->
+    <string name="settings_cookie_notices">Fenêtres contextuelles de gestion des cookies</string>
+    <string name="cookie_notice_accept_title">Accepter les cookies non essentiels</string>
+    <string name="cookie_notice_decline_title">Refuser les cookies non essentiels</string>
+
+    <!-- [Settings][Header] Groups together settings related to which non-essential cookies the user would like to enable on websites -->
+    <string name="settings_cookie_preferences">Cookies non essentiels</string>
+    <string name="cookie_analytics_title">Cookies d\'analyse</string>
+    <string name="cookie_analytics_description">Recueille des informations sur vos visites et vos actions sur un site</string>
+    <string name="cookie_marketing_title">Cookies marketing</string>
+    <string name="cookie_marketing_description">Suivi de votre activité en ligne à des fins publicitaires</string>
+    <string name="cookie_social_title">Cookies sociaux</string>
+    <string name="cookie_social_description">Personnalisation et fonctionnalités de médias sociaux de fournisseurs tiers</string>
+
+    <!-- [Settings] Disclaimer noting that if the app cannot individually choose whether to accept certain cookies, then all cookies will be accepted on that site -->
+    <string name="cookie_cutting_individual_disclaimer">Si un site ne prend pas en charge la sélection individuelle de ces options, tous les cookies non essentiels du site seront acceptés.</string>
+
+    <!-- [Settings] Disclaimer noting that essential cookies are mandatory and cannot be blocked by the app -->
+    <string name="cookie_cutting_essential_disclaimer">Les cookies essentiels sont utilisés par les sites pour enregistrer des éléments tels que vos informations de connexion et vos préférences. Ces cookies ne peuvent pas être bloqués par le bloqueur de cookies.</string>
+
+    <!-- [Clear browsing data][Header] Groups options for clearing data on this device. -->
+    <string name="clear_browsing_data_on_this_device">Données sur cet appareil</string>
+    <string name="settings_clear_downloaded_files">Effacer les fichiers téléchargés</string>
+    <string name="settings_browsing_history">Historique de navigation</string>
+    <string name="settings_cache">Cache</string>
+    <string name="settings_cookies_primary">Cookies</string>
+
+    <string name="settings_selected_data_cleared_success">Les données sélectionnées ont été effacées</string>
+    <string name="settings_cookies_secondary">Cette action vous déconnectera de la plupart des sites</string>
+
+    <string name="settings_clear_selected_data_on_device">Effacer les données sélectionnées de cet appareil</string>
+
+    <string name="settings_data_in_neeva_memory">Données dans la mémoire Neeva</string>
+    <string name="settings_manage_neeva_memory">Gérer la mémoire Neeva</string>
+
+    <!-- [Clear browsing data] Warning displayed to the user to tell them that we will delete the data they requested. -->
+    <string name="clear_browsing_dialog_text">Les éléments que vous avez sélectionnés seront supprimés. Cette action est irréversible.</string>
+
+    <!-- [Clear browsing data][Button] Deletes all of the data indicated by the user. -->
+    <string name="clear_browsing_clear_data">Effacer les données</string>
+
+    <!-- [Clear browsing data][Button] Time frame: We will delete everything within the last hour. -->
+    <string name="clear_browsing_last_hour">Dernière heure</string>
+
+    <!-- [Clear browsing data][Button] Time frame: We will delete everything within the last 24 hours. -->
+    <string name="clear_browsing_today">Dernières 24 heures</string>
+
+    <!-- [Clear browsing data][Button] Time frame: We will delete everything within the last 48 hours. -->
+    <string name="clear_browsing_today_and_yesterday">Dernières 48 heures</string>
+
+    <!-- [Clear browsing data][Button] Time frame: We will delete everything since they first opened the app. -->
+    <string name="clear_browsing_everything">Tout l\'historique</string>
+
+
+
+    <!-- [Feedback] Help center introduction -->
+    <string name="submit_feedback_help_center_title">Vous avez besoin d\'aide ou souhaitez obtenir des réponses instantanées aux questions fréquentes ?</string>
+
+    <!-- [Feedback][Button] Help center clickable link -->
+    <string name="submit_feedback_help_center_link">Accédez à notre centre d\'aide !</string>
+
+    <!-- [Feedback][Toggle] Lets the user decide whether or not they want to share a screenshot with their feedback. -->
+    <string name="submit_feedback_share_screenshot">Partager une capture d\'écran</string>
+
+    <!-- [Feedback][a11y] TalkBack description saying that the image being described will be sent to us. -->
+    <string name="submit_feedback_share_screenshot_preview">Capture d\'écran qui sera partagée avec Neeva</string>
+
+    <!-- [Feedback][Toggle] Lets the user decide whether or not they want to share the current URL with their feedback. -->
+    <string name="submit_feedback_view_share_url">Partager l\'URL</string>
+
+    <!-- [Feedback] Asks the user to send their feedback.  Displayed as a placeholder in a text box that the user will type into. -->
+    <string name="submit_feedback_textfield_placeholder">N\'hésitez pas à partager vos questions, problèmes ou demandes de fonctionnalités. C\'est grâce à vos commentaires que nous améliorons Neeva !</string>
+
+    <!-- [Feedback] Displayed to the user when they submit their feedback. -->
+    <string name="submit_feedback_acknowledgement">Envoyé. Merci d\'avoir partagé vos commentaires !</string>
+
+
+
+    <!-- [Profile] Section header describing the user's membership status -->
+    <string name="settings_membership_status">Statut d\'abonnement</string>
+    <string name="subscription_type_basic">Free Basic</string>
+    <string name="subscription_type_premium">Premium</string>
+    <string name="subscription_type_unknown">inconnue</string>
+
+
+
+    <!-- [Widget] Title of the widget.  Displayed when the user tries to add a Neeva widget to their homescreen. -->
+    <string name="widget_description">Actions rapides</string>
+
+    <!-- [Widget] Placeholder text.  When clicked, opens the app and allows the user to perform a search or navigate somewhere. -->
+    <string name="widget_search_neeva">Rechercher sur Neeva</string>
+
+
+
+    <!-- [Cookie Cutter] String displayed when we have a number is too big to fit on screen.  Example: 150 would be displayed as "99+" -->
+    <string name="cookie_cutter_too_many_items">Plus de %1$d</string>
+
+    <!-- [Cookie Cutter] Section header for the number of website trackers that we've blocked. -->
+    <string name="cookie_cutter_trackers">Traqueurs</string>
+
+    <!-- [Cookie Cutter] Section header for the number of website cookie popups that we've blocked. -->
+    <string name="cookie_cutter_popups">Fenêtres contextuelles de gestion des cookies</string>
+
+    <!-- [Cookie Cutter] Section header for the list of companies that we've blocked from tracking you. -->
+    <string name="cookie_cutter_whos_tracking_you">Qui vous suit</string>
+
+    <!-- [Cookie Cutter] Name of the "Cookie Cutter" feature. -->
+    <string name="cookie_cutter" translatable="false">Cookie Cutter</string>
+
+    <!-- [Cookie Cutter] Sends the user to the settings page for the "Cookie Cutter" feature. -->
+    <string name="cookie_cutter_settings">Paramètres du bloqueur de cookies</string>
+
+
+
+    <!-- [NeevaScope] Title of the NeevaScope feature. -->
+    <string name="neevascope" translatable="false">NeevaScope</string>
+
+    <!-- [NeevaScope] Tells the user how NeevaScope is triggered. -->
+    <string name="neevascope_intro_title">Appuyez sur le logo Neeva pour consulter les informations relatives au site Web que vous visitez.</string>
+
+    <!-- [NeevaScope] Tells the user what NeevaScope does. -->
+    <string name="neevascope_intro_body">Du contenu associé aux avis, NeevaScope est votre guide sur le Web !</string>
+
+    <!-- [NeevaScope][Button] User acknowledges that they understand what the feature does and dismisses the dialog. -->
+    <string name="neevascope_got_it">J\'ai compris !</string>
+
+    <!-- [NeevaScope][Colloquial] Tells the user that we are getting information about the current web page.
+         This is a pun because the "NeevaScope" feature is like a "telescope". -->
+    <string name="neevascope_loading">Mise au point des résultats…</string>
 </resources>
