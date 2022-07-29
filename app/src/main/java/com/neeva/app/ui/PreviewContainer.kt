@@ -23,18 +23,22 @@ import com.neeva.app.LocalChromiumVersion
 import com.neeva.app.LocalClientLogger
 import com.neeva.app.LocalDispatchers
 import com.neeva.app.LocalDomainProvider
+import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.LocalNavHostController
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalPopupModel
+import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.ApolloClientWrapper
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.PreviewAppNavModel
+import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.previewDispatchers
 import com.neeva.app.publicsuffixlist.previewDomainProvider
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
@@ -117,14 +121,21 @@ fun LightDarkPreviewContainer(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () -> Unit) {
+fun PreviewCompositionLocals(content: @Composable () -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     val previewSharedPreferencesModel = SharedPreferencesModel(LocalContext.current)
+    val previewSettingsDataModel = SettingsDataModel(previewSharedPreferencesModel)
+
     val previewNeevaConstants = NeevaConstants()
     val previewNeevaUserToken = NeevaUserToken(previewSharedPreferencesModel, previewNeevaConstants)
     val previewNeevaUser = NeevaUser(
         data = NeevaUserData(),
         neevaUserToken = previewNeevaUserToken
+    )
+
+    val previewPopupModel = PopupModel(
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers
     )
 
     val previewApolloWrapper = object : AuthenticatedApolloWrapper(
@@ -136,11 +147,23 @@ fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () ->
     ) {}
 
     val previewClientLogger = ClientLogger(
-        apolloWrapper = previewApolloWrapper,
+        authenticatedApolloWrapper = previewApolloWrapper,
         coroutineScope = coroutineScope,
         dispatchers = previewDispatchers,
         neevaConstants = previewNeevaConstants,
-        sharedPreferencesModel = previewSharedPreferencesModel
+        neevaUserToken = previewNeevaUserToken,
+        sharedPreferencesModel = previewSharedPreferencesModel,
+        settingsDataModel = previewSettingsDataModel
+    )
+
+    val previewFirstRunModel = FirstRunModel(
+        sharedPreferencesModel = previewSharedPreferencesModel,
+        neevaUserToken = previewNeevaUserToken,
+        neevaConstants = previewNeevaConstants,
+        clientLogger = previewClientLogger,
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers,
+        popupModel = previewPopupModel
     )
 
     // Provide classes that have no material impact on the Composable previews.  These can still be
@@ -151,15 +174,21 @@ fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () ->
         LocalChromiumVersion provides "XXX.XXX.XXX.XXX",
         LocalDispatchers provides previewDispatchers,
         LocalDomainProvider provides previewDomainProvider,
+        LocalFirstRunModel provides previewFirstRunModel,
         LocalNeevaConstants provides previewNeevaConstants,
         LocalNeevaUser provides previewNeevaUser,
-        LocalPopupModel provides PopupModel(
-            coroutineScope = coroutineScope,
-            dispatchers = previewDispatchers
-        ),
+        LocalPopupModel provides previewPopupModel,
         LocalNavHostController provides NavHostController(LocalContext.current),
-        LocalSharedPreferencesModel provides previewSharedPreferencesModel
+        LocalSharedPreferencesModel provides previewSharedPreferencesModel,
+        LocalSettingsDataModel provides previewSettingsDataModel
     ) {
+        content()
+    }
+}
+
+@Composable
+fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () -> Unit) {
+    PreviewCompositionLocals {
         NeevaTheme(useDarkTheme = useDarkTheme) {
             Box(
                 modifier = Modifier

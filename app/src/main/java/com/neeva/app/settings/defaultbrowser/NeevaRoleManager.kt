@@ -1,4 +1,4 @@
-package com.neeva.app.settings.setDefaultAndroidBrowser
+package com.neeva.app.settings.defaultbrowser
 
 import android.app.role.RoleManager
 import android.content.Context

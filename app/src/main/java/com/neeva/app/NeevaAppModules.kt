@@ -87,18 +87,22 @@ object NeevaAppModule {
     @Provides
     @Singleton
     fun providesClientLogger(
-        apolloWrapper: AuthenticatedApolloWrapper,
+        authenticatedApolloWrapper: AuthenticatedApolloWrapper,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
         neevaConstants: NeevaConstants,
-        sharedPreferencesModel: SharedPreferencesModel
+        neevaUserToken: NeevaUserToken,
+        sharedPreferencesModel: SharedPreferencesModel,
+        settingsDataModel: SettingsDataModel
     ): ClientLogger {
         return ClientLogger(
-            apolloWrapper,
-            coroutineScope,
-            dispatchers,
-            neevaConstants,
-            sharedPreferencesModel
+            authenticatedApolloWrapper = authenticatedApolloWrapper,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants,
+            neevaUserToken = neevaUserToken,
+            sharedPreferencesModel = sharedPreferencesModel,
+            settingsDataModel = settingsDataModel
         )
     }
 

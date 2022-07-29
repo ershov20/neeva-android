@@ -11,24 +11,32 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import com.neeva.app.Dispatchers
 import com.neeva.app.LocalClientLogger
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.MainActivity
 import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.appnav.Transitions
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
-import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
-import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
+import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserPane
+import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class FirstRunActivity : AppCompatActivity() {
@@ -42,8 +50,11 @@ class FirstRunActivity : AppCompatActivity() {
     }
 
     @Inject lateinit var clientLogger: ClientLogger
+    @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var firstRunModel: FirstRunModel
+    @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var neevaConstants: NeevaConstants
+    @Inject lateinit var settingsDataModel: SettingsDataModel
 
     private lateinit var setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
 
@@ -52,6 +63,10 @@ class FirstRunActivity : AppCompatActivity() {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        lifecycleScope.launch(dispatchers.io) {
+            historyDatabase.hostInfoDao().initializeForFirstRun(neevaConstants)
+        }
 
         clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
         clientLogger.logCounter(LogConfig.Interaction.GET_STARTED_IN_WELCOME, null)
@@ -65,7 +80,10 @@ class FirstRunActivity : AppCompatActivity() {
         setContent {
             NeevaTheme {
                 val navHost = rememberAnimatedNavController()
-                CompositionLocalProvider(LocalClientLogger provides clientLogger) {
+                CompositionLocalProvider(
+                    LocalClientLogger provides clientLogger,
+                    LocalNeevaConstants provides neevaConstants
+                ) {
                     AnimatedNavHost(
                         navController = navHost,
                         modifier = Modifier.fillMaxSize(),
@@ -87,16 +105,20 @@ class FirstRunActivity : AppCompatActivity() {
                             WelcomeScreen(
                                 onShowDefaultBrowserSettings = {
                                     navHost.navigate(Destinations.SET_DEFAULT_BROWSER.name)
-                                }
+                                },
+                                onOpenUrl = {
+                                    firstRunModel.openInCustomTabs(this@FirstRunActivity, it)
+                                },
+                                loggingConsentState =
+                                settingsDataModel
+                                    .getToggleState(SettingsToggle.LOGGING_CONSENT),
+                                toggleLoggingConsentState =
+                                settingsDataModel
+                                    .getTogglePreferenceToggler(SettingsToggle.LOGGING_CONSENT)
                             )
                         }
 
                         composable(Destinations.SET_DEFAULT_BROWSER.name) {
-                            clientLogger.logCounter(
-                                LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_IMP,
-                                null
-                            )
-
                             SetDefaultAndroidBrowserPane(
                                 clientLogger = clientLogger,
                                 onBackPressed = { navHost.popBackStack() },
@@ -119,6 +141,14 @@ class FirstRunActivity : AppCompatActivity() {
                                 onActivityResultCallback = ::sendUserToBrowser
                             ) {
                                 sendUserToBrowser()
+                            }
+
+                            LaunchedEffect(Unit) {
+                                clientLogger.logCounter(
+                                    path = LogConfig.Interaction
+                                        .DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_IMP,
+                                    attributes = null
+                                )
                             }
                         }
                     }
@@ -144,6 +174,7 @@ class FirstRunActivity : AppCompatActivity() {
         } else {
             clientLogger.logCounter(LogConfig.Interaction.SKIP_DEFAULT_BROWSER, null)
         }
+        clientLogger.sendPendingLogs()
 
         val newIntent = intent.apply {
             setClass(this@FirstRunActivity, MainActivity::class.java)

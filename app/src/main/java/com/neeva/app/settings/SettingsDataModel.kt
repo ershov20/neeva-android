@@ -49,11 +49,16 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         sharedPreferencesModel.setValue(SharedPrefFolder.Settings, key, newValue)
     }
 
-    fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {
-        return { newToggleValue ->
-            getToggleState(settingsToggle).value = newToggleValue
-            setSharedPrefValue(settingsToggle.key, newToggleValue)
+    /** When invoked, flips the value of the Boolean preference. */
+    fun getTogglePreferenceToggler(settingsToggle: SettingsToggle): () -> Unit {
+        return {
+            val currentValue = getSettingsToggleValue(settingsToggle)
+            setToggleState(settingsToggle, !currentValue)
         }
+    }
+
+    fun getTogglePreferenceSetter(settingsToggle: SettingsToggle): (Boolean) -> Unit {
+        return { newToggleValue -> setToggleState(settingsToggle, newToggleValue) }
     }
 
     fun getSettingsToggleValue(settingsToggle: SettingsToggle): Boolean {
@@ -63,6 +68,11 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     fun getToggleState(settingsToggle: SettingsToggle): MutableState<Boolean> {
         check(toggleMap[settingsToggle.key] != null)
         return toggleMap[settingsToggle.key] ?: mutableStateOf(false)
+    }
+
+    fun setToggleState(settingsToggle: SettingsToggle, newToggleValue: Boolean) {
+        getToggleState(settingsToggle).value = newToggleValue
+        setSharedPrefValue(settingsToggle.key, newToggleValue)
     }
 
     fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength {

@@ -1,12 +1,12 @@
-package com.neeva.app.settings.setDefaultAndroidBrowser
+package com.neeva.app.settings.defaultbrowser
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,12 +14,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalClientLogger
@@ -29,10 +30,12 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.ui.FullScreenDialogTopBar
+import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.PortraitPreviewsDark
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.ui.widgets.FilledButton
+import com.neeva.app.ui.widgets.StackedButtons
 
 @Composable
 fun SetDefaultAndroidBrowserPane(
@@ -113,7 +116,7 @@ fun SetDefaultAndroidBrowserPane(
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Top
         ) {
             if (!showAsDialog) {
                 FullScreenDialogTopBar(
@@ -127,60 +130,90 @@ fun SetDefaultAndroidBrowserPane(
                     .verticalScroll(rememberScrollState())
                     .padding(Dimensions.PADDING_LARGE)
                     .weight(1.0f),
-                verticalArrangement = Arrangement.SpaceAround
+                verticalArrangement = if (showAsDialog) {
+                    Arrangement.Center
+                } else {
+                    Arrangement.Top
+                }
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(Dimensions.PADDING_MEDIUM)
+                    verticalArrangement = Arrangement.spacedBy(space = Dimensions.PADDING_MEDIUM),
+                    modifier = Modifier.fillMaxSize()
                 ) {
                     Text(
                         text = stringResource(id = R.string.switch_default_browser_title),
                         style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
                     Text(
                         text = stringResource(id = R.string.switch_default_browser_promo),
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.outline
-                    )
-                }
-
-                // Because RoleManager is not available, we need to spell out the instructions
-                // to the user on how to change the default browser, since they will need to
-                // leave the app and manually make the change in Settings.
-                if (mustOpenSettings) {
-                    InstructionsForAndroidSettings()
-                }
-
-                val buttonResource = if (mustOpenSettings) {
-                    R.string.go_to_settings
-                } else {
-                    R.string.switch_default_browser_title_confirm_button
-                }
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
-
-                    FilledButton(
-                        text = stringResource(id = buttonResource),
-                        onClick = onOpenSettings
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
-
-                    if (showAsDialog) {
-                        // Add a dismiss button.
-                        TextButton(onClick = onMaybeLater) {
-                            Text(stringResource(id = R.string.maybe_later))
-                        }
+                    if (mustOpenSettings) {
+                        // Because RoleManager is not available, we need to spell out the
+                        // instructions to the user on how to change the default browser, since they
+                        // will need to leave the app and manually make the change in Settings.
+                        InstructionsForAndroidSettings()
+                    } else {
+                        // To avoid having a big empty space, show a promo image.
+                        Image(
+                            painter = painterResource(R.drawable.cookie_cutter_promo),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxWidth(0.8f)
+                                .align(Alignment.CenterHorizontally)
+                                .clip(RoundedCornerShape(Dimensions.RADIUS_LARGE))
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    shape = RoundedCornerShape(Dimensions.RADIUS_LARGE)
+                                )
+                        )
                     }
                 }
             }
+
+            SetDefaultAndroidBrowserButtons(
+                mustOpenSettings = mustOpenSettings,
+                onOpenSettings = onOpenSettings,
+                showMaybeLater = showAsDialog,
+                onMaybeLater = onMaybeLater
+            )
         }
     }
+}
+
+@Composable
+fun SetDefaultAndroidBrowserButtons(
+    mustOpenSettings: Boolean,
+    onOpenSettings: () -> Unit,
+    showMaybeLater: Boolean,
+    onMaybeLater: () -> Unit
+) {
+    val buttonResource = if (mustOpenSettings) {
+        R.string.go_to_settings
+    } else {
+        R.string.switch_default_browser_title_confirm_button
+    }
+    StackedButtons(
+        primaryLabel = stringResource(buttonResource),
+        onPrimaryButton = onOpenSettings,
+        secondaryLabel = if (showMaybeLater) {
+            stringResource(id = R.string.maybe_later)
+        } else {
+            null
+        },
+        onSecondaryButton = onMaybeLater,
+        modifier = Modifier.padding(
+            horizontal = Dimensions.PADDING_HUGE,
+            vertical = Dimensions.PADDING_MEDIUM
+        )
+    )
 }
 
 /**
@@ -191,39 +224,33 @@ fun SetDefaultAndroidBrowserPane(
 fun InstructionsForAndroidSettings() {
     Column(
         verticalArrangement = Arrangement.spacedBy(Dimensions.PADDING_MEDIUM),
+        modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = stringResource(
-                id = R.string.switch_default_browser_follow_3_steps
-            ),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.outline
+            text = stringResource(R.string.switch_default_browser_follow_3_steps),
+            style = MaterialTheme.typography.bodyLarge
         )
 
         Surface(
+            border = BorderStroke(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline
+            ),
             shape = RoundedCornerShape(Dimensions.RADIUS_LARGE),
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outline,
-                    shape = RoundedCornerShape(Dimensions.RADIUS_LARGE)
-                )
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 text = stringResource(
                     id = R.string.switch_default_browser_instructions
                 ),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(Dimensions.PADDING_MEDIUM)
             )
         }
     }
 }
 
-@Preview(name = "Dialog, 1x font size", locale = "en")
-@Preview(name = "Dialog, 2x font size", locale = "en", fontScale = 2.0f)
+@PortraitPreviews
 @Composable
 fun SettingsDefaultAndroidBrowser_PreviewAsDialog() {
     NeevaTheme {
@@ -237,8 +264,7 @@ fun SettingsDefaultAndroidBrowser_PreviewAsDialog() {
     }
 }
 
-@Preview(name = "Dark Dialog, 1x font size", locale = "en")
-@Preview(name = "Dark dialog, 2x font size", locale = "en", fontScale = 2.0f)
+@PortraitPreviewsDark
 @Composable
 fun SettingsDefaultAndroidBrowser_PreviewAsDialog_Dark() {
     NeevaTheme(useDarkTheme = true) {
@@ -252,8 +278,7 @@ fun SettingsDefaultAndroidBrowser_PreviewAsDialog_Dark() {
     }
 }
 
-@Preview(name = "Dialog mustOpenSettings, 1x font size", locale = "en")
-@Preview(name = "Dialog mustOpenSettings, 2x font size", locale = "en", fontScale = 2.0f)
+@PortraitPreviews
 @Composable
 fun SettingsDefaultAndroidBrowser_PreviewAsDialog_MustOpenSettings() {
     NeevaTheme {
@@ -267,8 +292,7 @@ fun SettingsDefaultAndroidBrowser_PreviewAsDialog_MustOpenSettings() {
     }
 }
 
-@Preview(name = "Dark dialog mustOpenSettings, 1x font size", locale = "en")
-@Preview(name = "Dark dialog mustOpenSettings, 2x font size", locale = "en", fontScale = 2.0f)
+@PortraitPreviewsDark
 @Composable
 fun SettingsDefaultAndroidBrowser_Dark_PreviewAsDialog_MustOpenSettings() {
     NeevaTheme(useDarkTheme = true) {
@@ -282,8 +306,7 @@ fun SettingsDefaultAndroidBrowser_Dark_PreviewAsDialog_MustOpenSettings() {
     }
 }
 
-@Preview(name = "Light pane, 1x font size", locale = "en")
-@Preview(name = "Light pane, 2x font size", locale = "en", fontScale = 2.0f)
+@PortraitPreviews
 @Composable
 fun SettingsDefaultAndroidBrowser_Preview() {
     NeevaTheme {
@@ -297,8 +320,7 @@ fun SettingsDefaultAndroidBrowser_Preview() {
     }
 }
 
-@Preview(name = "Dark pane, 1x font size", locale = "en")
-@Preview(name = "Dark pane, 2x font size", locale = "en", fontScale = 2.0f)
+@PortraitPreviewsDark
 @Composable
 fun SettingsDefaultAndroidBrowser_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
@@ -312,8 +334,7 @@ fun SettingsDefaultAndroidBrowser_Dark_Preview() {
     }
 }
 
-@Preview(name = "mustOpenSettings, 1x font size", locale = "en")
-@Preview(name = "mustOpenSettings, 2x font size", locale = "en", fontScale = 2.0f)
+@PortraitPreviews
 @Composable
 fun SettingsDefaultAndroidBrowser_Preview_MustOpenSettings() {
     NeevaTheme {
@@ -327,8 +348,7 @@ fun SettingsDefaultAndroidBrowser_Preview_MustOpenSettings() {
     }
 }
 
-@Preview(name = "Dark mustOpenSettings, 1x font size", locale = "en")
-@Preview(name = "Dark mustOpenSettings, 2x font size", locale = "en", fontScale = 2.0f)
+@PortraitPreviewsDark
 @Composable
 fun SettingsDefaultAndroidBrowser_Dark_Preview_MustOpenSettings() {
     NeevaTheme(useDarkTheme = true) {

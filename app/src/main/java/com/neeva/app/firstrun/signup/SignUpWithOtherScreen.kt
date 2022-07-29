@@ -1,18 +1,14 @@
 package com.neeva.app.firstrun.signup
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
 import com.neeva.app.firstrun.OnboardingContainer
@@ -23,6 +19,11 @@ import com.neeva.app.firstrun.widgets.textfields.OnboardingTextField
 import com.neeva.app.firstrun.widgets.textfields.PasswordTextField
 import com.neeva.app.firstrun.widgets.texts.BadPasswordText
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
+import com.neeva.app.ui.LandscapePreviews
+import com.neeva.app.ui.LandscapePreviewsDark
+import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.PortraitPreviewsDark
+import com.neeva.app.ui.PreviewCompositionLocals
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
@@ -52,15 +53,18 @@ fun SignUpWithOtherScreen(
     val email = rememberSaveable { mutableStateOf("") }
     val password = rememberSaveable { mutableStateOf("") }
 
-    Column(modifier = modifier) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+    ) {
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
+
         WelcomeHeader(
             primaryLabel = stringResource(id = R.string.first_run_intro),
-            secondaryLabel = stringResource(id = R.string.first_run_create_your_free_account),
-            modifier = Modifier
-                .padding(top = dimensionResource(id = R.dimen.sign_up_with_other_padding_top))
+            secondaryLabel = stringResource(id = R.string.first_run_create_your_free_account)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
 
         OnboardingTextField(
             text = email.value,
@@ -68,9 +72,8 @@ fun SignUpWithOtherScreen(
             label = stringResource(id = R.string.email_label)
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
 
-        // TODO(kobec): implement bad password text
         PasswordTextField(
             text = password.value,
             onTextChanged = { password.value = it },
@@ -87,11 +90,11 @@ fun SignUpWithOtherScreen(
             launchLoginIntent = launchLoginIntent
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
 
         OrSeparator()
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
 
         ToggleOnboardingButtons(
             signup = true,
@@ -99,58 +102,36 @@ fun SignUpWithOtherScreen(
             launchLoginIntent = launchLoginIntent
         )
 
-        Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
     }
 }
 
-@Preview("1x scale", locale = "en")
-@Preview("RTL, 1x scale", locale = "he")
+@PortraitPreviews
+@LandscapePreviews
 @Composable
 fun SignUpOther_Light_Preview() {
-    NeevaTheme {
-        SignUpWithOtherContainer(
-            launchLoginIntent = {},
-            onClose = {},
-            navigateToSignIn = {}
-        )
+    PreviewCompositionLocals {
+        NeevaTheme {
+            SignUpWithOtherContainer(
+                launchLoginIntent = {},
+                onClose = {},
+                navigateToSignIn = {}
+            )
+        }
     }
 }
 
-@Preview("Dark 1x scale", locale = "en")
-@Preview("Dark RTL, 1x scale", locale = "he")
+@PortraitPreviewsDark
+@LandscapePreviewsDark
 @Composable
 fun SignUpOther_Dark_Preview() {
-    NeevaTheme(useDarkTheme = true) {
-        SignUpWithOtherContainer(
-            launchLoginIntent = {},
-            onClose = {},
-            navigateToSignIn = {}
-        )
-    }
-}
-
-@Preview("Light Landscape, 1x scale", heightDp = 400, locale = "en", device = PIXEL_C)
-@Preview("Light Landscape, RTL, 1x scale", heightDp = 400, locale = "he", device = PIXEL_C)
-@Composable
-fun SignUpOther_Landscape_Preview() {
-    NeevaTheme {
-        SignUpWithOtherContainer(
-            launchLoginIntent = {},
-            onClose = {},
-            navigateToSignIn = {}
-        )
-    }
-}
-
-@Preview("Dark Landscape, 1x scale", heightDp = 400, locale = "en", device = PIXEL_C)
-@Preview("Dark Landscape, RTL, 1x scale", heightDp = 400, locale = "he", device = PIXEL_C)
-@Composable
-fun SignUpOther_Dark_Landscape_Preview() {
-    NeevaTheme(useDarkTheme = true) {
-        SignUpWithOtherContainer(
-            launchLoginIntent = {},
-            onClose = {},
-            navigateToSignIn = {}
-        )
+    PreviewCompositionLocals {
+        NeevaTheme(useDarkTheme = true) {
+            SignUpWithOtherContainer(
+                launchLoginIntent = {},
+                onClose = {},
+                navigateToSignIn = {}
+            )
+        }
     }
 }

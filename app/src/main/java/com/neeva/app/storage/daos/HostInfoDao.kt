@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.neeva.app.NeevaConstants
 import com.neeva.app.storage.entities.HostInfo
 import kotlinx.coroutines.flow.Flow
 
@@ -51,5 +52,19 @@ interface HostInfoDao {
             upsert(HostInfo(host = host, isTrackingAllowed = true))
             false
         }
+    }
+
+    suspend fun initializeForFirstRun(neevaConstants: NeevaConstants) {
+        // Initialize Cookie Cutter with an exclusion for the homepage.
+        // Although we could do this using a Room callback when the database is first created,
+        // it's safer to rely on using the HostInfoDao to do it directly rather than use raw SQL
+        // statements that don't get validated by Room, which can break if anyone ever updates the
+        // HostInfo class.
+        upsert(
+            HostInfo(
+                host = neevaConstants.appHost,
+                isTrackingAllowed = true
+            )
+        )
     }
 }

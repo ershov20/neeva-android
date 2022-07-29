@@ -1,5 +1,6 @@
 package com.neeva.app.ui
 
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -68,7 +69,17 @@ val previewCardGridTitles by lazy {
 @Preview(locale = "he")
 annotation class PortraitPreviews
 
+@Preview(locale = "en", uiMode = UI_MODE_NIGHT_YES)
+@Preview(locale = "en", fontScale = 2.0f, uiMode = UI_MODE_NIGHT_YES)
+@Preview(locale = "he", uiMode = UI_MODE_NIGHT_YES)
+annotation class PortraitPreviewsDark
+
 @Preview(widthDp = 731, heightDp = 390, locale = "en")
 @Preview(widthDp = 731, heightDp = 390, locale = "en", fontScale = 2.0f)
 @Preview(widthDp = 731, heightDp = 390, locale = "he")
 annotation class LandscapePreviews
+
+@Preview(widthDp = 731, heightDp = 390, locale = "en", uiMode = UI_MODE_NIGHT_YES)
+@Preview(widthDp = 731, heightDp = 390, locale = "en", fontScale = 2.0f, uiMode = UI_MODE_NIGHT_YES)
+@Preview(widthDp = 731, heightDp = 390, locale = "he", uiMode = UI_MODE_NIGHT_YES)
+annotation class LandscapePreviewsDark

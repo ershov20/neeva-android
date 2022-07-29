@@ -72,6 +72,13 @@ enum class SettingsToggle(
         primaryLabelId = R.string.tracking_protection,
         defaultValue = true
     ),
+    LOGGING_CONSENT(
+        primaryLabelId = R.string.logging_consent_toggle_title,
+        secondaryLabelId = R.string.logging_consent_toggle_subtitle,
+
+        // TODO(dan.alcantara): Figure out what to do here.  This is set to opt-out currently.
+        defaultValue = true
+    ),
     CLEAR_BROWSING_HISTORY(
         primaryLabelId = R.string.settings_browsing_history,
         defaultValue = true

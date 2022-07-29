@@ -76,6 +76,10 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                     primaryLabelId = R.string.settings_privacy_policy,
                     url = Uri.parse(neevaConstants.appPrivacyURL)
                 ),
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.LOGGING_CONSENT
+                )
             )
         ),
         SettingsGroupData(

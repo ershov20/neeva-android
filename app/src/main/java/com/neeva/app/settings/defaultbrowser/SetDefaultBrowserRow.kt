@@ -1,4 +1,4 @@
-package com.neeva.app.settings.setDefaultAndroidBrowser
+package com.neeva.app.settings.defaultbrowser
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

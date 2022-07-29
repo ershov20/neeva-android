@@ -1,6 +1,7 @@
 package com.neeva.app.firstrun.widgets.buttons
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
@@ -50,13 +51,36 @@ fun OnboardingButton(
     enabled: Boolean = true
 ) {
     val firstRunModel = LocalFirstRunModel.current
-    val context = LocalContext.current
     val appNavModel = LocalAppNavModel.current
+    val context = LocalContext.current
+
+    OnboardingButton(
+        emailProvided = emailProvided,
+        passwordProvided = passwordProvided,
+        signup = signup,
+        provider = provider,
+        launchLoginIntent = launchLoginIntent,
+        onActivityResult = { result ->
+            firstRunModel.handleLoginActivityResult(context, result) { appNavModel.openUrl(it) }
+        },
+        enabled = enabled
+    )
+}
+
+@Composable
+fun OnboardingButton(
+    emailProvided: String? = null,
+    passwordProvided: String? = null,
+    signup: Boolean,
+    provider: NeevaUser.SSOProvider,
+    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
+    onActivityResult: (ActivityResult) -> Unit,
+    enabled: Boolean = true
+) {
     val resultLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        firstRunModel.handleLoginActivityResult(context, result) { appNavModel.openUrl(it) }
-    }
+        ActivityResultContracts.StartActivityForResult(),
+        onActivityResult
+    )
     val onClick = {
         launchLoginIntent(
             LaunchLoginIntentParams(
@@ -266,7 +290,8 @@ fun NeevaOnboardingButtonPreview_Light() {
             signup = signup,
             enabled = isEnabled,
             provider = NeevaUser.SSOProvider.OKTA,
-            launchLoginIntent = {}
+            launchLoginIntent = {},
+            onActivityResult = {}
         )
     }
 }

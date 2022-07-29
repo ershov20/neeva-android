@@ -21,6 +21,9 @@
     <!-- [General][Button][a11y] Removes all of a user's input from the attached widget. -->
     <string name="clear">Clear</string>
 
+    <!-- [General][Button] Displayed on buttons that will send you to the next page. -->
+    <string name="continue_button">Continue</string>
+
     <!-- [General][Snackbar] Indicates that something has been copied to the clipboard. -->
     <string name="copied_to_clipboard">Copied to clipboard</string>
 
@@ -35,6 +38,9 @@
 
     <!-- [General] Label for a text field that allows the user to enter a description for something they are creating. -->
     <string name="description">Description</string>
+
+    <!-- [General] Separates out items in a horizontal list. -->
+    <string name="dot_separator" translatable="false"> · </string>
 
     <!-- [General] Label for a link that takes the user to a page to learn more about a feature -->
     <string name="learn_more">Learn more</string>
@@ -54,6 +60,9 @@
     <!-- [General][Button][a11y] Moves to the previous item. -->
     <string name="previous">Previous</string>
 
+    <!-- [General][Button] When clicked, shows the user the Terms of Service. -->
+    <string name="privacy_policy">Privacy Policy</string>
+
     <!-- [General][a11y] When clicked, copies the associated text into the URL bar for editing. -->
     <string name="refine">Refine</string>
 
@@ -65,6 +74,9 @@
 
     <!-- [General][a11y] Triggers sharing something with another person or app. -->
     <string name="share">Share</string>
+
+    <!-- [General][Button] When clicked, shows the user the Terms of Service. -->
+    <string name="terms_of_service">Terms of Service</string>
 
     <!-- [General] Label for a text field that allows the user to enter a title for something they are creating. -->
     <string name="title">Title</string>
@@ -384,6 +396,9 @@
     <!-- [First run][Button] Allows the user to move past the welcome screen. -->
     <string name="get_started">Get started</string>
 
+    <!-- [First run] Encourages users to send usage statistics to Neeva. -->
+    <string name="logging_consent">Help improve this app by sending usage statistics to Neeva.</string>
+
     <!-- [Sign up] Header displayed when asking the user to create an account. -->
     <string name="first_run_create_your_free_account">Create your free Neeva account</string>
 
@@ -456,6 +471,12 @@
 
     <!-- [Settings][Header] Header for privacy settings. -->
     <string name="settings_privacy">Privacy</string>
+
+    <!-- [Settings] Header for toggle that asks users to send usage statistics to Neeva. -->
+    <string name="logging_consent_toggle_title">Help improve Neeva</string>
+
+    <!-- [Settings] Subtitle for toggle that asks users to send usage statistics to Neeva. -->
+    <string name="logging_consent_toggle_subtitle">Automatically send usage statistics to Neeva</string>
 
     <!-- [Settings][Button] Sends the user to a screen where they can clear their browsing data. -->
     <string name="settings_clear_browsing_data">Clear browsing data</string>

@@ -19,10 +19,10 @@ import com.neeva.app.settings.LicensesPane
 import com.neeva.app.settings.clearBrowsing.ClearBrowsingPane
 import com.neeva.app.settings.cookiecutter.CookieCutterPane
 import com.neeva.app.settings.cookiecutter.CookiePreferencesPane
+import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserPane
 import com.neeva.app.settings.featureFlags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
 import com.neeva.app.settings.profile.ProfileSettingsPane
-import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserPane
 import com.neeva.app.spaces.EditSpaceDialog
 import com.neeva.app.spaces.SpaceDetail
 import com.neeva.app.spaces.SpaceEditMode

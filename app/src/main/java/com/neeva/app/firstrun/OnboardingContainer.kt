@@ -1,15 +1,13 @@
 package com.neeva.app.firstrun
 
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,8 +19,8 @@ import com.neeva.app.firstrun.widgets.OnboardingStickyFooter
 import com.neeva.app.firstrun.widgets.buttons.CloseButton
 import com.neeva.app.firstrun.widgets.textfields.rememberIsKeyboardOpen
 import com.neeva.app.ui.theme.ColorPalette
+import com.neeva.app.ui.widgets.ColumnWithMoreIndicator
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun OnboardingContainer(
     showBrowser: () -> Unit,
@@ -41,13 +39,17 @@ fun OnboardingContainer(
             val scrollState = rememberScrollState()
             val isKeyboardOpen by rememberIsKeyboardOpen()
             Column {
-                content(
-                    Modifier
-                        .fillMaxHeight()
-                        .verticalScroll(scrollState)
-                        .padding(horizontal = dimensionResource(id = R.dimen.first_run_padding))
-                        .then(Modifier.weight(1f, false))
-                )
+                ColumnWithMoreIndicator(
+                    scrollState = scrollState,
+                    color = backgroundColor,
+                    modifier = Modifier.weight(1f, fill = true)
+                ) {
+                    content(
+                        Modifier
+                            .fillMaxHeight()
+                            .padding(horizontal = dimensionResource(id = R.dimen.first_run_padding))
+                    )
+                }
 
                 if (!isKeyboardOpen) {
                     OnboardingStickyFooter(useSignUpStickyFooter, scrollState, stickyFooterOnClick)

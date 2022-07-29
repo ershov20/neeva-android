@@ -40,6 +40,7 @@ abstract class BaseScreenshotTest {
     companion object {
         val TAG = BaseScreenshotTest::class.simpleName
         const val GOLDEN_SCREENSHOT_DIRECTORY = "golden"
+        const val ALLOWED_FUDGE_FACTOR = 3
     }
 
     @get:Rule
@@ -126,9 +127,9 @@ abstract class BaseScreenshotTest {
         val actualBlue = (actualPixel and 0x00ff0000) shr 16
 
         return when {
-            abs(expectedRed - actualRed) > 1 -> false
-            abs(expectedGreen - actualGreen) > 1 -> false
-            abs(expectedBlue - actualBlue) > 1 -> false
+            abs(expectedRed - actualRed) > ALLOWED_FUDGE_FACTOR -> false
+            abs(expectedGreen - actualGreen) > ALLOWED_FUDGE_FACTOR -> false
+            abs(expectedBlue - actualBlue) > ALLOWED_FUDGE_FACTOR -> false
             else -> true
         }
     }

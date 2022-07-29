@@ -1,4 +1,4 @@
-package com.neeva.app.settings.setDefaultAndroidBrowser
+package com.neeva.app.settings.defaultbrowser
 
 import android.content.Context
 import android.content.Intent

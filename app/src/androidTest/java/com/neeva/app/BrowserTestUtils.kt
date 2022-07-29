@@ -212,6 +212,18 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.enableCloseAllInco
     waitForNavDestination(AppNavDestination.BROWSER)
 }
 
+/** Toggle the setting for app usage logging. */
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.toggleUsageLoggingSetting() {
+    openOverflowMenuAndClickItem(R.string.settings)
+    waitForNavDestination(AppNavDestination.SETTINGS)
+    waitForNodeWithTag("SettingsPaneItems").performScrollToNode(
+        hasText(getString(R.string.logging_consent_toggle_title))
+    )
+    clickOnNodeWithText(getString(R.string.logging_consent_toggle_title))
+    onBackPressed()
+    waitForNavDestination(AppNavDestination.BROWSER)
+}
+
 fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.closeActiveTabFromTabGrid() {
     val activeTabTitle =
         activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value

@@ -13,6 +13,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.NeevaConstants
 import com.neeva.app.logging.ClientLogger
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUserToken
@@ -40,6 +41,7 @@ class FirstRunModelTest : BaseTest() {
     private lateinit var context: Context
     private lateinit var firstRunModel: FirstRunModel
     private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
+    private lateinit var settingsDataModel: SettingsDataModel
 
     override fun setUp() {
         super.setUp()
@@ -57,12 +59,17 @@ class FirstRunModelTest : BaseTest() {
             neevaUserToken = neevaUserToken,
             neevaConstants = neevaConstants
         )
+
+        settingsDataModel = SettingsDataModel(sharedPreferencesModel)
+
         val clientLogger = ClientLogger(
-            apolloWrapper,
-            coroutineScopeRule.scope,
-            coroutineScopeRule.dispatchers,
-            neevaConstants,
-            sharedPreferencesModel
+            authenticatedApolloWrapper = apolloWrapper,
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
+            neevaConstants = neevaConstants,
+            neevaUserToken = neevaUserToken,
+            sharedPreferencesModel = sharedPreferencesModel,
+            settingsDataModel = settingsDataModel
         )
         val popupModel = PopupModel(coroutineScopeRule.scope, coroutineScopeRule.dispatchers)
 

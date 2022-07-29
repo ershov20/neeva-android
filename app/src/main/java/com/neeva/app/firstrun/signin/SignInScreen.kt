@@ -1,5 +1,6 @@
 package com.neeva.app.firstrun.signin
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -8,10 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Devices.PIXEL_C
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.firstrun.LaunchLoginIntentParams
@@ -21,6 +19,11 @@ import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.firstrun.widgets.buttons.ToggleOnboardingButtons
 import com.neeva.app.firstrun.widgets.textfields.OnboardingTextField
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
+import com.neeva.app.ui.LandscapePreviews
+import com.neeva.app.ui.LandscapePreviewsDark
+import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.PortraitPreviewsDark
+import com.neeva.app.ui.PreviewCompositionLocals
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
@@ -49,11 +52,14 @@ fun SignInScreen(
 ) {
     val email = rememberSaveable { mutableStateOf("") }
 
-    Column(modifier = modifier) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        modifier = modifier
+    ) {
+        Spacer(modifier = Modifier.padding(Dimensions.PADDING_HUGE))
+
         WelcomeHeader(
-            primaryLabel = stringResource(id = R.string.sign_in),
-            modifier = Modifier
-                .padding(top = dimensionResource(id = R.dimen.sign_up_landing_padding_top))
+            primaryLabel = stringResource(id = R.string.sign_in)
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -85,58 +91,36 @@ fun SignInScreen(
             launchLoginIntent = launchLoginIntent
         )
 
-        Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
+        Spacer(modifier = Modifier.padding(Dimensions.PADDING_HUGE))
     }
 }
 
-@Preview("1x scale", locale = "en")
-@Preview("RTL, 1x scale", locale = "he")
+@PortraitPreviews
+@LandscapePreviews
 @Composable
-fun SignUpOther_Light_Preview() {
-    NeevaTheme {
-        SignInScreenContainer(
-            launchLoginIntent = {},
-            onClose = {},
-            navigateToSignUp = {}
-        )
+fun SignInScreen_Light_Preview() {
+    PreviewCompositionLocals {
+        NeevaTheme {
+            SignInScreenContainer(
+                launchLoginIntent = {},
+                onClose = {},
+                navigateToSignUp = {}
+            )
+        }
     }
 }
 
-@Preview("Dark 1x scale", locale = "en")
-@Preview("Dark RTL, 1x scale", locale = "he")
+@PortraitPreviewsDark
+@LandscapePreviewsDark
 @Composable
-fun SignUpOther_Dark_Preview() {
-    NeevaTheme(useDarkTheme = true) {
-        SignInScreenContainer(
-            launchLoginIntent = {},
-            onClose = {},
-            navigateToSignUp = {}
-        )
-    }
-}
-
-@Preview("Light Landscape, 1x scale", heightDp = 400, locale = "en", device = PIXEL_C)
-@Preview("Light Landscape, RTL, 1x scale", heightDp = 400, locale = "he", device = PIXEL_C)
-@Composable
-fun SignUpOther_Landscape_Preview() {
-    NeevaTheme {
-        SignInScreenContainer(
-            launchLoginIntent = {},
-            onClose = {},
-            navigateToSignUp = {}
-        )
-    }
-}
-
-@Preview("Dark Landscape, 1x scale", heightDp = 400, locale = "en", device = PIXEL_C)
-@Preview("Dark Landscape, RTL, 1x scale", heightDp = 400, locale = "he", device = PIXEL_C)
-@Composable
-fun SignUpOther_Dark_Landscape_Preview() {
-    NeevaTheme(useDarkTheme = true) {
-        SignInScreenContainer(
-            launchLoginIntent = {},
-            onClose = {},
-            navigateToSignUp = {}
-        )
+fun SignInScreen_Dark_Preview() {
+    PreviewCompositionLocals {
+        NeevaTheme(useDarkTheme = true) {
+            SignInScreenContainer(
+                launchLoginIntent = {},
+                onClose = {},
+                navigateToSignUp = {}
+            )
+        }
     }
 }

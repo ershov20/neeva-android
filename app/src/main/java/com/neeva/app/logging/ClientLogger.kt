@@ -5,8 +5,12 @@ import com.apollographql.apollo3.api.Optional
 import com.neeva.app.BuildConfig
 import com.neeva.app.Dispatchers
 import com.neeva.app.LogMutation
+import com.neeva.app.NeevaBrowser
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.firstrun.FirstRunModel
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.ClientLog
 import com.neeva.app.type.ClientLogBase
@@ -14,6 +18,7 @@ import com.neeva.app.type.ClientLogCounter
 import com.neeva.app.type.ClientLogCounterAttribute
 import com.neeva.app.type.ClientLogEnvironment
 import com.neeva.app.type.ClientLogInput
+import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -22,17 +27,30 @@ enum class ClientLoggerStatus {
     DISABLED
 }
 
-/** TODO(dan.alcantara): Disallow logging until the user has finished First Run. */
+data class PendingLog(
+    val path: LogConfig.Interaction,
+    val attributes: List<ClientLogCounterAttribute>?
+)
+
 class ClientLogger(
-    private val apolloWrapper: AuthenticatedApolloWrapper,
+    private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
     private val neevaConstants: NeevaConstants,
-    private val sharedPreferencesModel: SharedPreferencesModel
+    private val neevaUserToken: NeevaUserToken,
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val settingsDataModel: SettingsDataModel
 ) {
-    private val env: ClientLogEnvironment =
-        if (BuildConfig.DEBUG) ClientLogEnvironment.Dev else ClientLogEnvironment.Prod
+    private val environment: ClientLogEnvironment = when {
+        NeevaBrowser.isBeingInstrumented() -> ClientLogEnvironment.Prod
+        BuildConfig.DEBUG -> ClientLogEnvironment.Dev
+        else -> ClientLogEnvironment.Prod
+    }
+
     private var status: ClientLoggerStatus = ClientLoggerStatus.ENABLED
+
+    /** Logs that weren't allowed to be sent when created.  Will be sent if/when allowed. */
+    private val pendingLogs = mutableListOf<PendingLog>()
 
     /** Enables or disables logging, based on whether the user is in private browsing mode. */
     fun onProfileSwitch(useIncognito: Boolean) {
@@ -44,7 +62,26 @@ class ClientLogger(
     }
 
     fun logCounter(path: LogConfig.Interaction, attributes: List<ClientLogCounterAttribute>?) {
+        coroutineScope.launch(dispatchers.io) {
+            logCounterInternal(path, attributes)
+        }
+    }
+
+    private suspend fun logCounterInternal(
+        path: LogConfig.Interaction,
+        attributes: List<ClientLogCounterAttribute>?
+    ) {
         if (status != ClientLoggerStatus.ENABLED) {
+            return
+        }
+
+        if (FirstRunModel.mustShowFirstRun(sharedPreferencesModel, neevaUserToken)) {
+            pendingLogs.add(PendingLog(path, attributes))
+            return
+        }
+
+        if (!settingsDataModel.getSettingsToggleValue(SettingsToggle.LOGGING_CONSENT)) {
+            Log.i(TAG, "Blocking log because logging is disabled")
             return
         }
 
@@ -61,29 +98,44 @@ class ClientLogger(
 
         // Check feature flag when we start supporting it
         val clientLogBase =
-            ClientLogBase(neevaConstants.browserIdentifier, BuildConfig.VERSION_NAME, env)
+            ClientLogBase(neevaConstants.browserIdentifier, BuildConfig.VERSION_NAME, environment)
         val clientLogCounter = ClientLogCounter(
             path.interactionName,
             Optional.presentIfNotNull(mutableAttributes)
         )
         val clientLog = ClientLog(Optional.presentIfNotNull(clientLogCounter))
 
-        if (BuildConfig.DEBUG) {
+        if (environment == ClientLogEnvironment.Dev) {
             val attributeMap = mutableAttributes.map { "${it.key}: ${it.value}" }
             Log.d(TAG, "${path.interactionName}: ${attributeMap.joinToString(separator = ",")}")
         } else {
             val logMutation = LogMutation(
                 ClientLogInput(
-                    Optional.presentIfNotNull(clientLogBase),
-                    listOf(clientLog)
+                    base = Optional.presentIfNotNull(clientLogBase),
+                    log = listOf(clientLog)
                 )
             )
 
-            coroutineScope.launch(dispatchers.io) {
-                apolloWrapper.performMutation(
-                    mutation = logMutation,
-                    userMustBeLoggedIn = false
-                )
+            // TODO(dan.alcantara): Should we re-queue any events if the mutation fails?
+            authenticatedApolloWrapper.performMutation(
+                mutation = logMutation,
+                userMustBeLoggedIn = false
+            )
+        }
+    }
+
+    /** Process any logged events that we were previously unable to send. */
+    fun sendPendingLogs() {
+        // Iterate on a copy of the list to prevent ConcurrentModificationExceptions.
+        val copiedLogs = synchronized(this) {
+            val copy = pendingLogs.toList()
+            pendingLogs.clear()
+            return@synchronized copy
+        }
+
+        coroutineScope.launch(dispatchers.io) {
+            copiedLogs.forEach {
+                logCounterInternal(it.path, it.attributes)
             }
         }
     }

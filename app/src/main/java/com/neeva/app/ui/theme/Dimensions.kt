@@ -7,6 +7,7 @@ object Dimensions {
     val PADDING_SMALL = 8.dp
     val PADDING_MEDIUM = 12.dp
     val PADDING_LARGE = 16.dp
+    val PADDING_HUGE = 24.dp
 
     val RADIUS_TINY = 4.dp
     val RADIUS_SMALL = 8.dp
@@ -19,6 +20,8 @@ object Dimensions {
     val SIZE_ICON_SMALL = 16.dp
     val SIZE_ICON_MEDIUM = 24.dp
     val SIZE_ICON_TOOLBAR = 21.dp
+
+    val SCROLL_GRADIENT_INDICATOR = 48.dp
 
     /** Default size of a Material icon. */
     val SIZE_ICON = 24.dp

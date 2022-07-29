@@ -17,10 +17,10 @@ import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.clearBrowsing.ClearDataButtonContainer
+import com.neeva.app.settings.defaultbrowser.SetDefaultBrowserRow
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.profile.ProfileRowContainer
 import com.neeva.app.settings.profile.SubscriptionRow
-import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultBrowserRow
 import com.neeva.app.settings.sharedComposables.subcomponents.CheckBoxGroup
 import com.neeva.app.settings.sharedComposables.subcomponents.CheckBoxItem
 import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow

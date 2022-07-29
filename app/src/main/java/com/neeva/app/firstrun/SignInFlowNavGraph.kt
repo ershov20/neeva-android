@@ -4,6 +4,7 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
@@ -20,7 +21,6 @@ import com.neeva.app.appnav.Transitions
 import com.neeva.app.firstrun.signin.SignInScreenContainer
 import com.neeva.app.firstrun.signup.SignUpLandingContainer
 import com.neeva.app.firstrun.signup.SignUpWithOtherContainer
-import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 
 enum class SignInFlowNavDestination {
@@ -32,11 +32,9 @@ enum class SignInFlowNavDestination {
 /** Manages navigation between the different screens of the sign-in flow. */
 class SignInFlowNavModel(
     private val appNavModel: AppNavModel,
-    private val clientLogger: ClientLogger,
     private val navController: NavController
 ) {
     fun navigateBackToSignUpLandingPage() {
-        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_LANDING, null)
         navController.navigate(SignInFlowNavDestination.SIGN_UP_LANDING_PAGE.route) {
             launchSingleTop = true
 
@@ -47,14 +45,12 @@ class SignInFlowNavModel(
     }
 
     fun navigateToSignIn() {
-        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_SIGN_IN, null)
         navController.navigate(SignInFlowNavDestination.SIGN_IN.route) {
             launchSingleTop = true
         }
     }
 
     fun navigateToSignUpWithOther() {
-        clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_OTHER, null)
         navController.navigate(SignInFlowNavDestination.SIGN_UP_OTHER.route) {
             launchSingleTop = true
         }
@@ -68,11 +64,10 @@ class SignInFlowNavModel(
 @Composable
 fun rememberSignInFlowNavModel(): SignInFlowNavModel {
     val appNavModel = LocalAppNavModel.current
-    val clientLogger = LocalClientLogger.current
     val navController = LocalNavHostController.current
 
-    return remember(appNavModel, clientLogger, navController) {
-        SignInFlowNavModel(appNavModel, clientLogger, navController)
+    return remember(appNavModel, navController) {
+        SignInFlowNavModel(appNavModel, navController)
     }
 }
 
@@ -87,15 +82,24 @@ fun NavGraphBuilder.signInFlowNavGraph() {
             enterTransition = { EnterTransition.None },
             exitTransition = { Transitions.fadeOutLambda() }
         ) {
+            val clientLogger = LocalClientLogger.current
+            val context = LocalContext.current
             val firstRunModel = LocalFirstRunModel.current
             val signInFlowNavModel = rememberSignInFlowNavModel()
+
             SignUpLandingContainer(
                 launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
-                onOpenUrl = firstRunModel.openInCustomTabs(LocalContext.current),
+                onOpenUrl = {
+                    firstRunModel.openInCustomTabs(context, it)
+                },
                 onClose = firstRunModel.getOnCloseOnboarding(signInFlowNavModel::exitSignInFlow),
                 navigateToSignIn = signInFlowNavModel::navigateToSignIn,
                 showSignUpWithOther = signInFlowNavModel::navigateToSignUpWithOther
             )
+
+            LaunchedEffect(true) {
+                clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_LANDING, null)
+            }
         }
 
         composable(
@@ -103,6 +107,7 @@ fun NavGraphBuilder.signInFlowNavGraph() {
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
+            val clientLogger = LocalClientLogger.current
             val firstRunModel = LocalFirstRunModel.current
             val signInFlowNavModel = rememberSignInFlowNavModel()
             SignUpWithOtherContainer(
@@ -110,6 +115,10 @@ fun NavGraphBuilder.signInFlowNavGraph() {
                 onClose = firstRunModel.getOnCloseOnboarding(signInFlowNavModel::exitSignInFlow),
                 navigateToSignIn = signInFlowNavModel::navigateToSignIn
             )
+
+            LaunchedEffect(true) {
+                clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_OTHER, null)
+            }
         }
 
         composable(
@@ -117,6 +126,7 @@ fun NavGraphBuilder.signInFlowNavGraph() {
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None }
         ) {
+            val clientLogger = LocalClientLogger.current
             val firstRunModel = LocalFirstRunModel.current
             val signInFlowNavModel = rememberSignInFlowNavModel()
             SignInScreenContainer(
@@ -124,6 +134,10 @@ fun NavGraphBuilder.signInFlowNavGraph() {
                 onClose = firstRunModel.getOnCloseOnboarding(signInFlowNavModel::exitSignInFlow),
                 navigateToSignUp = signInFlowNavModel::navigateBackToSignUpLandingPage
             )
+
+            LaunchedEffect(true) {
+                clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_SIGN_IN, null)
+            }
         }
     }
 }

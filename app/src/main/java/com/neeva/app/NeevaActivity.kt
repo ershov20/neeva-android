@@ -54,7 +54,7 @@ import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
-import com.neeva.app.settings.setDefaultAndroidBrowser.SetDefaultAndroidBrowserManager
+import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase

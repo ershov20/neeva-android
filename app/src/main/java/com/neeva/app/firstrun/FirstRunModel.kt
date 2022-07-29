@@ -81,6 +81,28 @@ class FirstRunModel internal constructor(
                 SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.ShouldLogFirstLogin, true
             )
         }
+
+        fun mustShowFirstRun(
+            sharedPreferencesModel: SharedPreferencesModel,
+            neevaUserToken: NeevaUserToken
+        ): Boolean {
+            val isFirstRunDone = sharedPreferencesModel.getValue(
+                SharedPrefFolder.FirstRun,
+                SharedPrefFolder.FirstRun.FirstRunDone,
+                false
+            )
+
+            return when {
+                // User has already signed in.
+                neevaUserToken.getToken().isNotEmpty() -> false
+
+                // SharedPreference has been set, so they must have gone through First Run already.
+                isFirstRunDone -> false
+
+                // Show First Run.
+                else -> true
+            }
+        }
     }
 
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -130,23 +152,7 @@ class FirstRunModel internal constructor(
     }
 
     fun mustShowFirstRun(): Boolean {
-        val isFirstRunDone = sharedPreferencesModel.getValue(
-            SharedPrefFolder.FirstRun,
-            SharedPrefFolder.FirstRun.FirstRunDone,
-            false
-        )
-
-        // TODO(dan.alcantara): Add country checks.
-        return when {
-            // User has already signed in, so they must have finished First Run.
-            neevaUserToken.getToken().isNotEmpty() -> false
-
-            // SharedPreference has been set, so they must have gone through the FirstRunActivity.
-            isFirstRunDone -> false
-
-            // Show First Run.
-            else -> true
-        }
+        return mustShowFirstRun(sharedPreferencesModel, neevaUserToken)
     }
 
     fun setFirstRunDone() {
@@ -197,21 +203,19 @@ class FirstRunModel internal constructor(
         }
     }
 
-    fun openInCustomTabs(context: Context): (Uri) -> Unit {
-        return { uri ->
-            val intent = CustomTabsIntent.Builder()
-                .setShowTitle(true)
-                .build()
-                .intent
-            intent.setPackage(
-                CustomTabsClient.getPackageName(context, listOf("com.android.chrome"))
-            )
-            intent.data = uri
-            if (context !is Activity) {
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            }
-            context.startActivity(intent)
+    fun openInCustomTabs(context: Context, uri: Uri) {
+        val intent = CustomTabsIntent.Builder()
+            .setShowTitle(true)
+            .build()
+            .intent
+        intent.setPackage(
+            CustomTabsClient.getPackageName(context, listOf("com.android.chrome"))
+        )
+        intent.data = uri
+        if (context !is Activity) {
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
+        context.startActivity(intent)
     }
 
     private fun launchCustomTabsLoginIntent(
@@ -277,8 +281,9 @@ class FirstRunModel internal constructor(
     ) {
         extractLoginUri(result)
             ?.let(onSuccess) ?: run {
-            openInCustomTabs(context).invoke(
-                authUri(
+            openInCustomTabs(
+                context = context,
+                uri = authUri(
                     signup = intentParamFlow.value?.signup ?: false,
                     provider = intentParamFlow.value?.provider ?: NeevaUser.SSOProvider.GOOGLE,
                     loginHint = intentParamFlow.value?.emailProvided ?: ""
