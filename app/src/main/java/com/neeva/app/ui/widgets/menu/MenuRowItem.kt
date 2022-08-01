@@ -84,13 +84,10 @@ data class MenuHeader(
                     )
                 }
 
-                // UX says to cap the number of lines to 18.  While users shouldn't normally hit
-                // this, Google search result URLs (e.g.) are painfully long and require 8 lines on
-                // a Pixel 2 using this font.
                 secondaryLabel?.let {
                     Text(
                         text = secondaryLabel,
-                        maxLines = 18,
+                        maxLines = 5,
                         overflow = TextOverflow.Ellipsis,
                         style = MaterialTheme.typography.bodyMedium
                     )
