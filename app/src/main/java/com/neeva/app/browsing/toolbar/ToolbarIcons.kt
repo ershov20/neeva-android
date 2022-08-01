@@ -10,10 +10,10 @@ import com.neeva.app.R
 
 /** Icon used to represent the tab switcher or the regular tab grid. */
 @Composable
-fun TabSwitcherIcon(contentDescription: String) {
+fun TabSwitcherIcon(contentDescription: String = "") {
     Icon(
-        painter = painterResource(R.drawable.ic_baseline_filter_none_24),
+        painter = painterResource(R.drawable.ic_tabs_24px),
         contentDescription = contentDescription,
-        modifier = Modifier.size(20.dp)
+        modifier = Modifier.size(24.dp)
     )
 }
