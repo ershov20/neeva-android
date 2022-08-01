@@ -60,7 +60,11 @@ fun NeevascopeResultScreen(
                 .fillMaxWidth()
                 .padding(horizontal = Dimensions.PADDING_LARGE)
         ) {
-            searches?.webSearches?.let {
+            searches?.redditDiscussions?.takeIf { it.isNotEmpty() }?.let {
+                // TODO: Add discussion page
+            }
+
+            searches?.webSearches?.takeIf { it.isNotEmpty() }?.let {
                 WebResultsList(
                     webResults = it,
                     openUrl = openUrl,
@@ -68,10 +72,20 @@ fun NeevascopeResultScreen(
                 )
             }
 
-            searches?.relatedSearches?.let {
+            searches?.relatedSearches?.takeIf { it.isNotEmpty() }?.let {
                 RelatedSearchesList(
                     title = R.string.neevascope_related_search,
                     searches = it,
+                    openUrl = openUrl,
+                    neevaConstants = neevaConstants,
+                    onDismiss = onDismiss
+                )
+            }
+
+            searches?.memorizedSearches?.takeIf { it.isNotEmpty() }?.let {
+                RelatedSearchesList(
+                    title = R.string.neevascope_memorized_query,
+                    searches = it.take(5),
                     openUrl = openUrl,
                     neevaConstants = neevaConstants,
                     onDismiss = onDismiss

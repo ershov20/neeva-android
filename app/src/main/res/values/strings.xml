@@ -668,15 +668,18 @@
          This is a pun because the "NeevaScope" feature is like a "telescope". -->
     <string name="neevascope_loading">Your NeevaScope is coming into focus…</string>
 
-    <!-- [NeevaScope] Title of the NeevaScope related search. -->
+    <!-- [NeevaScope] Displayed as a header for a section that displays a list of related searches. -->
     <string name="neevascope_related_search">People also search</string>
 
-    <!-- [NeevaScope] Title of the NeevaScope support section. -->
+    <!-- [NeevaScope] Displayed as a header for a section that displays a list of related queries. -->
+    <string name="neevascope_memorized_query">Keep looking</string>
+
+    <!-- [NeevaScope] Displayed as a header for support section. -->
     <string name="neevascope_support_title">Support</string>
 
-    <!-- [NeevaScope] NeevaScope support section introduction.  -->
+    <!-- [NeevaScope] Tells the user what support section does.  -->
     <string name="neevascope_support_body">Have questions or feedback for NeevaScope?</string>
 
-    <!-- [NeevaScope] NeevaScope feedback link.  -->
+    <!-- [NeevaScope] Sends the user to the support page  -->
     <string name="neevascope_contact_us">Contact us via Support</string>
 </resources>

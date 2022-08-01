@@ -982,9 +982,10 @@ abstract class BaseBrowserWrapper internal constructor(
             activeTabModel.displayedInfoFlow.value.mode != ActiveTabModel.DisplayMode.URL
 
         coroutineScope.launch {
-            activeTabModel.urlFlow.collectLatest { query ->
-                neevascopeModel.updateQuery(query.toString())
-            }
+            neevascopeModel.updateQuery(
+                activeTabModel.urlFlow.value.toString(),
+                activeTabModel.titleFlow.value
+            )
         }
 
         popupModel.showBottomSheet { onDismiss ->
