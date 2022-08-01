@@ -16,6 +16,7 @@ weblayer_support_apk="$root_dir/weblayer_support/build/outputs/apk/$mode/weblaye
 
 snapshots_dir="$root_dir/weblayer_support/snapshots"
 chromium_release_dir="$snapshots_dir/$(cat $snapshots_dir/CURRENT_VERSION)-arm"
+chromium_alt_release_dir="$snapshots_dir/$(cat $snapshots_dir/CURRENT_VERSION)-arm32"
 out_dir="$root_dir/build/$mode"
 out_dir_abs_path="$(pwd)/$out_dir"
 
@@ -24,6 +25,25 @@ out_apks="$out_dir/neeva.apks"
 
 rm -f $out_bundle $out_apks
 mkdir -p $out_dir
+
+tmpdir=$(mktemp -d -t $(basename $0)) || exit 1
+
+make_universal_support_apk_if_necessary() {
+    src_apk=$1
+    alt_apk=$2
+    out_apk=$3
+
+    if [ $src_apk -ot $out_apk -a $alt_apk -ot $out_apk ]; then
+        echo "Using cached $out_apk"
+        return
+    fi
+
+    libs=$(zipinfo -1 $alt_apk | grep ^lib)
+    unzip $alt_apk $libs -d $tmpdir
+
+    cp -f $src_apk $out_apk
+    (cd $tmpdir && zip -f $out_apk $libs)
+}
 
 make_archive_if_necessary() {
     src_apk=$1
@@ -39,10 +59,15 @@ make_archive_if_necessary() {
 
 make_archive_if_necessary $app_apk $out_dir/base
 make_archive_if_necessary $weblayer_support_apk $out_dir/weblayer_support
-make_archive_if_necessary $chromium_release_dir/WebLayerSupport.apk $out_dir/weblayer_support_impl --fast
+
+universal_weblayersupport_apk="$out_dir_abs_path/WebLayerSupport-universal.apk"
+make_universal_support_apk_if_necessary \
+    $chromium_release_dir/WebLayerSupport.apk \
+    $chromium_alt_release_dir/WebLayerSupport.apk \
+    $universal_weblayersupport_apk
+make_archive_if_necessary $universal_weblayersupport_apk $out_dir/weblayer_support_impl --fast
 
 # Copy generated manifest over top the one from Chromium:
-tmpdir=$(mktemp -d -t $(basename $0)) || exit 1
 unzip $out_dir/weblayer_support.zip manifest/AndroidManifest.xml -d $tmpdir > /dev/null
 (cd $tmpdir && zip -r $out_dir_abs_path/weblayer_support_impl.zip . > /dev/null)
 
