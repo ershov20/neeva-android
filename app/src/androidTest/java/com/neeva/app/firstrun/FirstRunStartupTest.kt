@@ -61,26 +61,43 @@ class FirstRunStartupTest : BaseBrowserTest() {
         firstRunModel.setFirstRunDone()
 
         activityTestRule.launchActivity(createMainIntent())
-        expectThat(multiActivityTestRule.activities.any { it.get() is FirstRunActivity }).isFalse()
-        expectThat(multiActivityTestRule.activities.any { it.get() is NeevaActivity }).isTrue()
+
+        androidComposeRule.apply {
+            waitUntil { activity is NeevaActivity }
+            multiActivityTestRule.activities.apply {
+                expectThat(any { it.get() is FirstRunActivity }).isFalse()
+                expectThat(any { it.get() is NeevaActivity }).isTrue()
+            }
+        }
     }
 
     @Test
     fun skipFirstRunIfUserTokenIsSet() {
         // Set the user token.  First run shouldn't be shown.
         neevaUserToken.setToken("not a real token, but it's set so first run should get skipped")
+
         activityTestRule.launchActivity(createMainIntent())
-        expectThat(multiActivityTestRule.activities.any { it.get() is FirstRunActivity }).isFalse()
-        expectThat(multiActivityTestRule.activities.any { it.get() is NeevaActivity }).isTrue()
+
+        androidComposeRule.apply {
+            waitUntil { activity is NeevaActivity }
+            multiActivityTestRule.activities.apply {
+                expectThat(any { it.get() is FirstRunActivity }).isFalse()
+                expectThat(any { it.get() is NeevaActivity }).isTrue()
+            }
+        }
     }
 
     @Test
     fun startsFirstRunWhenNecessaryAndSendsLogs() {
         activityTestRule.launchActivity(createMainIntent())
-        expectThat(multiActivityTestRule.activities.any { it.get() is FirstRunActivity }).isTrue()
-        expectThat(multiActivityTestRule.activities.any { it.get() is NeevaActivity }).isFalse()
 
         androidComposeRule.apply {
+            waitUntil { activity is FirstRunActivity }
+            multiActivityTestRule.activities.apply {
+                expectThat(any { it.get() is FirstRunActivity }).isTrue()
+                expectThat(any { it.get() is NeevaActivity }).isFalse()
+            }
+
             waitForIdle()
 
             // Get past the first screen.
@@ -105,10 +122,14 @@ class FirstRunStartupTest : BaseBrowserTest() {
     @Test
     fun startsFirstRunWhenNecessary_ifLoggingDisallowed_discardsLogs() {
         activityTestRule.launchActivity(createMainIntent())
-        expectThat(multiActivityTestRule.activities.any { it.get() is FirstRunActivity }).isTrue()
-        expectThat(multiActivityTestRule.activities.any { it.get() is NeevaActivity }).isFalse()
 
         androidComposeRule.apply {
+            waitUntil { activity is FirstRunActivity }
+            multiActivityTestRule.activities.apply {
+                expectThat(any { it.get() is FirstRunActivity }).isTrue()
+                expectThat(any { it.get() is NeevaActivity }).isFalse()
+            }
+
             waitForIdle()
 
             // Disallow sending logs.
