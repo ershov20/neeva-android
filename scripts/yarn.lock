@@ -331,9 +331,9 @@ commander@^7.0.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-7.2.0.tgz#a36cb57d0b501ce108e4d20559a150a391d97ab7"
   integrity sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==
 
-"cookie-cutter@github:neevaco/cookie-cutter-engine":
+"cookie-cutter@github:neevaco/cookie-cutter-engine#v0.0.2":
   version "0.0.2"
-  resolved "https://codeload.github.com/neevaco/cookie-cutter-engine/tar.gz/cec0a52089f6964309b9b2e164b3849e3fbfc048"
+  resolved "https://codeload.github.com/neevaco/cookie-cutter-engine/tar.gz/44928aea3ae79c4e8974c6abf764489256ea2c9a"
   dependencies:
     "@types/chrome" "^0.0.180"
     "@types/psl" "^1.1.0"
