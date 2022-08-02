@@ -32,11 +32,15 @@ interface URLBarModel {
     val isUserQueryBlank: Flow<Boolean>
         get() = stateFlow.map { it.queryText.isNullOrBlank() }.distinctUntilChanged()
 
-    val isEditing: Flow<Boolean>
-        get() = stateFlow.map { it.isEditing }.distinctUntilChanged()
+    val isLazyTab: Flow<Boolean>
+        get() = stateFlow.map { it.isLazyTab }.distinctUntilChanged()
 
-    /** Replaces all of the text that is in the URL bar. */
-    fun replaceLocationBarText(newValue: String)
+    /**
+     * Replaces all of the text that is in the URL bar.
+     *
+     * [isRefining] should be set to true if the user is editing an existing query or URL.
+     */
+    fun replaceLocationBarText(newValue: String, isRefining: Boolean = false)
 
     /** Called when the contents of the URL bar have been edited. */
     fun onLocationBarTextChanged(newValue: TextFieldValue)
@@ -45,7 +49,7 @@ interface URLBarModel {
     fun acceptAutocompleteSuggestion()
 
     /** Requests focus on the URL bar for editing. */
-    fun showZeroQuery(focusUrlBar: Boolean = true)
+    fun showZeroQuery(focusUrlBar: Boolean = true, isLazyTab: Boolean = false)
 
     /** Clears focus on the URL bar. */
     fun clearFocus()

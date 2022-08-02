@@ -11,6 +11,20 @@ data class URLBarModelState(
     /** Whether or not the user is editing the URL bar and should be shown suggestions. */
     val isEditing: Boolean = false,
 
+    /**
+     * Whether or not the user is in the middle of creating a new tab.
+     *
+     * Being in the "lazy tab" state means that:
+     * 1) The user is being shown zero query or search suggestions after trying to create a new tab
+     *    (e.g. after they click on "new tab" from the CardGrid)
+     *
+     * 2) A new tab will not be created until the user clicks on a link or types in a query.
+     */
+    val isLazyTab: Boolean = false,
+
+    /** Whether or not the user is refining a query or URL they previously entered. */
+    val isRefining: Boolean = false,
+
     /** Whether or not the URL bar should be focused when the user enters Zero Query. */
     val focusUrlBar: Boolean = true,
 
@@ -28,7 +42,6 @@ data class URLBarModelState(
 
     /** The full string of the autocomplete suggestion, if one is available. */
     internal val autocompleteSuggestion: String? = null
-
 ) {
     /** Exactly what the user has typed in, without any autocompleted text tacked on. */
     val userTypedInput: String

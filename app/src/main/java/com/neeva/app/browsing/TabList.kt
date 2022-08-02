@@ -195,6 +195,15 @@ class TabList {
         updateFlow()
     }
 
+    /** Returns the ID of a pre-existing Tab with a URI similar to the [uri] being passed in. */
+    fun findTabWithSimilarUri(uri: Uri): String? {
+        // TODO(dan.alcantara): Replace this with a map instead of iterating through.
+        val fuzzyUri = UriFuzzyMatchData.create(uri)
+        return _orderedTabList.value
+            .firstOrNull { it.fuzzyMatchUrl?.fuzzyEquals(fuzzyUri) == true }
+            ?.id
+    }
+
     private fun updateFlow() {
         _orderedTabList.value = tabs.mapNotNull { guid -> tabInfoMap[guid] }
     }

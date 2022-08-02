@@ -11,9 +11,9 @@ class PreviewUrlBarModel(urlBarModelState: URLBarModelState) : URLBarModel {
     override val stateFlow: StateFlow<URLBarModelState> = MutableStateFlow(urlBarModelState)
     override val urlBarControllerFlow: Flow<UrlBarController?> = MutableStateFlow(null)
 
-    override fun replaceLocationBarText(newValue: String) {}
+    override fun replaceLocationBarText(newValue: String, isRefining: Boolean) {}
     override fun onLocationBarTextChanged(newValue: TextFieldValue) {}
     override fun acceptAutocompleteSuggestion() {}
-    override fun showZeroQuery(focusUrlBar: Boolean) {}
+    override fun showZeroQuery(focusUrlBar: Boolean, isLazyTab: Boolean) {}
     override fun clearFocus() {}
 }

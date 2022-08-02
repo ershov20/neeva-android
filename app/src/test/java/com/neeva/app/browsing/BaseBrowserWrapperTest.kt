@@ -17,6 +17,7 @@ import com.neeva.app.R
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
+import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.createMockNavigationController
@@ -33,6 +34,8 @@ import com.neeva.app.userdata.NeevaUser
 import java.util.EnumSet
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserFragment
@@ -103,7 +106,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var neevaUser: NeevaUser
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
-    private lateinit var urlBarModelIsEditing: MutableStateFlow<Boolean>
+    private lateinit var urlBarModelStateFlow: MutableStateFlow<URLBarModelState>
     private lateinit var mockTabs: MutableList<Tab>
 
     private var activeTab: Tab? = null
@@ -119,7 +122,7 @@ class BaseBrowserWrapperTest : BaseTest() {
         tabList = TabList()
 
         navigationInfoFlow = MutableStateFlow(ActiveTabModel.NavigationInfo())
-        urlBarModelIsEditing = MutableStateFlow(false)
+        urlBarModelStateFlow = MutableStateFlow(URLBarModelState())
         mockTabs = mutableListOf()
 
         activeTabModelImpl = mock {
@@ -167,7 +170,10 @@ class BaseBrowserWrapperTest : BaseTest() {
         }
 
         urlBarModel = mock {
-            on { isEditing } doReturn urlBarModelIsEditing
+            on { stateFlow } doAnswer { urlBarModelStateFlow }
+            on { isLazyTab } doReturn(
+                urlBarModelStateFlow.map { it.isLazyTab }.distinctUntilChanged()
+                )
         }
 
         cookieCutterModel = mock {
@@ -420,7 +426,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         // Loading a URL without an active tab should create a new one with no parent.
         browserWrapper.loadUrl(
             uri = expectedUri,
-            inNewTab = false,
             isViaIntent = false,
             parentTabId = null
         )
@@ -538,7 +543,8 @@ class BaseBrowserWrapperTest : BaseTest() {
         // Opening a lazy tab should tell the URL bar to take focus so that the user can see zero
         // query and the other suggestions.
         browserWrapper.openLazyTab()
-        verify(urlBarModel).showZeroQuery()
+        verify(urlBarModel).showZeroQuery(focusUrlBar = true, isLazyTab = true)
+        urlBarModelStateFlow.value = urlBarModelStateFlow.value.copy(isLazyTab = true)
 
         // Load a URL without explicitly saying it should be in a new tab.
         browserWrapper.loadUrl(uri = expectedUri)
@@ -664,12 +670,18 @@ class BaseBrowserWrapperTest : BaseTest() {
         // Opening a lazy tab should tell the URL bar to take focus so that the user can see zero
         // query and the other suggestions.
         browserWrapper.openLazyTab()
-        verify(urlBarModel).showZeroQuery()
-        urlBarModelIsEditing.value = true
+        verify(urlBarModel).showZeroQuery(focusUrlBar = true, isLazyTab = true)
+        urlBarModelStateFlow.value = urlBarModelStateFlow.value.copy(
+            isEditing = true,
+            isLazyTab = true
+        )
 
         // Say that the URL bar lost focus.
         coroutineScopeRule.scope.advanceUntilIdle()
-        urlBarModelIsEditing.value = false
+        urlBarModelStateFlow.value = urlBarModelStateFlow.value.copy(
+            isEditing = false,
+            isLazyTab = false
+        )
         coroutineScopeRule.scope.advanceUntilIdle()
 
         // Load a URL.  Because the lazy tab state was lost, the tab should be opened up in the

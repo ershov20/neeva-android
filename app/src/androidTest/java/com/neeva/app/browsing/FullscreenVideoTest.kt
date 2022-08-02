@@ -9,7 +9,7 @@ import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.assertionToBoolean
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.onBackPressed
 import com.neeva.app.tapOnBrowserView
@@ -41,7 +41,7 @@ class FullscreenVideoTest : BaseBrowserTest() {
         scenario.moveToState(Lifecycle.State.RESUMED)
         androidComposeRule.apply {
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
@@ -50,7 +50,7 @@ class FullscreenVideoTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Click on the page, which should will make the video play in fullscreen.
             tapOnBrowserView {
@@ -68,7 +68,7 @@ class FullscreenVideoTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             waitForAssertion {
                 onNodeWithTag("LocationLabel").assertIsDisplayed()

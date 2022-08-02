@@ -161,6 +161,7 @@ class IncognitoBrowserWrapper private constructor(
     }
 
     override fun shouldInterceptLoad(uri: Uri): Boolean {
+        // TODO(dan.alcantara): Check what happens on slow networks.
         return !isIncognitoMutationPerformed && uri.isNeevaUri(neevaConstants)
     }
 

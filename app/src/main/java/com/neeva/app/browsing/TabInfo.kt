@@ -17,6 +17,55 @@ data class SearchNavigationInfo(
     val searchQuery: String
 )
 
+/** Normalizes URIs for fuzzy comparison. */
+data class UriFuzzyMatchData(
+    val authority: String?,
+    val path: String?,
+    val query: String?
+) {
+    companion object {
+        fun create(uri: Uri): UriFuzzyMatchData? {
+            // Ignore URIs that shouldn't be matched (e.g. file: or intent: URIs).
+            val scheme = uri.normalizeScheme().scheme
+            if (scheme != "http" && scheme != "https") return null
+
+            // Normalize the authority so that it strips off any mobile-specific tags.
+            var newAuthority = uri.authority
+            newAuthority?.let {
+                val starterRegex = "^(www|mobile|m)\\."
+                newAuthority = Regex(starterRegex).replace(it, "")
+            }
+            newAuthority?.let {
+                val mobileWikipediaRegex = "^(..)\\.m\\.wikipedia\\.org"
+                newAuthority = Regex(mobileWikipediaRegex).replace(it, "$1.wikipedia.org")
+            }
+
+            // Remove trailing slash, if it exists.
+            var newPath = uri.path
+            newPath?.let {
+                if (it.endsWith("/")) {
+                    newPath = it.dropLast(1)
+                }
+            }
+
+            return UriFuzzyMatchData(
+                newAuthority,
+                newPath,
+                uri.query
+            )
+        }
+    }
+
+    fun fuzzyEquals(other: UriFuzzyMatchData?) = when {
+        // iOS ignores the scheme and fragment when matching.
+        other == null -> false
+        authority != other.authority -> false
+        path != other.path -> false
+        query != other.query -> false
+        else -> true
+    }
+}
+
 /** Information required to render a Tab in the UI. */
 data class TabInfo(
     val id: String,
@@ -28,6 +77,9 @@ data class TabInfo(
     val searchQueryMap: Map<Int, SearchNavigationInfo> = emptyMap(),
     val data: PersistedData = PersistedData(null, TabOpenType.DEFAULT)
 ) {
+    /** Used to compare two URIs and sees if they're "close enough" to be a match. */
+    val fuzzyMatchUrl: UriFuzzyMatchData? = url?.let { UriFuzzyMatchData.create(url) }
+
     enum class TabOpenType {
         DEFAULT,
         CHILD_TAB,

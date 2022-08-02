@@ -31,7 +31,7 @@ fun CurrentPageRow(browserWrapper: BrowserWrapper) {
 
     val displayedInfo by activeTabModel.displayedInfoFlow.collectAsState()
     val currentURL: Uri by activeTabModel.urlFlow.collectAsState()
-    val isLazyTab: Boolean by browserWrapper.isLazyTabFlow.collectAsState()
+    val isLazyTab: Boolean by urlBarModel.isLazyTab.collectAsState(false)
 
     val displayedText = displayedInfo.displayedText
     val isShowingPlaceholder = displayedInfo.mode == ActiveTabModel.DisplayMode.PLACEHOLDER
@@ -54,11 +54,7 @@ fun CurrentPageRow(browserWrapper: BrowserWrapper) {
                 faviconBitmap = faviconBitmap,
                 label = label,
                 isShowingQuery = isShowingQuery,
-                onEditPressed = {
-                    urlBarModel.replaceLocationBarText(
-                        if (isShowingQuery) displayedText else currentURL.toString()
-                    )
-                },
+                onEditPressed = { urlBarModel.replaceLocationBarText(label, isRefining = true) },
                 onCopyPressed = clipboardManager?.let {
                     {
                         it.apply {

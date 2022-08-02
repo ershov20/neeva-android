@@ -100,9 +100,16 @@ enum class SettingsToggle(
         primaryLabelId = R.string.tracking_protection,
         defaultValue = false
     ),
-    IS_ADVANCED_SETTINGS_ALLOWED(defaultValue = false),
+    IS_ADVANCED_SETTINGS_ALLOWED(
+        defaultValue = false
+    ),
 
-    // Advanced Settings:
+    // Advanced / development settings:
+    AUTOMATED_TAB_MANAGEMENT(
+        primaryLabelId = R.string.settings_debug_automated_tab_management,
+        defaultValue = false,
+        isAdvancedSetting = true
+    ),
     DEBUG_ENABLE_INCOGNITO_SCREENSHOTS(
         primaryLabelId = R.string.settings_debug_enable_incognito_screenshots,
         defaultValue = false,

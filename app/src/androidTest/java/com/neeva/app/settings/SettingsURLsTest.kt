@@ -12,7 +12,7 @@ import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.TestNeevaConstantsModule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.clickOnNodeWithText
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
 import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.waitForActivityStartup
@@ -38,7 +38,7 @@ class SettingsURLsTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
 
@@ -57,7 +57,7 @@ class SettingsURLsTest : BaseBrowserTest() {
             // Should send the user to a new tab for viewing the URL.
             waitForNavDestination(AppNavDestination.BROWSER)
             waitForUrl(expectedUrl)
-            expectTabListState(isIncognito = false, regularTabCount = expectedTabCount)
+            expectBrowserState(isIncognito = false, regularTabCount = expectedTabCount)
         }
     }
 

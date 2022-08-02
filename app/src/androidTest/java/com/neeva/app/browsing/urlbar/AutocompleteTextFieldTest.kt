@@ -42,7 +42,7 @@ class AutocompleteTextFieldTest : BaseHiltTest() {
                         suggestionText = fullText.drop(typedLength),
                         faviconBitmap = null,
                         onLocationEdited = {},
-                        onLocationReplaced = { wasCleared = it.isEmpty() },
+                        onCleared = { wasCleared = it.isEmpty() },
                         onLoadUrl = {},
                         onAcceptAutocompleteSuggestion = {},
                         placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -71,7 +71,7 @@ class AutocompleteTextFieldTest : BaseHiltTest() {
                         suggestionText = null,
                         faviconBitmap = null,
                         onLocationEdited = {},
-                        onLocationReplaced = {},
+                        onCleared = {},
                         onLoadUrl = {},
                         onAcceptAutocompleteSuggestion = {},
                         placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -106,7 +106,7 @@ class AutocompleteTextFieldTest : BaseHiltTest() {
                         suggestionText = fullText.drop(typedLength),
                         faviconBitmap = null,
                         onLocationEdited = {},
-                        onLocationReplaced = {},
+                        onCleared = {},
                         onLoadUrl = {},
                         onAcceptAutocompleteSuggestion = { wasTriggered = true },
                         placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant

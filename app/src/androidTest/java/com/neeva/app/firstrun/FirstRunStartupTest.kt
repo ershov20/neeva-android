@@ -63,7 +63,8 @@ class FirstRunStartupTest : BaseBrowserTest() {
         activityTestRule.launchActivity(createMainIntent())
 
         androidComposeRule.apply {
-            waitUntil { activity is NeevaActivity }
+            waitFor { multiActivityTestRule.getNeevaActivity() != null }
+            waitFor { activity is NeevaActivity }
             multiActivityTestRule.activities.apply {
                 expectThat(any { it.get() is FirstRunActivity }).isFalse()
                 expectThat(any { it.get() is NeevaActivity }).isTrue()
@@ -79,7 +80,8 @@ class FirstRunStartupTest : BaseBrowserTest() {
         activityTestRule.launchActivity(createMainIntent())
 
         androidComposeRule.apply {
-            waitUntil { activity is NeevaActivity }
+            waitFor { multiActivityTestRule.getNeevaActivity() != null }
+            waitFor { activity is NeevaActivity }
             multiActivityTestRule.activities.apply {
                 expectThat(any { it.get() is FirstRunActivity }).isFalse()
                 expectThat(any { it.get() is NeevaActivity }).isTrue()
@@ -92,7 +94,8 @@ class FirstRunStartupTest : BaseBrowserTest() {
         activityTestRule.launchActivity(createMainIntent())
 
         androidComposeRule.apply {
-            waitUntil { activity is FirstRunActivity }
+            waitFor { multiActivityTestRule.getFirstRunActivity() != null }
+            waitFor { activity is FirstRunActivity }
             multiActivityTestRule.activities.apply {
                 expectThat(any { it.get() is FirstRunActivity }).isTrue()
                 expectThat(any { it.get() is NeevaActivity }).isFalse()
@@ -124,7 +127,8 @@ class FirstRunStartupTest : BaseBrowserTest() {
         activityTestRule.launchActivity(createMainIntent())
 
         androidComposeRule.apply {
-            waitUntil { activity is FirstRunActivity }
+            waitFor { multiActivityTestRule.getFirstRunActivity() != null }
+            waitFor { activity is FirstRunActivity }
             multiActivityTestRule.activities.apply {
                 expectThat(any { it.get() is FirstRunActivity }).isTrue()
                 expectThat(any { it.get() is NeevaActivity }).isFalse()
@@ -142,7 +146,8 @@ class FirstRunStartupTest : BaseBrowserTest() {
             waitForNodeWithText(getString(R.string.maybe_later)).performClick()
 
             // Wait for the browser app to start.
-            waitFor { it is NeevaActivity }
+            waitFor { multiActivityTestRule.getNeevaActivity() != null }
+            waitFor { activity is NeevaActivity }
 
             // Because we unchecked the checkbox, we should see no logging requests being sent.
             waitForIdle()

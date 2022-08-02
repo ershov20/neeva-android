@@ -13,7 +13,7 @@ import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.clickOnUrlBar
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.navigateViaUrlBar
 import com.neeva.app.visitMultipleSitesInSameTab
 import com.neeva.app.waitForActivityStartup
@@ -41,7 +41,7 @@ class RegularProfileZeroQueryTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
 

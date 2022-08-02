@@ -15,7 +15,7 @@ import com.neeva.app.WAIT_TIMEOUT
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.closeActiveTabFromTabGrid
 import com.neeva.app.enableCloseAllIncognitoTabsSetting
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
 import com.neeva.app.onBackPressed
 import com.neeva.app.openCardGrid
@@ -131,7 +131,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             waitForAssertion {
                 onAllNodesWithTag("TabCard").assertCountEquals(2)
             }
-            expectTabListState(
+            expectBrowserState(
                 isIncognito = false,
                 incognitoTabCount = 0,
                 regularTabCount = 3
@@ -175,7 +175,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             waitForAssertion {
                 onAllNodesWithTag("TabCard").assertCountEquals(2)
             }
-            expectTabListState(
+            expectBrowserState(
                 isIncognito = false,
                 incognitoTabCount = 0,
                 regularTabCount = 3
@@ -183,7 +183,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
 
             // Sending the app to the background should immediately close the tab.
             sendAppToBackground()
-            expectTabListState(
+            expectBrowserState(
                 isIncognito = false,
                 incognitoTabCount = 0,
                 regularTabCount = 2
@@ -276,7 +276,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             waitForAssertion {
                 onAllNodesWithTag("TabCard").assertCountEquals(0)
             }
-            expectTabListState(
+            expectBrowserState(
                 isIncognito = true,
                 incognitoTabCount = 1,
                 regularTabCount = 1

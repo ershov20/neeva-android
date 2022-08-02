@@ -17,7 +17,7 @@ import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.TestNeevaConstantsModule
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.AppNavDestination
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
 import com.neeva.app.onBackPressed
 import com.neeva.app.openOverflowMenuAndClickItem
@@ -70,7 +70,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             waitForNodeWithText(getString(R.string.submit_feedback_help_center_link)).performClick()
             waitForNavDestination(AppNavDestination.BROWSER)
             waitForUrl(TestNeevaConstantsModule.neevaConstants.appHelpCenterURL)
-            expectTabListState(isIncognito = false, regularTabCount = 2)
+            expectBrowserState(isIncognito = false, regularTabCount = 2)
         }
     }
 

@@ -200,9 +200,6 @@ abstract class BaseBrowserWrapper internal constructor(
 
     private var tabListRestorer: BrowserRestoreCallback? = null
 
-    private val _isLazyTabFlow = MutableStateFlow(false)
-    override val isLazyTabFlow: StateFlow<Boolean> get() = _isLazyTabFlow
-
     /** Tracks when the WebLayer [Browser] has finished restoration and the [tabList] is ready. */
     private val isBrowserReady = CompletableDeferred<Boolean>()
 
@@ -213,18 +210,12 @@ abstract class BaseBrowserWrapper internal constructor(
         faviconCache.profileProvider = FaviconCache.ProfileProvider { getProfile() }
 
         userMustStayInCardGridFlow = orderedTabList
-            .combine(_isLazyTabFlow) { tabs, isLazyTab ->
+            .combine(_urlBarModel.isLazyTab) { tabs, isLazyTab ->
                 // If the user has no open tabs (explicitly ignoring tabs being closed), keep them
                 // in the card grid instead of sending them back out to the browser.
                 tabs.filterNot { it.isClosing }.isEmpty() && !isLazyTab
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, false)
-
-        coroutineScope.launch {
-            urlBarModel.isEditing.collectLatest { isEditing ->
-                _isLazyTabFlow.value = _isLazyTabFlow.value && isEditing
-            }
-        }
 
         coroutineScope.launch {
             browserFlow.collectLatest { _urlBarModel.onBrowserChanged(it) }
@@ -808,8 +799,7 @@ abstract class BaseBrowserWrapper internal constructor(
      * trigger a navigation.
      */
     override fun openLazyTab(focusUrlBar: Boolean) {
-        _isLazyTabFlow.value = true
-        urlBarModel.showZeroQuery(focusUrlBar)
+        urlBarModel.showZeroQuery(focusUrlBar, isLazyTab = true)
     }
 
     /** Returns true if the [Browser] is maintaining no tabs. */
@@ -861,25 +851,15 @@ abstract class BaseBrowserWrapper internal constructor(
                 ?.get(tab.navigationController.navigationListCurrentIndex + 1)
                 ?.takeIf { it.navigationEntryUri == uri }
                 ?.let { entry ->
-                    urlBarModel.showZeroQuery(false)
+                    urlBarModel.showZeroQuery(focusUrlBar = false)
                     urlBarModel.replaceLocationBarText(entry.searchQuery)
                 }
         }
     }
 
-    /**
-     * Start a load of the given [uri].
-     *
-     * If the user is currently in the process of opening a new tab lazily, this will open a new Tab
-     * with the URL.
-     *
-     * If the BrowserWrapper needs to redirect the user to another URI (e.g. if the user is
-     * performing a search in Incognito for the first time), the load may be delayed by a network
-     * call to get the updated URL.
-     */
     override fun loadUrl(
         uri: Uri,
-        inNewTab: Boolean,
+        inNewTab: Boolean?,
         isViaIntent: Boolean,
         parentTabId: String?,
         stayInApp: Boolean,
@@ -897,15 +877,55 @@ abstract class BaseBrowserWrapper internal constructor(
             uri
         }
 
-        if (inNewTab || getActiveTab() == null) {
-            // TODO(dan.alcantara): Save the searchQuery when createOrSwitchTab behavior is in.
-            createTabWithUri(
-                uri = urlToLoad,
-                parentTabId = parentTabId,
-                isViaIntent = isViaIntent,
-                stayInApp = stayInApp,
-                searchQuery = null
-            )
+        val urlBarModelState = urlBarModel.stateFlow.value
+        val isCreateOrSwitchTabEnabled =
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.AUTOMATED_TAB_MANAGEMENT)
+        val inDifferentTab = when {
+            // Check for an explicit instruction from the caller to use the same tab or not.
+            inNewTab == false -> false
+            inNewTab == true -> true
+
+            // Creating a new tab from the TabGrid forces a new tab.
+            urlBarModelState.isLazyTab -> true
+
+            // Having no tab to load the URL in forces a new tab.
+            getActiveTab() == null -> true
+
+            // "Create or switch" uses the same tab when refining the existing query or URL.
+            isCreateOrSwitchTabEnabled && !urlBarModelState.isRefining -> true
+
+            // Default to loading the URL in the existing tab.
+            else -> false
+        }
+
+        if (inDifferentTab) {
+            var mustCreateNewTab = true
+            var parentTabIdToUse = parentTabId
+
+            if (isCreateOrSwitchTabEnabled) {
+                tabList.findTabWithSimilarUri(urlToLoad)
+                    ?.let { existingTabId ->
+                        // If there's a pre-existing tab with a similar URL, just switch to it.
+                        selectTab(existingTabId)
+                        mustCreateNewTab = false
+                    }
+                    ?: run {
+                        // Create a new tab that kicks the user back to the current tab on back.
+                        parentTabIdToUse = getActiveTab()?.guid ?: parentTabId
+                        mustCreateNewTab = true
+                    }
+            }
+
+            if (mustCreateNewTab) {
+                // TODO(dan.alcantara): Save the searchQuery when createOrSwitchTab behavior is in.
+                createTabWithUri(
+                    uri = urlToLoad,
+                    parentTabId = parentTabIdToUse,
+                    isViaIntent = isViaIntent,
+                    stayInApp = stayInApp,
+                    searchQuery = searchQuery
+                )
+            }
         } else {
             navigateTab(
                 tab = _activeTabModelImpl.activeTab,

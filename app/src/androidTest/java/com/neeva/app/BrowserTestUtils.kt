@@ -13,6 +13,7 @@ import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
@@ -25,6 +26,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.GeneralClickAction
 import androidx.test.espresso.action.GeneralLocation
@@ -74,7 +76,7 @@ fun longPressOnBrowserView() {
  * Trying to click on the center of the Browser using Espresso does nothing, for some reason.  Doing
  * a click via Compose's performClick DOES, though, and I don't get why.
  */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.tapOnBrowserView(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.tapOnBrowserView(
     expectedCondition: () -> Boolean
 ) {
     flakyClickOnNode(hasTestTag("WebLayerContainer")) {
@@ -82,7 +84,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.tapOnBrowserView(
     }
 }
 
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnBrowserAndWaitForUrlToLoad(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.clickOnBrowserAndWaitForUrlToLoad(
     url: String
 ) {
     tapOnBrowserView {
@@ -90,7 +92,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnBrowserAndWai
     }
 }
 
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.expectTabListState(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.expectBrowserState(
     isIncognito: Boolean,
     incognitoTabCount: Int = 0,
     regularTabCount: Int = 0
@@ -107,7 +109,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.expectTabListState(
 }
 
 /** Waits for the user to be in the correct profile and with the correct number of tabs. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForBrowserState(
     isIncognito: Boolean,
     expectedNumRegularTabs: Int = 0,
     expectedNumIncognitoTabs: Int? = null
@@ -126,19 +128,19 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForBrowserState(
 }
 
 /** Waits for the current tab to show that it has started loading the given URL. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForUrl(url: String) {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForUrl(url: String) {
     waitForIdle()
     waitFor { it.webLayerModel.currentBrowser.activeTabModel.urlFlow.value.toString() == url }
 }
 
 /** Waits for the current tab to show that it is displaying the correct title. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForTitle(title: String) {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForTitle(title: String) {
     waitForIdle()
     waitFor { it.webLayerModel.currentBrowser.activeTabModel.titleFlow.value == title }
 }
 
 /** Loads up a page that has a big clickable link that just navigates in the same tab. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesInSameTab() {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.visitMultipleSitesInSameTab() {
     val testUrl = WebpageServingRule.urlFor("big_link_element.html")
 
     // Load the test webpage up in the existing tab.
@@ -156,11 +158,11 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesIn
         expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
         expectThat(navigationInfoFlow.value.canGoForward).isFalse()
     }
-    expectTabListState(isIncognito = false, regularTabCount = 1)
+    expectBrowserState(isIncognito = false, regularTabCount = 1)
 }
 
 /** Loads up a page that has a big clickable link that just navigates in the same tab. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesInNewTabs() {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.visitMultipleSitesInNewTabs() {
     val testUrl = WebpageServingRule.urlFor("big_link_element_target_blank.html")
 
     // Load the test webpage up in the existing tab.
@@ -182,7 +184,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.visitMultipleSitesIn
 }
 
 /** Returns the node representing the tab with the given [title]. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.getSelectedTabNode(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.getSelectedTabNode(
     title: String
 ): SemanticsNodeInteraction {
     var node: SemanticsNodeInteraction? = null
@@ -224,6 +226,31 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.toggleUsageLogging
     waitForNavDestination(AppNavDestination.BROWSER)
 }
 
+/** Toggle the setting for advanced tab management. */
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.toggleAdvancedTabManagement() {
+    openOverflowMenuAndClickItem(R.string.settings)
+    waitForNavDestination(AppNavDestination.SETTINGS)
+
+    // Double-click the version number to show the developer options.
+    waitForNodeWithTag("SettingsPaneItems")
+        .performScrollToNode(hasText("Chromium version", substring = true))
+    waitForNode(hasText("Chromium version", substring = true)).performTouchInput {
+        doubleClick()
+    }
+
+    // Activate the setting.
+    waitForNodeWithTag("SettingsPaneItems")
+        .performScrollToNode(hasText(getString(R.string.settings_debug_local_feature_flags)))
+    waitForNode(hasText(getString(R.string.settings_debug_local_feature_flags))).performClick()
+    waitForNode(
+        hasText(getString(R.string.settings_debug_automated_tab_management))
+    ).performClick()
+
+    // Go back to the browser screen.
+    onBackPressed()
+    onBackPressed()
+}
+
 fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.closeActiveTabFromTabGrid() {
     val activeTabTitle =
         activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value
@@ -239,7 +266,7 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.closeActiveTabFrom
     waitForNodeWithText(closeSnackbarText).assertIsDisplayed()
 }
 
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnUrlBar() {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.clickOnUrlBar() {
     flakyClickOnNode(hasTestTag("LocationLabel")) {
         assertionToBoolean {
             waitForNode(hasTestTag("AutocompleteTextField")).assertIsDisplayed()
@@ -254,7 +281,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clickOnUrlBar() {
  *
  * Assumes that the user is in [AppNavDestination.BROWSER].
  */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.loadUrlInCurrentTab(url: String) {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.loadUrlInCurrentTab(url: String) {
     expectThat(activity.appNavModel!!.currentDestination.value!!.route)
         .isEqualTo(AppNavDestination.BROWSER.route)
 
@@ -268,7 +295,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.loadUrlInCurrentTab(
  *
  * Assumes that the user is viewing the regular or incognito TabGrid.
  */
-fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openLazyTab(url: String) {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.openLazyTab(url: String) {
     expectThat(activity.appNavModel!!.currentDestination.value!!.route)
         .isEqualTo(AppNavDestination.CARD_GRID.route)
 
@@ -278,7 +305,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openLazyTab(ur
 }
 
 /** Clears text from the URL bar, assuming it is already visible and has text in it. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clearUrlBar() {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.clearUrlBar() {
     flakyClickOnNode(hasContentDescription(getString(com.neeva.app.R.string.clear))) {
         activity.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.userTypedInput.isEmpty()
     }
@@ -289,7 +316,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.clearUrlBar() {
 }
 
 /** Enters text into the URL bar, assuming it is already visible. */
-fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(text: String) {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.typeIntoUrlBar(text: String) {
     waitForNodeWithTag("AutocompleteTextField").performTextInput(text)
 
     // Wait for the UrlBarModel to acknowledge that the text has made it through.
@@ -299,7 +326,7 @@ fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.typeIntoUrlBar(text:
 }
 
 /** Enters text into the URL bar and hits enter, assuming it is already visible. */
-fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.navigateViaUrlBar(url: String) {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.navigateViaUrlBar(url: String) {
     typeIntoUrlBar(url)
 
     waitFor {
@@ -352,7 +379,7 @@ fun <T : TestRule> AndroidComposeTestRule<T, NeevaActivity>.navigateViaUrlBar(ur
 }
 
 /** Wait for the NavController to tell us the user is at a particular [AppNavDestination]. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNavDestination(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForNavDestination(
     destination: AppNavDestination
 ) {
     waitFor("Navigating to $destination") {
@@ -360,7 +387,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForNavDestinatio
     }
 }
 
-fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openOverflowMenuAndClickItem(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.openOverflowMenuAndClickItem(
     @StringRes labelId: Int
 ) {
     flakyClickOnNode(hasContentDescription(getString(R.string.toolbar_menu))) {
@@ -372,7 +399,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openOverflowMe
 }
 
 /** Open the Card Grid by clicking on the Card Grid button from the bottom toolbar. */
-fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.openCardGrid(
     incognito: Boolean,
     expectedSubscreen: SelectedScreen? = null
 ) {
@@ -403,7 +430,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.openCardGrid(
     switchProfileOnCardGrid(incognito)
 }
 
-fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.switchProfileOnCardGrid(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.switchProfileOnCardGrid(
     incognito: Boolean
 ) {
     // Click on the correct tab switcher button.
@@ -423,7 +450,7 @@ fun <RULE : TestRule> AndroidComposeTestRule<RULE, NeevaActivity>.switchProfileO
 }
 
 /** Waits for the user to be on a particular sub-screen of the CardGrid. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForCardGridScreen(
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForCardGridScreen(
     expectedSubscreen: SelectedScreen
 ) {
     waitForNavDestination(AppNavDestination.CARD_GRID)
@@ -433,7 +460,7 @@ fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForCardGridScree
 }
 
 /** Tries to wait for when the NeevaActivity can start to be interacted with. */
-fun <R : TestRule> AndroidComposeTestRule<R, NeevaActivity>.waitForActivityStartup() {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForActivityStartup() {
     // Permanently register an IdlingResource that waits for the browser to finish loading its
     // current web page.
     fun NeevaActivity.isBrowserLoadingIdle(): Boolean {

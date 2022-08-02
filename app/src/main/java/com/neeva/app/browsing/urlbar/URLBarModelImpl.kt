@@ -34,22 +34,22 @@ class URLBarModelImpl(
     internal val neevaFavicon =
         AppCompatResources.getDrawable(appContext, R.drawable.ic_neeva_logo)?.toBitmap()
 
-    private val _state = MutableStateFlow(URLBarModelState())
-    override val stateFlow: StateFlow<URLBarModelState> = _state
+    private val _stateFlow = MutableStateFlow(URLBarModelState())
+    override val stateFlow: StateFlow<URLBarModelState> get() = _stateFlow
 
     private val _urlBarControllerFlow = MutableStateFlow<UrlBarController?>(null)
-    override val urlBarControllerFlow: StateFlow<UrlBarController?> = _urlBarControllerFlow
+    override val urlBarControllerFlow: StateFlow<UrlBarController?> get() = _urlBarControllerFlow
 
     init {
         // Update what is displayed in the URL bar as the user types.
         suggestionFlow
-            .combine(_state) { suggestion, currentState ->
+            .combine(_stateFlow) { suggestion, currentState ->
                 val newState = determineDisplayState(suggestion, currentState)
 
                 // Only update the data if nothing changed while we were processing the data.
                 // This reduces the inherent raciness in doing things while the user is typing out
                 // something in the URL bar.
-                _state.compareAndSet(currentState, newState)
+                _stateFlow.compareAndSet(currentState, newState)
             }
             .flowOn(dispatchers.io)
             .launchIn(coroutineScope)
@@ -98,14 +98,13 @@ class URLBarModelImpl(
         return newState
     }
 
-    /** Completely replaces what is displayed in the URL bar for user editing. */
-    override fun replaceLocationBarText(newValue: String) {
+    override fun replaceLocationBarText(newValue: String, isRefining: Boolean) {
         showZeroQuery()
 
-        val currentState = _state.value
+        val currentState = _stateFlow.value
         if (!currentState.isEditing) return
 
-        _state.value = currentState.withUpdatedTextFieldValue(
+        _stateFlow.value = currentState.withUpdatedTextFieldValue(
             newTextFieldValue = TextFieldValue(
                 text = newValue,
                 selection = TextRange(newValue.length)
@@ -116,11 +115,12 @@ class URLBarModelImpl(
             newIsAutocompleteAllowed = false,
             neevaConstants = neevaConstants
         )
+            .copy(isRefining = isRefining)
     }
 
     /** Updates what is displayed in the URL bar as the user edits it. */
     override fun onLocationBarTextChanged(newValue: TextFieldValue) {
-        val currentState = _state.value
+        val currentState = _stateFlow.value
         if (!currentState.isEditing) return
 
         val oldText = currentState.userTypedInput
@@ -129,7 +129,7 @@ class URLBarModelImpl(
         val didUserAddText =
             newValue.text.startsWith(oldText) && oldText.length < newValue.text.length
 
-        _state.value = when {
+        _stateFlow.value = when {
             didUserDeleteText -> {
                 val isShowingSuggestion = !currentState.autocompleteSuggestionText.isNullOrEmpty()
 
@@ -180,20 +180,27 @@ class URLBarModelImpl(
     }
 
     override fun acceptAutocompleteSuggestion() {
-        _state.value.autocompleteSuggestion?.let { replaceLocationBarText(it) }
+        _stateFlow.value.autocompleteSuggestion?.let { replaceLocationBarText(it) }
     }
 
-    override fun showZeroQuery(focusUrlBar: Boolean) {
-        _state.value = URLBarModelState(isEditing = true, focusUrlBar = focusUrlBar)
+    override fun showZeroQuery(focusUrlBar: Boolean, isLazyTab: Boolean) {
+        _stateFlow.value = URLBarModelState(
+            isEditing = true,
+            isLazyTab = isLazyTab,
+            focusUrlBar = focusUrlBar
+        )
     }
 
     override fun clearFocus() {
-        _state.value = URLBarModelState(isEditing = false)
+        _stateFlow.value = URLBarModelState(
+            isEditing = false,
+            isLazyTab = false
+        )
     }
 
     companion object {
         internal fun matchesLocalhost(urlBarContents: String): Boolean {
-            return Regex("(http:(//)?)?localhost(:[0-9][0-9]*)?(/(.*)?)?").matches(urlBarContents)
+            return Regex("(http:(//)?)?localhost(:\\d+)?(/(.*)?)?").matches(urlBarContents)
         }
 
         /**

@@ -19,7 +19,7 @@ import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.clickOnNodeWithContentDescription
 import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.clickOnUrlBar
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.getSelectedTabNode
 import com.neeva.app.getString
 import com.neeva.app.onBackPressed
@@ -59,7 +59,7 @@ class HistoryUITest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
 
@@ -107,7 +107,7 @@ class HistoryUITest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 2)
+            expectBrowserState(isIncognito = false, regularTabCount = 2)
 
             openCardGrid(false)
 
@@ -213,7 +213,7 @@ class HistoryUITest : BaseBrowserTest() {
             clickOnNodeWithText(getString(R.string.settings_manage_neeva_memory))
             waitForNavDestination(AppNavDestination.BROWSER)
             waitForUrl(TestNeevaConstantsModule.neevaConstants.appManageMemory)
-            expectTabListState(isIncognito = false, regularTabCount = 2)
+            expectBrowserState(isIncognito = false, regularTabCount = 2)
         }
     }
 }

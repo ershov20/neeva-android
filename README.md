@@ -116,6 +116,9 @@ These test small parts of the project in isolation -- generally single classes o
 ./gradlew :app:testDebugUnitTest
 ```
 
+#### Debugging unexpected coroutine behavior
+If your test is failing, you should check if the `coroutineScope` is still active.  If it isn't, the scope likely crashed due to your changes.  If your `CoroutineScope` is a `TestScopeImpl` under the hood, you can run the debugger and look at its `_state` to get the `_rootCause` to see the crashing stack trace.
+
 ### Integration tests
 These run on the device directly.  They will often start the whole app up and click on various things in order to check that functionality is working across multiple components (e.g. typing in a URL navigates to a new website and updates the title displayed in the tab switcher).  You may run these via:
 ```

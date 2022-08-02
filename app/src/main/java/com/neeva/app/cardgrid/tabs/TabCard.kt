@@ -54,6 +54,7 @@ fun thumbnailState(
     }
 }
 
+/** TODO(dan.alcantara): Add long press to duplicate. */
 @Composable
 fun TabCard(
     tabInfo: TabInfo,

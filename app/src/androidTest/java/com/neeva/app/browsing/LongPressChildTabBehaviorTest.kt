@@ -7,7 +7,7 @@ import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
 import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.longPressOnBrowserView
@@ -37,12 +37,12 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
             waitForTitle("Page 1")
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Open the link in a new child tab via the context menu.  The test website is just a link
             // that spans the entire page.
@@ -60,12 +60,12 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
             waitForTitle("Page 1")
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Open the link in a new child tab via the context menu.  The test website is just a link
             // that spans the entire page.
@@ -85,7 +85,7 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
             ).assertExists()
 
             // Make sure we've still only got one regular profile tab open.
-            expectTabListState(
+            expectBrowserState(
                 isIncognito = true,
                 incognitoTabCount = 1,
                 regularTabCount = 1

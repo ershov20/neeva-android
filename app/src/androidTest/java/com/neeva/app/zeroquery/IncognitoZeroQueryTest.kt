@@ -12,7 +12,7 @@ import com.neeva.app.R
 import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.clearUrlBar
 import com.neeva.app.clickOnUrlBar
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
 import com.neeva.app.navigateViaUrlBar
 import com.neeva.app.onBackPressed
@@ -51,7 +51,7 @@ class IncognitoZeroQueryTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
 
@@ -121,7 +121,7 @@ class IncognitoZeroQueryTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = true, regularTabCount = 1, incognitoTabCount = 1)
+            expectBrowserState(isIncognito = true, regularTabCount = 1, incognitoTabCount = 1)
 
             // After hitting back, you should be on the previous page and be able to hit forward.
             // However, you shouldn't be able to navigate backward anymore because we opened a lazy
@@ -133,7 +133,7 @@ class IncognitoZeroQueryTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
                 expectThat(navigationInfoFlow.value.canGoForward).isTrue()
             }
-            expectTabListState(isIncognito = true, regularTabCount = 1, incognitoTabCount = 1)
+            expectBrowserState(isIncognito = true, regularTabCount = 1, incognitoTabCount = 1)
         }
     }
 }

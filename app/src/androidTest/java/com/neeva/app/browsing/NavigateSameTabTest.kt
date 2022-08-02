@@ -12,7 +12,7 @@ import com.neeva.app.clearUrlBar
 import com.neeva.app.clickOnBrowserAndWaitForUrlToLoad
 import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.clickOnUrlBar
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
 import com.neeva.app.loadUrlInCurrentTab
 import com.neeva.app.navigateViaUrlBar
@@ -44,7 +44,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
@@ -53,7 +53,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Click on the page, which should load a URL in the current tab.
             clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=2")
@@ -62,7 +62,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // After hitting back, you should be on the previous page and be able to hit forward.
             onBackPressed()
@@ -72,7 +72,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isTrue()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
 
@@ -83,7 +83,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
@@ -92,7 +92,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Click on the page, which should load a URL in a new tab because it's set the target.
             clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=2")
@@ -104,7 +104,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 2)
+            expectBrowserState(isIncognito = false, regularTabCount = 2)
 
             // Hitting back should close the tab and send you back to the parent.  Because a new tab
             // was created, you can't re-open the closed tab.
@@ -115,7 +115,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
 
@@ -126,7 +126,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Load the test webpage up in the existing tab.
             loadUrlInCurrentTab(testUrl)
@@ -135,7 +135,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // Click on the URL bar to bring up the search bar.  It should be showing the
             // placeholder text.
@@ -156,7 +156,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
 
             // After hitting back, you should be on the previous page and be able to hit forward.
             onBackPressed()
@@ -166,7 +166,7 @@ class NavigateSameTabTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isTrue()
             }
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
 }

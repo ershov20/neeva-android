@@ -18,8 +18,3 @@ fun Uri.isNeevaUri(neevaConstants: NeevaConstants): Boolean {
 fun Uri.isNeevaSearchUri(neevaConstants: NeevaConstants): Boolean {
     return toString().startsWith(neevaConstants.appSearchURL)
 }
-
-fun Uri.neevaSearchQuery(neevaConstants: NeevaConstants): String? {
-    val isNeevaSearch = this.toString().startsWith(neevaConstants.appSearchURL)
-    return if (isNeevaSearch) this.getQueryParameter("q") else null
-}

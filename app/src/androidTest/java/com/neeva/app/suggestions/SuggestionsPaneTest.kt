@@ -23,7 +23,7 @@ import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.clickOnNodeWithContentDescription
 import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.clickOnUrlBar
-import com.neeva.app.expectTabListState
+import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
 import com.neeva.app.navigateViaUrlBar
 import com.neeva.app.onBackPressed
@@ -81,7 +81,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            expectTabListState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
 

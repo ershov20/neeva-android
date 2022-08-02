@@ -50,17 +50,6 @@ interface BrowserWrapper {
     /** Tracks whether the user needs to be kept in the CardGrid if they're on that screen. */
     val userMustStayInCardGridFlow: StateFlow<Boolean>
 
-    /**
-     * Tracks whether or not the user is in the middle of creating a new tab.
-     *
-     * Being in the "lazy tab" state means that:
-     * 1) The user is being shown zero query or search suggestions after trying to create a new tab
-     *    (e.g. after they click on "new tab" from the CardGrid)
-     *
-     * 2) A new tab will not be created until the user clicks on a link or types in a query.
-     */
-    val isLazyTabFlow: StateFlow<Boolean>
-
     /** Gets the [Fragment] created by WebLayer for this Browser. */
     fun getFragment(): Fragment?
 
@@ -128,16 +117,22 @@ interface BrowserWrapper {
     /**
      * Start a load of the given [uri].
      *
-     * If the user is currently in the process of opening a new tab lazily, this will open a new Tab
-     * with the URL.
-     *
      * If the BrowserWrapper needs to redirect the user to another URI (e.g. if the user is
      * performing a search in Incognito for the first time), the load may be delayed by a network
      * call to get the updated URL.
+     *
+     * If "create or switch to tab" behavior is on, this will send the user to a different tab if
+     * they are not actively refining the current tab's URL or query.
+     *
+     * @param inNewTab If false, forces the [uri] to be loaded in the same tab.
+     *                 If true, forces the [uri] to be loaded in a new tab.
+     *                 If unset, the load depends on whether the user is currently opening a tab
+     *                 from the TabGrid and if the user has an active tab.
+     * @param searchQuery Search As You Type query used to trigger the load of the given [uri].
      */
     fun loadUrl(
         uri: Uri,
-        inNewTab: Boolean = isLazyTabFlow.value,
+        inNewTab: Boolean? = null,
         isViaIntent: Boolean = false,
         parentTabId: String? = null,
         stayInApp: Boolean = true,

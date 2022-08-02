@@ -75,7 +75,7 @@ fun AutocompleteTextField(
     suggestionText: String?,
     faviconBitmap: Bitmap?,
     onLocationEdited: (TextFieldValue) -> Unit,
-    onLocationReplaced: (String) -> Unit,
+    onCleared: (String) -> Unit,
     onLoadUrl: () -> Unit,
     onAcceptAutocompleteSuggestion: () -> Unit,
     placeholderColor: Color,
@@ -211,7 +211,7 @@ fun AutocompleteTextField(
             exit = fadeOut()
         ) {
             IconButton(
-                onClick = { onLocationReplaced("") }
+                onClick = { onCleared("") }
             ) {
                 Icon(
                     imageVector = Icons.Default.Clear,
@@ -241,7 +241,7 @@ private fun AutocompleteTextFieldPreview_AutocompletedText() {
                 suggestionText = text.drop(userTypedLength),
                 faviconBitmap = null,
                 onLocationEdited = {},
-                onLocationReplaced = {},
+                onCleared = {},
                 onLoadUrl = {},
                 onAcceptAutocompleteSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -263,7 +263,7 @@ private fun AutocompleteTextFieldPreview_Placeholder() {
                 suggestionText = null,
                 faviconBitmap = null,
                 onLocationEdited = {},
-                onLocationReplaced = {},
+                onCleared = {},
                 onLoadUrl = {},
                 onAcceptAutocompleteSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -287,7 +287,7 @@ private fun AutocompleteTextFieldPreview_NoAutocomplete() {
                 suggestionText = null,
                 faviconBitmap = null,
                 onLocationEdited = {},
-                onLocationReplaced = {},
+                onCleared = {},
                 onLoadUrl = {},
                 onAcceptAutocompleteSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
