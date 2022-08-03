@@ -139,11 +139,6 @@ enum class SettingsToggle(
         primaryLabelId = R.string.settings_debug_neevascope,
         defaultValue = false,
         isAdvancedSetting = true
-    ),
-    DEBUG_COOKIE_NOTICES(
-        primaryLabelId = R.string.settings_debug_cookie_notices,
-        defaultValue = false,
-        isAdvancedSetting = true
     );
 
     val key: String = name

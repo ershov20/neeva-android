@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.NeevaConstants
 import com.neeva.app.settings.SettingsController
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedComposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
@@ -13,10 +12,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun CookieCutterPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
     SettingsPane(
         settingsController,
-        CookieCutterPaneData(
-            neevaConstants,
-            settingsController.getToggleState(SettingsToggle.DEBUG_COOKIE_NOTICES)
-        )
+        CookieCutterPaneData(neevaConstants)
     )
 }
 

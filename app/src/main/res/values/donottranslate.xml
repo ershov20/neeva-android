@@ -13,7 +13,6 @@
     <string name="settings_debug_flags">Flags</string>
     <string name="settings_debug_actions">Actions</string>
     <string name="settings_debug_automated_tab_management">Enable automated tab management</string>
-    <string name="settings_debug_cookie_notices">Enable cookie notice suppression</string>
     <string name="settings_debug_enable_incognito_screenshots">Enable screenshots while in Incognito</string>
     <string name="settings_debug_enable_show_desktop_site">Enable Show Desktop Site in Overflow Menu</string>
     <string name="settings_debug_open_50_tabs">Open 50 tabs</string>

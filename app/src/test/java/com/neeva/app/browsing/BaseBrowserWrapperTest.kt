@@ -185,7 +185,6 @@ class BaseBrowserWrapperTest : BaseTest() {
             on { cookieCuttingPreferences } doReturn mutableStateOf(
                 EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
             )
-            on { enableCookieNoticeSuppression } doReturn mutableStateOf(true)
             on { trackersAllowList } doReturn trackersAllowList
         }
 

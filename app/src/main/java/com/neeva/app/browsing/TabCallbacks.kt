@@ -53,7 +53,7 @@ class TabCallbacks(
         browserFlow = browserFlow,
         tabId = tab.guid,
         trackingDataFlow = cookieCutterModel.trackingDataFlow,
-        enableCookieNoticeSuppression = cookieCutterModel.enableCookieNoticeSuppression,
+        enableCookieNoticeSuppression = cookieCutterModel.enableTrackingProtection,
         cookieNoticeBlockedFlow = cookieCutterModel.cookieNoticeBlockedFlow,
         domainProvider = domainProvider,
         trackersAllowList = cookieCutterModel.trackersAllowList

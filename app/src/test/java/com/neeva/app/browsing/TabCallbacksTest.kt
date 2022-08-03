@@ -63,8 +63,8 @@ class TabCallbacksTest : BaseTest() {
 
     // CookieCutterModel related mocks.
     private lateinit var cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
-    private lateinit var enableCookieNoticeSuppression: MutableState<Boolean>
     private lateinit var trackingDataFlow: MutableStateFlow<TrackingData?>
+    private lateinit var enableTrackingProtection: MutableState<Boolean>
 
     private val navigationCallback = mutableListOf<NavigationCallback>()
 
@@ -73,14 +73,14 @@ class TabCallbacksTest : BaseTest() {
         MockKAnnotations.init(this)
 
         cookieNoticeBlockedFlow = MutableStateFlow(false)
-        enableCookieNoticeSuppression = mutableStateOf(false)
         trackingDataFlow = MutableStateFlow(null)
+        enableTrackingProtection = mutableStateOf(true)
 
         cookieCutterModel = mockk {
             every { cookieNoticeBlockedFlow } returns this@TabCallbacksTest.cookieNoticeBlockedFlow
             every { trackingDataFlow } returns this@TabCallbacksTest.trackingDataFlow
-            every { enableCookieNoticeSuppression }.returns(
-                this@TabCallbacksTest.enableCookieNoticeSuppression
+            every { enableTrackingProtection }.returns(
+                this@TabCallbacksTest.enableTrackingProtection
             )
             every { trackersAllowList }.returns(
                 this@TabCallbacksTest.trackersAllowList

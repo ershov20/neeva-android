@@ -3,7 +3,6 @@ package com.neeva.app.cookiecutter
 import androidx.annotation.StringRes
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.Dispatchers
 import com.neeva.app.R
@@ -21,7 +20,6 @@ interface CookieCutterModel {
     val trackingDataFlow: MutableStateFlow<TrackingData?>
     val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
     val enableTrackingProtection: MutableState<Boolean>
-    val enableCookieNoticeSuppression: State<Boolean>
     val cookieCuttingPreferences: State<Set<CookieNoticeCookies>>
 
     fun setUpTrackingProtection(manager: ContentFilterManager)
@@ -100,12 +98,6 @@ class CookieCutterModelImpl(
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection = settingsDataModel
         .getToggleState(SettingsToggle.TRACKING_PROTECTION)
-    override val enableCookieNoticeSuppression = derivedStateOf {
-        val featureFlag = settingsDataModel
-            .getToggleState(SettingsToggle.DEBUG_COOKIE_NOTICES)
-
-        featureFlag.value && enableTrackingProtection.value
-    }
 
     override val cookieCuttingPreferences = settingsDataModel.cookieNoticePreferences
 
@@ -152,7 +144,6 @@ class PreviewCookieCutterModel : CookieCutterModel {
     override val trackingDataFlow: MutableStateFlow<TrackingData?> = MutableStateFlow(null)
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection: MutableState<Boolean> = mutableStateOf(true)
-    override val enableCookieNoticeSuppression: MutableState<Boolean> = mutableStateOf(true)
     override val cookieCuttingPreferences =
         mutableStateOf(emptySet<CookieCutterModel.CookieNoticeCookies>())
     override fun setUpTrackingProtection(manager: ContentFilterManager) {}
