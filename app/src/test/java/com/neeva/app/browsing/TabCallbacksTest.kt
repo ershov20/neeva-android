@@ -8,6 +8,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.cookiecutter.ScriptInjectionManager
+import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.cookiecutter.TrackingData
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -48,6 +49,7 @@ class TabCallbacksTest : BaseTest() {
     @MockK lateinit var historyManager: HistoryManager
     @MockK lateinit var registerNewTab: (tab: Tab, type: Int) -> Unit
     @MockK lateinit var scriptInjectionManager: ScriptInjectionManager
+    @MockK lateinit var trackersAllowList: TrackersAllowList
 
     private lateinit var activityCallbackProvider: ActivityCallbackProvider
     private lateinit var browserFlow: StateFlow<Browser?>
@@ -80,6 +82,9 @@ class TabCallbacksTest : BaseTest() {
             every { enableCookieNoticeSuppression }.returns(
                 this@TabCallbacksTest.enableCookieNoticeSuppression
             )
+            every { trackersAllowList }.returns(
+                this@TabCallbacksTest.trackersAllowList
+            )
         }
 
         browser = mockk {
@@ -110,7 +115,9 @@ class TabCallbacksTest : BaseTest() {
             every { isDestroyed } returns false
         }
 
-        every { scriptInjectionManager.injectNavigationCompletedScripts(tab, any()) } returns Unit
+        every {
+            scriptInjectionManager.injectNavigationCompletedScripts(any(), tab, any())
+        } returns Unit
         every { scriptInjectionManager.initializeMessagePassing(tab, any()) } returns Unit
 
         tabCallbacks = TabCallbacks(
@@ -157,7 +164,7 @@ class TabCallbacksTest : BaseTest() {
 
         // Complete the navigation.
         navigationCallback.forEach { it.onNavigationCompleted(navigation) }
-        verify { scriptInjectionManager.injectNavigationCompletedScripts(tab, any()) }
+        verify { scriptInjectionManager.injectNavigationCompletedScripts(any(), tab, any()) }
 
         coroutineScopeRule.scope.advanceUntilIdle()
         coVerify {

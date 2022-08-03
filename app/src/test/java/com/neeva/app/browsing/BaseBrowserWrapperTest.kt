@@ -20,6 +20,7 @@ import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.cookiecutter.ScriptInjectionManager
+import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.createMockNavigationController
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.neevascope.NeevascopeModel
@@ -104,6 +105,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var scriptInjectionManager: ScriptInjectionManager
     @Mock private lateinit var popupModel: PopupModel
     @Mock private lateinit var neevaUser: NeevaUser
+    @Mock private lateinit var trackersAllowList: TrackersAllowList
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelStateFlow: MutableStateFlow<URLBarModelState>
@@ -184,6 +186,7 @@ class BaseBrowserWrapperTest : BaseTest() {
                 EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
             )
             on { enableCookieNoticeSuppression } doReturn mutableStateOf(true)
+            on { trackersAllowList } doReturn trackersAllowList
         }
 
         scriptInjectionManager = mock()

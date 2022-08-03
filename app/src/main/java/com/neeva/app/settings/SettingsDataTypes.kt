@@ -69,7 +69,7 @@ enum class SettingsToggle(
         defaultValue = false
     ),
     TRACKING_PROTECTION(
-        primaryLabelId = R.string.tracking_protection,
+        primaryLabelId = R.string.cookie_cutter,
         defaultValue = true
     ),
     LOGGING_CONSENT(

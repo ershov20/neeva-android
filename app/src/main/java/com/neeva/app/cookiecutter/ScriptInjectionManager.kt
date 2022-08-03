@@ -1,6 +1,7 @@
 package com.neeva.app.cookiecutter
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.annotation.WorkerThread
 import com.neeva.app.Dispatchers
@@ -31,13 +32,19 @@ class ScriptInjectionManager(
         tab.unregisterWebMessageCallback("__neeva_broker")
     }
 
-    fun injectNavigationCompletedScripts(tab: Tab, tabCookieCutterModel: TabCookieCutterModel) {
-        // if our preferences say we shouldn't activate cookie cutter, then don't.
-        if (!tabCookieCutterModel.shouldInjectCookieEngine) {
-            return
-        }
-
+    fun injectNavigationCompletedScripts(
+        uri: Uri,
+        tab: Tab,
+        tabCookieCutterModel: TabCookieCutterModel
+    ) {
         coroutineScope.launch(dispatchers.main) {
+            // If our preferences say we shouldn't activate cookie cutter, then don't.
+            // This depends on whether or not cookie cutter is enabled globally, and
+            // on a per-site basis.
+            if (!tabCookieCutterModel.shouldInjectCookieEngine(uri.host ?: "")) {
+                return@launch
+            }
+
             val scriptText = withContext(dispatchers.io) {
                 engineScript.await()
             } ?: return@launch

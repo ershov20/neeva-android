@@ -50,15 +50,13 @@ data class TrackingData(
 
 class TabCookieCutterModel(
     private val browserFlow: StateFlow<Browser?>,
-    private val tabId: String,
-    private val trackingDataFlow: MutableStateFlow<TrackingData?>,
-    private val enableCookieNoticeSuppression: State<Boolean>,
     private val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
+    private val enableCookieNoticeSuppression: State<Boolean>,
+    private val tabId: String,
+    private val trackersAllowList: TrackersAllowList,
+    private val trackingDataFlow: MutableStateFlow<TrackingData?>,
     val domainProvider: DomainProvider
 ) {
-    val shouldInjectCookieEngine
-        get() = enableCookieNoticeSuppression.value
-
     /** When true, the tab will be reloaded when it becomes active tab. */
     var reloadUponForeground = false
 
@@ -80,6 +78,15 @@ class TabCookieCutterModel(
                 trackingDataFlow.value = TrackingData.create(stats, domainProvider)
             }
         }
+
+    suspend fun shouldInjectCookieEngine(host: String): Boolean {
+        val trackersEnabled = trackersAllowList.getHostAllowsTrackers(host)
+
+        // Only allow cookie notice suppression if it is enabled globally, and
+        // if trackers are not enabled for that site. For the purposes of this flag,
+        // we consider "cookie notices" a tracker.
+        return enableCookieNoticeSuppression.value && !trackersEnabled
+    }
 
     fun currentTrackingData(): TrackingData {
         return TrackingData.create(stats, domainProvider)

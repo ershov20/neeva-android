@@ -4,7 +4,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.mockk
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.runTest
 import org.chromium.weblayer.Browser
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -13,24 +19,35 @@ import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
+import strikt.assertions.isFalse
+import strikt.assertions.isTrue
 
 /**
  * Tests that the TabCookieCutterModel updates the stats properly
  */
+@ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 class TabCookieCutterModelTest : BaseTest() {
     private lateinit var model: TabCookieCutterModel
     private lateinit var domainProviderImpl: DomainProviderImpl
     private lateinit var cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
+    private lateinit var trackersAllowList: TrackersAllowList
 
     @Mock
     private lateinit var browser: Browser
 
     override fun setUp() {
         super.setUp()
+        MockKAnnotations.init(this)
+
         domainProviderImpl = DomainProviderImpl(RuntimeEnvironment.getApplication())
         cookieNoticeBlockedFlow = MutableStateFlow(false)
+
+        trackersAllowList = mockk {
+            coEvery { getHostAllowsTrackers(any()) } returns false
+            coEvery { getHostAllowsTrackers("example.com") } returns true
+        }
 
         model = TabCookieCutterModel(
             browserFlow = MutableStateFlow(null),
@@ -38,7 +55,8 @@ class TabCookieCutterModelTest : BaseTest() {
             trackingDataFlow = MutableStateFlow(null),
             cookieNoticeBlockedFlow = cookieNoticeBlockedFlow,
             enableCookieNoticeSuppression = mutableStateOf(true),
-            domainProvider = domainProviderImpl
+            domainProvider = domainProviderImpl,
+            trackersAllowList = trackersAllowList
         )
     }
 
@@ -56,6 +74,29 @@ class TabCookieCutterModelTest : BaseTest() {
 
         // but we're not the active tab, so make sure the state flow wasn't updated
         expectThat(cookieNoticeBlockedFlow.value).isEqualTo(false)
+    }
+
+    @Test
+    fun testCookieSuppressionEnabledByHost() {
+        runTest {
+            // First, try a site that suppression should be enabled on.
+            val suppressResult = model.shouldInjectCookieEngine("suppress.com")
+
+            coVerify {
+                trackersAllowList.getHostAllowsTrackers("suppress.com")
+            }
+
+            expectThat(suppressResult).isTrue()
+
+            // Then, a site it should not be enabled on.
+            val exampleResult = model.shouldInjectCookieEngine("example.com")
+
+            coVerify {
+                trackersAllowList.getHostAllowsTrackers("example.com")
+            }
+
+            expectThat(exampleResult).isFalse()
+        }
     }
 
     @Test

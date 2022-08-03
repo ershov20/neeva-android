@@ -47,7 +47,7 @@ class TabCallbacks(
     fullscreenCallback: FullscreenCallback,
     private val cookieCutterModel: CookieCutterModel,
     domainProvider: DomainProvider,
-    private val scriptInjectionManager: ScriptInjectionManager,
+    private val scriptInjectionManager: ScriptInjectionManager
 ) {
     val tabCookieCutterModel = TabCookieCutterModel(
         browserFlow = browserFlow,
@@ -55,7 +55,8 @@ class TabCallbacks(
         trackingDataFlow = cookieCutterModel.trackingDataFlow,
         enableCookieNoticeSuppression = cookieCutterModel.enableCookieNoticeSuppression,
         cookieNoticeBlockedFlow = cookieCutterModel.cookieNoticeBlockedFlow,
-        domainProvider = domainProvider
+        domainProvider = domainProvider,
+        trackersAllowList = cookieCutterModel.trackersAllowList
     )
 
     /**
@@ -126,7 +127,11 @@ class TabCallbacks(
             // also make sure we're a scheme worth injecting into
             val isHttp = navigation.uri.scheme == "http" || navigation.uri.scheme == "https"
             if (!navigation.isSameDocument && isHttp) {
-                scriptInjectionManager.injectNavigationCompletedScripts(tab, tabCookieCutterModel)
+                scriptInjectionManager.injectNavigationCompletedScripts(
+                    navigation.uri,
+                    tab,
+                    tabCookieCutterModel
+                )
             }
 
             commitVisit(navigation)

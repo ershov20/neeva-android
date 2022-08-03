@@ -36,6 +36,9 @@ abstract class TrackersAllowList {
     /** Returns a flow describing if trackers are allowed on the given [host]. */
     abstract fun getHostAllowsTrackersFlow(host: String): Flow<Boolean>
 
+    /** Returns the immediate value indicating whether or not trackers are allowed on the given [host]. */
+    abstract suspend fun getHostAllowsTrackers(host: String): Boolean
+
     /**
      * Toggles whether or not the given [host] is allowed to use trackers.
      *
@@ -71,6 +74,11 @@ class RegularTrackersAllowList(
                 it?.isTrackingAllowed ?: false
             }
             .distinctUntilChanged()
+    }
+
+    override suspend fun getHostAllowsTrackers(host: String): Boolean {
+        // By default, we'll disallow trackers.
+        return hostInfoDao.getHostInfoByName(host)?.isTrackingAllowed ?: false
     }
 
     override fun toggleHostInAllowList(host: String, onSuccess: () -> Unit): Boolean {
@@ -111,6 +119,10 @@ class IncognitoTrackersAllowList : TrackersAllowList() {
         return allowedHosts.map { currentSet ->
             currentSet.any { it.host == host }
         }
+    }
+
+    override suspend fun getHostAllowsTrackers(host: String): Boolean {
+        return allowedHosts.value.any { it.host == host }
     }
 
     private fun addToAllowList(host: String, onSuccess: () -> Unit): Boolean {
@@ -154,5 +166,6 @@ class IncognitoTrackersAllowList : TrackersAllowList() {
 class PreviewTrackersAllowList : TrackersAllowList() {
     override suspend fun getAllHostsInList(): List<HostInfo> = emptyList()
     override fun getHostAllowsTrackersFlow(host: String) = MutableStateFlow(false)
+    override suspend fun getHostAllowsTrackers(host: String) = false
     override fun toggleHostInAllowList(host: String, onSuccess: () -> Unit) = true
 }
