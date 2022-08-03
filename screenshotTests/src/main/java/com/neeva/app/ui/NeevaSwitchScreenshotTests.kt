@@ -9,4 +9,10 @@ class NeevaSwitchScreenshotTests : BaseScreenshotTest() {
 
     @Test
     fun neevaSwitchPreviewDisabled() = runScreenshotTest { NeevaSwitchPreviewDisabled() }
+
+    @Test
+    fun neevaSwitchPreviewEnabled_NotChecked() = runScreenshotTest { NeevaSwitchPreviewEnabled_NotChecked() }
+
+    @Test
+    fun neevaSwitchPreviewDisabled_NotChecked() = runScreenshotTest { NeevaSwitchPreviewDisabled_NotChecked() }
 }

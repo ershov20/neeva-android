@@ -2,6 +2,7 @@ package com.neeva.app.ui
 
 import android.widget.FrameLayout
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,6 +33,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.viewinterop.AndroidView
@@ -48,7 +51,6 @@ import com.neeva.app.browsing.toolbar.BrowserToolbarContainer
 import com.neeva.app.browsing.toolbar.BrowserToolbarModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.suggestions.SuggestionPane
-import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 import java.lang.Float.min
 import kotlinx.coroutines.flow.StateFlow
@@ -112,13 +114,20 @@ private fun WebLayerContainer(browserWrapper: BrowserWrapper) {
 @Composable
 fun PullToRefreshBox(browserWrapper: BrowserWrapper) {
     val verticalOverscroll by browserWrapper.activeTabModel.verticalOverscrollFlow.collectAsState()
-    val shouldDisplayPullToRefresh by remember {
+    PullToRefreshBox(verticalOverscroll = verticalOverscroll)
+}
+
+@Composable
+fun PullToRefreshBox(verticalOverscroll: Float) {
+    val shouldDisplayPullToRefresh by remember(verticalOverscroll) {
         derivedStateOf {
             verticalOverscroll < 0
         }
     }
 
     if (shouldDisplayPullToRefresh) {
+        val backgroundColor = MaterialTheme.colorScheme.primary
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -131,7 +140,7 @@ fun PullToRefreshBox(browserWrapper: BrowserWrapper) {
             Spacer(modifier = Modifier.weight(1.0f))
 
             Surface(
-                color = ColorPalette.Brand.Blue,
+                color = backgroundColor,
                 modifier = Modifier
                     .size(Dimensions.SIZE_TOUCH_TARGET)
                     .rotate(min(-verticalOverscroll / 5, 480f)),
@@ -156,7 +165,7 @@ fun PullToRefreshBox(browserWrapper: BrowserWrapper) {
                     ) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             drawArc(
-                                color = ColorPalette.Brand.Blue,
+                                color = backgroundColor,
                                 min(-verticalOverscroll / 2.5f, 360f),
                                 360f - min(-verticalOverscroll / 2.5f, 360f),
                                 true,
@@ -267,6 +276,36 @@ private fun BoxScope.BrowserOverlay(
                     .fillMaxWidth()
                     .align(Alignment.BottomCenter)
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PullToRefreshBox_Preview() {
+    LightDarkPreviewContainer {
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.height(160.dp).fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                PullToRefreshBox(verticalOverscroll = -0.0f)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                PullToRefreshBox(verticalOverscroll = -200.0f)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                PullToRefreshBox(verticalOverscroll = -400.0f)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                PullToRefreshBox(verticalOverscroll = -600.0f)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                PullToRefreshBox(verticalOverscroll = -800.0f)
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                PullToRefreshBox(verticalOverscroll = -1000.0f)
+            }
         }
     }
 }

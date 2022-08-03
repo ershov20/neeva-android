@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun TabGridEmptyState(
@@ -44,7 +46,7 @@ fun TabGridEmptyState(
     }
 
     Box(
-        modifier = modifier,
+        modifier = modifier.padding(Dimensions.PADDING_LARGE),
         contentAlignment = Alignment.Center
     ) {
         Column(

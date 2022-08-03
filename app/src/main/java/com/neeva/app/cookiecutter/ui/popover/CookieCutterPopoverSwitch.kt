@@ -21,6 +21,7 @@ internal fun CookieCutterPopoverSwitch(
     val allowClickingSwitch = remember { mutableStateOf(true) }
     NeevaSwitch(
         primaryLabel = stringResource(id = R.string.cookie_cutter),
+        secondaryLabel = stringResource(id = R.string.cookie_cutter_subtitle),
         isChecked = cookieCutterEnabled,
         enabled = allowClickingSwitch.value,
         onCheckedChange = {

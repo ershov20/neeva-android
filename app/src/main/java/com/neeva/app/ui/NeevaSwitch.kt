@@ -57,8 +57,10 @@ fun NeevaSwitch(
     NeevaSwitch(
         switchLabelContent = {
             StackedText(
-                primaryLabel = primaryLabel, secondaryLabel = secondaryLabel,
-                primaryMaxLines = 2,
+                primaryLabel = primaryLabel,
+                secondaryLabel = secondaryLabel,
+                primaryMaxLines = Int.MAX_VALUE,
+                secondaryMaxLines = Int.MAX_VALUE,
                 enabled = enabled
             )
         },
@@ -71,8 +73,23 @@ fun NeevaSwitch(
 @PortraitPreviews
 @Composable
 fun NeevaSwitchPreviewEnabled() {
-    OneBooleanPreviewContainer { isChecked ->
-        val isCheckedState = remember { mutableStateOf(isChecked) }
+    LightDarkPreviewContainer {
+        val isCheckedState = remember { mutableStateOf(true) }
+        NeevaSwitch(
+            primaryLabel = "Some random setting that the user can toggle",
+            isChecked = isCheckedState.value,
+            onCheckedChange = { isCheckedState.value = it },
+            enabled = true,
+            secondaryLabel = "Some secondary label of the setting toggle."
+        )
+    }
+}
+
+@PortraitPreviews
+@Composable
+fun NeevaSwitchPreviewEnabled_NotChecked() {
+    LightDarkPreviewContainer {
+        val isCheckedState = remember { mutableStateOf(false) }
         NeevaSwitch(
             primaryLabel = "Some random setting that the user can toggle",
             isChecked = isCheckedState.value,
@@ -86,8 +103,23 @@ fun NeevaSwitchPreviewEnabled() {
 @PortraitPreviews
 @Composable
 fun NeevaSwitchPreviewDisabled() {
-    OneBooleanPreviewContainer { isChecked ->
-        val isCheckedState = remember { mutableStateOf(isChecked) }
+    LightDarkPreviewContainer {
+        val isCheckedState = remember { mutableStateOf(true) }
+        NeevaSwitch(
+            primaryLabel = "Some random setting that the user can toggle",
+            isChecked = isCheckedState.value,
+            onCheckedChange = { isCheckedState.value = it },
+            enabled = false,
+            secondaryLabel = "Some secondary label of the setting toggle."
+        )
+    }
+}
+
+@PortraitPreviews
+@Composable
+fun NeevaSwitchPreviewDisabled_NotChecked() {
+    LightDarkPreviewContainer {
+        val isCheckedState = remember { mutableStateOf(false) }
         NeevaSwitch(
             primaryLabel = "Some random setting that the user can toggle",
             isChecked = isCheckedState.value,

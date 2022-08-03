@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -35,6 +33,7 @@ import com.neeva.app.ui.PortraitPreviewsDark
 import com.neeva.app.ui.theme.ColorPalette
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.widgets.ColumnWithMoreIndicator
 import com.neeva.app.ui.widgets.StackedButtons
 
 @Composable
@@ -125,55 +124,58 @@ fun SetDefaultAndroidBrowserPane(
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(Dimensions.PADDING_LARGE)
-                    .weight(1.0f),
-                verticalArrangement = if (showAsDialog) {
-                    Arrangement.Center
+            ColumnWithMoreIndicator(
+                modifier = Modifier.weight(1.0f),
+                contentAlignment = if (showAsDialog) {
+                    Alignment.Center
                 } else {
-                    Arrangement.Top
+                    Alignment.TopCenter
                 }
             ) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(space = Dimensions.PADDING_MEDIUM),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.padding(Dimensions.PADDING_LARGE)
                 ) {
-                    Text(
-                        text = stringResource(id = R.string.switch_default_browser_title),
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Text(
-                        text = stringResource(id = R.string.switch_default_browser_promo),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    if (mustOpenSettings) {
-                        // Because RoleManager is not available, we need to spell out the
-                        // instructions to the user on how to change the default browser, since they
-                        // will need to leave the app and manually make the change in Settings.
-                        InstructionsForAndroidSettings()
-                    } else {
-                        // To avoid having a big empty space, show a promo image.
-                        Image(
-                            painter = painterResource(R.drawable.cookie_cutter_promo),
-                            contentDescription = null,
-                            contentScale = ContentScale.Fit,
-                            modifier = Modifier
-                                .fillMaxWidth(0.8f)
-                                .align(Alignment.CenterHorizontally)
-                                .clip(RoundedCornerShape(Dimensions.RADIUS_LARGE))
-                                .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.outline,
-                                    shape = RoundedCornerShape(Dimensions.RADIUS_LARGE)
-                                )
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(
+                            space = Dimensions.PADDING_MEDIUM
+                        ),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.switch_default_browser_title),
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.fillMaxWidth()
                         )
+
+                        Text(
+                            text = stringResource(id = R.string.switch_default_browser_promo),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        if (mustOpenSettings) {
+                            // Because RoleManager is not available, we need to spell out the
+                            // instructions to the user on how to change the default browser, since they
+                            // will need to leave the app and manually make the change in Settings.
+                            InstructionsForAndroidSettings()
+                        } else {
+                            // To avoid having a big empty space, show a promo image.
+                            Image(
+                                painter = painterResource(R.drawable.cookie_cutter_promo),
+                                contentDescription = null,
+                                contentScale = ContentScale.Fit,
+                                modifier = Modifier
+                                    .fillMaxWidth(0.8f)
+                                    .align(Alignment.CenterHorizontally)
+                                    .clip(RoundedCornerShape(Dimensions.RADIUS_LARGE))
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.outline,
+                                        shape = RoundedCornerShape(Dimensions.RADIUS_LARGE)
+                                    )
+                            )
+                        }
                     }
                 }
             }

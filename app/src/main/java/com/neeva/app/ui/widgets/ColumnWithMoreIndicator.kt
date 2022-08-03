@@ -27,6 +27,7 @@ import com.neeva.app.ui.theme.Dimensions
 fun ColumnWithMoreIndicator(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.background,
+    contentAlignment: Alignment = Alignment.Center,
     scrollState: ScrollState = rememberScrollState(),
     content: @Composable () -> Unit
 ) {
@@ -35,8 +36,8 @@ fun ColumnWithMoreIndicator(
     }
 
     Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
+        modifier = modifier,
+        contentAlignment = contentAlignment
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

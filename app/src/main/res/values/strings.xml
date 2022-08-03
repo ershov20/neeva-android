@@ -645,15 +645,18 @@
     <string name="cookie_cutter_whos_tracking_you">Who\'s tracking you</string>
 
     <!-- [Cookie Cutter] Name of the "Cookie Cutter" feature. -->
-    <string name="cookie_cutter" translatable="false">Cookie Cutter</string>
+    <string name="cookie_cutter">Cookie Cutter</string>
 
     <!-- [Cookie Cutter] Sends the user to the settings page for the "Cookie Cutter" feature. -->
     <string name="cookie_cutter_settings">Cookie Cutter settings</string>
 
+    <!-- [Cookie Cutter] Subtitle for a switch that allows a user to turn off Cookie Cutter. -->
+    <string name="cookie_cutter_subtitle">Site appears broken? Try deactivating.</string>
+
 
 
     <!-- [NeevaScope] Title of the NeevaScope feature. -->
-    <string name="neevascope" translatable="false">NeevaScope</string>
+    <string name="neevascope">NeevaScope</string>
 
     <!-- [NeevaScope] Tells the user how NeevaScope is triggered. -->
     <string name="neevascope_intro_title">Tap on the Neeva logo to see information related to the website you\'re visiting.</string>
