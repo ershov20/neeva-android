@@ -2,7 +2,6 @@ package com.neeva.app.neevascope
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.runtime.getValue
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
@@ -17,8 +16,8 @@ import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -72,70 +71,69 @@ class NeevascopeModelTest : BaseTest() {
         neevascopeModel = NeevascopeModel(
             apolloWrapper = apolloWrapper,
             coroutineScope = coroutineScopeRule.scope,
-            dispatchers = dispatchers
+            dispatchers = dispatchers,
+            appContext = context
         )
     }
 
     @Test
     fun onQueryChanged_withNonEmptyString_fetchNeevascopeDataAndTestResult() {
-        apolloWrapper.registerTestResponse(
-            SearchQuery(query = "input"),
-            SEARCH_DATA
-        )
-        apolloWrapper.registerTestResponse(
-            CheatsheetInfoQuery(input = "input", title = "title"),
-            CHEATSHEET_DATA
-        )
-
-        neevascopeModel.updateQuery(query = "input", title = "title")
-
-        coroutineScopeRule.scope.advanceUntilIdle()
-
-        val result = neevascopeModel.searchFlow.value!!
-
-        expectThat(result.webSearches).containsExactly(
-            NeevascopeWebResult(
-                faviconURL = "",
-                displayURLHost = "neeva.com",
-                displayURLPath = listOf("neeva", "search"),
-                actionURL = Uri.parse("www.neeva.com"),
-                title = "Neeva search",
-                snippet = ""
+        runBlocking {
+            val result = neevascopeModel.updateNeevascopeResult(
+                SEARCH_DATA,
+                CHEATSHEET_DATA,
+                context
             )
-        )
 
-        expectThat(result.relatedSearches).containsExactly("related search 1", "related search 2")
+            expectThat(result.webSearches).containsExactly(
+                NeevascopeWebResult(
+                    faviconURL = "",
+                    displayURLHost = "neeva.com",
+                    displayURLPath = listOf("neeva", "search"),
+                    actionURL = Uri.parse("www.neeva.com"),
+                    title = "Neeva search",
+                    snippet = ""
+                )
+            )
 
-        expectThat(result.memorizedSearches).containsExactly(
-            "memorized query 1",
-            "memorized query 2"
-        )
+            expectThat(result.relatedSearches).containsExactly(
+                "related search 1",
+                "related search 2"
+            )
 
-        expectThat(result.redditDiscussions).containsExactly(
-            NeevascopeDiscussion(
-                title = "GTA Vice City",
-                content = DiscussionContent(
-                    body = "This is forum body",
-                    comments = listOf(
-                        DiscussionComment(
-                            body = "Comment 1",
-                            url = Uri.parse(""),
-                            upvotes = 1
-                        ),
-                        DiscussionComment(
-                            body = "Comment 2",
-                            url = Uri.parse(""),
-                            upvotes = 2
+            expectThat(result.memorizedSearches).containsExactly(
+                "memorized query 1",
+                "memorized query 2"
+            )
+
+            expectThat(result.redditDiscussions).containsExactly(
+                NeevascopeDiscussion(
+                    title = "GTA Vice City",
+                    content = DiscussionContent(
+                        body = "This is forum body",
+                        comments = listOf(
+                            DiscussionComment(
+                                body = "Comment 1",
+                                url = Uri.parse(""),
+                                upvotes = 1
+                            ),
+                            DiscussionComment(
+                                body = "Comment 2",
+                                url = Uri.parse(""),
+                                upvotes = 2
+                            )
                         )
-                    )
-                ),
-                url = Uri.parse(
-                    "https://www.reddit.com/r/GTA/comments/85uyan/gta_vice_city"
-                ),
-                slash = "/r/GTA",
-                numComments = 4
+                    ),
+                    url = Uri.parse(
+                        "https://www.reddit.com/r/GTA/comments/85uyan/gta_vice_city"
+                    ),
+                    slash = "/r/GTA",
+                    upvotes = 1,
+                    numComments = 4,
+                    interval = "4 years ago"
+                )
             )
-        )
+        }
     }
 
     @Test

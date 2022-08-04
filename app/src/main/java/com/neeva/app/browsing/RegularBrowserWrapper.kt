@@ -70,7 +70,8 @@ class RegularBrowserWrapper(
     neevascopeModel = NeevascopeModel(
         apolloWrapper = authenticatedApolloWrapper,
         coroutineScope = coroutineScope,
-        dispatchers = dispatchers
+        dispatchers = dispatchers,
+        appContext = appContext
     ),
     popupModel = popupModel,
     neevaUser = neevaUser,

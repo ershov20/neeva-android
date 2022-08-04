@@ -677,6 +677,37 @@
     <!-- [NeevaScope] Displayed as a header for a section that displays a list of related queries. -->
     <string name="neevascope_memorized_query">Keep looking</string>
 
+    <!-- [NeevaScope] Displayed as a header for a section that displays a list of reddit discussions. -->
+    <string name="reddit_discussion">Discussions</string>
+
+    <!-- [NeevaScope] Indicate when reddit discussion posted -->
+    <plurals name="discussion_interval_day">
+        <item quantity="one">%d day ago</item>
+        <item quantity="many">%d days ago</item>
+        <item quantity="other">%d days ago</item>
+    </plurals>
+
+    <plurals name="discussion_interval_month">
+        <item quantity="one">%d month ago</item>
+        <item quantity="many">%d months ago</item>
+        <item quantity="other">%d months ago</item>
+    </plurals>
+
+    <plurals name="discussion_interval_year">
+        <item quantity="one">%d year ago</item>
+        <item quantity="many">%d years ago</item>
+        <item quantity="other">%d years ago</item>
+    </plurals>
+
+    <!-- [NeevaScope] Triggers showing full content. -->
+    <string name="discussion_comment_more">Read more</string>
+
+    <!-- [NeevaScope] Triggers showing less content. -->
+    <string name="discussion_comment_less">Read less</string>
+
+    <!-- [NeevaScope] Label for a link that takes the user to reddit discussion page. -->
+    <string name="discussion_more_comments">More comments</string>
+
     <!-- [NeevaScope] Displayed as a header for support section. -->
     <string name="neevascope_support_title">Support</string>
 

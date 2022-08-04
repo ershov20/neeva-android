@@ -61,7 +61,11 @@ fun NeevascopeResultScreen(
                 .padding(horizontal = Dimensions.PADDING_LARGE)
         ) {
             searches?.redditDiscussions?.takeIf { it.isNotEmpty() }?.let {
-                // TODO: Add discussion page
+                RedditDiscussionsList(
+                    discussions = it,
+                    openUrl = openUrl,
+                    onDismiss = onDismiss
+                )
             }
 
             searches?.webSearches?.takeIf { it.isNotEmpty() }?.let {
@@ -85,7 +89,7 @@ fun NeevascopeResultScreen(
             searches?.memorizedSearches?.takeIf { it.isNotEmpty() }?.let {
                 RelatedSearchesList(
                     title = R.string.neevascope_memorized_query,
-                    searches = it.take(5),
+                    searches = it,
                     openUrl = openUrl,
                     neevaConstants = neevaConstants,
                     onDismiss = onDismiss

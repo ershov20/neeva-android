@@ -55,7 +55,8 @@ class IncognitoBrowserWrapper private constructor(
     neevascopeModel = NeevascopeModel(
         apolloWrapper = unauthenticatedApolloWrapper,
         coroutineScope = coroutineScope,
-        dispatchers = dispatchers
+        dispatchers = dispatchers,
+        appContext = appContext
     ),
     popupModel = popupModel,
     neevaUser = neevaUser,

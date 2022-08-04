@@ -1,11 +1,17 @@
 package com.neeva.app.neevascope
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.neeva.app.CheatsheetInfoQuery
 import com.neeva.app.Dispatchers
+import com.neeva.app.R
 import com.neeva.app.SearchQuery
 import com.neeva.app.apollo.ApolloWrapper
+import java.time.LocalDate
+import java.time.Period
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -64,9 +70,12 @@ data class NeevascopeResult(
 class NeevascopeModel(
     private val apolloWrapper: ApolloWrapper,
     coroutineScope: CoroutineScope,
-    dispatchers: Dispatchers
+    dispatchers: Dispatchers,
+    appContext: Context
 ) {
     companion object {
+        private const val MEMORIZED_QUERY_COUNT_THRESHOLD = 5
+        private const val DISCUSSION_COUNT_THRESHOLD = 5
         val TAG = NeevascopeModel::class.simpleName
     }
 
@@ -78,50 +87,10 @@ class NeevascopeModel(
             // Neeva search
             val searchResultsData = performNeevaScopeQuery(query = search.query)
 
-            val searchResultGroups = searchResultsData?.search?.resultGroup
-            val webResults: MutableList<NeevascopeWebResult> = mutableListOf()
-            var relatedResults = emptyList<String>()
-
-            searchResultGroups?.forEach { resultGroup ->
-                resultGroup?.result?.filterNotNull()?.forEach { result ->
-                    if (result.typeSpecific != null) {
-                        when {
-                            result.typeSpecific.onWeb != null -> {
-                                webResults.add(result.toWebSearch())
-                            }
-
-                            result.typeSpecific.onRelatedSearches != null -> {
-                                val relatedSearch =
-                                    result.typeSpecific.onRelatedSearches.relatedSearches
-                                val entries = relatedSearch?.entries
-
-                                relatedResults = entries?.mapNotNull { it.searchText }
-                                    ?: emptyList()
-                            }
-                        }
-                    }
-                }
-            }
-
             // Neeva cheatsheet
             val cheatsheetInfoData = performCheatsheetInfoQuery(search.query, search.title)
-            val discussions: MutableList<NeevascopeDiscussion> = mutableListOf()
-            val memorizedResults =
-                cheatsheetInfoData?.getCheatsheetInfo?.MemorizedQuery ?: emptyList()
 
-            cheatsheetInfoData?.getCheatsheetInfo?.BacklinkURL
-                ?.mapNotNull { backlinkURL ->
-                    backlinkURL.toRedditDiscussion()?.let { discussion ->
-                        discussions.add(discussion)
-                    }
-                }
-
-            return@map NeevascopeResult(
-                webSearches = webResults,
-                relatedSearches = relatedResults,
-                redditDiscussions = discussions,
-                memorizedSearches = memorizedResults
-            )
+            return@map updateNeevascopeResult(searchResultsData, cheatsheetInfoData, appContext)
         }
         .flowOn(dispatchers.io)
         .stateIn(coroutineScope, SharingStarted.Eagerly, null)
@@ -161,6 +130,58 @@ class NeevascopeModel(
         return cheatsheetInfo
     }
 
+    suspend fun updateNeevascopeResult(
+        searchResultsData: SearchQuery.Data?,
+        cheatsheetInfoData: CheatsheetInfoQuery.Data?,
+        appContext: Context
+    ): NeevascopeResult {
+        val searchResultGroups = searchResultsData?.search?.resultGroup
+        val webResults: MutableList<NeevascopeWebResult> = mutableListOf()
+        var relatedResults = emptyList<String>()
+
+        searchResultGroups?.forEach { resultGroup ->
+            resultGroup?.result?.filterNotNull()?.forEach { result ->
+                if (result.typeSpecific != null) {
+                    when {
+                        result.typeSpecific.onWeb != null -> {
+                            webResults.add(result.toWebSearch())
+                        }
+
+                        result.typeSpecific.onRelatedSearches != null -> {
+                            val relatedSearch =
+                                result.typeSpecific.onRelatedSearches.relatedSearches
+                            val entries = relatedSearch?.entries
+
+                            relatedResults = entries?.mapNotNull { it.searchText }
+                                ?: emptyList()
+                        }
+                    }
+                }
+            }
+        }
+
+        val discussions: MutableList<NeevascopeDiscussion> = mutableListOf()
+        val memorizedResults =
+            cheatsheetInfoData?.getCheatsheetInfo?.MemorizedQuery ?: emptyList()
+
+        cheatsheetInfoData?.getCheatsheetInfo?.BacklinkURL
+            ?.mapNotNull { backlinkURL ->
+                backlinkURL
+                    .takeIf { it.Domain == "www.reddit.com" }
+                    ?.toRedditDiscussion(appContext)
+                    ?.let { discussion ->
+                        discussions.add(discussion)
+                    }
+            }
+
+        return NeevascopeResult(
+            webSearches = webResults,
+            relatedSearches = relatedResults,
+            redditDiscussions = discussions.take(DISCUSSION_COUNT_THRESHOLD),
+            memorizedSearches = memorizedResults.take(MEMORIZED_QUERY_COUNT_THRESHOLD)
+        )
+    }
+
     fun updateQuery(query: String, title: String) {
         _searchQuery.value = NeevascopeSearchQuery(query = query, title = title)
     }
@@ -179,7 +200,7 @@ fun SearchQuery.Result.toWebSearch(): NeevascopeWebResult {
     )
 }
 
-fun CheatsheetInfoQuery.BacklinkURL.toRedditDiscussion(): NeevascopeDiscussion? {
+fun CheatsheetInfoQuery.BacklinkURL.toRedditDiscussion(appContext: Context): NeevascopeDiscussion? {
     val content = this.Forum?.toDiscussionContent()
     val slash = this.URL?.toDiscussionSlash()
 
@@ -189,7 +210,9 @@ fun CheatsheetInfoQuery.BacklinkURL.toRedditDiscussion(): NeevascopeDiscussion? 
             content = it,
             url = Uri.parse(this.URL),
             slash = slash.toString(),
-            numComments = this.Forum?.numComments
+            upvotes = this.Forum?.score,
+            numComments = this.Forum?.numComments,
+            interval = this.Forum?.date?.toInterval(appContext)
         )
     }
 }
@@ -217,4 +240,40 @@ fun String.toDiscussionSlash(): String? {
     return matchResult?.range
         ?.let { this.substring(it) }
         ?.toString()
+}
+
+fun String.toInterval(appContext: Context): String {
+    if (this.isEmpty()) return ""
+
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z z")
+    val date = this
+        .let {
+            ZonedDateTime.parse(it, formatter)
+        }.toLocalDate()
+
+    return when {
+        Period.between(date, LocalDate.now()).years > 0 -> {
+            appContext.resources.getQuantityString(
+                R.plurals.discussion_interval_year,
+                Period.between(date, LocalDate.now()).years,
+                Period.between(date, LocalDate.now()).years
+            )
+        }
+
+        Period.between(date, LocalDate.now()).months > 0 -> {
+            appContext.resources.getQuantityString(
+                R.plurals.discussion_interval_month,
+                Period.between(date, LocalDate.now()).months,
+                Period.between(date, LocalDate.now()).months
+            )
+        }
+
+        else -> {
+            appContext.resources.getQuantityString(
+                R.plurals.discussion_interval_day,
+                Period.between(date, LocalDate.now()).days,
+                Period.between(date, LocalDate.now()).days
+            )
+        }
+    }
 }
