@@ -9,12 +9,7 @@ import java.io.File
 import java.io.InputStream
 import java.io.OutputStream
 
-/**
- * Encrypts files using a master key.
- *
- * TODO(dan.alcantara): See if we can use a master key that is automatically nuked when the user
- *                      exits incognito.
- */
+/** Encrypts files using a master key. */
 class FileEncrypter(context: Context) {
     private val appContext = context.applicationContext
 

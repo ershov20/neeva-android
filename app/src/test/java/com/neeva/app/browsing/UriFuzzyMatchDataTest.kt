@@ -73,11 +73,9 @@ class UriFuzzyMatchDataTest : BaseTest() {
         )
     }
 
-    private fun runFuzzyMatchTest(first: String, second: String?, expectedOutcome: Boolean) {
-        expectThat(
-            UriFuzzyMatchData.create(Uri.parse(first))
-                ?.fuzzyEquals(second?.let { UriFuzzyMatchData.create(Uri.parse(second)) })
-        )
-            .isEqualTo(expectedOutcome)
+    private fun runFuzzyMatchTest(first: String, second: String, expectedOutcome: Boolean) {
+        val firstUri = UriFuzzyMatchData.create(Uri.parse(first))
+        val secondUri = UriFuzzyMatchData.create(Uri.parse(second))
+        expectThat(firstUri == secondUri).isEqualTo(expectedOutcome)
     }
 }

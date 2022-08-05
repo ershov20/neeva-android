@@ -20,6 +20,7 @@ import strikt.assertions.hasSize
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
+import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
@@ -30,6 +31,7 @@ class TabListTest : BaseTest() {
     private lateinit var browser: Browser
     private lateinit var firstTab: Tab
     private lateinit var secondTab: Tab
+    private lateinit var thirdTab: Tab
 
     override fun setUp() {
         super.setUp()
@@ -53,6 +55,13 @@ class TabListTest : BaseTest() {
             on { getNavigationEntryTitle(eq(1)) } doReturn "Thing"
         }
 
+        val thirdNavigationController = mock<NavigationController> {
+            on { navigationListSize } doReturn 1
+            on { navigationListCurrentIndex } doReturn 0
+            on { getNavigationEntryDisplayUri(eq(0)) } doReturn Uri.parse("http://example.com")
+            on { getNavigationEntryTitle(eq(0)) } doReturn "Example"
+        }
+
         firstTab = mock {
             on { getNavigationController() } doReturn firstNavigationController
             on { getBrowser() } doReturn browser
@@ -70,6 +79,14 @@ class TabListTest : BaseTest() {
                 TabInfo.PersistedData.KEY_PARENT_TAB_ID to "tab guid 1",
                 TabInfo.PersistedData.KEY_OPEN_TYPE to TabInfo.TabOpenType.CHILD_TAB.name
             )
+        }
+
+        thirdTab = mock {
+            on { getNavigationController() } doReturn thirdNavigationController
+            on { getBrowser() } doReturn browser
+            on { guid } doReturn "tab guid 3"
+            on { isDestroyed } doReturn false
+            on { data } doReturn emptyMap()
         }
     }
 
@@ -328,10 +345,53 @@ class TabListTest : BaseTest() {
         tabList.add(firstTab)
         tabList.add(secondTab)
         expectThat(tabList.orderedTabList.value).hasSize(2)
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://example.com"))).isNotNull()
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://thing.com"))).isNotNull()
 
         tabList.clear()
         expectThat(tabList.orderedTabList.value).isEmpty()
         expectThat(tabList.getTabInfo(firstTab.guid)).isNull()
         expectThat(tabList.getTabInfo(secondTab.guid)).isNull()
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://example.com"))).isNull()
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://thing.com"))).isNull()
+    }
+
+    @Test
+    fun fuzzyMapStaysUpdated() {
+        `when`(browser.activeTab).doReturn(firstTab)
+
+        // Add two tabs with the same URL and one with a different URL.
+        tabList.add(firstTab)
+        tabList.add(secondTab)
+        tabList.add(thirdTab)
+
+        // Confirm that the map finds the right tabs for compatible URIs.
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://example.com")))
+            .isEqualTo(firstTab.guid)
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("https://www.example.com")))
+            .isEqualTo(firstTab.guid)
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("file:www.example.com")))
+            .isNull()
+
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://thing.com")))
+            .isEqualTo(secondTab.guid)
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("https://www.thing.com")))
+            .isEqualTo(secondTab.guid)
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("file:www.thing.com")))
+            .isNull()
+
+        // Update the first tab's URI, which should update the map for the first tab.
+        tabList.updateUrl(firstTab.guid, Uri.parse("https://www.reddit.com"))
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://example.com")))
+            .isEqualTo(thirdTab.guid)
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://reddit.com")))
+            .isEqualTo(firstTab.guid)
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://thing.com")))
+            .isEqualTo(secondTab.guid)
+
+        // Removing a tab from the list should result in the fuzzy match failing.
+        tabList.remove(secondTab.guid)
+        expectThat(tabList.findTabWithSimilarUri(Uri.parse("http://thing.com")))
+            .isNull()
     }
 }

@@ -184,6 +184,8 @@ class URLBarModelImpl(
     }
 
     override fun showZeroQuery(focusUrlBar: Boolean, isLazyTab: Boolean) {
+        if (_stateFlow.value.isEditing) return
+
         _stateFlow.value = URLBarModelState(
             isEditing = true,
             isLazyTab = isLazyTab,

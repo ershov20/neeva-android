@@ -80,7 +80,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var activeTabModelImpl: ActiveTabModelImpl
     private lateinit var browser: Browser
     private lateinit var browserFragment: BrowserFragment
-    private lateinit var browserWrapper: BrowserWrapper
+    private lateinit var browserWrapper: BaseBrowserWrapper
     private lateinit var context: Context
     private lateinit var neevaConstants: NeevaConstants
     private lateinit var tabList: TabList
@@ -564,98 +564,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         expectThat(tabInfoList).hasSize(1)
         expectThat(tabInfoList[0].data.parentTabId).isNull()
         expectThat(tabInfoList[0].data.openType).isEqualTo(TabInfo.TabOpenType.DEFAULT)
-    }
-
-    @Test
-    fun goBack_whenQueryExists_reshowsSuggestions() {
-        createAndAttachBrowser()
-        completeBrowserRestoration()
-        coroutineScopeRule.scope.advanceUntilIdle()
-
-        val currentTab = browser.activeTab!!
-        val currentNavController = currentTab.navigationController
-        Mockito.`when`(activeTabModelImpl.goBack(any(), any())).doAnswer {
-            val uri = currentNavController.getNavigationEntryDisplayUri(
-                currentNavController.navigationListCurrentIndex
-            )
-            currentNavController.goBack()
-
-            @Suppress("UNCHECKED_CAST")
-            val onNavigatedBack = it.arguments[0] as ((Uri) -> Unit)
-            onNavigatedBack.invoke(uri)
-        }
-
-        browserWrapper.loadUrl(
-            uri = Uri.parse("http://www.firstload.com"),
-            inNewTab = false,
-            searchQuery = null
-        )
-        coroutineScopeRule.scope.advanceUntilIdle()
-
-        browserWrapper.loadUrl(
-            uri = Uri.parse("http://www.secondload.com"),
-            inNewTab = false,
-            searchQuery = "query that triggered loading first example"
-        )
-        coroutineScopeRule.scope.advanceUntilIdle()
-
-        browserWrapper.loadUrl(
-            uri = Uri.parse("http://www.thirdload.com"),
-            inNewTab = false,
-            searchQuery = "query that triggered loading second example"
-        )
-        coroutineScopeRule.scope.advanceUntilIdle()
-
-        expectThat(currentNavController.navigationListCurrentIndex).isEqualTo(3)
-        expectThat(currentNavController.navigationListSize).isEqualTo(4)
-        expectThat(currentNavController.getNavigationEntryDisplayUri(0))
-            .isEqualTo(Uri.parse("https://neeva.com/"))
-        expectThat(currentNavController.getNavigationEntryDisplayUri(1))
-            .isEqualTo(Uri.parse("http://www.firstload.com"))
-        expectThat(currentNavController.getNavigationEntryDisplayUri(2))
-            .isEqualTo(Uri.parse("http://www.secondload.com"))
-        expectThat(currentNavController.getNavigationEntryDisplayUri(3))
-            .isEqualTo(Uri.parse("http://www.thirdload.com"))
-
-        // We should reshow the search suggestions that led to the navigation.
-        browserWrapper.goBack()
-        coroutineScopeRule.scope.advanceUntilIdle()
-        verify(urlBarModel).showZeroQuery(false)
-        verify(urlBarModel).replaceLocationBarText("query that triggered loading second example")
-        expectThat(currentNavController.navigationListCurrentIndex).isEqualTo(2)
-        expectThat(currentNavController.navigationListSize).isEqualTo(4)
-
-        browserWrapper.goBack()
-        coroutineScopeRule.scope.advanceUntilIdle()
-        verify(urlBarModel, times(2)).showZeroQuery(false)
-        verify(urlBarModel).replaceLocationBarText("query that triggered loading first example")
-        expectThat(currentNavController.navigationListCurrentIndex).isEqualTo(1)
-        expectThat(currentNavController.navigationListSize).isEqualTo(4)
-
-        // Navigating forward should overwrite the saved query data.
-        browserWrapper.loadUrl(
-            uri = Uri.parse("http://www.fourthload.com"),
-            inNewTab = false,
-            searchQuery = null
-        )
-        coroutineScopeRule.scope.advanceUntilIdle()
-
-        expectThat(currentNavController.getNavigationEntryDisplayUri(0))
-            .isEqualTo(Uri.parse("https://neeva.com/"))
-        expectThat(currentNavController.getNavigationEntryDisplayUri(1))
-            .isEqualTo(Uri.parse("http://www.firstload.com"))
-        expectThat(currentNavController.getNavigationEntryDisplayUri(2))
-            .isEqualTo(Uri.parse("http://www.fourthload.com"))
-        expectThat(currentNavController.navigationListCurrentIndex).isEqualTo(2)
-        expectThat(currentNavController.navigationListSize).isEqualTo(3)
-
-        // We shouldn't have tried to reshow the search results because the queries are gone.
-        verify(urlBarModel, times(2)).showZeroQuery(false)
-        browserWrapper.goBack()
-        coroutineScopeRule.scope.advanceUntilIdle()
-        expectThat(currentNavController.navigationListCurrentIndex).isEqualTo(1)
-        expectThat(currentNavController.navigationListSize).isEqualTo(3)
-        verify(urlBarModel, times(2)).showZeroQuery(false)
     }
 
     @Test

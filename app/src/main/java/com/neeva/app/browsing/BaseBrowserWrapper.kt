@@ -7,6 +7,7 @@ import android.net.Uri
 import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.fragment.app.Fragment
@@ -834,8 +835,8 @@ abstract class BaseBrowserWrapper internal constructor(
     // region: Active tab operations
     override fun goBack() {
         _activeTabModelImpl.goBack(
-            onNavigatedBack = ::showSearchResultsAgainIfNecessary,
-            onCloseTab = ::closeTab
+            onCloseTab = ::closeTab,
+            onShowSearchResults = ::reshowSearchResultsInLazyTab
         )
     }
 
@@ -844,17 +845,10 @@ abstract class BaseBrowserWrapper internal constructor(
     override fun toggleViewDesktopSite() = _activeTabModelImpl.toggleViewDesktopSite()
     override fun resetOverscroll(action: Int) = _activeTabModelImpl.resetOverscroll(action)
 
-    /** If a navigation was originally triggered by a query, show the results again. */
-    private fun showSearchResultsAgainIfNecessary(uri: Uri) {
-        browserFlow.getActiveTab()?.let { tab ->
-            tabList.getTabInfo(tab.guid)?.searchQueryMap
-                ?.get(tab.navigationController.navigationListCurrentIndex + 1)
-                ?.takeIf { it.navigationEntryUri == uri }
-                ?.let { entry ->
-                    urlBarModel.showZeroQuery(focusUrlBar = false)
-                    urlBarModel.replaceLocationBarText(entry.searchQuery)
-                }
-        }
+    @VisibleForTesting
+    internal fun reshowSearchResultsInLazyTab(query: String) {
+        urlBarModel.showZeroQuery(focusUrlBar = false, isLazyTab = true)
+        urlBarModel.replaceLocationBarText(query)
     }
 
     override fun loadUrl(
@@ -917,7 +911,6 @@ abstract class BaseBrowserWrapper internal constructor(
             }
 
             if (mustCreateNewTab) {
-                // TODO(dan.alcantara): Save the searchQuery when createOrSwitchTab behavior is in.
                 createTabWithUri(
                     uri = urlToLoad,
                     parentTabId = parentTabIdToUse,

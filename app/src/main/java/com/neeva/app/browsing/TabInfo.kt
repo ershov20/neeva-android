@@ -17,7 +17,11 @@ data class SearchNavigationInfo(
     val searchQuery: String
 )
 
-/** Normalizes URIs for fuzzy comparison. */
+/**
+ * Normalizes URIs for fuzzy comparison.
+ *
+ * iOS ignores the scheme and fragment when matching.
+ */
 data class UriFuzzyMatchData(
     val authority: String?,
     val path: String?,
@@ -54,15 +58,6 @@ data class UriFuzzyMatchData(
                 uri.query
             )
         }
-    }
-
-    fun fuzzyEquals(other: UriFuzzyMatchData?) = when {
-        // iOS ignores the scheme and fragment when matching.
-        other == null -> false
-        authority != other.authority -> false
-        path != other.path -> false
-        query != other.query -> false
-        else -> true
     }
 }
 

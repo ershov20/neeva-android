@@ -584,4 +584,26 @@ class URLBarModelImplTest : BaseTest() {
         expectThat(URLBarModelImpl.matchesLocalhost("ftp://localhost")).isFalse()
         expectThat(URLBarModelImpl.matchesLocalhost("ftp://localhost:8000")).isFalse()
     }
+
+    @Test
+    fun showZeroQuery_ifAlreadyOpen_ignoresCall() {
+        model.showZeroQuery(focusUrlBar = true, isLazyTab = true)
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isLazyTab).isTrue()
+        expectThat(model.stateFlow.value.focusUrlBar).isTrue()
+
+        model.showZeroQuery(focusUrlBar = false, isLazyTab = false)
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isLazyTab).isTrue()
+        expectThat(model.stateFlow.value.focusUrlBar).isTrue()
+
+        model.clearFocus()
+        expectThat(model.stateFlow.value.isEditing).isFalse()
+        expectThat(model.stateFlow.value.isLazyTab).isFalse()
+
+        model.showZeroQuery(focusUrlBar = false, isLazyTab = false)
+        expectThat(model.stateFlow.value.isEditing).isTrue()
+        expectThat(model.stateFlow.value.isLazyTab).isFalse()
+        expectThat(model.stateFlow.value.focusUrlBar).isFalse()
+    }
 }

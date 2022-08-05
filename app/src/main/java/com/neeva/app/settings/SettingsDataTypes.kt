@@ -75,8 +75,6 @@ enum class SettingsToggle(
     LOGGING_CONSENT(
         primaryLabelId = R.string.logging_consent_toggle_title,
         secondaryLabelId = R.string.logging_consent_toggle_subtitle,
-
-        // TODO(dan.alcantara): Figure out what to do here.  This is set to opt-out currently.
         defaultValue = true
     ),
     CLEAR_BROWSING_HISTORY(

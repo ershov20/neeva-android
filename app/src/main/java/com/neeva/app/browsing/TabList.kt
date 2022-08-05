@@ -13,6 +13,7 @@ import org.chromium.weblayer.Tab
 class TabList {
     private val tabs: MutableList<String> = mutableListOf()
     private val tabInfoMap: MutableMap<String, TabInfo> = mutableMapOf()
+    private val fuzzyMatchMap: MutableMap<UriFuzzyMatchData, MutableSet<String>> = mutableMapOf()
 
     private val _orderedTabList = MutableStateFlow<List<TabInfo>>(emptyList())
     val orderedTabList: StateFlow<List<TabInfo>> = _orderedTabList
@@ -38,13 +39,21 @@ class TabList {
         if (tabs.contains(tab.guid)) return
         tabs.add(tab.guid)
 
-        tabInfoMap[tab.guid] = TabInfo(
+        TabInfo(
             id = tab.guid,
             url = tab.currentDisplayUrl,
             title = tab.currentDisplayTitle,
             isSelected = tab.isSelected,
             data = TabInfo.PersistedData(tab.data)
-        )
+        ).apply {
+            tabInfoMap[tab.guid] = this
+
+            fuzzyMatchUrl?.let {
+                val updatedSet = fuzzyMatchMap.getOrDefault(it, mutableSetOf())
+                updatedSet.add(id)
+                fuzzyMatchMap[it] = updatedSet
+            }
+        }
 
         updateFlow()
     }
@@ -53,6 +62,9 @@ class TabList {
     fun remove(tabId: String): TabInfo? {
         tabs.remove(tabId)
         val childInfo = tabInfoMap.remove(tabId)
+        childInfo?.let { childInfo ->
+            childInfo.fuzzyMatchUrl?.let { fuzzyMatchMap[it]?.remove(tabId) }
+        }
         updateFlow()
         return childInfo
     }
@@ -124,7 +136,18 @@ class TabList {
         tabInfoMap[tabId]
             ?.takeUnless { it.url == newUrl }
             ?.let { existingInfo ->
-                tabInfoMap[tabId] = existingInfo.copy(url = newUrl)
+                val newInfo = existingInfo.copy(url = newUrl)
+                tabInfoMap[tabId] = newInfo
+
+                existingInfo.fuzzyMatchUrl?.let {
+                    fuzzyMatchMap[it]?.remove(existingInfo.id)
+                }
+                newInfo.fuzzyMatchUrl?.let {
+                    val updatedSet = fuzzyMatchMap.getOrDefault(it, mutableSetOf())
+                    updatedSet.add(newInfo.id)
+                    fuzzyMatchMap[it] = updatedSet
+                }
+
                 updateFlow()
             }
     }
@@ -184,24 +207,27 @@ class TabList {
         val tabInfo = getTabInfo(tabId)
         return tabInfo?.data
             ?.takeIf { it.openType == TabInfo.TabOpenType.CHILD_TAB }
-            ?.let { data ->
-                data.parentTabId?.let { tabs.contains(it) }
-            } ?: false
+            ?.let { data -> data.parentTabId?.let { tabs.contains(it) } }
+            ?: false
     }
 
     internal fun clear() {
         tabs.clear()
         tabInfoMap.clear()
+        fuzzyMatchMap.clear()
         updateFlow()
     }
 
     /** Returns the ID of a pre-existing Tab with a URI similar to the [uri] being passed in. */
     fun findTabWithSimilarUri(uri: Uri): String? {
-        // TODO(dan.alcantara): Replace this with a map instead of iterating through.
-        val fuzzyUri = UriFuzzyMatchData.create(uri)
-        return _orderedTabList.value
-            .firstOrNull { it.fuzzyMatchUrl?.fuzzyEquals(fuzzyUri) == true }
-            ?.id
+        val fuzzyUri = UriFuzzyMatchData.create(uri) ?: return null
+        return fuzzyMatchMap[fuzzyUri]?.firstOrNull()
+    }
+
+    fun getSearchNavigationInfo(guid: String, navigationEntryIndex: Int): SearchNavigationInfo? {
+        return getTabInfo(guid)
+            ?.searchQueryMap
+            ?.get(navigationEntryIndex)
     }
 
     private fun updateFlow() {

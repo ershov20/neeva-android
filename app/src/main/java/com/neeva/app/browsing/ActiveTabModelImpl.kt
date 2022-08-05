@@ -205,20 +205,39 @@ class ActiveTabModelImpl(
     }
 
     fun goBack(
-        onNavigatedBack: (uri: Uri) -> Unit,
-        onCloseTab: (tabGuid: String) -> Unit
+        onCloseTab: (tabGuid: String) -> Unit,
+        onShowSearchResults: (query: String) -> Unit
     ) {
         if (!navigationInfoFlow.value.canGoBackward) return
 
-        activeTab?.let { activeTab ->
-            if (activeTab.navigationController.canGoBack()) {
-                val currentUri = activeTab.currentDisplayUrl ?: Uri.EMPTY
-                activeTab.navigationController.goBack()
-                onNavigatedBack(currentUri)
-            } else if (tabList.isParentTabInList(activeTab.guid)) {
-                onCloseTab(activeTab.guid)
+        var originalSearchQuery: String? = null
+
+        activeTab?.apply {
+            val tabId = guid
+            if (navigationController.canGoBack()) {
+                val currentUri = currentDisplayUrl ?: Uri.EMPTY
+                originalSearchQuery = tabList
+                    .getSearchNavigationInfo(tabId, navigationController.navigationListCurrentIndex)
+                    ?.takeIf {
+                        // Because we don't own WebLayer's NavigationController, make sure that the
+                        // user is viewing the URL that we expect for any associated search query.
+                        it.navigationEntryUri == currentUri
+                    }
+                    ?.searchQuery
+
+                navigationController.goBack()
+            } else {
+                originalSearchQuery = tabList.getSearchNavigationInfo(tabId, 0)?.searchQuery
+
+                // Close the tab.  If this was a child tab, the user will get kicked to the parent
+                // tab (if it's still alive).
+                val isParentInTabList = tabList.isParentTabInList(tabId)
+                onCloseTab(tabId)
             }
         }
+
+        // If a navigation was originally triggered by a query, show the results again.
+        originalSearchQuery?.let { onShowSearchResults(it) }
     }
 
     fun goForward() {
@@ -253,14 +272,28 @@ class ActiveTabModelImpl(
     }
 
     private fun updateNavigationInfo() {
-        val hasBackNavigations = activeTab?.navigationController?.canGoBack() ?: false
-        val isParentTabInList = tabList.isParentTabInList(activeTab?.guid)
+        val canGoBackward = activeTab.let { currentTab ->
+            when {
+                currentTab == null -> false
+
+                // The user can go backwards in their navigation history.
+                currentTab.navigationController.canGoBack() -> true
+
+                // The user can go backwards to a still-existing parent tab.
+                tabList.isParentTabInList(currentTab.guid) -> true
+
+                // The user can be re-shown the query results that led them to this tab.
+                tabList.getSearchNavigationInfo(currentTab.guid, 0) != null -> true
+
+                else -> false
+            }
+        }
 
         _navigationInfoFlow.value = ActiveTabModel.NavigationInfo(
-            activeTab?.navigationController?.navigationListSize ?: 0,
-            hasBackNavigations || isParentTabInList,
-            activeTab?.navigationController?.canGoForward() ?: false,
-            activeTab?.isDesktopUserAgentEnabled ?: false
+            navigationListSize = activeTab?.navigationController?.navigationListSize ?: 0,
+            canGoBackward = canGoBackward,
+            canGoForward = activeTab?.navigationController?.canGoForward() ?: false,
+            desktopUserAgentEnabled = activeTab?.isDesktopUserAgentEnabled ?: false
         )
     }
 }

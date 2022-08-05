@@ -5,14 +5,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
+import com.neeva.app.MockNavigationController
 import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.ActiveTabModel.DisplayMode
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.storage.TabScreenshotManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import org.chromium.weblayer.NavigationCallback
-import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
 import org.junit.Before
@@ -27,8 +26,11 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
+import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
+import strikt.assertions.hasSize
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
@@ -44,15 +46,15 @@ class ActiveTabModelImplTest : BaseTest() {
     val coroutineScopeRule = CoroutineScopeRule()
 
     @Mock private lateinit var onCloseTab: (String) -> Unit
-    @Mock private lateinit var onShowSearchResults: (Uri) -> Unit
+    @Mock private lateinit var onShowSearchResults: (query: String) -> Unit
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
 
     private lateinit var model: ActiveTabModelImpl
-    private lateinit var mainTab: MockTabHarness
+    private lateinit var mainTab: MockHarness
     private lateinit var neevaConstants: NeevaConstants
-    private lateinit var neevaHomepageTab: MockTabHarness
-    private lateinit var neevaSearchTab: MockTabHarness
-    private lateinit var neevaSpacesTab: MockTabHarness
+    private lateinit var neevaHomepageTab: MockHarness
+    private lateinit var neevaSearchTab: MockHarness
+    private lateinit var neevaSpacesTab: MockHarness
     private lateinit var tabList: TabList
 
     @Before
@@ -73,221 +75,236 @@ class ActiveTabModelImplTest : BaseTest() {
             tabList = tabList
         )
 
-        mainTab = MockTabHarness(
-            currentTitle = "Title #1",
-            currentUri = Uri.parse("https://www.site.com/1"),
-            canGoBack = true,
-            canGoForward = true
+        mainTab = MockHarness(
+            navigations = listOf(
+                Uri.parse("https://www.site.com/0"),
+                Uri.parse("https://www.site.com/1"),
+            )
         )
-        neevaHomepageTab = MockTabHarness(
-            currentTitle = "Neeva homepage",
-            currentUri = Uri.parse(neevaConstants.appURL),
-            canGoBack = false,
-            canGoForward = false
+        neevaHomepageTab = MockHarness(
+            navigations = listOf(
+                Uri.parse(neevaConstants.appURL)
+            )
         )
-        neevaSearchTab = MockTabHarness(
-            currentTitle = "Neeva Search",
-            currentUri = Uri.parse("https://neeva.com/search?q=query"),
-            canGoBack = true,
-            canGoForward = false
+        neevaSearchTab = MockHarness(
+            navigations = listOf(
+                Uri.parse("https://neeva.com/search?q=query")
+            )
         )
-        neevaSpacesTab = MockTabHarness(
-            currentTitle = "Neeva Spaces",
-            currentUri = Uri.parse("https://neeva.com/spaces"),
-            canGoBack = true,
-            canGoForward = false
+        neevaSpacesTab = MockHarness(
+            navigations = listOf(
+                Uri.parse("https://neeva.com/landing"),
+                Uri.parse("https://neeva.com/spaces")
+            )
         )
     }
 
     @Test
     fun onActiveTabChanged_updatesValuesAfterTabSwitches() {
-        expectThat(model.activeTab).isNull()
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
-        expectThat(model.titleFlow.value).isEqualTo("")
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
-        expectThat(model.navigationInfoFlow.value.canGoForward).isFalse()
+        model.apply {
+            expectThat(activeTab).isNull()
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(Uri.EMPTY)
+            expectThat(titleFlow.value).isEqualTo("")
+            expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+        }
 
-        // Set the first tab as active and confirm the flows were updated.
+        // Set the first tab as active.
         model.onActiveTabChanged(mainTab.tab)
-        expectThat(model.activeTab).isEqualTo(mainTab.tab)
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
-        expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
-        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+
+        // Confirm that the flows all updated.
+        model.apply {
+            expectThat(activeTab).isEqualTo(mainTab.tab)
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(mainTab.tab.currentDisplayUrl)
+            expectThat(titleFlow.value).isEqualTo(mainTab.tab.currentDisplayTitle)
+            expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+            expectThat(displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
+            expectThat(displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+        }
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
-        expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
+        expectThat(mainTab.mockNavigationController.callbacks.size).isEqualTo(1)
 
         // Set the second tab as active and confirm the flows were updated.
-        val secondTab = MockTabHarness(
-            currentTitle = "Title #2",
-            currentUri = Uri.parse("http://news.othersite.com/2"),
-            canGoBack = false,
-            canGoForward = true
+        val secondTab = MockHarness(
+            navigations = listOf(
+                Uri.parse("http://news.othersite.com/1"),
+                Uri.parse("http://news.othersite.com/2")
+            )
         )
+        secondTab.mockNavigationController.controller.goBack()
         model.onActiveTabChanged(secondTab.tab)
-        expectThat(model.activeTab).isEqualTo(secondTab.tab)
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(secondTab.currentUri)
-        expectThat(model.titleFlow.value).isEqualTo(secondTab.currentTitle)
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(secondTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(secondTab.canGoForward)
-        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("news.othersite.com")
-        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+
+        model.apply {
+            expectThat(activeTab).isEqualTo(secondTab.tab)
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(secondTab.tab.currentDisplayUrl)
+            expectThat(titleFlow.value).isEqualTo(secondTab.tab.currentDisplayTitle)
+            expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
+            expectThat(navigationInfoFlow.value.canGoForward).isTrue()
+            expectThat(displayedInfoFlow.value.displayedText).isEqualTo("news.othersite.com")
+            expectThat(displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+        }
         expectThat(secondTab.tabCallbacks.size).isEqualTo(1)
-        expectThat(secondTab.navigationCallbacks.size).isEqualTo(1)
+        expectThat(secondTab.mockNavigationController.callbacks.size).isEqualTo(1)
 
         // The first tab's callbacks should have been unregistered.
-        expectThat(mainTab.tabCallbacks.size).isEqualTo(0)
-        expectThat(mainTab.navigationCallbacks.size).isEqualTo(0)
+        expectThat(mainTab.tabCallbacks).isEmpty()
+        expectThat(mainTab.mockNavigationController.callbacks).isEmpty()
     }
 
     @Test
     fun onActiveTabChanged_updatesValuesAfterNullActiveTab() {
-        expectThat(model.activeTab).isNull()
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
-        expectThat(model.titleFlow.value).isEqualTo("")
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
-        expectThat(model.navigationInfoFlow.value.canGoForward).isFalse()
+        model.apply {
+            expectThat(activeTab).isNull()
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(Uri.EMPTY)
+            expectThat(titleFlow.value).isEqualTo("")
+            expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+        }
 
         // Set the first tab as active and confirm the flows were updated.
         model.onActiveTabChanged(mainTab.tab)
-        expectThat(model.activeTab).isEqualTo(mainTab.tab)
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
-        expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
-        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+        model.apply {
+            expectThat(activeTab).isEqualTo(mainTab.tab)
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(mainTab.tab.currentDisplayUrl)
+            expectThat(titleFlow.value).isEqualTo(mainTab.tab.currentDisplayTitle)
+            expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+            expectThat(displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
+            expectThat(displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+        }
         expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
-        expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
+        expectThat(mainTab.mockNavigationController.callbacks.size).isEqualTo(1)
 
-        // Set the second tab as active and confirm the flows were updated.
+        // Say that there's no active tab anymore.
         model.onActiveTabChanged(null)
-        expectThat(model.activeTab).isEqualTo(null)
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
-        expectThat(model.titleFlow.value).isEqualTo("")
-        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("")
-        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(false)
-        expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(false)
+        model.apply {
+            expectThat(activeTab).isEqualTo(null)
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(Uri.EMPTY)
+            expectThat(titleFlow.value).isEqualTo("")
+            expectThat(displayedInfoFlow.value.displayedText).isEqualTo("")
+            expectThat(displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+            expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+        }
 
         // The first tab's callbacks should have been unregistered.
         expectThat(mainTab.tabCallbacks.size).isEqualTo(0)
-        expectThat(mainTab.navigationCallbacks.size).isEqualTo(0)
+        expectThat(mainTab.mockNavigationController.callbacks).isEmpty()
     }
 
     @Test
     fun mode_onNeevaHomepage_showsPlaceholder() {
         model.onActiveTabChanged(neevaHomepageTab.tab)
-        expectThat(mainTab.tabCallbacks.size).isEqualTo(0)
-        expectThat(mainTab.navigationCallbacks.size).isEqualTo(0)
         expectThat(model.activeTab).isEqualTo(neevaHomepageTab.tab)
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(neevaHomepageTab.currentUri)
-        expectThat(model.titleFlow.value).isEqualTo(neevaHomepageTab.currentTitle)
-        expectThat(model.navigationInfoFlow.value.canGoBackward)
-            .isEqualTo(neevaHomepageTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward)
-            .isEqualTo(neevaHomepageTab.canGoForward)
-        expectThat(model.displayedInfoFlow.value.displayedText).isEmpty()
-        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.PLACEHOLDER)
-        expectThat(neevaHomepageTab.tabCallbacks.size).isEqualTo(1)
-        expectThat(neevaHomepageTab.navigationCallbacks.size).isEqualTo(1)
+
+        model.apply {
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(neevaHomepageTab.tab.currentDisplayUrl)
+            expectThat(titleFlow.value).isEqualTo(neevaHomepageTab.tab.currentDisplayTitle)
+            expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+            expectThat(displayedInfoFlow.value.displayedText).isEmpty()
+            expectThat(displayedInfoFlow.value.mode).isEqualTo(DisplayMode.PLACEHOLDER)
+        }
+        expectThat(neevaHomepageTab.tabCallbacks).hasSize(1)
+        expectThat(neevaHomepageTab.mockNavigationController.callbacks).hasSize(1)
     }
 
     @Test
     fun displayedText_showsDomainAndQuery() {
+        // A tab with a Neeva search URL should show the search query in the URL bar.
         model.onActiveTabChanged(neevaSearchTab.tab)
-        expectThat(mainTab.tabCallbacks.size).isEqualTo(0)
-        expectThat(mainTab.navigationCallbacks.size).isEqualTo(0)
-        expectThat(model.activeTab).isEqualTo(neevaSearchTab.tab)
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(neevaSearchTab.currentUri)
-        expectThat(model.titleFlow.value).isEqualTo(neevaSearchTab.currentTitle)
-        expectThat(model.navigationInfoFlow.value.canGoBackward)
-            .isEqualTo(neevaSearchTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward)
-            .isEqualTo(neevaSearchTab.canGoForward)
-        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("query")
-        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.QUERY)
-        expectThat(neevaSearchTab.tabCallbacks.size).isEqualTo(1)
-        expectThat(neevaSearchTab.navigationCallbacks.size).isEqualTo(1)
+        model.apply {
+            expectThat(activeTab).isEqualTo(neevaSearchTab.tab)
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(neevaSearchTab.tab.currentDisplayUrl)
+            expectThat(titleFlow.value).isEqualTo(neevaSearchTab.tab.currentDisplayTitle)
+            expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+            expectThat(displayedInfoFlow.value.displayedText).isEqualTo("query")
+            expectThat(displayedInfoFlow.value.mode).isEqualTo(DisplayMode.QUERY)
+        }
+        expectThat(neevaSearchTab.tabCallbacks).hasSize(1)
+        expectThat(neevaSearchTab.mockNavigationController.callbacks).hasSize(1)
 
+        // A tab with a non-search URL should show the URL directly in the URL bar.
         model.onActiveTabChanged(neevaSpacesTab.tab)
-        expectThat(neevaSearchTab.tabCallbacks.size).isEqualTo(0)
-        expectThat(neevaSearchTab.navigationCallbacks.size).isEqualTo(0)
-        expectThat(model.activeTab).isEqualTo(neevaSpacesTab.tab)
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(neevaSpacesTab.currentUri)
-        expectThat(model.titleFlow.value).isEqualTo(neevaSpacesTab.currentTitle)
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(neevaSpacesTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward)
-            .isEqualTo(neevaSpacesTab.canGoForward)
-        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("neeva.com")
-        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
-        expectThat(neevaSpacesTab.tabCallbacks.size).isEqualTo(1)
-        expectThat(neevaSpacesTab.navigationCallbacks.size).isEqualTo(1)
+        model.apply {
+            expectThat(activeTab).isEqualTo(neevaSpacesTab.tab)
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(neevaSpacesTab.tab.currentDisplayUrl)
+            expectThat(titleFlow.value).isEqualTo(neevaSpacesTab.tab.currentDisplayTitle)
+            expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+            expectThat(displayedInfoFlow.value.displayedText).isEqualTo("neeva.com")
+            expectThat(displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+        }
+
+        // The active tab callback should have swapped.
+        expectThat(neevaSearchTab.tabCallbacks).isEmpty()
+        expectThat(neevaSearchTab.mockNavigationController.callbacks).isEmpty()
+        expectThat(neevaSpacesTab.tabCallbacks).hasSize(1)
+        expectThat(neevaSpacesTab.mockNavigationController.callbacks).hasSize(1)
     }
 
     @Test
     fun onActiveTabChanged_monitorsChangesToTab() {
-        expectThat(model.activeTab).isNull()
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(Uri.EMPTY)
-        expectThat(model.titleFlow.value).isEqualTo("")
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
-        expectThat(model.navigationInfoFlow.value.canGoForward).isFalse()
+        model.apply {
+            expectThat(activeTab).isNull()
+            expectThat(progressFlow.value).isEqualTo(100)
+            expectThat(urlFlow.value).isEqualTo(Uri.EMPTY)
+            expectThat(titleFlow.value).isEqualTo("")
+            expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
+            expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+        }
 
         // Set the first tab as active and confirm the flows were updated.
         model.onActiveTabChanged(mainTab.tab)
-        expectThat(model.activeTab).isEqualTo(mainTab.tab)
-        expectThat(model.progressFlow.value).isEqualTo(100)
-        expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
-        expectThat(model.titleFlow.value).isEqualTo(mainTab.currentTitle)
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
-        expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
-        expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
-        expectThat(mainTab.tabCallbacks.size).isEqualTo(1)
-        expectThat(mainTab.navigationCallbacks.size).isEqualTo(1)
+        model.apply {
+            expectThat(model.activeTab).isEqualTo(mainTab.tab)
+            expectThat(model.progressFlow.value).isEqualTo(100)
+            expectThat(model.urlFlow.value).isEqualTo(mainTab.tab.currentDisplayUrl)
+            expectThat(model.titleFlow.value).isEqualTo(mainTab.tab.currentDisplayTitle)
+            expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
+            expectThat(model.navigationInfoFlow.value.canGoForward).isFalse()
+            expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("www.site.com")
+            expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
+        }
+        expectThat(mainTab.tabCallbacks).hasSize(1)
+        expectThat(mainTab.mockNavigationController.callbacks).hasSize(1)
 
         // Check that the title gets updated.
-        mainTab.currentTitle = "New title"
-        mainTab.tabCallbacks.first().onTitleUpdated(mainTab.currentTitle ?: "")
+        mainTab.tabCallbacks.first().onTitleUpdated("New title")
         expectThat(model.titleFlow.value).isEqualTo("New title")
 
         // Check that the Uri gets updated.
-        mainTab.currentUri = Uri.parse("http://news.othersite.com/2")
-        mainTab.tabCallbacks.first().onVisibleUriChanged(mainTab.currentUri ?: Uri.EMPTY)
-        expectThat(model.urlFlow.value).isEqualTo(mainTab.currentUri)
+        mainTab.tabCallbacks.first().onVisibleUriChanged(Uri.parse("http://news.othersite.com/2"))
+        expectThat(model.urlFlow.value).isEqualTo(Uri.parse("http://news.othersite.com/2"))
         expectThat(model.displayedInfoFlow.value.displayedText).isEqualTo("news.othersite.com")
         expectThat(model.displayedInfoFlow.value.mode).isEqualTo(DisplayMode.URL)
 
-        // Check that navigations are kept in sync.
-        mainTab.canGoBack = false
-        mainTab.canGoForward = true
-        mainTab.navigationCallbacks.first().onNavigationStarted(mock())
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
+        // Check that back and forward statuses are kept in sync.
+        mainTab.mockNavigationController.controller.goBack()
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
+        expectThat(model.navigationInfoFlow.value.canGoForward).isTrue()
 
-        mainTab.canGoBack = true
-        mainTab.canGoForward = false
-        mainTab.navigationCallbacks.first().onNavigationStarted(mock())
-        expectThat(model.navigationInfoFlow.value.canGoBackward).isEqualTo(mainTab.canGoBack)
-        expectThat(model.navigationInfoFlow.value.canGoForward).isEqualTo(mainTab.canGoForward)
+        mainTab.mockNavigationController.controller.goForward()
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
+        expectThat(model.navigationInfoFlow.value.canGoForward).isFalse()
 
-        mainTab.navigationCallbacks.first().onLoadProgressChanged(0.429)
+        // Check that the load progress is updated.
+        mainTab.mockNavigationController.callbacks.forEach { it.onLoadProgressChanged(0.429) }
         expectThat(model.progressFlow.value).isEqualTo(43)
         verify(tabScreenshotManager, never()).captureAndSaveScreenshot(any(), any())
 
-        mainTab.navigationCallbacks.first().onLoadProgressChanged(1.0)
+        mainTab.mockNavigationController.callbacks.forEach { it.onLoadProgressChanged(1.0) }
         expectThat(model.progressFlow.value).isEqualTo(100)
         verify(tabScreenshotManager).captureAndSaveScreenshot(any(), any())
     }
@@ -296,47 +313,38 @@ class ActiveTabModelImplTest : BaseTest() {
     fun reload_withActiveTab_reloadsTab() {
         model.onActiveTabChanged(mainTab.tab)
         model.reload()
-        verify(mainTab.navigationController, times(1)).reload()
+        verify(mainTab.mockNavigationController.controller, times(1)).reload()
     }
 
     @Test
     fun goBack() {
         // Set the tab.
-        val harness = MockTabHarness(
-            currentTitle = "Title",
-            currentUri = Uri.parse("https://www.site.com/"),
-            canGoBack = false,
-            canGoForward = false
+        val harness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.site.com/"))
         )
         model.onActiveTabChanged(harness.tab)
 
-        model.goBack(onNavigatedBack = onShowSearchResults, onCloseTab = onCloseTab)
-        verify(harness.navigationController, never()).goBack()
+        // There is no way to go back because there's only one URL.
+        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+        verify(harness.mockNavigationController.controller, never()).goBack()
         verify(onCloseTab, never()).invoke(any())
 
         // Say that the user navigated somewhere and we can now go backward.
-        harness.canGoBack = true
-        harness.navigationCallbacks.first().onNavigationCompleted(mock())
+        harness.mockNavigationController.controller.navigate(Uri.parse("http://anywhere.else"))
 
-        model.goBack(onShowSearchResults, onCloseTab)
-        verify(harness.navigationController, times(1)).goBack()
+        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+        verify(harness.mockNavigationController.controller, times(1)).goBack()
     }
 
     @Test
     fun goBack_forChildTab() {
         // Set the tab.
-        val parentTabHarness = MockTabHarness(
-            currentTitle = "Parent",
-            currentUri = Uri.parse("https://www.techmeme.com/"),
-            canGoBack = false,
-            canGoForward = false,
+        val parentTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.techmeme.com/")),
             tabId = "parent tab"
         )
-        val childTabHarness = MockTabHarness(
-            currentTitle = "Child",
-            currentUri = Uri.parse("https://www.sitelinkedfromtechmeme.com/"),
-            canGoBack = false,
-            canGoForward = false,
+        val childTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.sitelinkedfromtechmeme.com/")),
             tabId = "child tab",
             parentTabId = parentTabHarness.tabId
         )
@@ -345,29 +353,89 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
-        model.goBack(onNavigatedBack = onShowSearchResults, onCloseTab = onCloseTab)
+        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
 
         // Even though there are no navigations on this tab, because it is a child we should have
         // closed it.
-        verify(childTabHarness.navigationController, never()).goBack()
+        verify(childTabHarness.mockNavigationController.controller, never()).goBack()
         verify(onCloseTab).invoke(any())
+    }
+
+    @Test
+    fun goBack_forChildTabWithSearchQuery_reshowsQuery() {
+        // Create two tabs, with the second tab spawning from the first because of a search query.
+        val parentTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.techmeme.com/")),
+            tabId = "parent tab"
+        )
+        val childTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.sitelinkedfromtechmeme.com/")),
+            tabId = "child tab",
+            parentTabId = parentTabHarness.tabId
+        )
+        tabList.updateQueryNavigation(
+            tabId = childTabHarness.tabId,
+            navigationEntryIndex = 0,
+            navigationEntryUri = Uri.parse("https://www.sitelinkedfromtechmeme.com/"),
+            searchQuery = "triggering query"
+        )
+
+        model.onActiveTabChanged(childTabHarness.tab)
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
+
+        // Hit "back" on the child tab.
+        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+
+        // Even though there are no navigations on this tab, because it is a child we should have
+        // closed it.
+        verify(childTabHarness.mockNavigationController.controller, never()).goBack()
+        verify(onCloseTab).invoke(childTabHarness.tabId)
+        verify(onShowSearchResults).invoke("triggering query")
+    }
+
+    @Test
+    fun goBack_forChildTabWithoutParent_stillReshowsQuery() {
+        // Create two tabs, with the second tab spawning from the first because of a search query.
+        val parentTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.techmeme.com/")),
+            tabId = "parent tab"
+        )
+        val childTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.sitelinkedfromtechmeme.com/")),
+            tabId = "child tab",
+            parentTabId = parentTabHarness.tabId
+        )
+        tabList.updateQueryNavigation(
+            tabId = childTabHarness.tabId,
+            navigationEntryIndex = 0,
+            navigationEntryUri = Uri.parse("https://www.sitelinkedfromtechmeme.com/"),
+            searchQuery = "triggering query"
+        )
+
+        // Remove the parent tab.
+        tabList.remove(parentTabHarness.tabId)
+
+        model.onActiveTabChanged(childTabHarness.tab)
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
+
+        // Hit "back" on the child tab.
+        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+
+        // This tab was created to show search results.  Make sure it's closed and reshow the query.
+        verify(childTabHarness.mockNavigationController.controller, never()).goBack()
+        verify(onCloseTab).invoke(childTabHarness.tabId)
+        verify(onShowSearchResults).invoke("triggering query")
     }
 
     @Test
     fun goBack_forChildTabAfterParentClosed_doesNothing() {
         // Set the tab.
-        val parentTabHarness = MockTabHarness(
-            currentTitle = "Parent",
-            currentUri = Uri.parse("https://www.techmeme.com/"),
-            canGoBack = false,
-            canGoForward = false,
+        val parentTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.techmeme.com/")),
             tabId = "parent tab"
         )
-        val childTabHarness = MockTabHarness(
-            currentTitle = "Child",
-            currentUri = Uri.parse("https://www.sitelinkedfromtechmeme.com/"),
-            canGoBack = false,
-            canGoForward = false,
+        val childTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.sitelinkedfromtechmeme.com/")),
             tabId = "child tab",
             parentTabId = parentTabHarness.tabId
         )
@@ -383,75 +451,99 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
 
         // Hit "back" on the child tab.
-        model.goBack(onNavigatedBack = onShowSearchResults, onCloseTab = onCloseTab)
+        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
 
         // Nothing should happen.
-        verify(childTabHarness.navigationController, never()).goBack()
+        verify(childTabHarness.mockNavigationController.controller, never()).goBack()
         verify(onCloseTab, never()).invoke(any())
+    }
+
+    @Test
+    fun goBack_whenQueryExists_reshowsSuggestions() {
+        val harness = MockHarness(
+            navigations = listOf(
+                Uri.parse("https://www.first.com"),
+                Uri.parse("http://www.second.com"),
+                Uri.parse("http://third.net"),
+            )
+        )
+        model.onActiveTabChanged(harness.tab)
+
+        // Say that the user got to the last two navigations via SAYT.
+        tabList.updateQueryNavigation(
+            tabId = harness.tabId,
+            navigationEntryIndex = 1,
+            navigationEntryUri = Uri.parse("http://www.second.com"),
+            searchQuery = "first search term"
+        )
+        tabList.updateQueryNavigation(
+            tabId = harness.tabId,
+            navigationEntryIndex = 2,
+            navigationEntryUri = Uri.parse("http://third.net"),
+            searchQuery = "second search term"
+        )
+
+        // Go back.  We should be asked to show search results.
+        model.goBack(onCloseTab, onShowSearchResults)
+        verify(harness.mockNavigationController.controller).goBack()
+        verify(onShowSearchResults).invoke("second search term")
+
+        model.goBack(onCloseTab, onShowSearchResults)
+        verify(harness.mockNavigationController.controller, times(2)).goBack()
+        verify(onShowSearchResults).invoke("first search term")
+
+        // Navigate somewhere to clear out the navigation history.
+        harness.mockNavigationController.controller.navigate(Uri.parse("https://www.fourth.com"))
+
+        expectThat(harness.mockNavigationController.controller.getNavigationEntryDisplayUri(0))
+            .isEqualTo(Uri.parse("https://www.first.com"))
+        expectThat(harness.mockNavigationController.controller.getNavigationEntryDisplayUri(1))
+            .isEqualTo(Uri.parse("https://www.fourth.com"))
+        expectThat(harness.mockNavigationController.controller.navigationListCurrentIndex)
+            .isEqualTo(1)
+
+        // We shouldn't have tried to reshow the search results because the queries are gone.
+        model.goBack(onCloseTab, onShowSearchResults)
+        verify(harness.mockNavigationController.controller, times(3)).goBack()
+        verifyNoInteractions(onCloseTab)
+        verifyNoMoreInteractions(onShowSearchResults)
     }
 
     @Test
     fun goForward() {
         // Set the tab.
-        val harness = MockTabHarness(
-            currentTitle = "Title",
-            currentUri = Uri.parse("https://www.site.com/"),
-            canGoBack = false,
-            canGoForward = false
+        val harness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.site.com/"))
         )
         model.onActiveTabChanged(harness.tab)
 
         model.goForward()
-        verify(harness.navigationController, never()).goForward()
+        verify(harness.mockNavigationController.controller, never()).goForward()
 
         // Say that the user navigated somewhere and we can now go forward.
-        harness.canGoForward = true
-        harness.navigationCallbacks.first().onNavigationCompleted(mock())
+        harness.mockNavigationController.controller.navigate(Uri.parse("http://anywhere.else"))
+        harness.mockNavigationController.controller.goBack()
 
         model.goForward()
-        verify(harness.navigationController, times(1)).goForward()
+        verify(harness.mockNavigationController.controller, times(1)).goForward()
     }
 
     private var nextMockTabId: Int = 0
-    inner class MockTabHarness(
-        var currentTitle: String? = null,
-        var currentUri: Uri? = null,
-        var canGoBack: Boolean = false,
-        var canGoForward: Boolean = false,
+    inner class MockHarness(
         val tabId: String = (nextMockTabId++).toString(),
-        val parentTabId: String? = null
+        val parentTabId: String? = null,
+        val navigations: List<Uri> = emptyList()
     ) {
         val tabCallbacks = mutableSetOf<TabCallback>()
-        val navigationCallbacks = mutableSetOf<NavigationCallback>()
 
-        val navigationController = mock<NavigationController> {
-            on { registerNavigationCallback(any()) } doAnswer {
-                val callback = it.getArgument(0) as NavigationCallback
-                expectThat(navigationCallbacks.contains(callback)).isFalse()
-                navigationCallbacks.add(callback)
-                Unit
-            }
-
-            on { unregisterNavigationCallback(any()) } doAnswer {
-                val callback = it.getArgument(0) as NavigationCallback
-                expectThat(navigationCallbacks.contains(callback)).isTrue()
-                navigationCallbacks.remove(callback)
-                Unit
-            }
-
-            // Set up the test so that it always returns the title and URL that we set.
-            on { navigationListSize } doReturn 1
-            on { navigationListCurrentIndex } doReturn 0
-            on { getNavigationEntryTitle(0) } doAnswer { currentTitle }
-            on { getNavigationEntryDisplayUri(0) } doAnswer { currentUri }
-            on { canGoBack() } doAnswer { canGoBack }
-            on { canGoForward() } doAnswer { canGoForward }
+        val mockNavigationController = MockNavigationController().apply {
+            navigations.forEach { recordNavigation(it) }
         }
 
         val tab = mock<Tab> {
             on { guid } doReturn tabId
 
-            on { navigationController } doReturn navigationController
+            on { navigationController } doReturn mockNavigationController.controller
 
             on { registerTabCallback(any()) } doAnswer {
                 val callback = it.getArgument(0) as TabCallback
