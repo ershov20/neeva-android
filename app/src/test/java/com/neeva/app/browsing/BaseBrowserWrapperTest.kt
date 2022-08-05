@@ -121,7 +121,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         neevaConstants = NeevaConstants()
         context = ApplicationProvider.getApplicationContext()
-        tabList = TabList()
+        tabList = IncognitoTabList()
 
         navigationInfoFlow = MutableStateFlow(ActiveTabModel.NavigationInfo())
         urlBarModelStateFlow = MutableStateFlow(URLBarModelState())
@@ -195,11 +195,13 @@ class BaseBrowserWrapperTest : BaseTest() {
             appContext = context,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = coroutineScopeRule.dispatchers,
+            popupModel = popupModel,
             activityCallbackProvider = activityCallbackProvider,
+            neevaUser = neevaUser,
+            neevaConstants = neevaConstants,
+            domainProvider = domainProvider,
             suggestionsModel = suggestionsModel,
             neevascopeModel = neevascopeModel,
-            popupModel = popupModel,
-            neevaUser = neevaUser,
             faviconCache = faviconCache,
             spaceStore = spaceStore,
             tabList = tabList,
@@ -208,11 +210,9 @@ class BaseBrowserWrapperTest : BaseTest() {
             _findInPageModel = findInPageModel,
             historyManager = historyManager,
             tabScreenshotManager = tabScreenshotManager,
-            domainProvider = domainProvider,
-            neevaConstants = neevaConstants,
+            scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
-            cookieCutterModel = cookieCutterModel,
-            scriptInjectionManager = scriptInjectionManager
+            cookieCutterModel = cookieCutterModel
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment

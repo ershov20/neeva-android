@@ -4,17 +4,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
-import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
-import org.chromium.weblayer.Browser
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
 import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -34,12 +31,8 @@ class TabCookieCutterModelTest : BaseTest() {
     private lateinit var cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
     private lateinit var trackersAllowList: TrackersAllowList
 
-    @Mock
-    private lateinit var browser: Browser
-
     override fun setUp() {
         super.setUp()
-        MockKAnnotations.init(this)
 
         domainProviderImpl = DomainProviderImpl(RuntimeEnvironment.getApplication())
         cookieNoticeBlockedFlow = MutableStateFlow(false)

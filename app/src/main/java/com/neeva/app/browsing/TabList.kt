@@ -1,8 +1,14 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import com.neeva.app.Dispatchers
+import com.neeva.app.storage.daos.SearchNavigationDao
+import com.neeva.app.storage.entities.SearchNavigation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 import org.chromium.weblayer.NavigationController
 import org.chromium.weblayer.Tab
 
@@ -10,13 +16,15 @@ import org.chromium.weblayer.Tab
  * Maintains a list of Tabs that are displayed in the browser, as well as the metadata associated
  * with each.
  */
-class TabList {
-    private val tabs: MutableList<String> = mutableListOf()
+abstract class TabList {
+    protected val tabs: MutableList<String> = mutableListOf()
     private val tabInfoMap: MutableMap<String, TabInfo> = mutableMapOf()
     private val fuzzyMatchMap: MutableMap<UriFuzzyMatchData, MutableSet<String>> = mutableMapOf()
 
     private val _orderedTabList = MutableStateFlow<List<TabInfo>>(emptyList())
     val orderedTabList: StateFlow<List<TabInfo>> = _orderedTabList
+
+    abstract val searchNavigationMap: StateFlow<Map<String, List<SearchNavigation>>>?
 
     /**
      * Returns true if there are no open tabs in the list.
@@ -62,51 +70,28 @@ class TabList {
     fun remove(tabId: String): TabInfo? {
         tabs.remove(tabId)
         val childInfo = tabInfoMap.remove(tabId)
-        childInfo?.let { childInfo ->
-            childInfo.fuzzyMatchUrl?.let { fuzzyMatchMap[it]?.remove(tabId) }
-        }
+        childInfo?.fuzzyMatchUrl?.let { fuzzyMatchMap[it]?.remove(tabId) }
         updateFlow()
+        removeQueryNavigations(tabId)
         return childInfo
     }
 
     /** Records the query that triggered a navigation via Search As You Type. */
-    fun updateQueryNavigation(
+    abstract fun updateQueryNavigation(
         tabId: String,
         navigationEntryIndex: Int,
         navigationEntryUri: Uri,
         searchQuery: String?
-    ) {
-        tabInfoMap[tabId]?.let { existingInfo ->
-            val newQueryMap = existingInfo.searchQueryMap.toMutableMap()
-            if (searchQuery != null) {
-                newQueryMap[navigationEntryIndex] = SearchNavigationInfo(
-                    navigationEntryIndex = navigationEntryIndex,
-                    navigationEntryUri = navigationEntryUri,
-                    searchQuery = searchQuery
-                )
-            } else {
-                newQueryMap.remove(navigationEntryIndex)
-            }
+    )
 
-            tabInfoMap[tabId] = existingInfo.copy(searchQueryMap = newQueryMap)
-            updateFlow()
-        }
-    }
+    /** Removes all query records associated with the given [tabId]. */
+    abstract fun removeQueryNavigations(tabId: String)
+
+    /** Removes any query records that correspond to tabs that no longer exist. */
+    abstract fun pruneQueryNavigations()
 
     /** Removes any recorded search queries that correspond to Navigations that no longer exist. */
-    fun pruneQueries(tabId: String, navigationController: NavigationController) {
-        tabInfoMap[tabId]?.let { existingInfo ->
-            val navigationListSize = navigationController.navigationListSize
-            val newQueryMap = existingInfo.searchQueryMap
-                .filter { it.key < navigationListSize }
-                .filter {
-                    val expectedUri = navigationController.getNavigationEntryDisplayUri(it.key)
-                    it.value.navigationEntryUri == expectedUri
-                }
-
-            tabInfoMap[tabId] = existingInfo.copy(searchQueryMap = newQueryMap)
-        }
-    }
+    abstract fun pruneQueryNavigations(tabId: String, navigationController: NavigationController)
 
     fun updatedSelectedTab(selectedTabId: String?) {
         tabInfoMap.keys.forEach { tabId ->
@@ -224,10 +209,10 @@ class TabList {
         return fuzzyMatchMap[fuzzyUri]?.firstOrNull()
     }
 
-    fun getSearchNavigationInfo(guid: String, navigationEntryIndex: Int): SearchNavigationInfo? {
-        return getTabInfo(guid)
-            ?.searchQueryMap
-            ?.get(navigationEntryIndex)
+    fun getSearchNavigationInfo(guid: String, navigationEntryIndex: Int): SearchNavigation? {
+        return searchNavigationMap?.value
+            ?.get(guid)
+            ?.firstOrNull { it.navigationEntryIndex == navigationEntryIndex }
     }
 
     private fun updateFlow() {
@@ -236,5 +221,121 @@ class TabList {
 
     internal fun forEach(closure: (String) -> Unit) {
         tabs.forEach(action = closure)
+    }
+}
+
+/** TabList that does not persist its data to storage. */
+class IncognitoTabList : TabList() {
+    override val searchNavigationMap =
+        MutableStateFlow<MutableMap<String, MutableList<SearchNavigation>>>(mutableMapOf())
+
+    override fun updateQueryNavigation(
+        tabId: String,
+        navigationEntryIndex: Int,
+        navigationEntryUri: Uri,
+        searchQuery: String?
+    ) {
+        searchNavigationMap.value = searchNavigationMap.value.apply {
+            val tabEntries = getOrDefault(tabId, mutableListOf())
+            if (searchQuery != null) {
+                tabEntries.add(
+                    SearchNavigation(
+                        tabId = tabId,
+                        navigationEntryIndex = navigationEntryIndex,
+                        navigationEntryUri = navigationEntryUri,
+                        searchQuery = searchQuery
+                    )
+                )
+            } else {
+                tabEntries
+                    .firstOrNull { it.navigationEntryIndex == navigationEntryIndex }
+                    ?.let { tabEntries.remove(it) }
+            }
+            put(tabId, tabEntries)
+        }
+    }
+
+    override fun removeQueryNavigations(tabId: String) {
+        searchNavigationMap.value.remove(tabId)
+    }
+
+    override fun pruneQueryNavigations() {
+        val liveTabIds = tabs.toSet()
+        val allTabIds = searchNavigationMap.value.keys
+        allTabIds.minus(liveTabIds).forEach {
+            removeQueryNavigations(it)
+        }
+    }
+
+    override fun pruneQueryNavigations(tabId: String, navigationController: NavigationController) {
+        val maxNavigationIndex = navigationController.navigationListSize
+        searchNavigationMap.value = searchNavigationMap.value.apply {
+            get(tabId)?.let { entries ->
+                put(
+                    tabId,
+                    entries
+                        .filter { it.navigationEntryIndex < maxNavigationIndex }
+                        .toMutableList()
+                )
+            }
+        }
+    }
+}
+
+class RegularTabList(
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers,
+    private val searchNavigationDao: SearchNavigationDao
+) : TabList() {
+    override val searchNavigationMap = searchNavigationDao.getAllMapFlow(
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers
+    )
+
+    override fun updateQueryNavigation(
+        tabId: String,
+        navigationEntryIndex: Int,
+        navigationEntryUri: Uri,
+        searchQuery: String?
+    ) {
+        coroutineScope.launch(dispatchers.io) {
+            if (searchQuery != null) {
+                searchNavigationDao.add(
+                    SearchNavigation(
+                        tabId = tabId,
+                        navigationEntryIndex = navigationEntryIndex,
+                        navigationEntryUri = navigationEntryUri,
+                        searchQuery = searchQuery
+                    )
+                )
+            } else {
+                searchNavigationDao.delete(
+                    tabId = tabId,
+                    navigationEntryIndex = navigationEntryIndex
+                )
+            }
+        }
+    }
+
+    override fun removeQueryNavigations(tabId: String) {
+        coroutineScope.launch(dispatchers.io) {
+            searchNavigationDao.deleteAllForTab(tabId)
+        }
+    }
+
+    override fun pruneQueryNavigations() {
+        val liveTabIds = tabs.toSet()
+        val allTabIds = searchNavigationMap.value.keys
+        coroutineScope.launch(dispatchers.io) {
+            val missingTabs = allTabIds.minus(liveTabIds).toList()
+            searchNavigationDao.deleteAllForTabs(missingTabs)
+        }
+    }
+
+    override fun pruneQueryNavigations(tabId: String, navigationController: NavigationController) {
+        val size = navigationController.navigationListSize
+        coroutineScope.launch(dispatchers.io) {
+            searchNavigationDao.prune(tabId, size)
+        }
     }
 }

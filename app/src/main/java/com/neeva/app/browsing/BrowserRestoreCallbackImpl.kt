@@ -42,7 +42,7 @@ class BrowserRestoreCallbackImpl(
         }
 
         cleanCache()
-
+        tabList.pruneQueryNavigations()
         afterRestoreCompleted()
     }
 }

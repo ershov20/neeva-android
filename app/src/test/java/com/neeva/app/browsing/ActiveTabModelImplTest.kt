@@ -62,7 +62,7 @@ class ActiveTabModelImplTest : BaseTest() {
         super.setUp()
 
         neevaConstants = NeevaConstants()
-        tabList = TabList()
+        tabList = IncognitoTabList()
 
         model = ActiveTabModelImpl(
             coroutineScope = coroutineScopeRule.scope,

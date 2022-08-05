@@ -122,7 +122,7 @@ abstract class BaseBrowserWrapper internal constructor(
         scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
         trackerAllowList: TrackersAllowList,
-        tabList: TabList = TabList()
+        tabList: TabList
     ) : this(
         isIncognito = isIncognito,
         appContext = appContext,

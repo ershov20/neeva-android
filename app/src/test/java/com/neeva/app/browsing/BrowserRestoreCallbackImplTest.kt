@@ -28,6 +28,7 @@ class BrowserRestoreCallbackImplTest {
 
         // Assert: We should have received a callback about there being no tabs to restore.
         verify(testSetup.restoreCompletedCallback).invoke()
+        verify(testSetup.tabList).pruneQueryNavigations()
         verify(testSetup.onEmptyTabList, times(1)).invoke()
 
         verify(testSetup.cleanCache, times(1)).invoke()
@@ -44,6 +45,7 @@ class BrowserRestoreCallbackImplTest {
 
         // Assert: It should have done something with the tab.
         verify(testSetup.restoreCompletedCallback).invoke()
+        verify(testSetup.tabList).pruneQueryNavigations()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.onBlankTabCreated).invoke(any())
 
@@ -61,6 +63,7 @@ class BrowserRestoreCallbackImplTest {
 
         // Assert: It should not have done anything with the tab.
         verify(testSetup.restoreCompletedCallback).invoke()
+        verify(testSetup.tabList).pruneQueryNavigations()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.onBlankTabCreated, never()).invoke(any())
 
@@ -77,6 +80,7 @@ class BrowserRestoreCallbackImplTest {
 
         // Assert: Because there were multiple tabs restored, "blank tab" logic shouldn't kick in.
         verify(testSetup.restoreCompletedCallback).invoke()
+        verify(testSetup.tabList).pruneQueryNavigations()
         verify(testSetup.onEmptyTabList, times(0)).invoke()
         verify(testSetup.onBlankTabCreated, never()).invoke(any())
 
@@ -93,6 +97,7 @@ class BrowserRestoreCallbackImplTest {
 
         // Assert: Confirm that the data was pulled back out correctly.
         verify(testSetup.restoreCompletedCallback).invoke()
+        verify(testSetup.tabList).pruneQueryNavigations()
         testSetup.tabs.forEach {
             val expectedData = TabInfo.PersistedData(it.data)
             verify(testSetup.tabList).setPersistedInfo(eq(it), eq(expectedData), eq(false))

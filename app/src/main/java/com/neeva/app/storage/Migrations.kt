@@ -48,4 +48,6 @@ object Migrations {
         DeleteColumn(tableName = "HostInfo", columnName = "hostUID")
     )
     class MigrationFrom15To16 : AutoMigrationSpec
+
+    class MigrationFrom16To17 : AutoMigrationSpec
 }

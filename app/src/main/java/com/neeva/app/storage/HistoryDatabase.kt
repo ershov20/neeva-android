@@ -19,8 +19,10 @@ import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.daos.HistoryDao
 import com.neeva.app.storage.daos.HostInfoDao
+import com.neeva.app.storage.daos.SearchNavigationDao
 import com.neeva.app.storage.daos.SpaceDao
 import com.neeva.app.storage.entities.HostInfo
+import com.neeva.app.storage.entities.SearchNavigation
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
@@ -30,8 +32,17 @@ import java.util.Date
 import kotlinx.coroutines.withContext
 
 @Database(
-    entities = [Site::class, Visit::class, SpaceItem::class, Space::class, HostInfo::class],
-    version = 16,
+    entities = [
+        Site::class,
+        Visit::class,
+        HostInfo::class,
+
+        Space::class,
+        SpaceItem::class,
+
+        SearchNavigation::class
+    ],
+    version = 17,
     autoMigrations = [
         AutoMigration(from = 6, to = 7, spec = Migrations.MigrationFrom6To7::class),
         AutoMigration(from = 7, to = 8, spec = Migrations.MigrationFrom7To8::class),
@@ -42,7 +53,8 @@ import kotlinx.coroutines.withContext
         AutoMigration(from = 12, to = 13, spec = Migrations.MigrationFrom12To13::class),
         AutoMigration(from = 13, to = 14, spec = Migrations.MigrationFrom13To14::class),
         AutoMigration(from = 14, to = 15, spec = Migrations.MigrationFrom14To15::class),
-        AutoMigration(from = 15, to = 16, spec = Migrations.MigrationFrom15To16::class)
+        AutoMigration(from = 15, to = 16, spec = Migrations.MigrationFrom15To16::class),
+        AutoMigration(from = 16, to = 17, spec = Migrations.MigrationFrom16To17::class)
     ]
 )
 @TypeConverters(com.neeva.app.storage.TypeConverters::class)
@@ -50,6 +62,7 @@ abstract class HistoryDatabase : RoomDatabase() {
     abstract fun dao(): HistoryDao
     abstract fun spaceDao(): SpaceDao
     abstract fun hostInfoDao(): HostInfoDao
+    abstract fun searchNavigationDao(): SearchNavigationDao
 
     companion object {
         private val TAG = HistoryDatabase::class.simpleName

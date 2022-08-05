@@ -231,7 +231,6 @@ class ActiveTabModelImpl(
 
                 // Close the tab.  If this was a child tab, the user will get kicked to the parent
                 // tab (if it's still alive).
-                val isParentInTabList = tabList.isParentTabInList(tabId)
                 onCloseTab(tabId)
             }
         }

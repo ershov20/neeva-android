@@ -190,9 +190,7 @@ object NeevaAppModule {
     fun providesBrowserWrapperFactory(
         activityCallbackProvider: ActivityCallbackProvider,
         application: Application,
-        apolloWrapper: AuthenticatedApolloWrapper,
         authenticatedApolloWrapper: AuthenticatedApolloWrapper,
-        unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
         clientLogger: ClientLogger,
         directories: Directories,
         dispatchers: Dispatchers,
@@ -201,31 +199,31 @@ object NeevaAppModule {
         historyManager: HistoryManager,
         neevaConstants: NeevaConstants,
         neevaUser: NeevaUser,
+        popupModel: PopupModel,
         regularFaviconCache: RegularFaviconCache,
         scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
         spaceStore: SpaceStore,
-        popupModel: PopupModel
+        unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
     ): BrowserWrapperFactory {
         return BrowserWrapperFactory(
             activityCallbackProvider = activityCallbackProvider,
             application = application,
-            apolloWrapper = apolloWrapper,
             authenticatedApolloWrapper = authenticatedApolloWrapper,
-            unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
             clientLogger = clientLogger,
             directories = directories,
             dispatchers = dispatchers,
             domainProvider = domainProvider,
             historyManager = historyManager,
-            hostInfoDao = historyDatabase.hostInfoDao(),
+            historyDatabase = historyDatabase,
             neevaConstants = neevaConstants,
             neevaUser = neevaUser,
+            popupModel = popupModel,
             regularFaviconCache = regularFaviconCache,
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
             spaceStore = spaceStore,
-            popupModel = popupModel
+            unauthenticatedApolloWrapper = unauthenticatedApolloWrapper
         )
     }
 

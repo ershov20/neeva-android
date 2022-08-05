@@ -68,7 +68,8 @@ class IncognitoBrowserWrapper private constructor(
     neevaConstants = neevaConstants,
     settingsDataModel = settingsDataModel,
     trackerAllowList = IncognitoTrackersAllowList(),
-    scriptInjectionManager = scriptInjectionManager
+    scriptInjectionManager = scriptInjectionManager,
+    tabList = IncognitoTabList()
 ) {
     constructor(
         appContext: Context,

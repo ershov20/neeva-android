@@ -1,6 +1,7 @@
 package com.neeva.app
 
 import androidx.annotation.CallSuper
+import io.mockk.MockKAnnotations
 import org.junit.After
 import org.junit.Before
 import org.mockito.Mockito
@@ -18,6 +19,8 @@ abstract class BaseTest {
             .initMocks(this)
             .strictness(Strictness.WARN)
             .startMocking()
+
+        MockKAnnotations.init(this)
     }
 
     @After

@@ -12,7 +12,7 @@ import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.Directories
-import com.neeva.app.storage.daos.HostInfoDao
+import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
@@ -21,7 +21,6 @@ import kotlinx.coroutines.CoroutineScope
 class BrowserWrapperFactory(
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val application: Application,
-    private val apolloWrapper: AuthenticatedApolloWrapper,
     private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
     private val unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
     private val clientLogger: ClientLogger,
@@ -29,7 +28,7 @@ class BrowserWrapperFactory(
     private val dispatchers: Dispatchers,
     private val domainProvider: DomainProvider,
     private val historyManager: HistoryManager,
-    private val hostInfoDao: HostInfoDao,
+    private val historyDatabase: HistoryDatabase,
     private val neevaConstants: NeevaConstants,
     private val neevaUser: NeevaUser,
     private val regularFaviconCache: RegularFaviconCache,
@@ -42,7 +41,6 @@ class BrowserWrapperFactory(
         return RegularBrowserWrapper(
             appContext = application,
             activityCallbackProvider = activityCallbackProvider,
-            apolloWrapper = apolloWrapper,
             authenticatedApolloWrapper = authenticatedApolloWrapper,
             clientLogger = clientLogger,
             coroutineScope = coroutineScope,
@@ -50,7 +48,8 @@ class BrowserWrapperFactory(
             dispatchers = dispatchers,
             domainProvider = domainProvider,
             historyManager = historyManager,
-            hostInfoDao = hostInfoDao,
+            hostInfoDao = historyDatabase.hostInfoDao(),
+            searchNavigationDao = historyDatabase.searchNavigationDao(),
             neevaConstants = neevaConstants,
             neevaUser = neevaUser,
             regularFaviconCache = regularFaviconCache,
@@ -71,7 +70,7 @@ class BrowserWrapperFactory(
             directories = directories,
             dispatchers = dispatchers,
             activityCallbackProvider = activityCallbackProvider,
-            authenticatedApolloWrapper = apolloWrapper,
+            authenticatedApolloWrapper = authenticatedApolloWrapper,
             unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
             domainProvider = domainProvider,
             onRemovedFromHierarchy = onRemovedFromHierarchy,

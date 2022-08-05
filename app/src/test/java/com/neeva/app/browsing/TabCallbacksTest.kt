@@ -13,7 +13,6 @@ import com.neeva.app.cookiecutter.TrackingData
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.favicons.FaviconCache
-import io.mockk.MockKAnnotations
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -70,7 +69,6 @@ class TabCallbacksTest : BaseTest() {
 
     override fun setUp() {
         super.setUp()
-        MockKAnnotations.init(this)
 
         cookieNoticeBlockedFlow = MutableStateFlow(false)
         trackingDataFlow = MutableStateFlow(null)
@@ -93,7 +91,7 @@ class TabCallbacksTest : BaseTest() {
         }
 
         browserFlow = MutableStateFlow(browser)
-        tabList = TabList()
+        tabList = IncognitoTabList()
 
         activityCallbackProvider = mockk {
             every { get() } returns this@TabCallbacksTest.activityCallbacks

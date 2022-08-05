@@ -223,7 +223,7 @@ class TabCallbacks(
 
         private fun pruneQueryList() {
             tab.takeUnless { it.isDestroyed }?.let {
-                tabList.pruneQueries(tab.guid, tab.navigationController)
+                tabList.pruneQueryNavigations(tab.guid, tab.navigationController)
             }
         }
     }

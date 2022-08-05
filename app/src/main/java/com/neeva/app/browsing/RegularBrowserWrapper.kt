@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.Uri
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.cookiecutter.RegularTrackersAllowList
 import com.neeva.app.cookiecutter.ScriptInjectionManager
@@ -17,6 +16,7 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.RegularTabScreenshotManager
 import com.neeva.app.storage.daos.HostInfoDao
+import com.neeva.app.storage.daos.SearchNavigationDao
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.PopupModel
@@ -36,7 +36,6 @@ import org.chromium.weblayer.WebLayer
 class RegularBrowserWrapper(
     appContext: Context,
     activityCallbackProvider: ActivityCallbackProvider,
-    private val apolloWrapper: ApolloWrapper,
     private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
     clientLogger: ClientLogger,
     coroutineScope: CoroutineScope,
@@ -45,6 +44,7 @@ class RegularBrowserWrapper(
     domainProvider: DomainProvider,
     historyManager: HistoryManager,
     hostInfoDao: HostInfoDao,
+    searchNavigationDao: SearchNavigationDao,
     neevaConstants: NeevaConstants,
     private val neevaUser: NeevaUser,
     regularFaviconCache: RegularFaviconCache,
@@ -62,7 +62,7 @@ class RegularBrowserWrapper(
         coroutineScope = coroutineScope,
         historyManager = historyManager,
         settingsDataModel = settingsDataModel,
-        apolloWrapper = apolloWrapper,
+        apolloWrapper = authenticatedApolloWrapper,
         dispatchers = dispatchers,
         neevaConstants = neevaConstants,
         clientLogger = clientLogger
@@ -91,6 +91,11 @@ class RegularBrowserWrapper(
         hostInfoDao = hostInfoDao,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers
+    ),
+    tabList = RegularTabList(
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers,
+        searchNavigationDao = searchNavigationDao
     )
 ) {
     companion object {
@@ -147,7 +152,7 @@ class RegularBrowserWrapper(
                         val value = cookie.trim().substringAfter('=')
                         neevaUser.neevaUserToken.setToken(value)
                         coroutineScope.launch(dispatchers.io) {
-                            neevaUser.fetch(apolloWrapper)
+                            neevaUser.fetch(authenticatedApolloWrapper)
                         }
                     }
                 }
