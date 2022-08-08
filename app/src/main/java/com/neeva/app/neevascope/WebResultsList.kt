@@ -11,9 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -29,17 +32,30 @@ import com.neeva.app.ui.widgets.UriDisplayView
 
 fun LazyListScope.WebResultsList(
     webResults: List<NeevascopeWebResult>,
+    showAllSearches: MutableState<Boolean>,
     openUrl: (Uri) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val numSearchesDisplayed = mutableStateOf(if (showAllSearches.value) webResults.count() else 3)
     item {
         WebResultsListHeader()
         Spacer(modifier = Modifier.padding(Dimensions.PADDING_MEDIUM))
     }
 
-    items(webResults) { result ->
+    items(webResults.take(numSearchesDisplayed.value)) { result ->
         WebResultRow(result = result, openUrl = openUrl, onDismiss = onDismiss)
         Spacer(modifier = Modifier.padding(Dimensions.PADDING_MEDIUM))
+    }
+
+    if (!showAllSearches.value) {
+        item { ShowMoreButton(showAll = showAllSearches) }
+    }
+
+    item {
+        Divider(
+            modifier = Modifier.padding(Dimensions.PADDING_MEDIUM),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
     }
 }
 

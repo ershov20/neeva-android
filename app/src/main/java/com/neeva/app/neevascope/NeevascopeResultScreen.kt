@@ -5,16 +5,24 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
@@ -26,6 +34,8 @@ import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
+
+private const val NUMBER_COLLAPSED = 3
 
 @Composable
 fun NeevascopeResultScreen(
@@ -53,6 +63,16 @@ fun NeevascopeResultScreen(
     searches: NeevascopeResult?,
     neevaConstants: NeevaConstants
 ) {
+    val showAllDiscussions = remember { mutableStateOf(true) }
+    searches?.redditDiscussions?.takeIf { it.isNotEmpty() }?.let {
+        showAllDiscussions.value = it.count() <= NUMBER_COLLAPSED
+    }
+
+    val showAllSearches = remember { mutableStateOf(true) }
+    searches?.webSearches?.takeIf { it.isNotEmpty() }?.let {
+        showAllSearches.value = it.count() <= NUMBER_COLLAPSED
+    }
+
     Surface {
         LazyColumn(
             modifier = Modifier
@@ -63,6 +83,7 @@ fun NeevascopeResultScreen(
             searches?.redditDiscussions?.takeIf { it.isNotEmpty() }?.let {
                 RedditDiscussionsList(
                     discussions = it,
+                    showAllDiscussions = showAllDiscussions,
                     openUrl = openUrl,
                     onDismiss = onDismiss
                 )
@@ -71,6 +92,7 @@ fun NeevascopeResultScreen(
             searches?.webSearches?.takeIf { it.isNotEmpty() }?.let {
                 WebResultsList(
                     webResults = it,
+                    showAllSearches = showAllSearches,
                     openUrl = openUrl,
                     onDismiss = onDismiss
                 )
@@ -104,6 +126,24 @@ fun NeevascopeResultScreen(
 }
 
 @Composable
+fun ShowMoreButton(showAll: MutableState<Boolean>) {
+    FilledTonalButton(
+        onClick = { showAll.value = !showAll.value },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(text = stringResource(id = R.string.neevascope_show_more))
+
+        Spacer(modifier = Modifier.padding(Dimensions.PADDING_SMALL))
+        Icon(
+            Icons.Outlined.KeyboardArrowDown,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(Dimensions.SIZE_ICON_SMALL)
+        )
+    }
+}
+
+@Composable
 fun SupportSection(
     showFeedback: () -> Unit,
     onDismiss: () -> Unit
@@ -112,8 +152,6 @@ fun SupportSection(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Dimensions.PADDING_SMALL)
     ) {
-        Divider()
-
         Text(
             text = stringResource(id = R.string.neevascope_support_title),
             style = MaterialTheme.typography.titleLarge,
@@ -137,7 +175,6 @@ fun SupportSection(
                     onDismiss()
                 }
             )
-            // TODO: Add chat bubble icon
         }
     }
 }

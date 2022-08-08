@@ -127,7 +127,7 @@ class NeevascopeModelTest : BaseTest() {
                     url = Uri.parse(
                         "https://www.reddit.com/r/GTA/comments/85uyan/gta_vice_city"
                     ),
-                    slash = "/r/GTA",
+                    slash = "r/GTA",
                     upvotes = 1,
                     numComments = 4,
                     interval = "4 years ago"
@@ -138,9 +138,9 @@ class NeevascopeModelTest : BaseTest() {
 
     @Test
     fun toDiscussionSlash() {
-        expectThat("https://www.reddit.com/r/android".toDiscussionSlash()).isEqualTo("/r/android")
+        expectThat("https://www.reddit.com/r/android".toDiscussionSlash()).isEqualTo("r/android")
         expectThat("https://www.reddit.com/r/airsoft/comments/airsoft_maryland".toDiscussionSlash())
-            .isEqualTo("/r/airsoft")
+            .isEqualTo("r/airsoft")
         expectThat("https://www.reddit.com/airsoft/comments/airsoft_maryland".toDiscussionSlash())
             .isEqualTo(null)
     }

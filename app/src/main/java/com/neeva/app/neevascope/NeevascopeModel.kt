@@ -238,7 +238,7 @@ fun String.toDiscussionSlash(): String? {
     // extract /r in URL
     val matchResult = Regex("/r/([a-zA-Z0-9_]{1,21}+)").find(this)
     return matchResult?.range
-        ?.let { this.substring(it) }
+        ?.let { this.substring(it).drop(1) }
         ?.toString()
 }
 

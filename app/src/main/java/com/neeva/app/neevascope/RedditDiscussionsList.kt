@@ -16,14 +16,16 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
-import androidx.compose.material.icons.outlined.ChatBubble
+import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.NorthEast
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,19 +46,31 @@ import com.neeva.app.ui.theme.Dimensions
 
 fun LazyListScope.RedditDiscussionsList(
     discussions: List<NeevascopeDiscussion>,
+    showAllDiscussions: MutableState<Boolean>,
     openUrl: (Uri) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val numDiscussionsDisplayed =
+        mutableStateOf(if (showAllDiscussions.value) discussions.count() else 3)
     item {
         RedditDiscussionsListHeader()
         Spacer(modifier = Modifier.padding(Dimensions.PADDING_MEDIUM))
     }
 
-    items(discussions) { discussion ->
+    items(discussions.take(numDiscussionsDisplayed.value)) { discussion ->
         RedditDiscussionRow(discussion, openUrl, onDismiss)
         Spacer(modifier = Modifier.padding(Dimensions.PADDING_MEDIUM))
+    }
 
-        // TODO: Add show more discussions
+    if (!showAllDiscussions.value) {
+        item { ShowMoreButton(showAll = showAllDiscussions) }
+    }
+
+    item {
+        Divider(
+            modifier = Modifier.padding(Dimensions.PADDING_MEDIUM),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        )
     }
 }
 
@@ -96,7 +110,7 @@ fun RedditDiscussionHeader(
             )
 
             RedditDiscussionIcon(
-                icon = Icons.Outlined.ChatBubble,
+                icon = Icons.Outlined.ChatBubbleOutline,
                 text = "${discussion.numComments}",
                 hasDot = true
             )
@@ -186,7 +200,7 @@ fun RedditDiscussionRow(
 
         if (discussion.content.comments.isNotEmpty()) {
             LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(Dimensions.PADDING_MEDIUM)
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.PADDING_LARGE)
             ) {
                 items(discussion.content.comments.take(10)) { comment ->
                     Row {

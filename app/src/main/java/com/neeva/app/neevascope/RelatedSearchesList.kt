@@ -2,12 +2,15 @@ package com.neeva.app.neevascope
 
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -18,6 +21,7 @@ import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.theme.Dimensions
 
 fun LazyListScope.RelatedSearchesList(
     @StringRes title: Int,
@@ -41,6 +45,13 @@ fun LazyListScope.RelatedSearchesList(
                 openUrl(search.toSearchUri(neevaConstants))
                 onDismiss()
             }
+        )
+    }
+
+    item {
+        Divider(
+            modifier = Modifier.padding(Dimensions.PADDING_MEDIUM),
+            color = MaterialTheme.colorScheme.surfaceVariant
         )
     }
 }

@@ -680,6 +680,9 @@
     <!-- [NeevaScope] Displayed as a header for a section that displays a list of reddit discussions. -->
     <string name="reddit_discussion">Discussions</string>
 
+    <!-- [NeevaScope][Button] Triggers showing more results. -->
+    <string name="neevascope_show_more">Show more</string>
+
     <!-- [NeevaScope] Indicate when reddit discussion posted -->
     <plurals name="discussion_interval_day">
         <item quantity="one">%d day ago</item>
