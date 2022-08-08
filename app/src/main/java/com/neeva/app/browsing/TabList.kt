@@ -155,7 +155,12 @@ abstract class TabList {
             }
     }
 
-    fun updateParentInfo(tab: Tab, parentTabId: String?, tabOpenType: TabInfo.TabOpenType) {
+    fun updateParentInfo(
+        tab: Tab,
+        parentTabId: String?,
+        parentSpaceId: String?,
+        tabOpenType: TabInfo.TabOpenType
+    ) {
         if (tab.isDestroyed) return
 
         tabInfoMap[tab.guid]?.let { existingTabInfo ->
@@ -163,7 +168,22 @@ abstract class TabList {
                 tab = tab,
                 newData = existingTabInfo.data.copy(
                     parentTabId = parentTabId,
+                    parentSpaceId = parentSpaceId,
                     openType = tabOpenType
+                ),
+                persist = true
+            )
+        }
+    }
+
+    internal fun updateTimestamp(tab: Tab, lastActiveTimestamp: Long) {
+        if (tab.isDestroyed) return
+
+        tabInfoMap[tab.guid]?.let { existingTabInfo ->
+            setPersistedInfo(
+                tab = tab,
+                newData = existingTabInfo.data.copy(
+                    lastActiveMs = lastActiveTimestamp
                 ),
                 persist = true
             )

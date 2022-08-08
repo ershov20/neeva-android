@@ -20,7 +20,8 @@ interface AppNavModel {
     fun popBackStack()
 
     fun openLazyTab(focusUrlBar: Boolean = true)
-    fun openUrl(url: Uri)
+    fun openUrl(url: Uri, parentSpaceId: String? = null)
+    fun navigateBackOnActiveTab()
 
     // region Internal screens
     fun showBrowser(forceUserToStayInCardGrid: Boolean = true)
@@ -71,7 +72,8 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
 
     override fun popBackStack() {}
     override fun openLazyTab(focusUrlBar: Boolean) {}
-    override fun openUrl(url: Uri) {}
+    override fun openUrl(url: Uri, parentSpaceId: String?) {}
+    override fun navigateBackOnActiveTab() {}
     override fun showBrowser(forceUserToStayInCardGrid: Boolean) {}
     override fun showCardGrid() {}
     override fun showClearBrowsingSettings() {}

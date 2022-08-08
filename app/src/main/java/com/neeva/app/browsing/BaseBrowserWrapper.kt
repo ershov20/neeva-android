@@ -137,12 +137,12 @@ abstract class BaseBrowserWrapper internal constructor(
         spaceStore = spaceStore,
         tabList = tabList,
         _activeTabModelImpl = ActiveTabModelImpl(
-            spaceStore = spaceStore,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
             neevaConstants = neevaConstants,
             tabScreenshotManager = tabScreenshotManager,
-            tabList = tabList
+            tabList = tabList,
+            spaceStore = spaceStore
         ),
         _urlBarModel = URLBarModelImpl(
             suggestionFlow = suggestionsModel?.autocompleteSuggestionFlow ?: MutableStateFlow(null),
@@ -502,6 +502,7 @@ abstract class BaseBrowserWrapper internal constructor(
                 createTabWithUri(
                     uri = Uri.parse(neevaConstants.appURL),
                     parentTabId = null,
+                    parentSpaceId = null,
                     isViaIntent = false,
                     stayInApp = true,
                     searchQuery = null
@@ -683,13 +684,14 @@ abstract class BaseBrowserWrapper internal constructor(
     private fun createTabWithUri(
         uri: Uri,
         parentTabId: String?,
+        parentSpaceId: String?,
         isViaIntent: Boolean,
         stayInApp: Boolean,
         searchQuery: String?
     ) {
         browser?.let {
             val tabOpenType = when {
-                parentTabId != null -> TabInfo.TabOpenType.CHILD_TAB
+                parentTabId != null || parentSpaceId != null -> TabInfo.TabOpenType.CHILD_TAB
                 isViaIntent -> TabInfo.TabOpenType.VIA_INTENT
                 else -> TabInfo.TabOpenType.DEFAULT
             }
@@ -702,6 +704,7 @@ abstract class BaseBrowserWrapper internal constructor(
             tabList.updateParentInfo(
                 tab = newTab,
                 parentTabId = parentTabId,
+                parentSpaceId = parentSpaceId,
                 tabOpenType = tabOpenType
             )
 
@@ -750,7 +753,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
         getTab(id)?.let {
             it.dispatchBeforeUnloadAndClose()
-            if (getActiveTab()?.guid == it.guid) {
+            if (getActiveTab()?.guid == id) {
                 setNextActiveTab(tabInfo, tabIndex)
             }
         }
@@ -833,11 +836,17 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     // region: Active tab operations
-    override fun goBack() {
-        _activeTabModelImpl.goBack(
-            onCloseTab = ::closeTab,
-            onShowSearchResults = ::reshowSearchResultsInLazyTab
-        )
+    override fun goBack(): GoBackResult {
+        val result = _activeTabModelImpl.goBack()
+
+        // Close the tab.  If this was a child tab, the user will get kicked to the parent
+        // tab (if it's still alive).
+        result.tabIdToClose?.let { closeTab(result.tabIdToClose) }
+
+        // Reshow the SAYT results that the user clicked on to open the child tab.
+        result.originalSearchQuery?.let { reshowSearchResultsInLazyTab(result.originalSearchQuery) }
+
+        return result
     }
 
     override fun goForward() = _activeTabModelImpl.goForward()
@@ -856,6 +865,7 @@ abstract class BaseBrowserWrapper internal constructor(
         inNewTab: Boolean?,
         isViaIntent: Boolean,
         parentTabId: String?,
+        parentSpaceId: String?,
         stayInApp: Boolean,
         searchQuery: String?,
         onLoadStarted: () -> Unit
@@ -914,6 +924,7 @@ abstract class BaseBrowserWrapper internal constructor(
                 createTabWithUri(
                     uri = urlToLoad,
                     parentTabId = parentTabIdToUse,
+                    parentSpaceId = parentSpaceId,
                     isViaIntent = isViaIntent,
                     stayInApp = stayInApp,
                     searchQuery = searchQuery

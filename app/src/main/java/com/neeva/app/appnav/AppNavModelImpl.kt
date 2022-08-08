@@ -137,13 +137,21 @@ class AppNavModelImpl(
         webLayerModel.currentBrowser.openLazyTab(focusUrlBar)
     }
 
-    override fun openUrl(url: Uri) {
+    override fun openUrl(url: Uri, parentSpaceId: String?) {
         webLayerModel.currentBrowser.loadUrl(
             uri = url,
             inNewTab = true,
+            parentSpaceId = parentSpaceId,
             onLoadStarted = this::showBrowser,
             stayInApp = true
         )
+    }
+
+    override fun navigateBackOnActiveTab() {
+        val result = webLayerModel.currentBrowser.goBack()
+
+        // Send the user back to the Space that caused the tab to be opened.
+        result.spaceIdToOpen?.let { showSpaceDetail(it) }
     }
 
     override fun openAndroidDefaultBrowserSettings() {
@@ -180,7 +188,7 @@ class AppNavModelImpl(
     override fun showSettings() = show(AppNavDestination.SETTINGS)
 
     override fun showSpaceDetail(spaceID: String) {
-        // We still set the detailedSpaceIDFlow value in case we need to fetch the Space.
+        // We set the detailedSpaceIDFlow value in case we need to fetch the Space.
         coroutineScope.launch {
             spaceStore.detailedSpaceIDFlow.value = spaceID
         }

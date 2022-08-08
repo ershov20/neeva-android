@@ -659,6 +659,11 @@ class SpaceStore(
             }
         }
 
+    fun doesSpaceExist(spaceId: String?): Boolean {
+        spaceId ?: return false
+        return allSpacesFlow.value.any { it.id == spaceId }
+    }
+
     private suspend fun saveBitmap(
         directory: File,
         dispatchers: Dispatchers,

@@ -93,6 +93,7 @@ class TabCallbacks(
             tabList.updateParentInfo(
                 tab = newTab,
                 parentTabId = tab.guid,
+                parentSpaceId = null,
                 tabOpenType = TabOpenType.CHILD_TAB
             )
             registerNewTab(newTab, type)

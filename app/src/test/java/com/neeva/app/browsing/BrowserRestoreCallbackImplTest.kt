@@ -7,6 +7,7 @@ import org.chromium.weblayer.Tab
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -14,6 +15,8 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
+import strikt.api.expectThat
+import strikt.assertions.isEqualTo
 
 @RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
@@ -100,7 +103,13 @@ class BrowserRestoreCallbackImplTest {
         verify(testSetup.tabList).pruneQueryNavigations()
         testSetup.tabs.forEach {
             val expectedData = TabInfo.PersistedData(it.data)
-            verify(testSetup.tabList).setPersistedInfo(eq(it), eq(expectedData), eq(false))
+            val actualData = argumentCaptor<TabInfo.PersistedData>()
+            verify(testSetup.tabList).setPersistedInfo(eq(it), actualData.capture(), eq(false))
+
+            // Explicitly set the time so that we know what the value of System.currentTimeMillis.
+            expectThat(actualData.lastValue).isEqualTo(
+                expectedData.copy(lastActiveMs = actualData.lastValue.lastActiveMs)
+            )
         }
     }
 

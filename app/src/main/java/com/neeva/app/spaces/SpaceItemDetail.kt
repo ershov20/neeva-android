@@ -48,7 +48,7 @@ fun SpaceItemDetail(
                     if (it.toString().startsWith(neevaConstants.appSpacesURL)) {
                         appNavModel.showSpaceDetail(it.pathSegments.last())
                     } else {
-                        appNavModel.openUrl(it)
+                        appNavModel.openUrl(it, parentSpaceId = spaceItem.spaceID)
                     }
                 }
             }

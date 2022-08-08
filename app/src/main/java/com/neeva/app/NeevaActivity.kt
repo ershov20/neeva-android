@@ -522,7 +522,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             }
 
             browserWrapper.canGoBackward() -> {
-                browserWrapper.goBack()
+                appNavModel?.navigateBackOnActiveTab()
             }
 
             browserWrapper.closeActiveTabIfOpenedViaIntent() -> {

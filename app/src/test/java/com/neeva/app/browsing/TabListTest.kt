@@ -94,7 +94,9 @@ class TabListTest : BaseTest() {
             on { getBrowser() } doReturn browser
             on { guid } doReturn "tab guid 1"
             on { isDestroyed } doReturn false
-            on { data } doReturn emptyMap()
+            on { data } doReturn mapOf(
+                TabInfo.PersistedData.KEY_LAST_ACTIVE_MS to "1000000"
+            )
         }
 
         secondTab = mock {
@@ -104,7 +106,8 @@ class TabListTest : BaseTest() {
             on { isDestroyed } doReturn false
             on { data } doReturn mapOf(
                 TabInfo.PersistedData.KEY_PARENT_TAB_ID to "tab guid 1",
-                TabInfo.PersistedData.KEY_OPEN_TYPE to TabInfo.TabOpenType.CHILD_TAB.name
+                TabInfo.PersistedData.KEY_OPEN_TYPE to TabInfo.TabOpenType.CHILD_TAB.name,
+                TabInfo.PersistedData.KEY_LAST_ACTIVE_MS to "2000000"
             )
         }
 
@@ -113,7 +116,9 @@ class TabListTest : BaseTest() {
             on { getBrowser() } doReturn browser
             on { guid } doReturn "tab guid 3"
             on { isDestroyed } doReturn false
-            on { data } doReturn emptyMap()
+            on { data } doReturn mapOf(
+                TabInfo.PersistedData.KEY_LAST_ACTIVE_MS to "3000000"
+            )
         }
     }
 
@@ -134,7 +139,8 @@ class TabListTest : BaseTest() {
                 isCrashed = false,
                 data = TabInfo.PersistedData(
                     parentTabId = null,
-                    openType = TabInfo.TabOpenType.DEFAULT
+                    openType = TabInfo.TabOpenType.DEFAULT,
+                    lastActiveMs = 1_000_000L
                 )
             ),
             TabInfo(
@@ -145,7 +151,8 @@ class TabListTest : BaseTest() {
                 isCrashed = false,
                 data = TabInfo.PersistedData(
                     parentTabId = "tab guid 1",
-                    openType = TabInfo.TabOpenType.CHILD_TAB
+                    openType = TabInfo.TabOpenType.CHILD_TAB,
+                    lastActiveMs = 2_000_000L
                 )
             )
         )
@@ -160,7 +167,8 @@ class TabListTest : BaseTest() {
                 isCrashed = false,
                 data = TabInfo.PersistedData(
                     parentTabId = "tab guid 1",
-                    openType = TabInfo.TabOpenType.CHILD_TAB
+                    openType = TabInfo.TabOpenType.CHILD_TAB,
+                    lastActiveMs = 2_000_000L
                 )
             )
         )
@@ -266,7 +274,12 @@ class TabListTest : BaseTest() {
 
         expectThat(tabList.isParentTabInList(thirdTab.guid)).isFalse()
 
-        tabList.updateParentInfo(thirdTab, firstTab.guid, TabInfo.TabOpenType.CHILD_TAB)
+        tabList.updateParentInfo(
+            tab = thirdTab,
+            parentTabId = firstTab.guid,
+            parentSpaceId = null,
+            tabOpenType = TabInfo.TabOpenType.CHILD_TAB
+        )
         expectThat(tabList.isParentTabInList(thirdTab.guid)).isTrue()
     }
 

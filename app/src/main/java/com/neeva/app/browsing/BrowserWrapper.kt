@@ -93,7 +93,7 @@ interface BrowserWrapper {
     fun getCookiePairs(uri: Uri, callback: (List<CookiePair>) -> Unit)
 
     // region: Active tab operations
-    fun goBack()
+    fun goBack(): GoBackResult
     fun goForward()
     fun reload()
     fun canGoBackward(): Boolean
@@ -135,6 +135,7 @@ interface BrowserWrapper {
         inNewTab: Boolean? = null,
         isViaIntent: Boolean = false,
         parentTabId: String? = null,
+        parentSpaceId: String? = null,
         stayInApp: Boolean = true,
         searchQuery: String? = null,
         onLoadStarted: () -> Unit = {}

@@ -9,6 +9,7 @@ import com.neeva.app.MockNavigationController
 import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.ActiveTabModel.DisplayMode
 import com.neeva.app.browsing.TabInfo.TabOpenType
+import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -19,6 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
@@ -26,9 +28,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.verifyNoMoreInteractions
-import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.hasSize
 import strikt.assertions.isEmpty
@@ -39,14 +38,12 @@ import strikt.assertions.isTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
-@Config(manifest = Config.NONE)
 class ActiveTabModelImplTest : BaseTest() {
     @Rule
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    @Mock private lateinit var onCloseTab: (String) -> Unit
-    @Mock private lateinit var onShowSearchResults: (query: String) -> Unit
+    @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
 
     private lateinit var model: ActiveTabModelImpl
@@ -72,7 +69,8 @@ class ActiveTabModelImplTest : BaseTest() {
             ),
             neevaConstants = neevaConstants,
             tabScreenshotManager = tabScreenshotManager,
-            tabList = tabList
+            tabList = tabList,
+            spaceStore = spaceStore
         )
 
         mainTab = MockHarness(
@@ -325,15 +323,28 @@ class ActiveTabModelImplTest : BaseTest() {
         model.onActiveTabChanged(harness.tab)
 
         // There is no way to go back because there's only one URL.
-        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+        val firstGoBackResult = model.goBack()
         verify(harness.mockNavigationController.controller, never()).goBack()
-        verify(onCloseTab, never()).invoke(any())
+        expectThat(firstGoBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = null,
+                spaceIdToOpen = null,
+                originalSearchQuery = null
+            )
+        )
 
         // Say that the user navigated somewhere and we can now go backward.
         harness.mockNavigationController.controller.navigate(Uri.parse("http://anywhere.else"))
 
-        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+        val secondGoBackResult = model.goBack()
         verify(harness.mockNavigationController.controller, times(1)).goBack()
+        expectThat(secondGoBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = null,
+                spaceIdToOpen = null,
+                originalSearchQuery = null
+            )
+        )
     }
 
     @Test
@@ -353,12 +364,18 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
-        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+        val goBackResult = model.goBack()
 
         // Even though there are no navigations on this tab, because it is a child we should have
         // closed it.
         verify(childTabHarness.mockNavigationController.controller, never()).goBack()
-        verify(onCloseTab).invoke(any())
+        expectThat(goBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = childTabHarness.tabId,
+                spaceIdToOpen = null,
+                originalSearchQuery = null
+            )
+        )
     }
 
     @Test
@@ -384,13 +401,73 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
-        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+        val goBackResult = model.goBack()
 
         // Even though there are no navigations on this tab, because it is a child we should have
         // closed it.
         verify(childTabHarness.mockNavigationController.controller, never()).goBack()
-        verify(onCloseTab).invoke(childTabHarness.tabId)
-        verify(onShowSearchResults).invoke("triggering query")
+        expectThat(goBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = childTabHarness.tabId,
+                spaceIdToOpen = null,
+                originalSearchQuery = "triggering query"
+            )
+        )
+    }
+
+    @Test
+    fun goBack_forChildTabOfSpace_reshowsSpace() {
+        Mockito.`when`(spaceStore.doesSpaceExist("parentSpaceId")).thenReturn(true)
+
+        // Create a tab that is spawned from a click on a Space.
+        val childTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.sitelinkedfromtechmeme.com/")),
+            tabId = "child tab",
+            parentSpaceId = "parentSpaceId"
+        )
+
+        model.onActiveTabChanged(childTabHarness.tab)
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
+
+        // Hit "back" on the child tab.
+        val goBackResult = model.goBack()
+
+        // Even though there are no navigations on this tab, because it is a child we should have
+        // closed it.
+        verify(childTabHarness.mockNavigationController.controller, never()).goBack()
+        expectThat(goBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = childTabHarness.tabId,
+                spaceIdToOpen = "parentSpaceId",
+                originalSearchQuery = null
+            )
+        )
+    }
+
+    @Test
+    fun goBack_forChildTabOfMissingSpace_doesNotReshowSpace() {
+        Mockito.`when`(spaceStore.doesSpaceExist("parentSpaceId")).thenReturn(false)
+
+        // Create a tab that is spawned from a click on a Space.
+        val childTabHarness = MockHarness(
+            navigations = listOf(Uri.parse("https://www.sitelinkedfromtechmeme.com/")),
+            tabId = "child tab",
+            parentSpaceId = "parentSpaceId"
+        )
+
+        model.onActiveTabChanged(childTabHarness.tab)
+        expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
+
+        // Hit "back" on the child tab.  Nothing should have happened.
+        val goBackResult = model.goBack()
+        verify(childTabHarness.mockNavigationController.controller, never()).goBack()
+        expectThat(goBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = null,
+                spaceIdToOpen = null,
+                originalSearchQuery = null
+            )
+        )
     }
 
     @Test
@@ -419,12 +496,17 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
-        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+        val goBackResult = model.goBack()
 
         // This tab was created to show search results.  Make sure it's closed and reshow the query.
         verify(childTabHarness.mockNavigationController.controller, never()).goBack()
-        verify(onCloseTab).invoke(childTabHarness.tabId)
-        verify(onShowSearchResults).invoke("triggering query")
+        expectThat(goBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = childTabHarness.tabId,
+                spaceIdToOpen = null,
+                originalSearchQuery = "triggering query"
+            )
+        )
     }
 
     @Test
@@ -451,11 +533,17 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
 
         // Hit "back" on the child tab.
-        model.goBack(onCloseTab = onCloseTab, onShowSearchResults = onShowSearchResults)
+        val goBackResult = model.goBack()
 
         // Nothing should happen.
         verify(childTabHarness.mockNavigationController.controller, never()).goBack()
-        verify(onCloseTab, never()).invoke(any())
+        expectThat(goBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = null,
+                spaceIdToOpen = null,
+                originalSearchQuery = null
+            )
+        )
     }
 
     @Test
@@ -484,13 +572,25 @@ class ActiveTabModelImplTest : BaseTest() {
         )
 
         // Go back.  We should be asked to show search results.
-        model.goBack(onCloseTab, onShowSearchResults)
+        val firstGoBackResult = model.goBack()
         verify(harness.mockNavigationController.controller).goBack()
-        verify(onShowSearchResults).invoke("second search term")
+        expectThat(firstGoBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = null,
+                spaceIdToOpen = null,
+                originalSearchQuery = "second search term"
+            )
+        )
 
-        model.goBack(onCloseTab, onShowSearchResults)
+        val secondGoBackResult = model.goBack()
         verify(harness.mockNavigationController.controller, times(2)).goBack()
-        verify(onShowSearchResults).invoke("first search term")
+        expectThat(secondGoBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = null,
+                spaceIdToOpen = null,
+                originalSearchQuery = "first search term"
+            )
+        )
 
         // Navigate somewhere to clear out the navigation history.
         harness.mockNavigationController.controller.navigate(Uri.parse("https://www.fourth.com"))
@@ -503,10 +603,15 @@ class ActiveTabModelImplTest : BaseTest() {
             .isEqualTo(1)
 
         // We shouldn't have tried to reshow the search results because the queries are gone.
-        model.goBack(onCloseTab, onShowSearchResults)
+        val thirdGoBackResult = model.goBack()
         verify(harness.mockNavigationController.controller, times(3)).goBack()
-        verifyNoInteractions(onCloseTab)
-        verifyNoMoreInteractions(onShowSearchResults)
+        expectThat(thirdGoBackResult).isEqualTo(
+            GoBackResult(
+                tabIdToClose = null,
+                spaceIdToOpen = null,
+                originalSearchQuery = null
+            )
+        )
     }
 
     @Test
@@ -532,6 +637,7 @@ class ActiveTabModelImplTest : BaseTest() {
     inner class MockHarness(
         val tabId: String = (nextMockTabId++).toString(),
         val parentTabId: String? = null,
+        val parentSpaceId: String? = null,
         val navigations: List<Uri> = emptyList()
     ) {
         val tabCallbacks = mutableSetOf<TabCallback>()
@@ -565,6 +671,7 @@ class ActiveTabModelImplTest : BaseTest() {
             tabList.updateParentInfo(
                 tab = tab,
                 parentTabId = parentTabId,
+                parentSpaceId = parentSpaceId,
                 tabOpenType = parentTabId?.let { TabOpenType.CHILD_TAB } ?: TabOpenType.DEFAULT
             )
         }

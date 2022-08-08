@@ -17,7 +17,7 @@ class BrowserToolbarModelImpl(
     private val toolbarConfiguration: ToolbarConfiguration,
     private val neevaConstants: NeevaConstants
 ) : BrowserToolbarModel() {
-    override fun goBack() = browserWrapper.goBack()
+    override fun goBack() = appNavModel.navigateBackOnActiveTab()
     override fun goForward() = browserWrapper.goForward()
     override fun reload() = browserWrapper.reload()
     override fun reloadAfterContentFilterAllowListUpdate() =

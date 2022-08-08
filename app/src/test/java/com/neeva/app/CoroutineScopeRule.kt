@@ -54,6 +54,9 @@ class CoroutineScopeRule : TestRule {
     /** Runs any pending tasks and confirms that the CoroutineScope didn't cancel or crash. */
     fun advanceUntilIdle() {
         scope.advanceUntilIdle()
+
+        // If this line fails, then your test crashed.  Set a breakpoint here, run your test in
+        // debug mode, and examine the contents of the TestScope to see the crash stack.
         expectThat(scope.isActive).isTrue()
     }
 }

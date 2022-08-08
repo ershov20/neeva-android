@@ -28,12 +28,12 @@ import org.chromium.weblayer.TabCallback
  * Provides an API to use activeTab [Tab] and update respective Stateflow values.
  */
 class ActiveTabModelImpl(
-    private val spaceStore: SpaceStore? = null,
-    val coroutineScope: CoroutineScope,
-    val dispatchers: Dispatchers,
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers,
     private val neevaConstants: NeevaConstants,
     private val tabScreenshotManager: TabScreenshotManager,
-    private val tabList: TabList
+    private val tabList: TabList,
+    private val spaceStore: SpaceStore?
 ) : ActiveTabModel {
 
     companion object {
@@ -191,6 +191,7 @@ class ActiveTabModelImpl(
 
         override fun onNavigationStarted(navigation: Navigation) {
             updateNavigationInfo()
+            activeTab?.let { tabList.updateTimestamp(it, System.currentTimeMillis()) }
         }
 
         override fun onNavigationFailed(navigation: Navigation) {
@@ -204,39 +205,41 @@ class ActiveTabModelImpl(
         }
     }
 
-    fun goBack(
-        onCloseTab: (tabGuid: String) -> Unit,
-        onShowSearchResults: (query: String) -> Unit
-    ) {
-        if (!navigationInfoFlow.value.canGoBackward) return
+    fun goBack(): GoBackResult {
+        if (!navigationInfoFlow.value.canGoBackward) return GoBackResult()
 
-        var originalSearchQuery: String? = null
+        var goBackResult = GoBackResult()
 
         activeTab?.apply {
             val tabId = guid
             if (navigationController.canGoBack()) {
                 val currentUri = currentDisplayUrl ?: Uri.EMPTY
-                originalSearchQuery = tabList
-                    .getSearchNavigationInfo(tabId, navigationController.navigationListCurrentIndex)
-                    ?.takeIf {
-                        // Because we don't own WebLayer's NavigationController, make sure that the
-                        // user is viewing the URL that we expect for any associated search query.
-                        it.navigationEntryUri == currentUri
-                    }
-                    ?.searchQuery
+                goBackResult = GoBackResult(
+                    originalSearchQuery = tabList
+                        .getSearchNavigationInfo(
+                            tabId,
+                            navigationController.navigationListCurrentIndex
+                        )
+                        ?.takeIf {
+                            // Because we don't own WebLayer's NavigationController, make sure that
+                            // the user is viewing the URL that we expect for any associated search
+                            // query.
+                            it.navigationEntryUri == currentUri
+                        }
+                        ?.searchQuery
+                )
 
                 navigationController.goBack()
             } else {
-                originalSearchQuery = tabList.getSearchNavigationInfo(tabId, 0)?.searchQuery
-
-                // Close the tab.  If this was a child tab, the user will get kicked to the parent
-                // tab (if it's still alive).
-                onCloseTab(tabId)
+                goBackResult = GoBackResult(
+                    originalSearchQuery = tabList.getSearchNavigationInfo(tabId, 0)?.searchQuery,
+                    spaceIdToOpen = tabList.getTabInfo(tabId)?.data?.parentSpaceId,
+                    tabIdToClose = tabId
+                )
             }
         }
 
-        // If a navigation was originally triggered by a query, show the results again.
-        originalSearchQuery?.let { onShowSearchResults(it) }
+        return goBackResult
     }
 
     fun goForward() {
@@ -280,6 +283,14 @@ class ActiveTabModelImpl(
 
                 // The user can go backwards to a still-existing parent tab.
                 tabList.isParentTabInList(currentTab.guid) -> true
+
+                // Try to send the user back to the Space that opened it.
+                tabList.getTabInfo(currentTab.guid)?.data?.parentSpaceId
+                    ?.let { parentSpaceId -> spaceStore?.doesSpaceExist(parentSpaceId) }
+                    ?: false ->
+                    {
+                        true
+                    }
 
                 // The user can be re-shown the query results that led them to this tab.
                 tabList.getSearchNavigationInfo(currentTab.guid, 0) != null -> true

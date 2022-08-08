@@ -54,7 +54,7 @@ data class TabInfo(
     val isSelected: Boolean,
     val isCrashed: Boolean = false,
     val isClosing: Boolean = false,
-    val data: PersistedData = PersistedData(null, TabOpenType.DEFAULT)
+    val data: PersistedData = PersistedData()
 ) {
     /** Used to compare two URIs and sees if they're "close enough" to be a match. */
     val fuzzyMatchUrl: UriFuzzyMatchData? = url?.let { UriFuzzyMatchData.create(url) }
@@ -68,15 +68,21 @@ data class TabInfo(
     /** Used to save info about Tab across process restarts via WebLayer. */
     data class PersistedData(
         val parentTabId: String? = null,
+        val parentSpaceId: String? = null,
+        val lastActiveMs: Long? = System.currentTimeMillis(),
         val openType: TabOpenType = TabOpenType.DEFAULT
     ) {
         companion object {
             const val KEY_PARENT_TAB_ID = "PARENT_TAB_ID"
+            const val KEY_PARENT_SPACE_ID = "PARENT_SPACE_ID"
+            const val KEY_LAST_ACTIVE_MS = "LAST_ACTIVE_MS"
             const val KEY_OPEN_TYPE = "OPEN_TYPE"
         }
 
         constructor(map: Map<String, String>) : this(
             parentTabId = map[KEY_PARENT_TAB_ID],
+            parentSpaceId = map[KEY_PARENT_SPACE_ID],
+            lastActiveMs = map[KEY_LAST_ACTIVE_MS]?.toLongOrNull(),
             openType = TabOpenType.values()
                 .firstOrNull { it.name == map[KEY_OPEN_TYPE] }
                 ?: TabOpenType.DEFAULT
@@ -85,6 +91,11 @@ data class TabInfo(
         fun toMap(): Map<String, String> {
             return mutableMapOf<String, String>().apply {
                 put(KEY_OPEN_TYPE, openType.name)
+                put(KEY_LAST_ACTIVE_MS, lastActiveMs.toString())
+
+                if (parentSpaceId != null) {
+                    put(KEY_PARENT_SPACE_ID, parentSpaceId)
+                }
 
                 if (parentTabId != null) {
                     put(KEY_PARENT_TAB_ID, parentTabId)
