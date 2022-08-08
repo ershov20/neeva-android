@@ -631,7 +631,7 @@
 
 
     <!-- [Cookie Cutter] String displayed when we have a number is too big to fit on screen.  Example: 150 would be displayed as "99+" -->
-    <string name="cookie_cutter_too_many_items">Plus de %1$d</string>
+    <string name="cookie_cutter_too_many_items">%1$d+</string>
 
     <!-- [Cookie Cutter] Section header for the number of website trackers that we've blocked. -->
     <string name="cookie_cutter_trackers">Traqueurs</string>
