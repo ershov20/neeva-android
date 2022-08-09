@@ -22,6 +22,7 @@ pushd $root_dir > /dev/null
 
 if [ $CLEAN_BUILD = 1 ]; then
     ./gradlew clean task || exit 1
+    ./bootstrap.sh || exit 1
 fi
 
 ./gradlew :app:assembleStaging :weblayer_support:assembleStaging task || exit 1
