@@ -17,11 +17,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
-import androidx.compose.material.icons.outlined.NorthEast
+import androidx.compose.material.icons.outlined.OpenInNew
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -38,7 +39,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import com.neeva.app.R
-import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
@@ -53,7 +53,7 @@ fun LazyListScope.RedditDiscussionsList(
     val numDiscussionsDisplayed =
         mutableStateOf(if (showAllDiscussions.value) discussions.count() else 3)
     item {
-        RedditDiscussionsListHeader()
+        NeevaScopeSectionHeader(title = R.string.neevascope_reddit_discussion)
         Spacer(modifier = Modifier.padding(Dimensions.PADDING_MEDIUM))
     }
 
@@ -63,26 +63,18 @@ fun LazyListScope.RedditDiscussionsList(
     }
 
     if (!showAllDiscussions.value) {
-        item { ShowMoreButton(showAll = showAllDiscussions) }
+        item {
+            ShowMoreButton(
+                text = R.string.neevascope_discussion_show_more,
+                showAll = showAllDiscussions
+            )
+        }
     }
 
     item {
         Divider(
             modifier = Modifier.padding(Dimensions.PADDING_MEDIUM),
             color = MaterialTheme.colorScheme.surfaceVariant
-        )
-    }
-}
-
-@Composable
-fun RedditDiscussionsListHeader() {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(id = R.string.reddit_discussion),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -96,11 +88,12 @@ fun RedditDiscussionHeader(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Dimensions.PADDING_LARGE)
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.PADDING_TINY)
         ) {
             RedditDiscussionIcon(
                 painterId = R.drawable.outbrain,
-                text = discussion.slash
+                text = discussion.slash,
+                lightColor = false
             )
 
             RedditDiscussionIcon(
@@ -123,8 +116,8 @@ fun RedditDiscussionHeader(
 
         Text(
             text = discussion.title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -134,7 +127,8 @@ fun RedditDiscussionIcon(
     icon: ImageVector? = null,
     painterId: Int? = null,
     text: String,
-    hasDot: Boolean? = false
+    lightColor: Boolean = true,
+    hasDot: Boolean = false
 ) {
     CompositionLocalProvider(
         LocalContentColor provides MaterialTheme.colorScheme.outline
@@ -146,9 +140,11 @@ fun RedditDiscussionIcon(
             if (hasDot == true) {
                 Text(
                     text = stringResource(id = R.string.dot_separator),
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+
             val iconModifier = Modifier.size(Dimensions.SIZE_ICON_SMALL)
             when {
                 icon != null -> {
@@ -171,7 +167,12 @@ fun RedditDiscussionIcon(
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
-                maxLines = 1
+                maxLines = 1,
+                color = if (lightColor) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
             )
         }
     }
@@ -229,19 +230,21 @@ fun RedditDiscussionRow(
 
                 if (showMoreCommentsButton) {
                     item {
-                        OnboardingButton(
-                            stringResource(id = R.string.discussion_more_comments),
-                            endComposable = {
-                                Icon(
-                                    Icons.Outlined.NorthEast,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(Dimensions.SIZE_ICON_SMALL)
-                                )
+                        OutlinedButton(
+                            onClick = {
+                                openUrl(discussion.url)
+                                onDismiss()
                             }
                         ) {
-                            openUrl(discussion.url)
-                            onDismiss()
+                            Icon(
+                                Icons.Outlined.OpenInNew,
+                                contentDescription = null,
+                                modifier = Modifier.size(Dimensions.SIZE_ICON_SMALL)
+                            )
+
+                            Spacer(modifier = Modifier.padding(Dimensions.PADDING_TINY))
+
+                            Text(text = stringResource(id = R.string.discussion_more_comments))
                         }
                     }
                 }
@@ -250,7 +253,7 @@ fun RedditDiscussionRow(
             Text(
                 text = discussion.content.body,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 3
             )
         }
@@ -285,7 +288,7 @@ fun ExpandableTextView(
     Text(
         text = text,
         style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onBackground,
+        color = MaterialTheme.colorScheme.onSurface,
         maxLines = if (isExpanded) Int.MAX_VALUE else maxLine,
         onTextLayout = { textLayoutResultState.value = it },
         modifier = Modifier.animateContentSize()

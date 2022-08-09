@@ -20,7 +20,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.neeva.app.R
@@ -38,7 +37,7 @@ fun LazyListScope.WebResultsList(
 ) {
     val numSearchesDisplayed = mutableStateOf(if (showAllSearches.value) webResults.count() else 3)
     item {
-        WebResultsListHeader()
+        NeevaScopeSectionHeader(title = R.string.neeva_search)
         Spacer(modifier = Modifier.padding(Dimensions.PADDING_MEDIUM))
     }
 
@@ -48,26 +47,13 @@ fun LazyListScope.WebResultsList(
     }
 
     if (!showAllSearches.value) {
-        item { ShowMoreButton(showAll = showAllSearches) }
+        item { ShowMoreButton(text = R.string.neevascope_show_more, showAll = showAllSearches) }
     }
 
     item {
         Divider(
             modifier = Modifier.padding(Dimensions.PADDING_MEDIUM),
             color = MaterialTheme.colorScheme.surfaceVariant
-        )
-    }
-}
-
-@Composable
-fun WebResultsListHeader() {
-    Row(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(id = R.string.neeva_search),
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -132,15 +118,6 @@ fun WebResultHeader(
             color = MaterialTheme.colorScheme.primary,
             maxLines = 1
         )
-    }
-}
-
-@PortraitPreviews
-@LandscapePreviews
-@Composable
-fun WebResultsListHeader_Preview() {
-    LightDarkPreviewContainer {
-        WebResultsListHeader()
     }
 }
 

@@ -678,10 +678,13 @@
     <string name="neevascope_memorized_query">Keep looking</string>
 
     <!-- [NeevaScope] Displayed as a header for a section that displays a list of reddit discussions. -->
-    <string name="reddit_discussion">Discussions</string>
+    <string name="neevascope_reddit_discussion">Discussions</string>
 
-    <!-- [NeevaScope][Button] Triggers showing more results. -->
+    <!-- [NeevaScope][Button] Triggers showing more search results. -->
     <string name="neevascope_show_more">Show more</string>
+
+    <!-- [NeevaScope][Button] Triggers showing more reddit discussion results. -->
+    <string name="neevascope_discussion_show_more">Show more discussions</string>
 
     <!-- [NeevaScope] Indicate when reddit discussion posted -->
     <plurals name="discussion_interval_day">
@@ -711,8 +714,8 @@
     <!-- [NeevaScope] Label for a link that takes the user to reddit discussion page. -->
     <string name="discussion_more_comments">More comments</string>
 
-    <!-- [NeevaScope] Displayed as a header for support section. -->
-    <string name="neevascope_support_title">Support</string>
+    <!-- [NeevaScope][Button] Sends the user to the support page. -->
+    <string name="neevascope_support">Support</string>
 
     <!-- [NeevaScope] Tells the user what support section does.  -->
     <string name="neevascope_support_body">Have questions or feedback for NeevaScope?</string>
