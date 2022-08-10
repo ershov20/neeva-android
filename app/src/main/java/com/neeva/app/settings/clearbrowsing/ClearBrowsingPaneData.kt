@@ -65,9 +65,9 @@ enum class TimeClearingOption(@StringRes val string_id: Int) {
     LAST_HOUR(R.string.clear_browsing_last_hour),
     TODAY(R.string.clear_browsing_today),
     TODAY_AND_YESTERDAY(R.string.clear_browsing_today_and_yesterday),
-    EVERYTHING(R.string.clear_browsing_everything)
-}
+    EVERYTHING(R.string.clear_browsing_everything);
 
-object TimeClearingOptionsConstants {
-    val sharedPrefKey = "CLEAR_BROWSING_TIME_CLEARING_OPTION"
+    companion object {
+        const val SHARED_PREF_KEY = "CLEAR_BROWSING_TIME_CLEARING_OPTION"
+    }
 }

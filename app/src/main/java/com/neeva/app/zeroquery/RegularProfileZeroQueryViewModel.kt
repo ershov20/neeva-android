@@ -13,7 +13,6 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
-import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceRowData
 import com.neeva.app.spaces.SpaceStore
@@ -22,6 +21,7 @@ import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.suggestions.QueryRowSuggestion
+import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionState
 import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionStateModel
 import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionStateSharedPref
 import com.neeva.app.userdata.NeevaUser
@@ -61,11 +61,19 @@ class RegularProfileZeroQueryViewModel @Inject constructor(
 
     private val homeLabel = appContext.resources.getString(R.string.home)
 
-    private val collapsingSectionStateModel =
-        CollapsingSectionStateModel(sharedPreferencesModel, SharedPrefFolder.App)
+    private val collapsingSectionStateModel = CollapsingSectionStateModel(sharedPreferencesModel)
+    val isSuggestedSitesExpanded = getStateFlow(ZeroQueryPrefs.SuggestedSitesState)
+    val isSuggestedQueriesExpanded = getStateFlow(ZeroQueryPrefs.SuggestedQueriesState)
+    val isCommunitySpacesExpanded = getStateFlow(ZeroQueryPrefs.CommunitySpacesState)
+    val isSpacesExpanded = getStateFlow(ZeroQueryPrefs.SpacesState)
 
-    fun getState(preferenceKey: CollapsingSectionStateSharedPref) =
-        collapsingSectionStateModel.getState(preferenceKey)
+    private fun getStateFlow(
+        preferenceKey: CollapsingSectionStateSharedPref
+    ): StateFlow<CollapsingSectionState> {
+        return collapsingSectionStateModel
+            .getFlow(preferenceKey)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, preferenceKey.defaultValue)
+    }
 
     fun advanceState(preferenceKey: CollapsingSectionStateSharedPref) =
         collapsingSectionStateModel.advanceState(preferenceKey)

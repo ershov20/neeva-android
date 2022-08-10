@@ -29,7 +29,7 @@ fun AddToSpaceUI(
 ) {
     val spaces: List<Space> by spaceStore.editableSpacesFlow.collectAsState(emptyList())
     val spacesWithURL by activeTabModel.spacesContainingCurrentUrlFlow.collectAsState()
-    val displayedSpaces by remember {
+    val displayedSpaces by remember(spaces) {
         derivedStateOf {
             spaces.sortedByDescending { spacesWithURL.contains(it.id) }
         }

@@ -22,7 +22,6 @@
     <string name="settings_debug_import_database_description">Destroys your existing database</string>
     <string name="settings_debug_m1_apphost">Point the app at m1.neeva.com</string>
     <string name="settings_debug_local_neeva_dev_apphost">Point the app at local.neeva.dev</string>
-    <string name="settings_debug_native_spaces">Enable native Spaces detail UI</string>
     <string name="settings_debug_neevascope">Enable NeevaScope button</string>
 
     <!-- Debug strings for Previews -->

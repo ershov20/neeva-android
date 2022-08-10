@@ -211,11 +211,8 @@ class WebLayerModel internal constructor(
             incognitoBrowserWrapper = createIncognitoBrowserWrapper()
         )
 
-        val userWasIncognitoWhenAppDied = sharedPreferencesModel.getValue(
-            folder = SharedPrefFolder.App,
-            sharedPrefKey = SharedPrefFolder.App.IsCurrentlyIncognito,
-            defaultValue = false
-        )
+        val userWasIncognitoWhenAppDied =
+            SharedPrefFolder.App.IsCurrentlyIncognito.get(sharedPreferencesModel)
         switchToProfile(useIncognito = userWasIncognitoWhenAppDied)
     }
 
@@ -232,11 +229,7 @@ class WebLayerModel internal constructor(
 
         // Keep track of what mode the user entered so that we can send them back there after the
         // app restarts.
-        sharedPreferencesModel.setValue(
-            folder = SharedPrefFolder.App,
-            sharedPrefKey = SharedPrefFolder.App.IsCurrentlyIncognito,
-            value = useIncognito
-        )
+        SharedPrefFolder.App.IsCurrentlyIncognito.set(sharedPreferencesModel, useIncognito)
 
         if (_browsersFlow.value.isCurrentlyIncognito == useIncognito) return
 
@@ -302,9 +295,8 @@ class WebLayerModel internal constructor(
         ) { success ->
             val currentUrl = regularBrowser.activeTabModel.urlFlow.value
             if (success) {
-                sharedPreferencesModel.setValue(
-                    SharedPrefFolder.FirstRun,
-                    SharedPrefFolder.FirstRun.HasSignedInBefore,
+                SharedPrefFolder.FirstRun.HasSignedInBefore.set(
+                    sharedPreferencesModel,
                     true
                 )
 

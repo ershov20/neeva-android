@@ -32,23 +32,18 @@ class NeevaUserToken(
     }
 
     fun getToken(): String {
-        return sharedPreferencesModel.getValue(
-            folder = SharedPrefFolder.User,
-            sharedPrefKey = SharedPrefFolder.User.Token,
-            defaultValue = ""
-        )
+        return SharedPrefFolder.User.Token.get(sharedPreferencesModel)
     }
 
     fun setToken(token: String) {
-        sharedPreferencesModel.setValue(
-            folder = SharedPrefFolder.User,
-            sharedPrefKey = SharedPrefFolder.User.Token,
+        SharedPrefFolder.User.Token.set(
+            sharedPreferencesModel = sharedPreferencesModel,
             value = token,
             mustCommitImmediately = true
         )
     }
 
     fun removeToken() {
-        sharedPreferencesModel.removeValue(SharedPrefFolder.User, SharedPrefFolder.User.Token)
+        SharedPrefFolder.User.Token.remove(sharedPreferencesModel)
     }
 }

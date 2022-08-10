@@ -33,12 +33,10 @@ import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalDomainProvider
 import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalRegularProfileZeroQueryViewModel
-import com.neeva.app.LocalSettingsController
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.toSearchUri
 import com.neeva.app.browsing.urlbar.URLBarModel
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.spaces.SpaceRow
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.suggestions.QueryRowSuggestion
@@ -58,29 +56,24 @@ data class SuggestedSite(
 fun RegularProfileZeroQuery(
     urlBarModel: URLBarModel,
     isFirstRun: Boolean,
-    neevaConstants: NeevaConstants,
     topContent: @Composable () -> Unit = {},
 ) {
     val browserWrapper = LocalBrowserWrapper.current
     val domainProvider = LocalDomainProvider.current
     val appNavModel = LocalAppNavModel.current
-    val settingsController = LocalSettingsController.current
     val neevaUser = LocalNeevaUser.current
 
     val zeroQueryModel = LocalRegularProfileZeroQueryViewModel.current
     val suggestedSearchesWithDefaults by zeroQueryModel.suggestedSearches.collectAsState()
     val suggestedSitesPlusHome by zeroQueryModel.suggestedSites.collectAsState()
 
-    val isSuggestedSitesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedSitesState)
-    val isSuggestedQueriesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SuggestedQueriesState)
-    val isCommunitySpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.CommunitySpacesState)
-    val isSpacesExpanded = zeroQueryModel.getState(ZeroQueryPrefs.SpacesState)
+    val isSuggestedSitesExpanded by zeroQueryModel.isSuggestedSitesExpanded.collectAsState()
+    val isSuggestedQueriesExpanded by zeroQueryModel.isSuggestedQueriesExpanded.collectAsState()
+    val isCommunitySpacesExpanded by zeroQueryModel.isCommunitySpacesExpanded.collectAsState()
+    val isSpacesExpanded by zeroQueryModel.isSpacesExpanded.collectAsState()
 
     val spaces: List<SpacePlusBitmap> by zeroQueryModel.spaces.collectAsState()
     val communitySpaces: List<SpaceRowPlusBitmap> by zeroQueryModel.communitySpaces.collectAsState()
-
-    val isNativeSpacesEnabled =
-        settingsController.getToggleState(SettingsToggle.DEBUG_NATIVE_SPACES)
 
     LazyColumn(
         modifier = Modifier
@@ -94,7 +87,7 @@ fun RegularProfileZeroQuery(
         if (!isFirstRun) {
             collapsingThreeStateSection(
                 label = R.string.suggested_sites,
-                collapsingSectionState = isSuggestedSitesExpanded.value,
+                collapsingSectionState = isSuggestedSitesExpanded,
                 onUpdateCollapsingSectionState = {
                     zeroQueryModel.advanceState(ZeroQueryPrefs.SuggestedSitesState)
                 },
@@ -137,7 +130,7 @@ fun RegularProfileZeroQuery(
 
             collapsingSection(
                 label = R.string.searches,
-                collapsingSectionState = isSuggestedQueriesExpanded.value,
+                collapsingSectionState = isSuggestedQueriesExpanded,
                 onUpdateCollapsingSectionState = {
                     zeroQueryModel.advanceState(ZeroQueryPrefs.SuggestedQueriesState)
                 }
@@ -160,7 +153,7 @@ fun RegularProfileZeroQuery(
 
                 collapsingSection(
                     label = R.string.community_spaces,
-                    collapsingSectionState = isCommunitySpacesExpanded.value,
+                    collapsingSectionState = isCommunitySpacesExpanded,
                     onUpdateCollapsingSectionState = {
                         zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
                     }
@@ -181,11 +174,7 @@ fun RegularProfileZeroQuery(
                             thumbnail = thumbnail?.asImageBitmap(),
                             isCurrentUrlInSpace = null
                         ) {
-                            if (isNativeSpacesEnabled.value) {
-                                appNavModel.showSpaceDetail(spaceRowData.id)
-                            } else {
-                                appNavModel.openUrl(spaceRowData.url())
-                            }
+                            appNavModel.showSpaceDetail(spaceRowData.id)
                         }
                     }
                 }
@@ -198,7 +187,7 @@ fun RegularProfileZeroQuery(
 
                 collapsingSection(
                     label = R.string.spaces,
-                    collapsingSectionState = isSpacesExpanded.value,
+                    collapsingSectionState = isSpacesExpanded,
                     onUpdateCollapsingSectionState = {
                         zeroQueryModel.advanceState(ZeroQueryPrefs.SpacesState)
                     }
@@ -209,11 +198,7 @@ fun RegularProfileZeroQuery(
                             thumbnail = spacePlusThumbnail.bitmap?.asImageBitmap(),
                             isCurrentUrlInSpace = null
                         ) {
-                            if (isNativeSpacesEnabled.value) {
-                                appNavModel.showSpaceDetail(spacePlusThumbnail.space.id)
-                            } else {
-                                appNavModel.openUrl(spacePlusThumbnail.space.url(neevaConstants))
-                            }
+                            appNavModel.showSpaceDetail(spacePlusThumbnail.space.id)
                         }
                     }
                 }

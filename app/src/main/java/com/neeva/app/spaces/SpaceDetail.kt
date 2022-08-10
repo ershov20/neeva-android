@@ -87,15 +87,9 @@ fun SpaceDetail(spaceID: String?) {
         spaceID = spaceID
     )
     val sharedPrefs = LocalSharedPreferencesModel.current
-    val showDescriptions = remember {
-        mutableStateOf(
-            sharedPrefs.getValue(
-                SharedPrefFolder.App,
-                SharedPrefFolder.App.SpacesShowDescriptionsPreferenceKey,
-                defaultValue = false
-            )
-        )
-    }
+    val showDescriptions by SharedPrefFolder.App.SpacesShowDescriptionsPreferenceKey
+        .getFlow(sharedPrefs)
+        .collectAsState()
 
     val showRemoveSpaceConfirmationDialog = remember {
         mutableStateOf(false)
@@ -113,14 +107,12 @@ fun SpaceDetail(spaceID: String?) {
                 lazyListState = state,
                 space = space.value,
                 showRemoveSpaceConfirmationDialog = showRemoveSpaceConfirmationDialog,
-                showDescriptions = showDescriptions.value
+                showDescriptions = showDescriptions
             ) {
-                sharedPrefs.setValue(
-                    SharedPrefFolder.App,
-                    SharedPrefFolder.App.SpacesShowDescriptionsPreferenceKey,
-                    !showDescriptions.value
+                SharedPrefFolder.App.SpacesShowDescriptionsPreferenceKey.set(
+                    sharedPrefs,
+                    !showDescriptions
                 )
-                showDescriptions.value = !showDescriptions.value
             }
         }
 
@@ -201,7 +193,7 @@ fun SpaceDetail(spaceID: String?) {
                 ) {
                     SpaceItemDetail(
                         spaceItem = spaceItem,
-                        showDescriptions = showDescriptions.value
+                        showDescriptions = showDescriptions
                     )
                 }
             }

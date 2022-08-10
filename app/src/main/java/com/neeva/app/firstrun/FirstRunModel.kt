@@ -74,23 +74,15 @@ class FirstRunModel internal constructor(
         const val TAG = "FirstRunModel"
 
         fun setFirstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
-            sharedPreferencesModel.setValue(
-                SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.FirstRunDone, true
-            )
-            sharedPreferencesModel.setValue(
-                SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.ShouldLogFirstLogin, true
-            )
+            SharedPrefFolder.FirstRun.FirstRunDone.set(sharedPreferencesModel, true)
+            SharedPrefFolder.FirstRun.ShouldLogFirstLogin.set(sharedPreferencesModel, true)
         }
 
         fun mustShowFirstRun(
             sharedPreferencesModel: SharedPreferencesModel,
             neevaUserToken: NeevaUserToken
         ): Boolean {
-            val isFirstRunDone = sharedPreferencesModel.getValue(
-                SharedPrefFolder.FirstRun,
-                SharedPrefFolder.FirstRun.FirstRunDone,
-                false
-            )
+            val isFirstRunDone = SharedPrefFolder.FirstRun.FirstRunDone.get(sharedPreferencesModel)
 
             return when {
                 // User has already signed in.
@@ -160,34 +152,24 @@ class FirstRunModel internal constructor(
     }
 
     fun shouldLogFirstLogin(): Boolean {
-        return sharedPreferencesModel.getValue(
-            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.ShouldLogFirstLogin, false
-        )
+        return SharedPrefFolder.FirstRun.ShouldLogFirstLogin.get(sharedPreferencesModel)
     }
 
     fun setShouldLogFirstLogin(value: Boolean) {
-        sharedPreferencesModel.setValue(
-            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.ShouldLogFirstLogin, value
-        )
+        SharedPrefFolder.FirstRun.ShouldLogFirstLogin.set(sharedPreferencesModel, value)
     }
 
     fun shouldShowPreviewPromptForSignedOutQuery(): Boolean {
-        val hasSignedInBefore = sharedPreferencesModel.getValue(
-            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.HasSignedInBefore,
-            defaultValue = false
-        )
+        val hasSignedInBefore =
+            SharedPrefFolder.FirstRun.HasSignedInBefore.get(sharedPreferencesModel)
 
         // Preview mode is only valid when the user has never signed in before.
         if (hasSignedInBefore) return false
 
-        val previewQueries = sharedPreferencesModel.getValue(
-            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.PreviewQueryCount,
-            defaultValue = 0
-        ) + 1
+        val previewQueries =
+            SharedPrefFolder.FirstRun.PreviewQueryCount.get(sharedPreferencesModel) + 1
 
-        sharedPreferencesModel.setValue(
-            SharedPrefFolder.FirstRun, SharedPrefFolder.FirstRun.PreviewQueryCount, previewQueries
-        )
+        SharedPrefFolder.FirstRun.PreviewQueryCount.set(sharedPreferencesModel, previewQueries)
 
         return previewQueries % PREVIEW_MODE_COUNT_THRESHOLD == 0
     }

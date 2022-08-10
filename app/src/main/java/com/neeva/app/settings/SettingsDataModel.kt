@@ -4,7 +4,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.settings.clearbrowsing.TimeClearingOption
-import com.neeva.app.settings.clearbrowsing.TimeClearingOptionsConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import java.util.EnumSet
@@ -30,7 +29,7 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         )
     )
     private val selectedTimeClearingOptionIndex = mutableStateOf(
-        getSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, 0)
+        getSharedPrefValue(TimeClearingOption.SHARED_PREF_KEY, 0)
     )
 
     val cookieNoticePreferences = mutableStateOf(loadCookieNoticePreferences())
@@ -41,7 +40,7 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         }
     }
 
-    private fun <T> getSharedPrefValue(key: String, defaultValue: T): T {
+    private fun <T : Any> getSharedPrefValue(key: String, defaultValue: T): T {
         return sharedPreferencesModel.getValue(SharedPrefFolder.Settings, key, defaultValue)
     }
 
@@ -124,7 +123,7 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     }
 
     fun saveSelectedTimeClearingOption(index: Int) {
-        setSharedPrefValue(TimeClearingOptionsConstants.sharedPrefKey, index)
+        setSharedPrefValue(TimeClearingOption.SHARED_PREF_KEY, index)
     }
 
     fun toggleIsAdvancedSettingsAllowed() {

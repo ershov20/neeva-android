@@ -200,11 +200,7 @@ class WebLayerModelTest : BaseTest() {
         ).thenReturn(false)
 
         // Say that the user was in Incognito before the app died.
-        sharedPreferencesModel.setValue(
-            folder = SharedPrefFolder.App,
-            sharedPrefKey = SharedPrefFolder.App.IsCurrentlyIncognito,
-            value = true
-        )
+        SharedPrefFolder.App.IsCurrentlyIncognito.set(sharedPreferencesModel, true)
 
         // TEST
         expectThat(webLayerModel.initializationState.value).isEqualTo(LoadingState.LOADING)

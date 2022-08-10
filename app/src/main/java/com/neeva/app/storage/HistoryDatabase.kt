@@ -119,15 +119,11 @@ abstract class HistoryDatabase : RoomDatabase() {
             context: Context,
             sharedPreferencesModel: SharedPreferencesModel
         ) {
-            val checkForDatabase = sharedPreferencesModel.getValue(
-                folder = SharedPrefFolder.App,
-                sharedPrefKey = SharedPrefFolder.App.CheckForImportedDatabaseKey,
-                defaultValue = false
-            )
+            val checkForDatabase =
+                SharedPrefFolder.App.CheckForImportedDatabaseKey.get(sharedPreferencesModel)
             if (!checkForDatabase) return
-            sharedPreferencesModel.setValue(
-                folder = SharedPrefFolder.App,
-                sharedPrefKey = SharedPrefFolder.App.CheckForImportedDatabaseKey,
+            SharedPrefFolder.App.CheckForImportedDatabaseKey.set(
+                sharedPreferencesModel = sharedPreferencesModel,
                 value = false,
                 mustCommitImmediately = true
             )

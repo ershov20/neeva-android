@@ -6,28 +6,11 @@ import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionState
 import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionStateSharedPref
 
 enum class ZeroQueryPrefs(
-    override val allowCompactState: Boolean,
-    override val defaultValue: CollapsingSectionState,
-    override val sharedPrefKey: SharedPrefKey<String>
+    override val sharedPrefKey: SharedPrefKey<CollapsingSectionState>,
+    override val allowCompactState: Boolean
 ) : CollapsingSectionStateSharedPref {
-    SuggestedSitesState(
-        true,
-        CollapsingSectionState.COMPACT,
-        SharedPrefFolder.App.ZeroQuerySuggestedSitesState
-    ),
-    CommunitySpacesState(
-        false,
-        CollapsingSectionState.EXPANDED,
-        SharedPrefFolder.App.ZeroQueryCommunitySpacesState
-    ),
-    SuggestedQueriesState(
-        false,
-        CollapsingSectionState.EXPANDED,
-        SharedPrefFolder.App.ZeroQuerySuggestedQueriesState
-    ),
-    SpacesState(
-        false,
-        CollapsingSectionState.EXPANDED,
-        SharedPrefFolder.App.ZeroQuerySpacesState
-    );
+    SuggestedSitesState(SharedPrefFolder.App.ZeroQuerySuggestedSitesState, true),
+    CommunitySpacesState(SharedPrefFolder.App.ZeroQueryCommunitySpacesState, false),
+    SuggestedQueriesState(SharedPrefFolder.App.ZeroQuerySuggestedQueriesState, false),
+    SpacesState(SharedPrefFolder.App.ZeroQuerySpacesState, false);
 }

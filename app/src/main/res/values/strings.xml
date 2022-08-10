@@ -593,6 +593,17 @@
 
 
 
+    <!-- [Archived tabs][Button] Says that a user wants to automatically archive a tab after 7 days have passed. -->
+    <string name="archived_tabs_archive_after_seven_days">After 7 days</string>
+
+    <!-- [Archived tabs][Button] Says that a user wants to automatically archive a tab after 30 days have passed. -->
+    <string name="archived_tabs_archive_after_thirty_days">After 30 days</string>
+
+    <!-- [Archived tabs][Button] Says that a user never wants to automatically archive a tab. -->
+    <string name="archived_tabs_archive_never">Never</string>
+
+
+
     <!-- [Feedback] Help center introduction -->
     <string name="submit_feedback_help_center_title">Need help or want instant answers to FAQs?</string>
 

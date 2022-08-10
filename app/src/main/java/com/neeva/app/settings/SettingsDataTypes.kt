@@ -128,11 +128,6 @@ enum class SettingsToggle(
         defaultValue = false,
         isAdvancedSetting = true
     ),
-    DEBUG_NATIVE_SPACES(
-        primaryLabelId = R.string.settings_debug_native_spaces,
-        defaultValue = true,
-        isAdvancedSetting = true
-    ),
     DEBUG_NEEVASCOPE(
         primaryLabelId = R.string.settings_debug_neevascope,
         defaultValue = false,

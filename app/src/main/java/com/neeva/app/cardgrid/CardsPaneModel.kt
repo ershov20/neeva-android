@@ -10,7 +10,6 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.settings.SettingsDataModel
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.PopupModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -133,14 +132,7 @@ class CardsPaneModelImpl(
     }
 
     override fun selectSpace(browserWrapper: BrowserWrapper, spaceUrl: Uri) {
-        val showNativeSpaceDetail = settingsDataModel
-            .getSettingsToggleValue(SettingsToggle.DEBUG_NATIVE_SPACES)
-        if (showNativeSpaceDetail) {
-            val id = spaceUrl.pathSegments.last() ?: return
-            appNavModel.showSpaceDetail(id)
-        } else {
-            browserWrapper.loadUrl(spaceUrl, inNewTab = true)
-            showBrowser()
-        }
+        val id = spaceUrl.pathSegments.last() ?: return
+        appNavModel.showSpaceDetail(id)
     }
 }

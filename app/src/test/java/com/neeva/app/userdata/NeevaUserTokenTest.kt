@@ -26,7 +26,9 @@ class NeevaUserTokenTest : BaseTest() {
     @Test
     fun getToken_resultIsEmpty_returnsEmpty() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
-            on { getValue(any(), eq(SharedPrefFolder.User.Token), eq("")) } doReturn ""
+            on {
+                getValue(any(), eq(SharedPrefFolder.User.Token.preferenceKey), eq(""), any())
+            } doReturn ""
         }
         val neevaConstants = NeevaConstants()
         val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
@@ -38,7 +40,7 @@ class NeevaUserTokenTest : BaseTest() {
     fun getToken_stringIsSet_returnsString() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
             on {
-                getValue(any(), eq(SharedPrefFolder.User.Token), any() as String)
+                getValue(any(), eq(SharedPrefFolder.User.Token.preferenceKey), eq(""), any())
             } doReturn "whatever"
         }
         val neevaConstants = NeevaConstants()
@@ -51,7 +53,7 @@ class NeevaUserTokenTest : BaseTest() {
     fun loginCookieString() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
             on {
-                getValue(any(), eq(SharedPrefFolder.User.Token), any() as String)
+                getValue(any(), eq(SharedPrefFolder.User.Token.preferenceKey), eq(""), any())
             } doReturn "whatever"
         }
 
@@ -109,7 +111,7 @@ class NeevaUserTokenTest : BaseTest() {
         neevaUserToken.setToken("expectedToken")
         verify(sharedPreferencesModel).setValue(
             eq(SharedPrefFolder.User),
-            eq(SharedPrefFolder.User.Token),
+            eq(SharedPrefFolder.User.Token.preferenceKey),
             eq("expectedToken"),
             eq(true)
         )
