@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
+import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsButtonRow
 import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.TwoBooleanPreviewContainer

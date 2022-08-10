@@ -3,8 +3,8 @@ package com.neeva.app.settings
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.settings.clearBrowsing.TimeClearingOption
-import com.neeva.app.settings.clearBrowsing.TimeClearingOptionsConstants
+import com.neeva.app.settings.clearbrowsing.TimeClearingOption
+import com.neeva.app.settings.clearbrowsing.TimeClearingOptionsConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import java.util.EnumSet

@@ -31,7 +31,7 @@ import com.neeva.app.storage.daos.SitePlusVisit
 import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
-import com.neeva.app.storage.favicons.mockFaviconCache
+import com.neeva.app.storage.favicons.previewFaviconCache
 import com.neeva.app.suggestions.NavSuggestionRow
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.FullScreenDialogTopBar
@@ -135,21 +135,25 @@ private fun HistoryUI(
 
                     if (showDate) {
                         val formatted = SimpleDateFormat.getDateInstance().format(timestamp)
-
-                        BaseRowLayout {
-                            Text(
-                                text = formatted,
-                                style = MaterialTheme.typography.titleMedium,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
+                        HistoryHeader(formatted)
                     }
 
                     HistoryEntry(site, faviconCache, domainProvider, onOpenUrl, onDeleteVisit)
                 }
             }
         }
+    }
+}
+
+@Composable
+fun HistoryHeader(text: String) {
+    BaseRowLayout {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
 
@@ -238,8 +242,8 @@ private fun HistoryUI_Preview(useDarkTheme: Boolean) {
             onClose = {},
             onOpenUrl = {},
             onDeleteVisit = { _, _ -> },
-            faviconCache = mockFaviconCache,
-            domainProvider = mockFaviconCache.domainProvider
+            faviconCache = previewFaviconCache,
+            domainProvider = previewFaviconCache.domainProvider
         )
     }
 }

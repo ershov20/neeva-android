@@ -1,4 +1,4 @@
-package com.neeva.app.settings.featureFlags
+package com.neeva.app.settings.featureflags
 
 import androidx.annotation.StringRes
 import com.neeva.app.R

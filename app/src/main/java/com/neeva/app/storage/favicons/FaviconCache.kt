@@ -192,7 +192,7 @@ abstract class FaviconCache(
 }
 
 /** Favicon cache used for Composable previews.  Doesn't actually provide favicons. */
-val mockFaviconCache: FaviconCache by lazy {
+val previewFaviconCache: FaviconCache by lazy {
     object : FaviconCache(
         domainProvider = previewDomainProvider,
         dispatchers = previewDispatchers

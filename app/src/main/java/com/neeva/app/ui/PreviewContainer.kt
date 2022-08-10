@@ -187,13 +187,24 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
 }
 
 @Composable
-fun NeevaThemePreviewContainer(useDarkTheme: Boolean, content: @Composable () -> Unit) {
+fun NeevaThemePreviewContainer(
+    useDarkTheme: Boolean,
+    addBorder: Boolean = true,
+    content: @Composable () -> Unit
+) {
     PreviewCompositionLocals {
         NeevaTheme(useDarkTheme = useDarkTheme) {
             Box(
                 modifier = Modifier
-                    .background(Color.Magenta)
-                    .padding(Dimensions.PADDING_SMALL)
+                    .then(
+                        if (addBorder) {
+                            Modifier
+                                .background(Color.Magenta)
+                                .padding(Dimensions.PADDING_SMALL)
+                        } else {
+                            Modifier
+                        }
+                    )
                     .background(MaterialTheme.colorScheme.background)
             ) {
                 content()

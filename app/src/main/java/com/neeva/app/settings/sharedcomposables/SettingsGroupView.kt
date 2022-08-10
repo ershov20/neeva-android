@@ -1,4 +1,4 @@
-package com.neeva.app.settings.sharedComposables
+package com.neeva.app.settings.sharedcomposables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package com.neeva.app.settings.sharedComposables.subcomponents
+package com.neeva.app.settings.sharedcomposables.subcomponents
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column

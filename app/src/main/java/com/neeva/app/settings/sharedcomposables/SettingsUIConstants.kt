@@ -1,4 +1,4 @@
-package com.neeva.app.settings.sharedComposables
+package com.neeva.app.settings.sharedcomposables
 
 import androidx.compose.ui.unit.dp
 

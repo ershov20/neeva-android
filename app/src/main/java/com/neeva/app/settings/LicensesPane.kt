@@ -12,10 +12,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsNavigationRow
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.widgets.AssetsText
+import com.neeva.app.ui.widgets.NavigationRow
 import com.neeva.app.ui.widgets.collapsingsection.CollapsingSectionState
 import com.neeva.app.ui.widgets.collapsingsection.collapsingSection
 import com.neeva.app.ui.widgets.collapsingsection.setNextState
@@ -41,7 +41,7 @@ fun LicensesPane(
 
         LazyColumn(modifier = Modifier.padding(paddingValues)) {
             item {
-                SettingsNavigationRow(
+                NavigationRow(
                     primaryLabel = stringResource(R.string.settings_additional_licenses),
                     onClick = onShowAdditionalLicenses
                 )

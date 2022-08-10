@@ -1,4 +1,4 @@
-package com.neeva.app.settings.clearBrowsing
+package com.neeva.app.settings.clearbrowsing
 
 import android.net.Uri
 import androidx.annotation.StringRes

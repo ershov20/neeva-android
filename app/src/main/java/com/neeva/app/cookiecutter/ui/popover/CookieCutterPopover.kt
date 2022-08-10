@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsNavigationRow
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.NavigationRow
 
 @Composable
 fun CookieCutterPopover(
@@ -97,7 +97,7 @@ private fun CookieCutterPopoverContent(
                             .fillMaxWidth()
                     )
 
-                    SettingsNavigationRow(
+                    NavigationRow(
                         primaryLabel = stringResource(R.string.cookie_cutter_settings),
                         onClick = cookieCutterPopoverModel::openCookieCutterSettings
                     )

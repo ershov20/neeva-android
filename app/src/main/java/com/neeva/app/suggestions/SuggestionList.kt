@@ -14,7 +14,7 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.storage.favicons.FaviconCache
-import com.neeva.app.storage.favicons.mockFaviconCache
+import com.neeva.app.storage.favicons.previewFaviconCache
 import com.neeva.app.ui.SectionHeader
 import com.neeva.app.ui.theme.NeevaTheme
 
@@ -190,7 +190,7 @@ fun SuggestionList_PreviewFullyLoaded_ShowSearchSuggestions() {
                     type = SuggestionType.HISTORY_SUGGESTION
                 ),
             ),
-            faviconCache = mockFaviconCache,
+            faviconCache = previewFaviconCache,
             onOpenUrl = {},
             onEditUrl = {}
         )

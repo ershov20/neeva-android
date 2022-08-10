@@ -3,8 +3,8 @@ package com.neeva.app.settings.defaultbrowser
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLabelRow
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsNavigationRow
+import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsLabelRow
+import com.neeva.app.ui.widgets.NavigationRow
 
 @Composable
 fun SetDefaultBrowserRow(
@@ -25,7 +25,7 @@ fun SetDefaultBrowserRow(
             secondaryLabel = stringResource(id = R.string.neeva)
         )
     } else {
-        SettingsNavigationRow(
+        NavigationRow(
             primaryLabel = stringResource(id = R.string.switch_default_browser_title),
             onClick = {
                 if (setDefaultAndroidBrowserManager.isRoleManagerAvailable()) {

@@ -35,7 +35,7 @@ import com.neeva.app.R
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.cardgrid.Card
 import com.neeva.app.storage.favicons.FaviconCache
-import com.neeva.app.storage.favicons.mockFaviconCache
+import com.neeva.app.storage.favicons.previewFaviconCache
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.theme.Dimensions
@@ -138,7 +138,7 @@ private fun TabCardPreview_LongString() {
             ),
             onSelect = {},
             onClose = {},
-            faviconCache = mockFaviconCache,
+            faviconCache = previewFaviconCache,
             screenshotProvider = { createCheckerboardBitmap(false) }
         )
     }
@@ -160,7 +160,7 @@ private fun TabCardPreview_ShortTitleSelected() {
             ),
             onSelect = {},
             onClose = {},
-            faviconCache = mockFaviconCache,
+            faviconCache = previewFaviconCache,
             screenshotProvider = { createCheckerboardBitmap(false) }
         )
     }

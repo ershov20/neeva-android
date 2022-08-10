@@ -1,23 +1,22 @@
-package com.neeva.app.settings.sharedComposables.subcomponents
+package com.neeva.app.ui.widgets
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.widgets.ClickableRow
-import com.neeva.app.ui.widgets.RowActionIconParams
 
 @Composable
-fun SettingsNavigationRow(
+fun NavigationRow(
     primaryLabel: String,
     secondaryLabel: String? = null,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     ClickableRow(
-        primaryLabel = primaryLabel, secondaryLabel = secondaryLabel,
+        primaryLabel = primaryLabel,
+        secondaryLabel = secondaryLabel,
         actionIconParams = RowActionIconParams(
             onTapAction = onClick,
             actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
@@ -28,13 +27,23 @@ fun SettingsNavigationRow(
     )
 }
 
-@Preview("SettingsNavigationRow, LTR, 1x scale", locale = "en")
-@Preview("SettingsNavigationRow, LTR, 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("SettingsNavigationRow, RTL, 1x scale", locale = "he")
+@PortraitPreviews
 @Composable
-fun SettingsNavigationRowPreview() {
-    OneBooleanPreviewContainer { isEnabled ->
-        SettingsNavigationRow(
+fun NavigationRowPreview() {
+    OneBooleanPreviewContainer(useDarkTheme = false) { isEnabled ->
+        NavigationRow(
+            primaryLabel = stringResource(R.string.debug_long_string_primary),
+            secondaryLabel = stringResource(R.string.debug_long_string_primary),
+            enabled = isEnabled
+        ) {}
+    }
+}
+
+@PortraitPreviews
+@Composable
+fun NavigationRowPreviewDark() {
+    OneBooleanPreviewContainer(useDarkTheme = true) { isEnabled ->
+        NavigationRow(
             primaryLabel = stringResource(R.string.debug_long_string_primary),
             secondaryLabel = stringResource(R.string.debug_long_string_primary),
             enabled = isEnabled

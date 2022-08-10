@@ -1,4 +1,4 @@
-package com.neeva.app.settings.sharedComposables.subcomponents
+package com.neeva.app.settings.sharedcomposables.subcomponents
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource

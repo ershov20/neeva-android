@@ -1,8 +1,8 @@
 package com.neeva.app.settings
 
 import com.neeva.app.BaseScreenshotTest
-import com.neeva.app.settings.clearBrowsing.ClearBrowsingSettings_Dark_Preview
-import com.neeva.app.settings.clearBrowsing.ClearBrowsingSettings_Preview
+import com.neeva.app.settings.clearbrowsing.ClearBrowsingSettings_Dark_Preview
+import com.neeva.app.settings.clearbrowsing.ClearBrowsingSettings_Preview
 import com.neeva.app.settings.defaultbrowser.SettingsDefaultAndroidBrowser_Dark_Preview
 import com.neeva.app.settings.defaultbrowser.SettingsDefaultAndroidBrowser_Preview
 import com.neeva.app.settings.main.SettingsMain_Dark_Preview

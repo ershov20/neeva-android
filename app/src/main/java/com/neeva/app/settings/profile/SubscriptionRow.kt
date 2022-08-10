@@ -3,7 +3,7 @@ package com.neeva.app.settings.profile
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
+import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsLinkRow
 import com.neeva.app.type.SubscriptionType
 
 @Composable

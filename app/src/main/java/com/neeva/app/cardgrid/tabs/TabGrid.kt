@@ -18,7 +18,7 @@ import com.neeva.app.browsing.TabInfo
 import com.neeva.app.cardgrid.CardGrid
 import com.neeva.app.cardgrid.CardsPaneModel
 import com.neeva.app.storage.favicons.FaviconCache
-import com.neeva.app.storage.favicons.mockFaviconCache
+import com.neeva.app.storage.favicons.previewFaviconCache
 import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.previewCardGridTitles
 import com.neeva.app.ui.theme.NeevaTheme
@@ -122,7 +122,7 @@ class TabGridPreviews : BooleanPreviewParameterProvider<TabGridPreviews.Params>(
                 onSelectTab = {},
                 onCloseTabs = {},
                 tabs = tabs,
-                faviconCache = mockFaviconCache,
+                faviconCache = previewFaviconCache,
                 screenshotProvider = { null }
             )
         }

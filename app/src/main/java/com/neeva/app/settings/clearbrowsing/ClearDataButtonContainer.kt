@@ -1,4 +1,4 @@
-package com.neeva.app.settings.clearBrowsing
+package com.neeva.app.settings.clearbrowsing
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text

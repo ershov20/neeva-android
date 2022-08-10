@@ -1,4 +1,4 @@
-package com.neeva.app.settings.sharedComposables
+package com.neeva.app.settings.sharedcomposables
 
 import android.net.Uri
 import androidx.compose.foundation.layout.padding
@@ -16,19 +16,20 @@ import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
-import com.neeva.app.settings.clearBrowsing.ClearDataButtonContainer
+import com.neeva.app.settings.clearbrowsing.ClearDataButtonContainer
 import com.neeva.app.settings.defaultbrowser.SetDefaultBrowserRow
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.profile.ProfileRowContainer
 import com.neeva.app.settings.profile.SubscriptionRow
-import com.neeva.app.settings.sharedComposables.subcomponents.CheckBoxGroup
-import com.neeva.app.settings.sharedComposables.subcomponents.CheckBoxItem
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsButtonRow
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsLinkRow
-import com.neeva.app.settings.sharedComposables.subcomponents.SettingsNavigationRow
+import com.neeva.app.settings.sharedcomposables.subcomponents.CheckBoxGroup
+import com.neeva.app.settings.sharedcomposables.subcomponents.CheckBoxItem
+import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsButtonRow
+import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsLinkRow
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.NeevaSwitch
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.NavigationRow
+import com.neeva.app.ui.widgets.RadioButtonGroup
 
 data class SettingsRowDataValues(
     val primaryLabel: String,
@@ -120,7 +121,7 @@ fun SettingsRow(
                         navigateToPane = onClick
                     )
                 } else {
-                    SettingsNavigationRow(
+                    NavigationRow(
                         primaryLabel = rowDataValues.primaryLabel,
                         enabled = rowData.enabled,
                         onClick = onClick

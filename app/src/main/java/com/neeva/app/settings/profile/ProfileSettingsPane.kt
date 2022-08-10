@@ -5,7 +5,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.NeevaConstants
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsControllerImpl
-import com.neeva.app.settings.sharedComposables.SettingsPane
+import com.neeva.app.settings.sharedcomposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable

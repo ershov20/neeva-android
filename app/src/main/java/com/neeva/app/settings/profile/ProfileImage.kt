@@ -23,7 +23,7 @@ import androidx.compose.ui.res.painterResource
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.SettingsUIConstants
+import com.neeva.app.settings.sharedcomposables.SettingsUIConstants
 import com.neeva.app.storage.toLetterBitmap
 
 @Composable

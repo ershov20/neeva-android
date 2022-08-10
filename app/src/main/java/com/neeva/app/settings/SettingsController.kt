@@ -9,7 +9,7 @@ import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.settings.clearBrowsing.TimeClearingOption
+import com.neeva.app.settings.clearbrowsing.TimeClearingOption
 import com.neeva.app.settings.defaultbrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.ui.PopupModel

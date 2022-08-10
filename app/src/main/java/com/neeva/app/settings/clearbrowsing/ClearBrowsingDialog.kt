@@ -1,10 +1,10 @@
-package com.neeva.app.settings.clearBrowsing
+package com.neeva.app.settings.clearbrowsing
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
-import com.neeva.app.settings.sharedComposables.SettingsDialog
+import com.neeva.app.settings.sharedcomposables.SettingsDialog
 
 @Composable
 fun ClearBrowsingDialog(
