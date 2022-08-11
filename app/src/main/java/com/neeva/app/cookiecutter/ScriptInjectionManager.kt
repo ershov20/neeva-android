@@ -23,12 +23,15 @@ class ScriptInjectionManager(
     }
 
     fun initializeMessagePassing(tab: Tab, callbacks: WebMessageCallback) {
-        // calling this method once registers the __neeva_broker object for
-        // all navigations in this tab
+        if (tab.isDestroyed) return
+
+        // Calling this method once registers the __neeva_broker object for all navigations in the
+        // given [tab].
         tab.registerWebMessageCallback(callbacks, "__neeva_broker", listOf("*"))
     }
 
     fun unregisterMessagePassing(tab: Tab) {
+        if (tab.isDestroyed) return
         tab.unregisterWebMessageCallback("__neeva_broker")
     }
 
@@ -38,9 +41,10 @@ class ScriptInjectionManager(
         tabCookieCutterModel: TabCookieCutterModel
     ) {
         coroutineScope.launch(dispatchers.main) {
-            // If our preferences say we shouldn't activate cookie cutter, then don't.
-            // This depends on whether or not cookie cutter is enabled globally, and
-            // on a per-site basis.
+            if (tab.isDestroyed) return@launch
+
+            // If our preferences say we shouldn't activate cookie cutter, then don't. This depends
+            // on whether or not cookie cutter is enabled globally, and on a per-site basis.
             if (!tabCookieCutterModel.shouldInjectCookieEngine(uri.host ?: "")) {
                 return@launch
             }
