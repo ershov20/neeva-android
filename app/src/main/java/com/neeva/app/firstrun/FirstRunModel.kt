@@ -12,7 +12,6 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.neeva.app.Dispatchers
@@ -221,18 +220,6 @@ class FirstRunModel internal constructor(
                 )
             }
             return
-        } else if (provider == NeevaUser.SSOProvider.GOOGLE && context is Activity) {
-            // Fallback to custom tabs for Google sign in if the context is not an Activity
-            val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestIdToken(SERVER_CLIENT_ID)
-                .requestServerAuthCode(SERVER_CLIENT_ID, true)
-                .build()
-
-            googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
-            intentParamFlow.value?.resultLauncher
-                ?.launch(googleSignInClient.signInIntent)
-                ?.let { return }
         }
 
         val intent = CustomTabsIntent.Builder()
