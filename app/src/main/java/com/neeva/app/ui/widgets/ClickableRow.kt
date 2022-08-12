@@ -3,9 +3,9 @@ package com.neeva.app.ui.widgets
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
 import com.neeva.app.ui.LightDarkPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
 
@@ -13,6 +13,9 @@ import com.neeva.app.ui.theme.Dimensions
 fun ClickableRow(
     primaryLabel: String,
     secondaryLabel: String? = null,
+    primaryMaxLines: Int = 1,
+    secondaryMaxLines: Int = 1,
+    isActionDangerous: Boolean = false,
     actionIconParams: RowActionIconParams,
     enabled: Boolean = true
 ) {
@@ -20,16 +23,29 @@ fun ClickableRow(
     BaseRowLayout(
         onTapRow = actionIconParams.onTapAction.takeIf { enabled },
         onTapRowContentDescription = actionIconParams.contentDescription,
-        endComposable = { RowActionIconButton(actionIconParams) },
+        endComposable = if (actionIconParams.actionType != RowActionIconParams.ActionType.NONE) {
+            { RowActionIconButton(actionIconParams) }
+        } else {
+            null
+        },
         backgroundColor = backgroundColor
     ) {
-        StackedText(primaryLabel = primaryLabel, secondaryLabel = secondaryLabel, enabled = enabled)
+        StackedText(
+            primaryLabel = primaryLabel,
+            secondaryLabel = secondaryLabel,
+            primaryMaxLines = primaryMaxLines,
+            secondaryMaxLines = secondaryMaxLines,
+            primaryColor = if (isActionDangerous) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
+            enabled = enabled
+        )
     }
 }
 
-@Preview("ClickableRow navigate, LTR, 1x font scale", locale = "en")
-@Preview("ClickableRow navigate, LTR, 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("ClickableRow navigate, RTL, 1x font scale", locale = "he")
+@PortraitPreviews
 @Composable
 fun ClickableRowPreviewNavigate() {
     LightDarkPreviewContainer {
@@ -44,9 +60,7 @@ fun ClickableRowPreviewNavigate() {
     }
 }
 
-@Preview("ClickableRow open url, LTR, 1x font scale", locale = "en")
-@Preview("ClickableRow open url, LTR, 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("ClickableRow open url, RTL, 1x font scale", locale = "he")
+@PortraitPreviews
 @Composable
 fun ClickableRowPreviewOpenUrl() {
     LightDarkPreviewContainer {
@@ -61,9 +75,7 @@ fun ClickableRowPreviewOpenUrl() {
     }
 }
 
-@Preview("ClickableRow refine, LTR, 1x font scale", locale = "en")
-@Preview("ClickableRow refine, LTR, 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("ClickableRow refine, RTL, 1x font scale", locale = "he")
+@PortraitPreviews
 @Composable
 fun ClickableRowPreviewRefine() {
     LightDarkPreviewContainer {

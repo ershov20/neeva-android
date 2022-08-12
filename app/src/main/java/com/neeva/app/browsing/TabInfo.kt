@@ -1,6 +1,7 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
+import java.util.concurrent.TimeUnit
 
 /**
  * Normalizes URIs for fuzzy comparison.
@@ -69,7 +70,7 @@ data class TabInfo(
     data class PersistedData(
         val parentTabId: String? = null,
         val parentSpaceId: String? = null,
-        val lastActiveMs: Long? = System.currentTimeMillis(),
+        val lastActiveMs: Long = System.currentTimeMillis(),
         val openType: TabOpenType = TabOpenType.DEFAULT
     ) {
         companion object {
@@ -79,10 +80,14 @@ data class TabInfo(
             const val KEY_OPEN_TYPE = "OPEN_TYPE"
         }
 
-        constructor(map: Map<String, String>) : this(
+        constructor(isSelected: Boolean, map: Map<String, String>) : this(
             parentTabId = map[KEY_PARENT_TAB_ID],
             parentSpaceId = map[KEY_PARENT_SPACE_ID],
-            lastActiveMs = map[KEY_LAST_ACTIVE_MS]?.toLongOrNull(),
+            lastActiveMs = if (isSelected) {
+                System.currentTimeMillis()
+            } else {
+                map[KEY_LAST_ACTIVE_MS]?.toLongOrNull() ?: System.currentTimeMillis()
+            },
             openType = TabOpenType.values()
                 .firstOrNull { it.name == map[KEY_OPEN_TYPE] }
                 ?: TabOpenType.DEFAULT
@@ -102,5 +107,30 @@ data class TabInfo(
                 }
             }
         }
+    }
+
+    /** Determines which [AgeGroup] applies to this tab, according to when it was last active. */
+    fun getAgeGroup(ageGroupCalculator: AgeGroupCalculator): AgeGroup {
+        return if (isSelected) {
+            AgeGroup.TODAY
+        } else {
+            ageGroupCalculator.getAgeBucket(data.lastActiveMs)
+        }
+    }
+
+    fun isArchived(archiveAfterOption: ArchiveAfterOption, now: Long): Boolean {
+        if (isSelected) return false
+
+        val sevenDaysAgo = now - TimeUnit.DAYS.toMillis(7)
+        val thirtyDaysAgo = now - TimeUnit.DAYS.toMillis(30)
+        val foreverAgo = 0L
+
+        val timeLimit = when (archiveAfterOption) {
+            ArchiveAfterOption.AFTER_7_DAYS -> sevenDaysAgo
+            ArchiveAfterOption.AFTER_30_DAYS -> thirtyDaysAgo
+            ArchiveAfterOption.NEVER -> foreverAgo
+        }
+
+        return data.lastActiveMs < timeLimit
     }
 }

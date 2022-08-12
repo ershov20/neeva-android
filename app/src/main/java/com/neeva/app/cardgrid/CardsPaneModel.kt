@@ -3,12 +3,15 @@ package com.neeva.app.cardgrid
 import android.content.Context
 import android.net.Uri
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.cardgrid.tabs.ArchivedTabsList
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.ui.PopupModel
 import kotlinx.coroutines.CoroutineScope
@@ -21,6 +24,7 @@ interface CardsPaneModel {
 
     fun switchScreen(newSelectedScreen: SelectedScreen)
     fun showBrowser()
+    fun showArchivedTabs(browserWrapper: BrowserWrapper)
 
     fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo)
     fun closeTab(browserWrapper: BrowserWrapper, tab: TabInfo)
@@ -102,6 +106,24 @@ class CardsPaneModelImpl(
 
     override fun showBrowser() {
         appNavModel.showBrowser()
+    }
+
+    override fun showArchivedTabs(browserWrapper: BrowserWrapper) {
+        popupModel.showBottomSheet(titleResId = R.string.archived_tabs) { dismissPopup ->
+            val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
+            ArchivedTabsList(
+                tabs = tabs,
+                faviconCache = browserWrapper.faviconCache,
+                onTabSelected = { tabId ->
+                    browserWrapper.selectTab(tabId)
+                    appNavModel.showBrowser()
+                    dismissPopup()
+                },
+                onClearArchivedTabs = {
+                    browserWrapper.closeArchivedTabs()
+                }
+            )
+        }
     }
 
     override fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo) {

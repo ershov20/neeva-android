@@ -26,6 +26,7 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.neevascope.NeevascopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
@@ -98,6 +99,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     @Mock private lateinit var historyManager: HistoryManager
     @Mock private lateinit var settingsDataModel: SettingsDataModel
+    @Mock private lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var suggestionsModel: SuggestionsModel
     @Mock private lateinit var neevascopeModel: NeevascopeModel
@@ -212,6 +214,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             tabScreenshotManager = tabScreenshotManager,
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
+            sharedPreferencesModel = sharedPreferencesModel,
             cookieCutterModel = cookieCutterModel
         ) {
             override fun createBrowserFragment(): Fragment =

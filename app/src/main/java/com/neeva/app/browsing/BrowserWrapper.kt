@@ -71,6 +71,7 @@ interface BrowserWrapper {
     fun cancelClosingTab(id: String)
     fun closeTab(id: String)
     fun closeAllTabs()
+    fun closeArchivedTabs()
 
     /**
      * Allows the user to use the URL bar and see suggestions without opening a tab until they

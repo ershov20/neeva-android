@@ -34,6 +34,7 @@ data class RowActionIconParams(
     val enabled: Boolean = true
 ) {
     enum class ActionType {
+        NONE,
         ADD,
         BACK,
         COPY,
@@ -62,6 +63,8 @@ data class RowActionIconParams(
 
 @Composable
 fun RowActionIconButton(iconParams: RowActionIconParams) {
+    if (iconParams.actionType == RowActionIconParams.ActionType.NONE) return
+
     CompositionLocalProvider(
         LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
     ) {
@@ -190,5 +193,7 @@ fun RowActionIcon(
                 modifier = modifier
             )
         }
+
+        else -> {}
     }
 }

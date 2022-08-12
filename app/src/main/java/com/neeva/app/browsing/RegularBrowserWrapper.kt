@@ -12,6 +12,7 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.neevascope.NeevascopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.RegularTabScreenshotManager
@@ -49,6 +50,7 @@ class RegularBrowserWrapper(
     private val neevaUser: NeevaUser,
     regularFaviconCache: RegularFaviconCache,
     scriptInjectionManager: ScriptInjectionManager,
+    sharedPreferencesModel: SharedPreferencesModel,
     settingsDataModel: SettingsDataModel,
     spaceStore: SpaceStore,
     popupModel: PopupModel
@@ -86,6 +88,7 @@ class RegularBrowserWrapper(
     domainProvider = domainProvider,
     neevaConstants = neevaConstants,
     scriptInjectionManager = scriptInjectionManager,
+    sharedPreferencesModel = sharedPreferencesModel,
     settingsDataModel = settingsDataModel,
     trackerAllowList = RegularTrackersAllowList(
         hostInfoDao = hostInfoDao,

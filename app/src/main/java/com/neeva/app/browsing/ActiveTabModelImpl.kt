@@ -109,6 +109,7 @@ class ActiveTabModelImpl(
         // Update all the state to account for the currently selected tab's information.
         updateNavigationInfo()
         updateUrl(newActiveTab?.currentDisplayUrl ?: Uri.EMPTY)
+        newActiveTab?.let { tabList.updateTimestamp(newActiveTab, System.currentTimeMillis()) }
         _titleFlow.value = newActiveTab?.currentDisplayTitle ?: ""
     }
 

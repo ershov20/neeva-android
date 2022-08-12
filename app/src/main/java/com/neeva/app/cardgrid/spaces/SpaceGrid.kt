@@ -1,8 +1,7 @@
 package com.neeva.app.cardgrid.spaces
 
 import android.net.Uri
-import androidx.compose.foundation.lazy.grid.LazyGridState
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -38,7 +37,6 @@ fun SpaceGrid(
     val spaceStore = LocalSpaceStore.current
     val neevaUser = LocalNeevaUser.current
     val spaces by spaceStore.allSpacesFlow.collectAsState(emptyList())
-    val gridState = rememberLazyGridState()
 
     // TODO(dan.alcantara): Find a better place to trigger these refreshes.
     LaunchedEffect(true) {
@@ -49,7 +47,6 @@ fun SpaceGrid(
         SpacesIntro(includeSpaceCard = true)
     } else {
         SpaceGrid(
-            gridState = gridState,
             onSelectSpace = { spaceUrl -> cardsPaneModel.selectSpace(browserWrapper, spaceUrl) },
             spaces = spaces,
             itemProvider = { spaceId -> spaceStore.contentDataForSpace(spaceId) },
@@ -62,7 +59,6 @@ fun SpaceGrid(
 
 @Composable
 fun SpaceGrid(
-    gridState: LazyGridState,
     onSelectSpace: (spaceUrl: Uri) -> Unit,
     spaces: List<Space>,
     itemProvider: suspend (spaceId: String) -> List<SpaceItem>,
@@ -71,19 +67,20 @@ fun SpaceGrid(
     modifier: Modifier = Modifier
 ) {
     CardGrid(
-        gridState = gridState,
-        allItems = spaces,
+        items = spaces,
         modifier = modifier,
         emptyComposable = { /* Empty state shows nothing on iOS */ },
-    ) { space ->
-        SpaceCard(
-            spaceId = space.id,
-            spaceName = space.name,
-            isSpacePublic = space.isPublic,
-            onSelect = { onSelectSpace(space.url(neevaConstants)) },
-            itemProvider = itemProvider,
-            dispatchers = dispatchers
-        )
+    ) { _, listItems ->
+        items(listItems, key = { it.id }) { space ->
+            SpaceCard(
+                spaceId = space.id,
+                spaceName = space.name,
+                isSpacePublic = space.isPublic,
+                onSelect = { onSelectSpace(space.url(neevaConstants)) },
+                itemProvider = itemProvider,
+                dispatchers = dispatchers
+            )
+        }
     }
 }
 
@@ -105,7 +102,6 @@ class SpacesGridPreviews : BooleanPreviewParameterProvider<SpacesGridPreviews.Pa
         val darkTheme = params.darkTheme
 
         NeevaTheme(useDarkTheme = darkTheme) {
-            val gridState = rememberLazyGridState()
             val spaces = mutableListOf<Space>()
 
             val spaceNames = previewCardGridTitles.take(5)
@@ -126,7 +122,6 @@ class SpacesGridPreviews : BooleanPreviewParameterProvider<SpacesGridPreviews.Pa
             }
 
             SpaceGrid(
-                gridState = gridState,
                 onSelectSpace = {},
                 spaces = spaces,
                 itemProvider = {

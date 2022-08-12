@@ -52,7 +52,7 @@ abstract class TabList {
             url = tab.currentDisplayUrl,
             title = tab.currentDisplayTitle,
             isSelected = tab.isSelected,
-            data = TabInfo.PersistedData(tab.data)
+            data = TabInfo.PersistedData(tab.isSelected, tab.data)
         ).apply {
             tabInfoMap[tab.guid] = this
 

@@ -38,10 +38,10 @@ import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.toLocalDate
 import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
-import java.time.ZoneId
 import java.util.Date
 import kotlinx.coroutines.flow.flowOf
 
@@ -156,8 +156,6 @@ fun HistoryHeader(text: String) {
         )
     }
 }
-
-private fun Date.toLocalDate() = this.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 
 @Composable
 fun HistoryEntry(

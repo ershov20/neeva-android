@@ -204,6 +204,7 @@ object NeevaAppModule {
         regularFaviconCache: RegularFaviconCache,
         scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
+        sharedPreferencesModel: SharedPreferencesModel,
         spaceStore: SpaceStore,
         unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
     ): BrowserWrapperFactory {
@@ -223,6 +224,7 @@ object NeevaAppModule {
             regularFaviconCache = regularFaviconCache,
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
+            sharedPreferencesModel = sharedPreferencesModel,
             spaceStore = spaceStore,
             unauthenticatedApolloWrapper = unauthenticatedApolloWrapper
         )

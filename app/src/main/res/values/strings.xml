@@ -602,6 +602,12 @@
 
 
 
+    <!-- [Tab switcher] Clicking this will send the user to a screen to see tabs that have been archived. -->
+    <string name="archived_tabs">Archived tabs</string>
+
+    <!-- [Archived tabs][Setting title] Sends the user to a page that allows then to select when tabs are automatically archived -->
+    <string name="archived_tabs_archive">Auto-archive tabs</string>
+
     <!-- [Archived tabs][Button] Says that a user wants to automatically archive a tab after 7 days have passed. -->
     <string name="archived_tabs_archive_after_seven_days">After 7 days</string>
 
@@ -610,6 +616,24 @@
 
     <!-- [Archived tabs][Button] Says that a user never wants to automatically archive a tab. -->
     <string name="archived_tabs_archive_never">Never</string>
+
+    <!-- [Archived tabs][Button] Closes all the tabs that have been archived. -->
+    <string name="archived_tabs_clear_archived">Clear all archived tabs</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 24 hours. -->
+    <string name="archived_tabs_today">Today</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that were opened between 24 and 48 hours ago. -->
+    <string name="archived_tabs_yesterday">Yesterday</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 7 days. -->
+    <string name="archived_tabs_last_seven_days">Last 7 days</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 30 days. -->
+    <string name="archived_tabs_last_thirty_days">Last 30 days</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that are older than the oldest time frame we're showing. -->
+    <string name="archived_tabs_older">Older</string>
 
 
 

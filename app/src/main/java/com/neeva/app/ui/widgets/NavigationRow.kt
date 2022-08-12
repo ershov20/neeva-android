@@ -11,12 +11,16 @@ import com.neeva.app.ui.theme.Dimensions
 fun NavigationRow(
     primaryLabel: String,
     secondaryLabel: String? = null,
+    primaryMaxLines: Int = Int.MAX_VALUE,
+    secondaryMaxLines: Int = Int.MAX_VALUE,
     enabled: Boolean = true,
     onClick: () -> Unit
 ) {
     ClickableRow(
         primaryLabel = primaryLabel,
         secondaryLabel = secondaryLabel,
+        primaryMaxLines = primaryMaxLines,
+        secondaryMaxLines = secondaryMaxLines,
         actionIconParams = RowActionIconParams(
             onTapAction = onClick,
             actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,

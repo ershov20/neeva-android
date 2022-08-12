@@ -102,7 +102,7 @@ class BrowserRestoreCallbackImplTest {
         verify(testSetup.restoreCompletedCallback).invoke()
         verify(testSetup.tabList).pruneQueryNavigations()
         testSetup.tabs.forEach {
-            val expectedData = TabInfo.PersistedData(it.data)
+            val expectedData = TabInfo.PersistedData(it.isSelected, it.data)
             val actualData = argumentCaptor<TabInfo.PersistedData>()
             verify(testSetup.tabList).setPersistedInfo(eq(it), actualData.capture(), eq(false))
 

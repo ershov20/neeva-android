@@ -38,7 +38,11 @@ class BrowserRestoreCallbackImpl(
                 tabList.add(it)
             }
 
-            tabList.setPersistedInfo(it, TabInfo.PersistedData(it.data), false)
+            tabList.setPersistedInfo(
+                tab = it,
+                newData = TabInfo.PersistedData(it.isSelected, it.data),
+                persist = false
+            )
         }
 
         cleanCache()

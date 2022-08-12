@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,6 +26,7 @@ fun StackedText(
     secondaryTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     primaryMaxLines: Int = 1,
     secondaryMaxLines: Int = 1,
+    primaryColor: Color? = MaterialTheme.colorScheme.onBackground,
     showActualUrl: Boolean = false,
     enabled: Boolean = true,
     modifier: Modifier = Modifier
@@ -33,7 +35,7 @@ fun StackedText(
         Text(
             text = primaryLabel,
             style = primaryTextStyle,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = primaryColor ?: MaterialTheme.colorScheme.onBackground,
             maxLines = primaryMaxLines,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth()

@@ -66,20 +66,28 @@ val previewCardGridTitles by lazy {
 
 @Preview(locale = "en")
 @Preview(locale = "en", fontScale = 2.0f)
+@Preview(locale = "fr")
+@Preview(locale = "de")
 @Preview(locale = "he")
 annotation class PortraitPreviews
 
 @Preview(locale = "en", uiMode = UI_MODE_NIGHT_YES)
 @Preview(locale = "en", fontScale = 2.0f, uiMode = UI_MODE_NIGHT_YES)
+@Preview(locale = "fr", uiMode = UI_MODE_NIGHT_YES)
+@Preview(locale = "de", uiMode = UI_MODE_NIGHT_YES)
 @Preview(locale = "he", uiMode = UI_MODE_NIGHT_YES)
 annotation class PortraitPreviewsDark
 
 @Preview(widthDp = 731, heightDp = 390, locale = "en")
 @Preview(widthDp = 731, heightDp = 390, locale = "en", fontScale = 2.0f)
+@Preview(widthDp = 731, heightDp = 390, locale = "fr")
+@Preview(widthDp = 731, heightDp = 390, locale = "de")
 @Preview(widthDp = 731, heightDp = 390, locale = "he")
 annotation class LandscapePreviews
 
 @Preview(widthDp = 731, heightDp = 390, locale = "en", uiMode = UI_MODE_NIGHT_YES)
 @Preview(widthDp = 731, heightDp = 390, locale = "en", fontScale = 2.0f, uiMode = UI_MODE_NIGHT_YES)
+@Preview(widthDp = 731, heightDp = 390, locale = "fr", uiMode = UI_MODE_NIGHT_YES)
+@Preview(widthDp = 731, heightDp = 390, locale = "de", uiMode = UI_MODE_NIGHT_YES)
 @Preview(widthDp = 731, heightDp = 390, locale = "he", uiMode = UI_MODE_NIGHT_YES)
 annotation class LandscapePreviewsDark

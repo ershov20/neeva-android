@@ -15,7 +15,6 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import strikt.api.expectThat
-import strikt.assertions.containsExactly
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.hasSize
 import strikt.assertions.isEmpty
@@ -130,7 +129,16 @@ class TabListTest : BaseTest() {
         tabList.add(firstTab)
         tabList.add(secondTab)
 
-        expectThat(tabList.orderedTabList.value).containsExactly(
+        val actualTabs = tabList.orderedTabList.value
+        expectThat(actualTabs).hasSize(2)
+
+        // Because the tab is selected, it should update its "last active" timestamp.
+        val updatedTab = actualTabs[0]
+        expectThat(updatedTab.id).isEqualTo(firstTab.guid)
+        expectThat(updatedTab.data.lastActiveMs!! > 1_000_000L).isTrue()
+
+        val updatedTimestamp = updatedTab.data.lastActiveMs!!
+        expectThat(actualTabs[0]).isEqualTo(
             TabInfo(
                 id = "tab guid 1",
                 url = Uri.parse("http://example.com"),
@@ -140,9 +148,12 @@ class TabListTest : BaseTest() {
                 data = TabInfo.PersistedData(
                     parentTabId = null,
                     openType = TabInfo.TabOpenType.DEFAULT,
-                    lastActiveMs = 1_000_000L
+                    lastActiveMs = updatedTimestamp
                 )
-            ),
+            )
+        )
+
+        expectThat(actualTabs[1]).isEqualTo(
             TabInfo(
                 id = "tab guid 2",
                 url = Uri.parse("http://thing.com"),

@@ -34,6 +34,8 @@ import com.neeva.app.neevascope.NeevascopeResultScreen
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import com.neeva.app.storage.favicons.FaviconCache
@@ -93,6 +95,7 @@ abstract class BaseBrowserWrapper internal constructor(
     private val domainProvider: DomainProvider,
     protected val neevaConstants: NeevaConstants,
     private val scriptInjectionManager: ScriptInjectionManager,
+    private val sharedPreferencesModel: SharedPreferencesModel,
     private val settingsDataModel: SettingsDataModel,
     override val cookieCutterModel: CookieCutterModel
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
@@ -120,6 +123,7 @@ abstract class BaseBrowserWrapper internal constructor(
         domainProvider: DomainProvider,
         neevaConstants: NeevaConstants,
         scriptInjectionManager: ScriptInjectionManager,
+        sharedPreferencesModel: SharedPreferencesModel,
         settingsDataModel: SettingsDataModel,
         trackerAllowList: TrackersAllowList,
         tabList: TabList
@@ -158,6 +162,7 @@ abstract class BaseBrowserWrapper internal constructor(
         domainProvider = domainProvider,
         neevaConstants = neevaConstants,
         scriptInjectionManager = scriptInjectionManager,
+        sharedPreferencesModel = sharedPreferencesModel,
         settingsDataModel = settingsDataModel,
         cookieCutterModel = CookieCutterModelImpl(
             trackerAllowList,
@@ -761,6 +766,14 @@ abstract class BaseBrowserWrapper internal constructor(
 
     override fun closeAllTabs() {
         tabList.forEach { closeTab(it) }
+    }
+
+    override fun closeArchivedTabs() {
+        val archiveAfterOption = AutomaticallyArchiveTabs.get(sharedPreferencesModel)
+        val now = System.currentTimeMillis()
+        tabList.orderedTabList.value
+            .filter { it.isArchived(archiveAfterOption, now) }
+            .forEach { closeTab(it.id) }
     }
 
     override fun selectTab(id: String): Boolean {

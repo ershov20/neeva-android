@@ -14,6 +14,7 @@ import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.neevascope.NeevascopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.IncognitoTabScreenshotManager
 import com.neeva.app.storage.favicons.IncognitoFaviconCache
@@ -43,6 +44,7 @@ class IncognitoBrowserWrapper private constructor(
     settingsDataModel: SettingsDataModel,
     tabScreenshotManager: IncognitoTabScreenshotManager,
     scriptInjectionManager: ScriptInjectionManager,
+    sharedPreferencesModel: SharedPreferencesModel,
     popupModel: PopupModel,
     neevaUser: NeevaUser
 ) : BaseBrowserWrapper(
@@ -66,6 +68,7 @@ class IncognitoBrowserWrapper private constructor(
     tabScreenshotManager = tabScreenshotManager,
     domainProvider = domainProvider,
     neevaConstants = neevaConstants,
+    sharedPreferencesModel = sharedPreferencesModel,
     settingsDataModel = settingsDataModel,
     trackerAllowList = IncognitoTrackersAllowList(),
     scriptInjectionManager = scriptInjectionManager,
@@ -82,6 +85,7 @@ class IncognitoBrowserWrapper private constructor(
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
         neevaConstants: NeevaConstants,
         scriptInjectionManager: ScriptInjectionManager,
+        sharedPreferencesModel: SharedPreferencesModel,
         settingsDataModel: SettingsDataModel,
         directories: Directories,
         tempDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(FOLDER_NAME),
@@ -104,6 +108,7 @@ class IncognitoBrowserWrapper private constructor(
         neevaConstants = neevaConstants,
         onRemovedFromHierarchy = onRemovedFromHierarchy,
         scriptInjectionManager = scriptInjectionManager,
+        sharedPreferencesModel = sharedPreferencesModel,
         settingsDataModel = settingsDataModel,
         tabScreenshotManager = IncognitoTabScreenshotManager(
             appContext = appContext,

@@ -10,6 +10,7 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
@@ -34,6 +35,7 @@ class BrowserWrapperFactory(
     private val regularFaviconCache: RegularFaviconCache,
     private val scriptInjectionManager: ScriptInjectionManager,
     private val settingsDataModel: SettingsDataModel,
+    private val sharedPreferencesModel: SharedPreferencesModel,
     private val spaceStore: SpaceStore,
     private val popupModel: PopupModel
 ) {
@@ -55,6 +57,7 @@ class BrowserWrapperFactory(
             regularFaviconCache = regularFaviconCache,
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
+            sharedPreferencesModel = sharedPreferencesModel,
             spaceStore = spaceStore,
             popupModel = popupModel
         )
@@ -77,6 +80,7 @@ class BrowserWrapperFactory(
             neevaConstants = neevaConstants,
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
+            sharedPreferencesModel = sharedPreferencesModel,
             popupModel = popupModel,
             neevaUser = neevaUser
         )
