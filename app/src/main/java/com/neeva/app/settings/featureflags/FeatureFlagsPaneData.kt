@@ -1,29 +1,54 @@
 package com.neeva.app.settings.featureflags
 
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
 import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
 
 object FeatureFlagsPaneData : SettingsPaneDataInterface {
     @StringRes
     override val topAppBarTitleResId: Int = R.string.settings_debug_local_feature_flags
     override val shouldShowUserName: Boolean = false
-    private val allDebugFlags = SettingsToggle.values()
-        .filter { it.isAdvancedSetting }
-        .map {
-            SettingsRowData(
-                type = SettingsRowType.TOGGLE,
-                settingsToggle = it
-            )
-        }
+
     override val data = listOf(
         SettingsGroupData(
+            R.string.settings_debug_custom_neeva_domain,
+            listOf(
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.DEBUG_USE_CUSTOM_DOMAIN
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.BUTTON,
+                    primaryLabelId = R.string.settings_debug_custom_neeva_domain_current,
+                    secondaryLabelLambda = @Composable {
+                        SharedPrefFolder.App.CustomNeevaDomain
+                            .getFlow(LocalSharedPreferencesModel.current)
+                            .collectAsState()
+                            .value
+                    }
+                ),
+            )
+        ),
+        SettingsGroupData(
             R.string.settings_debug_flags,
-            allDebugFlags
+            listOf(
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.DEBUG_ENABLE_INCOGNITO_SCREENSHOTS
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.DEBUG_ENABLE_SHOW_DESKTOP_SITE
+                )
+            )
         ),
         SettingsGroupData(
             R.string.settings_debug_actions,
@@ -35,7 +60,12 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
                     primaryLabelId = R.string.settings_debug_open_500_tabs
-                ),
+                )
+            )
+        ),
+        SettingsGroupData(
+            R.string.settings_debug_database,
+            listOf(
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
                     primaryLabelId = R.string.settings_debug_export_database

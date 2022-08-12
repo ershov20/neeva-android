@@ -1,6 +1,8 @@
 package com.neeva.app.settings
 
 import android.net.Uri
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.neeva.app.R
 
 interface SettingsPaneDataInterface {
@@ -31,8 +33,17 @@ data class SettingsRowData(
     val enabled: Boolean = true,
 
     /** Intended for use with ProfileRow. */
-    val showSSOProviderAsPrimaryLabel: Boolean = false
-)
+    val showSSOProviderAsPrimaryLabel: Boolean = false,
+
+    /** If set, will provide a secondary label that overrides [secondaryLabelId]. */
+    val secondaryLabelLambda: @Composable (() -> String)? = null
+) {
+    @Composable
+    fun getSecondaryLabel(): String? {
+        return secondaryLabelLambda?.invoke()
+            ?: secondaryLabelId?.let { stringResource(it) }
+    }
+}
 
 enum class SettingsRowType {
     LINK,
@@ -51,8 +62,7 @@ enum class SettingsRowType {
 enum class SettingsToggle(
     val primaryLabelId: Int? = null,
     val secondaryLabelId: Int? = null,
-    val defaultValue: Boolean,
-    val isAdvancedSetting: Boolean = false
+    val defaultValue: Boolean
 ) {
     SHOW_SEARCH_SUGGESTIONS(
         primaryLabelId = R.string.settings_show_search_search_suggestions,
@@ -104,34 +114,24 @@ enum class SettingsToggle(
 
     // Advanced / development settings:
     AUTOMATED_TAB_MANAGEMENT(
-        primaryLabelId = R.string.settings_debug_automated_tab_management,
-        defaultValue = false,
-        isAdvancedSetting = true
+        primaryLabelId = R.string.settings_automated_tab_management,
+        defaultValue = false
     ),
     DEBUG_ENABLE_INCOGNITO_SCREENSHOTS(
         primaryLabelId = R.string.settings_debug_enable_incognito_screenshots,
-        defaultValue = false,
-        isAdvancedSetting = true
+        defaultValue = false
     ),
     DEBUG_ENABLE_SHOW_DESKTOP_SITE(
         primaryLabelId = R.string.settings_debug_enable_show_desktop_site,
-        defaultValue = false,
-        isAdvancedSetting = true
+        defaultValue = false
     ),
-    DEBUG_M1_APP_HOST(
-        primaryLabelId = R.string.settings_debug_m1_apphost,
-        defaultValue = false,
-        isAdvancedSetting = true
+    DEBUG_USE_CUSTOM_DOMAIN(
+        primaryLabelId = R.string.settings_debug_use_custom_neeva_domain,
+        defaultValue = false
     ),
-    DEBUG_LOCAL_NEEVA_DEV_APP_HOST(
-        primaryLabelId = R.string.settings_debug_local_neeva_dev_apphost,
-        defaultValue = false,
-        isAdvancedSetting = true
-    ),
-    DEBUG_NEEVASCOPE(
-        primaryLabelId = R.string.settings_debug_neevascope,
-        defaultValue = false,
-        isAdvancedSetting = true
+    ENABLE_NEEVASCOPE(
+        primaryLabelId = R.string.settings_neevascope,
+        defaultValue = false
     );
 
     val key: String = name

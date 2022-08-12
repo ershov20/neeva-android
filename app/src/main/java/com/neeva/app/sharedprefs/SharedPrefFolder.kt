@@ -24,6 +24,12 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             defaultValue = false
         )
 
+        val CustomNeevaDomain = SharedPrefKey(
+            App,
+            preferenceKey = "CUSTOM_NEEVA_DOMAIN",
+            defaultValue = "m1.neeva.com"
+        )
+
         val SessionIdV2Key = SharedPrefKey(
             App,
             preferenceKey = "SESSION_ID_V2",

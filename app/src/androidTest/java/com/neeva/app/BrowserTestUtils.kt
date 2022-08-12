@@ -13,7 +13,6 @@ import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.doubleClick
 import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasContentDescription
@@ -26,7 +25,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
-import androidx.compose.ui.test.performTouchInput
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.GeneralClickAction
 import androidx.test.espresso.action.GeneralLocation
@@ -231,23 +229,12 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.toggleAdvancedTabM
     openOverflowMenuAndClickItem(R.string.settings)
     waitForNavDestination(AppNavDestination.SETTINGS)
 
-    // Double-click the version number to show the developer options.
-    waitForNodeWithTag("SettingsPaneItems")
-        .performScrollToNode(hasText("Chromium version", substring = true))
-    waitForNode(hasText("Chromium version", substring = true)).performTouchInput {
-        doubleClick()
-    }
-
     // Activate the setting.
     waitForNodeWithTag("SettingsPaneItems")
-        .performScrollToNode(hasText(getString(R.string.settings_debug_local_feature_flags)))
-    waitForNode(hasText(getString(R.string.settings_debug_local_feature_flags))).performClick()
-    waitForNode(
-        hasText(getString(R.string.settings_debug_automated_tab_management))
-    ).performClick()
+        .performScrollToNode(hasText(getString(R.string.settings_automated_tab_management)))
+    waitForNode(hasText(getString(R.string.settings_automated_tab_management))).performClick()
 
     // Go back to the browser screen.
-    onBackPressed()
     onBackPressed()
 }
 

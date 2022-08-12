@@ -12,17 +12,19 @@
     <string name="settings_debug_local_feature_flags">Developer settings</string>
     <string name="settings_debug_flags">Flags</string>
     <string name="settings_debug_actions">Actions</string>
-    <string name="settings_debug_automated_tab_management">Enable automated tab management</string>
     <string name="settings_debug_enable_incognito_screenshots">Enable screenshots while in Incognito</string>
     <string name="settings_debug_enable_show_desktop_site">Enable Show Desktop Site in Overflow Menu</string>
     <string name="settings_debug_open_50_tabs">Open 50 tabs</string>
     <string name="settings_debug_open_500_tabs">Open 500 tabs</string>
+    <string name="settings_debug_database">Database operations</string>
     <string name="settings_debug_export_database">Export history database</string>
     <string name="settings_debug_import_database">Import history database</string>
     <string name="settings_debug_import_database_description">Destroys your existing database</string>
-    <string name="settings_debug_m1_apphost">Point the app at m1.neeva.com</string>
-    <string name="settings_debug_local_neeva_dev_apphost">Point the app at local.neeva.dev</string>
-    <string name="settings_debug_neevascope">Enable NeevaScope button</string>
+    <string name="settings_debug_use_custom_neeva_domain">Use custom Neeva domain</string>
+    <string name="settings_debug_custom_neeva_domain">Neeva domain override</string>
+    <string name="settings_debug_custom_neeva_domain_current">Custom domain to use</string>
+    <string name="settings_debug_custom_neeva_domain_description"><![CDATA[Valid examples include <b>m1.neeva.com</b> and <b>username.local.neeva.dev</b>]]></string>
+    <string name="settings_debug_restart">Restart for changes to take effect.</string>
 
     <!-- Debug strings for Previews -->
     <string name="debug_short_url">www.url.com</string>

@@ -37,7 +37,7 @@ fun BrowserBottomToolbar(
     BrowserBottomToolbar(
         isIncognito = browserWrapper.isIncognito,
         isNeevascopeEnabled = settingsDataModel
-            .getSettingsToggleValue(SettingsToggle.DEBUG_NEEVASCOPE),
+            .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE),
         modifier = modifier.offset(y = bottomOffsetDp)
     )
 }

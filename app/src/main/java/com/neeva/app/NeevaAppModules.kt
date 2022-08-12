@@ -15,6 +15,7 @@ import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.Directories
@@ -260,17 +261,15 @@ class DatabaseModule {
 object NeevaConstantsModule {
     @Provides
     @Singleton
-    fun providesNeevaConstants(settingsDataModel: SettingsDataModel): NeevaConstants {
+    fun providesNeevaConstants(
+        settingsDataModel: SettingsDataModel,
+        sharedPreferencesModel: SharedPreferencesModel
+    ): NeevaConstants {
         // This is done during initialization so that the app consistently hits the same server
         // during the app's lifetime.  To use a different host, you will need to restart the app.
         val appHost = when {
-            settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_M1_APP_HOST) -> {
-                "m1.neeva.com"
-            }
-
-            settingsDataModel
-                .getSettingsToggleValue(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST) -> {
-                "local.neeva.dev"
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_USE_CUSTOM_DOMAIN) -> {
+                SharedPrefFolder.App.CustomNeevaDomain.get(sharedPreferencesModel)
             }
 
             else -> {

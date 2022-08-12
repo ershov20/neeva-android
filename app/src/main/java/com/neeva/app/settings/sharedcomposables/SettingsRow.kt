@@ -43,7 +43,7 @@ private fun getSettingsRowDataValues(
     // if there was no primaryLabelId set,
     // screenshot tests and developers will see that their new SettingsRow has no label
     var primaryLabel = rowData.primaryLabelId?.let { stringResource(it) } ?: ""
-    var secondaryLabel = rowData.secondaryLabelId?.let { stringResource(it) }
+    var secondaryLabel = rowData.getSecondaryLabel()
     if (rowData.primaryLabelId == R.string.settings_neeva_browser_version) {
         primaryLabel = stringResource(rowData.primaryLabelId, BuildConfig.VERSION_NAME)
         secondaryLabel = stringResource(

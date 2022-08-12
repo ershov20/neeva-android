@@ -3,7 +3,9 @@ package com.neeva.app.settings
 import android.net.Uri
 import android.text.format.DateUtils
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbackProvider
@@ -127,19 +129,8 @@ class SettingsControllerImpl(
             SettingsToggle.TRACKING_PROTECTION.key to {
                 onTrackingProtectionUpdate()
             },
-            SettingsToggle.DEBUG_M1_APP_HOST.key to {
+            SettingsToggle.DEBUG_USE_CUSTOM_DOMAIN.key to {
                 popupModel.showSnackbar("Restart for app host changes to take effect.")
-                if (getToggleState(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST).value) {
-                    getTogglePreferenceSetter(SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST)
-                        .invoke(false)
-                }
-            },
-            SettingsToggle.DEBUG_LOCAL_NEEVA_DEV_APP_HOST.key to {
-                popupModel.showSnackbar("Restart for app host changes to take effect.")
-                if (getToggleState(SettingsToggle.DEBUG_M1_APP_HOST).value) {
-                    getTogglePreferenceSetter(SettingsToggle.DEBUG_M1_APP_HOST)
-                        .invoke(false)
-                }
             }
         )
     }
@@ -164,6 +155,7 @@ class SettingsControllerImpl(
     private fun getButtonClicks(): Map<Int, (() -> Unit)?> {
         return mapOf(
             R.string.settings_sign_out to { signOut() },
+            R.string.settings_debug_custom_neeva_domain_current to { debugSetCustomBackend() },
             R.string.settings_debug_open_50_tabs to { debugOpenManyTabs() },
             R.string.settings_debug_open_500_tabs to { debugOpenManyTabs(500) },
             R.string.settings_debug_export_database to { debugExportDatabase() },
@@ -263,6 +255,15 @@ class SettingsControllerImpl(
 
     private fun toggleIsAdvancedSettingsAllowed() {
         settingsDataModel.toggleIsAdvancedSettingsAllowed()
+    }
+
+    private fun debugSetCustomBackend() {
+        popupModel.showDialog {
+            SetCustomBackendDialog(
+                onShowSnackbar = { popupModel.showSnackbar(it) },
+                onDismissRequested = popupModel::removeDialog
+            )
+        }
     }
 
     private fun debugOpenManyTabs(numTabs: Int = 50, msBetweenOpens: Long = 1000) {

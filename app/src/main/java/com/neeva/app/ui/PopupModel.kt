@@ -17,7 +17,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 data class DialogState(
-    val content: @Composable (dismiss: () -> Unit) -> Unit
+    val content: @Composable () -> Unit
 )
 
 data class SnackbarCallbacks(
@@ -104,8 +104,8 @@ class PopupModel(
         }
     }
 
-    /** Shows a full-screen dialog with the given content. */
-    fun showDialog(content: @Composable (dismiss: () -> Unit) -> Unit) {
+    /** Allows showing a full-screen dialog with the given content. */
+    fun showDialog(content: @Composable () -> Unit) {
         _dialogState.value = DialogState(content)
     }
 

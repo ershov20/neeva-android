@@ -17,12 +17,19 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -60,6 +67,7 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.removeViewFromParent
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
@@ -563,13 +571,21 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     override fun showContextMenuForTab(contextMenuParams: ContextMenuParams, tab: Tab) {
-        popupModel.showDialog { onDismissRequested ->
-            LinkContextMenu(
-                webLayerModel = webLayerModel,
-                params = contextMenuParams,
-                tab = tab,
-                onDismissRequested = onDismissRequested
-            )
+        popupModel.showDialog {
+            Dialog(onDismissRequest = popupModel::removeDialog) {
+                Surface(
+                    tonalElevation = 3.dp,
+                    shape = RoundedCornerShape(Dimensions.RADIUS_TINY),
+                    modifier = Modifier.verticalScroll(rememberScrollState())
+                ) {
+                    LinkContextMenu(
+                        webLayerModel = webLayerModel,
+                        params = contextMenuParams,
+                        tab = tab,
+                        onDismissRequested = popupModel::removeDialog
+                    )
+                }
+            }
         }
     }
 
