@@ -80,13 +80,17 @@ data class TabInfo(
             const val KEY_OPEN_TYPE = "OPEN_TYPE"
         }
 
-        constructor(isSelected: Boolean, map: Map<String, String>) : this(
+        constructor(
+            isSelected: Boolean,
+            map: Map<String, String>,
+            now: Long = System.currentTimeMillis()
+        ) : this(
             parentTabId = map[KEY_PARENT_TAB_ID],
             parentSpaceId = map[KEY_PARENT_SPACE_ID],
             lastActiveMs = if (isSelected) {
-                System.currentTimeMillis()
+                now
             } else {
-                map[KEY_LAST_ACTIVE_MS]?.toLongOrNull() ?: System.currentTimeMillis()
+                map[KEY_LAST_ACTIVE_MS]?.toLongOrNull() ?: now
             },
             openType = TabOpenType.values()
                 .firstOrNull { it.name == map[KEY_OPEN_TYPE] }

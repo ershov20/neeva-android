@@ -24,7 +24,11 @@ class BrowserRestoreCallbackImplTest {
     @Test
     fun onRestoreCompleted_withoutTabs_firesEmptyTabList() {
         // Arrange: Say that the browser had no tabs.
-        val testSetup = TestSetup(emptyList(), null)
+        val testSetup = TestSetup(
+            inactiveTabIds = emptyList(),
+            inactiveTabTimestamps = emptyList(),
+            activeTabId = null
+        )
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
@@ -41,7 +45,12 @@ class BrowserRestoreCallbackImplTest {
     fun onRestoreCompleted_withSingleActiveTabAndInvalidNavigation_goesHome() {
         // Arrange: Say that the browser had only one tab, it was active, and in a bad state.
         val activeTabId = "tab b"
-        val testSetup = TestSetup(emptyList(), activeTabId, -1)
+        val testSetup = TestSetup(
+            inactiveTabIds = emptyList(),
+            inactiveTabTimestamps = emptyList(),
+            activeTabId = activeTabId,
+            activeTabNavigationIndex = -1
+        )
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
@@ -59,7 +68,12 @@ class BrowserRestoreCallbackImplTest {
     fun onRestoreCompleted_withSingleActiveTabAndValidNavigation_staysPut() {
         // Arrange: Say that the browser had only one tab, it was active, and in a good state.
         val activeTabId = "tab b"
-        val testSetup = TestSetup(emptyList(), activeTabId, 13)
+        val testSetup = TestSetup(
+            inactiveTabIds = emptyList(),
+            inactiveTabTimestamps = emptyList(),
+            activeTabId = activeTabId,
+            activeTabNavigationIndex = 13
+        )
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
@@ -76,7 +90,11 @@ class BrowserRestoreCallbackImplTest {
     @Test
     fun onRestoreCompleted_withActiveTabAndInvalidNavigation_doesNothing() {
         // Arrange: Say that the browser had three tabs and that the active tab was in a bad state.
-        val testSetup = TestSetup(listOf("tab a", "tab c"), "tab b")
+        val testSetup = TestSetup(
+            inactiveTabIds = listOf("tab a", "tab c"),
+            inactiveTabTimestamps = listOf(1_000_000L, 2_000_000L),
+            activeTabId = "tab b"
+        )
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
@@ -92,8 +110,18 @@ class BrowserRestoreCallbackImplTest {
 
     @Test
     fun onRestoreCompleted_restoresTabData() {
-        // Arrange: Say that the browser had three tabs and that the active tab was in a bad state.
-        val testSetup = TestSetup(listOf("tab a", "tab c"), "tab b")
+        val inactiveTabData = listOf(
+            Pair("tab a", 1_000_000L),
+            Pair("tab c", null),
+            Pair("tab d", 2_000_000L),
+        )
+
+        // Arrange: Say that the browser had four tabs.
+        val testSetup = TestSetup(
+            inactiveTabIds = inactiveTabData.map { it.first },
+            inactiveTabTimestamps = inactiveTabData.map { it.second },
+            activeTabId = "tab b"
+        )
 
         // Act: Restore the tabs.
         testSetup.callback.onRestoreCompleted()
@@ -101,20 +129,50 @@ class BrowserRestoreCallbackImplTest {
         // Assert: Confirm that the data was pulled back out correctly.
         verify(testSetup.restoreCompletedCallback).invoke()
         verify(testSetup.tabList).pruneQueryNavigations()
-        testSetup.tabs.forEach {
-            val expectedData = TabInfo.PersistedData(it.isSelected, it.data)
+        testSetup.tabs.forEach { tab ->
             val actualData = argumentCaptor<TabInfo.PersistedData>()
-            verify(testSetup.tabList).setPersistedInfo(eq(it), actualData.capture(), eq(false))
-
-            // Explicitly set the time so that we know what the value of System.currentTimeMillis.
-            expectThat(actualData.lastValue).isEqualTo(
-                expectedData.copy(lastActiveMs = actualData.lastValue.lastActiveMs)
+            val expectedData = TabInfo.PersistedData(
+                isSelected = tab.isSelected,
+                map = tab.data
             )
+
+            when (tab.guid) {
+                "tab a", "tab d" -> {
+                    // Inactive tabs with persisted timestamps should restore them.
+                    // Confirm that the data was restored correctly.
+                    verify(testSetup.tabList).setPersistedInfo(tab, expectedData, false)
+                }
+
+                "tab b" -> {
+                    // Active tabs should get an updated timestamp.
+                    verify(testSetup.tabList).setPersistedInfo(
+                        eq(tab),
+                        actualData.capture(),
+                        eq(true)
+                    )
+                    expectThat(actualData.lastValue).isEqualTo(
+                        expectedData.copy(lastActiveMs = actualData.lastValue.lastActiveMs)
+                    )
+                }
+
+                "tab c" -> {
+                    // The timestamp should have been updated because the tab had no timestamp.
+                    verify(testSetup.tabList).setPersistedInfo(
+                        eq(tab),
+                        actualData.capture(),
+                        eq(true)
+                    )
+                    expectThat(actualData.lastValue).isEqualTo(
+                        expectedData.copy(lastActiveMs = actualData.lastValue.lastActiveMs)
+                    )
+                }
+            }
         }
     }
 
     class TestSetup(
         inactiveTabIds: List<String>,
+        inactiveTabTimestamps: List<Long?>,
         activeTabId: String?,
         activeTabNavigationIndex: Int = -1
     ) {
@@ -125,7 +183,12 @@ class BrowserRestoreCallbackImplTest {
         val tabs = mutableSetOf<Tab>()
         val restoreCompletedCallback: () -> Unit = mock()
 
-        val browser = createMockBrowser(inactiveTabIds, activeTabId, activeTabNavigationIndex)
+        private val browser = createMockBrowser(
+            inactiveTabIds,
+            inactiveTabTimestamps,
+            activeTabId,
+            activeTabNavigationIndex
+        )
 
         val callback = BrowserRestoreCallbackImpl(
             tabList = tabList,
@@ -138,13 +201,20 @@ class BrowserRestoreCallbackImplTest {
 
         private fun createMockBrowser(
             inactiveTabIds: List<String>,
+            inactiveTabTimestamps: List<Long?>,
             activeTabId: String?,
             activeTabNavigationIndex: Int = -1
         ): Browser {
             // Create a set of Tabs that the Browser will be managing and returning to callers.
             tabs.clear()
-            inactiveTabIds.forEach { tabId ->
-                val dataMap = mapOf(TabInfo.PersistedData.KEY_PARENT_TAB_ID to "parent of tabId")
+            inactiveTabIds.forEachIndexed { index, tabId ->
+                val dataMap = mutableMapOf<String, String>().apply {
+                    put(TabInfo.PersistedData.KEY_PARENT_TAB_ID, "parent of tabId")
+
+                    inactiveTabTimestamps[index]?.let {
+                        put(TabInfo.PersistedData.KEY_LAST_ACTIVE_MS, it.toString())
+                    }
+                }
                 tabs.add(
                     mock {
                         on { getGuid() } doReturn(tabId)

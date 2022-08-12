@@ -38,10 +38,17 @@ class BrowserRestoreCallbackImpl(
                 tabList.add(it)
             }
 
+            // If the tab doesn't have a timestamp yet (e.g. it was created before we added tab
+            // archiving), set it to the current time and persist it so the tab correctly ages from
+            // this point forward.
+            val now = System.currentTimeMillis()
+            val persistedData = TabInfo.PersistedData(it.isSelected, it.data, now)
+            val mustPersist = (now == persistedData.lastActiveMs)
+
             tabList.setPersistedInfo(
                 tab = it,
-                newData = TabInfo.PersistedData(it.isSelected, it.data),
-                persist = false
+                newData = persistedData,
+                persist = mustPersist
             )
         }
 

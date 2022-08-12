@@ -135,9 +135,9 @@ class TabListTest : BaseTest() {
         // Because the tab is selected, it should update its "last active" timestamp.
         val updatedTab = actualTabs[0]
         expectThat(updatedTab.id).isEqualTo(firstTab.guid)
-        expectThat(updatedTab.data.lastActiveMs!! > 1_000_000L).isTrue()
+        expectThat(updatedTab.data.lastActiveMs > 1_000_000L).isTrue()
 
-        val updatedTimestamp = updatedTab.data.lastActiveMs!!
+        val updatedTimestamp = updatedTab.data.lastActiveMs
         expectThat(actualTabs[0]).isEqualTo(
             TabInfo(
                 id = "tab guid 1",
