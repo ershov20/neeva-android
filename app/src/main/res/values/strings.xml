@@ -562,10 +562,10 @@
     <string name="settings_features_under_development">Features under development</string>
 
     <!-- [Settings] Enables create or switch tab behavior + tab archiving. -->
-    <string name="settings_automated_tab_management">Enable automated tab management</string>
+    <string name="settings_automated_tab_management" translatable="false">Enable automated tab management</string>
 
     <!-- [Settings] Enables NeevaScope. -->
-    <string name="settings_neevascope">Enable NeevaScope</string>
+    <string name="settings_neevascope" translatable="false">Enable NeevaScope</string>
 
     <!-- [Clear browsing data][Header] Groups options for clearing data on this device. -->
     <string name="clear_browsing_data_on_this_device">Data on this device</string>
