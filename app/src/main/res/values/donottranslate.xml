@@ -25,6 +25,7 @@
     <string name="settings_debug_custom_neeva_domain_current">Custom domain to use</string>
     <string name="settings_debug_custom_neeva_domain_description"><![CDATA[Valid examples include <b>m1.neeva.com</b> and <b>username.local.neeva.dev</b>]]></string>
     <string name="settings_debug_restart">Restart for changes to take effect.</string>
+    <string name="settings_debug_tabs_in_reverse">Reverse sort tabs by creation time when archiving</string>
 
     <!-- Debug strings for Previews -->
     <string name="debug_short_url">www.url.com</string>

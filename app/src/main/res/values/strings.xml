@@ -606,7 +606,7 @@
     <string name="archived_tabs">Archived tabs</string>
 
     <!-- [Archived tabs][Setting title] Sends the user to a page that allows then to select when tabs are automatically archived -->
-    <string name="archived_tabs_archive">Auto-archive tabs</string>
+    <string name="archived_tabs_archive">Auto archive tabs</string>
 
     <!-- [Archived tabs][Button] Says that a user wants to automatically archive a tab after 7 days have passed. -->
     <string name="archived_tabs_archive_after_seven_days">After 7 days</string>

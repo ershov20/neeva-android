@@ -147,10 +147,17 @@ fun ChronologicalTabGrid(
     val archiveAfterOption = AutomaticallyArchiveTabs
         .getFlow(LocalSharedPreferencesModel.current)
         .collectAsState()
+    val displayTabsByReverseCreationTime = LocalSettingsDataModel.current
+        .getToggleState(SettingsToggle.DEBUG_ENABLE_DISPLAY_TABS_BY_REVERSE_CREATION_TIME)
 
-    val sections by remember(visibleTabs, archiveAfterOption) {
+    val sections by remember(visibleTabs, archiveAfterOption, displayTabsByReverseCreationTime) {
         derivedStateOf {
-            computeTabGridSections(context, visibleTabs, archiveAfterOption.value)
+            computeTabGridSections(
+                context = context,
+                tabs = visibleTabs,
+                archiveAfterOption = archiveAfterOption.value,
+                displayTabsInReverseCreationTime = displayTabsByReverseCreationTime.value
+            )
         }
     }
 

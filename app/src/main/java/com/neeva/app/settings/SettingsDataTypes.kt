@@ -117,6 +117,10 @@ enum class SettingsToggle(
         primaryLabelId = R.string.settings_automated_tab_management,
         defaultValue = false
     ),
+    DEBUG_ENABLE_DISPLAY_TABS_BY_REVERSE_CREATION_TIME(
+        primaryLabelId = R.string.settings_debug_tabs_in_reverse,
+        defaultValue = false,
+    ),
     DEBUG_ENABLE_INCOGNITO_SCREENSHOTS(
         primaryLabelId = R.string.settings_debug_enable_incognito_screenshots,
         defaultValue = false

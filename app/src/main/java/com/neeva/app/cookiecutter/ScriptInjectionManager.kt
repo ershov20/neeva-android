@@ -56,6 +56,7 @@ class ScriptInjectionManager(
             // Note: if you are expecting this script to run when the document has loaded,
             // that would be incorrect. It actually runs like halfway though. Make sure to attach
             // event handlers to, e.g. DOMContentLoaded, so that logic only runs when it should
+            if (tab.isDestroyed) return@launch
             tab.executeScript(scriptText, false, null)
         }
     }

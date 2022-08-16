@@ -58,7 +58,7 @@ class TabGridSectionTest : BaseTest() {
     }
 
     @Test
-    fun computeTabGridSections_archiveAfter7Days() {
+    fun computeTabGridSections_forwardCreationTime_archiveAfter7Days() {
         val now = LocalDateTime.of(
             TimeUnit.DAYS.toMillis(1000).toLocalDate(),
             LocalTime.NOON
@@ -71,6 +71,7 @@ class TabGridSectionTest : BaseTest() {
             context = context,
             tabs = tabs,
             archiveAfterOption = ArchiveAfterOption.AFTER_7_DAYS,
+            displayTabsInReverseCreationTime = false,
             now = now.toEpochMilli()
         )
 
@@ -97,7 +98,7 @@ class TabGridSectionTest : BaseTest() {
     }
 
     @Test
-    fun computeTabGridSections_archiveAfter30Days() {
+    fun computeTabGridSections_forwardCreationTime_archiveAfter30Days() {
         val now = LocalDateTime.of(
             TimeUnit.DAYS.toMillis(1000).toLocalDate(),
             LocalTime.NOON
@@ -110,6 +111,7 @@ class TabGridSectionTest : BaseTest() {
             context = context,
             tabs = tabs,
             archiveAfterOption = ArchiveAfterOption.AFTER_30_DAYS,
+            displayTabsInReverseCreationTime = false,
             now = now.toEpochMilli()
         )
 
@@ -142,7 +144,7 @@ class TabGridSectionTest : BaseTest() {
     }
 
     @Test
-    fun computeTabGridSections_archiveNever() {
+    fun computeTabGridSections_forwardCreationTime_archiveNever() {
         val now = LocalDateTime.of(
             TimeUnit.DAYS.toMillis(1000).toLocalDate(),
             LocalTime.NOON
@@ -155,6 +157,7 @@ class TabGridSectionTest : BaseTest() {
             context = context,
             tabs = tabs,
             archiveAfterOption = ArchiveAfterOption.NEVER,
+            displayTabsInReverseCreationTime = false,
             now = now.toEpochMilli()
         )
 
@@ -188,6 +191,144 @@ class TabGridSectionTest : BaseTest() {
             TabGridSection(
                 header = olderString,
                 items = tabs.subList(31, tabs.size).toMutableList()
+            )
+        )
+    }
+
+    @Test
+    fun computeTabGridSections_reverseCreationTime_archiveAfter7Days() {
+        val now = LocalDateTime.of(
+            TimeUnit.DAYS.toMillis(1000).toLocalDate(),
+            LocalTime.NOON
+        )
+
+        val selectedTabIndex = 5
+        val tabs = createTabs(selectedTabIndex, now)
+
+        val sections = computeTabGridSections(
+            context = context,
+            tabs = tabs,
+            archiveAfterOption = ArchiveAfterOption.AFTER_7_DAYS,
+            displayTabsInReverseCreationTime = true,
+            now = now.toEpochMilli()
+        )
+
+        // The today section should have today's tabs plus the active tab.
+        expectThat(sections).hasSize(3)
+        expectThat(sections[0]).isEqualTo(
+            TabGridSection(
+                header = todayString,
+                items = mutableListOf(tabs[0], tabs[5]).asReversed()
+            )
+        )
+        expectThat(sections[1]).isEqualTo(
+            TabGridSection(
+                header = yesterdayString,
+                items = mutableListOf(tabs[1])
+            )
+        )
+        expectThat(sections[2]).isEqualTo(
+            TabGridSection(
+                header = lastWeekString,
+                items = mutableListOf(tabs[2], tabs[3], tabs[4], tabs[6], tabs[7]).asReversed()
+            )
+        )
+    }
+
+    @Test
+    fun computeTabGridSections_reverseCreationTime_archiveAfter30Days() {
+        val now = LocalDateTime.of(
+            TimeUnit.DAYS.toMillis(1000).toLocalDate(),
+            LocalTime.NOON
+        )
+
+        val selectedTabIndex = 5
+        val tabs = createTabs(selectedTabIndex, now)
+
+        val sections = computeTabGridSections(
+            context = context,
+            tabs = tabs,
+            archiveAfterOption = ArchiveAfterOption.AFTER_30_DAYS,
+            displayTabsInReverseCreationTime = true,
+            now = now.toEpochMilli()
+        )
+
+        // The today section should have today's tabs plus the active tab.
+        expectThat(sections).hasSize(4)
+        expectThat(sections[0]).isEqualTo(
+            TabGridSection(
+                header = todayString,
+                items = mutableListOf(tabs[0], tabs[5]).asReversed()
+            )
+        )
+        expectThat(sections[1]).isEqualTo(
+            TabGridSection(
+                header = yesterdayString,
+                items = mutableListOf(tabs[1])
+            )
+        )
+        expectThat(sections[2]).isEqualTo(
+            TabGridSection(
+                header = lastWeekString,
+                items = mutableListOf(tabs[2], tabs[3], tabs[4], tabs[6], tabs[7]).asReversed()
+            )
+        )
+        expectThat(sections[3]).isEqualTo(
+            TabGridSection(
+                header = lastMonthString,
+                items = tabs.subList(8, 31).toMutableList().asReversed()
+            )
+        )
+    }
+
+    @Test
+    fun computeTabGridSections_reverseCreationTime_archiveNever() {
+        val now = LocalDateTime.of(
+            TimeUnit.DAYS.toMillis(1000).toLocalDate(),
+            LocalTime.NOON
+        )
+
+        val selectedTabIndex = 5
+        val tabs = createTabs(selectedTabIndex, now)
+
+        val sections = computeTabGridSections(
+            context = context,
+            tabs = tabs,
+            archiveAfterOption = ArchiveAfterOption.NEVER,
+            displayTabsInReverseCreationTime = true,
+            now = now.toEpochMilli()
+        )
+
+        // The today section should have today's tabs plus the active tab.
+        expectThat(sections).hasSize(5)
+        expectThat(sections[0]).isEqualTo(
+            TabGridSection(
+                header = todayString,
+                items = mutableListOf(tabs[0], tabs[5]).asReversed()
+            )
+        )
+        expectThat(sections[1]).isEqualTo(
+            TabGridSection(
+                header = yesterdayString,
+                items = mutableListOf(tabs[1])
+            )
+        )
+        expectThat(sections[2]).isEqualTo(
+            TabGridSection(
+                header = lastWeekString,
+                items = mutableListOf(tabs[2], tabs[3], tabs[4], tabs[6], tabs[7]).asReversed()
+            )
+        )
+        expectThat(sections[3]).isEqualTo(
+            TabGridSection(
+                header = lastMonthString,
+                items = tabs.subList(8, 31).toMutableList().asReversed()
+            )
+        )
+        expectThat(sections[4]).isEqualTo(
+            TabGridSection(
+                header = olderString,
+                items = tabs.subList(31, tabs.size).toMutableList().asReversed()
             )
         )
     }

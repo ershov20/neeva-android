@@ -47,6 +47,11 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.DEBUG_ENABLE_SHOW_DESKTOP_SITE
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle =
+                    SettingsToggle.DEBUG_ENABLE_DISPLAY_TABS_BY_REVERSE_CREATION_TIME
                 )
             )
         ),

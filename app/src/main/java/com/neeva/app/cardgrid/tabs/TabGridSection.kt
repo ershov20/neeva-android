@@ -15,6 +15,7 @@ fun computeTabGridSections(
     context: Context,
     tabs: List<TabInfo>,
     archiveAfterOption: ArchiveAfterOption,
+    displayTabsInReverseCreationTime: Boolean,
     now: Long = System.currentTimeMillis()
 ): List<TabGridSection<TabInfo>> {
     // It'd be more correct to make the time be a State, too, but it'd be expensive because we would
@@ -35,12 +36,16 @@ fun computeTabGridSections(
 
     return mappedSections
         .mapValues { entry ->
-            // Sort the items in each bucket by how old they are.
-            entry.value.copy(
-                items = entry.value.items
-                    .sortedByDescending { it.data.lastActiveMs }
-                    .toMutableList()
-            )
+            if (displayTabsInReverseCreationTime) {
+                // Sort the items in each bucket by their creation time, with more newly created
+                // tabs appearing earlier.
+                entry.value.copy(
+                    items = entry.value.items.asReversed()
+                )
+            } else {
+                // Use the items as-is.
+                entry.value
+            }
         }
         .toList()
         .sortedBy { it.first.ordinal }
