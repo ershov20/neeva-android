@@ -76,6 +76,11 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             defaultValue = CollapsingSectionState.EXPANDED,
             enumFromString = { it.toCollapsingSectionState() }
         )
+        val ShowTryNeevaScopeTooltip = SharedPrefKey(
+            App,
+            preferenceKey = "SHOW_TRY_NEEVASCOPE_TOOLTIP",
+            defaultValue = true
+        )
     }
 
     object FirstRun : SharedPrefFolder("FIRST_RUN") {

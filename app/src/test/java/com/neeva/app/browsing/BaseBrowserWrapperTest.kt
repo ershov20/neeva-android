@@ -23,7 +23,7 @@ import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.createMockNavigationController
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.neevascope.NeevascopeModel
+import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -102,7 +102,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var suggestionsModel: SuggestionsModel
-    @Mock private lateinit var neevascopeModel: NeevascopeModel
+    @Mock private lateinit var neevaScopeModel: NeevaScopeModel
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
     @Mock private lateinit var scriptInjectionManager: ScriptInjectionManager
     @Mock private lateinit var popupModel: PopupModel
@@ -203,7 +203,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             neevaConstants = neevaConstants,
             domainProvider = domainProvider,
             suggestionsModel = suggestionsModel,
-            neevascopeModel = neevascopeModel,
+            neevaScopeModel = neevaScopeModel,
             faviconCache = faviconCache,
             spaceStore = spaceStore,
             tabList = tabList,

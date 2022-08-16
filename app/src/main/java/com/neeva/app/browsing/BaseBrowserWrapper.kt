@@ -27,13 +27,14 @@ import com.neeva.app.cookiecutter.CookieCutterModelImpl
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.history.HistoryManager
-import com.neeva.app.neevascope.NeevascopeInfoScreen
-import com.neeva.app.neevascope.NeevascopeLoadingScreen
-import com.neeva.app.neevascope.NeevascopeModel
-import com.neeva.app.neevascope.NeevascopeResultScreen
+import com.neeva.app.neevascope.NeevaScopeInfoScreen
+import com.neeva.app.neevascope.NeevaScopeLoadingScreen
+import com.neeva.app.neevascope.NeevaScopeModel
+import com.neeva.app.neevascope.NeevaScopeResultScreen
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
@@ -81,7 +82,7 @@ abstract class BaseBrowserWrapper internal constructor(
     protected val dispatchers: Dispatchers,
     protected val activityCallbackProvider: ActivityCallbackProvider,
     override val suggestionsModel: SuggestionsModel?,
-    override val neevascopeModel: NeevascopeModel,
+    override val neevaScopeModel: NeevaScopeModel,
     private val popupModel: PopupModel,
     private val neevaUser: NeevaUser,
     final override val faviconCache: FaviconCache,
@@ -113,7 +114,7 @@ abstract class BaseBrowserWrapper internal constructor(
         dispatchers: Dispatchers,
         activityCallbackProvider: ActivityCallbackProvider,
         suggestionsModel: SuggestionsModel?,
-        neevascopeModel: NeevascopeModel,
+        neevaScopeModel: NeevaScopeModel,
         popupModel: PopupModel,
         neevaUser: NeevaUser,
         faviconCache: FaviconCache,
@@ -134,7 +135,7 @@ abstract class BaseBrowserWrapper internal constructor(
         dispatchers = dispatchers,
         activityCallbackProvider = activityCallbackProvider,
         suggestionsModel = suggestionsModel,
-        neevascopeModel = neevascopeModel,
+        neevaScopeModel = neevaScopeModel,
         popupModel = popupModel,
         neevaUser = neevaUser,
         faviconCache = faviconCache,
@@ -1014,32 +1015,47 @@ abstract class BaseBrowserWrapper internal constructor(
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
     override suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
 
-    override fun showNeevascope() {
+    override fun showNeevaScopeTooltip(): Boolean {
+        val isNeevaScopeEnabled =
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE)
+        val showTryNeevaScopeTooltip =
+            SharedPrefFolder.App.ShowTryNeevaScopeTooltip.get(sharedPreferencesModel)
+        val isDisplayingUrl =
+            activeTabModel.displayedInfoFlow.value.mode == ActiveTabModel.DisplayMode.URL
+
+        if (isNeevaScopeEnabled && showTryNeevaScopeTooltip && isDisplayingUrl) {
+            SharedPrefFolder.App.ShowTryNeevaScopeTooltip.set(sharedPreferencesModel, false)
+            return true
+        }
+        return false
+    }
+
+    override fun showNeevaScope() {
         val isOnNeevaSearch =
             activeTabModel.displayedInfoFlow.value.mode != ActiveTabModel.DisplayMode.URL
 
         coroutineScope.launch {
-            neevascopeModel.updateQuery(
+            neevaScopeModel.updateQuery(
                 activeTabModel.urlFlow.value.toString(),
                 activeTabModel.titleFlow.value
             )
         }
 
         popupModel.showBottomSheet { onDismiss ->
-            val searchState by neevascopeModel.searchFlow.collectAsState()
+            val searchState by neevaScopeModel.searchFlow.collectAsState()
 
             when {
                 neevaUser.isSignedOut() || isOnNeevaSearch -> {
-                    NeevascopeInfoScreen(onTapAction = onDismiss)
+                    NeevaScopeInfoScreen(onTapAction = onDismiss)
                 }
 
                 searchState == null -> {
-                    NeevascopeLoadingScreen()
+                    NeevaScopeLoadingScreen()
                 }
 
                 else -> {
-                    NeevascopeResultScreen(
-                        neevascopeModel = neevascopeModel,
+                    NeevaScopeResultScreen(
+                        neevascopeModel = neevaScopeModel,
                         onDismiss = onDismiss
                     )
                 }

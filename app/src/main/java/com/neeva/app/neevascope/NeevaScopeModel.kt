@@ -21,12 +21,12 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-data class NeevascopeSearchQuery(
+data class NeevaScopeSearchQuery(
     val query: String,
     val title: String
 )
 
-data class NeevascopeWebResult(
+data class NeevaScopeWebResult(
     val faviconURL: String,
     val displayURLHost: String,
     val displayURLPath: List<String>?,
@@ -47,7 +47,7 @@ data class DiscussionContent(
     val comments: List<DiscussionComment>
 )
 
-data class NeevascopeDiscussion(
+data class NeevaScopeDiscussion(
     // Required properties
     val title: String,
     val content: DiscussionContent,
@@ -60,14 +60,14 @@ data class NeevascopeDiscussion(
     val interval: String? = null,
 )
 
-data class NeevascopeResult(
-    val webSearches: List<NeevascopeWebResult> = emptyList(),
+data class NeevaScopeResult(
+    val webSearches: List<NeevaScopeWebResult> = emptyList(),
     val relatedSearches: List<String> = emptyList(),
-    val redditDiscussions: List<NeevascopeDiscussion> = emptyList(),
+    val redditDiscussions: List<NeevaScopeDiscussion> = emptyList(),
     val memorizedSearches: List<String> = emptyList()
 )
 
-class NeevascopeModel(
+class NeevaScopeModel(
     private val apolloWrapper: ApolloWrapper,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
@@ -76,12 +76,12 @@ class NeevascopeModel(
     companion object {
         private const val MEMORIZED_QUERY_COUNT_THRESHOLD = 5
         private const val DISCUSSION_COUNT_THRESHOLD = 5
-        val TAG = NeevascopeModel::class.simpleName
+        val TAG = NeevaScopeModel::class.simpleName
     }
 
-    private val _searchQuery = MutableStateFlow<NeevascopeSearchQuery?>(value = null)
-    val searchQuery: StateFlow<NeevascopeSearchQuery?> get() = _searchQuery
-    val searchFlow: StateFlow<NeevascopeResult?> = searchQuery
+    private val _searchQuery = MutableStateFlow<NeevaScopeSearchQuery?>(value = null)
+    val searchQuery: StateFlow<NeevaScopeSearchQuery?> get() = _searchQuery
+    val searchFlow: StateFlow<NeevaScopeResult?> = searchQuery
         .filterNotNull()
         .map { search ->
             // Neeva search
@@ -90,7 +90,7 @@ class NeevascopeModel(
             // Neeva cheatsheet
             val cheatsheetInfoData = performCheatsheetInfoQuery(search.query, search.title)
 
-            return@map updateNeevascopeResult(searchResultsData, cheatsheetInfoData, appContext)
+            return@map updateNeevaScopeResult(searchResultsData, cheatsheetInfoData, appContext)
         }
         .flowOn(dispatchers.io)
         .stateIn(coroutineScope, SharingStarted.Eagerly, null)
@@ -130,13 +130,13 @@ class NeevascopeModel(
         return cheatsheetInfo
     }
 
-    suspend fun updateNeevascopeResult(
+    suspend fun updateNeevaScopeResult(
         searchResultsData: SearchQuery.Data?,
         cheatsheetInfoData: CheatsheetInfoQuery.Data?,
         appContext: Context
-    ): NeevascopeResult {
+    ): NeevaScopeResult {
         val searchResultGroups = searchResultsData?.search?.resultGroup
-        val webResults: MutableList<NeevascopeWebResult> = mutableListOf()
+        val webResults: MutableList<NeevaScopeWebResult> = mutableListOf()
         var relatedResults = emptyList<String>()
 
         searchResultGroups?.forEach { resultGroup ->
@@ -160,7 +160,7 @@ class NeevascopeModel(
             }
         }
 
-        val discussions: MutableList<NeevascopeDiscussion> = mutableListOf()
+        val discussions: MutableList<NeevaScopeDiscussion> = mutableListOf()
         val memorizedResults =
             cheatsheetInfoData?.getCheatsheetInfo?.MemorizedQuery ?: emptyList()
 
@@ -174,7 +174,7 @@ class NeevascopeModel(
                     }
             }
 
-        return NeevascopeResult(
+        return NeevaScopeResult(
             webSearches = webResults,
             relatedSearches = relatedResults,
             redditDiscussions = discussions.take(DISCUSSION_COUNT_THRESHOLD),
@@ -183,13 +183,13 @@ class NeevascopeModel(
     }
 
     fun updateQuery(query: String, title: String) {
-        _searchQuery.value = NeevascopeSearchQuery(query = query, title = title)
+        _searchQuery.value = NeevaScopeSearchQuery(query = query, title = title)
     }
 }
 
-fun SearchQuery.Result.toWebSearch(): NeevascopeWebResult {
+fun SearchQuery.Result.toWebSearch(): NeevaScopeWebResult {
     val web = this.typeSpecific?.onWeb?.web
-    return NeevascopeWebResult(
+    return NeevaScopeWebResult(
         faviconURL = web?.favIconURL.toString(),
         displayURLHost = web?.structuredUrl?.hostname.toString(),
         displayURLPath = web?.structuredUrl?.paths,
@@ -200,12 +200,12 @@ fun SearchQuery.Result.toWebSearch(): NeevascopeWebResult {
     )
 }
 
-fun CheatsheetInfoQuery.BacklinkURL.toRedditDiscussion(appContext: Context): NeevascopeDiscussion? {
+fun CheatsheetInfoQuery.BacklinkURL.toRedditDiscussion(appContext: Context): NeevaScopeDiscussion? {
     val content = this.Forum?.toDiscussionContent()
     val slash = this.URL?.toDiscussionSlash()
 
     return content?.let {
-        NeevascopeDiscussion(
+        NeevaScopeDiscussion(
             title = this.Title.toString(),
             content = it,
             url = Uri.parse(this.URL),

@@ -9,7 +9,7 @@ import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.neevascope.NeevascopeModel
+import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.Job
@@ -37,7 +37,7 @@ interface BrowserWrapper {
     val faviconCache: FaviconCache
     val findInPageModel: FindInPageModel
     val suggestionsModel: SuggestionsModel?
-    val neevascopeModel: NeevascopeModel
+    val neevaScopeModel: NeevaScopeModel
     val urlBarModel: URLBarModel
     val cookieCutterModel: CookieCutterModel
 
@@ -165,7 +165,8 @@ interface BrowserWrapper {
 
     fun reloadAfterContentFilterAllowListUpdate()
 
-    fun showNeevascope()
+    fun showNeevaScopeTooltip(): Boolean
+    fun showNeevaScope()
 }
 
 class CookiePair(val key: String, val value: String)

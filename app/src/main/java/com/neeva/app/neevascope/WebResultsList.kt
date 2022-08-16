@@ -30,7 +30,7 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.UriDisplayView
 
 fun LazyListScope.WebResultsList(
-    webResults: List<NeevascopeWebResult>,
+    webResults: List<NeevaScopeWebResult>,
     showAllSearches: MutableState<Boolean>,
     openUrl: (Uri) -> Unit,
     onDismiss: () -> Unit
@@ -60,7 +60,7 @@ fun LazyListScope.WebResultsList(
 
 @Composable
 fun WebResultRow(
-    result: NeevascopeWebResult,
+    result: NeevaScopeWebResult,
     openUrl: (Uri) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -88,7 +88,7 @@ fun WebResultRow(
 
 @Composable
 fun WebResultHeader(
-    result: NeevascopeWebResult
+    result: NeevaScopeWebResult
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp)
@@ -127,7 +127,7 @@ fun WebResultHeader(
 fun WebResultRow_Preview() {
     LightDarkPreviewContainer {
         WebResultRow(
-            result = NeevascopeWebResult(
+            result = NeevaScopeWebResult(
                 faviconURL = "www.reddit.com",
                 displayURLHost = "www.reddit.com",
                 displayURLPath = listOf("reddit", "path"),

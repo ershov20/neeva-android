@@ -10,8 +10,8 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectBrowserState
 import com.neeva.app.navigateViaUrlBar
@@ -30,7 +30,8 @@ import org.junit.Test
 @HiltAndroidTest
 class RegularProfileZeroQueryTest : BaseBrowserTest() {
     @get:Rule
-    val skipFirstRunRule = SkipFirstRunRule()
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()

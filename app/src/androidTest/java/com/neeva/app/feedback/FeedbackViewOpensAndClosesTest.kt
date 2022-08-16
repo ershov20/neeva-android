@@ -5,8 +5,8 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.getString
 import com.neeva.app.onBackPressed
@@ -21,7 +21,8 @@ import org.junit.Test
 @HiltAndroidTest
 class FeedbackViewOpensAndClosesTest : BaseBrowserTest() {
     @get:Rule
-    val skipFirstRunRule = SkipFirstRunRule()
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()

@@ -16,8 +16,8 @@ import com.neeva.app.BaseBrowserTest
 import com.neeva.app.DeleteSpaceResultByURLMutation
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaActivity
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.expectBrowserState
@@ -52,7 +52,8 @@ class AddToSpaceTest : BaseBrowserTest() {
     private val testUrl = WebpageServingRule.urlFor("big_link_element.html")
 
     @get:Rule
-    val skipFirstRunRule = SkipFirstRunRule()
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()

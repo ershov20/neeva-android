@@ -35,7 +35,7 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun NeevascopeInfoScreen(
+fun NeevaScopeInfoScreen(
     onTapAction: () -> Unit
 ) {
     Surface {
@@ -64,15 +64,15 @@ fun NeevascopeInfoScreen(
                         horizontalAlignment = Alignment.Start,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        NeevascopeInfoHeader()
+                        NeevaScopeInfoHeader()
 
                         Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
 
-                        NeevascopeInfoBody()
+                        NeevaScopeInfoBody()
 
                         Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
 
-                        NeevascopeInfoButton(
+                        NeevaScopeInfoButton(
                             onTapAction = onTapAction,
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
@@ -83,14 +83,14 @@ fun NeevascopeInfoScreen(
                 // Portrait
                 Column(
                     modifier = Modifier
-                        .padding(horizontal = Dimensions.PADDING_LARGE)
+                        .padding(horizontal = Dimensions.PADDING_HUGE)
                         .verticalScroll(rememberScrollState())
                 ) {
-                    NeevascopeInfoHeader()
+                    NeevaScopeInfoHeader()
 
                     Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
 
-                    NeevascopeInfoBody()
+                    NeevaScopeInfoBody()
 
                     Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
 
@@ -102,7 +102,7 @@ fun NeevascopeInfoScreen(
                             .align(Alignment.CenterHorizontally)
                     )
 
-                    NeevascopeInfoButton(
+                    NeevaScopeInfoButton(
                         onTapAction = onTapAction,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
@@ -113,10 +113,9 @@ fun NeevascopeInfoScreen(
 }
 
 @Composable
-fun NeevascopeInfoHeader() {
+fun NeevaScopeInfoHeader() {
     Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_neeva_logo),
@@ -133,10 +132,8 @@ fun NeevascopeInfoHeader() {
 }
 
 @Composable
-fun NeevascopeInfoBody() {
-    Column(
-        modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
-    ) {
+fun NeevaScopeInfoBody() {
+    Column {
         Text(
             text = stringResource(id = R.string.neevascope_intro_title),
             style = MaterialTheme.typography.bodyLarge
@@ -150,7 +147,7 @@ fun NeevascopeInfoBody() {
 }
 
 @Composable
-fun NeevascopeInfoButton(
+fun NeevaScopeInfoButton(
     onTapAction: () -> Unit,
     modifier: Modifier
 ) {
@@ -171,9 +168,9 @@ fun NeevascopeInfoButton(
 @PortraitPreviews
 @LandscapePreviews
 @Composable
-fun NeevascopeInfo_Light_Preview() {
+fun NeevaScopeInfo_Light_Preview() {
     NeevaTheme {
-        NeevascopeInfoScreen(
+        NeevaScopeInfoScreen(
             onTapAction = {}
         )
     }
@@ -186,9 +183,9 @@ fun NeevascopeInfo_Light_Preview() {
     uiMode = UI_MODE_NIGHT_YES
 )
 @Composable
-fun NeevascopeInfo_Dark_Preview() {
+fun NeevaScopeInfo_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        NeevascopeInfoScreen(
+        NeevaScopeInfoScreen(
             onTapAction = {}
         )
     }

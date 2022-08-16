@@ -7,6 +7,7 @@ import com.neeva.app.LogMutation
 import com.neeva.app.MainActivity
 import com.neeva.app.MultiActivityTestRule
 import com.neeva.app.NeevaActivity
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.createMainIntent
@@ -32,6 +33,10 @@ class FirstRunStartupTest : BaseBrowserTest() {
         false,
         false
     )
+
+    @get:Rule
+    val skipNeevaScopeTooltipRule =
+        PresetSharedPreferencesRule(skipNeevaScopeTooltip = true)
 
     @get:Rule
     val multiActivityTestRule = MultiActivityTestRule()

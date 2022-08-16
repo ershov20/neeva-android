@@ -22,7 +22,7 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
-fun NeevascopeLoadingScreen() {
+fun NeevaScopeLoadingScreen() {
     Surface {
         Column(
             modifier = Modifier
@@ -37,11 +37,11 @@ fun NeevascopeLoadingScreen() {
                 contentDescription = null
             )
 
-            Spacer(Modifier.padding(Dimensions.PADDING_LARGE))
+            Spacer(Modifier.padding(Dimensions.PADDING_HUGE))
 
             Text(
                 text = stringResource(id = R.string.neevascope_loading),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(Dimensions.PADDING_LARGE)
             )
@@ -52,17 +52,17 @@ fun NeevascopeLoadingScreen() {
 @PortraitPreviews
 @LandscapePreviews
 @Composable
-fun NeevascopeLoading_Preview() {
+fun NeevaScopeLoading_Preview() {
     NeevaTheme {
-        NeevascopeLoadingScreen()
+        NeevaScopeLoadingScreen()
     }
 }
 
 @PortraitPreviews
 @LandscapePreviews
 @Composable
-fun NeevascopeLoading_Dark_Preview() {
+fun NeevaScopeLoading_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
-        NeevascopeLoadingScreen()
+        NeevaScopeLoadingScreen()
     }
 }

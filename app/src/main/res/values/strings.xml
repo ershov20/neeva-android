@@ -702,6 +702,9 @@
     <!-- [NeevaScope] Title of the NeevaScope feature. -->
     <string name="neevascope">NeevaScope</string>
 
+    <!-- [NeevaScope] Title of the NeevaScope tooltip. -->
+    <string name="neevascope_tooltip">Try NeevaScope!</string>
+
     <!-- [NeevaScope] Tells the user how NeevaScope is triggered. -->
     <string name="neevascope_intro_title">Tap on the Neeva logo to see information related to the website you\'re visiting.</string>
 

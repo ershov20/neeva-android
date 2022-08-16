@@ -9,7 +9,7 @@ import com.neeva.app.cookiecutter.RegularTrackersAllowList
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
-import com.neeva.app.neevascope.NeevascopeModel
+import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -69,7 +69,7 @@ class RegularBrowserWrapper(
         neevaConstants = neevaConstants,
         clientLogger = clientLogger
     ),
-    neevascopeModel = NeevascopeModel(
+    neevaScopeModel = NeevaScopeModel(
         apolloWrapper = authenticatedApolloWrapper,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,

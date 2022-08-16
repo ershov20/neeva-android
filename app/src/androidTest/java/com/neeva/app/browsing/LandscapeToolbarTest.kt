@@ -7,8 +7,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.getString
 import com.neeva.app.openCardGrid
 import com.neeva.app.openLazyTab
@@ -23,7 +23,8 @@ import org.junit.Test
 @HiltAndroidTest
 class LandscapeToolbarTest : BaseBrowserTest() {
     @get:Rule
-    val skipFirstRunRule = SkipFirstRunRule()
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()

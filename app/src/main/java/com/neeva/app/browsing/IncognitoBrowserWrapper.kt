@@ -11,7 +11,7 @@ import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.cookiecutter.IncognitoTrackersAllowList
 import com.neeva.app.cookiecutter.ScriptInjectionManager
-import com.neeva.app.neevascope.NeevascopeModel
+import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -54,7 +54,7 @@ class IncognitoBrowserWrapper private constructor(
     dispatchers = dispatchers,
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = null,
-    neevascopeModel = NeevascopeModel(
+    neevaScopeModel = NeevaScopeModel(
         apolloWrapper = unauthenticatedApolloWrapper,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,

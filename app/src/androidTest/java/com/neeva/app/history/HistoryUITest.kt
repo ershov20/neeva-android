@@ -12,8 +12,8 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.SkipFirstRunRule
 import com.neeva.app.TestNeevaConstantsModule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.clickOnNodeWithContentDescription
@@ -48,7 +48,8 @@ class HistoryUITest : BaseBrowserTest() {
     private val testUrl = WebpageServingRule.urlFor("big_link_element.html")
 
     @get:Rule
-    val skipFirstRunRule = SkipFirstRunRule()
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()

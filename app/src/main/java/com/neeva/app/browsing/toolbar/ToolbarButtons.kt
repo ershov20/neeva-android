@@ -71,7 +71,7 @@ fun NeevaScopeButton(modifier: Modifier = Modifier) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
 
     IconButton(
-        onClick = browserToolbarModel::showNeevascope,
+        onClick = browserToolbarModel::showNeevaScope,
         modifier = modifier
     ) {
         Icon(

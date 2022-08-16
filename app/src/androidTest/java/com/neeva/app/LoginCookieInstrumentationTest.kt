@@ -12,6 +12,7 @@ import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
 import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isEmpty
@@ -24,6 +25,10 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
     private lateinit var neevaUserToken: NeevaUserToken
     private lateinit var neevaUser: NeevaUser
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
+
+    @get:Rule
+    val skipNeevaScopeTooltipRule =
+        PresetSharedPreferencesRule(skipNeevaScopeTooltip = true)
 
     private fun setUpLoggedInUser(context: Context) {
         neevaConstants = TestNeevaConstantsModule.neevaConstants

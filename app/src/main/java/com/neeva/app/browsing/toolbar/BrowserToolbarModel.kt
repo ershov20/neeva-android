@@ -12,7 +12,7 @@ abstract class BrowserToolbarModel {
     abstract fun goForward()
     abstract fun reload()
     abstract fun reloadAfterContentFilterAllowListUpdate()
-    abstract fun showNeevascope()
+    abstract fun showNeevaScope()
     abstract fun share()
     abstract fun onAddToSpace()
     abstract fun onMenuItem(id: OverflowMenuItemId)

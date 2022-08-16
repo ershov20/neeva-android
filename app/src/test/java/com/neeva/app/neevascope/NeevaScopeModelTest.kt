@@ -29,13 +29,13 @@ import strikt.assertions.isEqualTo
 @RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
-class NeevascopeModelTest : BaseTest() {
+class NeevaScopeModelTest : BaseTest() {
     @Rule
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
     private lateinit var dispatchers: Dispatchers
-    private lateinit var neevascopeModel: NeevascopeModel
+    private lateinit var neevaScopeModel: NeevaScopeModel
     private lateinit var context: Context
     private lateinit var neevaConstants: NeevaConstants
     private lateinit var neevaUser: NeevaUser
@@ -68,7 +68,7 @@ class NeevascopeModelTest : BaseTest() {
             io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
         )
 
-        neevascopeModel = NeevascopeModel(
+        neevaScopeModel = NeevaScopeModel(
             apolloWrapper = apolloWrapper,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = dispatchers,
@@ -77,16 +77,16 @@ class NeevascopeModelTest : BaseTest() {
     }
 
     @Test
-    fun onQueryChanged_withNonEmptyString_fetchNeevascopeDataAndTestResult() {
+    fun onQueryChanged_withNonEmptyString_fetchNeevaScopeDataAndTestResult() {
         runBlocking {
-            val result = neevascopeModel.updateNeevascopeResult(
+            val result = neevaScopeModel.updateNeevaScopeResult(
                 SEARCH_DATA,
                 CHEATSHEET_DATA,
                 context
             )
 
             expectThat(result.webSearches).containsExactly(
-                NeevascopeWebResult(
+                NeevaScopeWebResult(
                     faviconURL = "",
                     displayURLHost = "neeva.com",
                     displayURLPath = listOf("neeva", "search"),
@@ -107,7 +107,7 @@ class NeevascopeModelTest : BaseTest() {
             )
 
             expectThat(result.redditDiscussions).containsExactly(
-                NeevascopeDiscussion(
+                NeevaScopeDiscussion(
                     title = "GTA Vice City",
                     content = DiscussionContent(
                         body = "This is forum body",

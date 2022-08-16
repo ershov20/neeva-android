@@ -42,15 +42,15 @@ import com.neeva.app.ui.theme.Dimensions
 private const val NUMBER_COLLAPSED = 3
 
 @Composable
-fun NeevascopeResultScreen(
-    neevascopeModel: NeevascopeModel,
+fun NeevaScopeResultScreen(
+    neevascopeModel: NeevaScopeModel,
     onDismiss: () -> Unit
 ) {
     val appNavModel = LocalAppNavModel.current
     val neevaConstants = LocalNeevaConstants.current
     val searches by neevascopeModel.searchFlow.collectAsState(initial = null)
 
-    NeevascopeResultScreen(
+    NeevaScopeResultScreen(
         openUrl = appNavModel::openUrl,
         showFeedback = appNavModel::showFeedback,
         onDismiss = onDismiss,
@@ -60,11 +60,11 @@ fun NeevascopeResultScreen(
 }
 
 @Composable
-fun NeevascopeResultScreen(
+fun NeevaScopeResultScreen(
     openUrl: (Uri) -> Unit,
     showFeedback: () -> Unit,
     onDismiss: () -> Unit,
-    searches: NeevascopeResult?,
+    searches: NeevaScopeResult?,
     neevaConstants: NeevaConstants
 ) {
     val showAllDiscussions = remember { mutableStateOf(true) }

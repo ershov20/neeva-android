@@ -40,6 +40,7 @@ import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopover
 import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
 import com.neeva.app.cookiecutter.ui.popover.PreviewCookieCutterPopoverModel
 import com.neeva.app.cookiecutter.ui.popover.rememberCookieCutterPopoverModel
+import com.neeva.app.neevascope.NeevaScopeTooltip
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.settings.SettingsToggle
@@ -57,6 +58,10 @@ fun BrowserToolbarContainer(topOffset: Float) {
     val enableShowDesktopSite = LocalSettingsDataModel.current
         .getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
 
+    val showNeevaScopeTooltip = LocalBrowserWrapper.current.showNeevaScopeTooltip()
+    val enableNeevaScope = LocalSettingsDataModel.current
+        .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE)
+
     val appNavModel = LocalAppNavModel.current
     val cookieCutterPopoverModel = rememberCookieCutterPopoverModel(
         appNavModel = appNavModel,
@@ -68,6 +73,8 @@ fun BrowserToolbarContainer(topOffset: Float) {
     BrowserToolbar(
         findInPageModel = findInPageModel,
         enableShowDesktopSite = enableShowDesktopSite,
+        showNeevaScopeTooltip = showNeevaScopeTooltip,
+        enableNeevaScope = enableNeevaScope,
         cookieCutterPopoverModel = cookieCutterPopoverModel,
         modifier = Modifier
             .offset(y = topOffsetDp)
@@ -86,6 +93,8 @@ fun BrowserToolbarContainer(topOffset: Float) {
 fun BrowserToolbar(
     findInPageModel: FindInPageModel,
     enableShowDesktopSite: Boolean,
+    showNeevaScopeTooltip: Boolean,
+    enableNeevaScope: Boolean,
     cookieCutterPopoverModel: CookieCutterPopoverModel,
     modifier: Modifier = Modifier,
 ) {
@@ -166,6 +175,10 @@ fun BrowserToolbar(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (browserToolbarModel.useSingleBrowserToolbar) {
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
+                                if (enableNeevaScope) {
+                                    NeevaScopeButton()
+                                    Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
+                                }
                                 AddToSpaceButton()
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                                 TabSwitcherButton()
@@ -193,6 +206,10 @@ fun BrowserToolbar(
                         cookieCutterPopoverModel = cookieCutterPopoverModel
                     )
                 }
+
+                if (showNeevaScopeTooltip) {
+                    NeevaScopeTooltip(browserToolbarModel.useSingleBrowserToolbar)
+                }
             }
         }
     }
@@ -214,6 +231,8 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 enableShowDesktopSite = true,
+                showNeevaScopeTooltip = false,
+                enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
@@ -244,6 +263,8 @@ internal fun ToolbarPreview_Focus(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 enableShowDesktopSite = true,
+                showNeevaScopeTooltip = false,
+                enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
@@ -275,6 +296,8 @@ internal fun ToolbarPreview_Typing(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 enableShowDesktopSite = true,
+                showNeevaScopeTooltip = false,
+                enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
@@ -305,6 +328,8 @@ internal fun ToolbarPreview_Search(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 enableShowDesktopSite = true,
+                showNeevaScopeTooltip = false,
+                enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
@@ -337,6 +362,8 @@ internal fun ToolbarPreview_Loading(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 enableShowDesktopSite = true,
+                showNeevaScopeTooltip = false,
+                enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }

@@ -45,7 +45,7 @@ import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 
 fun LazyListScope.RedditDiscussionsList(
-    discussions: List<NeevascopeDiscussion>,
+    discussions: List<NeevaScopeDiscussion>,
     showAllDiscussions: MutableState<Boolean>,
     openUrl: (Uri) -> Unit,
     onDismiss: () -> Unit
@@ -81,7 +81,7 @@ fun LazyListScope.RedditDiscussionsList(
 
 @Composable
 fun RedditDiscussionHeader(
-    discussion: NeevascopeDiscussion
+    discussion: NeevaScopeDiscussion
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(Dimensions.PADDING_SMALL)
@@ -180,7 +180,7 @@ fun RedditDiscussionIcon(
 
 @Composable
 fun RedditDiscussionRow(
-    discussion: NeevascopeDiscussion,
+    discussion: NeevaScopeDiscussion,
     openUrl: (Uri) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -322,7 +322,7 @@ fun ExpandableTextView(
 fun RedditDiscussionRow_withComments_Preview() {
     LightDarkPreviewContainer {
         RedditDiscussionRow(
-            discussion = NeevascopeDiscussion(
+            discussion = NeevaScopeDiscussion(
                 title = "GTA Vice City",
                 content = DiscussionContent(
                     body = "",
