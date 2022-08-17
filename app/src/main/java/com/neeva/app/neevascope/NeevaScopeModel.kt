@@ -81,14 +81,21 @@ class NeevaScopeModel(
 
     private val _searchQuery = MutableStateFlow<NeevaScopeSearchQuery?>(value = null)
     val searchQuery: StateFlow<NeevaScopeSearchQuery?> get() = _searchQuery
+    private val _isLoading = MutableStateFlow(value = false)
+    val isLoading: StateFlow<Boolean> get() = _isLoading
+
     val searchFlow: StateFlow<NeevaScopeResult?> = searchQuery
         .filterNotNull()
         .map { search ->
+            _isLoading.value = true
+
             // Neeva search
             val searchResultsData = performNeevaScopeQuery(query = search.query)
 
             // Neeva cheatsheet
             val cheatsheetInfoData = performCheatsheetInfoQuery(search.query, search.title)
+
+            _isLoading.value = false
 
             return@map updateNeevaScopeResult(searchResultsData, cheatsheetInfoData, appContext)
         }

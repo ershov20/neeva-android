@@ -1042,14 +1042,14 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         popupModel.showBottomSheet { onDismiss ->
-            val searchState by neevaScopeModel.searchFlow.collectAsState()
+            val isLoading by neevaScopeModel.isLoading.collectAsState()
 
             when {
                 neevaUser.isSignedOut() || isOnNeevaSearch -> {
                     NeevaScopeInfoScreen(onTapAction = onDismiss)
                 }
 
-                searchState == null -> {
+                isLoading -> {
                     NeevaScopeLoadingScreen()
                 }
 
