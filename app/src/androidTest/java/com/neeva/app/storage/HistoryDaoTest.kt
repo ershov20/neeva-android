@@ -1,11 +1,13 @@
 package com.neeva.app.storage
 
 import android.net.Uri
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.storage.daos.HistoryDao
 import com.neeva.app.storage.entities.Visit
 import dagger.hilt.android.testing.HiltAndroidTest
 import java.util.Date
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
@@ -15,6 +17,10 @@ import strikt.assertions.isEqualTo
 @HiltAndroidTest
 class HistoryDaoTest : HistoryDatabaseBaseTest() {
     private lateinit var sitesRepository: HistoryDao
+
+    @get:Rule
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     override fun setUp() {
         super.setUp()

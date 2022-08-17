@@ -27,8 +27,7 @@ class IntentLaunchTest : BaseBrowserTest() {
     )
 
     @get:Rule
-    val presetSharedPreferencesRule =
-        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
+    val presetSharedPreferencesRule = PresetSharedPreferencesRule()
 
     @get:Rule
     val multiActivityTestRule = MultiActivityTestRule()

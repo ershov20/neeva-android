@@ -52,8 +52,7 @@ import strikt.assertions.isEqualTo
 @HiltAndroidTest
 class SuggestionsPaneTest : BaseBrowserTest() {
     @get:Rule
-    val presetSharedPreferencesRule =
-        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
+    val presetSharedPreferencesRule = PresetSharedPreferencesRule()
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()

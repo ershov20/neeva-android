@@ -11,8 +11,8 @@ import org.junit.runners.model.Statement
 
 /** Forces the Neeva app to skip First Run or NeevaScope tooltip when it starts. */
 class PresetSharedPreferencesRule(
-    val skipFirstRun: Boolean = false,
-    val skipNeevaScopeTooltip: Boolean = false
+    val skipFirstRun: Boolean = true,
+    val skipNeevaScopeTooltip: Boolean = true
 ) : TestRule {
     override fun apply(base: Statement?, description: Description?): Statement {
         return object : Statement() {

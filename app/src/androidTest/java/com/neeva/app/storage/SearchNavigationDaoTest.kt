@@ -2,9 +2,11 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import com.apollographql.apollo3.testing.runTest
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.storage.daos.SearchNavigationDao
 import com.neeva.app.storage.entities.SearchNavigation
 import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
@@ -13,6 +15,10 @@ import strikt.assertions.isEmpty
 @HiltAndroidTest
 class SearchNavigationDaoTest : HistoryDatabaseBaseTest() {
     private lateinit var searchNavigationDao: SearchNavigationDao
+
+    @get:Rule
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     override fun setUp() {
         super.setUp()

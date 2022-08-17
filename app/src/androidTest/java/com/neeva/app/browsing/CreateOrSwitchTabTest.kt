@@ -38,8 +38,7 @@ import strikt.assertions.isTrue
 @HiltAndroidTest
 class CreateOrSwitchTabTest : BaseBrowserTest() {
     @get:Rule
-    val presetSharedPreferencesRule =
-        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
+    val presetSharedPreferencesRule = PresetSharedPreferencesRule()
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()

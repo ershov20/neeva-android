@@ -35,8 +35,8 @@ class FirstRunStartupTest : BaseBrowserTest() {
     )
 
     @get:Rule
-    val skipNeevaScopeTooltipRule =
-        PresetSharedPreferencesRule(skipNeevaScopeTooltip = true)
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     @get:Rule
     val multiActivityTestRule = MultiActivityTestRule()

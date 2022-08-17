@@ -4,6 +4,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.BaseHiltTest
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.storage.entities.SpaceEntityType
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
@@ -16,6 +17,10 @@ class HistoryDatabaseMigrationTest : BaseHiltTest() {
     companion object {
         private const val TEST_DB_FILENAME = "migration-test"
     }
+
+    @get:Rule
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     @get:Rule
     val helper: MigrationTestHelper = MigrationTestHelper(

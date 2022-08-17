@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.BaseHiltTest
 import com.neeva.app.Dispatchers
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.storage.toByteArray
@@ -15,6 +16,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
@@ -27,6 +29,10 @@ class IncognitoFaviconCacheTest : BaseHiltTest() {
     private lateinit var domainProvider: DomainProvider
     private lateinit var dispatchers: Dispatchers
     private lateinit var incognitoFaviconCache: IncognitoFaviconCache
+
+    @get:Rule
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     override fun setUp() {
         super.setUp()

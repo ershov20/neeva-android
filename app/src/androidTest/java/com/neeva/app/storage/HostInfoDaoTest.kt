@@ -1,9 +1,11 @@
 package com.neeva.app.storage
 
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.storage.daos.HostInfoDao
 import com.neeva.app.storage.entities.HostInfo
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.hasSize
@@ -14,6 +16,10 @@ import strikt.assertions.isTrue
 @HiltAndroidTest
 class HostInfoDaoTest : HistoryDatabaseBaseTest() {
     private lateinit var hostInfoRepository: HostInfoDao
+
+    @get:Rule
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     override fun setUp() {
         super.setUp()

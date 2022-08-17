@@ -27,8 +27,8 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
 
     @get:Rule
-    val skipNeevaScopeTooltipRule =
-        PresetSharedPreferencesRule(skipNeevaScopeTooltip = true)
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     private fun setUpLoggedInUser(context: Context) {
         neevaConstants = TestNeevaConstantsModule.neevaConstants

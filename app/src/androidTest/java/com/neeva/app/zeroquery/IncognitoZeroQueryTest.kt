@@ -40,8 +40,7 @@ class IncognitoZeroQueryTest : BaseBrowserTest() {
     private val testUrl = WebpageServingRule.urlFor("big_link_element.html")
 
     @get:Rule
-    val presetSharedPreferencesRule =
-        PresetSharedPreferencesRule(skipFirstRun = true, skipNeevaScopeTooltip = true)
+    val presetSharedPreferencesRule = PresetSharedPreferencesRule()
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()

@@ -2,6 +2,7 @@ package com.neeva.app.storage
 
 import android.net.Uri
 import com.neeva.app.GetSpacesDataQuery
+import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.spaces.toSpace
 import com.neeva.app.storage.daos.SpaceDao
 import com.neeva.app.storage.entities.SpaceEntityType
@@ -10,6 +11,7 @@ import com.neeva.app.storage.entities.spaceItem
 import com.neeva.testcommon.apollo.MockListSpacesQueryData
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
+import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.contains
@@ -31,6 +33,10 @@ class SpaceDaoTest : HistoryDatabaseBaseTest() {
     }
 
     private lateinit var spacesRepository: SpaceDao
+
+    @get:Rule
+    val presetSharedPreferencesRule =
+        PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     override fun setUp() {
         super.setUp()
