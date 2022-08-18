@@ -176,7 +176,10 @@ fun BrowserToolbar(
                             if (browserToolbarModel.useSingleBrowserToolbar) {
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                                 if (enableNeevaScope) {
-                                    NeevaScopeButton()
+                                    NeevaScopeButton(
+                                        isLandscape = true,
+                                        isIncognito = browserToolbarModel.isIncognito
+                                    )
                                     Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                                 }
                                 AddToSpaceButton()
@@ -216,7 +219,7 @@ fun BrowserToolbar(
 }
 
 @Composable
-internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
+internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean, enableNeevaScope: Boolean) {
     OneBooleanPreviewContainer { isIncognito ->
         CompositionLocalProvider(
             LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
@@ -232,7 +235,7 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
                 findInPageModel = PreviewFindInPageModel(),
                 enableShowDesktopSite = true,
                 showNeevaScopeTooltip = false,
-                enableNeevaScope = false,
+                enableNeevaScope = enableNeevaScope,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
             )
         }
@@ -243,7 +246,7 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
 @Preview("Blank, RTL", locale = "he")
 @Composable
 fun ToolbarPreview_Blank_Portrait() {
-    ToolbarPreview_Blank(false)
+    ToolbarPreview_Blank(false, false)
 }
 
 @Composable

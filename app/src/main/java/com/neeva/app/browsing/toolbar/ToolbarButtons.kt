@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -67,8 +68,21 @@ fun ShareButton(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun NeevaScopeButton(modifier: Modifier = Modifier) {
+fun NeevaScopeButton(
+    isLandscape: Boolean = false,
+    isIncognito: Boolean = false,
+    modifier: Modifier = Modifier
+) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
+    val iconColor = if (isIncognito) {
+        if (isLandscape) {
+            MaterialTheme.colorScheme.onSurface
+        } else {
+            MaterialTheme.colorScheme.inverseOnSurface
+        }
+    } else {
+        Color.Unspecified
+    }
 
     IconButton(
         onClick = browserToolbarModel::showNeevaScope,
@@ -78,7 +92,7 @@ fun NeevaScopeButton(modifier: Modifier = Modifier) {
             painter = painterResource(id = R.drawable.ic_neeva_logo),
             contentDescription = stringResource(id = R.string.neevascope),
             modifier = Modifier.size(Dimensions.SIZE_ICON_TOOLBAR),
-            tint = Color.Unspecified
+            tint = iconColor
         )
     }
 }

@@ -85,6 +85,7 @@ fun BrowserBottomToolbar(
                     NeevaScopeTooltip(browserToolbarModel.useSingleBrowserToolbar)
                 }
                 NeevaScopeButton(
+                    isIncognito = isIncognito,
                     modifier = Modifier.weight(1.0f)
                 )
             }
