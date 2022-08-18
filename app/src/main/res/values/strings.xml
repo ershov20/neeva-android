@@ -151,7 +151,7 @@
 
     <!-- [URL bar][a11y] Indicates that the user is on a Neeva search results page.
          [Suggestions] Section header for search results and suggestions from Neeva. -->
-    <string name="neeva_search">Neeva Search</string>
+    <string name="neeva_search">Neeva search</string>
 
 
 
@@ -368,6 +368,8 @@
     <!-- [History][Snackbar] Tells the user that the site with the given title was removed from their browsing history. -->
     <string name="history_removed_visit">Removed \"%1$s\" from history</string>
 
+    <!-- [History] Placeholder text shown to a user to suggest that they can type into the URL bar. -->
+    <string name="history_filter_placeholder">Search your history</string>
 
 
     <!-- [Zero query][Button] Sends the user to the homepage (https://www.neeva.com). -->

@@ -697,8 +697,8 @@ abstract class BaseBrowserWrapper internal constructor(
     ) {
         browser?.let {
             val tabOpenType = when {
-                parentTabId != null || parentSpaceId != null -> TabInfo.TabOpenType.CHILD_TAB
                 isViaIntent -> TabInfo.TabOpenType.VIA_INTENT
+                parentTabId != null || parentSpaceId != null -> TabInfo.TabOpenType.CHILD_TAB
                 else -> TabInfo.TabOpenType.DEFAULT
             }
 
@@ -928,8 +928,13 @@ abstract class BaseBrowserWrapper internal constructor(
                         mustCreateNewTab = false
                     }
                     ?: run {
-                        // Create a new tab that kicks the user back to the current tab on back.
-                        parentTabIdToUse = getActiveTab()?.guid ?: parentTabId
+                        parentTabIdToUse = if (isViaIntent) {
+                            // Create a new tab that kicks the user back to the calling app.
+                            null
+                        } else {
+                            // Create a new tab that kicks the user back to the current tab on back.
+                            getActiveTab()?.guid ?: parentTabId
+                        }
                         mustCreateNewTab = true
                     }
             }

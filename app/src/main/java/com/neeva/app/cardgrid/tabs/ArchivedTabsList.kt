@@ -130,7 +130,11 @@ fun ArchivedTabsList(
         }
     }
 
-    ArchivingOptionsDialog(isArchivingDialogVisibleState)
+    if (isArchivingDialogVisibleState.value) {
+        ArchivingOptionsDialog(
+            onDismissDialog = { isArchivingDialogVisibleState.value = false }
+        )
+    }
 }
 
 @PortraitPreviews

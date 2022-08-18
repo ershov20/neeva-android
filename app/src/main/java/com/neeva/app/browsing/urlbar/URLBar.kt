@@ -3,10 +3,7 @@ package com.neeva.app.browsing.urlbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -18,7 +15,8 @@ import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.toolbar.PreviewBrowserToolbarModel
 import com.neeva.app.ui.OneBooleanPreviewContainer
-import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.AutocompleteTextField
+import com.neeva.app.ui.widgets.PillSurface
 
 @Composable
 fun URLBar(modifier: Modifier = Modifier) {
@@ -48,12 +46,10 @@ fun URLBar(modifier: Modifier = Modifier) {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
 
-    Surface(
-        color = backgroundColor,
-        contentColor = foregroundColor,
-        shape = RoundedCornerShape(24.dp),
-        tonalElevation = 2.dp,
-        modifier = modifier.padding(vertical = Dimensions.PADDING_SMALL)
+    PillSurface(
+        backgroundColor = backgroundColor,
+        foregroundColor = foregroundColor,
+        modifier = modifier
     ) {
         val childModifier = Modifier
             .fillMaxWidth()
@@ -65,11 +61,11 @@ fun URLBar(modifier: Modifier = Modifier) {
                 suggestionText = urlBarModelState.value.autocompleteSuggestionText,
                 faviconBitmap = urlBarModelState.value.faviconBitmap,
                 placeholderColor = placeholderColor,
-                onLocationEdited = { urlBarModel.onLocationBarTextChanged(it) },
-                onCleared = { urlBarModel.replaceLocationBarText("") },
-                onLoadUrl = { browserToolbarModel.onLoadUrl(urlBarModelState.value) },
-                onAcceptAutocompleteSuggestion = urlBarModel::acceptAutocompleteSuggestion,
-                focusUrlBar = focusUrlBar,
+                onTextEdited = { urlBarModel.onLocationBarTextChanged(it) },
+                onTextCleared = { urlBarModel.replaceLocationBarText("") },
+                onSubmitted = { browserToolbarModel.onLoadUrl(urlBarModelState.value) },
+                onAcceptSuggestion = urlBarModel::acceptAutocompleteSuggestion,
+                focusImmediately = focusUrlBar,
                 modifier = childModifier
             )
         } else {

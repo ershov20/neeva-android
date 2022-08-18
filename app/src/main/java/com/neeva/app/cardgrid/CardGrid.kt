@@ -25,19 +25,18 @@ fun <T> CardGrid(
     content: LazyGridScope.(numCellsPerRow: Int, listItems: List<T>) -> Unit
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val numCells = round(maxWidth / minimumCardWidth).toInt().coerceAtLeast(2)
-        val gridState = rememberLazyGridState(
-            initialFirstVisibleItemIndex = computeFirstVisibleItemIndex(numCells)
-        )
-
-        val contentModifier = Modifier.fillMaxSize()
         if (items.isEmpty()) {
             emptyComposable()
         } else {
+            val numCells = round(maxWidth / minimumCardWidth).toInt().coerceAtLeast(2)
+            val gridState = rememberLazyGridState(
+                initialFirstVisibleItemIndex = computeFirstVisibleItemIndex(numCells)
+            )
+
             LazyVerticalGrid(
                 columns = GridCells.Fixed(numCells),
                 state = gridState,
-                modifier = contentModifier
+                modifier = Modifier.fillMaxSize()
             ) {
                 content(numCells, items)
             }

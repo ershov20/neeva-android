@@ -1,4 +1,4 @@
-package com.neeva.app.browsing.urlbar
+package com.neeva.app.ui.widgets
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -46,10 +46,10 @@ class AutocompleteTextFieldTest : BaseHiltTest() {
                         ),
                         suggestionText = fullText.drop(typedLength),
                         faviconBitmap = null,
-                        onLocationEdited = {},
-                        onCleared = { wasCleared = it.isEmpty() },
-                        onLoadUrl = {},
-                        onAcceptAutocompleteSuggestion = {},
+                        onTextEdited = {},
+                        onTextCleared = { wasCleared = true },
+                        onSubmitted = {},
+                        onAcceptSuggestion = {},
                         placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -75,10 +75,10 @@ class AutocompleteTextFieldTest : BaseHiltTest() {
                         textFieldValue = TextFieldValue(),
                         suggestionText = null,
                         faviconBitmap = null,
-                        onLocationEdited = {},
-                        onCleared = {},
-                        onLoadUrl = {},
-                        onAcceptAutocompleteSuggestion = {},
+                        onTextEdited = {},
+                        onTextCleared = {},
+                        onSubmitted = {},
+                        onAcceptSuggestion = {},
                         placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -110,10 +110,10 @@ class AutocompleteTextFieldTest : BaseHiltTest() {
                         ),
                         suggestionText = fullText.drop(typedLength),
                         faviconBitmap = null,
-                        onLocationEdited = {},
-                        onCleared = {},
-                        onLoadUrl = {},
-                        onAcceptAutocompleteSuggestion = { wasTriggered = true },
+                        onTextEdited = {},
+                        onTextCleared = {},
+                        onSubmitted = {},
+                        onAcceptSuggestion = { wasTriggered = true },
                         placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }

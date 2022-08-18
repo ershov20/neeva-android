@@ -1,4 +1,4 @@
-package com.neeva.app.browsing.urlbar
+package com.neeva.app.ui.widgets
 
 import android.graphics.Bitmap
 import android.view.KeyEvent
@@ -35,6 +35,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -55,7 +56,6 @@ import com.neeva.app.R
 import com.neeva.app.ui.KeyboardFocusEffect
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.widgets.FaviconView
 
 private class AutocompleteOffsetMapping(private val originalText: AnnotatedString) : OffsetMapping {
     override fun originalToTransformed(offset: Int): Int {
@@ -72,14 +72,16 @@ private class AutocompleteOffsetMapping(private val originalText: AnnotatedStrin
 @Composable
 fun AutocompleteTextField(
     textFieldValue: TextFieldValue,
-    suggestionText: String?,
-    faviconBitmap: Bitmap?,
-    onLocationEdited: (TextFieldValue) -> Unit,
-    onCleared: (String) -> Unit,
-    onLoadUrl: () -> Unit,
-    onAcceptAutocompleteSuggestion: () -> Unit,
+    suggestionText: String? = null,
+    imageVector: ImageVector? = null,
+    faviconBitmap: Bitmap? = null,
+    onTextEdited: (TextFieldValue) -> Unit,
+    onTextCleared: () -> Unit,
+    onSubmitted: () -> Unit,
+    onAcceptSuggestion: () -> Unit = {},
     placeholderColor: Color,
-    focusUrlBar: Boolean = true,
+    focusImmediately: Boolean = true,
+    placeholderText: String = stringResource(R.string.url_bar_placeholder),
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -88,15 +90,25 @@ fun AutocompleteTextField(
     ) {
         Spacer(Modifier.width(Dimensions.PADDING_MEDIUM))
 
-        FaviconView(
-            bitmap = faviconBitmap,
-            drawContainer = false
-        )
+        when {
+            imageVector != null -> {
+                Icon(
+                    imageVector = imageVector,
+                    contentDescription = null
+                )
+            }
+
+            else -> {
+                FaviconView(
+                    bitmap = faviconBitmap,
+                    drawContainer = false
+                )
+            }
+        }
 
         Spacer(Modifier.width(Dimensions.PADDING_SMALL))
 
         val selectionBackground = LocalTextSelectionColors.current.backgroundColor
-        val placeholderText = stringResource(R.string.url_bar_placeholder)
 
         // Append additional text after what the user _actually_ typed in.
         val visualTransformation = VisualTransformation { text ->
@@ -137,13 +149,13 @@ fun AutocompleteTextField(
                 .height(IntrinsicSize.Min)
         ) {
             val focusRequester = remember { FocusRequester() }
-            KeyboardFocusEffect(focusRequester.takeIf { focusUrlBar })
+            KeyboardFocusEffect(focusRequester.takeIf { focusImmediately })
 
             // [BasicTextField]s don't have support for Material 3 colors, so we have to manually
             // provide them.
             BasicTextField(
                 value = textFieldValue,
-                onValueChange = onLocationEdited,
+                onValueChange = onTextEdited,
                 modifier = Modifier
                     .focusRequester(focusRequester)
                     .onPreviewKeyEvent {
@@ -154,7 +166,7 @@ fun AutocompleteTextField(
                             // keyup event.  To avoid creating two tabs, explicitly look for the
                             // keydown event and ignore the keyup.
                             if (it.nativeKeyEvent.action == KeyEvent.ACTION_DOWN) {
-                                onLoadUrl()
+                                onSubmitted()
                             }
                             true
                         } else {
@@ -182,7 +194,7 @@ fun AutocompleteTextField(
                     autoCorrect = false
                 ),
                 keyboardActions = KeyboardActions(
-                    onGo = { onLoadUrl() }
+                    onGo = { onSubmitted() }
                 ),
                 cursorBrush = SolidColor(LocalContentColor.current)
             )
@@ -192,7 +204,7 @@ fun AutocompleteTextField(
             if (!suggestionText.isNullOrEmpty()) {
                 val completedSuggestion = textFieldValue.text + suggestionText
                 Button(
-                    onClick = onAcceptAutocompleteSuggestion,
+                    onClick = onAcceptSuggestion,
                     modifier = Modifier.fillMaxSize().alpha(0f)
                 ) {
                     Text(
@@ -211,7 +223,7 @@ fun AutocompleteTextField(
             exit = fadeOut()
         ) {
             IconButton(
-                onClick = { onCleared("") }
+                onClick = { onTextCleared() }
             ) {
                 Icon(
                     imageVector = Icons.Default.Clear,
@@ -240,10 +252,10 @@ private fun AutocompleteTextFieldPreview_AutocompletedText() {
                 ),
                 suggestionText = text.drop(userTypedLength),
                 faviconBitmap = null,
-                onLocationEdited = {},
-                onCleared = {},
-                onLoadUrl = {},
-                onAcceptAutocompleteSuggestion = {},
+                onTextEdited = {},
+                onTextCleared = {},
+                onSubmitted = {},
+                onAcceptSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -262,10 +274,10 @@ private fun AutocompleteTextFieldPreview_Placeholder() {
                 textFieldValue = TextFieldValue(),
                 suggestionText = null,
                 faviconBitmap = null,
-                onLocationEdited = {},
-                onCleared = {},
-                onLoadUrl = {},
-                onAcceptAutocompleteSuggestion = {},
+                onTextEdited = {},
+                onTextCleared = {},
+                onSubmitted = {},
+                onAcceptSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -286,10 +298,10 @@ private fun AutocompleteTextFieldPreview_NoAutocomplete() {
                 textFieldValue = TextFieldValue(text),
                 suggestionText = null,
                 faviconBitmap = null,
-                onLocationEdited = {},
-                onCleared = {},
-                onLoadUrl = {},
-                onAcceptAutocompleteSuggestion = {},
+                onTextEdited = {},
+                onTextCleared = {},
+                onSubmitted = {},
+                onAcceptSuggestion = {},
                 placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }

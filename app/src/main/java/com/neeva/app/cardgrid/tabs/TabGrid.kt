@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,9 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -26,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.R
@@ -39,7 +41,6 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.previewFaviconCache
-import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.LandscapePreviewsDark
 import com.neeva.app.ui.NeevaThemePreviewContainer
@@ -47,6 +48,7 @@ import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.PortraitPreviewsDark
 import com.neeva.app.ui.previewCardGridTitles
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.HeavyDivider
 import java.util.concurrent.TimeUnit
 
 @Composable
@@ -161,58 +163,70 @@ fun ChronologicalTabGrid(
         }
     }
 
-    Column(modifier = modifier) {
-        CardGrid(
-            items = sections,
-            modifier = Modifier.weight(1.0f),
-            computeFirstVisibleItemIndex = { numCellsPerRow ->
-                computeVisibleItemIndex(sections, numCellsPerRow)
-            },
-            emptyComposable = {
-                TabGridEmptyState(isIncognito, Modifier.fillMaxSize())
-            }
-        ) { numCellsPerRow, listItems ->
-            listItems.forEach { section ->
-                item(span = { GridItemSpan(numCellsPerRow) }) {
-                    HistoryHeader(section.header)
-                }
+    CardGrid(
+        items = sections,
+        computeFirstVisibleItemIndex = { numCellsPerRow ->
+            computeVisibleItemIndex(sections, numCellsPerRow)
+        },
+        emptyComposable = {
+            Column {
+                TabGridEmptyState(isIncognito, Modifier.weight(1.0f))
 
-                items(
-                    items = section.items,
-                    key = { it.id }
-                ) { tab ->
-                    TabCard(
-                        tabInfo = tab,
-                        onSelect = { onSelectTab(tab) },
-                        onClose = { onCloseTabs(tab) },
-                        faviconCache = faviconCache,
-                        screenshotProvider = screenshotProvider
-                    )
-                }
+                ArchivedTabsButton(onShowArchivedTabs = onShowArchivedTabs)
+            }
+        },
+        modifier = modifier
+    ) { numCellsPerRow, listItems ->
+        listItems.forEach { section ->
+            item(span = { GridItemSpan(numCellsPerRow) }) {
+                HistoryHeader(section.header)
+            }
+
+            items(
+                items = section.items,
+                key = { it.id }
+            ) { tab ->
+                TabCard(
+                    tabInfo = tab,
+                    onSelect = { onSelectTab(tab) },
+                    onClose = { onCloseTabs(tab) },
+                    faviconCache = faviconCache,
+                    screenshotProvider = screenshotProvider
+                )
             }
         }
 
-        Row(
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically,
+        item(span = { GridItemSpan(numCellsPerRow) }) {
+            Column(Modifier.fillMaxHeight()) {
+                HeavyDivider()
+                ArchivedTabsButton(onShowArchivedTabs = onShowArchivedTabs)
+            }
+        }
+    }
+}
+
+@Composable
+fun ArchivedTabsButton(onShowArchivedTabs: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FilledTonalButton(
+            onClick = onShowArchivedTabs,
             modifier = Modifier.padding(
                 horizontal = Dimensions.PADDING_LARGE,
                 vertical = Dimensions.PADDING_SMALL
             )
         ) {
-            FilledTonalButton(
-                onClick = onShowArchivedTabs,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Schedule,
-                    contentDescription = null
-                )
+            Icon(
+                imageVector = Icons.Default.History,
+                contentDescription = null
+            )
 
-                Spacer(modifier = Modifier.size(Dimensions.PADDING_SMALL))
+            Spacer(modifier = Modifier.size(Dimensions.PADDING_SMALL))
 
-                Text(stringResource(R.string.archived_tabs))
-            }
+            Text(stringResource(R.string.archived_tabs))
         }
     }
 }
@@ -234,41 +248,133 @@ fun computeVisibleItemIndex(sections: List<TabGridSection<TabInfo>>, numCells: I
         } ?: 0
 }
 
-class TabGridPreviews : BooleanPreviewParameterProvider<TabGridPreviews.Params>(2) {
-    data class Params(
-        val isIncognito: Boolean,
-        val isAutomatedTabManagementEnabled: Boolean
+@PortraitPreviews
+@LandscapePreviews
+@Composable
+fun TabGridPreview_LightIncognitoArchiving() {
+    TabGridPreview(
+        darkTheme = false,
+        isIncognito = true,
+        isAutomatedTabManagementEnabled = true
     )
+}
 
-    override fun createParams(booleanArray: BooleanArray) = Params(
-        isIncognito = booleanArray[0],
-        isAutomatedTabManagementEnabled = booleanArray[1]
+@PortraitPreviews
+@LandscapePreviews
+@Composable
+fun TabGridPreview_LightIncognitoLegacy() {
+    TabGridPreview(
+        darkTheme = false,
+        isIncognito = true,
+        isAutomatedTabManagementEnabled = false
     )
+}
 
-    @PortraitPreviews
-    @LandscapePreviews
-    @Composable
-    fun TabGrid_Preview_Light(@PreviewParameter(TabGridPreviews::class) params: Params) {
-        TabGridPreview(darkTheme = false, params = params)
-    }
+@PortraitPreviews
+@LandscapePreviews
+@Composable
+fun TabGridPreview_LightRegularArchiving() {
+    TabGridPreview(
+        darkTheme = false,
+        isIncognito = false,
+        isAutomatedTabManagementEnabled = true
+    )
+}
 
-    @PortraitPreviewsDark
-    @LandscapePreviewsDark
-    @Composable
-    fun TabGrid_Preview_Dark(@PreviewParameter(TabGridPreviews::class) params: Params) {
-        TabGridPreview(darkTheme = true, params = params)
-    }
+@PortraitPreviews
+@LandscapePreviews
+@Composable
+fun TabGridPreview_LightRegularArchivingWithoutTabs() {
+    TabGridPreview(
+        darkTheme = false,
+        isIncognito = false,
+        isAutomatedTabManagementEnabled = true,
+        tabTitles = emptyList()
+    )
+}
 
-    @Composable
-    fun TabGridPreview(darkTheme: Boolean, params: Params) {
-        NeevaThemePreviewContainer(
-            useDarkTheme = darkTheme,
-            addBorder = false
-        ) {
+@PortraitPreviews
+@LandscapePreviews
+@Composable
+fun TabGridPreview_LightRegularLegacy() {
+    TabGridPreview(
+        darkTheme = false,
+        isIncognito = false,
+        isAutomatedTabManagementEnabled = false
+    )
+}
+
+@PortraitPreviewsDark
+@LandscapePreviewsDark
+@Composable
+fun TabGridPreview_DarkIncognitoArchiving() {
+    TabGridPreview(
+        darkTheme = true,
+        isIncognito = true,
+        isAutomatedTabManagementEnabled = true
+    )
+}
+
+@PortraitPreviewsDark
+@LandscapePreviewsDark
+@Composable
+fun TabGridPreview_DarkIncognitoLegacy() {
+    TabGridPreview(
+        darkTheme = true,
+        isIncognito = true,
+        isAutomatedTabManagementEnabled = false
+    )
+}
+
+@PortraitPreviewsDark
+@LandscapePreviewsDark
+@Composable
+fun TabGridPreview_DarkRegularArchiving() {
+    TabGridPreview(
+        darkTheme = true,
+        isIncognito = false,
+        isAutomatedTabManagementEnabled = true
+    )
+}
+
+@PortraitPreviewsDark
+@LandscapePreviewsDark
+@Composable
+fun TabGridPreview_DarkRegularLegacy() {
+    TabGridPreview(
+        darkTheme = true,
+        isIncognito = false,
+        isAutomatedTabManagementEnabled = false
+    )
+}
+
+@PortraitPreviewsDark
+@LandscapePreviewsDark
+@Composable
+fun TabGridPreview_DarkRegularArchivingWithoutTabs() {
+    TabGridPreview(
+        darkTheme = true,
+        isIncognito = false,
+        isAutomatedTabManagementEnabled = true,
+        tabTitles = emptyList()
+    )
+}
+
+@Composable
+private fun TabGridPreview(
+    darkTheme: Boolean,
+    isIncognito: Boolean,
+    isAutomatedTabManagementEnabled: Boolean,
+    tabTitles: List<String> = previewCardGridTitles
+) {
+    NeevaThemePreviewContainer(
+        useDarkTheme = darkTheme,
+        addBorder = false
+    ) {
+        Surface(color = MaterialTheme.colorScheme.background) {
             val tabs = mutableListOf<TabInfo>()
 
             val selectedTabIndex = 5
-            val tabTitles = previewCardGridTitles
             val now = System.currentTimeMillis()
             tabTitles.forEachIndexed { i, title ->
                 tabs.add(
@@ -285,8 +391,8 @@ class TabGridPreviews : BooleanPreviewParameterProvider<TabGridPreviews.Params>(
             }
 
             TabGrid(
-                isIncognito = params.isIncognito,
-                isAutomatedTabManagementEnabled = params.isAutomatedTabManagementEnabled,
+                isIncognito = isIncognito,
+                isAutomatedTabManagementEnabled = isAutomatedTabManagementEnabled,
                 onSelectTab = {},
                 onCloseTabs = {},
                 onShowArchivedTabs = {},

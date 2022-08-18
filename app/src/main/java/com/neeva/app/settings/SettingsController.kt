@@ -3,13 +3,12 @@ package com.neeva.app.settings
 import android.net.Uri
 import android.text.format.DateUtils
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.cardgrid.tabs.ArchivingOptionsDialog
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.settings.clearbrowsing.TimeClearingOption
 import com.neeva.app.settings.defaultbrowser.FakeSetDefaultAndroidBrowserManager
@@ -142,6 +141,11 @@ class SettingsControllerImpl(
             R.string.settings_default_browser to { appNavModel.showDefaultBrowserSettings() },
             R.string.settings_debug_local_feature_flags to {
                 appNavModel.showLocalFeatureFlagsPane()
+            },
+            R.string.archived_tabs_archive to {
+                popupModel.showDialog {
+                    ArchivingOptionsDialog(popupModel::removeDialog)
+                }
             },
             R.string.cookie_cutter to { appNavModel.showCookieCutterSettings() },
             R.string.settings_licenses to { appNavModel.showLicenses() }
@@ -350,6 +354,7 @@ val mockSettingsControllerImpl by lazy {
                 R.string.settings_sign_out to { },
                 R.string.settings_clear_browsing_data to { },
                 R.string.settings_default_browser to { },
+                R.string.archived_tabs_archive to { },
                 R.string.settings_debug_local_feature_flags to { }
             )
         }

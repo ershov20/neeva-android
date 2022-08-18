@@ -22,6 +22,7 @@ import com.neeva.app.ui.widgets.ComposeTextFieldWorkaround
 @Composable
 fun CreateSpaceDialog(
     isDialogVisible: State<Boolean>,
+    promptToOpenSpace: Boolean,
     onDismissRequested: () -> Unit
 ) {
     if (!isDialogVisible.value) return
@@ -34,7 +35,10 @@ fun CreateSpaceDialog(
 
     val onDone = {
         if (spaceName.value.isNotBlank()) {
-            spaceStore.createSpace(spaceName.value) { spaceId ->
+            spaceStore.createSpace(
+                spaceName = spaceName.value,
+                promptToOpenSpace = promptToOpenSpace
+            ) { spaceId ->
                 appNavModel.showSpaceDetail(spaceId)
             }
             isDismissing.value = true

@@ -24,20 +24,16 @@ interface HistoryDao : SiteDao, VisitDao {
         """
         SELECT *
         FROM site INNER JOIN visit ON site.siteUID = visit.visitedSiteUID
-        WHERE visit.timestamp >= :startTime
-              AND visit.timestamp < :endTime
+        WHERE visit.timestamp >= :thresholdTime
+              AND (Site.siteURL LIKE '%'||:query||'%' OR Site.title LIKE '%'||:query||'%')
               AND NOT visit.isMarkedForDeletion
         ORDER BY visit.timestamp DESC
         """
     )
-    fun getPagedSitesVisitedBetween(
-        startTime: Date,
-        endTime: Date
+    fun getPagedSitesVisitedAfter(
+        thresholdTime: Date,
+        query: String = ""
     ): PagingSource<Int, SitePlusVisit>
-
-    fun getPagedSitesVisitedAfter(thresholdTime: Date): PagingSource<Int, SitePlusVisit> {
-        return getPagedSitesVisitedBetween(thresholdTime, Date(Long.MAX_VALUE))
-    }
 
     /** Deletes any entries in the [Site] table that have no corresponding [Visit] information. */
     @Query(

@@ -123,6 +123,7 @@ fun SettingsRow(
                 } else {
                     NavigationRow(
                         primaryLabel = rowDataValues.primaryLabel,
+                        secondaryLabel = rowDataValues.secondaryLabel,
                         enabled = rowData.enabled,
                         onClick = onClick
                     )

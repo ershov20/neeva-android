@@ -18,6 +18,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.widgets.DefaultDivider
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
 
@@ -68,7 +69,7 @@ fun CurrentPageRow(browserWrapper: BrowserWrapper) {
                 }
             )
 
-            SuggestionDivider()
+            DefaultDivider()
         }
     }
 }

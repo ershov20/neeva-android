@@ -74,6 +74,7 @@ fun AddToSpaceUI(
 
     CreateSpaceDialog(
         isDialogVisible = isCreateSpaceDialogVisible,
+        promptToOpenSpace = false,
         onDismissRequested = { isCreateSpaceDialogVisible.value = false }
     )
 }

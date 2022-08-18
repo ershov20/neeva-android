@@ -47,9 +47,9 @@ class HistoryManager(
 
     private val dao = historyDatabase.dao()
 
-    fun getHistoryAfter(startTime: Date): Flow<PagingData<SitePlusVisit>> {
+    fun getPagedHistory(startTime: Date, filter: String = ""): Flow<PagingData<SitePlusVisit>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
-            dao.getPagedSitesVisitedAfter(startTime)
+            dao.getPagedSitesVisitedAfter(thresholdTime = startTime, query = filter)
         }.flow
     }
 

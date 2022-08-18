@@ -2,6 +2,10 @@ package com.neeva.app.settings.main
 
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.res.stringResource
+import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
@@ -9,6 +13,7 @@ import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
 
 class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterface {
     @StringRes
@@ -53,6 +58,19 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.REQUIRE_CONFIRMATION_ON_TAB_CLOSE,
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.NAVIGATION,
+                    primaryLabelId = R.string.archived_tabs_archive,
+                    secondaryLabelLambda = @Composable {
+                        stringResource(
+                            SharedPrefFolder.App.AutomaticallyArchiveTabs
+                                .getFlow(LocalSharedPreferencesModel.current)
+                                .collectAsState()
+                                .value
+                                .resourceId
+                        )
+                    }
                 )
             )
         ),

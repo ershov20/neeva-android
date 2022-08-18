@@ -584,7 +584,11 @@ class SpaceStore(
         }
     }
 
-    fun createSpace(spaceName: String, onOpenSpace: (String) -> Unit) {
+    fun createSpace(
+        spaceName: String,
+        promptToOpenSpace: Boolean,
+        onOpenSpace: (String) -> Unit
+    ) {
         coroutineScope.launch(dispatchers.io) {
             val response = authenticatedApolloWrapper.performMutation(
                 CreateSpaceMutation(name = spaceName),
@@ -594,7 +598,9 @@ class SpaceStore(
             response?.data?.createSpace?.let {
                 popupModel.showSnackbar(
                     message = appContext.getString(R.string.space_create_success, spaceName),
-                    actionLabel = appContext.getString(R.string.space_open),
+                    actionLabel = appContext
+                        .getString(R.string.space_open)
+                        .takeIf { promptToOpenSpace },
                     onActionPerformed = { onOpenSpace(it) }
                 )
                 performRefresh()

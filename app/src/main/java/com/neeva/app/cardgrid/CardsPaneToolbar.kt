@@ -137,6 +137,7 @@ private fun CardsPaneToolbarAddButton(
 
     CreateSpaceDialog(
         isDialogVisible = isCreateSpaceDialogVisible,
+        promptToOpenSpace = true,
         onDismissRequested = { isCreateSpaceDialogVisible.value = false }
     )
 }

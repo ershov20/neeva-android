@@ -22,7 +22,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil.annotation.ExperimentalCoilApi
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -30,7 +29,6 @@ import com.neeva.app.ui.theme.Dimensions
  * Base skeleton for everything that can be displayed as a row in UI, including history items,
  * navigation suggestions, and settings.
  */
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun BaseRowLayout(
     modifier: Modifier = Modifier,
@@ -42,7 +40,7 @@ fun BaseRowLayout(
     endComposablePadding: Dp = Dimensions.PADDING_SMALL,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(backgroundColor),
-    applyVerticalPadding: Boolean = true,
+    verticalPadding: Dp = Dimensions.PADDING_SMALL,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     mainContent: @Composable () -> Unit
 ) {
@@ -82,7 +80,7 @@ fun BaseRowLayout(
             verticalAlignment = verticalAlignment,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = if (applyVerticalPadding) Dimensions.PADDING_SMALL else 0.dp)
+                .padding(vertical = verticalPadding)
         ) {
             startComposable?.let {
                 Box(

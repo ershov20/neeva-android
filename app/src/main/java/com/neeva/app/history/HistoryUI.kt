@@ -4,20 +4,32 @@ import android.graphics.Bitmap
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.net.Uri
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -36,10 +48,14 @@ import com.neeva.app.suggestions.NavSuggestionRow
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.NeevaThemePreviewContainer
-import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.PortraitPreviewsDark
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.toLocalDate
+import com.neeva.app.ui.widgets.AutocompleteTextField
 import com.neeva.app.ui.widgets.ClickableRow
+import com.neeva.app.ui.widgets.HeavyDivider
+import com.neeva.app.ui.widgets.PillSurface
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
 import java.util.Date
@@ -56,15 +72,22 @@ fun HistoryUI(
     val historyManager = LocalHistoryManager.current
     val snackbarModel = LocalPopupModel.current
     val context = LocalContext.current
+    val filterTextFieldValue = remember { mutableStateOf(TextFieldValue()) }
 
-    val allHistory = historyManager.getHistoryAfter(Date(0L)).collectAsLazyPagingItems()
+    val allHistory = remember(filterTextFieldValue.value.text) {
+        historyManager
+            .getPagedHistory(
+                startTime = Date(0L),
+                filter = filterTextFieldValue.value.text
+            )
+    }.collectAsLazyPagingItems()
 
     HistoryUI(
         allHistory = allHistory,
         onClearHistory = onClearHistory,
         onClose = onClose,
         onOpenUrl = onOpenUrl,
-        onDeleteVisit = { visitUID, siteLabel ->
+        onDeleteVisit = { visitUID: Int, siteLabel: String ->
             historyManager.markVisitForDeletion(visitUID, isMarkedForDeletion = true)
             snackbarModel.showSnackbar(
                 message = context.getString(R.string.history_removed_visit, siteLabel),
@@ -75,7 +98,8 @@ fun HistoryUI(
             )
         },
         faviconCache = faviconCache,
-        domainProvider = domainProvider
+        domainProvider = domainProvider,
+        filterTextFieldValue = filterTextFieldValue
     )
 }
 
@@ -88,7 +112,8 @@ private fun HistoryUI(
     onOpenUrl: (Uri) -> Unit,
     onDeleteVisit: (visitUID: Int, siteLabel: String) -> Unit,
     faviconCache: FaviconCache,
-    domainProvider: DomainProvider
+    domainProvider: DomainProvider,
+    filterTextFieldValue: MutableState<TextFieldValue>
 ) {
     Scaffold(
         topBar = @Composable {
@@ -104,6 +129,31 @@ private fun HistoryUI(
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
+            item {
+                Box(modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)) {
+                    PillSurface {
+                        AutocompleteTextField(
+                            textFieldValue = filterTextFieldValue.value,
+                            imageVector = Icons.Default.Search,
+                            onTextEdited = {
+                                filterTextFieldValue.component2().invoke(it)
+                            },
+                            onTextCleared = {
+                                filterTextFieldValue.component2().invoke(TextFieldValue())
+                            },
+                            onSubmitted = {},
+                            onAcceptSuggestion = {},
+                            placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            placeholderText = stringResource(R.string.history_filter_placeholder),
+                            focusImmediately = false,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(height = 40.dp)
+                        )
+                    }
+                }
+            }
+
             item {
                 ClickableRow(
                     primaryLabel = stringResource(R.string.settings_clear_browsing_data),
@@ -145,15 +195,40 @@ private fun HistoryUI(
     }
 }
 
+@PortraitPreviews
+@Composable
+fun HistoryHeaderPreview_Light() {
+    NeevaThemePreviewContainer(useDarkTheme = false) {
+        Surface {
+            HistoryHeader(stringResource(id = R.string.debug_long_string_primary))
+        }
+    }
+}
+
+@PortraitPreviewsDark
+@Composable
+fun HistoryHeaderPreview_Dark() {
+    NeevaThemePreviewContainer(useDarkTheme = true) {
+        Surface {
+            HistoryHeader(stringResource(id = R.string.debug_long_string_primary))
+        }
+    }
+}
+
 @Composable
 fun HistoryHeader(text: String) {
-    BaseRowLayout {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        HeavyDivider()
+
         Text(
             text = text,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
         )
+
+        Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
     }
 }
 
@@ -189,11 +264,11 @@ fun HistoryEntry(
     )
 }
 
-@Preview
+@PortraitPreviews
 @Composable
 fun HistoryUI_Preview_Light() = HistoryUI_Preview(useDarkTheme = false)
 
-@Preview
+@PortraitPreviews
 @Composable
 fun HistoryUI_Preview_Dark() = HistoryUI_Preview(useDarkTheme = true)
 
@@ -232,6 +307,7 @@ private fun HistoryUI_Preview(useDarkTheme: Boolean) {
     }
 
     val allHistoryFlow = flowOf(PagingData.from(allHistory))
+    val filterTextFieldValue = remember { mutableStateOf(TextFieldValue()) }
 
     NeevaThemePreviewContainer(useDarkTheme = useDarkTheme) {
         HistoryUI(
@@ -241,7 +317,8 @@ private fun HistoryUI_Preview(useDarkTheme: Boolean) {
             onOpenUrl = {},
             onDeleteVisit = { _, _ -> },
             faviconCache = previewFaviconCache,
-            domainProvider = previewFaviconCache.domainProvider
+            domainProvider = previewFaviconCache.domainProvider,
+            filterTextFieldValue = filterTextFieldValue
         )
     }
 }

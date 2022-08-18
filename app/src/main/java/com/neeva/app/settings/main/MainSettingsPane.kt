@@ -7,8 +7,8 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedcomposables.SettingsPane
+import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
-import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun MainSettingsPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
@@ -18,7 +18,7 @@ fun MainSettingsPane(settingsController: SettingsController, neevaConstants: Nee
 @PortraitPreviews
 @Composable
 fun SettingsMain_Preview() {
-    NeevaTheme(useDarkTheme = false) {
+    NeevaThemePreviewContainer(useDarkTheme = false, addBorder = false) {
         CompositionLocalProvider(LocalChromiumVersion provides "XXX.XXX.XXX.XXX") {
             MainSettingsPane(mockSettingsControllerImpl, NeevaConstants())
         }
@@ -28,7 +28,7 @@ fun SettingsMain_Preview() {
 @PortraitPreviews
 @Composable
 fun SettingsMain_Dark_Preview() {
-    NeevaTheme(useDarkTheme = true) {
+    NeevaThemePreviewContainer(useDarkTheme = true, addBorder = false) {
         CompositionLocalProvider(LocalChromiumVersion provides "XXX.XXX.XXX.XXX") {
             MainSettingsPane(mockSettingsControllerImpl, NeevaConstants())
         }

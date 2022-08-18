@@ -16,10 +16,11 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.AnimationConstants
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.layouts.BaseRowLayout
 
 enum class CollapsingSectionState {
@@ -111,7 +112,7 @@ private fun CollapsingHeader(
         onTapRow = onClick,
         backgroundColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        applyVerticalPadding = false,
+        verticalPadding = 0.dp,
         endComposable = {
             IconButton(onClick = onClick) {
                 Icon(
@@ -124,16 +125,14 @@ private fun CollapsingHeader(
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
     }
 }
 
-@Preview("CollapsingHeaderPreviews 2 states, 1x font scale", locale = "en")
-@Preview("CollapsingHeaderPreviews 2 states, 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("CollapsingHeaderPreviews 2 states, RTL, 1x font scale", locale = "he")
+@PortraitPreviews
 @Composable
 fun CollapsingHeaderPreviews_TwoStates() {
     OneBooleanPreviewContainer { useLongLabel ->
@@ -150,9 +149,7 @@ fun CollapsingHeaderPreviews_TwoStates() {
     }
 }
 
-@Preview("CollapsingHeaderPreviews 3 states, 1x font scale", locale = "en")
-@Preview("CollapsingHeaderPreviews 3 states, 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("CollapsingHeaderPreviews 3 states, RTL, 1x font scale", locale = "he")
+@PortraitPreviews
 @Composable
 fun CollapsingHeaderPreviews_ThreeStates() {
     OneBooleanPreviewContainer { useLongLabel ->

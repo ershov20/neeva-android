@@ -47,9 +47,7 @@ fun FullScreenDialogTopBar(
                 TextButton(onClick = { onButtonPressed() }) {
                     Text(
                         text = buttonTitle,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.bodyMedium
+                        maxLines = 1
                     )
                 }
             }

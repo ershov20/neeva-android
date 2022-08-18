@@ -2,21 +2,27 @@ package com.neeva.app.suggestions
 
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import com.neeva.app.R
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.previewFaviconCache
-import com.neeva.app.ui.SectionHeader
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.LandscapePreviews
+import com.neeva.app.ui.NeevaThemePreviewContainer
+import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.DefaultDivider
 
 @Composable
 fun SuggestionList(
@@ -39,13 +45,17 @@ fun SuggestionList(
             item {
                 NavSuggestion(faviconCache, onOpenUrl, onLogSuggestionTap, it)
             }
+
+            item {
+                DefaultDivider()
+            }
         }
 
         // Display search results.
         if (queryRowSuggestions.isNotEmpty() || queryNavSuggestions.isNotEmpty()) {
             // Display all queries with their associated navigations.
             item {
-                SectionHeader(R.string.neeva_search)
+                SuggestionHeader(R.string.neeva_search)
             }
 
             queryRowSuggestions.forEachIndexed { index, queryRowSuggestion ->
@@ -66,7 +76,7 @@ fun SuggestionList(
                 }
 
                 if (index != queryRowSuggestions.size - 1) {
-                    item { SuggestionDivider() }
+                    item { DefaultDivider() }
                 }
             }
 
@@ -76,7 +86,7 @@ fun SuggestionList(
                 it.queryIndex == null || it.queryIndex >= queryRowSuggestions.size
             }
             if (unassociatedSuggestions.isNotEmpty()) {
-                item { SuggestionDivider() }
+                item { DefaultDivider() }
 
                 items(
                     unassociatedSuggestions,
@@ -85,13 +95,17 @@ fun SuggestionList(
                     NavSuggestion(faviconCache, onOpenUrl, onLogSuggestionTap, it)
                 }
             }
+
+            item {
+                DefaultDivider()
+            }
         }
 
         // Display results from the user's navigation history.
         if (historySuggestions.isNotEmpty()) {
             // Display all queries with their associated navigations.
             item {
-                SectionHeader(R.string.history)
+                SuggestionHeader(R.string.history)
             }
 
             items(
@@ -104,13 +118,30 @@ fun SuggestionList(
     }
 }
 
-@Preview(name = "Suggestion List 1x font size", locale = "en")
-@Preview(name = "Suggestion List 2x font size", locale = "en", fontScale = 2.0f)
-@Preview(name = "Suggestion List RTL, 1x font size", locale = "he")
-@Preview(name = "Suggestion List RTL, 2x font size", locale = "he", fontScale = 2.0f)
+@Composable
+fun SuggestionHeader(stringId: Int) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(stringId),
+            style = MaterialTheme.typography.titleSmall,
+            maxLines = 1,
+            modifier = Modifier.padding(
+                horizontal = Dimensions.PADDING_LARGE,
+                vertical = Dimensions.PADDING_SMALL
+            ),
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@PortraitPreviews
+@LandscapePreviews
 @Composable
 fun SuggestionList_PreviewFullyLoaded_ShowSearchSuggestions() {
-    NeevaTheme {
+    NeevaThemePreviewContainer(
+        useDarkTheme = false,
+        addBorder = false
+    ) {
         SuggestionList(
             topSuggestion = NavSuggestion(
                 url = Uri.parse("https://www.reddit.com"),

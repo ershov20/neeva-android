@@ -4,7 +4,6 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,8 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -79,7 +76,7 @@ fun TabCard(
     ) {
         Surface(
             shadowElevation = 2.dp,
-            shape = RoundedCornerShape(Dimensions.RADIUS_MEDIUM),
+            shape = RoundedCornerShape(Dimensions.RADIUS_LARGE),
             border = if (tabInfo.isSelected) {
                 BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
             } else {
@@ -98,14 +95,13 @@ fun TabCard(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
-                Box(
+                Surface(
                     modifier = Modifier
-                        .size(36.dp)
+                        .padding(Dimensions.PADDING_SMALL)
                         .clickable { onClose() }
-                        .padding(Dimensions.PADDING_TINY)
-                        .background(Color.LightGray, shape = CircleShape)
                         .align(Alignment.TopEnd),
-                    contentAlignment = Alignment.Center
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.surfaceVariant
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_baseline_close_24),
@@ -113,7 +109,7 @@ fun TabCard(
                             R.string.close_tab, tabInfo.title ?: ""
                         ),
                         contentScale = ContentScale.Inside,
-                        colorFilter = ColorFilter.tint(Color.White)
+                        modifier = Modifier.size(32.dp)
                     )
                 }
             }
