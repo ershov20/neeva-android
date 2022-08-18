@@ -1,5 +1,6 @@
 package com.neeva.app.browsing.toolbar
 
+import android.net.Uri
 import com.neeva.app.NeevaConstants
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.appnav.AppNavModel
@@ -10,6 +11,7 @@ import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.cookiecutter.PreviewCookieCutterModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 class BrowserToolbarModelImpl(
     private val appNavModel: AppNavModel,
@@ -43,6 +45,7 @@ class BrowserToolbarModelImpl(
 
     override val navigationInfoFlow get() = browserWrapper.activeTabModel.navigationInfoFlow
     override val spaceStoreHasUrlFlow get() = browserWrapper.activeTabModel.isCurrentUrlInSpaceFlow
+    override val urlFlow: StateFlow<Uri> get() = browserWrapper.activeTabModel.urlFlow
     override val displayedInfoFlow get() = browserWrapper.activeTabModel.displayedInfoFlow
     override val tabProgressFlow get() = browserWrapper.activeTabModel.progressFlow
     override val trackersFlow get() = browserWrapper.activeTabModel.trackersFlow
@@ -67,6 +70,7 @@ internal class PreviewBrowserToolbarModel(
     val tabProgressValue: Int = 100,
     val trackers: Int = 0,
     val displayedInfo: ActiveTabModel.DisplayedInfo = ActiveTabModel.DisplayedInfo(),
+    val url: Uri = Uri.EMPTY
 ) : BrowserToolbarModel() {
     override fun goBack() {}
     override fun goForward() {}
@@ -81,6 +85,7 @@ internal class PreviewBrowserToolbarModel(
 
     override val navigationInfoFlow = MutableStateFlow(navigationInfo)
     override val spaceStoreHasUrlFlow = MutableStateFlow(spaceStoreHasUrl)
+    override val urlFlow get() = MutableStateFlow(url)
     override val displayedInfoFlow get() = MutableStateFlow(displayedInfo)
     override val tabProgressFlow get() = MutableStateFlow(tabProgressValue)
     override val trackersFlow get() = MutableStateFlow(trackers)

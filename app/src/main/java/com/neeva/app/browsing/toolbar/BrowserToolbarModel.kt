@@ -1,5 +1,6 @@
 package com.neeva.app.browsing.toolbar
 
+import android.net.Uri
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelState
@@ -23,6 +24,7 @@ abstract class BrowserToolbarModel {
     abstract val spaceStoreHasUrlFlow: StateFlow<Boolean>
 
     //region URL Bar Model UI
+    abstract val urlFlow: StateFlow<Uri>
     abstract val displayedInfoFlow: StateFlow<ActiveTabModel.DisplayedInfo>
     abstract val tabProgressFlow: StateFlow<Int>
     abstract val trackersFlow: StateFlow<Int>

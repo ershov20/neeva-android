@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <id name="weblayer_fragment_view_container" />
+    <id name="full_url_text_view" />
     <id name="browser_bottom_toolbar_placeholder" />
 </resources>

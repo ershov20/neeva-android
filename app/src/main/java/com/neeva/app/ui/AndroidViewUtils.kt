@@ -3,21 +3,22 @@ package com.neeva.app.ui
 import android.view.View
 import android.view.ViewGroup
 
-/**
- * Moves the [childView] from its current parent to the [desiredParentView] if the childView is
- * currently in the Android View hierarchy.
- */
-fun reparentView(childView: View, desiredParentView: ViewGroup) {
-    if (childView.parent == null || childView.parent == desiredParentView) return
+/** Moves the [childView] from its current parent to the [desiredParentView]. */
+fun reparentView(
+    childView: View?,
+    desiredParentView: ViewGroup,
+    layoutParams: ViewGroup.LayoutParams = ViewGroup.LayoutParams(
+        ViewGroup.LayoutParams.MATCH_PARENT,
+        ViewGroup.LayoutParams.MATCH_PARENT
+    )
+) {
+    when {
+        childView == null -> return
+        childView.parent == desiredParentView -> return
+    }
 
     removeViewFromParent(childView)
-    desiredParentView.addView(
-        childView,
-        ViewGroup.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.MATCH_PARENT
-        )
-    )
+    desiredParentView.addView(childView, layoutParams)
 }
 
 /** Removes the given [childView] from its parent. */

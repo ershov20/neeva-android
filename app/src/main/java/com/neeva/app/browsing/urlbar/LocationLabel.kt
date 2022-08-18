@@ -6,6 +6,7 @@ import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -17,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,12 +33,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.reparentView
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.mapComposeColorToResource
 import org.chromium.weblayer.UrlBarOptions
@@ -47,7 +50,7 @@ fun LocationLabel(
     modifier: Modifier = Modifier
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
-    val displayInfo = browserToolbarModel.displayedInfoFlow.collectAsState().value
+    val displayInfo by browserToolbarModel.displayedInfoFlow.collectAsState()
 
     // WebLayer requires that you pass it an old-school color resource from the XML files.
     val colorResource = mapComposeColorToResource(LocalContentColor.current)
@@ -66,13 +69,17 @@ fun LocationLabel(
         )
     }
 
-    LocationLabelContent(
-        urlBarView = urlBarView,
-        mode = displayInfo.mode,
-        displayedText = displayInfo.displayedText,
-        placeholderColor = placeholderColor,
-        modifier = modifier.semantics { testTag = "LocationLabel" }
-    )
+    Box {
+        HiddenUrlBar()
+
+        LocationLabelContent(
+            urlBarView = urlBarView,
+            mode = displayInfo.mode,
+            displayedText = displayInfo.displayedText,
+            placeholderColor = placeholderColor,
+            modifier = modifier.semantics { testTag = "LocationLabel" }
+        )
+    }
 }
 
 @Composable
@@ -121,22 +128,14 @@ fun LocationLabelContent(
                 AndroidView(
                     factory = { FrameLayout(it) },
                     update = { rootView: FrameLayout ->
-                        if (urlBarView == null || urlBarView.parent == rootView) {
-                            return@AndroidView
-                        }
-
-                        // Attach the URL Bar provided by WebLayer to our hierarchy.
-                        rootView.removeAllViews()
-                        urlBarView.run {
-                            (parent as? ViewGroup)?.removeView(this)
-                            rootView.addView(
-                                this,
-                                FrameLayout.LayoutParams(
-                                    ViewGroup.LayoutParams.MATCH_PARENT,
-                                    ViewGroup.LayoutParams.WRAP_CONTENT
-                                )
+                        reparentView(
+                            urlBarView,
+                            rootView,
+                            FrameLayout.LayoutParams(
+                                ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
                             )
-                        }
+                        )
                     }
                 )
             }
@@ -144,9 +143,44 @@ fun LocationLabelContent(
     }
 }
 
-@Preview("URL 1x font scale", locale = "en")
-@Preview("URL 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("URL RTL, 1x font scale", locale = "he")
+/**
+ * Add an Android TextView that presents the full URL for password managers but is not displayed to
+ * users (users see only the URI authority presented by WebLayer via the LocationLabel).
+ */
+@Composable
+fun HiddenUrlBar() {
+    val browserToolbarModel = LocalBrowserToolbarModel.current
+    val url by browserToolbarModel.urlFlow.collectAsState()
+
+    val context = LocalContext.current
+
+    val fullUrlView: TextView = remember {
+        TextView(context).apply {
+            id = R.id.full_url_text_view
+            visibility = View.GONE
+        }
+    }
+
+    LaunchedEffect(url) {
+        fullUrlView.text = url.toString()
+    }
+
+    AndroidView(
+        factory = { FrameLayout(it) },
+        update = { rootView: FrameLayout ->
+            reparentView(
+                fullUrlView,
+                rootView,
+                FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            )
+        }
+    )
+}
+
+@PortraitPreviews
 @Composable
 private fun URLPreview() {
     OneBooleanPreviewContainer { useLongText ->
@@ -175,9 +209,7 @@ private fun URLPreview() {
     }
 }
 
-@Preview("Query 1x font scale", locale = "en")
-@Preview("Query 2x font scale", locale = "en", fontScale = 2.0f)
-@Preview("Query RTL, 1x font scale", locale = "he")
+@PortraitPreviews
 @Composable
 private fun QueryPreview() {
     OneBooleanPreviewContainer { useLongText ->
@@ -199,8 +231,7 @@ private fun QueryPreview() {
     }
 }
 
-@Preview("Placeholder 1x font scale", locale = "en")
-@Preview("Placeholder 2x font scale", locale = "en", fontScale = 2.0f)
+@PortraitPreviews
 @Composable
 private fun NeevaHomepagePreview() {
     OneBooleanPreviewContainer { isIncognito ->
