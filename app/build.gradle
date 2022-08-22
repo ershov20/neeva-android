@@ -142,6 +142,10 @@ android {
         }
     }
     dynamicFeatures = [':weblayer_support']
+
+    lintOptions {
+        disable 'MissingQuantity'
+    }
 }
 
 tasks.preBuild.dependsOn ":scripts:buildScripts"

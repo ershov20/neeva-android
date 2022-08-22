@@ -556,6 +556,15 @@
     <!-- [Settings] Disclaimer noting that essential cookies are mandatory and cannot be blocked by the app -->
     <string name="cookie_cutting_essential_disclaimer">Essential cookies are used by sites to remember things like your login information and preferences. These cookies cannot be blocked by Cookie Cutter.</string>
 
+    <!-- [Settings] Header for settings enabling features that are currently under development. -->
+    <string name="settings_features_under_development">Features under development</string>
+
+    <!-- [Settings] Enables create or switch tab behavior + tab archiving. -->
+    <string name="settings_automated_tab_management" translatable="false">Enable automated tab management</string>
+
+    <!-- [Settings] Enables NeevaScope. -->
+    <string name="settings_neevascope" translatable="false">Enable NeevaScope</string>
+
     <!-- [Clear browsing data][Header] Groups options for clearing data on this device. -->
     <string name="clear_browsing_data_on_this_device">Data on this device</string>
     <string name="settings_clear_downloaded_files">Clear downloaded files</string>
@@ -588,6 +597,41 @@
 
     <!-- [Clear browsing data][Button] Time frame: We will delete everything since they first opened the app. -->
     <string name="clear_browsing_everything">All time</string>
+
+
+
+    <!-- [Tab switcher] Clicking this will send the user to a screen to see tabs that have been archived. -->
+    <string name="archived_tabs">Archived Tabs</string>
+
+    <!-- [Archived tabs][Setting title] Sends the user to a page that allows then to select when tabs are automatically archived -->
+    <string name="archived_tabs_archive">Auto-archive tabs</string>
+
+    <!-- [Archived tabs][Button] Says that a user wants to automatically archive a tab after 7 days have passed. -->
+    <string name="archived_tabs_archive_after_seven_days">After 7 days</string>
+
+    <!-- [Archived tabs][Button] Says that a user wants to automatically archive a tab after 30 days have passed. -->
+    <string name="archived_tabs_archive_after_thirty_days">After 30 days</string>
+
+    <!-- [Archived tabs][Button] Says that a user never wants to automatically archive a tab. -->
+    <string name="archived_tabs_archive_never">Never</string>
+
+    <!-- [Archived tabs][Button] Closes all the tabs that have been archived. -->
+    <string name="archived_tabs_clear_archived">Clear All Archived Tabs</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 24 hours. -->
+    <string name="archived_tabs_today">Today</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that were opened between 24 and 48 hours ago. -->
+    <string name="archived_tabs_yesterday">Yesterday</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 7 days. -->
+    <string name="archived_tabs_last_seven_days">Last 7 days</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 30 days. -->
+    <string name="archived_tabs_last_thirty_days">Last 30 days</string>
+
+    <!-- [Archived tabs][Section header] Time frame: Tabs that are older than the oldest time frame we're showing. -->
+    <string name="archived_tabs_older">Older</string>
 
 
 
@@ -643,15 +687,18 @@
     <string name="cookie_cutter_whos_tracking_you">Who\'s tracking you</string>
 
     <!-- [Cookie Cutter] Name of the "Cookie Cutter" feature. -->
-    <string name="cookie_cutter" translatable="false">Cookie Cutter</string>
+    <string name="cookie_cutter">Cookie Cutter</string>
 
     <!-- [Cookie Cutter] Sends the user to the settings page for the "Cookie Cutter" feature. -->
     <string name="cookie_cutter_settings">Cookie Cutter settings</string>
 
+    <!-- [Cookie Cutter] Subtitle for a switch that allows a user to turn off Cookie Cutter. -->
+    <string name="cookie_cutter_subtitle">Site appears broken? Try deactivating.</string>
+
 
 
     <!-- [NeevaScope] Title of the NeevaScope feature. -->
-    <string name="neevascope" translatable="false">NeevaScope</string>
+    <string name="neevascope">NeevaScope</string>
 
     <!-- [NeevaScope] Tells the user how NeevaScope is triggered. -->
     <string name="neevascope_intro_title">Tap on the Neeva logo to see information related to the website you\'re visiting.</string>
@@ -665,4 +712,53 @@
     <!-- [NeevaScope][Colloquial] Tells the user that we are getting information about the current web page.
          This is a pun because the "NeevaScope" feature is like a "telescope". -->
     <string name="neevascope_loading">Your NeevaScope is coming into focus…</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays a list of related searches. -->
+    <string name="neevascope_related_search">People Also Search</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays a list of related queries. -->
+    <string name="neevascope_memorized_query">Keep Looking</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays a list of reddit discussions. -->
+    <string name="neevascope_reddit_discussion">Discussions</string>
+
+    <!-- [NeevaScope][Button] Triggers showing more search results. -->
+    <string name="neevascope_show_more">Show More</string>
+
+    <!-- [NeevaScope][Button] Triggers showing more reddit discussion results. -->
+    <string name="neevascope_discussion_show_more">Show More Discussions</string>
+
+    <!-- [NeevaScope] Indicate when reddit discussion posted -->
+    <plurals name="discussion_interval_day">
+        <item quantity="one">%1$d days ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
+
+    <plurals name="discussion_interval_month">
+        <item quantity="one">%1$d month ago</item>
+        <item quantity="other">%1$d months ago</item>
+    </plurals>
+
+    <plurals name="discussion_interval_year">
+        <item quantity="one">%1$d year ago</item>
+        <item quantity="other">%1$d years ago</item>
+    </plurals>
+
+    <!-- [NeevaScope] Triggers showing full content. -->
+    <string name="discussion_comment_more">Read More</string>
+
+    <!-- [NeevaScope] Triggers showing less content. -->
+    <string name="discussion_comment_less">Read Less</string>
+
+    <!-- [NeevaScope] Label for a link that takes the user to reddit discussion page. -->
+    <string name="discussion_more_comments">More Comments</string>
+
+    <!-- [NeevaScope][Button] Sends the user to the support page. -->
+    <string name="neevascope_support">Support</string>
+
+    <!-- [NeevaScope] Tells the user what support section does.  -->
+    <string name="neevascope_support_body">Have questions or feedback for NeevaScope?</string>
+
+    <!-- [NeevaScope] Sends the user to the support page  -->
+    <string name="neevascope_contact_us">Contact us via Support</string>
 </resources>
