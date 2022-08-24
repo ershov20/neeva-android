@@ -16,13 +16,23 @@ We use Beta or Canary versions of Android Studio so that we can use Compose Prev
 You will want to max out the amount of memory Android Studio is allowed to use in the **Memory Settings** section of the Android Studio preferences.  To get there, quickly double-tap the Shift key and type "Memory Settings" into the box, then select it from the dropdown.
 
 #### Install the command line tools, too
-In order to run our screenshot tests, you'll need to have the Android Studio command line tools installed.  You can get them from the "Command line tools only" section of https://developer.android.com/studio.
+In order to run our screenshot tests, you'll need to have the Android Studio command line tools installed. You can get them from Android Studio > Preferences > Appearance & Behavior > Android SDK > SDK Tools. Your SDK Tools tab should look like this:
+
+<img width="754" alt="Screen Shot 2022-08-24" src="https://user-images.githubusercontent.com/20916043/186373262-db6b218e-be7f-4a90-825a-0bb736fdc7e3.png">
 
 Once those are installed, you can run a version of this command to add them to your `$PATH` and make sure they're accessible from anywhere:
 ```
-# Assuming that you've installed the tools to the default directories:
-echo "export PATH=\"\$PATH:$HOME/Library/Android/sdk/platform-tools\"" >> ~/.zshrc
-echo "export PATH=\"\$PATH:$HOME/Library/Android/sdk/cmdline-tools/latest/bin\"" >> ~/.zshrc
+# Assuming that you've installed the tools to the default directories:  
+# To set the correct sdkmanager, avdmanager, emulator executables
+echo "export ANDROID_HOME=\"$HOME/Library/Android/sdk\"" >> ~/.zshrc
+echo "export PATH=\"\$PATH:$ANDROID_HOME/platform-tools\"" >> ~/.zshrc
+echo "export PATH=\"\$PATH:$ANDROID_HOME/cmdline-tools/latest/bin\"" >> ~/.zshrc
+echo "export PATH=\"\$PATH:$ANDROID_HOME/emulator\"" >> ~/.zshrc
+
+source ~/.zshrc
+
+# verify this is $HOME/Library/Android/sdk/cmdline-tools/latest/bin/sdkmanager
+which sdkmanager
 ```
 
 If you don't already have the Java runtime installed, you'll need to install that from: https://www.oracle.com/java/technologies/downloads/
