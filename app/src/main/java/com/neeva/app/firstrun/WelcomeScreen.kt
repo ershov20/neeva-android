@@ -324,6 +324,7 @@ fun ConsentCheckbox(
     toggleLoggingConsentState: () -> Unit
 ) {
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .clickable { toggleLoggingConsentState() }

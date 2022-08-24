@@ -11,6 +11,7 @@ import com.neeva.app.browsing.GoBackResult
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.NeevaUser
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
@@ -29,6 +30,7 @@ class AppNavModelImplTest : BaseTest() {
     @get:Rule
     val coroutineScopeRule = CoroutineScopeRule()
 
+    @MockK lateinit var neevaUser: NeevaUser
     @MockK lateinit var onTakeScreenshot: (callback: () -> Unit) -> Unit
     @MockK lateinit var popupModel: PopupModel
     @MockK lateinit var spaceStore: SpaceStore
@@ -75,7 +77,8 @@ class AppNavModelImplTest : BaseTest() {
             popupModel = popupModel,
             spaceStore = spaceStore,
             onTakeScreenshot = onTakeScreenshot,
-            neevaConstants = neevaConstants
+            neevaConstants = neevaConstants,
+            neevaUser = neevaUser
         )
     }
 

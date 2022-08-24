@@ -2,12 +2,15 @@ package com.neeva.app.ui.widgets.bottomsheetdialog
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.StringRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
@@ -26,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -35,6 +39,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.theme.Dimensions
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
@@ -51,7 +56,10 @@ fun BottomSheetDialog(
     onGone: () -> Unit,
     content: @Composable (dismissDialog: () -> Unit) -> Unit
 ) {
+    // Animate the bottom sheet coming in halfway.
+    var drawScrim by remember { mutableStateOf(false) }
     LaunchedEffect(true) {
+        drawScrim = true
         state.animateTo(BottomSheetDialogStates.HALF)
     }
 
@@ -89,6 +97,15 @@ fun BottomSheetDialog(
             )
         }
 
+        if (drawScrim) {
+            val alpha = (1.0f - state.offset.value / maxHeightPx).coerceAtMost(0.5f)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = alpha))
+            )
+        }
+
         Box(
             modifier = modifier
                 .fillMaxSize()
@@ -116,23 +133,25 @@ fun BottomSheetDialog(
                     }
             ) {
                 Column {
-                    BaseRowLayout(
-                        endComposable = {
-                            IconButton(onClick = dismissDialog) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_baseline_close_24),
-                                    contentDescription = stringResource(R.string.close),
-                                )
+                    if (titleResId != null) {
+                        BaseRowLayout(
+                            endComposable = {
+                                IconButton(onClick = dismissDialog) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_baseline_close_24),
+                                        contentDescription = stringResource(R.string.close),
+                                    )
+                                }
                             }
-                        }
-                    ) {
-                        titleResId?.let { titleResId ->
+                        ) {
                             Text(
                                 text = stringResource(titleResId),
                                 style = MaterialTheme.typography.titleMedium,
                                 maxLines = 1
                             )
                         }
+                    } else {
+                        Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
                     }
 
                     content(dismissDialog)

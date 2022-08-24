@@ -164,7 +164,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         popupModel = popupModel,
                         spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
-                        neevaConstants = neevaConstants
+                        neevaConstants = neevaConstants,
+                        neevaUser = neevaUser
                     )
                 }
                 cardsPaneModel = remember(appNavModel) {

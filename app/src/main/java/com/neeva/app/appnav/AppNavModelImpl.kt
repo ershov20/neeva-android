@@ -27,6 +27,7 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -46,7 +47,8 @@ class AppNavModelImpl(
     private val popupModel: PopupModel,
     private val spaceStore: SpaceStore,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
-    private val neevaConstants: NeevaConstants
+    private val neevaConstants: NeevaConstants,
+    private val neevaUser: NeevaUser
 ) : AppNavModel {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     override val currentDestination: StateFlow<NavDestination?>
@@ -208,7 +210,12 @@ class AppNavModelImpl(
 
     override fun showAddToSpace() {
         popupModel.showBottomSheet(
-            titleResId = R.string.toolbar_save_to_space
+            titleResId = if (neevaUser.isSignedOut()) {
+                // We're going to show a big promo that has a title built in.
+                null
+            } else {
+                R.string.toolbar_save_to_space
+            }
         ) { onDismissRequested ->
             val spaceStore = LocalSpaceStore.current
             val browserWrapper = webLayerModel.currentBrowser
