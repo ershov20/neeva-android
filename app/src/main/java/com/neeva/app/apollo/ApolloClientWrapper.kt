@@ -1,6 +1,7 @@
 package com.neeva.app.apollo
 
 import androidx.annotation.CallSuper
+import androidx.compose.ui.text.intl.Locale
 import com.apollographql.apollo3.ApolloCall
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.api.Mutation
@@ -65,6 +66,7 @@ class OkHttpApolloClientWrapper(
             .addHeader("User-Agent", "NeevaBrowserAndroid")
             .addHeader("X-Neeva-Client-ID", neevaConstants.browserIdentifier)
             .addHeader("X-Neeva-Client-Version", BuildConfig.VERSION_NAME)
+            .addHeader("accept-language", Locale.current.toLanguageTag())
             .build()
         return chain.proceed(request)
     }
