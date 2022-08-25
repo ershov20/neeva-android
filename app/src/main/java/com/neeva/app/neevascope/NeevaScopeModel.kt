@@ -26,45 +26,12 @@ data class NeevaScopeSearchQuery(
     val title: String
 )
 
-data class NeevaScopeWebResult(
-    val faviconURL: String,
-    val displayURLHost: String,
-    val displayURLPath: List<String>?,
-    val actionURL: Uri,
-    val title: String,
-    val snippet: String? = null,
-    val publicationDate: String? = null
-)
-
-data class DiscussionComment(
-    val body: String,
-    val url: Uri? = null,
-    val upvotes: Int? = null
-)
-
-data class DiscussionContent(
-    val body: String,
-    val comments: List<DiscussionComment>
-)
-
-data class NeevaScopeDiscussion(
-    // Required properties
-    val title: String,
-    val content: DiscussionContent,
-    val url: Uri,
-    val slash: String,
-
-    // Optionally displayed properties
-    val upvotes: Int? = null,
-    val numComments: Int? = null,
-    val interval: String? = null,
-)
-
 data class NeevaScopeResult(
     val webSearches: List<NeevaScopeWebResult> = emptyList(),
     val relatedSearches: List<String> = emptyList(),
     val redditDiscussions: List<NeevaScopeDiscussion> = emptyList(),
-    val memorizedSearches: List<String> = emptyList()
+    val memorizedSearches: List<String> = emptyList(),
+    val recipe: NeevaScopeRecipe?
 )
 
 class NeevaScopeModel(
@@ -127,7 +94,7 @@ class NeevaScopeModel(
         try {
             cheatsheetInfo = apolloWrapper.performQuery(
                 CheatsheetInfoQuery(input = input, title = title),
-                userMustBeLoggedIn = true
+                userMustBeLoggedIn = false
             )?.data
         } catch (e: Exception) {
             // TODO(https://github.com/neevaco/neeva-android/issues/826): Show error states
@@ -170,6 +137,7 @@ class NeevaScopeModel(
         val discussions: MutableList<NeevaScopeDiscussion> = mutableListOf()
         val memorizedResults =
             cheatsheetInfoData?.getCheatsheetInfo?.MemorizedQuery ?: emptyList()
+        val recipe = cheatsheetInfoData?.getCheatsheetInfo?.Recipe?.toNeevaScopeRecipe()
 
         cheatsheetInfoData?.getCheatsheetInfo?.BacklinkURL
             ?.mapNotNull { backlinkURL ->
@@ -185,7 +153,8 @@ class NeevaScopeModel(
             webSearches = webResults,
             relatedSearches = relatedResults,
             redditDiscussions = discussions.take(DISCUSSION_COUNT_THRESHOLD),
-            memorizedSearches = memorizedResults.take(MEMORIZED_QUERY_COUNT_THRESHOLD)
+            memorizedSearches = memorizedResults.take(MEMORIZED_QUERY_COUNT_THRESHOLD),
+            recipe = recipe
         )
     }
 
@@ -283,4 +252,39 @@ fun String.toInterval(appContext: Context): String {
             )
         }
     }
+}
+
+fun CheatsheetInfoQuery.Recipe.toNeevaScopeRecipe(): NeevaScopeRecipe {
+    return NeevaScopeRecipe(
+        title = this.title ?: "",
+        imageURL = this.imageURL ?: "",
+        totalTime = this.totalTime,
+        prepTime = this.prepTime,
+        yield = this.yield,
+        ingredients = this.ingredients?.mapNotNull { ingredient ->
+            ingredient.text
+        },
+        instructions = this.instructions?.mapNotNull { instruction ->
+            instruction.text
+        },
+        recipeRating = this.recipeRating?.let { recipeRating ->
+            RecipeRating(
+                maxStars = recipeRating.maxStars ?: 0.0,
+                recipeStars = recipeRating.recipeStars ?: 0.0,
+                numReviews = recipeRating.numReviews ?: 0
+            )
+        },
+        reviews = this.reviews?.map { review ->
+            RecipeReview(
+                reviewerName = review.reviewerName ?: "",
+                body = review.body ?: "",
+                rating = review.rating.let { rating ->
+                    ReviewRating(
+                        maxStars = rating?.maxStars ?: 0.0,
+                        actualStars = rating?.actualStars ?: 0.0
+                    )
+                }
+            )
+        }
+    )
 }

@@ -13,13 +13,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
+import androidx.compose.material3.Divider
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,22 +33,25 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.sp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
+import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.theme.NeevaScopeTheme
 
 private const val NUMBER_COLLAPSED = 3
 
 @Composable
 fun NeevaScopeResultScreen(
     neevascopeModel: NeevaScopeModel,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    faviconCache: FaviconCache?,
+    currentUrl: Uri?
 ) {
     val appNavModel = LocalAppNavModel.current
     val neevaConstants = LocalNeevaConstants.current
@@ -55,6 +62,8 @@ fun NeevaScopeResultScreen(
         showFeedback = appNavModel::showFeedback,
         onDismiss = onDismiss,
         searches = searches,
+        faviconCache = faviconCache,
+        currentUrl = currentUrl,
         neevaConstants = neevaConstants
     )
 }
@@ -65,6 +74,8 @@ fun NeevaScopeResultScreen(
     showFeedback: () -> Unit,
     onDismiss: () -> Unit,
     searches: NeevaScopeResult?,
+    faviconCache: FaviconCache?,
+    currentUrl: Uri?,
     neevaConstants: NeevaConstants
 ) {
     val showAllDiscussions = remember { mutableStateOf(true) }
@@ -77,53 +88,68 @@ fun NeevaScopeResultScreen(
         showAllSearches.value = it.count() <= NUMBER_COLLAPSED
     }
 
-    Surface {
-        LazyColumn(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .fillMaxWidth()
-                .padding(horizontal = Dimensions.PADDING_LARGE)
-        ) {
-            searches?.redditDiscussions?.takeIf { it.isNotEmpty() }?.let {
-                RedditDiscussionsList(
-                    discussions = it,
-                    showAllDiscussions = showAllDiscussions,
-                    openUrl = openUrl,
-                    onDismiss = onDismiss
-                )
-            }
+    val showFullRecipe = remember { mutableStateOf(false) }
 
-            searches?.webSearches?.takeIf { it.isNotEmpty() }?.let {
-                WebResultsList(
-                    webResults = it,
-                    showAllSearches = showAllSearches,
-                    openUrl = openUrl,
-                    onDismiss = onDismiss
-                )
-            }
+    CompositionLocalProvider(
+        LocalTextStyle.provides(MaterialTheme.typography.bodyMedium)
+    ) {
+        Surface {
+            LazyColumn(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.background)
+                    .fillMaxWidth()
+                    .padding(horizontal = Dimensions.PADDING_LARGE)
+            ) {
+                searches?.recipe?.takeIf { it.title != "" }?.let {
+                    RecipeList(
+                        recipe = it,
+                        faviconCache = faviconCache,
+                        currentUrl = currentUrl,
+                        showFullRecipe = showFullRecipe
+                    )
+                }
 
-            searches?.relatedSearches?.takeIf { it.isNotEmpty() }?.let {
-                RelatedSearchesList(
-                    title = R.string.neevascope_related_search,
-                    searches = it,
-                    openUrl = openUrl,
-                    neevaConstants = neevaConstants,
-                    onDismiss = onDismiss
-                )
-            }
+                searches?.redditDiscussions?.takeIf { it.isNotEmpty() }?.let {
+                    RedditDiscussionsList(
+                        discussions = it,
+                        showAllDiscussions = showAllDiscussions,
+                        openUrl = openUrl,
+                        onDismiss = onDismiss
+                    )
+                }
 
-            searches?.memorizedSearches?.takeIf { it.isNotEmpty() }?.let {
-                RelatedSearchesList(
-                    title = R.string.neevascope_memorized_query,
-                    searches = it,
-                    openUrl = openUrl,
-                    neevaConstants = neevaConstants,
-                    onDismiss = onDismiss
-                )
-            }
+                searches?.webSearches?.takeIf { it.isNotEmpty() }?.let {
+                    WebResultsList(
+                        webResults = it,
+                        showAllSearches = showAllSearches,
+                        openUrl = openUrl,
+                        onDismiss = onDismiss
+                    )
+                }
 
-            item {
-                SupportSection(showFeedback = showFeedback, onDismiss = onDismiss)
+                searches?.relatedSearches?.takeIf { it.isNotEmpty() }?.let {
+                    RelatedSearchesList(
+                        title = R.string.neevascope_related_search,
+                        searches = it,
+                        openUrl = openUrl,
+                        neevaConstants = neevaConstants,
+                        onDismiss = onDismiss
+                    )
+                }
+
+                searches?.memorizedSearches?.takeIf { it.isNotEmpty() }?.let {
+                    RelatedSearchesList(
+                        title = R.string.neevascope_memorized_query,
+                        searches = it,
+                        openUrl = openUrl,
+                        neevaConstants = neevaConstants,
+                        onDismiss = onDismiss
+                    )
+                }
+
+                item {
+                    SupportSection(showFeedback = showFeedback, onDismiss = onDismiss)
+                }
             }
         }
     }
@@ -131,18 +157,34 @@ fun NeevaScopeResultScreen(
 
 @Composable
 fun NeevaScopeSectionHeader(
-    @StringRes title: Int
+    @StringRes title: Int,
+    content: String? = null
 ) {
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = stringResource(id = title),
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 20.sp,
-            lineHeight = 24.sp
-        )
+        if (content != null) {
+            Text(
+                text = stringResource(id = title, content),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = NeevaScopeTheme.headerStyle
+            )
+        } else {
+            Text(
+                text = stringResource(id = title),
+                color = MaterialTheme.colorScheme.onSurface,
+                style = NeevaScopeTheme.headerStyle
+            )
+        }
     }
+}
+
+@Composable
+fun NeevaScopeDivider() {
+    Divider(
+        modifier = Modifier.padding(vertical = Dimensions.PADDING_MEDIUM),
+        color = MaterialTheme.colorScheme.surfaceVariant
+    )
 }
 
 @Composable
@@ -159,7 +201,11 @@ fun ShowMoreButton(
         Spacer(modifier = Modifier.padding(Dimensions.PADDING_TINY))
 
         Icon(
-            Icons.Outlined.KeyboardArrowDown,
+            if (showAll.value) {
+                Icons.Outlined.KeyboardArrowUp
+            } else {
+                Icons.Outlined.KeyboardArrowDown
+            },
             contentDescription = null,
             modifier = Modifier.size(Dimensions.SIZE_ICON_SMALL)
         )

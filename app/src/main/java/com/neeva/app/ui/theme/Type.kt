@@ -126,3 +126,14 @@ val AppTypography = Typography(
         letterSpacing = 0.5.sp,
     ),
 )
+
+object NeevaScopeTheme {
+    // TextStyle for NeevaScope section header
+    val headerStyle = TextStyle(
+        fontFamily = Roboto,
+        fontWeight = FontWeight.W400,
+        fontSize = 20.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp,
+    )
+}

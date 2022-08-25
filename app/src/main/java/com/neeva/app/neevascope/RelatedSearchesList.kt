@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,10 +51,7 @@ fun LazyListScope.RelatedSearchesList(
     }
 
     item {
-        Divider(
-            modifier = Modifier.padding(Dimensions.PADDING_MEDIUM),
-            color = MaterialTheme.colorScheme.surfaceVariant
-        )
+        NeevaScopeDivider()
     }
 }
 

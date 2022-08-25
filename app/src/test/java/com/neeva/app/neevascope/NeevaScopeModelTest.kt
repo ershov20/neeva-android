@@ -11,6 +11,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.SearchQuery
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.type.UserPreference
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
@@ -131,6 +132,21 @@ class NeevaScopeModelTest : BaseTest() {
                     upvotes = 1,
                     numComments = 4,
                     interval = "4 years ago"
+                )
+            )
+
+            expectThat(result.recipe).equals(
+                NeevaScopeRecipe(
+                    title = "Lemon Bars",
+                    imageURL = "",
+                    totalTime = "",
+                    prepTime = "",
+                    yield = "24 Servings",
+                    ingredients = listOf(),
+                    instructions = listOf(),
+                    recipeRating = RecipeRating(5.0, 4.7, 877),
+                    reviews = listOf(),
+                    preference = null
                 )
             )
         }
@@ -255,6 +271,22 @@ class NeevaScopeModelTest : BaseTest() {
                             )
                         )
                     )
+                ),
+                Recipe = CheatsheetInfoQuery.Recipe(
+                    title = "Lemon Bars",
+                    preference = UserPreference.UNKNOWN__,
+                    imageURL = "",
+                    totalTime = "",
+                    prepTime = "",
+                    yield = "24 Servings",
+                    ingredients = listOf(),
+                    instructions = listOf(),
+                    recipeRating = CheatsheetInfoQuery.RecipeRating(
+                        maxStars = 5.0,
+                        recipeStars = 4.7,
+                        numReviews = 877
+                    ),
+                    reviews = listOf()
                 )
             )
         )

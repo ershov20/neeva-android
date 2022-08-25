@@ -1039,9 +1039,11 @@ abstract class BaseBrowserWrapper internal constructor(
         val isOnNeevaSearch =
             activeTabModel.displayedInfoFlow.value.mode != ActiveTabModel.DisplayMode.URL
 
+        var currentUrl: Uri? = null
         coroutineScope.launch {
+            currentUrl = activeTabModel.urlFlow.value
             neevaScopeModel.updateQuery(
-                activeTabModel.urlFlow.value.toString(),
+                currentUrl.toString(),
                 activeTabModel.titleFlow.value
             )
         }
@@ -1061,7 +1063,9 @@ abstract class BaseBrowserWrapper internal constructor(
                 else -> {
                     NeevaScopeResultScreen(
                         neevascopeModel = neevaScopeModel,
-                        onDismiss = onDismiss
+                        onDismiss = onDismiss,
+                        faviconCache = faviconCache,
+                        currentUrl = currentUrl
                     )
                 }
             }

@@ -1,6 +1,33 @@
 query CheatsheetInfo($input: String!, $title: String!) {
   getCheatsheetInfo(input: $input, title: $title) {
     MemorizedQuery
+    Recipe {
+      title
+      preference
+      imageURL
+      totalTime
+      prepTime
+      yield
+      ingredients {
+        text
+      }
+      instructions {
+        text
+      }
+      recipeRating {
+        maxStars
+        recipeStars
+        numReviews
+      }
+      reviews {
+        reviewerName
+        body
+        rating {
+          maxStars
+          actualStars
+        }
+      }
+    }
     BacklinkURL {
         URL
         Title

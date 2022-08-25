@@ -735,6 +735,12 @@
     <!-- [NeevaScope][Button] Triggers showing more reddit discussion results. -->
     <string name="neevascope_discussion_show_more">Show more discussions</string>
 
+    <!-- [NeevaScope][Button] Triggers showing full recipe. -->
+    <string name="neevascope_recipe_show_full">Show full recipe</string>
+
+    <!-- [NeevaScope][Button] Triggers hiding full recipe . -->
+    <string name="neevascope_recipe_hide_full">Hide full recipe</string>
+
     <!-- [NeevaScope] Indicate when reddit discussion posted -->
     <plurals name="discussion_interval_day">
         <item quantity="one">%d day ago</item>
@@ -762,6 +768,31 @@
 
     <!-- [NeevaScope] Label for a link that takes the user to reddit discussion page. -->
     <string name="discussion_more_comments">More comments</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays recipe. -->
+    <string name="neevascope_recipe">%1$s</string>
+
+    <!-- [NeevaScope] Indicates how many reviews of recipe. -->
+    <plurals name="neevascope_recipe_reviews">
+        <item quantity="one">%d Review</item>
+        <item quantity="many">%d Reviews</item>
+        <item quantity="other">%d Reviews</item>
+    </plurals>
+
+    <!-- [NeevaScope] Tells the user how long cooking takes. -->
+    <string name="neevascope_recipe_cookingtime">%1$s (Total time), %2$s (Prep time)</string>
+
+    <!-- [NeevaScope] Textual description of the icon to tell user how many servings. -->
+    <string name="neevascope_recipe_yield">Yield</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays a list of ingredients. -->
+    <string name="neevascope_recipe_ingredients">Ingredients</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays recipe instructions. -->
+    <string name="neevascope_recipe_instructions">Instructions</string>
+
+    <!-- [NeevaScope] Indicates the step of instructions. -->
+    <string name="neevascope_recipe_instruction_index">%d. </string>
 
     <!-- [NeevaScope][Button] Sends the user to the support page. -->
     <string name="neevascope_support">Support</string>

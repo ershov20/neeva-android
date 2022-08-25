@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.OpenInNew
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -72,10 +71,7 @@ fun LazyListScope.RedditDiscussionsList(
     }
 
     item {
-        Divider(
-            modifier = Modifier.padding(Dimensions.PADDING_MEDIUM),
-            color = MaterialTheme.colorScheme.surfaceVariant
-        )
+        NeevaScopeDivider()
     }
 }
 
@@ -137,10 +133,9 @@ fun RedditDiscussionIcon(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Dimensions.PADDING_TINY)
         ) {
-            if (hasDot == true) {
+            if (hasDot) {
                 Text(
                     text = stringResource(id = R.string.dot_separator),
-                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -252,7 +247,6 @@ fun RedditDiscussionRow(
         } else if (discussion.content.body.isNotEmpty()) {
             Text(
                 text = discussion.content.body,
-                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 3
             )
@@ -287,7 +281,6 @@ fun ExpandableTextView(
 
     Text(
         text = text,
-        style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurface,
         maxLines = if (isExpanded) Int.MAX_VALUE else maxLine,
         onTextLayout = { textLayoutResultState.value = it },
@@ -307,7 +300,6 @@ fun ExpandableTextView(
             Text(
                 text = stringResource(id = readMoreOrLess),
                 textAlign = TextAlign.End,
-                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = modifier
                     .clickable { isExpanded = !isExpanded }
