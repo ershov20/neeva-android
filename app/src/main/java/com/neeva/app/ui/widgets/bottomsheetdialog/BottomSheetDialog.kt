@@ -98,7 +98,8 @@ fun BottomSheetDialog(
         }
 
         if (drawScrim) {
-            val alpha = (1.0f - state.offset.value / maxHeightPx).coerceAtMost(0.5f)
+            val alpha = (1.0f - state.offset.value / maxHeightPx)
+                .coerceAtMost(0.5f).coerceAtLeast(0f)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
