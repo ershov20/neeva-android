@@ -24,7 +24,7 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
 
     override fun setUp() {
         super.setUp()
-        sitesRepository = database.dao()
+        sitesRepository = database.historyDao()
     }
 
     private suspend fun addSitesIntoDatabase() {
@@ -57,7 +57,7 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
     fun insert() {
         runBlocking {
             addSitesIntoDatabase()
-            val sites = database.dao().getFrequentSitesAfter(Date(0L))
+            val sites = database.historyDao().getFrequentSitesAfter(Date(0L))
 
             expectThat(sites).hasSize(3)
             expectThat(sites[0].siteURL).isEqualTo("https://www.a.com")
@@ -67,7 +67,9 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
             expectThat(sites[2].siteURL).isEqualTo("https://www.c.com")
             expectThat(sites[2].title).isEqualTo("Title C")
 
-            val visits = database.dao().getVisitsWithinTimeframeForTest(Date(0L), Date(50000L))
+            val visits = database
+                .historyDao()
+                .getVisitsWithinTimeframeForTest(Date(0L), Date(50000L))
             expectThat(visits).hasSize(6)
         }
     }
@@ -76,7 +78,7 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
     fun deleteOrphanedSiteEntities() {
         runBlocking {
             addSitesIntoDatabase()
-            val sitesBefore = database.dao().getAllSites()
+            val sitesBefore = database.historyDao().getAllSites()
             expectThat(sitesBefore).hasSize(3)
             expectThat(sitesBefore.map { it.siteURL })
                 .containsExactly("https://www.a.com", "https://www.b.com", "https://www.c.com")
@@ -84,7 +86,7 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
             // Delete some of the recorded Visits.
             // There should still be 3 visits for www.a.com and 1 for www.b.com.
             sitesRepository.deleteHistoryWithinTimeframe(Date(20001L), Date(50000L))
-            val sitesAfter = database.dao().getAllSites()
+            val sitesAfter = database.historyDao().getAllSites()
             expectThat(sitesAfter).hasSize(2)
             expectThat(sitesAfter.map { it.siteURL })
                 .containsExactly("https://www.a.com", "https://www.b.com")
@@ -95,14 +97,14 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
     fun getFrequentHistorySuggestions_byTitle() {
         runBlocking {
             addSitesIntoDatabase()
-            val sites = database.dao().getFrequentHistorySuggestions("Title")
+            val sites = database.historyDao().getFrequentHistorySuggestions("Title")
             expectThat(sites.map { it.siteURL })
                 .containsExactly("https://www.a.com", "https://www.b.com", "https://www.c.com")
 
             // Delete some of the recorded Visits.
             // There should still be 3 visits for www.a.com and 1 for www.b.com.
             sitesRepository.deleteHistoryWithinTimeframe(Date(20001L), Date(50000L))
-            val sitesAfter = database.dao().getFrequentHistorySuggestions("Title")
+            val sitesAfter = database.historyDao().getFrequentHistorySuggestions("Title")
             expectThat(sitesAfter).hasSize(2)
             expectThat(sitesAfter.map { it.siteURL })
                 .containsExactly("https://www.a.com", "https://www.b.com")
@@ -113,11 +115,18 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
     fun getFrequentHistorySuggestions_byUrl() {
         runBlocking {
             addSitesIntoDatabase()
-            expectThat(database.dao().getFrequentHistorySuggestions("com").map { it.siteURL })
-                .containsExactly("https://www.a.com", "https://www.b.com", "https://www.c.com")
+            expectThat(
+                database
+                    .historyDao()
+                    .getFrequentHistorySuggestions("com").map { it.siteURL }
+            ).containsExactly("https://www.a.com", "https://www.b.com", "https://www.c.com")
 
-            expectThat(database.dao().getFrequentHistorySuggestions("c.com").map { it.siteURL })
-                .containsExactly("https://www.c.com")
+            expectThat(
+                database
+                    .historyDao()
+                    .getFrequentHistorySuggestions("c.com")
+                    .map { it.siteURL }
+            ).containsExactly("https://www.c.com")
         }
     }
 
@@ -125,11 +134,19 @@ class HistoryDaoTest : HistoryDatabaseBaseTest() {
     fun getRecentHistorySuggestions() {
         runBlocking {
             addSitesIntoDatabase()
-            expectThat(database.dao().getRecentHistorySuggestions("com").map { it.siteURL })
-                .containsExactly("https://www.c.com", "https://www.b.com", "https://www.a.com")
+            expectThat(
+                database
+                    .historyDao()
+                    .getRecentHistorySuggestions("com")
+                    .map { it.siteURL }
+            ).containsExactly("https://www.c.com", "https://www.b.com", "https://www.a.com")
 
-            expectThat(database.dao().getRecentHistorySuggestions("c.com").map { it.siteURL })
-                .containsExactly("https://www.c.com")
+            expectThat(
+                database
+                    .historyDao()
+                    .getRecentHistorySuggestions("c.com")
+                    .map { it.siteURL }
+            ).containsExactly("https://www.c.com")
         }
     }
 }

@@ -50,4 +50,5 @@ object Migrations {
     class MigrationFrom15To16 : AutoMigrationSpec
 
     class MigrationFrom16To17 : AutoMigrationSpec
+    class MigrationFrom17To18 : AutoMigrationSpec
 }

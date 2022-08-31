@@ -13,6 +13,7 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.daos.SitePlusVisit
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
+import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.entities.Visit
 import com.neeva.app.suggestions.NavSuggestion
 import com.neeva.app.suggestions.QueryRowSuggestion
@@ -45,22 +46,17 @@ class HistoryManager(
         private val TAG = HistoryManager::class.simpleName
     }
 
-    private val dao = historyDatabase.dao()
-
-    fun getPagedHistory(startTime: Date, filter: String = ""): Flow<PagingData<SitePlusVisit>> {
-        return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
-            dao.getPagedSitesVisitedAfter(thresholdTime = startTime, query = filter)
-        }.flow
-    }
+    private val historyDao = historyDatabase.historyDao()
+    private val tabDataDao = historyDatabase.tabDataDao()
 
     private val frequentSites: Flow<List<Site>> =
-        dao.getFrequentSitesAfterFlow(HISTORY_START_DATE, MAX_FREQUENT_SITES)
+        historyDao.getFrequentSitesAfterFlow(HISTORY_START_DATE, MAX_FREQUENT_SITES)
 
     private val _historySuggestions = MutableStateFlow<List<NavSuggestion>>(emptyList())
     val historySuggestions: StateFlow<List<NavSuggestion>> = _historySuggestions
 
     /** Provides the top 3 search suggestions based on how often a user visited a site. */
-    val suggestedQueries: Flow<List<QueryRowSuggestion>> = dao
+    val suggestedQueries: Flow<List<QueryRowSuggestion>> = historyDao
         .getRecentHistorySuggestionsFlow(query = neevaConstants.appSearchURL)
         .map { siteList ->
             siteList.mapNotNull { it.toSearchSuggest(neevaConstants) }.take(3)
@@ -77,10 +73,38 @@ class HistoryManager(
             }
         }
 
+    fun addArchivedTab(tabData: TabData) {
+        coroutineScope.launch(dispatchers.io) {
+            tabDataDao.add(tabData)
+        }
+    }
+
+    fun removeArchivedTab(tabId: String) {
+        coroutineScope.launch(dispatchers.io) {
+            tabDataDao.delete(tabId)
+        }
+    }
+
+    fun getPagedHistory(startTime: Date, filter: String = ""): Flow<PagingData<SitePlusVisit>> {
+        return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
+            historyDao.getPagedSitesVisitedAfter(thresholdTime = startTime, query = filter)
+        }.flow
+    }
+
+    fun getPagedArchivedTabs(): Flow<PagingData<TabData>> {
+        return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
+            tabDataDao.getAllArchivedPaged()
+        }.flow
+    }
+
+    suspend fun clearArchivedTabs() {
+        tabDataDao.deleteAllArchived()
+    }
+
     /** Updates the query that is being used to fetch history suggestions. */
     suspend fun updateSuggestionQuery(currentInput: String?) {
         val siteSuggestions = if (currentInput != null) {
-            dao.getFrequentHistorySuggestions(currentInput, limit = 10)
+            historyDao.getFrequentHistorySuggestions(currentInput, limit = 10)
         } else {
             emptyList()
         }
@@ -90,7 +114,7 @@ class HistoryManager(
 
     /** Returns the favicon that corresponds to an exact visit in the user's history. */
     suspend fun getFaviconFromHistory(uri: Uri): Favicon? {
-        val siteFavicon = dao.getSiteByUrl(uri)?.largestFavicon
+        val siteFavicon = historyDao.getSiteByUrl(uri)?.largestFavicon
         if (siteFavicon != null) return siteFavicon
         return null
     }
@@ -103,36 +127,36 @@ class HistoryManager(
         visit: Visit? = null
     ) {
         withContext(dispatchers.io) {
-            dao.upsert(url, title, favicon, visit)
+            historyDao.upsert(url, title, favicon, visit)
         }
     }
 
     /** Marks a visit for deletion when the database is next pruned. */
     fun markVisitForDeletion(visitUID: Int, isMarkedForDeletion: Boolean) {
         coroutineScope.launch(dispatchers.io) {
-            dao.setMarkedForDeletion(visitUID, isMarkedForDeletion = isMarkedForDeletion)
+            historyDao.setMarkedForDeletion(visitUID, isMarkedForDeletion = isMarkedForDeletion)
         }
     }
 
     /** Cleans out entries from the database that are no longer necessary. */
     fun pruneDatabase() {
-        val numVisitsPurged = dao.purgeVisitsMarkedForDeletion()
+        val numVisitsPurged = historyDao.purgeVisitsMarkedForDeletion()
         Log.d(TAG, "Purged $numVisitsPurged visits from the database")
 
-        val numSitesPurged = dao.deleteOrphanedSiteEntities()
+        val numSitesPurged = historyDao.deleteOrphanedSiteEntities()
         Log.d(TAG, "Purged $numSitesPurged orphaned sites from the database")
     }
 
     fun clearHistory(fromMillis: Long) {
         coroutineScope.launch(dispatchers.io) {
-            dao.deleteHistoryWithinTimeframe(
+            historyDao.deleteHistoryWithinTimeframe(
                 Date(fromMillis),
                 Date()
             )
         }
     }
 
-    suspend fun getAllFaviconUris(): List<String> = dao.getAllFavicons()
+    suspend fun getAllFaviconUris(): List<String> = historyDao.getAllFavicons()
 }
 
 fun Site.toSearchSuggest(neevaConstants: NeevaConstants): QueryRowSuggestion? {

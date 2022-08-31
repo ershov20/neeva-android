@@ -26,7 +26,7 @@ class VisitDaoTest : HistoryDatabaseBaseTest() {
 
     override fun setUp() {
         super.setUp()
-        visitDao = database.dao()
+        visitDao = database.historyDao()
     }
 
     @Test

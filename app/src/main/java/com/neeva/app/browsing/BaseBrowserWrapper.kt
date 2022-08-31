@@ -39,6 +39,7 @@ import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
+import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.PopupModel
@@ -758,6 +759,20 @@ abstract class BaseBrowserWrapper internal constructor(
         val tabInfo = tabList.getTabInfo(id)
 
         getTab(id)?.let {
+            val isCreateOrSwitchTabEnabled =
+                settingsDataModel.getSettingsToggleValue(SettingsToggle.AUTOMATED_TAB_MANAGEMENT)
+            if (isCreateOrSwitchTabEnabled && tabInfo?.url != null) {
+                historyManager?.addArchivedTab(
+                    TabData(
+                        id = id,
+                        url = tabInfo.url,
+                        title = tabInfo.title,
+                        lastActiveMs = tabInfo.data.lastActiveMs,
+                        isArchived = true
+                    )
+                )
+            }
+
             it.dispatchBeforeUnloadAndClose()
             if (getActiveTab()?.guid == id) {
                 setNextActiveTab(tabInfo, tabIndex)
