@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -66,7 +66,7 @@ fun TabGrid(
         isAutomatedTabManagementEnabled = isArchiveEnabled,
         onSelectTab = { tabInfo -> cardsPaneModel.selectTab(browserWrapper, tabInfo) },
         onCloseTabs = { tabInfo -> cardsPaneModel.closeTab(browserWrapper, tabInfo) },
-        onShowArchivedTabs = { cardsPaneModel.showArchivedTabs(browserWrapper) },
+        onShowArchivedTabs = { cardsPaneModel.showArchivedTabs() },
         tabs = tabs,
         faviconCache = browserWrapper.faviconCache,
         screenshotProvider = browserWrapper::restoreScreenshotOfTab,
@@ -172,14 +172,17 @@ fun ChronologicalTabGrid(
             Column {
                 TabGridEmptyState(isIncognito, Modifier.weight(1.0f))
 
-                ArchivedTabsButton(onShowArchivedTabs = onShowArchivedTabs)
+                // We don't keep track of tabs that have been archived while incognito.
+                if (!isIncognito) {
+                    ArchivedTabsButton(onShowArchivedTabs = onShowArchivedTabs)
+                }
             }
         },
         modifier = modifier
     ) { numCellsPerRow, listItems ->
         listItems.forEach { section ->
             item(span = { GridItemSpan(numCellsPerRow) }) {
-                HistoryHeader(section.header)
+                HistoryHeader(section.header, useHeavyDivider = true)
             }
 
             items(
@@ -196,10 +199,13 @@ fun ChronologicalTabGrid(
             }
         }
 
-        item(span = { GridItemSpan(numCellsPerRow) }) {
-            Column(Modifier.fillMaxHeight()) {
-                HeavyDivider()
-                ArchivedTabsButton(onShowArchivedTabs = onShowArchivedTabs)
+        // We don't keep track of tabs that have been archived while incognito.
+        if (!isIncognito) {
+            item(span = { GridItemSpan(numCellsPerRow) }) {
+                Column(Modifier.fillMaxHeight()) {
+                    HeavyDivider()
+                    ArchivedTabsButton(onShowArchivedTabs = onShowArchivedTabs)
+                }
             }
         }
     }
@@ -220,7 +226,7 @@ fun ArchivedTabsButton(onShowArchivedTabs: () -> Unit) {
             )
         ) {
             Icon(
-                imageVector = Icons.Default.History,
+                imageVector = Icons.Outlined.Inventory2,
                 contentDescription = null
             )
 

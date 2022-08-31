@@ -174,7 +174,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         webLayerModel = webLayerModel,
                         appNavModel = appNavModel!!,
                         popupModel = popupModel,
-                        settingsDataModel = settingsDataModel,
                         coroutineScope = lifecycleScope
                     )
                 }

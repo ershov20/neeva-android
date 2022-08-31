@@ -17,6 +17,7 @@ fun ClickableRow(
     secondaryMaxLines: Int = 1,
     isActionDangerous: Boolean = false,
     actionIconParams: RowActionIconParams,
+    applyVerticalPadding: Boolean = true,
     enabled: Boolean = true
 ) {
     val backgroundColor = MaterialTheme.colorScheme.surface
@@ -28,7 +29,8 @@ fun ClickableRow(
         } else {
             null
         },
-        backgroundColor = backgroundColor
+        backgroundColor = backgroundColor,
+        applyVerticalPadding = applyVerticalPadding
     ) {
         StackedText(
             primaryLabel = primaryLabel,

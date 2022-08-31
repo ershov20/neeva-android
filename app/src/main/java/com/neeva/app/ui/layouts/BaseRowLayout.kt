@@ -40,7 +40,7 @@ fun BaseRowLayout(
     endComposablePadding: Dp = Dimensions.PADDING_SMALL,
     backgroundColor: Color = MaterialTheme.colorScheme.surface,
     contentColor: Color = contentColorFor(backgroundColor),
-    verticalPadding: Dp = Dimensions.PADDING_SMALL,
+    applyVerticalPadding: Boolean = true,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     mainContent: @Composable () -> Unit
 ) {
@@ -80,7 +80,13 @@ fun BaseRowLayout(
             verticalAlignment = verticalAlignment,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = verticalPadding)
+                .padding(
+                    vertical = if (applyVerticalPadding) {
+                        Dimensions.PADDING_SMALL
+                    } else {
+                        0.dp
+                    }
+                )
         ) {
             startComposable?.let {
                 Box(

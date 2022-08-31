@@ -16,7 +16,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.ui.AnimationConstants
 import com.neeva.app.ui.OneBooleanPreviewContainer
@@ -112,7 +111,7 @@ private fun CollapsingHeader(
         onTapRow = onClick,
         backgroundColor = MaterialTheme.colorScheme.background,
         contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        verticalPadding = 0.dp,
+        applyVerticalPadding = false,
         endComposable = {
             IconButton(onClick = onClick) {
                 Icon(

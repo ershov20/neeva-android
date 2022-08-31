@@ -608,7 +608,10 @@
     <string name="archived_tabs">Archived tabs</string>
 
     <!-- [Archived tabs][Setting title] Sends the user to a page that allows then to select when tabs are automatically archived -->
-    <string name="archived_tabs_archive">Auto archive tabs</string>
+    <string name="archived_tabs_archive">Archive tabs</string>
+
+    <!-- [Archived tabs] Description for how tab archiving works. -->
+    <string name="archived_tabs_description">Let Neeva automatically archive tabs that haven\’t recently been viewed.</string>
 
     <!-- [Archived tabs][Button] Says that a user wants to automatically archive a tab after 7 days have passed. -->
     <string name="archived_tabs_archive_after_seven_days">After 7 days</string>
@@ -621,6 +624,9 @@
 
     <!-- [Archived tabs][Button] Closes all the tabs that have been archived. -->
     <string name="archived_tabs_clear_archived">Clear all archived tabs</string>
+
+    <!-- [Archived tabs] Asks the user if they're sure that they want to delete all archived tabs. -->
+    <string name="archived_tabs_are_you_sure">Are you sure you want to clear all archived tabs? It cannot be undone.</string>
 
     <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 24 hours. -->
     <string name="archived_tabs_today">Today</string>

@@ -8,7 +8,6 @@ import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
@@ -19,6 +18,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.history.HistorySubpage
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
 import com.neeva.app.spaces.ShareSpaceUIContainer
@@ -156,6 +156,10 @@ class AppNavModelImpl(
         result.spaceIdToOpen?.let { showSpaceDetail(it) }
     }
 
+    override fun clearArchivedTabs() {
+        webLayerModel.browsersFlow.value.regularBrowserWrapper.closeArchivedTabs()
+    }
+
     override fun openAndroidDefaultBrowserSettings() {
         safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
     }
@@ -189,12 +193,12 @@ class AppNavModelImpl(
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showSettings() = show(AppNavDestination.SETTINGS)
 
-    override fun showSpaceDetail(spaceID: String) {
+    override fun showSpaceDetail(spaceId: String) {
         // We set the detailedSpaceIDFlow value in case we need to fetch the Space.
         coroutineScope.launch {
-            spaceStore.detailedSpaceIDFlow.value = spaceID
+            spaceStore.detailedSpaceIDFlow.value = spaceId
         }
-        show(AppNavDestination.SPACE_DETAIL, navArguments = listOf(spaceID))
+        show(AppNavDestination.SPACE_DETAIL, navArguments = listOf(spaceId))
     }
 
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {
@@ -202,9 +206,9 @@ class AppNavModelImpl(
         show(AppNavDestination.EDIT_SPACE_DIALOG, navArguments = listOf(mode.name, id))
     }
 
-    override fun showShareSpaceSheet(spaceID: String) {
+    override fun showShareSpaceSheet(spaceId: String) {
         popupModel.showBottomSheet(titleResId = R.string.share_space_title) {
-            ShareSpaceUIContainer(spaceID = spaceID)
+            ShareSpaceUIContainer(spaceID = spaceId)
         }
     }
 
@@ -254,7 +258,15 @@ class AppNavModelImpl(
         show(AppNavDestination.SIGN_IN_FLOW)
     }
 
-    override fun showHistory() = show(AppNavDestination.HISTORY)
+    override fun showHistory() = show(
+        AppNavDestination.HISTORY,
+        navArguments = listOf(HistorySubpage.History.name)
+    )
+
+    override fun showArchivedTabs() = show(
+        AppNavDestination.HISTORY,
+        navArguments = listOf(HistorySubpage.ArchivedTabs.name)
+    )
 
     override fun showFeedback() {
         onTakeScreenshot {

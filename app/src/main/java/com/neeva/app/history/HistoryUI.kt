@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +17,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +46,6 @@ import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.previewFaviconCache
 import com.neeva.app.suggestions.NavSuggestionRow
 import com.neeva.app.suggestions.toNavSuggestion
-import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.PortraitPreviewsDark
@@ -54,6 +53,7 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.toLocalDate
 import com.neeva.app.ui.widgets.AutocompleteTextField
 import com.neeva.app.ui.widgets.ClickableRow
+import com.neeva.app.ui.widgets.DefaultDivider
 import com.neeva.app.ui.widgets.HeavyDivider
 import com.neeva.app.ui.widgets.PillSurface
 import com.neeva.app.ui.widgets.RowActionIconParams
@@ -63,7 +63,6 @@ import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun HistoryUI(
-    onClose: () -> Unit,
     onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
     faviconCache: FaviconCache
@@ -85,7 +84,6 @@ fun HistoryUI(
     HistoryUI(
         allHistory = allHistory,
         onClearHistory = onClearHistory,
-        onClose = onClose,
         onOpenUrl = onOpenUrl,
         onDeleteVisit = { visitUID: Int, siteLabel: String ->
             historyManager.markVisitForDeletion(visitUID, isMarkedForDeletion = true)
@@ -107,7 +105,6 @@ fun HistoryUI(
 @Composable
 private fun HistoryUI(
     allHistory: LazyPagingItems<SitePlusVisit>,
-    onClose: () -> Unit,
     onClearHistory: () -> Unit,
     onOpenUrl: (Uri) -> Unit,
     onDeleteVisit: (visitUID: Int, siteLabel: String) -> Unit,
@@ -115,81 +112,73 @@ private fun HistoryUI(
     domainProvider: DomainProvider,
     filterTextFieldValue: MutableState<TextFieldValue>
 ) {
-    Scaffold(
-        topBar = @Composable {
-            FullScreenDialogTopBar(
-                title = stringResource(R.string.history),
-                onBackPressed = onClose
-            )
-        },
-        modifier = Modifier.fillMaxSize()
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            item {
-                Box(modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)) {
-                    PillSurface {
-                        AutocompleteTextField(
-                            textFieldValue = filterTextFieldValue.value,
-                            imageVector = Icons.Default.Search,
-                            onTextEdited = {
-                                filterTextFieldValue.component2().invoke(it)
-                            },
-                            onTextCleared = {
-                                filterTextFieldValue.component2().invoke(TextFieldValue())
-                            },
-                            onSubmitted = {},
-                            onAcceptSuggestion = {},
-                            placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            placeholderText = stringResource(R.string.history_filter_placeholder),
-                            focusImmediately = false,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(height = 40.dp)
-                        )
-                    }
-                }
-            }
-
-            item {
-                ClickableRow(
-                    primaryLabel = stringResource(R.string.settings_clear_browsing_data),
-                    actionIconParams = RowActionIconParams(
-                        onTapAction = onClearHistory,
-                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
-                        size = Dimensions.SIZE_ICON_SMALL
+    LazyColumn {
+        item {
+            Box(
+                modifier = Modifier
+                    .padding(
+                        horizontal = Dimensions.PADDING_LARGE,
+                        vertical = Dimensions.PADDING_TINY
                     )
+            ) {
+                PillSurface {
+                    AutocompleteTextField(
+                        textFieldValue = filterTextFieldValue.value,
+                        imageVector = Icons.Default.Search,
+                        onTextEdited = {
+                            filterTextFieldValue.component2().invoke(it)
+                        },
+                        onTextCleared = {
+                            filterTextFieldValue.component2().invoke(TextFieldValue())
+                        },
+                        onSubmitted = {},
+                        onAcceptSuggestion = {},
+                        placeholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        placeholderText = stringResource(R.string.history_filter_placeholder),
+                        focusImmediately = false,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(height = 40.dp)
+                    )
+                }
+            }
+        }
+
+        item {
+            ClickableRow(
+                primaryLabel = stringResource(R.string.settings_clear_browsing_data),
+                actionIconParams = RowActionIconParams(
+                    onTapAction = onClearHistory,
+                    actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
+                    size = Dimensions.SIZE_ICON_SMALL
                 )
+            )
+        }
+
+        itemsIndexed(
+            items = allHistory,
+            key = { _, site -> site.visit.visitUID }
+        ) { index, site ->
+            val previousTimestamp = (index - 1)
+                .takeIf { it >= 0 }
+                ?.let { allHistory[index - 1]?.visit?.timestamp?.toLocalDate() }
+            val currentTimestamp = site?.visit?.timestamp?.toLocalDate()
+
+            val showDate = when {
+                currentTimestamp == null -> false
+                previousTimestamp == null -> true
+                else -> currentTimestamp != previousTimestamp
             }
 
-            itemsIndexed(
-                items = allHistory,
-                key = { _, site -> site.visit.visitUID }
-            ) { index, site ->
-                val previousTimestamp = (index - 1)
-                    .takeIf { it >= 0 }
-                    ?.let { allHistory[index - 1]?.visit?.timestamp?.toLocalDate() }
-                val currentTimestamp = site?.visit?.timestamp?.toLocalDate()
+            site?.let {
+                val timestamp = it.visit.timestamp
 
-                val showDate = when {
-                    currentTimestamp == null -> false
-                    previousTimestamp == null -> true
-                    else -> currentTimestamp != previousTimestamp
+                if (showDate) {
+                    val formatted = SimpleDateFormat.getDateInstance().format(timestamp)
+                    HistoryHeader(formatted)
                 }
 
-                site?.let {
-                    val timestamp = it.visit.timestamp
-
-                    if (showDate) {
-                        val formatted = SimpleDateFormat.getDateInstance().format(timestamp)
-                        HistoryHeader(formatted)
-                    }
-
-                    HistoryEntry(site, faviconCache, domainProvider, onOpenUrl, onDeleteVisit)
-                }
+                HistoryEntry(site, faviconCache, domainProvider, onOpenUrl, onDeleteVisit)
             }
         }
     }
@@ -216,9 +205,13 @@ fun HistoryHeaderPreview_Dark() {
 }
 
 @Composable
-fun HistoryHeader(text: String) {
+fun HistoryHeader(text: String, useHeavyDivider: Boolean = false) {
     Column(modifier = Modifier.fillMaxWidth()) {
-        HeavyDivider()
+        if (useHeavyDivider) {
+            HeavyDivider()
+        } else {
+            DefaultDivider()
+        }
 
         Text(
             text = text,
@@ -310,15 +303,19 @@ private fun HistoryUI_Preview(useDarkTheme: Boolean) {
     val filterTextFieldValue = remember { mutableStateOf(TextFieldValue()) }
 
     NeevaThemePreviewContainer(useDarkTheme = useDarkTheme) {
-        HistoryUI(
-            allHistory = allHistoryFlow.collectAsLazyPagingItems(),
-            onClearHistory = {},
-            onClose = {},
-            onOpenUrl = {},
-            onDeleteVisit = { _, _ -> },
-            faviconCache = previewFaviconCache,
-            domainProvider = previewFaviconCache.domainProvider,
-            filterTextFieldValue = filterTextFieldValue
-        )
+        Surface(
+            color = MaterialTheme.colorScheme.background,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            HistoryUI(
+                allHistory = allHistoryFlow.collectAsLazyPagingItems(),
+                onClearHistory = {},
+                onOpenUrl = {},
+                onDeleteVisit = { _, _ -> },
+                faviconCache = previewFaviconCache,
+                domainProvider = previewFaviconCache.domainProvider,
+                filterTextFieldValue = filterTextFieldValue
+            )
+        }
     }
 }

@@ -22,6 +22,7 @@ interface AppNavModel {
     fun openLazyTab(focusUrlBar: Boolean = true)
     fun openUrl(url: Uri, parentSpaceId: String? = null)
     fun navigateBackOnActiveTab()
+    fun clearArchivedTabs()
 
     // region Internal screens
     fun showBrowser(forceUserToStayInCardGrid: Boolean = true)
@@ -33,13 +34,14 @@ interface AppNavModel {
     fun showFeedback()
     fun showHelp()
     fun showHistory()
+    fun showArchivedTabs()
     fun showLicenses()
     fun showLocalFeatureFlagsPane()
     fun showProfileSettings()
     fun showSettings()
-    fun showSpaceDetail(spaceID: String)
+    fun showSpaceDetail(spaceId: String)
     fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?)
-    fun showShareSpaceSheet(spaceID: String)
+    fun showShareSpaceSheet(spaceId: String)
     fun showSignInFlow()
     // endregion
 
@@ -74,6 +76,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun openLazyTab(focusUrlBar: Boolean) {}
     override fun openUrl(url: Uri, parentSpaceId: String?) {}
     override fun navigateBackOnActiveTab() {}
+    override fun clearArchivedTabs() {}
     override fun showBrowser(forceUserToStayInCardGrid: Boolean) {}
     override fun showCardGrid() {}
     override fun showClearBrowsingSettings() {}
@@ -83,13 +86,14 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showFeedback() {}
     override fun showHelp() {}
     override fun showHistory() {}
+    override fun showArchivedTabs() {}
     override fun showLicenses() {}
     override fun showLocalFeatureFlagsPane() {}
     override fun showProfileSettings() {}
     override fun showSettings() {}
-    override fun showSpaceDetail(spaceID: String) { }
+    override fun showSpaceDetail(spaceId: String) { }
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {}
-    override fun showShareSpaceSheet(spaceID: String) {}
+    override fun showShareSpaceSheet(spaceId: String) {}
     override fun showSignInFlow() {}
     override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}

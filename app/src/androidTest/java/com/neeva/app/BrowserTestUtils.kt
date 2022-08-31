@@ -369,8 +369,15 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.navigateViaUrlBar(
 fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForNavDestination(
     destination: AppNavDestination
 ) {
-    waitFor("Navigating to $destination") {
-        it.appNavModel?.currentDestination?.value?.route == destination.route
+    waitForNavDestination(destination.route)
+}
+
+/** Wait for the NavController to tell us the user is at a particular [AppNavDestination]. */
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForNavDestination(
+    route: String
+) {
+    waitFor("Navigating to $route") {
+        it.appNavModel?.currentDestination?.value?.route == route
     }
 }
 

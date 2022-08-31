@@ -142,7 +142,7 @@ class HistoryUITest : BaseBrowserTest() {
 
             // Go back to history.
             onBackPressed()
-            waitForNavDestination(AppNavDestination.HISTORY)
+            waitForHistorySubpage(HistorySubpage.History)
             waitForAssertion { onNodeWithText("Page 1").assertDoesNotExist() }
             waitForAssertion { onNodeWithText("Page 2").assertDoesNotExist() }
             waitForAssertion { onNodeWithText("Page 3").assertDoesNotExist() }
@@ -173,7 +173,7 @@ class HistoryUITest : BaseBrowserTest() {
             onBackPressed()
             waitForNodeToDisappear(suggestionListNode)
             openOverflowMenuAndClickItem(R.string.history)
-            waitForNavDestination(AppNavDestination.HISTORY)
+            waitForHistorySubpage(HistorySubpage.History)
 
             // Clear the user's history.
             clickOnNodeWithText(getString(R.string.settings_clear_browsing_data))
@@ -184,7 +184,7 @@ class HistoryUITest : BaseBrowserTest() {
 
             // Go back to the browser.
             onBackPressed()
-            waitForNavDestination(AppNavDestination.HISTORY)
+            waitForHistorySubpage(HistorySubpage.History)
             onBackPressed()
             waitForNavDestination(AppNavDestination.BROWSER)
 
@@ -203,7 +203,7 @@ class HistoryUITest : BaseBrowserTest() {
         androidComposeRule.apply {
             // Open up the history UI.
             openOverflowMenuAndClickItem(R.string.history)
-            waitForNavDestination(AppNavDestination.HISTORY)
+            waitForHistorySubpage(HistorySubpage.History)
 
             // Open the Clear Browsing Data screen.
             clickOnNodeWithText(getString(R.string.settings_clear_browsing_data))
@@ -214,6 +214,13 @@ class HistoryUITest : BaseBrowserTest() {
             waitForNavDestination(AppNavDestination.BROWSER)
             waitForUrl(TestNeevaConstantsModule.neevaConstants.appManageMemory)
             expectBrowserState(isIncognito = false, regularTabCount = 2)
+        }
+    }
+
+    private fun waitForHistorySubpage(subpage: HistorySubpage) {
+        androidComposeRule.apply {
+            waitForNavDestination(AppNavDestination.HISTORY.route.plus("/{subpage}"))
+            waitForNodeWithText(getString(subpage.titleId))
         }
     }
 }

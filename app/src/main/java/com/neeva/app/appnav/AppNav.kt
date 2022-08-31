@@ -15,6 +15,7 @@ import com.neeva.app.cardgrid.CardsPane
 import com.neeva.app.feedback.FeedbackView
 import com.neeva.app.firstrun.signInFlowNavGraph
 import com.neeva.app.history.HistoryContainer
+import com.neeva.app.history.HistorySubpage.Companion.toHistorySubpage
 import com.neeva.app.settings.LicensesPane
 import com.neeva.app.settings.clearbrowsing.ClearBrowsingPane
 import com.neeva.app.settings.cookiecutter.CookieCutterPane
@@ -100,9 +101,13 @@ fun AppNav(
             )
         }
 
-        composable(AppNavDestination.HISTORY.route) {
+        composable(AppNavDestination.HISTORY.route.plus("/{subpage}")) { backStackEntry ->
+            val subpage = backStackEntry.arguments?.getString("subpage").toHistorySubpage()
+
             HistoryContainer(
-                faviconCache = webLayerModel.getRegularProfileFaviconCache()
+                webLayerModel = webLayerModel,
+                faviconCache = webLayerModel.getRegularProfileFaviconCache(),
+                initialSubpage = subpage
             ) {
                 appNavModel.openUrl(it)
             }
