@@ -105,7 +105,6 @@ fun AppNav(
             val subpage = backStackEntry.arguments?.getString("subpage").toHistorySubpage()
 
             HistoryContainer(
-                webLayerModel = webLayerModel,
                 faviconCache = webLayerModel.getRegularProfileFaviconCache(),
                 initialSubpage = subpage
             ) {

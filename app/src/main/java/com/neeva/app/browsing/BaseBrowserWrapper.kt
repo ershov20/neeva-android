@@ -99,7 +99,8 @@ abstract class BaseBrowserWrapper internal constructor(
     private val scriptInjectionManager: ScriptInjectionManager,
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val settingsDataModel: SettingsDataModel,
-    override val cookieCutterModel: CookieCutterModel
+    override val cookieCutterModel: CookieCutterModel,
+    private val getCurrentTime: () -> Long = { System.currentTimeMillis() }
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
     /**
      * Constructor used to create a BaseBrowserWrapper that automatically creates various internal
@@ -515,7 +516,10 @@ abstract class BaseBrowserWrapper internal constructor(
                     searchQuery = null
                 )
             },
-            afterRestoreCompleted = { isBrowserReady.complete(true) }
+            afterRestoreCompleted = {
+                closeInactiveTabs()
+                isBrowserReady.complete(true)
+            }
         ).also {
             tabListRestorer = it
         }
@@ -784,16 +788,38 @@ abstract class BaseBrowserWrapper internal constructor(
         tabList.forEach { closeTab(it) }
     }
 
-    override fun closeArchivedTabs() {
+    /** Closes all tabs that have been inactive for too long. */
+    internal fun closeInactiveTabs() {
+        val isCreateOrSwitchTabEnabled =
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.AUTOMATED_TAB_MANAGEMENT)
         val archiveAfterOption = AutomaticallyArchiveTabs.get(sharedPreferencesModel)
-        val now = System.currentTimeMillis()
+        if (!isCreateOrSwitchTabEnabled || archiveAfterOption == ArchiveAfterOption.NEVER) {
+            return
+        }
+
+        val now = getCurrentTime()
         tabList.orderedTabList.value
-            .filter { it.isArchived(archiveAfterOption, now) }
+            .filter { it.isArchivable(archiveAfterOption, now) }
             .forEach { closeTab(it.id) }
+    }
+
+    override fun clearAllArchivedTabs() {
+        coroutineScope.launch(dispatchers.io) {
+            historyManager?.clearArchivedTabs()
+        }
     }
 
     override fun selectTab(id: String): Boolean {
         return browserFlow.setActiveTab(id)
+    }
+
+    override fun restoreTab(tabData: TabData) {
+        if (tabData.isArchived) {
+            tabData.url?.let {
+                loadUrl(uri = it, inNewTab = true)
+                historyManager?.removeArchivedTab(tabId = tabData.id)
+            }
+        }
     }
 
     override suspend fun restoreScreenshotOfTab(tabId: String): Bitmap? {

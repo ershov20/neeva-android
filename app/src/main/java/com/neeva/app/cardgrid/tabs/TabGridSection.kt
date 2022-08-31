@@ -25,7 +25,7 @@ fun computeTabGridSections(
     // Bucket the items by how old they are.
     val mappedSections = mutableMapOf<AgeGroup, TabGridSection<TabInfo>>()
     tabs.forEach { tabInfo ->
-        if (tabInfo.isArchived(archiveAfterOption, now)) return@forEach
+        if (tabInfo.isArchivable(archiveAfterOption, now)) return@forEach
 
         val ageBucket = tabInfo.getAgeGroup(timeBuckets)
         mappedSections

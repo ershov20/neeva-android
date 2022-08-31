@@ -30,25 +30,25 @@ class TabInfoTest : BaseTest() {
         baseTabInfo.copy(
             data = TabInfo.PersistedData(lastActiveMs = now - TimeUnit.DAYS.toMillis(3))
         ).apply {
-            expectThat(isArchived(ArchiveAfterOption.AFTER_7_DAYS, now)).isFalse()
-            expectThat(isArchived(ArchiveAfterOption.AFTER_30_DAYS, now)).isFalse()
-            expectThat(isArchived(ArchiveAfterOption.NEVER, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.AFTER_7_DAYS, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.AFTER_30_DAYS, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.NEVER, now)).isFalse()
         }
 
         baseTabInfo.copy(
             data = TabInfo.PersistedData(lastActiveMs = now - TimeUnit.DAYS.toMillis(14))
         ).apply {
-            expectThat(isArchived(ArchiveAfterOption.AFTER_7_DAYS, now)).isTrue()
-            expectThat(isArchived(ArchiveAfterOption.AFTER_30_DAYS, now)).isFalse()
-            expectThat(isArchived(ArchiveAfterOption.NEVER, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.AFTER_7_DAYS, now)).isTrue()
+            expectThat(isArchivable(ArchiveAfterOption.AFTER_30_DAYS, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.NEVER, now)).isFalse()
         }
 
         baseTabInfo.copy(
             data = TabInfo.PersistedData(lastActiveMs = now - TimeUnit.DAYS.toMillis(31))
         ).apply {
-            expectThat(isArchived(ArchiveAfterOption.AFTER_7_DAYS, now)).isTrue()
-            expectThat(isArchived(ArchiveAfterOption.AFTER_30_DAYS, now)).isTrue()
-            expectThat(isArchived(ArchiveAfterOption.NEVER, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.AFTER_7_DAYS, now)).isTrue()
+            expectThat(isArchivable(ArchiveAfterOption.AFTER_30_DAYS, now)).isTrue()
+            expectThat(isArchivable(ArchiveAfterOption.NEVER, now)).isFalse()
         }
 
         // Selected tabs will never be archived.
@@ -56,9 +56,9 @@ class TabInfoTest : BaseTest() {
             isSelected = true,
             data = TabInfo.PersistedData(lastActiveMs = now - TimeUnit.DAYS.toMillis(31))
         ).apply {
-            expectThat(isArchived(ArchiveAfterOption.AFTER_7_DAYS, now)).isFalse()
-            expectThat(isArchived(ArchiveAfterOption.AFTER_30_DAYS, now)).isFalse()
-            expectThat(isArchived(ArchiveAfterOption.NEVER, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.AFTER_7_DAYS, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.AFTER_30_DAYS, now)).isFalse()
+            expectThat(isArchivable(ArchiveAfterOption.NEVER, now)).isFalse()
         }
     }
     @Test

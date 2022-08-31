@@ -26,14 +26,18 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
+import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import java.util.EnumSet
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -64,6 +68,7 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import strikt.api.expectThat
+import strikt.assertions.containsExactly
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
@@ -83,9 +88,12 @@ class BaseBrowserWrapperTest : BaseTest() {
     private lateinit var browserFragment: BrowserFragment
     private lateinit var browserWrapper: BaseBrowserWrapper
     private lateinit var context: Context
+    private lateinit var currentTimeProvider: () -> Long
     private lateinit var neevaConstants: NeevaConstants
-    private lateinit var tabList: TabList
     private lateinit var profile: Profile
+    private lateinit var settingsDataModel: SettingsDataModel
+    private lateinit var sharedPreferencesModel: SharedPreferencesModel
+    private lateinit var tabList: TabList
     private lateinit var urlBarModel: URLBarModelImpl
 
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
@@ -98,8 +106,6 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var findInPageModel: FindInPageModelImpl
     @Mock private lateinit var fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     @Mock private lateinit var historyManager: HistoryManager
-    @Mock private lateinit var settingsDataModel: SettingsDataModel
-    @Mock private lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var suggestionsModel: SuggestionsModel
     @Mock private lateinit var neevaScopeModel: NeevaScopeModel
@@ -120,9 +126,17 @@ class BaseBrowserWrapperTest : BaseTest() {
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun setUp() {
         super.setUp()
+        context = ApplicationProvider.getApplicationContext()
 
         neevaConstants = NeevaConstants()
-        context = ApplicationProvider.getApplicationContext()
+        sharedPreferencesModel = SharedPreferencesModel(context)
+        settingsDataModel = SettingsDataModel(sharedPreferencesModel)
+        currentTimeProvider = mock {
+            on { invoke() } doReturn TimeUnit.DAYS.toMillis(100)
+        }
+
+        // Use an incognito tab list because it's implemented as a straightforward in-memory list
+        // and doesn't need a HistoryDatabase to work.
         tabList = IncognitoTabList()
 
         navigationInfoFlow = MutableStateFlow(ActiveTabModel.NavigationInfo())
@@ -215,7 +229,8 @@ class BaseBrowserWrapperTest : BaseTest() {
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
-            cookieCutterModel = cookieCutterModel
+            cookieCutterModel = cookieCutterModel,
+            getCurrentTime = currentTimeProvider
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment
@@ -650,6 +665,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         // Actually close it.
         browserWrapper.closeTab(tab.guid)
+        coroutineScopeRule.advanceUntilIdle()
 
         // Confirm that the Tab was told to close.  The callback saying it was removed should fire.
         verify(tab).dispatchBeforeUnloadAndClose()
@@ -661,18 +677,27 @@ class BaseBrowserWrapperTest : BaseTest() {
     }
 
     @Test
-    fun closeTab() {
+    fun closeTab_withValidUrl_addsToArchive() {
+        settingsDataModel.setToggleState(SettingsToggle.AUTOMATED_TAB_MANAGEMENT, true)
+
         createAndAttachBrowser()
         completeBrowserRestoration()
-        coroutineScopeRule.scope.advanceUntilIdle()
+        coroutineScopeRule.advanceUntilIdle()
 
         // Say that the user has an active tab.
         expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
-        val tab = mockTabs.last()
+        val tab = mockTabs.find { browserWrapper.orderedTabList.value[0].id == it.guid }!!
         browser.setActiveTab(tab)
+
+        // Navigate the tab somewhere.  We have to manually update the TabList because our mock Tab
+        // doesn't fire the WebLayer callbacks.
+        browserWrapper.loadUrl(Uri.parse("https://www.example.com"), inNewTab = false)
+        coroutineScopeRule.advanceUntilIdle()
+        tabList.updateUrl(tab.guid, Uri.parse("https://www.example.com"))
 
         // Close the tab.
         browserWrapper.closeTab(tab.guid)
+        coroutineScopeRule.advanceUntilIdle()
 
         // Confirm that the Tab was told to close.  The callback saying it was removed should fire.
         verify(tab).dispatchBeforeUnloadAndClose()
@@ -681,5 +706,83 @@ class BaseBrowserWrapperTest : BaseTest() {
         expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(0)
         expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = true)).isTrue()
         expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = false)).isTrue()
+
+        // Confirm that the tab was added to the tab archive.
+        val tabDataCaptor = argumentCaptor<TabData>()
+        verify(historyManager).addArchivedTab(tabDataCaptor.capture())
+    }
+
+    @Test
+    fun closeTab_withoutValidUrl_doesNotAddToArchive() {
+        settingsDataModel.setToggleState(SettingsToggle.AUTOMATED_TAB_MANAGEMENT, true)
+
+        createAndAttachBrowser()
+        completeBrowserRestoration()
+        coroutineScopeRule.advanceUntilIdle()
+
+        // Say that the user has an active tab, but don't update the TabList to say that it has a
+        // non-null URL.
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+        val tab = mockTabs.find { browserWrapper.orderedTabList.value[0].id == it.guid }!!
+        browser.setActiveTab(tab)
+
+        // Close the tab.
+        browserWrapper.closeTab(tab.guid)
+        coroutineScopeRule.advanceUntilIdle()
+
+        // Confirm that the Tab was told to close.  The callback saying it was removed should fire.
+        verify(tab).dispatchBeforeUnloadAndClose()
+
+        // Confirm that everything is gone.
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(0)
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = true)).isTrue()
+        expectThat(browserWrapper.hasNoTabs(ignoreClosingTabs = false)).isTrue()
+
+        // Confirm that the tab was NOT added to the tab archive.
+        val tabDataCaptor = argumentCaptor<TabData>()
+        verify(historyManager, never()).addArchivedTab(tabDataCaptor.capture())
+    }
+
+    @Test
+    fun closeInactiveTabs_withAutomatedTabManagementEnabled_closesOldTabs() {
+        AutomaticallyArchiveTabs.set(sharedPreferencesModel, ArchiveAfterOption.AFTER_7_DAYS)
+        settingsDataModel.setToggleState(SettingsToggle.AUTOMATED_TAB_MANAGEMENT, true)
+
+        createAndAttachBrowser()
+        completeBrowserRestoration()
+        coroutineScopeRule.advanceUntilIdle()
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+
+        // Add two new tabs.
+        browserWrapper.loadUrl(
+            uri = Uri.parse("https://www.example.com"),
+            inNewTab = true
+        )
+        browserWrapper.loadUrl(
+            uri = Uri.parse("https://www.example2.com"),
+            inNewTab = true
+        )
+        browserWrapper.loadUrl(
+            uri = Uri.parse("https://www.example3.com"),
+            inNewTab = true
+        )
+        coroutineScopeRule.advanceUntilIdle()
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(4)
+        expectThat(mockTabs).hasSize(4)
+
+        // Set the timestamps on all the URLs.
+        tabList.updateTimestamp(mockTabs[0], currentTimeProvider() - TimeUnit.DAYS.toMillis(10))
+        tabList.updateTimestamp(mockTabs[1], currentTimeProvider() - TimeUnit.DAYS.toMillis(5))
+        tabList.updateTimestamp(mockTabs[2], currentTimeProvider() - TimeUnit.DAYS.toMillis(8))
+        tabList.updateTimestamp(mockTabs[3], currentTimeProvider() - TimeUnit.DAYS.toMillis(30))
+        val ids = mockTabs.map { it.guid }
+        coroutineScopeRule.advanceUntilIdle()
+
+        // Closing inactive tabs should close old tabs that aren't currently selected.
+        browserWrapper.closeInactiveTabs()
+        coroutineScopeRule.advanceUntilIdle()
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(2)
+        expectThat(browserWrapper.orderedTabList.value.map { it.id })
+            .containsExactly(ids[1], ids[3])
     }
 }

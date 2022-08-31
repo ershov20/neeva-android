@@ -19,7 +19,6 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +30,6 @@ import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalPopupModel
 import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
-import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.tabs.ArchivedTabsList
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.storage.favicons.FaviconCache
@@ -61,7 +59,6 @@ enum class HistorySubpage(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryContainer(
-    webLayerModel: WebLayerModel,
     faviconCache: FaviconCache,
     initialSubpage: HistorySubpage,
     onOpenUrl: (Uri) -> Unit
@@ -105,28 +102,16 @@ fun HistoryContainer(
 
             Box(modifier = Modifier.weight(1.0f)) {
                 when (selectedTab) {
-                    HistorySubpage.ArchivedTabs -> {
-                        val browsers by webLayerModel.browsersFlow.collectAsState()
-                        val regularTabs by browsers.regularBrowserWrapper
-                            .orderedTabList
-                            .collectAsState()
-
-                        ArchivedTabsList(
-                            tabs = regularTabs,
-                            faviconCache = faviconCache,
-                            onTabSelected = { tabId ->
-                                webLayerModel.switchToProfile(useIncognito = false)
-                                browsers.regularBrowserWrapper.selectTab(tabId)
-                                appNavModel.showBrowser()
-                            },
-                            onClearArchivedTabs = {
-                                showClearArchivedTabsConfirmationDialog(
-                                    popupModel = popupModel,
-                                    onConfirm = appNavModel::clearArchivedTabs
-                                )
-                            },
-                        )
-                    }
+                    HistorySubpage.ArchivedTabs -> ArchivedTabsList(
+                        faviconCache = faviconCache,
+                        onRestoreTab = appNavModel::restoreTab,
+                        onClearArchivedTabs = {
+                            showClearArchivedTabsConfirmationDialog(
+                                popupModel = popupModel,
+                                onConfirm = appNavModel::clearArchivedTabs
+                            )
+                        },
+                    )
 
                     else -> HistoryUI(
                         onClearHistory = appNavModel::showClearBrowsingSettings,

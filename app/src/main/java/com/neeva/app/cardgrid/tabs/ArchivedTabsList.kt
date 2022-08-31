@@ -5,21 +5,24 @@ import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemsIndexed
+import com.neeva.app.LocalHistoryManager
 import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ArchiveAfterOption
-import com.neeva.app.browsing.TabInfo
 import com.neeva.app.history.HistoryHeader
 import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
+import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.previewFaviconCache
 import com.neeva.app.suggestions.NavSuggestionRow
@@ -32,47 +35,38 @@ import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
 import java.util.Date
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.flow.flowOf
 
 @Composable
 fun ArchivedTabsList(
-    tabs: List<TabInfo>,
     faviconCache: FaviconCache,
-    onTabSelected: (id: String) -> Unit,
+    onRestoreTab: (tabData: TabData) -> Unit,
     onClearArchivedTabs: () -> Unit
 ) {
+    val historyManager = LocalHistoryManager.current
+    val pagedArchivedTabs = historyManager.getPagedArchivedTabs().collectAsLazyPagingItems()
+
     val archiveAfterOption = AutomaticallyArchiveTabs
         .getFlow(LocalSharedPreferencesModel.current)
         .collectAsState()
     ArchivedTabsList(
-        tabs = tabs,
+        tabs = pagedArchivedTabs,
         archiveAfterOption = archiveAfterOption.value,
         faviconCache = faviconCache,
-        onTabSelected = onTabSelected,
+        onTabSelected = onRestoreTab,
         onClearArchivedTabs = onClearArchivedTabs
     )
 }
 
 @Composable
 fun ArchivedTabsList(
-    tabs: List<TabInfo>,
+    tabs: LazyPagingItems<TabData>,
     archiveAfterOption: ArchiveAfterOption,
     faviconCache: FaviconCache,
-    onTabSelected: (id: String) -> Unit,
+    onTabSelected: (tabData: TabData) -> Unit,
     onClearArchivedTabs: () -> Unit
 ) {
     val isArchivingDialogVisibleState = remember { mutableStateOf(false) }
-
-    // It'd be more correct to make the time be a state, too, but it'd be expensive because
-    // we would be re-filtering the list every time the time changed.
-    val now = System.currentTimeMillis()
-
-    val visibleTabs by remember(tabs, archiveAfterOption) {
-        derivedStateOf {
-            tabs
-                .filter { it.isArchived(archiveAfterOption, now) }
-                .sortedByDescending { it.data.lastActiveMs }
-        }
-    }
 
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         item {
@@ -101,22 +95,20 @@ fun ArchivedTabsList(
         }
 
         itemsIndexed(
-            items = visibleTabs,
-            key = { _, tabInfo -> tabInfo.id }
+            items = tabs,
+            key = { _, item -> item.id }
         ) { index, tabInfo ->
-            val previousTimestamp = (index - 1)
+            tabInfo ?: return@itemsIndexed
+
+            val previousDate = (index - 1)
                 .takeIf { it >= 0 }
-                ?.let { visibleTabs[index - 1].data.lastActiveMs.toLocalDate() }
-            val currentTimestamp = tabInfo.data.lastActiveMs.toLocalDate()
+                ?.let { tabs[index - 1]?.lastActiveMs?.toLocalDate() }
+            val currentTimestamp = tabInfo.lastActiveMs
+            val currentDate = currentTimestamp.toLocalDate()
 
-            val showDate = when (previousTimestamp) {
-                null -> true
-                else -> currentTimestamp != previousTimestamp
-            }
-
-            if (showDate) {
+            if (previousDate == null || currentDate != previousDate) {
                 HistoryHeader(
-                    SimpleDateFormat.getDateInstance().format(Date(tabInfo.data.lastActiveMs))
+                    SimpleDateFormat.getDateInstance().format(Date(currentTimestamp))
                 )
             }
 
@@ -125,7 +117,7 @@ fun ArchivedTabsList(
                 iconParams = RowActionStartIconParams(faviconBitmap = faviconBitmap),
                 primaryLabel = tabInfo.title ?: "",
                 secondaryLabel = tabInfo.url?.toString(),
-                onTapRow = { onTabSelected(tabInfo.id) }
+                onTapRow = { onTabSelected(tabInfo) }
             )
         }
     }
@@ -159,20 +151,19 @@ fun PreviewArchivedTabsList(useDarkTheme: Boolean) {
     ) {
         val tabs = (0 until 100)
             .map {
-                TabInfo(
+                TabData(
                     id = "tab $it",
                     url = Uri.parse("https://www.neeva.com/$it"),
                     title = "Title $it",
-                    isSelected = false,
-                    data = TabInfo.PersistedData(
-                        lastActiveMs = now - TimeUnit.DAYS.toMillis(2L * it)
-                    )
+                    lastActiveMs = now - TimeUnit.DAYS.toMillis(2L * it),
+                    isArchived = true
                 )
             }
             .toList()
+        val pagingTabs = PagingData.from(tabs)
 
         ArchivedTabsList(
-            tabs = tabs,
+            tabs = flowOf(pagingTabs).collectAsLazyPagingItems(),
             archiveAfterOption = ArchiveAfterOption.AFTER_7_DAYS,
             faviconCache = previewFaviconCache,
             onTabSelected = {},

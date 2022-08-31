@@ -26,6 +26,7 @@ import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
+import com.neeva.app.storage.entities.TabData
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
@@ -157,7 +158,12 @@ class AppNavModelImpl(
     }
 
     override fun clearArchivedTabs() {
-        webLayerModel.browsersFlow.value.regularBrowserWrapper.closeArchivedTabs()
+        webLayerModel.browsersFlow.value.regularBrowserWrapper.clearAllArchivedTabs()
+    }
+
+    override fun restoreTab(tabData: TabData) {
+        webLayerModel.currentBrowser.restoreTab(tabData)
+        showBrowser()
     }
 
     override fun openAndroidDefaultBrowserSettings() {

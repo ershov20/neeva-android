@@ -122,7 +122,7 @@ data class TabInfo(
         }
     }
 
-    fun isArchived(archiveAfterOption: ArchiveAfterOption, now: Long): Boolean {
+    fun isArchivable(archiveAfterOption: ArchiveAfterOption, now: Long): Boolean {
         if (isSelected) return false
 
         val sevenDaysAgo = now - TimeUnit.DAYS.toMillis(7)

@@ -9,6 +9,7 @@ import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
+import com.neeva.app.storage.entities.TabData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -23,6 +24,7 @@ interface AppNavModel {
     fun openUrl(url: Uri, parentSpaceId: String? = null)
     fun navigateBackOnActiveTab()
     fun clearArchivedTabs()
+    fun restoreTab(tabData: TabData)
 
     // region Internal screens
     fun showBrowser(forceUserToStayInCardGrid: Boolean = true)
@@ -77,6 +79,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun openUrl(url: Uri, parentSpaceId: String?) {}
     override fun navigateBackOnActiveTab() {}
     override fun clearArchivedTabs() {}
+    override fun restoreTab(tabData: TabData) {}
     override fun showBrowser(forceUserToStayInCardGrid: Boolean) {}
     override fun showCardGrid() {}
     override fun showClearBrowsingSettings() {}
