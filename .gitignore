@@ -29,6 +29,7 @@ Thumbs.db
 .gradle
 .idea/*
 !.idea/codeStyles/
+!.idea/copyright/
 *.iml
 .navigation
 output.json 
