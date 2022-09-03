@@ -209,7 +209,7 @@ fun CheatsheetInfoQuery.Forum.toDiscussionContent(): DiscussionContent {
 fun CheatsheetInfoQuery.Comment.toDiscussionComment(): DiscussionComment {
     return DiscussionComment(
         body = this.body.toString(),
-        url = Uri.parse(this.url),
+        url = if (this.url == null) Uri.EMPTY else Uri.parse(this.url),
         upvotes = this.score
     )
 }

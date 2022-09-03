@@ -198,6 +198,7 @@ dependencies {
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
     testImplementation 'org.robolectric:robolectric:4.8.1'
+    testImplementation 'org.yaml:snakeyaml:1.28'
 
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.4.0'
     androidTestImplementation "com.apollographql.apollo3:apollo-testing-support:$apollo_version"
