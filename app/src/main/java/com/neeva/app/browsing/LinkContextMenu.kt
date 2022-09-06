@@ -14,7 +14,7 @@ import com.neeva.app.R
 import com.neeva.app.ui.widgets.menu.MenuAction
 import com.neeva.app.ui.widgets.menu.MenuContent
 import com.neeva.app.ui.widgets.menu.MenuHeader
-import com.neeva.app.ui.widgets.menu.MenuRowItem
+import com.neeva.app.ui.widgets.menu.MenuItem
 import com.neeva.app.ui.widgets.menu.MenuSeparator
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
@@ -36,7 +36,7 @@ fun LinkContextMenu(
     }
 
     val menuItems = remember(params, isCurrentTabIncognito, tab) {
-        mutableListOf<MenuRowItem>().apply {
+        mutableListOf<MenuItem>().apply {
             val primaryLabel: String? = params.titleOrAltText
             val secondaryLabel: String? = params.linkUri?.toString()
             if (primaryLabel != null || secondaryLabel != null) {
@@ -73,7 +73,7 @@ fun LinkContextMenu(
         }
     }
 
-    MenuContent(menuItems) { id ->
+    MenuContent(menuItems = menuItems) { id ->
         if (tab.isDestroyed) {
             onDismissRequested()
             return@MenuContent

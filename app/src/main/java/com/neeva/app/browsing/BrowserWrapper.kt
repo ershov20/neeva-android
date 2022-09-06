@@ -14,7 +14,6 @@ import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.neevascope.NeevaScopeModel
-import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import kotlinx.coroutines.Job
@@ -72,12 +71,10 @@ interface BrowserWrapper {
     suspend fun waitUntilBrowserIsReady(): Boolean
 
     fun selectTab(id: String): Boolean
-    fun restoreTab(tabData: TabData)
     fun startClosingTab(id: String)
     fun cancelClosingTab(id: String)
     fun closeTab(id: String)
     fun closeAllTabs()
-    fun clearAllArchivedTabs()
 
     /**
      * Allows the user to use the URL bar and see suggestions without opening a tab until they

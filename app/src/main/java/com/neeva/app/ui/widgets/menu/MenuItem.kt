@@ -39,7 +39,7 @@ import coil.compose.AsyncImage
 import com.neeva.app.R
 import com.neeva.app.ui.theme.Dimensions
 
-interface MenuRowItem {
+interface MenuItem {
     @Composable fun Composed(onClick: (id: Int) -> Unit)
 }
 
@@ -47,7 +47,7 @@ data class MenuHeader(
     internal val label: String? = null,
     internal val secondaryLabel: String? = null,
     internal val imageUrl: Uri? = null
-) : MenuRowItem {
+) : MenuItem {
     init {
         assert(label != null || secondaryLabel != null)
     }
@@ -103,7 +103,7 @@ data class MenuHeader(
     }
 }
 
-object MenuSeparator : MenuRowItem {
+object MenuSeparator : MenuItem {
     @Composable
     override fun Composed(onClick: (id: Int) -> Unit) {
         Spacer(
@@ -120,7 +120,7 @@ data class MenuAction(
     @StringRes internal val labelId: Int = id,
     internal val icon: ImageVector? = null,
     @DrawableRes internal val imageResourceID: Int? = null
-) : MenuRowItem {
+) : MenuItem {
     @Composable
     override fun Composed(onClick: (id: Int) -> Unit) {
         val label = stringResource(id = labelId)

@@ -19,6 +19,7 @@ fun NavSuggestionRow(
     primaryLabel: String,
     onTapRow: () -> Unit,
     onTapRowContentDescription: String? = null,
+    onLongPress: (() -> Unit)? = null,
     secondaryLabel: String? = null,
     actionIconParams: RowActionIconParams? = null,
     showActualUrlInSecondaryLabel: Boolean = false
@@ -27,9 +28,14 @@ fun NavSuggestionRow(
         iconParams = iconParams,
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
+        onLongTap = onLongPress,
         actionIconParams = actionIconParams
     ) {
-        StackedText(primaryLabel, secondaryLabel, showActualUrl = showActualUrlInSecondaryLabel)
+        StackedText(
+            primaryLabel = primaryLabel,
+            secondaryLabel = secondaryLabel,
+            showActualUrl = showActualUrlInSecondaryLabel
+        )
     }
 }
 

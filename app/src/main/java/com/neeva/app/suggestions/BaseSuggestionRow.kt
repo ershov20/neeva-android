@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import coil.annotation.ExperimentalCoilApi
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
@@ -26,18 +25,19 @@ import com.neeva.app.ui.widgets.RowActionStartIconParams
  * a Composable [mainContent] that applies the provided modifier in order for it to properly take
  * the fully available width in the row.
  */
-@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun BaseSuggestionRow(
     iconParams: RowActionStartIconParams,
     onTapRow: () -> Unit,
     onTapRowContentDescription: String? = null,
+    onLongTap: (() -> Unit)? = null,
     actionIconParams: RowActionIconParams? = null,
     mainContent: @Composable () -> Unit
 ) {
     BaseRowLayout(
         onTapRow = onTapRow,
         onTapRowContentDescription = onTapRowContentDescription,
+        onLongTap = onLongTap,
         startComposable = {
             RowActionStartIcon(iconParams)
         },

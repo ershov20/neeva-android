@@ -807,23 +807,8 @@ abstract class BaseBrowserWrapper internal constructor(
             .forEach { closeTab(it.id) }
     }
 
-    override fun clearAllArchivedTabs() {
-        coroutineScope.launch(dispatchers.io) {
-            historyManager?.clearArchivedTabs()
-        }
-    }
-
     override fun selectTab(id: String): Boolean {
         return browserFlow.setActiveTab(id)
-    }
-
-    override fun restoreTab(tabData: TabData) {
-        if (tabData.isArchived) {
-            tabData.url?.let {
-                loadUrl(uri = it, inNewTab = true)
-                historyManager?.removeArchivedTab(tabId = tabData.id)
-            }
-        }
     }
 
     override suspend fun restoreScreenshotOfTab(tabId: String): Bitmap? {

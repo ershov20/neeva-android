@@ -21,6 +21,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemsIndexed
 import com.neeva.app.LocalHistoryManager
+import com.neeva.app.LocalPopupModel
 import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ArchiveAfterOption
@@ -37,6 +38,8 @@ import com.neeva.app.ui.toLocalDate
 import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
+import com.neeva.app.ui.widgets.menu.MenuAction
+import com.neeva.app.ui.widgets.menu.MenuContent
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.flowOf
@@ -44,8 +47,9 @@ import kotlinx.coroutines.flow.flowOf
 @Composable
 fun ArchivedTabsList(
     faviconCache: FaviconCache,
-    onRestoreTab: (tabData: TabData) -> Unit,
-    onClearArchivedTabs: () -> Unit
+    onRestoreArchivedTab: (tabData: TabData) -> Unit,
+    onDeleteArchivedTab: (tabData: TabData) -> Unit,
+    onDeleteAllArchivedTabs: () -> Unit
 ) {
     val historyManager = LocalHistoryManager.current
     val pagedArchivedTabs = historyManager.getPagedArchivedTabs().collectAsLazyPagingItems()
@@ -57,8 +61,9 @@ fun ArchivedTabsList(
         tabs = pagedArchivedTabs,
         archiveAfterOption = archiveAfterOption.value,
         faviconCache = faviconCache,
-        onTabSelected = onRestoreTab,
-        onClearArchivedTabs = onClearArchivedTabs
+        onRestoreArchivedTab = onRestoreArchivedTab,
+        onDeleteArchivedTab = onDeleteArchivedTab,
+        onDeleteAllArchivedTabs = onDeleteAllArchivedTabs
     )
 }
 
@@ -67,9 +72,11 @@ fun ArchivedTabsList(
     tabs: LazyPagingItems<TabData>,
     archiveAfterOption: ArchiveAfterOption,
     faviconCache: FaviconCache,
-    onTabSelected: (tabData: TabData) -> Unit,
-    onClearArchivedTabs: () -> Unit
+    onRestoreArchivedTab: (tabData: TabData) -> Unit,
+    onDeleteArchivedTab: (tabData: TabData) -> Unit,
+    onDeleteAllArchivedTabs: () -> Unit
 ) {
+    val popupModel = LocalPopupModel.current
     val isArchivingDialogVisibleState = remember { mutableStateOf(false) }
 
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
@@ -92,7 +99,7 @@ fun ArchivedTabsList(
                 primaryMaxLines = Int.MAX_VALUE,
                 isActionDangerous = true,
                 actionIconParams = RowActionIconParams(
-                    onTapAction = onClearArchivedTabs,
+                    onTapAction = onDeleteAllArchivedTabs,
                     actionType = RowActionIconParams.ActionType.NONE
                 )
             )
@@ -121,7 +128,20 @@ fun ArchivedTabsList(
                 iconParams = RowActionStartIconParams(faviconBitmap = faviconBitmap),
                 primaryLabel = tabInfo.title ?: "",
                 secondaryLabel = tabInfo.url?.toString(),
-                onTapRow = { onTabSelected(tabInfo) }
+                onTapRow = { onRestoreArchivedTab(tabInfo) },
+                onLongPress = {
+                    popupModel.showContextMenu { onDismissRequested ->
+                        MenuContent(
+                            menuItems = listOf(MenuAction(id = R.string.delete))
+                        ) { id ->
+                            when (id) {
+                                R.string.delete -> onDeleteArchivedTab(tabInfo)
+                            }
+
+                            onDismissRequested()
+                        }
+                    }
+                }
             )
         }
     }
@@ -170,8 +190,9 @@ fun PreviewArchivedTabsList(useDarkTheme: Boolean) {
             tabs = flowOf(pagingTabs).collectAsLazyPagingItems(),
             archiveAfterOption = ArchiveAfterOption.AFTER_7_DAYS,
             faviconCache = previewFaviconCache,
-            onTabSelected = {},
-            onClearArchivedTabs = {}
+            onRestoreArchivedTab = {},
+            onDeleteArchivedTab = {},
+            onDeleteAllArchivedTabs = {}
         )
     }
 }

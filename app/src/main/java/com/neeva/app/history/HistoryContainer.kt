@@ -36,6 +36,7 @@ import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.cardgrid.tabs.ArchivedTabsList
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.ui.FullScreenDialogTopBar
 import com.neeva.app.ui.PopupModel
@@ -65,7 +66,10 @@ enum class HistorySubpage(
 fun HistoryContainer(
     faviconCache: FaviconCache,
     initialSubpage: HistorySubpage,
-    onOpenUrl: (Uri) -> Unit
+    onOpenUrl: (Uri) -> Unit,
+    onRestoreArchivedTab: (TabData) -> Unit,
+    onDeleteAllArchivedTabs: () -> Unit,
+    onDeleteArchivedTab: (TabData) -> Unit
 ) {
     val appNavModel = LocalAppNavModel.current
     val popupModel = LocalPopupModel.current
@@ -108,11 +112,12 @@ fun HistoryContainer(
                 when (selectedTab) {
                     HistorySubpage.ArchivedTabs -> ArchivedTabsList(
                         faviconCache = faviconCache,
-                        onRestoreTab = appNavModel::restoreTab,
-                        onClearArchivedTabs = {
+                        onRestoreArchivedTab = onRestoreArchivedTab,
+                        onDeleteArchivedTab = onDeleteArchivedTab,
+                        onDeleteAllArchivedTabs = {
                             showClearArchivedTabsConfirmationDialog(
                                 popupModel = popupModel,
-                                onConfirm = appNavModel::clearArchivedTabs
+                                onConfirm = onDeleteAllArchivedTabs
                             )
                         },
                     )

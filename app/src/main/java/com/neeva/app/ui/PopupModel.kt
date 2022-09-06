@@ -4,14 +4,22 @@
 
 package com.neeva.app.ui
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.SwipeableDefaults.AnimationSpec
 import androidx.compose.material.SwipeableState
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.neeva.app.Dispatchers
+import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.bottomsheetdialog.BottomSheetDialogStates
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -111,6 +119,27 @@ class PopupModel(
     /** Allows showing a full-screen dialog with the given content. */
     fun showDialog(content: @Composable () -> Unit) {
         _dialogState.value = DialogState(content)
+    }
+
+    /**
+     * Shows a dialog suitable for showing a context menu.
+     *
+     * For consistency with other context menus, use [com.neeva.app.ui.widgets.menu.MenuContent].
+     */
+    fun showContextMenu(content: @Composable (onDismissRequested: () -> Unit) -> Unit) {
+        _dialogState.value = DialogState(
+            content = {
+                Dialog(onDismissRequest = ::removeDialog) {
+                    Surface(
+                        tonalElevation = 3.dp,
+                        shape = RoundedCornerShape(Dimensions.RADIUS_TINY),
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    ) {
+                        content(onDismissRequested = ::removeDialog)
+                    }
+                }
+            }
+        )
     }
 
     /** Removes references to any dialog that is currently showing. */

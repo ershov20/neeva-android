@@ -19,9 +19,14 @@ import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
 
+/**
+ * Creates a menu for display.
+ *
+ * Items passed as [menuIconItems] are displayed as icons at the top of the menu in a single row.
+ */
 @Composable
 fun MenuContent(
-    menuRows: Collection<MenuRowItem>,
+    menuItems: Collection<MenuItem>,
     menuIconItems: Collection<MenuIconItemData> = emptyList(),
     onMenuItem: (id: Int) -> Unit
 ) {
@@ -42,7 +47,7 @@ fun MenuContent(
             }
         }
 
-        menuRows.forEach {
+        menuItems.forEach {
             it.Composed(onClick = onMenuItem)
         }
     }
@@ -56,7 +61,7 @@ fun MenuContent_Light() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
         Surface {
             MenuContent(
-                menuRows = listOf(
+                menuItems = listOf(
                     MenuHeader(
                         stringResource(R.string.debug_long_string_primary),
                         stringResource(R.string.debug_long_url)
@@ -81,7 +86,7 @@ fun MenuContent_Dark() {
     NeevaThemePreviewContainer(useDarkTheme = true) {
         Surface {
             MenuContent(
-                menuRows = listOf(
+                menuItems = listOf(
                     MenuHeader(
                         stringResource(R.string.debug_long_string_primary),
                         stringResource(R.string.debug_long_url)
@@ -106,7 +111,7 @@ fun MenuContent_OnlyTitle() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
         Surface {
             MenuContent(
-                menuRows = listOf(
+                menuItems = listOf(
                     MenuHeader(stringResource(R.string.debug_long_string_primary)),
                     MenuSeparator,
                     MenuAction(R.string.menu_open_in_new_tab),
@@ -128,7 +133,7 @@ fun MenuContent_OnlyUrl() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
         Surface {
             MenuContent(
-                menuRows = listOf(
+                menuItems = listOf(
                     MenuHeader(null, stringResource(R.string.debug_long_url)),
                     MenuSeparator,
                     MenuAction(R.string.menu_open_in_new_tab),
@@ -150,7 +155,7 @@ fun MenuContent_OverflowMenu_Light() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
         Surface {
             MenuContent(
-                menuRows = OverflowMenuData().rowItems
+                menuItems = OverflowMenuData().rowItems
             ) {}
         }
     }
@@ -164,7 +169,7 @@ fun MenuContent_OverflowMenu_Dark() {
     NeevaThemePreviewContainer(useDarkTheme = true) {
         Surface {
             MenuContent(
-                menuRows = OverflowMenuData().rowItems
+                menuItems = OverflowMenuData().rowItems
             ) {}
         }
     }

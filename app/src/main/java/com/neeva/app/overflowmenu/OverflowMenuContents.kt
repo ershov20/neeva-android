@@ -21,7 +21,7 @@ fun OverflowMenuContents(
     onMenuItem: (Int) -> Unit
 ) {
     MenuContent(
-        menuRows = overflowMenuData.rowItems,
+        menuItems = overflowMenuData.rowItems,
         menuIconItems = overflowMenuData.iconItems
     ) { id ->
         onMenuItem(id)

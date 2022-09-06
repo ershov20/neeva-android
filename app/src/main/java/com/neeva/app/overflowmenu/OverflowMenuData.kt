@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.neeva.app.R
 import com.neeva.app.ui.widgets.menu.MenuAction
 import com.neeva.app.ui.widgets.menu.MenuIconItemData
-import com.neeva.app.ui.widgets.menu.MenuRowItem
+import com.neeva.app.ui.widgets.menu.MenuItem
 
 enum class OverflowMenuItemId {
     SETTINGS,
@@ -43,10 +43,10 @@ fun overflowMenuItem(
 class OverflowMenuData(
     val isBadgeVisible: Boolean = false,
     val iconItems: List<MenuIconItemData> = emptyList(),
-    additionalRowItems: List<MenuRowItem> = emptyList(),
+    additionalRowItems: List<MenuItem> = emptyList(),
     showDefaultItems: Boolean = true
 ) {
-    val rowItems: List<MenuRowItem> = additionalRowItems.plus(
+    val rowItems: List<MenuItem> = additionalRowItems.plus(
         if (showDefaultItems) {
             listOf(
                 overflowMenuItem(

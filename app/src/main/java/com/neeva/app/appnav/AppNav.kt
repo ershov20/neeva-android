@@ -110,10 +110,15 @@ fun AppNav(
 
             HistoryContainer(
                 faviconCache = webLayerModel.getRegularProfileFaviconCache(),
-                initialSubpage = subpage
-            ) {
-                appNavModel.openUrl(it)
-            }
+                initialSubpage = subpage,
+                onOpenUrl = appNavModel::openUrl,
+                onRestoreArchivedTab = {
+                    webLayerModel.restoreArchivedTab(it)
+                    appNavModel.showBrowser()
+                },
+                onDeleteAllArchivedTabs = webLayerModel::deleteAllArchivedTabs,
+                onDeleteArchivedTab = webLayerModel::deleteArchivedTab
+            )
         }
 
         composable(AppNavDestination.CARD_GRID.route) {

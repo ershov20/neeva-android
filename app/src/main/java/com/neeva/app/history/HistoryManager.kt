@@ -83,7 +83,7 @@ class HistoryManager(
         }
     }
 
-    fun removeArchivedTab(tabId: String) {
+    fun deleteArchivedTab(tabId: String) {
         coroutineScope.launch(dispatchers.io) {
             tabDataDao.delete(tabId)
         }
@@ -97,12 +97,14 @@ class HistoryManager(
 
     fun getPagedArchivedTabs(): Flow<PagingData<TabData>> {
         return Pager(PagingConfig(pageSize = PAGE_SIZE)) {
-            tabDataDao.getAllArchivedPaged()
+            tabDataDao.getAllArchivedTabsPaged()
         }.flow
     }
 
-    suspend fun clearArchivedTabs() {
-        tabDataDao.deleteAllArchived()
+    fun deleteAllArchivedTabs() {
+        coroutineScope.launch(dispatchers.io) {
+            tabDataDao.deleteAllArchivedTabs()
+        }
     }
 
     /** Updates the query that is being used to fetch history suggestions. */

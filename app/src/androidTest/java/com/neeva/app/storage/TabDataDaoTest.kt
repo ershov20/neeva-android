@@ -33,13 +33,14 @@ class TabDataDaoTest : HistoryDatabaseBaseTest() {
         tabDataDao.add(SECOND_ENTRY)
 
         expectThat(tabDataDao.getAll()).containsExactlyInAnyOrder(FIRST_ENTRY, SECOND_ENTRY)
-        expectThat(tabDataDao.getAllArchived()).containsExactlyInAnyOrder(FIRST_ENTRY, SECOND_ENTRY)
+        expectThat(tabDataDao.getAllArchivedTabs())
+            .containsExactlyInAnyOrder(FIRST_ENTRY, SECOND_ENTRY)
 
         // Conflicts result in overwriting an existing entry.
         tabDataDao.add(FIRST_ENTRY_REPLACED)
         expectThat(tabDataDao.getAll())
             .containsExactlyInAnyOrder(FIRST_ENTRY_REPLACED, SECOND_ENTRY)
-        expectThat(tabDataDao.getAllArchived()).containsExactlyInAnyOrder(SECOND_ENTRY)
+        expectThat(tabDataDao.getAllArchivedTabs()).containsExactlyInAnyOrder(SECOND_ENTRY)
     }
 
     @Test
@@ -81,7 +82,7 @@ class TabDataDaoTest : HistoryDatabaseBaseTest() {
         expectThat(tabDataDao.getAll())
             .containsExactlyInAnyOrder(FIRST_ENTRY, SECOND_ENTRY, THIRD_ENTRY)
 
-        tabDataDao.deleteAllArchived()
+        tabDataDao.deleteAllArchivedTabs()
         expectThat(tabDataDao.getAll()).containsExactly(THIRD_ENTRY)
     }
 

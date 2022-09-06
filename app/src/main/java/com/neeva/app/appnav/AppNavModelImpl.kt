@@ -30,7 +30,6 @@ import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
-import com.neeva.app.storage.entities.TabData
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
@@ -159,15 +158,6 @@ class AppNavModelImpl(
 
         // Send the user back to the Space that caused the tab to be opened.
         result.spaceIdToOpen?.let { showSpaceDetail(it) }
-    }
-
-    override fun clearArchivedTabs() {
-        webLayerModel.browsersFlow.value.regularBrowserWrapper.clearAllArchivedTabs()
-    }
-
-    override fun restoreTab(tabData: TabData) {
-        webLayerModel.currentBrowser.restoreTab(tabData)
-        showBrowser()
     }
 
     override fun openAndroidDefaultBrowserSettings() {

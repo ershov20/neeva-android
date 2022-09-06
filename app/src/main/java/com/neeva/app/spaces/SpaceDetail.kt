@@ -71,7 +71,7 @@ import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.StackedText
 import com.neeva.app.ui.widgets.menu.MenuAction
-import com.neeva.app.ui.widgets.menu.MenuRowItem
+import com.neeva.app.ui.widgets.menu.MenuItem
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -344,7 +344,7 @@ fun SpaceDetailToolbar(
             )
 
             url?.let { spaceUrl ->
-                val menuItems = mutableListOf<MenuRowItem>()
+                val menuItems = mutableListOf<MenuItem>()
                 val menuActions = mutableMapOf<Int, () -> Unit>()
 
                 val isOwner = space.userACL == SpaceACLLevel.Owner

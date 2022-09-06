@@ -38,7 +38,7 @@ abstract class TabDataDao {
         ORDER BY    lastActiveMs DESC
         """
     )
-    abstract fun getAllArchived(): List<TabData>
+    abstract fun getAllArchivedTabs(): List<TabData>
 
     @Query(
         """
@@ -48,7 +48,7 @@ abstract class TabDataDao {
         ORDER BY    lastActiveMs DESC
         """
     )
-    abstract fun getAllArchivedPaged(): PagingSource<Int, TabData>
+    abstract fun getAllArchivedTabsPaged(): PagingSource<Int, TabData>
 
     @Query("DELETE FROM TabData WHERE id = :id")
     abstract fun delete(id: String)
@@ -60,5 +60,5 @@ abstract class TabDataDao {
         WHERE   isArchived = 1
         """
     )
-    abstract fun deleteAllArchived()
+    abstract fun deleteAllArchivedTabs()
 }

@@ -19,6 +19,7 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.userdata.NeevaUser
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -376,5 +377,24 @@ class WebLayerModel internal constructor(
 
     private fun shouldDestroyIncognitoOnSwitch(): Boolean {
         return settingsDataModel.getSettingsToggleValue(SettingsToggle.CLOSE_INCOGNITO_TABS)
+    }
+
+    /** Re-creates a previously archived tab by opening a new tab with its last known URL. */
+    fun restoreArchivedTab(tabData: TabData) {
+        if (tabData.isArchived && tabData.url != null) {
+            regularBrowser.loadUrl(uri = tabData.url, inNewTab = true)
+            deleteArchivedTab(tabData)
+            switchToProfile(useIncognito = false)
+        }
+    }
+
+    /** Deletes a single archived tab from the user's history. */
+    fun deleteArchivedTab(tabData: TabData) {
+        historyManager.deleteArchivedTab(tabData.id)
+    }
+
+    /** Deletes all archived tabs from the user's history. */
+    fun deleteAllArchivedTabs() {
+        historyManager.deleteAllArchivedTabs()
     }
 }
