@@ -38,13 +38,13 @@ interface CookieCutterModel {
         TRACKER_COOKIE(
             R.string.blocking_strength_standard_description,
             R.string.blocking_strength_standard_title,
-            "assets/easyprivacy.dat",
+            "easyprivacy",
             ContentFilterMode.BLOCK_COOKIES
         ),
         TRACKER_REQUEST(
             R.string.blocking_strength_strict_description,
             R.string.blocking_strength_strict_title,
-            "assets/easyprivacy.dat",
+            "easyprivacy",
             ContentFilterMode.BLOCK_REQUESTS
         ),
         // TODO: enable this when CSS blocking is supported
@@ -120,23 +120,24 @@ class CookieCutterModelImpl(
         enableTrackingProtection.value =
             settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)
 
+        contentFilterManager.disableAllRulesFiles()
+
         if (enableTrackingProtection.value) {
             val blockingStrength = settingsDataModel.getCookieCutterStrength()
-            contentFilterManager.setRulesFile(blockingStrength.blockingList)
+            contentFilterManager.enableRulesFile(blockingStrength.blockingList)
             contentFilterManager.setMode(blockingStrength.mode)
 
             coroutineScope.launch {
                 val allTrackingAllowedHosts = withContext(dispatchers.io) {
                     trackersAllowList.getAllHostsInList()
                 }
-
                 withContext(dispatchers.main) {
                     allTrackingAllowedHosts.forEach { hostInfo ->
                         contentFilterManager.addHostExclusion(hostInfo.host)
                     }
+                    contentFilterManager.startFiltering()
                 }
             }
-            contentFilterManager.startFiltering()
         } else {
             contentFilterManager.stopFiltering()
         }
