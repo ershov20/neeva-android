@@ -19,8 +19,7 @@ import com.neeva.app.ui.widgets.menu.MenuSeparator
 fun createBrowserOverflowMenuData(
     isForwardEnabled: Boolean,
     isUpdateAvailableVisible: Boolean,
-    isDesktopUserAgentEnabled: Boolean,
-    enableShowDesktopSite: Boolean = false
+    isDesktopUserAgentEnabled: Boolean
 ): OverflowMenuData {
     val iconItems = listOf(
         MenuIconItemData(
@@ -60,23 +59,21 @@ fun createBrowserOverflowMenuData(
             )
         )
 
-        if (enableShowDesktopSite) {
-            add(
-                if (isDesktopUserAgentEnabled) {
-                    overflowMenuItem(
-                        id = OverflowMenuItemId.TOGGLE_DESKTOP_SITE,
-                        labelId = R.string.menu_mobile_site,
-                        imageResourceID = R.drawable.ic_mobile
-                    )
-                } else {
-                    overflowMenuItem(
-                        id = OverflowMenuItemId.TOGGLE_DESKTOP_SITE,
-                        labelId = R.string.menu_desktop_site,
-                        imageResourceID = R.drawable.ic_desktop
-                    )
-                }
-            )
-        }
+        add(
+            if (isDesktopUserAgentEnabled) {
+                overflowMenuItem(
+                    id = OverflowMenuItemId.TOGGLE_DESKTOP_SITE,
+                    labelId = R.string.menu_mobile_site,
+                    imageResourceID = R.drawable.ic_mobile
+                )
+            } else {
+                overflowMenuItem(
+                    id = OverflowMenuItemId.TOGGLE_DESKTOP_SITE,
+                    labelId = R.string.menu_desktop_site,
+                    imageResourceID = R.drawable.ic_desktop
+                )
+            }
+        )
 
         add(MenuSeparator)
     }

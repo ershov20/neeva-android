@@ -43,8 +43,7 @@ class OverflowMenuContentsPreviews {
                         overflowMenuData = createBrowserOverflowMenuData(
                             isForwardEnabled = isForwardEnabled,
                             isUpdateAvailableVisible = isUpdateAvailableVisible,
-                            isDesktopUserAgentEnabled = desktopUserAgentEnabled,
-                            enableShowDesktopSite = true
+                            isDesktopUserAgentEnabled = desktopUserAgentEnabled
                         ),
                         onMenuItem = {}
                     )

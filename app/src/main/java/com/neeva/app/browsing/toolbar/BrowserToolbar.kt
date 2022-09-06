@@ -59,9 +59,6 @@ fun BrowserToolbarContainer(topOffset: Float) {
 
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
 
-    val enableShowDesktopSite = LocalSettingsDataModel.current
-        .getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_SHOW_DESKTOP_SITE)
-
     val showNeevaScopeTooltip = LocalBrowserWrapper.current.showNeevaScopeTooltip()
     val enableNeevaScope = LocalSettingsDataModel.current
         .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE)
@@ -76,7 +73,6 @@ fun BrowserToolbarContainer(topOffset: Float) {
 
     BrowserToolbar(
         findInPageModel = findInPageModel,
-        enableShowDesktopSite = enableShowDesktopSite,
         showNeevaScopeTooltip = showNeevaScopeTooltip,
         enableNeevaScope = enableNeevaScope,
         cookieCutterPopoverModel = cookieCutterPopoverModel,
@@ -96,7 +92,6 @@ fun BrowserToolbarContainer(topOffset: Float) {
 @Composable
 fun BrowserToolbar(
     findInPageModel: FindInPageModel,
-    enableShowDesktopSite: Boolean,
     showNeevaScopeTooltip: Boolean,
     enableNeevaScope: Boolean,
     cookieCutterPopoverModel: CookieCutterPopoverModel,
@@ -128,14 +123,12 @@ fun BrowserToolbar(
                 browserToolbarModel.useSingleBrowserToolbar,
                 isForwardEnabled,
                 browserToolbarModel.isUpdateAvailable,
-                isDesktopUserAgentEnabled,
-                enableShowDesktopSite
+                isDesktopUserAgentEnabled
             ) {
                 createBrowserOverflowMenuData(
                     isForwardEnabled = isForwardEnabled,
                     isUpdateAvailableVisible = browserToolbarModel.isUpdateAvailable,
-                    isDesktopUserAgentEnabled = isDesktopUserAgentEnabled,
-                    enableShowDesktopSite = enableShowDesktopSite
+                    isDesktopUserAgentEnabled = isDesktopUserAgentEnabled
                 )
             }
 
@@ -237,7 +230,6 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean, enableNeevaS
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true,
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = enableNeevaScope,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
@@ -269,7 +261,6 @@ internal fun ToolbarPreview_Focus(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true,
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
@@ -302,7 +293,6 @@ internal fun ToolbarPreview_Typing(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true,
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
@@ -334,7 +324,6 @@ internal fun ToolbarPreview_Search(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true,
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
@@ -368,7 +357,6 @@ internal fun ToolbarPreview_Loading(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                enableShowDesktopSite = true,
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = false,
                 cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()

@@ -129,10 +129,6 @@ enum class SettingsToggle(
         primaryLabelId = R.string.settings_debug_enable_incognito_screenshots,
         defaultValue = false
     ),
-    DEBUG_ENABLE_SHOW_DESKTOP_SITE(
-        primaryLabelId = R.string.settings_debug_enable_show_desktop_site,
-        defaultValue = false
-    ),
     DEBUG_USE_CUSTOM_DOMAIN(
         primaryLabelId = R.string.settings_debug_use_custom_neeva_domain,
         defaultValue = false
