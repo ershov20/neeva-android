@@ -366,6 +366,8 @@
     <!-- [History][Snackbar] Tells the user that the site with the given title was removed from their browsing history. -->
     <string name="history_removed_visit">„%1$s“ wurde aus dem Verlauf entfernt</string>
 
+    <!-- [History] Placeholder text shown to a user to suggest that they can type into the URL bar. -->
+    <string name="history_filter_placeholder">Suche in Ihrem Verlauf</string>
 
 
     <!-- [Zero query][Button] Sends the user to the homepage (https://www.neeva.com). -->
@@ -604,7 +606,10 @@
     <string name="archived_tabs">Archivierte Tabs</string>
 
     <!-- [Archived tabs][Setting title] Sends the user to a page that allows then to select when tabs are automatically archived -->
-    <string name="archived_tabs_archive">Automatische Archivierung von Tabs</string>
+    <string name="archived_tabs_archive">Tabs archivieren</string>
+
+    <!-- [Archived tabs] Description for how tab archiving works. -->
+    <string name="archived_tabs_description">Tabs, die in letzter Zeit nicht angesehen wurden, automatisch von Neeva archivieren lassen.</string>
 
     <!-- [Archived tabs][Button] Says that a user wants to automatically archive a tab after 7 days have passed. -->
     <string name="archived_tabs_archive_after_seven_days">Nach 7 tagen</string>
@@ -700,6 +705,9 @@
     <!-- [NeevaScope] Title of the NeevaScope feature. -->
     <string name="neevascope">NeevaScope</string>
 
+    <!-- [NeevaScope] Title of the NeevaScope tooltip. -->
+    <string name="neevascope_tooltip">Testen Sie NeevaScope!</string>
+
     <!-- [NeevaScope] Tells the user how NeevaScope is triggered. -->
     <string name="neevascope_intro_title">Tippen Sie auf das Neeva-Logo, um Informationen zu der von Ihnen besuchten Website anzuzeigen.</string>
 
@@ -728,6 +736,12 @@
     <!-- [NeevaScope][Button] Triggers showing more reddit discussion results. -->
     <string name="neevascope_discussion_show_more">Weitere Diskussionen anzeigen</string>
 
+    <!-- [NeevaScope][Button] Triggers showing full recipe. -->
+    <string name="neevascope_recipe_show_full">Vollständiges Rezept anzeigen</string>
+
+    <!-- [NeevaScope][Button] Triggers hiding full recipe . -->
+    <string name="neevascope_recipe_hide_full">Vollständiges Rezept ausblenden</string>
+
     <!-- [NeevaScope] Indicate when reddit discussion posted -->
     <plurals name="discussion_interval_day">
         <item quantity="one">vor %1$d Tag</item>
@@ -752,6 +766,30 @@
 
     <!-- [NeevaScope] Label for a link that takes the user to reddit discussion page. -->
     <string name="discussion_more_comments">Weitere Kommentare</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays recipe. -->
+    <string name="neevascope_recipe">%1$s</string>
+
+    <!-- [NeevaScope] Indicates how many reviews of recipe. -->
+    <plurals name="neevascope_recipe_reviews">
+        <item quantity="one">%1$d Bewertung</item>
+        <item quantity="other">%1$d Bewertungen</item>
+    </plurals>
+
+    <!-- [NeevaScope] Tells the user how long cooking takes. -->
+    <string name="neevascope_recipe_cookingtime">%1$s (Gesamtzeit), %2$s (Vorbereitungszeit)</string>
+
+    <!-- [NeevaScope] Textual description of the icon to tell user how many servings. -->
+    <string name="neevascope_recipe_yield">Ergibt</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays a list of ingredients. -->
+    <string name="neevascope_recipe_ingredients">Zutaten</string>
+
+    <!-- [NeevaScope] Displayed as a header for a section that displays recipe instructions. -->
+    <string name="neevascope_recipe_instructions">Anweisungen</string>
+
+    <!-- [NeevaScope] Indicates the step of instructions. -->
+    <string name="neevascope_recipe_instruction_index">%1$d. </string>
 
     <!-- [NeevaScope][Button] Sends the user to the support page. -->
     <string name="neevascope_support">Support</string>
