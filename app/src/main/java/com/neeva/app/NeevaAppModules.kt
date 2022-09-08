@@ -174,8 +174,14 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesNeevaUser(neevaUserToken: NeevaUserToken): NeevaUser {
-        return NeevaUser(neevaUserToken = neevaUserToken)
+    fun providesNeevaUser(
+        neevaUserToken: NeevaUserToken,
+        sharedPreferencesModel: SharedPreferencesModel
+    ): NeevaUser {
+        return NeevaUser(
+            neevaUserToken = neevaUserToken,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
     }
 
     @Provides

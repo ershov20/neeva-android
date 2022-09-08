@@ -10,6 +10,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -54,9 +56,10 @@ fun getTopAppBarTitle(
     settingsController: SettingsController,
     paneData: SettingsPaneDataInterface
 ): String {
+    val userInfo by settingsController.getNeevaUserInfoFlow().collectAsState()
     return when {
         paneData.topAppBarTitleResId != -1 -> stringResource(paneData.topAppBarTitleResId)
-        paneData.shouldShowUserName -> settingsController.getNeevaUserData().displayName ?: ""
+        paneData.shouldShowUserName -> userInfo?.displayName ?: ""
         else -> stringResource(R.string.settings)
     }
 }

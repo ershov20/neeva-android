@@ -23,8 +23,8 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.UserInfo
 import com.neeva.testcommon.apollo.MockListSpacesQueryData
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import java.io.File
@@ -74,16 +74,21 @@ class SpaceStoreTest : BaseTest() {
 
         context = ApplicationProvider.getApplicationContext()
         database = HistoryDatabase.createInMemory(context)
+        val sharedPreferencesModel = SharedPreferencesModel(context)
+
         val neevaUserToken = NeevaUserToken(
-            sharedPreferencesModel = SharedPreferencesModel(context),
+            sharedPreferencesModel = sharedPreferencesModel,
             neevaConstants = neevaConstants
         )
         neevaUserToken.setToken("NotAnEmptyToken")
 
         neevaUser = NeevaUser(
-            data = NeevaUserData("c5rgtdldv9enb8j1gupg"),
+            sharedPreferencesModel = sharedPreferencesModel,
             neevaUserToken = neevaUserToken
         )
+
+        neevaUser.setUserInfo(UserInfo("c5rgtdldv9enb8j1gupg"))
+
         apolloWrapper = TestAuthenticatedApolloWrapper(
             neevaUserToken = neevaUserToken,
             neevaConstants = neevaConstants
@@ -114,7 +119,7 @@ class SpaceStoreTest : BaseTest() {
     @Test fun convertApolloSpace_givenAllRequiredData_createsSpace() =
         runTest(coroutineScopeRule.scope.testScheduler) {
             val original = MockListSpacesQueryData.SPACE_1
-            original.toSpace(neevaUser.data.id)!!.apply {
+            original.toSpace(neevaUser.userInfoFlow.value!!.id)!!.apply {
                 expectThat(id).isEqualTo("c5rgtmtdv9enb8j1gv60")
                 expectThat(name).isEqualTo("Saved For Later")
                 expectThat(lastModifiedTs).isEqualTo("2022-02-10T22:08:01Z")
@@ -129,11 +134,11 @@ class SpaceStoreTest : BaseTest() {
 
     @Test fun convertApolloSpace_properlyHandlesAclInfo() =
         runTest(coroutineScopeRule.scope.testScheduler) {
-            neevaUser.data = NeevaUserData(id = "wrong id")
+            neevaUser.setUserInfo(UserInfo(id = "wrong id"))
             val original = MockListSpacesQueryData.SPACE_2.copy(
                 space = MockListSpacesQueryData.SPACE_2.space!!.copy(hasPublicACL = false)
             )
-            original.toSpace(neevaUser.data.id)!!.apply {
+            original.toSpace(neevaUser.userInfoFlow.value!!.id)!!.apply {
                 expectThat(userACL).isEqualTo(SpaceACLLevel.Comment)
                 expectThat(isPublic).isFalse()
                 expectThat(isShared).isFalse()
@@ -242,19 +247,19 @@ class SpaceStoreTest : BaseTest() {
         runTest(coroutineScopeRule.scope.testScheduler) {
             expectThat(
                 MockListSpacesQueryData.SPACE_1.copy(pageMetadata = null)
-                    .toSpace(neevaUser.data.id)
+                    .toSpace(neevaUser.userInfoFlow.value!!.id)
             ).isNull()
 
             expectThat(
                 MockListSpacesQueryData.SPACE_1.copy(space = null)
-                    .toSpace(neevaUser.data.id)
+                    .toSpace(neevaUser.userInfoFlow.value!!.id)
             ).isNull()
 
             expectThat(
                 MockListSpacesQueryData.SPACE_1.copy(
                     space = MockListSpacesQueryData.SPACE_1.space!!.copy(name = null)
                 )
-                    .toSpace(neevaUser.data.id)
+                    .toSpace(neevaUser.userInfoFlow.value!!.id)
             ).isNull()
 
             expectThat(
@@ -264,13 +269,13 @@ class SpaceStoreTest : BaseTest() {
                             lastModifiedTs = null
                         )
                     )
-                    .toSpace(neevaUser.data.id)
+                    .toSpace(neevaUser.userInfoFlow.value!!.id)
             ).isNull()
 
             expectThat(
                 MockListSpacesQueryData.SPACE_1
                     .copy(space = MockListSpacesQueryData.SPACE_1.space!!.copy(userACL = null))
-                    .toSpace(neevaUser.data.id)
+                    .toSpace(neevaUser.userInfoFlow.value!!.id)
             ).isNull()
         }
 
@@ -535,7 +540,8 @@ class SpaceStoreTest : BaseTest() {
 
             apolloWrapper.registerTestResponse(
                 SpaceStore.createAddToSpaceMutation(
-                    space = MockListSpacesQueryData.SPACE_2.toSpace(neevaUser.data.id)!!,
+                    space = MockListSpacesQueryData.SPACE_2
+                        .toSpace(neevaUser.userInfoFlow.value!!.id)!!,
                     url = Uri.parse("https://example.com/"),
                     title = "Example page"
                 ),
@@ -618,7 +624,7 @@ class SpaceStoreTest : BaseTest() {
                 .url!!
             apolloWrapper.registerTestResponse(
                 SpaceStore.createDeleteSpaceResultByURLMutation(
-                    MockListSpacesQueryData.SPACE_2.toSpace(neevaUser.data.id)!!,
+                    MockListSpacesQueryData.SPACE_2.toSpace(neevaUser.userInfoFlow.value!!.id)!!,
                     urlToRemove
                 ),
                 RESPONSE_DELETE_FROM_SPACE_MUTATION

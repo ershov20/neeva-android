@@ -166,7 +166,7 @@ class NeevaActivityViewModel(
 
     fun signOut() {
         viewModelScope.launch(dispatchers.io) { spaceStore.deleteAllData() }
-        neevaUser.clearUser()
+        neevaUser.clearUserInfo()
         webLayerModel.clearNeevaCookies()
     }
 

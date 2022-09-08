@@ -111,7 +111,7 @@ class NeevaActivityViewModelTest : BaseTest() {
         runBlocking {
             verify(spaceStore).deleteAllData()
         }
-        verify(neevaUser).clearUser()
+        verify(neevaUser).clearUserInfo()
         verify(webLayerModel).clearNeevaCookies()
     }
 

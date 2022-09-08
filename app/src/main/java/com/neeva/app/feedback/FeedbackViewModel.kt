@@ -58,7 +58,7 @@ class FeedbackViewModel @Inject constructor(
                 feedback = Optional.presentIfNotNull(feedback),
                 source = Optional.presentIfNotNull(source),
                 shareResults = Optional.presentIfNotNull(true),
-                userProvidedEmail = Optional.presentIfNotNull(user.data.email),
+                userProvidedEmail = Optional.presentIfNotNull(user.userInfoFlow.value?.email),
                 screenshot = Optional.presentIfNotNull(
                     screenshot?.toBase64String()
                 )

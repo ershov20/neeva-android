@@ -47,7 +47,6 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
 
 /**
@@ -133,7 +132,7 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
     val previewNeevaConstants = NeevaConstants()
     val previewNeevaUserToken = NeevaUserToken(previewSharedPreferencesModel, previewNeevaConstants)
     val previewNeevaUser = NeevaUser(
-        data = NeevaUserData(),
+        sharedPreferencesModel = previewSharedPreferencesModel,
         neevaUserToken = previewNeevaUserToken
     )
 
