@@ -6,6 +6,7 @@ package com.neeva.app.settings.cookiecutter
 
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.settings.SettingsGroupData
@@ -15,7 +16,8 @@ import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
 class CookieCutterPaneData(
-    neevaConstants: NeevaConstants
+    neevaConstants: NeevaConstants,
+    isStrictModeEnabled: @Composable () -> Boolean
 ) : SettingsPaneDataInterface {
     @StringRes
     override val topAppBarTitleResId: Int = R.string.cookie_cutter
@@ -34,6 +36,11 @@ class CookieCutterPaneData(
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.COOKIE_CUTTER_BLOCKING_STRENGTH
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.AD_BLOCKING,
+                    enabledLambda = isStrictModeEnabled
                 )
             )
         ),

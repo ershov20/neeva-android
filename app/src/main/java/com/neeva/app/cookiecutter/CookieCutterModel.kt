@@ -24,6 +24,7 @@ interface CookieCutterModel {
     val trackingDataFlow: MutableStateFlow<TrackingData?>
     val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
     val enableTrackingProtection: MutableState<Boolean>
+    val enableAdBlocking: MutableState<Boolean>
     val cookieCuttingPreferences: State<Set<CookieNoticeCookies>>
 
     fun setUpTrackingProtection(manager: ContentFilterManager)
@@ -32,27 +33,18 @@ interface CookieCutterModel {
     enum class BlockingStrength(
         @StringRes val description: Int,
         @StringRes val title: Int,
-        val blockingList: String,
         val mode: Int
     ) {
         TRACKER_COOKIE(
             R.string.blocking_strength_standard_description,
             R.string.blocking_strength_standard_title,
-            "easyprivacy",
             ContentFilterMode.BLOCK_COOKIES
         ),
         TRACKER_REQUEST(
             R.string.blocking_strength_strict_description,
             R.string.blocking_strength_strict_title,
-            "easyprivacy",
             ContentFilterMode.BLOCK_REQUESTS
-        ),
-        // TODO: enable this when CSS blocking is supported
-        // AD_BLOCK(
-        //    "ad blocker",
-        //    "assets/easylist.proto",
-        //    ContentFilterMode.BLOCK_REQUESTS
-        // )
+        )
     }
 
     enum class CookieNoticeSelection(
@@ -102,6 +94,8 @@ class CookieCutterModelImpl(
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection = settingsDataModel
         .getToggleState(SettingsToggle.TRACKING_PROTECTION)
+    override val enableAdBlocking = settingsDataModel
+        .getToggleState(SettingsToggle.AD_BLOCKING)
 
     override val cookieCuttingPreferences = settingsDataModel.cookieNoticePreferences
 
@@ -119,13 +113,21 @@ class CookieCutterModelImpl(
     override fun updateTrackingProtectionConfiguration() {
         enableTrackingProtection.value =
             settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)
+        enableAdBlocking.value =
+            settingsDataModel.getSettingsToggleValue(SettingsToggle.AD_BLOCKING)
 
         contentFilterManager.disableAllRulesFiles()
 
         if (enableTrackingProtection.value) {
             val blockingStrength = settingsDataModel.getCookieCutterStrength()
-            contentFilterManager.enableRulesFile(blockingStrength.blockingList)
             contentFilterManager.setMode(blockingStrength.mode)
+
+            contentFilterManager.enableRulesFile("easyprivacy")
+            if (enableAdBlocking.value &&
+                blockingStrength == CookieCutterModel.BlockingStrength.TRACKER_REQUEST
+            ) {
+                contentFilterManager.enableRulesFile("easylist")
+            }
 
             coroutineScope.launch {
                 val allTrackingAllowedHosts = withContext(dispatchers.io) {
@@ -149,6 +151,7 @@ class PreviewCookieCutterModel : CookieCutterModel {
     override val trackingDataFlow: MutableStateFlow<TrackingData?> = MutableStateFlow(null)
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection: MutableState<Boolean> = mutableStateOf(true)
+    override val enableAdBlocking: MutableState<Boolean> = mutableStateOf(false)
     override val cookieCuttingPreferences =
         mutableStateOf(emptySet<CookieCutterModel.CookieNoticeCookies>())
     override fun setUpTrackingProtection(manager: ContentFilterManager) {}

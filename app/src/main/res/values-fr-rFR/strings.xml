@@ -531,13 +531,6 @@
     <!-- [Settings][Button] Logs the user out of the app. -->
     <string name="settings_sign_out">Se déconnecter</string>
 
-    <!-- [Settings][Header] Groups together settings related to JavaScript tracking on web sites. -->
-    <string name="settings_trackers">Traqueurs</string>
-    <string name="blocking_strength_standard_title">Standard</string>
-    <string name="blocking_strength_strict_title">Stricts</string>
-    <string name="blocking_strength_standard_description">Cookies de suivi uniquement</string>
-    <string name="blocking_strength_strict_description">Demande de suivi</string>
-
     <!-- [Settings][Header] Groups together settings related to hiding cookie popups on websites -->
     <string name="settings_cookie_notices">Fenêtres contextuelles de gestion des cookies</string>
     <string name="cookie_notice_accept_title">Accepter les cookies non essentiels</string>

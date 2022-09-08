@@ -534,11 +534,15 @@
     <string name="settings_sign_out">Sign out</string>
 
     <!-- [Settings][Header] Groups together settings related to JavaScript tracking on web sites. -->
-    <string name="settings_trackers">Trackers</string>
+    <string name="settings_trackers">Tracker blocking</string>
     <string name="blocking_strength_standard_title">Standard</string>
+    <string name="blocking_strength_standard_description">Blocks most trackers. Minimizes disruption to ads and other functionality.</string>
     <string name="blocking_strength_strict_title">Strict</string>
-    <string name="blocking_strength_standard_description">Tracker cookies only</string>
-    <string name="blocking_strength_strict_description">Tracker request</string>
+    <string name="blocking_strength_strict_description">Blocks more trackers. May disrupt ads and other functionality on some sites.</string>
+
+    <!-- [Settings][Header] Settings related to Ad blocking on web sites. -->
+    <string name="ad_blocking_title">Ad blocking</string>
+    <string name="ad_blocking_description">Only available in Strict mode.</string>
 
     <!-- [Settings][Header] Groups together settings related to hiding cookie popups on websites -->
     <string name="settings_cookie_notices">Cookie popups</string>

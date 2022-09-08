@@ -26,11 +26,12 @@ import com.neeva.app.ui.BooleanPreviewParameterProvider
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.RadioButtonGroup
+import com.neeva.app.ui.widgets.RadioButtonItem
 
 @Composable
 fun SettingsDialog(
     @StringRes textId: Int,
-    radioOptions: List<String>? = null,
+    radioOptions: List<RadioButtonItem>? = null,
     selectedOptionIndex: MutableState<Int>,
     saveSelectedOptionIndex: (Int) -> Unit = {},
     @StringRes confirmStringId: Int,
@@ -91,9 +92,11 @@ class SettingsDialogPreviews :
         @PreviewParameter(SettingsDialogPreviews::class) params: Params
     ) {
         NeevaTheme(useDarkTheme = params.darkTheme) {
-            var radioOptions: List<String>? = null
+            var radioOptions: List<RadioButtonItem>? = null
             if (params.hasRadioOptions) {
-                radioOptions = TimeClearingOption.values().map { stringResource(it.string_id) }
+                radioOptions = TimeClearingOption.values().map {
+                    RadioButtonItem(title = it.string_id)
+                }
             }
 
             val selectedOption = rememberSaveable { mutableStateOf(0) }

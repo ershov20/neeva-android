@@ -34,10 +34,12 @@ import com.neeva.app.ui.NeevaSwitch
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.NavigationRow
 import com.neeva.app.ui.widgets.RadioButtonGroup
+import com.neeva.app.ui.widgets.RadioButtonItem
 
 data class SettingsRowDataValues(
     val primaryLabel: String,
-    val secondaryLabel: String? = null
+    val secondaryLabel: String? = null,
+    val enabled: Boolean
 )
 
 @Composable
@@ -55,7 +57,8 @@ private fun getSettingsRowDataValues(
             LocalChromiumVersion.current
         )
     }
-    return SettingsRowDataValues(primaryLabel, secondaryLabel)
+    var enabled = rowData.isEnabled()
+    return SettingsRowDataValues(primaryLabel, secondaryLabel, enabled)
 }
 
 @Composable
@@ -107,7 +110,7 @@ fun SettingsRow(
                         .primaryLabelId?.let { stringResource(it) } ?: "",
                     secondaryLabel = rowData.settingsToggle
                         .secondaryLabelId?.let { stringResource(it) },
-                    enabled = rowData.enabled,
+                    enabled = rowDataValues.enabled,
                     isChecked = toggleState.value,
                     onCheckedChange = settingsController
                         .getTogglePreferenceSetter(rowData.settingsToggle)
@@ -166,7 +169,7 @@ fun SettingsRow(
         SettingsRowType.COOKIE_CUTTER_BLOCKING_STRENGTH -> {
             RadioButtonGroup(
                 CookieCutterModel.BlockingStrength.values().map {
-                    stringResource(it.title)
+                    RadioButtonItem(it.title, it.description)
                 },
                 settingsController.getCookieCutterStrength().ordinal,
                 onSelect = { index ->
@@ -179,7 +182,7 @@ fun SettingsRow(
         SettingsRowType.COOKIE_CUTTER_NOTICE_SELECTION -> {
             RadioButtonGroup(
                 CookieCutterModel.CookieNoticeSelection.values().map {
-                    stringResource(it.title)
+                    RadioButtonItem(it.title, null)
                 },
                 settingsController.getCookieNoticeSelection().ordinal,
                 onSelect = { index ->

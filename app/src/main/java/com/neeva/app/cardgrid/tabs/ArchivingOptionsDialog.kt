@@ -20,6 +20,7 @@ import com.neeva.app.browsing.ArchiveAfterOption
 import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.RadioButtonGroup
+import com.neeva.app.ui.widgets.RadioButtonItem
 
 @Composable
 fun ArchivingOptionsDialog(onDismissDialog: () -> Unit) {
@@ -48,7 +49,7 @@ fun ArchivingOptionsDialog(onDismissDialog: () -> Unit) {
                 RadioButtonGroup(
                     radioOptions = ArchiveAfterOption
                         .values()
-                        .map { stringResource(it.resourceId) },
+                        .map { RadioButtonItem(title = it.resourceId) },
                     selectedOptionIndex = currentIndex,
                     onSelect = {
                         AutomaticallyArchiveTabs.set(

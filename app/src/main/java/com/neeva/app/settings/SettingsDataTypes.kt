@@ -36,12 +36,20 @@ data class SettingsRowData(
     /** Whether or not the user can interact with the menu item. */
     val enabled: Boolean = true,
 
+    /** If set, will provide a value that overrides [enabled]. */
+    var enabledLambda: @Composable (() -> Boolean)? = null,
+
     /** Intended for use with ProfileRow. */
     val showSSOProviderAsPrimaryLabel: Boolean = false,
 
     /** If set, will provide a secondary label that overrides [secondaryLabelId]. */
     val secondaryLabelLambda: @Composable (() -> String)? = null
 ) {
+    @Composable
+    fun isEnabled(): Boolean {
+        return enabledLambda?.invoke() ?: enabled
+    }
+
     @Composable
     fun getSecondaryLabel(): String? {
         return secondaryLabelLambda?.invoke()
@@ -84,6 +92,11 @@ enum class SettingsToggle(
     ),
     TRACKING_PROTECTION(
         primaryLabelId = R.string.cookie_cutter,
+        defaultValue = true
+    ),
+    AD_BLOCKING(
+        primaryLabelId = R.string.ad_blocking_title,
+        secondaryLabelId = R.string.ad_blocking_description,
         defaultValue = true
     ),
     LOGGING_CONSENT(

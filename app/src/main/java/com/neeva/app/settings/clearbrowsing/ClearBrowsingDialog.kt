@@ -5,10 +5,10 @@
 package com.neeva.app.settings.clearbrowsing
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.settings.sharedcomposables.SettingsDialog
+import com.neeva.app.ui.widgets.RadioButtonItem
 
 @Composable
 fun ClearBrowsingDialog(
@@ -17,7 +17,7 @@ fun ClearBrowsingDialog(
 ) {
     val settingsDataModel = LocalSettingsDataModel.current
     val selectedOptionIndex = settingsDataModel.getTimeClearingOptionIndex()
-    val radioOptions = TimeClearingOption.values().map { stringResource(it.string_id) }
+    val radioOptions = TimeClearingOption.values().map { RadioButtonItem(title = it.string_id) }
     SettingsDialog(
         textId = R.string.clear_browsing_dialog_text,
         radioOptions = radioOptions,

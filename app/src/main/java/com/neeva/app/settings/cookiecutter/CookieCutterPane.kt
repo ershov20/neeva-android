@@ -7,6 +7,7 @@ package com.neeva.app.settings.cookiecutter
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.NeevaConstants
+import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedcomposables.SettingsPane
@@ -14,9 +15,14 @@ import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun CookieCutterPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
+    val isStrictModeEnabled: @Composable () -> Boolean = {
+        settingsController.getCookieCutterStrength() ==
+            CookieCutterModel.BlockingStrength.TRACKER_REQUEST
+    }
+
     SettingsPane(
         settingsController,
-        CookieCutterPaneData(neevaConstants)
+        CookieCutterPaneData(neevaConstants, isStrictModeEnabled)
     )
 }
 
