@@ -27,6 +27,7 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserImpl
 import com.neeva.app.userdata.NeevaUserToken
 import dagger.Module
 import dagger.Provides
@@ -178,7 +179,7 @@ object NeevaAppModule {
         neevaUserToken: NeevaUserToken,
         sharedPreferencesModel: SharedPreferencesModel
     ): NeevaUser {
-        return NeevaUser(
+        return NeevaUserImpl(
             neevaUserToken = neevaUserToken,
             sharedPreferencesModel = sharedPreferencesModel
         )

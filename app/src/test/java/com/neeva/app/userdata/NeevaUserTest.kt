@@ -73,7 +73,7 @@ class NeevaUserTest : BaseTest() {
             "https://www.cdn/my-image.png",
             NeevaUser.SSOProvider.GOOGLE
         )
-        neevaUser = NeevaUser(sharedPreferencesModel, neevaUserToken)
+        neevaUser = NeevaUserImpl(sharedPreferencesModel, neevaUserToken)
         neevaUser.setUserInfo(userInfo)
     }
 
@@ -136,7 +136,7 @@ class NeevaUserTest : BaseTest() {
 
     @Test
     fun clearUser_dataIsEmpty_clearsNeevaUserInfo() {
-        val neevaUser = NeevaUser(sharedPreferencesModel, neevaUserToken)
+        val neevaUser = NeevaUserImpl(sharedPreferencesModel, neevaUserToken)
         neevaUser.clearUserInfo()
         expectThat(neevaUser.userInfoFlow.value).isEqualTo(null)
     }

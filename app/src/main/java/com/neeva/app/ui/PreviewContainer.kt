@@ -46,8 +46,8 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.PreviewNeevaUser
 
 /**
  * Show a bunch of previews for the same Composable in a Column to reduce the number of previews has
@@ -131,10 +131,7 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
 
     val previewNeevaConstants = NeevaConstants()
     val previewNeevaUserToken = NeevaUserToken(previewSharedPreferencesModel, previewNeevaConstants)
-    val previewNeevaUser = NeevaUser(
-        sharedPreferencesModel = previewSharedPreferencesModel,
-        neevaUserToken = previewNeevaUserToken
-    )
+    val previewNeevaUser = PreviewNeevaUser(previewNeevaUserToken)
 
     val previewPopupModel = PopupModel(
         coroutineScope = coroutineScope,

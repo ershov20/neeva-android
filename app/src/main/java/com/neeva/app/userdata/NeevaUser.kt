@@ -30,17 +30,37 @@ data class UserInfo(
     val subscriptionType: SubscriptionType = SubscriptionType.Unknown
 )
 
-class NeevaUser(
-    val sharedPreferencesModel: SharedPreferencesModel,
-    val neevaUserToken: NeevaUserToken
-) {
-    private val moshiJsonAdapter: JsonAdapter<UserInfo> =
-        Moshi.Builder().build().adapter(UserInfo::class.java)
+abstract class NeevaUser(val neevaUserToken: NeevaUserToken) {
+    enum class SSOProvider(val url: String, val finalPath: String) {
+        UNKNOWN("", ""),
+        GOOGLE("neeva.co/auth/oauth2/authenticators/google", "/"),
+        APPLE("neeva.co/auth/oauth2/authenticators/apple", "/"),
+        MICROSOFT("neeva.co/auth/oauth2/authenticators/microsoft", "/"),
+        OKTA("neeva.co/auth/oauth2/authenticators/okta", "/?nva")
+    }
 
     // TODO(kobec): can use a CompletableDeferred and ask spaces.refresh() to await()
     //  so that it will use a valid userid (instead of null) when fetching spaces.
     //  https://github.com/neevaco/neeva-android/issues/948
     val userInfoFlow: MutableStateFlow<UserInfo?> = MutableStateFlow(null)
+
+    abstract fun setUserInfo(newData: UserInfo)
+    abstract fun clearUserInfo()
+    abstract fun isSignedOut(): Boolean
+
+    abstract suspend fun fetch(
+        apolloWrapper: ApolloWrapper,
+        context: Context,
+        checkNetworkConnectivityBeforeFetch: Boolean = true
+    )
+}
+
+class NeevaUserImpl(
+    val sharedPreferencesModel: SharedPreferencesModel,
+    neevaUserToken: NeevaUserToken
+) : NeevaUser(neevaUserToken) {
+    private val moshiJsonAdapter: JsonAdapter<UserInfo> =
+        Moshi.Builder().build().adapter(UserInfo::class.java)
 
     init {
         // Load UserInfo from shared preferences at start-up
@@ -53,7 +73,7 @@ class NeevaUser(
         userInfoFlow.value = fetchedUserInfo
     }
 
-    fun setUserInfo(newData: UserInfo) {
+    override fun setUserInfo(newData: UserInfo) {
         userInfoFlow.value = newData
 
         val newDataAsString = try {
@@ -68,12 +88,12 @@ class NeevaUser(
         )
     }
 
-    fun clearUserInfo() {
+    override fun clearUserInfo() {
         userInfoFlow.value = null
         SharedPrefFolder.User.UserInfo.remove(sharedPreferencesModel)
     }
 
-    fun isSignedOut(): Boolean {
+    override fun isSignedOut(): Boolean {
         return neevaUserToken.getToken().isEmpty()
     }
 
@@ -92,10 +112,10 @@ class NeevaUser(
     /**
      * For an error handling flowchart, see: FetchUserInfoFlowChart.md
      */
-    suspend fun fetch(
+    override suspend fun fetch(
         apolloWrapper: ApolloWrapper,
         context: Context,
-        checkNetworkConnectivityBeforeFetch: Boolean = true
+        checkNetworkConnectivityBeforeFetch: Boolean
     ) {
         if (neevaUserToken.getToken().isEmpty()) return
         if (checkNetworkConnectivityBeforeFetch && !isConnectedToInternet(context)) return
@@ -139,15 +159,23 @@ class NeevaUser(
         }
     }
 
-    enum class SSOProvider(val url: String, val finalPath: String) {
-        UNKNOWN("", ""),
-        GOOGLE("neeva.co/auth/oauth2/authenticators/google", "/"),
-        APPLE("neeva.co/auth/oauth2/authenticators/apple", "/"),
-        MICROSOFT("neeva.co/auth/oauth2/authenticators/microsoft", "/"),
-        OKTA("neeva.co/auth/oauth2/authenticators/okta", "/?nva")
-    }
-
     companion object {
-        private const val TAG = "NeevaUser"
+        private const val TAG = "NeevaUserImpl"
+    }
+}
+
+class PreviewNeevaUser(
+    neevaUserToken: NeevaUserToken
+) : NeevaUser(neevaUserToken = neevaUserToken) {
+    override fun setUserInfo(newData: UserInfo) {}
+    override fun clearUserInfo() {}
+
+    override fun isSignedOut(): Boolean = false
+
+    override suspend fun fetch(
+        apolloWrapper: ApolloWrapper,
+        context: Context,
+        checkNetworkConnectivityBeforeFetch: Boolean
+    ) {
     }
 }

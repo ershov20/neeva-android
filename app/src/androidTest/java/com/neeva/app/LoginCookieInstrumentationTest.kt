@@ -13,6 +13,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserImpl
 import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.userdata.UserInfo
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -48,7 +49,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
             "https://www.cdn/my-image.png",
             NeevaUser.SSOProvider.GOOGLE
         )
-        neevaUser = NeevaUser(sharedPreferencesModel, neevaUserToken)
+        neevaUser = NeevaUserImpl(sharedPreferencesModel, neevaUserToken)
         neevaUser.setUserInfo(loggedInUserInfo)
     }
 

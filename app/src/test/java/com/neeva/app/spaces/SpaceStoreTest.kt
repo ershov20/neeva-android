@@ -23,6 +23,7 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserImpl
 import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.userdata.UserInfo
 import com.neeva.testcommon.apollo.MockListSpacesQueryData
@@ -82,7 +83,7 @@ class SpaceStoreTest : BaseTest() {
         )
         neevaUserToken.setToken("NotAnEmptyToken")
 
-        neevaUser = NeevaUser(
+        neevaUser = NeevaUserImpl(
             sharedPreferencesModel = sharedPreferencesModel,
             neevaUserToken = neevaUserToken
         )

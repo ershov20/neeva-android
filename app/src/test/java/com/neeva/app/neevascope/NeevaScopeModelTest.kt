@@ -17,6 +17,7 @@ import com.neeva.app.SearchQuery
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.UserPreference
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.userdata.NeevaUserImpl
 import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.userdata.UserInfo
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
@@ -58,7 +59,7 @@ class NeevaScopeModelTest : BaseTest() {
         )
         neevaUserToken.setToken("NotAnEmptyToken")
 
-        neevaUser = NeevaUser(
+        neevaUser = NeevaUserImpl(
             sharedPreferencesModel = SharedPreferencesModel(context),
             neevaUserToken = neevaUserToken
         )

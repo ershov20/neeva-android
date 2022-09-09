@@ -167,9 +167,11 @@ class IncognitoTrackersAllowList : TrackersAllowList() {
     }
 }
 
-class PreviewTrackersAllowList : TrackersAllowList() {
+class PreviewTrackersAllowList(hostAllowsTrackers: Boolean = true) : TrackersAllowList() {
+    private val hostAllowsTrackersFlow = MutableStateFlow(hostAllowsTrackers)
+
     override suspend fun getAllHostsInList(): List<HostInfo> = emptyList()
-    override fun getHostAllowsTrackersFlow(host: String) = MutableStateFlow(false)
-    override suspend fun getHostAllowsTrackers(host: String) = false
+    override fun getHostAllowsTrackersFlow(host: String) = hostAllowsTrackersFlow
+    override suspend fun getHostAllowsTrackers(host: String) = hostAllowsTrackersFlow.value
     override fun toggleHostInAllowList(host: String, onSuccess: () -> Unit) = true
 }
