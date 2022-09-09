@@ -12,7 +12,7 @@ import com.neeva.app.R
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.WebLayerModel
-import com.neeva.app.cardgrid.tabs.ArchivingOptionsDialog
+import com.neeva.app.cardgrid.archived.ArchivingOptionsDialog
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.settings.clearbrowsing.TimeClearingOption
 import com.neeva.app.settings.defaultbrowser.FakeSetDefaultAndroidBrowserManager

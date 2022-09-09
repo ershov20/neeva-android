@@ -5,13 +5,10 @@
 package com.neeva.app.history
 
 import android.graphics.Bitmap
-import android.icu.text.SimpleDateFormat
 import android.icu.util.Calendar
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,7 +19,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -32,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
@@ -52,13 +47,10 @@ import com.neeva.app.suggestions.NavSuggestionRow
 import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
-import com.neeva.app.ui.PortraitPreviewsDark
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.toLocalDate
 import com.neeva.app.ui.widgets.AutocompleteTextField
 import com.neeva.app.ui.widgets.ClickableRow
-import com.neeva.app.ui.widgets.DefaultDivider
-import com.neeva.app.ui.widgets.HeavyDivider
 import com.neeva.app.ui.widgets.PillSurface
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
@@ -163,9 +155,11 @@ private fun HistoryUI(
             items = allHistory,
             key = { _, site -> site.visit.visitUID }
         ) { index, site ->
+            // Because Compose can skip entries when deciding what to render, we can't cache the
+            // timestamp from a previous check and we have to check two entries for each item.
             val previousTimestamp = (index - 1)
                 .takeIf { it >= 0 }
-                ?.let { allHistory[index - 1]?.visit?.timestamp?.toLocalDate() }
+                ?.let { allHistory[it]?.visit?.timestamp?.toLocalDate() }
             val currentTimestamp = site?.visit?.timestamp?.toLocalDate()
 
             val showDate = when {
@@ -178,54 +172,12 @@ private fun HistoryUI(
                 val timestamp = it.visit.timestamp
 
                 if (showDate) {
-                    val formatted = SimpleDateFormat.getDateInstance().format(timestamp)
-                    HistoryHeader(formatted)
+                    HistoryHeader(timestamp.toInstant().toEpochMilli())
                 }
 
                 HistoryEntry(site, faviconCache, domainProvider, onOpenUrl, onDeleteVisit)
             }
         }
-    }
-}
-
-@PortraitPreviews
-@Composable
-fun HistoryHeaderPreview_Light() {
-    NeevaThemePreviewContainer(useDarkTheme = false) {
-        Surface {
-            HistoryHeader(stringResource(id = R.string.debug_long_string_primary))
-        }
-    }
-}
-
-@PortraitPreviewsDark
-@Composable
-fun HistoryHeaderPreview_Dark() {
-    NeevaThemePreviewContainer(useDarkTheme = true) {
-        Surface {
-            HistoryHeader(stringResource(id = R.string.debug_long_string_primary))
-        }
-    }
-}
-
-@Composable
-fun HistoryHeader(text: String, useHeavyDivider: Boolean = false) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        if (useHeavyDivider) {
-            HeavyDivider()
-        } else {
-            DefaultDivider()
-        }
-
-        Text(
-            text = text,
-            style = MaterialTheme.typography.titleSmall,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)
-        )
-
-        Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
     }
 }
 

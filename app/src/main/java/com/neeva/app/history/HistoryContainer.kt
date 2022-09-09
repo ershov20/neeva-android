@@ -34,7 +34,7 @@ import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalPopupModel
 import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
-import com.neeva.app.cardgrid.tabs.ArchivedTabsList
+import com.neeva.app.cardgrid.archived.ArchivedTabGrid
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
@@ -110,7 +110,7 @@ fun HistoryContainer(
 
             Box(modifier = Modifier.weight(1.0f)) {
                 when (selectedTab) {
-                    HistorySubpage.ArchivedTabs -> ArchivedTabsList(
+                    HistorySubpage.ArchivedTabs -> ArchivedTabGrid(
                         faviconCache = faviconCache,
                         onRestoreArchivedTab = onRestoreArchivedTab,
                         onDeleteArchivedTab = onDeleteArchivedTab,

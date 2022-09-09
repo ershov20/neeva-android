@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cardgrid.tabs
+package com.neeva.app.cardgrid.archived
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
