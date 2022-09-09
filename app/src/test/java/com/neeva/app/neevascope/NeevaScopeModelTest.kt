@@ -17,9 +17,8 @@ import com.neeva.app.SearchQuery
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.UserPreference
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserImpl
+import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
-import com.neeva.app.userdata.UserInfo
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -59,11 +58,10 @@ class NeevaScopeModelTest : BaseTest() {
         )
         neevaUserToken.setToken("NotAnEmptyToken")
 
-        neevaUser = NeevaUserImpl(
-            sharedPreferencesModel = SharedPreferencesModel(context),
+        neevaUser = NeevaUser(
+            data = NeevaUserData("c5rgtdldv9enb8j1gupg"),
             neevaUserToken = neevaUserToken
         )
-        neevaUser.setUserInfo(UserInfo("c5rgtdldv9enb8j1gupg"))
 
         apolloWrapper = TestAuthenticatedApolloWrapper(
             neevaUserToken = neevaUserToken,

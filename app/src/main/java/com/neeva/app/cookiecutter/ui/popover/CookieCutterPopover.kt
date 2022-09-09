@@ -23,15 +23,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.neeva.app.R
-import com.neeva.app.cookiecutter.TrackersAllowList
-import com.neeva.app.ui.NeevaThemePreviewContainer
-import com.neeva.app.ui.PortraitPreviews
-import com.neeva.app.ui.PortraitPreviewsDark
+import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.NavigationRow
 
@@ -67,28 +65,9 @@ private fun CookieCutterPopoverContent(
     // Default to saying that trackers are disallowed to avoid the TrackingDataDisplay UI appearing
     // and then disappearing immediately.
     val trackersAllowList = cookieCutterPopoverModel.trackersAllowList
-    val allowsTrackersFlow by trackersAllowList
-        .getHostAllowsTrackersFlow(host)
-        .collectAsState(false)
-    val isCookieCutterEnabled = !allowsTrackersFlow
+    val allowsTrackersFlow by trackersAllowList.getHostAllowsTrackersFlow(host).collectAsState(true)
+    val cookieCutterEnabled = !allowsTrackersFlow
 
-    CookieCutterPopoverContent(
-        host = host,
-        isCookieCutterEnabled = isCookieCutterEnabled,
-        trackersAllowList = trackersAllowList,
-        cookieCutterPopoverModel = cookieCutterPopoverModel,
-        modifier = modifier
-    )
-}
-
-@Composable
-private fun CookieCutterPopoverContent(
-    host: String,
-    isCookieCutterEnabled: Boolean,
-    trackersAllowList: TrackersAllowList,
-    cookieCutterPopoverModel: CookieCutterPopoverModel,
-    modifier: Modifier = Modifier
-) {
     Surface(
         shape = RoundedCornerShape(Dimensions.RADIUS_SMALL),
         shadowElevation = 2.dp,
@@ -101,7 +80,7 @@ private fun CookieCutterPopoverContent(
                 .fillMaxWidth()
         ) {
             TrackingDataDisplay(
-                visible = isCookieCutterEnabled,
+                visible = cookieCutterEnabled,
                 cookieCutterPopoverModel = cookieCutterPopoverModel
             )
 
@@ -109,7 +88,7 @@ private fun CookieCutterPopoverContent(
             TrackingDataSurface {
                 Column {
                     CookieCutterPopoverSwitch(
-                        cookieCutterEnabled = isCookieCutterEnabled,
+                        cookieCutterEnabled = cookieCutterEnabled,
                         host = host,
                         trackersAllowList = trackersAllowList,
                         onSuccess = { cookieCutterPopoverModel.onReloadTab() }
@@ -132,21 +111,12 @@ private fun CookieCutterPopoverContent(
     }
 }
 
-@PortraitPreviews
+@Preview("CookieCutterPopover 1x font scale", locale = "en")
+@Preview("CookieCutterPopover 2x font scale", locale = "en", fontScale = 2.0f)
+@Preview("CookieCutterPopover RTL, 1x font scale", locale = "he")
 @Composable
-private fun CookieCutterPopoverContentPreview_Light() {
-    NeevaThemePreviewContainer(useDarkTheme = false) {
-        CookieCutterPopoverContent(
-            cookieCutterPopoverModel = PreviewCookieCutterPopoverModel(),
-            modifier = Modifier.height(400.dp)
-        )
-    }
-}
-
-@PortraitPreviewsDark
-@Composable
-private fun CookieCutterPopoverContentPreview_Dark() {
-    NeevaThemePreviewContainer(useDarkTheme = true) {
+private fun CookieCutterPopoverContentPreview() {
+    LightDarkPreviewContainer {
         CookieCutterPopoverContent(
             cookieCutterPopoverModel = PreviewCookieCutterPopoverModel(),
             modifier = Modifier.height(400.dp)

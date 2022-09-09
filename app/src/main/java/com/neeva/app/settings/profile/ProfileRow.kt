@@ -23,17 +23,17 @@ import com.neeva.app.ui.widgets.StackedText
 import com.neeva.app.ui.widgets.icons.SSOImagePainter
 import com.neeva.app.ui.widgets.icons.getFormattedSSOProviderName
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.UserInfo
+import com.neeva.app.userdata.NeevaUserData
 
 @Composable
 fun ProfileRowContainer(
     isSignedOut: Boolean,
     showSSOProviderAsPrimaryLabel: Boolean,
-    userInfo: UserInfo?,
+    userData: NeevaUserData,
     onClick: (() -> Unit)?
 ) {
     when {
-        (isSignedOut && onClick != null) || userInfo == null -> {
+        isSignedOut && onClick != null -> {
             SettingsButtonRow(
                 primaryLabel = stringResource(R.string.settings_sign_in_to_join_neeva),
                 onClick = onClick
@@ -42,24 +42,19 @@ fun ProfileRowContainer(
 
         showSSOProviderAsPrimaryLabel -> {
             ProfileRow(
-                primaryLabel = getFormattedSSOProviderName(userInfo.ssoProvider),
-                secondaryLabel = userInfo.email,
-                painter = SSOImagePainter(userInfo.ssoProvider), circlePicture = false,
+                primaryLabel = getFormattedSSOProviderName(userData.ssoProvider),
+                secondaryLabel = userData.email,
+                painter = SSOImagePainter(userData.ssoProvider), circlePicture = false,
                 showSingleLetterPictureIfAvailable = false,
                 onClick = null
             )
         }
 
         else -> {
-            val painter = if (userInfo.pictureURL != null) {
-                pictureUrlPainter(pictureURI = Uri.parse(userInfo.pictureURL))
-            } else {
-                null
-            }
             ProfileRow(
-                primaryLabel = userInfo.displayName,
-                secondaryLabel = userInfo.email,
-                painter = painter,
+                primaryLabel = userData.displayName,
+                secondaryLabel = userData.email,
+                painter = pictureUrlPainter(pictureURI = userData.pictureURI),
                 showSingleLetterPictureIfAvailable = true,
                 onClick = onClick
             )
@@ -104,14 +99,14 @@ fun ProfileRow(
 }
 
 class ProfileRowPreviews {
-    private fun getMockUserInfo(
+    private fun getMockUserData(
         hasDisplayName: Boolean = true,
         invalidProfileUrl: Boolean = false,
         subscriptionType: SubscriptionType = SubscriptionType.Basic,
         ssoProvider: NeevaUser.SSOProvider = NeevaUser.SSOProvider.GOOGLE
-    ): UserInfo {
-        val pictureURL: String? = if (!invalidProfileUrl) {
-            ""
+    ): NeevaUserData {
+        val pictureURI: Uri? = if (!invalidProfileUrl) {
+            Uri.parse("")
         } else {
             null
         }
@@ -122,11 +117,11 @@ class ProfileRowPreviews {
             null
         }
 
-        return UserInfo(
+        return NeevaUserData(
             id = null,
             displayName = displayName,
             email = "kobec@neeva.co",
-            pictureURL = pictureURL,
+            pictureURI = pictureURI,
             ssoProvider = ssoProvider,
             subscriptionType = subscriptionType
         )
@@ -141,7 +136,7 @@ class ProfileRowPreviews {
             ProfileRowContainer(
                 isSignedOut = true,
                 showSSOProviderAsPrimaryLabel = false,
-                userInfo = getMockUserInfo(),
+                userData = getMockUserData(),
                 onClick = { }
             )
         }
@@ -158,7 +153,7 @@ class ProfileRowPreviews {
                     ProfileRowContainer(
                         isSignedOut = false,
                         showSSOProviderAsPrimaryLabel = true,
-                        userInfo = getMockUserInfo(ssoProvider = it),
+                        userData = getMockUserData(ssoProvider = it),
                         onClick = { }
                     )
                 }
@@ -175,7 +170,7 @@ class ProfileRowPreviews {
             ProfileRowContainer(
                 isSignedOut = false,
                 showSSOProviderAsPrimaryLabel = false,
-                userInfo = getMockUserInfo(hasDisplayName, invalidProfileUrl),
+                userData = getMockUserData(hasDisplayName, invalidProfileUrl),
                 onClick = { }
             )
         }
@@ -190,7 +185,7 @@ class ProfileRowPreviews {
             ProfileRowContainer(
                 isSignedOut = false,
                 showSSOProviderAsPrimaryLabel = false,
-                userInfo = getMockUserInfo(hasDisplayName, invalidProfileUrl),
+                userData = getMockUserData(hasDisplayName, invalidProfileUrl),
                 onClick = null
             )
         }
@@ -207,10 +202,7 @@ class ProfileRowPreviews {
                     ProfileRowContainer(
                         isSignedOut = false,
                         showSSOProviderAsPrimaryLabel = false,
-                        userInfo = getMockUserInfo(
-                            invalidProfileUrl = true,
-                            subscriptionType = it
-                        ),
+                        userData = getMockUserData(invalidProfileUrl = true, subscriptionType = it),
                         onClick = { }
                     )
                 }
@@ -227,7 +219,7 @@ class ProfileRowPreviews {
             ProfileRowContainer(
                 isSignedOut = false,
                 showSSOProviderAsPrimaryLabel = false,
-                userInfo = getMockUserInfo(hasDisplayName = false, invalidProfileUrl = true),
+                userData = getMockUserData(hasDisplayName = false, invalidProfileUrl = true),
                 onClick = null
             )
         }

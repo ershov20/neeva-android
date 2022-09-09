@@ -13,9 +13,8 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserImpl
+import com.neeva.app.userdata.NeevaUserData
 import com.neeva.app.userdata.NeevaUserToken
-import com.neeva.app.userdata.UserInfo
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Rule
 import org.junit.Test
@@ -28,7 +27,6 @@ import strikt.assertions.isNullOrEmpty
 class LoginCookieInstrumentationTest : BaseHiltTest() {
     private lateinit var neevaConstants: NeevaConstants
     private lateinit var neevaUserToken: NeevaUserToken
-    private lateinit var loggedInUserInfo: UserInfo
     private lateinit var neevaUser: NeevaUser
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
 
@@ -40,17 +38,15 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
         neevaConstants = TestNeevaConstantsModule.neevaConstants
         sharedPreferencesModel = SharedPreferencesModel(context)
         neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
-
         neevaUserToken.setToken("myToken")
-        loggedInUserInfo = UserInfo(
+        val data = NeevaUserData(
             "my-id",
             "some display name",
             "email@neeva.co",
-            "https://www.cdn/my-image.png",
+            Uri.parse("https://www.cdn/my-image.png"),
             NeevaUser.SSOProvider.GOOGLE
         )
-        neevaUser = NeevaUserImpl(sharedPreferencesModel, neevaUserToken)
-        neevaUser.setUserInfo(loggedInUserInfo)
+        neevaUser = NeevaUser(data, neevaUserToken)
     }
 
     private fun onActivityStartedTest(context: Context, test: (activity: NeevaActivity) -> Unit) {
@@ -65,13 +61,13 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
     }
 
     @Test
-    fun signedIn_whenLoggedIn_UserDataCachedAndNeevaUserTokenAndLoginCookieExists() {
+    fun signedIn_whenLoggedIn_UserDataClearedAndNeevaUserTokenAndLoginCookieExists() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         setUpLoggedInUser(context)
 
         onActivityStartedTest(context) { activity ->
             // because NeevaUser.fetch() is run on a fake token ("myToken")
-            // ApolloWrapper should give a null response. This should not clear the user data.
+            // ApolloWrapper should give a null response and ONLY clear the NeevaUser.data.
             // The token + cookies should still be set to "myToken".
             activity.webLayerModel.currentBrowser
                 .getCookiePairs(Uri.parse(neevaConstants.appURL)) {
@@ -81,7 +77,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
                     ).isEqualTo("myToken")
                 }
             expectThat(activity.neevaUser.neevaUserToken.getToken()).isEqualTo("myToken")
-            expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(loggedInUserInfo)
+            expectThat(activity.neevaUser.data).isEqualTo(NeevaUserData())
         }
     }
 
@@ -95,7 +91,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
 
             // ^^ sign out should have cleared NeevaUser.data and NeevaUserToken!
             expectThat(activity.neevaUser.neevaUserToken.getToken()).isEmpty()
-            expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(null)
+            expectThat(activity.neevaUser.data).isEqualTo(NeevaUserData())
 
             activity.webLayerModel.currentBrowser
                 .getCookiePairs(Uri.parse(neevaConstants.appURL)) {

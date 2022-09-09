@@ -194,8 +194,7 @@ class IncognitoBrowserWrapper private constructor(
                     )
                 ),
                 userMustBeLoggedIn = true
-            )?.response
-
+            )
             response?.data?.result
         }
 

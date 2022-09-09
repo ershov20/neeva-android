@@ -234,6 +234,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 webLayerModel.initializedBrowserFlow.collectLatest { prepareBrowser(it) }
             }
         }
+
         lifecycleScope.launch {
             fetchNeevaUserInfo()
         }
@@ -278,7 +279,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     private suspend fun fetchNeevaUserInfo() {
         withContext(dispatchers.io) {
-            neevaUser.fetch(apolloWrapper, applicationContext)
+            neevaUser.fetch(apolloWrapper)
         }
     }
 
