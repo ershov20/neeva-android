@@ -15,13 +15,11 @@ import org.chromium.weblayer.Browser
 
 data class TrackingData(
     val numTrackers: Int,
-    val numDomains: Int,
     val trackingEntities: Map<TrackingEntity, Int>
 ) {
     companion object {
         fun create(stats: Map<String, Int>?, domainProvider: DomainProvider): TrackingData {
             val numTrackers: Int = stats?.values?.sum() ?: 0
-            val numDomains: Int = stats?.keys?.count() ?: 0
             val trackingEntities: Map<TrackingEntity, Int> =
                 mutableMapOf<TrackingEntity, Int>().apply {
                     stats?.forEach {
@@ -36,7 +34,6 @@ data class TrackingData(
 
             return TrackingData(
                 numTrackers = numTrackers,
-                numDomains = numDomains,
                 trackingEntities = trackingEntities
             )
         }

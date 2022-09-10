@@ -20,8 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 
 /** Stores all controller and state logic needed in [CookieCutterPopover] UI. */
 interface CookieCutterPopoverModel {
-    val trackingDataFlow: StateFlow<TrackingData?>?
-    val cookieNoticeBlocked: StateFlow<Boolean>?
+    val trackingDataFlow: StateFlow<TrackingData?>
+    val cookieNoticeBlocked: StateFlow<Boolean>
     val trackersAllowList: TrackersAllowList
     val popoverVisible: MutableState<Boolean>
     val urlFlow: StateFlow<Uri>
@@ -57,8 +57,8 @@ fun rememberCookieCutterPopoverModel(
 class CookieCutterPopoverModelImpl(
     private val appNavModel: AppNavModel,
     override val popoverVisible: MutableState<Boolean>,
-    override val trackingDataFlow: StateFlow<TrackingData?>?,
-    override val cookieNoticeBlocked: StateFlow<Boolean>?,
+    override val trackingDataFlow: StateFlow<TrackingData?>,
+    override val cookieNoticeBlocked: StateFlow<Boolean>,
     override val trackersAllowList: TrackersAllowList,
     override val urlFlow: StateFlow<Uri>,
     override val onReloadTab: () -> Unit
@@ -77,20 +77,18 @@ class CookieCutterPopoverModelImpl(
     }
 }
 
-class PreviewCookieCutterPopoverModel : CookieCutterPopoverModel {
-    override val trackingDataFlow: StateFlow<TrackingData?>
-        get() = MutableStateFlow(
-            TrackingData(
-                numTrackers = 999,
-                numDomains = 999,
-                trackingEntities = mapOf(
-                    TrackingEntity.GOOGLE to 500,
-                    TrackingEntity.AMAZON to 38,
-                    TrackingEntity.WARNERMEDIA to 4,
-                    TrackingEntity.CRITEO to 19
-                )
-            )
+class PreviewCookieCutterPopoverModel(
+    trackingData: TrackingData = TrackingData(
+        numTrackers = 999,
+        trackingEntities = mapOf(
+            TrackingEntity.GOOGLE to 500,
+            TrackingEntity.AMAZON to 38,
+            TrackingEntity.WARNERMEDIA to 4,
+            TrackingEntity.CRITEO to 19
         )
+    )
+) : CookieCutterPopoverModel {
+    override val trackingDataFlow: StateFlow<TrackingData?> = MutableStateFlow(trackingData)
     override val cookieNoticeBlocked = MutableStateFlow(true)
     override val trackersAllowList = PreviewTrackersAllowList()
     override val popoverVisible = mutableStateOf(false)

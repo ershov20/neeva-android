@@ -107,13 +107,11 @@ class TabCookieCutterModelTest : BaseTest() {
         )
         val trackingData = model.currentTrackingData()
         expectThat(trackingData.numTrackers).isEqualTo(6)
-        expectThat(trackingData.numDomains).isEqualTo(3)
         expectThat(trackingData.trackingEntities.size).isEqualTo(3)
 
         model.resetStat()
         val emptyTrackingData = model.currentTrackingData()
         expectThat(emptyTrackingData.numTrackers).isEqualTo(0)
-        expectThat(emptyTrackingData.numDomains).isEqualTo(0)
         expectThat(emptyTrackingData.trackingEntities.size).isEqualTo(0)
     }
 }

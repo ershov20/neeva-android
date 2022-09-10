@@ -40,7 +40,6 @@ class TrackingDataTest : BaseTest() {
             mapOf("www.testing.com" to 5), domainProviderImpl
         )
 
-        expectThat(singleDomainTrackingData.numDomains).isEqualTo(1)
         expectThat(singleDomainTrackingData.numTrackers).isEqualTo(5)
         expectThat(singleDomainTrackingData.trackingEntities.size).isEqualTo(0)
     }
@@ -56,7 +55,6 @@ class TrackingDataTest : BaseTest() {
             domainProviderImpl
         )
 
-        expectThat(multiDomainTrackingData.numDomains).isEqualTo(3)
         expectThat(multiDomainTrackingData.numTrackers).isEqualTo(6)
         expectThat(multiDomainTrackingData.trackingEntities.size).isEqualTo(0)
     }
@@ -75,9 +73,6 @@ class TrackingDataTest : BaseTest() {
             domainProviderImpl
         )
 
-        expectThat(
-            multiDomainWithWhosTrackingYouEntityData.numDomains
-        ).isEqualTo(6)
         expectThat(
             multiDomainWithWhosTrackingYouEntityData.numTrackers
         ).isEqualTo(21)
@@ -116,7 +111,6 @@ class TrackingDataTest : BaseTest() {
         )
 
         expectThat(testWhoIsTrackingYouTrackingData.numTrackers).isEqualTo(302)
-        expectThat(testWhoIsTrackingYouTrackingData.numDomains).isEqualTo(5)
         expectThat(testWhoIsTrackingYouTrackingData.trackingEntities.size).isEqualTo(5)
 
         val whoIsTrackingYouHosts = testWhoIsTrackingYouTrackingData.whoIsTrackingYouHosts()
