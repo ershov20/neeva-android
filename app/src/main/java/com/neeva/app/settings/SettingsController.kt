@@ -19,11 +19,13 @@ import com.neeva.app.settings.defaultbrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserData
+import com.neeva.app.userdata.UserInfo
 import java.util.Date
 import java.util.EnumSet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 /**
@@ -47,7 +49,7 @@ interface SettingsController {
 
     //region Profile Settings
     fun isSignedOut(): Boolean
-    fun getNeevaUserData(): NeevaUserData
+    fun getNeevaUserInfoFlow(): StateFlow<UserInfo?>
     fun signOut()
     //endregion
 
@@ -175,8 +177,8 @@ class SettingsControllerImpl(
         return neevaUser.isSignedOut()
     }
 
-    override fun getNeevaUserData(): NeevaUserData {
-        return neevaUser.data
+    override fun getNeevaUserInfoFlow(): StateFlow<UserInfo?> {
+        return neevaUser.userInfoFlow
     }
 
     override fun signOut() {
@@ -369,11 +371,13 @@ val mockSettingsControllerImpl by lazy {
 
         override fun isSignedOut(): Boolean { return false }
 
-        override fun getNeevaUserData(): NeevaUserData {
-            return NeevaUserData(
-                displayName = "Jehan Kobe Chang",
-                email = "kobec@neeva.co",
-                pictureURI = null
+        override fun getNeevaUserInfoFlow(): StateFlow<UserInfo?> {
+            return MutableStateFlow(
+                UserInfo(
+                    displayName = "Jehan Kobe Chang",
+                    email = "kobec@neeva.co",
+                    pictureURL = null
+                )
             )
         }
 

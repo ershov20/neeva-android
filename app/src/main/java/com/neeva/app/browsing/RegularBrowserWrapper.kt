@@ -159,7 +159,7 @@ class RegularBrowserWrapper(
                         val value = cookie.trim().substringAfter('=')
                         neevaUser.neevaUserToken.setToken(value)
                         coroutineScope.launch(dispatchers.io) {
-                            neevaUser.fetch(authenticatedApolloWrapper)
+                            neevaUser.fetch(authenticatedApolloWrapper, appContext)
                         }
                     }
                 }

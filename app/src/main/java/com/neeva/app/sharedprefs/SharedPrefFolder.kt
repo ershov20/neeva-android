@@ -118,5 +118,10 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "TOKEN",
             defaultValue = ""
         )
+        val UserInfo = SharedPrefKey(
+            User,
+            preferenceKey = "USER_INFO",
+            defaultValue = ""
+        )
     }
 }

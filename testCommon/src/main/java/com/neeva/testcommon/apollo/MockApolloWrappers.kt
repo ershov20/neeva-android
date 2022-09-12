@@ -3,6 +3,7 @@ package com.neeva.testcommon.apollo
 import com.apollographql.apollo3.ApolloCall
 import com.apollographql.apollo3.ApolloClient
 import com.apollographql.apollo3.annotations.ApolloExperimental
+import com.apollographql.apollo3.api.Error
 import com.apollographql.apollo3.api.Mutation
 import com.apollographql.apollo3.api.Operation
 import com.apollographql.apollo3.api.Query
@@ -45,8 +46,12 @@ class TestAuthenticatedApolloWrapper(
     neevaConstants = neevaConstants,
     apolloClientWrapper = testApolloClientWrapper
 ) {
-    fun <D : Operation.Data> registerTestResponse(operation: Operation<D>, response: D?) {
-        testApolloClientWrapper.apolloClient().registerTestResponse(operation, response)
+    fun <D : Operation.Data> registerTestResponse(
+        operation: Operation<D>,
+        response: D?,
+        errors: List<Error>? = null
+    ) {
+        testApolloClientWrapper.apolloClient().registerTestResponse(operation, response, errors)
     }
 }
 
