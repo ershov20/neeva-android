@@ -616,6 +616,9 @@
     <!-- [Archived tabs][Button] Closes all the tabs that have been archived. -->
     <string name="archived_tabs_clear_archived">Alle archivierten Tabs löschen</string>
 
+    <!-- [Archived tabs] Asks the user if they're sure that they want to delete all archived tabs. -->
+    <string name="archived_tabs_are_you_sure">Möchten Sie wirklich alle archivierten Tabs löschen? Dies kann nicht rückgängig gemacht werden.</string>
+
     <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 24 hours. -->
     <string name="archived_tabs_today">Heute</string>
 

@@ -616,6 +616,9 @@
     <!-- [Archived tabs][Button] Closes all the tabs that have been archived. -->
     <string name="archived_tabs_clear_archived">Effacer tous les onglets archivés</string>
 
+    <!-- [Archived tabs] Asks the user if they're sure that they want to delete all archived tabs. -->
+    <string name="archived_tabs_are_you_sure">Voulez-vous vraiment effacer tous les onglets archivés ? Cette action est irréversible.</string>
+
     <!-- [Archived tabs][Section header] Time frame: Tabs that were opened within the last 24 hours. -->
     <string name="archived_tabs_today">Aujourd\'hui</string>
 
