@@ -111,7 +111,7 @@ fun AppNav(
             HistoryContainer(
                 faviconCache = webLayerModel.getRegularProfileFaviconCache(),
                 initialSubpage = subpage,
-                onOpenUrl = appNavModel::openUrl,
+                onOpenUrl = appNavModel::openUrlInNewTab,
                 onRestoreArchivedTab = {
                     webLayerModel.restoreArchivedTab(it)
                     appNavModel.showBrowser()

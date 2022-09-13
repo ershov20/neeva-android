@@ -10,7 +10,7 @@ import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.PresetSharedPreferencesRule
-import com.neeva.app.loadUrlInCurrentTab
+import com.neeva.app.loadUrlByClickingOnBar
 import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForBrowserState
@@ -38,7 +38,7 @@ class LongPressLinkTest : BaseBrowserTest() {
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 1)
 
             // Load the test webpage up in the existing tab.
-            loadUrlInCurrentTab(imageLinkUrl)
+            loadUrlByClickingOnBar(imageLinkUrl)
 
             // Long press on the context menu and wait for certain controls to show up.
             longPressOnBrowserView()
@@ -58,7 +58,7 @@ class LongPressLinkTest : BaseBrowserTest() {
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 1)
 
             // Load the test webpage up in the existing tab.
-            loadUrlInCurrentTab(linkUrl)
+            loadUrlByClickingOnBar(linkUrl)
 
             // Long press on the context menu and wait for certain controls to show up.
             longPressOnBrowserView()

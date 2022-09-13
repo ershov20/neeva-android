@@ -12,7 +12,8 @@ open class NeevaConstants(
     val appURL: String = "https://$appHost/",
     val cookieHost: String = appHost,
     val cookieURL: String = "https://$cookieHost/",
-    val appHelpCenterURL: String = "https://help.$appHost/"
+    val appHelpCenterURL: String = "https://help.$appHost/",
+    val appWelcomeToursURL: String = "$appURL#modal-hello"
 ) {
     val appSearchURL: String = "${appURL}search"
     val appSpacesURL: String = "${appURL}spaces"
@@ -25,8 +26,6 @@ open class NeevaConstants(
 
     val appPrivacyURL: String = "${appURL}privacy"
     val appTermsURL: String = "${appURL}terms"
-
-    val appWelcomeToursURL: String = "$appURL#modal-hello"
 
     val apolloURL: String = "${appURL}graphql"
     open val cookieCutterLearnMoreUrl: String = "$appHelpCenterURL/hc/en-us/articles/4486326606355"

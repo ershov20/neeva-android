@@ -30,7 +30,6 @@ import com.neeva.app.history.HistoryManager
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
@@ -320,7 +319,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     }
 
     @Test
-    fun loadUrl_withIntercept_loadsRedirectedUrlInActiveTab() {
+    fun loadUrl_withIntercept_loadsRedirectedUrl() {
         val expectedUri = Uri.parse("https://www.example.com")
         val redirectUri = Uri.parse("https://www.example.com/incognito_redirect")
 
@@ -339,13 +338,24 @@ class BaseBrowserWrapperTest : BaseTest() {
         browserWrapper.loadUrl(expectedUri)
         coroutineScopeRule.scope.advanceUntilIdle()
 
+        // Confirm that a new tab was opened for the URL.
         val navigateParams = argumentCaptor<NavigateParams>()
-        expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore)
-        verify(activeTab.navigationController, never()).navigate(eq(expectedUri), any())
-        verify(activeTab.navigationController).navigate(eq(redirectUri), navigateParams.capture())
-        expectThat(navigateParams.lastValue.isIntentProcessingDisabled).isTrue()
+        expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore + 1)
 
-        verify(browser, times(1)).createTab()
+        verify(browser, times(2)).createTab()
+        expectThat(browser.activeTab).isNotEqualTo(activeTab)
+
+        // The old tab shouldn't have been told to navigate anywhere.
+        verify(activeTab.navigationController, never()).navigate(eq(expectedUri), any())
+        verify(activeTab.navigationController, never())
+            .navigate(eq(redirectUri), navigateParams.capture())
+
+        // The new tab should have been told to navigate to the redirected URL.
+        verify(browser.activeTab!!.navigationController, never()).navigate(eq(expectedUri), any())
+        verify(browser.activeTab!!.navigationController)
+            .navigate(eq(redirectUri), navigateParams.capture())
+
+        expectThat(navigateParams.lastValue.isIntentProcessingDisabled).isTrue()
     }
 
     @Test
@@ -584,8 +594,8 @@ class BaseBrowserWrapperTest : BaseTest() {
         // Check that the new tab's properties were saved.
         val tabInfoList = browserWrapper.orderedTabList.value.filter { it.id == latestTab.guid }
         expectThat(tabInfoList).hasSize(1)
-        expectThat(tabInfoList[0].data.parentTabId).isNull()
-        expectThat(tabInfoList[0].data.openType).isEqualTo(TabInfo.TabOpenType.DEFAULT)
+        expectThat(tabInfoList[0].data.parentTabId).isEqualTo(activeTabBefore.guid)
+        expectThat(tabInfoList[0].data.openType).isEqualTo(TabInfo.TabOpenType.CHILD_TAB)
     }
 
     @Test
@@ -616,14 +626,14 @@ class BaseBrowserWrapperTest : BaseTest() {
         )
         coroutineScopeRule.scope.advanceUntilIdle()
 
-        // Load a URL.  Because the lazy tab state was lost, the tab should be opened up in the
-        // existing tab.
+        // Load a URL.
         browserWrapper.loadUrl(uri = expectedUri)
         coroutineScopeRule.scope.advanceUntilIdle()
 
-        expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore)
+        // Because no existing tab was found with the same URL, it should create a new tab.
+        expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore + 1)
         verify(browser.activeTab!!.navigationController).navigate(eq(expectedUri), any())
-        verify(browser, times(1)).createTab()
+        verify(browser, times(2)).createTab()
     }
 
     @Test
@@ -682,8 +692,6 @@ class BaseBrowserWrapperTest : BaseTest() {
 
     @Test
     fun closeTab_withValidUrl_addsToArchive() {
-        settingsDataModel.setToggleState(SettingsToggle.AUTOMATED_TAB_MANAGEMENT, true)
-
         createAndAttachBrowser()
         completeBrowserRestoration()
         coroutineScopeRule.advanceUntilIdle()
@@ -718,8 +726,6 @@ class BaseBrowserWrapperTest : BaseTest() {
 
     @Test
     fun closeTab_withoutValidUrl_doesNotAddToArchive() {
-        settingsDataModel.setToggleState(SettingsToggle.AUTOMATED_TAB_MANAGEMENT, true)
-
         createAndAttachBrowser()
         completeBrowserRestoration()
         coroutineScopeRule.advanceUntilIdle()
@@ -750,7 +756,6 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Test
     fun closeInactiveTabs_withAutomatedTabManagementEnabled_closesOldTabs() {
         AutomaticallyArchiveTabs.set(sharedPreferencesModel, ArchiveAfterOption.AFTER_7_DAYS)
-        settingsDataModel.setToggleState(SettingsToggle.AUTOMATED_TAB_MANAGEMENT, true)
 
         createAndAttachBrowser()
         completeBrowserRestoration()

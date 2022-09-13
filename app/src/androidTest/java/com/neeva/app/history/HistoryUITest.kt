@@ -4,7 +4,9 @@
 
 package com.neeva.app.history
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasAnyDescendant
 import androidx.compose.ui.test.hasText
@@ -30,7 +32,7 @@ import com.neeva.app.onBackPressed
 import com.neeva.app.openCardGrid
 import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.typeIntoUrlBar
-import com.neeva.app.visitMultipleSitesInSameTab
+import com.neeva.app.visitMultipleSitesInNewTabs
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForAssertion
 import com.neeva.app.waitForNavDestination
@@ -46,10 +48,11 @@ import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isFalse
+import strikt.assertions.isTrue
 
 @HiltAndroidTest
 class HistoryUITest : BaseBrowserTest() {
-    private val testUrl = WebpageServingRule.urlFor("big_link_element.html")
+    private val testUrl = WebpageServingRule.urlFor("big_link_element_target_blank.html")
 
     @get:Rule
     val presetSharedPreferencesRule = PresetSharedPreferencesRule()
@@ -70,7 +73,7 @@ class HistoryUITest : BaseBrowserTest() {
     @Test
     fun deleteItemFromHistory() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
 
             // Open up history.
             openOverflowMenuAndClickItem(R.string.history)
@@ -95,7 +98,7 @@ class HistoryUITest : BaseBrowserTest() {
     @Test
     fun visitUrlFromHistory() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
 
             // Open up history.
             openOverflowMenuAndClickItem(R.string.history)
@@ -103,20 +106,28 @@ class HistoryUITest : BaseBrowserTest() {
             waitForNodeWithText("Page 2").assertIsDisplayed()
             waitForNodeWithText("Page 3").assertIsDisplayed()
 
-            // Click on one of the items in history.  It should create a new tab for that URL.
+            // Click on one of the items in history.  It should create a new tab for that URL even
+            // if a tab with the same URL already exists.
             waitForNodeWithText("Page 1").performClick()
             waitForUrl(testUrl)
             waitForTitle("Page 1")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
-                expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
+                expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectBrowserState(isIncognito = false, regularTabCount = 2)
+            expectBrowserState(isIncognito = false, regularTabCount = 5)
 
             openCardGrid(false)
 
             // The tab should be selected in the card grid.
             getSelectedTabNode(title = "Page 1").assertIsDisplayed()
+
+            // There should be two cards for tabs with "Page 1" as the title.
+            waitForAssertion {
+                onAllNodesWithTag("TabCard", useUnmergedTree = true)
+                    .filter(hasAnyDescendant(hasText("Page 1")))
+                    .assertCountEquals(2)
+            }
 
             waitForAssertion {
                 onAllNodesWithTag("TabCard", useUnmergedTree = true)
@@ -129,7 +140,7 @@ class HistoryUITest : BaseBrowserTest() {
     @Test
     fun clearAllHistory() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
 
             // Open up history.
             openOverflowMenuAndClickItem(R.string.history)
@@ -160,7 +171,7 @@ class HistoryUITest : BaseBrowserTest() {
     @Test
     fun clearAllHistoryRemovesSuggestions() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
 
             // Confirm that all the visited sites show up as suggestions when we type into the URL
             // bar.  Because the keyboard is visible, and because SuggestionPane is a LazyColumn, we

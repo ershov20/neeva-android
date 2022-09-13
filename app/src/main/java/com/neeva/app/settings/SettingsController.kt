@@ -112,7 +112,7 @@ class SettingsControllerImpl(
         if (openViaIntent) {
             appNavModel.openUrlViaIntent(uri)
         } else {
-            appNavModel.openUrl(uri)
+            appNavModel.openUrlInNewTab(uri)
         }
     }
 

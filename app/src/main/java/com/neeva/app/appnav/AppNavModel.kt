@@ -24,7 +24,8 @@ interface AppNavModel {
     fun popBackStack()
 
     fun openLazyTab(focusUrlBar: Boolean = true)
-    fun openUrl(url: Uri, parentSpaceId: String? = null)
+    /** Loads the given [url] in a new tab, even if a pre-existing tab with the same URL exists. */
+    fun openUrlInNewTab(url: Uri, parentSpaceId: String? = null)
     fun navigateBackOnActiveTab()
 
     // region Internal screens
@@ -77,7 +78,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
 
     override fun popBackStack() {}
     override fun openLazyTab(focusUrlBar: Boolean) {}
-    override fun openUrl(url: Uri, parentSpaceId: String?) {}
+    override fun openUrlInNewTab(url: Uri, parentSpaceId: String?) {}
     override fun navigateBackOnActiveTab() {}
     override fun showBrowser(forceUserToStayInCardGrid: Boolean) {}
     override fun showCardGrid() {}

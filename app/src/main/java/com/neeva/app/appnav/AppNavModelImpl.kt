@@ -143,7 +143,7 @@ class AppNavModelImpl(
         webLayerModel.currentBrowser.openLazyTab(focusUrlBar)
     }
 
-    override fun openUrl(url: Uri, parentSpaceId: String?) {
+    override fun openUrlInNewTab(url: Uri, parentSpaceId: String?) {
         webLayerModel.currentBrowser.loadUrl(
             uri = url,
             inNewTab = true,
@@ -275,7 +275,7 @@ class AppNavModelImpl(
     }
 
     override fun showHelp() {
-        openUrl(Uri.parse(neevaConstants.appHelpCenterURL))
+        openUrlInNewTab(Uri.parse(neevaConstants.appHelpCenterURL))
     }
 
     override fun shareCurrentPage() {
@@ -334,7 +334,7 @@ class AppNavModelImpl(
             }
 
             OverflowMenuItemId.SPACES_WEBSITE -> {
-                openUrl(Uri.parse(neevaConstants.appSpacesURL))
+                openUrlInNewTab(Uri.parse(neevaConstants.appSpacesURL))
             }
 
             OverflowMenuItemId.CLOSE_ALL_TABS -> {

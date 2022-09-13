@@ -14,7 +14,7 @@ import com.neeva.app.NeevaActivity
 import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.assertionToBoolean
 import com.neeva.app.expectBrowserState
-import com.neeva.app.loadUrlInCurrentTab
+import com.neeva.app.loadUrlByClickingOnBar
 import com.neeva.app.onBackPressed
 import com.neeva.app.tapOnBrowserView
 import com.neeva.app.waitForActivityStartup
@@ -47,14 +47,14 @@ class FullscreenVideoTest : BaseBrowserTest() {
             waitForActivityStartup()
             expectBrowserState(isIncognito = false, regularTabCount = 1)
 
-            // Load the test webpage up in the existing tab.
-            loadUrlInCurrentTab(testUrl)
+            // Load the test webpage up.
+            loadUrlByClickingOnBar(testUrl)
             waitForTitle("Fullscreen video test")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectBrowserState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 2)
 
             // Click on the page, which should will make the video play in fullscreen.
             tapOnBrowserView {
@@ -72,7 +72,7 @@ class FullscreenVideoTest : BaseBrowserTest() {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectBrowserState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 2)
 
             waitForAssertion {
                 onNodeWithTag("LocationLabel").assertIsDisplayed()

@@ -767,9 +767,7 @@ abstract class BaseBrowserWrapper internal constructor(
         val tabInfo = tabList.getTabInfo(id)
 
         getTab(id)?.let {
-            val isCreateOrSwitchTabEnabled =
-                settingsDataModel.getSettingsToggleValue(SettingsToggle.AUTOMATED_TAB_MANAGEMENT)
-            if (isCreateOrSwitchTabEnabled && tabInfo?.url != null) {
+            if (tabInfo?.url != null) {
                 historyManager?.addArchivedTab(
                     TabData(
                         id = id,
@@ -794,10 +792,8 @@ abstract class BaseBrowserWrapper internal constructor(
 
     /** Closes all tabs that have been inactive for too long. */
     internal fun closeInactiveTabs() {
-        val isCreateOrSwitchTabEnabled =
-            settingsDataModel.getSettingsToggleValue(SettingsToggle.AUTOMATED_TAB_MANAGEMENT)
         val archiveAfterOption = AutomaticallyArchiveTabs.get(sharedPreferencesModel)
-        if (!isCreateOrSwitchTabEnabled || archiveAfterOption == ArchiveAfterOption.NEVER) {
+        if (archiveAfterOption == ArchiveAfterOption.NEVER) {
             return
         }
 
@@ -926,8 +922,6 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         val urlBarModelState = urlBarModel.stateFlow.value
-        val isCreateOrSwitchTabEnabled =
-            settingsDataModel.getSettingsToggleValue(SettingsToggle.AUTOMATED_TAB_MANAGEMENT)
         val inDifferentTab = when {
             // Check for an explicit instruction from the caller to use the same tab or not.
             inNewTab == false -> false
@@ -940,7 +934,7 @@ abstract class BaseBrowserWrapper internal constructor(
             getActiveTab() == null -> true
 
             // "Create or switch" uses the same tab when refining the existing query or URL.
-            isCreateOrSwitchTabEnabled && !urlBarModelState.isRefining -> true
+            !urlBarModelState.isRefining -> true
 
             // Default to loading the URL in the existing tab.
             else -> false
@@ -950,24 +944,30 @@ abstract class BaseBrowserWrapper internal constructor(
             var mustCreateNewTab = true
             var parentTabIdToUse = parentTabId
 
-            if (isCreateOrSwitchTabEnabled) {
-                tabList.findTabWithSimilarUri(urlToLoad)
-                    ?.let { existingTabId ->
-                        // If there's a pre-existing tab with a similar URL, just switch to it.
-                        selectTab(existingTabId)
-                        mustCreateNewTab = false
+            tabList.findTabWithSimilarUri(urlToLoad)
+                ?.takeUnless {
+                    // Explicitly being told to load a URL in a new tab should skip searching for a
+                    // pre-existing tab.
+                    inNewTab == true
+                }
+                ?.let { existingTabId ->
+                    // If there's a pre-existing tab with a similar URL, just switch to it.
+                    selectTab(existingTabId)
+                    mustCreateNewTab = false
+                }
+                ?: run {
+                    parentTabIdToUse = if (isViaIntent) {
+                        // Create a new tab that kicks the user back to the calling app when the
+                        // the user hits the back button.
+                        null
+                    } else {
+                        // If a parent was passed in, send the user back to it when they hit the
+                        // back button to close the new tab.  If not, try to send the user back to
+                        // the tab that is currently active.
+                        parentTabId ?: getActiveTab()?.guid
                     }
-                    ?: run {
-                        parentTabIdToUse = if (isViaIntent) {
-                            // Create a new tab that kicks the user back to the calling app.
-                            null
-                        } else {
-                            // Create a new tab that kicks the user back to the current tab on back.
-                            getActiveTab()?.guid ?: parentTabId
-                        }
-                        mustCreateNewTab = true
-                    }
-            }
+                    mustCreateNewTab = true
+                }
 
             if (mustCreateNewTab) {
                 createTabWithUri(

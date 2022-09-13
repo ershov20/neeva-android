@@ -19,7 +19,7 @@ import com.neeva.app.R
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectBrowserState
 import com.neeva.app.navigateViaUrlBar
-import com.neeva.app.visitMultipleSitesInSameTab
+import com.neeva.app.visitMultipleSitesInNewTabs
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeToDisappear
 import com.neeva.app.waitForNodeWithContentDescription
@@ -95,7 +95,7 @@ class RegularProfileZeroQueryTest : BaseBrowserTest() {
     fun suggestedSitesSectionExpandsAndCollapses() {
         val suggestions = DefaultSuggestions.DEFAULT_SITE_SUGGESTIONS
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
 
             // We should have 4 sites in history that get suggested to the user, plus four default
             // site suggestions.

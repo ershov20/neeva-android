@@ -5,30 +5,25 @@
 package com.neeva.app.browsing
 
 import android.net.Uri
-import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.NativeKeyEvent
-import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performKeyPress
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.clearUrlBar
+import com.neeva.app.clearUrlBarByMashingDelete
+import com.neeva.app.clearUrlBarViaClearButton
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
-import com.neeva.app.loadUrlInCurrentTab
+import com.neeva.app.loadUrlByClickingOnBar
 import com.neeva.app.navigateViaUrlBar
 import com.neeva.app.onBackPressed
-import com.neeva.app.toggleAdvancedTabManagement
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForBrowserState
 import com.neeva.app.waitForNode
-import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForTitle
 import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -52,7 +47,6 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
         androidComposeRule.apply {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
-            toggleAdvancedTabManagement()
             expectBrowserState(isIncognito = false, regularTabCount = 1)
         }
     }
@@ -62,7 +56,7 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
         androidComposeRule.apply {
             // Load the test webpage up by tapping on the Location bar, which creates a new tab.
             val firstUrl = WebpageServingRule.urlFor("big_link_element.html")
-            loadUrlInCurrentTab(firstUrl)
+            loadUrlByClickingOnBar(firstUrl)
             waitForTitle("Page 1")
 
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
@@ -72,7 +66,7 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 2)
 
             val secondUrl = WebpageServingRule.urlFor("audio.html")
-            loadUrlInCurrentTab(secondUrl)
+            loadUrlByClickingOnBar(secondUrl)
             waitForTitle("Audio controls test")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
@@ -95,13 +89,13 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
         androidComposeRule.apply {
             // Load the test webpage up by tapping on the Location bar, which creates a new tab.
             val firstUrl = WebpageServingRule.urlFor("big_link_element.html")
-            loadUrlInCurrentTab(firstUrl)
+            loadUrlByClickingOnBar(firstUrl)
             waitForTitle("Page 1")
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 2)
 
             // Load another URL that creates another tab.
             val secondUrl = WebpageServingRule.urlFor("audio.html")
-            loadUrlInCurrentTab(secondUrl)
+            loadUrlByClickingOnBar(secondUrl)
             waitForTitle("Audio controls test")
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 3)
             activity.webLayerModel.currentBrowser.orderedTabList.value.let { tabs ->
@@ -114,7 +108,7 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
             }
 
             // Load a URL that should bring up the existing tab and select it.
-            loadUrlInCurrentTab(firstUrl)
+            loadUrlByClickingOnBar(firstUrl)
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 3)
             activity.webLayerModel.currentBrowser.orderedTabList.value.let { tabs ->
                 expectThat(tabs.map { it.url }).containsExactly(
@@ -131,12 +125,12 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
     fun refiningForcesLoadInSameTab() {
         androidComposeRule.apply {
             val firstUrl = WebpageServingRule.urlFor("big_link_element.html")
-            loadUrlInCurrentTab(firstUrl)
+            loadUrlByClickingOnBar(firstUrl)
             waitForTitle("Page 1")
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 2)
 
             val secondUrl = WebpageServingRule.urlFor("audio.html")
-            loadUrlInCurrentTab(secondUrl)
+            loadUrlByClickingOnBar(secondUrl)
             waitForTitle("Audio controls test")
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 3)
 
@@ -145,19 +139,7 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
             waitForNode(hasText(getString(R.string.edit_current_url))).performClick()
 
             // Delete everything in the bar.
-            waitForNodeWithTag("AutocompleteTextField").apply {
-                assertTextEquals(secondUrl)
-
-                (secondUrl.indices).forEach { _ ->
-                    performKeyPress(
-                        KeyEvent(
-                            NativeKeyEvent(NativeKeyEvent.ACTION_DOWN, NativeKeyEvent.KEYCODE_DEL)
-                        )
-                    )
-                }
-
-                assertTextEquals(getString(R.string.url_bar_placeholder))
-            }
+            clearUrlBarByMashingDelete()
 
             // Because we're refining, we should load in the same tab.
             val thirdUrl = WebpageServingRule.urlFor("video.html")
@@ -178,12 +160,12 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
     fun refiningThenCancelingLoadsDifferentTab() {
         androidComposeRule.apply {
             val firstUrl = WebpageServingRule.urlFor("big_link_element.html")
-            loadUrlInCurrentTab(firstUrl)
+            loadUrlByClickingOnBar(firstUrl)
             waitForTitle("Page 1")
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 2)
 
             val secondUrl = WebpageServingRule.urlFor("audio.html")
-            loadUrlInCurrentTab(secondUrl)
+            loadUrlByClickingOnBar(secondUrl)
             waitForTitle("Audio controls test")
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 3)
 
@@ -192,7 +174,7 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
             waitForNode(hasText(getString(R.string.edit_current_url))).performClick()
 
             // Clearing the URL re-enables create or switch behavior.
-            clearUrlBar()
+            clearUrlBarViaClearButton()
 
             // Because we're no longer refining, we should load in a different tab.
             val thirdUrl = WebpageServingRule.urlFor("video.html")
@@ -214,12 +196,12 @@ class CreateOrSwitchTabTest : BaseBrowserTest() {
     fun zeroQueryClickReselectsExistingTab() {
         androidComposeRule.apply {
             val firstUrl = WebpageServingRule.urlFor("big_link_element.html")
-            loadUrlInCurrentTab(firstUrl)
+            loadUrlByClickingOnBar(firstUrl)
             waitForTitle("Page 1")
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 2)
 
             val secondUrl = WebpageServingRule.urlFor("audio.html")
-            loadUrlInCurrentTab(secondUrl)
+            loadUrlByClickingOnBar(secondUrl)
             waitForTitle("Audio controls test")
             waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 3)
             activity.webLayerModel.currentBrowser.orderedTabList.value.let { tabs ->

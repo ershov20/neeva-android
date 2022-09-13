@@ -42,7 +42,7 @@ fun PreviewModeSignUpPrompt(
             onDismiss()
         },
         onOpenUrl = {
-            appNavModel.openUrl(it)
+            appNavModel.openUrlInNewTab(it)
             onDismiss()
         },
         showSignUpWithOther = {

@@ -14,7 +14,7 @@ import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.clearUrlBar
+import com.neeva.app.clearUrlBarViaClearButton
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
@@ -23,7 +23,7 @@ import com.neeva.app.onBackPressed
 import com.neeva.app.openCardGrid
 import com.neeva.app.openLazyTab
 import com.neeva.app.typeIntoUrlBar
-import com.neeva.app.visitMultipleSitesInSameTab
+import com.neeva.app.visitMultipleSitesInNewTabs
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNodeWithContentDescription
 import com.neeva.app.waitForNodeWithTag
@@ -62,7 +62,7 @@ class IncognitoZeroQueryTest : BaseBrowserTest() {
     @Test
     fun hasNoSuggestionsFromRegularProfile() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
 
             openCardGrid(incognito = true)
             openLazyTab(testUrl)
@@ -92,7 +92,7 @@ class IncognitoZeroQueryTest : BaseBrowserTest() {
     @Test
     fun canEditUrlAndNavigate() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
 
             openCardGrid(incognito = true)
             openLazyTab(testUrl)
@@ -116,28 +116,27 @@ class IncognitoZeroQueryTest : BaseBrowserTest() {
                 .assertTextEquals(testUrl)
                 .assertIsDisplayed()
 
-            // Clear the URL and type in a different one.
+            // Clear the URL and type in a different one.  This should open a new tab.
             val newUrl = WebpageServingRule.urlFor("audio.html")
-            clearUrlBar()
+            clearUrlBarViaClearButton()
             navigateViaUrlBar(newUrl)
             waitForTitle("Audio controls test")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
                 expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
                 expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectBrowserState(isIncognito = true, regularTabCount = 1, incognitoTabCount = 1)
+            expectBrowserState(isIncognito = true, regularTabCount = 4, incognitoTabCount = 2)
 
-            // After hitting back, you should be on the previous page and be able to hit forward.
-            // However, you shouldn't be able to navigate backward anymore because we opened a lazy
-            // tab directly to this page.
+            // After hitting back, you should be on the previous tab.  However, you shouldn't be
+            // able to navigate backward anymore because we opened a lazy tab directly to this page.
             onBackPressed()
             waitForUrl(testUrl)
             waitForTitle("Page 1")
             activity.webLayerModel.currentBrowser.activeTabModel.apply {
                 expectThat(navigationInfoFlow.value.canGoBackward).isFalse()
-                expectThat(navigationInfoFlow.value.canGoForward).isTrue()
+                expectThat(navigationInfoFlow.value.canGoForward).isFalse()
             }
-            expectBrowserState(isIncognito = true, regularTabCount = 1, incognitoTabCount = 1)
+            expectBrowserState(isIncognito = true, regularTabCount = 4, incognitoTabCount = 1)
         }
     }
 }

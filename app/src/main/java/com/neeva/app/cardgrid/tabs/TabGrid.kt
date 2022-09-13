@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -62,12 +61,9 @@ fun TabGrid(
     modifier: Modifier = Modifier
 ) {
     val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
-    val isArchiveEnabled by LocalSettingsDataModel.current
-        .getToggleState(SettingsToggle.AUTOMATED_TAB_MANAGEMENT)
 
     TabGrid(
         isIncognito = browserWrapper.isIncognito,
-        isAutomatedTabManagementEnabled = isArchiveEnabled,
         onSelectTab = { tabInfo -> cardsPaneModel.selectTab(browserWrapper, tabInfo) },
         onCloseTabs = { tabInfo -> cardsPaneModel.closeTab(browserWrapper, tabInfo) },
         onShowArchivedTabs = { cardsPaneModel.showArchivedTabs() },
@@ -81,7 +77,6 @@ fun TabGrid(
 @Composable
 fun TabGrid(
     isIncognito: Boolean,
-    isAutomatedTabManagementEnabled: Boolean,
     onSelectTab: (TabInfo) -> Unit,
     onCloseTabs: (TabInfo) -> Unit,
     onShowArchivedTabs: () -> Unit,
@@ -96,45 +91,16 @@ fun TabGrid(
         }
     }
 
-    if (isAutomatedTabManagementEnabled) {
-        ChronologicalTabGrid(
-            isIncognito = isIncognito,
-            onSelectTab = onSelectTab,
-            onCloseTabs = onCloseTabs,
-            onShowArchivedTabs = onShowArchivedTabs,
-            visibleTabs = visibleTabs,
-            faviconCache = faviconCache,
-            screenshotProvider = screenshotProvider,
-            modifier = modifier
-        )
-        return
-    }
-
-    CardGrid(
-        items = visibleTabs,
-        modifier = modifier,
-        computeFirstVisibleItemIndex = {
-            // Scroll the user to the currently selected tab when they first navigate here,
-            // but don't update it if the user closes tabs while they're here.
-            visibleTabs.indexOfFirst { it.isSelected }.coerceAtLeast(0)
-        },
-        emptyComposable = {
-            TabGridEmptyState(isIncognito, Modifier.fillMaxSize())
-        }
-    ) { _, listItems ->
-        items(
-            items = listItems,
-            key = { it.id }
-        ) { tab ->
-            TabCard(
-                tabInfo = tab,
-                onSelect = { onSelectTab(tab) },
-                onClose = { onCloseTabs(tab) },
-                faviconCache = faviconCache,
-                screenshotProvider = screenshotProvider
-            )
-        }
-    }
+    ChronologicalTabGrid(
+        isIncognito = isIncognito,
+        onSelectTab = onSelectTab,
+        onCloseTabs = onCloseTabs,
+        onShowArchivedTabs = onShowArchivedTabs,
+        visibleTabs = visibleTabs,
+        faviconCache = faviconCache,
+        screenshotProvider = screenshotProvider,
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -264,19 +230,7 @@ fun computeVisibleItemIndex(sections: List<TabGridSection<TabInfo>>, numCells: I
 fun TabGridPreview_LightIncognitoArchiving() {
     TabGridPreview(
         darkTheme = false,
-        isIncognito = true,
-        isAutomatedTabManagementEnabled = true
-    )
-}
-
-@PortraitPreviews
-@LandscapePreviews
-@Composable
-fun TabGridPreview_LightIncognitoLegacy() {
-    TabGridPreview(
-        darkTheme = false,
-        isIncognito = true,
-        isAutomatedTabManagementEnabled = false
+        isIncognito = true
     )
 }
 
@@ -286,8 +240,7 @@ fun TabGridPreview_LightIncognitoLegacy() {
 fun TabGridPreview_LightRegularArchiving() {
     TabGridPreview(
         darkTheme = false,
-        isIncognito = false,
-        isAutomatedTabManagementEnabled = true
+        isIncognito = false
     )
 }
 
@@ -298,19 +251,7 @@ fun TabGridPreview_LightRegularArchivingWithoutTabs() {
     TabGridPreview(
         darkTheme = false,
         isIncognito = false,
-        isAutomatedTabManagementEnabled = true,
         tabTitles = emptyList()
-    )
-}
-
-@PortraitPreviews
-@LandscapePreviews
-@Composable
-fun TabGridPreview_LightRegularLegacy() {
-    TabGridPreview(
-        darkTheme = false,
-        isIncognito = false,
-        isAutomatedTabManagementEnabled = false
     )
 }
 
@@ -320,19 +261,7 @@ fun TabGridPreview_LightRegularLegacy() {
 fun TabGridPreview_DarkIncognitoArchiving() {
     TabGridPreview(
         darkTheme = true,
-        isIncognito = true,
-        isAutomatedTabManagementEnabled = true
-    )
-}
-
-@PortraitPreviewsDark
-@LandscapePreviewsDark
-@Composable
-fun TabGridPreview_DarkIncognitoLegacy() {
-    TabGridPreview(
-        darkTheme = true,
-        isIncognito = true,
-        isAutomatedTabManagementEnabled = false
+        isIncognito = true
     )
 }
 
@@ -342,19 +271,7 @@ fun TabGridPreview_DarkIncognitoLegacy() {
 fun TabGridPreview_DarkRegularArchiving() {
     TabGridPreview(
         darkTheme = true,
-        isIncognito = false,
-        isAutomatedTabManagementEnabled = true
-    )
-}
-
-@PortraitPreviewsDark
-@LandscapePreviewsDark
-@Composable
-fun TabGridPreview_DarkRegularLegacy() {
-    TabGridPreview(
-        darkTheme = true,
-        isIncognito = false,
-        isAutomatedTabManagementEnabled = false
+        isIncognito = false
     )
 }
 
@@ -365,7 +282,6 @@ fun TabGridPreview_DarkRegularArchivingWithoutTabs() {
     TabGridPreview(
         darkTheme = true,
         isIncognito = false,
-        isAutomatedTabManagementEnabled = true,
         tabTitles = emptyList()
     )
 }
@@ -374,7 +290,6 @@ fun TabGridPreview_DarkRegularArchivingWithoutTabs() {
 private fun TabGridPreview(
     darkTheme: Boolean,
     isIncognito: Boolean,
-    isAutomatedTabManagementEnabled: Boolean,
     tabTitles: List<String> = previewCardGridTitles
 ) {
     NeevaThemePreviewContainer(
@@ -402,7 +317,6 @@ private fun TabGridPreview(
 
             TabGrid(
                 isIncognito = isIncognito,
-                isAutomatedTabManagementEnabled = isAutomatedTabManagementEnabled,
                 onSelectTab = {},
                 onCloseTabs = {},
                 onShowArchivedTabs = {},

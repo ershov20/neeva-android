@@ -56,8 +56,8 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Open a bunch of tabs.
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = false)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = false, regularTabCount = 3)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = false, regularTabCount = 4)
 
             // Close all tabs from the menu.
             openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
@@ -79,8 +79,8 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Open a bunch of Incognito tabs.
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = true)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = true, incognitoTabCount = 4, regularTabCount = 1)
 
             // Close all tabs from the menu.
             openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
@@ -107,12 +107,12 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Open a bunch of tabs.
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = false)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = false, regularTabCount = 3)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = false, regularTabCount = 4)
 
             // The dialog should appear and no tabs should be closed.
             openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
-            expectBrowserState(isIncognito = false, regularTabCount = 3)
+            expectBrowserState(isIncognito = false, regularTabCount = 4)
 
             // Confirm the tab closure.
             waitForNodeWithText(getString(android.R.string.ok)).performClick()
@@ -139,12 +139,12 @@ class TabSwitcherTest : BaseBrowserTest() {
             openLazyTab(WebpageServingRule.urlFor("index.html"))
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = true)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = true, incognitoTabCount = 4, regularTabCount = 1)
 
             // The dialog should appear and no tabs should be closed.
             openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
-            expectBrowserState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
+            expectBrowserState(isIncognito = true, incognitoTabCount = 4, regularTabCount = 1)
 
             // Confirm the tab closure.
             waitForNodeWithText(getString(android.R.string.ok)).performClick()
@@ -169,19 +169,19 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Open a bunch of tabs.
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = false)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = false, regularTabCount = 3)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = false, regularTabCount = 4)
 
             // The dialog should appear and no tabs should be closed.
             openOverflowMenuAndClickItem(R.string.menu_close_all_tabs)
-            expectBrowserState(isIncognito = false, regularTabCount = 3)
+            expectBrowserState(isIncognito = false, regularTabCount = 4)
 
             // Cancel the tab closure.  The tabs should stick around.
             waitForNodeWithText(getString(android.R.string.cancel)).performClick()
             waitForIdle()
 
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = false, regularTabCount = 3)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = false, regularTabCount = 4)
         }
     }
 
@@ -219,17 +219,17 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Open a bunch of Incognito tabs.
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = true)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = true, incognitoTabCount = 4, regularTabCount = 1)
 
             // Switch to the regular profile and then back.  No tabs should close.
             openCardGrid(incognito = false)
             onAllNodesWithTag("TabCard").assertCountEquals(1)
-            expectBrowserState(isIncognito = false, incognitoTabCount = 3, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, incognitoTabCount = 4, regularTabCount = 1)
 
             openCardGrid(incognito = true)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = true, incognitoTabCount = 4, regularTabCount = 1)
         }
     }
 
@@ -244,8 +244,8 @@ class TabSwitcherTest : BaseBrowserTest() {
             // Open a bunch of Incognito tabs.
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = true)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
-            expectBrowserState(isIncognito = true, incognitoTabCount = 3, regularTabCount = 1)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
+            expectBrowserState(isIncognito = true, incognitoTabCount = 4, regularTabCount = 1)
 
             // Switch to the regular profile.  All the tabs should close.
             openCardGrid(incognito = false)

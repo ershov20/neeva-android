@@ -567,9 +567,6 @@
     <!-- [Settings] Header for settings enabling features that are currently under development. -->
     <string name="settings_features_under_development">Features under development</string>
 
-    <!-- [Settings] Enables create or switch tab behavior + tab archiving. -->
-    <string name="settings_automated_tab_management" translatable="false">Enable automated tab management</string>
-
     <!-- [Settings] Enables NeevaScope. -->
     <string name="settings_neevascope" translatable="false">Enable NeevaScope</string>
 

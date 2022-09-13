@@ -36,7 +36,7 @@ import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.typeIntoUrlBar
-import com.neeva.app.visitMultipleSitesInSameTab
+import com.neeva.app.visitMultipleSitesInNewTabs
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNavDestination
 import com.neeva.app.waitForNode
@@ -102,7 +102,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
             onBackPressed()
             waitForNavDestination(AppNavDestination.BROWSER)
 
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
             clickOnUrlBar()
             typeIntoUrlBar("Page")
 
@@ -164,7 +164,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
     @Test
     fun displaysNeevaSuggestionsAndHistory() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
             clickOnUrlBar()
             typeIntoUrlBar("Page")
 
@@ -189,7 +189,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
     @Test
     fun queryRefiningPutsTextIntoUrlBar() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
             clickOnUrlBar()
             typeIntoUrlBar("Page")
 
@@ -224,7 +224,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
     @Test
     fun queryResultClickNavigatesToPage() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
             clickOnUrlBar()
             typeIntoUrlBar("Page")
 
@@ -244,7 +244,7 @@ class SuggestionsPaneTest : BaseBrowserTest() {
     @Test
     fun resultClickNavigatesToPage() {
         androidComposeRule.apply {
-            visitMultipleSitesInSameTab()
+            visitMultipleSitesInNewTabs()
             clickOnUrlBar()
             typeIntoUrlBar("Page")
 

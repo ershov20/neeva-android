@@ -364,7 +364,7 @@ fun SpaceDetailToolbar(
                 menuItems.add(
                     MenuAction(id = R.string.space_edit_on_web, icon = Icons.Outlined.ExitToApp)
                 )
-                menuActions[R.string.space_edit_on_web] = { appNavModel.openUrl(spaceUrl) }
+                menuActions[R.string.space_edit_on_web] = { appNavModel.openUrlInNewTab(spaceUrl) }
 
                 if (canEdit && isTitleVisible) {
                     menuItems.add(MenuAction(id = R.string.space_edit, icon = Icons.Outlined.Edit))

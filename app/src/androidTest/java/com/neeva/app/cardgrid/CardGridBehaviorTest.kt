@@ -119,26 +119,26 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = false)
 
-            // Confirm that there are three open tabs.
+            // Confirm that there are four open tabs.
             waitForBrowserState(
                 isIncognito = false,
-                expectedNumRegularTabs = 3
+                expectedNumRegularTabs = 4
             )
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
 
             // Close the active tab.
             val firstActiveTabTitle =
                 activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value
             closeActiveTabFromTabGrid()
 
-            // Confirm that there are only two tabs displayed, but three still three live tabs.
+            // Confirm that there are only three tabs displayed, but three still four live tabs.
             waitForAssertion {
-                onAllNodesWithTag("TabCard").assertCountEquals(2)
+                onAllNodesWithTag("TabCard").assertCountEquals(3)
             }
             expectBrowserState(
                 isIncognito = false,
                 incognitoTabCount = 0,
-                regularTabCount = 3
+                regularTabCount = 4
             )
 
             // Confirm that a new tab was selected.
@@ -148,7 +148,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             waitForNodeWithContentDescription(
                 activity.getString(R.string.close_tab, secondActiveTabTitle)
             ).assertIsDisplayed()
-            onAllNodesWithTag("TabCard").assertCountEquals(2)
+            onAllNodesWithTag("TabCard").assertCountEquals(3)
 
             // Hitting back should send the user back to the browser with the second tab loaded.
             onBackPressed()
@@ -160,7 +160,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             waitForNodeToDisappear(onNodeWithText(closeSnackbarText))
             waitForBrowserState(
                 isIncognito = false,
-                expectedNumRegularTabs = 2
+                expectedNumRegularTabs = 3
             )
         }
     }
@@ -170,19 +170,19 @@ class CardGridBehaviorTest : BaseBrowserTest() {
         androidComposeRule.apply {
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = false)
-            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 3)
+            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 4)
 
             // Close the active tab.
             closeActiveTabFromTabGrid()
 
-            // Confirm that there are only two tabs displayed, but three still three live tabs.
+            // Confirm that there are only three tabs displayed, but three still four live tabs.
             waitForAssertion {
-                onAllNodesWithTag("TabCard").assertCountEquals(2)
+                onAllNodesWithTag("TabCard").assertCountEquals(3)
             }
             expectBrowserState(
                 isIncognito = false,
                 incognitoTabCount = 0,
-                regularTabCount = 3
+                regularTabCount = 4
             )
 
             // Sending the app to the background should immediately close the tab.
@@ -190,7 +190,7 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             expectBrowserState(
                 isIncognito = false,
                 incognitoTabCount = 0,
-                regularTabCount = 2
+                regularTabCount = 3
             )
         }
     }
@@ -201,17 +201,18 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = false)
 
-            // Confirm that there are three open tabs.
+            // Confirm that there are four open tabs.
             waitForBrowserState(
                 isIncognito = false,
-                expectedNumRegularTabs = 3
+                expectedNumRegularTabs = 4
             )
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
 
             // Close the active tab.
             val firstActiveTabTitle =
                 activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value
             closeActiveTabFromTabGrid()
+            onAllNodesWithTag("TabCard").assertCountEquals(3)
 
             // Confirm that a new tab was selected.
             val secondActiveTabTitle =
@@ -224,12 +225,12 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             // Undo the tab closure.
             waitForNodeWithText(getString(R.string.undo)).performClick()
 
-            // Confirm that we're back up to three tabs.
+            // Confirm that we're back up to four tabs.
             waitForBrowserState(
                 isIncognito = false,
-                expectedNumRegularTabs = 3
+                expectedNumRegularTabs = 4
             )
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
         }
     }
 
@@ -239,9 +240,9 @@ class CardGridBehaviorTest : BaseBrowserTest() {
             visitMultipleSitesInNewTabs()
             openCardGrid(incognito = false)
 
-            // Confirm that there are three open tabs.
-            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 3)
-            onAllNodesWithTag("TabCard").assertCountEquals(3)
+            // Confirm that there are four open tabs.
+            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 4)
+            onAllNodesWithTag("TabCard").assertCountEquals(4)
 
             // Close the active tab.
             closeActiveTabFromTabGrid()

@@ -62,7 +62,7 @@ fun NeevaScopeResultScreen(
     val searches by neevascopeModel.searchFlow.collectAsState(initial = null)
 
     NeevaScopeResultScreen(
-        openUrl = appNavModel::openUrl,
+        openUrl = appNavModel::openUrlInNewTab,
         showFeedback = appNavModel::showFeedback,
         onDismiss = onDismiss,
         searches = searches,

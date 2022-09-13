@@ -10,18 +10,8 @@ class TabGridScreenshotTest : BaseScreenshotTest() {
     }
 
     @Test
-    fun tabGridPreview_LightIncognitoLegacy() {
-        runScreenshotTest { TabGridPreview_LightIncognitoLegacy() }
-    }
-
-    @Test
     fun tabGridPreview_LightRegularArchiving() {
         runScreenshotTest { TabGridPreview_LightRegularArchiving() }
-    }
-
-    @Test
-    fun tabGridPreview_LightRegularLegacy() {
-        runScreenshotTest { TabGridPreview_LightRegularLegacy() }
     }
 
     @Test
@@ -35,18 +25,8 @@ class TabGridScreenshotTest : BaseScreenshotTest() {
     }
 
     @Test
-    fun tabGridPreview_DarkIncognitoLegacy() {
-        runScreenshotTest { TabGridPreview_DarkIncognitoLegacy() }
-    }
-
-    @Test
     fun tabGridPreview_DarkRegularArchiving() {
         runScreenshotTest { TabGridPreview_DarkRegularArchiving() }
-    }
-
-    @Test
-    fun tabGridPreview_DarkRegularLegacy() {
-        runScreenshotTest { TabGridPreview_DarkRegularLegacy() }
     }
 
     @Test

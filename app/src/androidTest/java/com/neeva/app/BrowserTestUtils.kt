@@ -141,34 +141,12 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForTitle(title
     waitFor { it.webLayerModel.currentBrowser.activeTabModel.titleFlow.value == title }
 }
 
-/** Loads up a page that has a big clickable link that just navigates in the same tab. */
-fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.visitMultipleSitesInSameTab() {
-    val testUrl = WebpageServingRule.urlFor("big_link_element.html")
-
-    // Load the test webpage up in the existing tab.
-    loadUrlInCurrentTab(testUrl)
-    waitForTitle("Page 1")
-
-    // Navigate a couple of times so that we can add entries into history.
-    clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=2")
-    waitForTitle("Page 2")
-
-    clickOnBrowserAndWaitForUrlToLoad("$testUrl?page_index=3")
-    waitForTitle("Page 3")
-
-    activity.webLayerModel.currentBrowser.activeTabModel.apply {
-        expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
-        expectThat(navigationInfoFlow.value.canGoForward).isFalse()
-    }
-    expectBrowserState(isIncognito = false, regularTabCount = 1)
-}
-
-/** Loads up a page that has a big clickable link that just navigates in the same tab. */
+/** Loads up a page that has a big clickable link that causes a new tab to open. */
 fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.visitMultipleSitesInNewTabs() {
     val testUrl = WebpageServingRule.urlFor("big_link_element_target_blank.html")
 
     // Load the test webpage up in the existing tab.
-    loadUrlInCurrentTab(testUrl)
+    loadUrlByClickingOnBar(testUrl)
     waitForTitle("Page 1")
 
     // Navigate a couple of times so that we can add entries into history.
@@ -228,20 +206,6 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.toggleUsageLogging
     waitForNavDestination(AppNavDestination.BROWSER)
 }
 
-/** Toggle the setting for advanced tab management. */
-fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.toggleAdvancedTabManagement() {
-    openOverflowMenuAndClickItem(R.string.settings)
-    waitForNavDestination(AppNavDestination.SETTINGS)
-
-    // Activate the setting.
-    waitForNodeWithTag("SettingsPaneItems")
-        .performScrollToNode(hasText(getString(R.string.settings_automated_tab_management)))
-    waitForNode(hasText(getString(R.string.settings_automated_tab_management))).performClick()
-
-    // Go back to the browser screen.
-    onBackPressed()
-}
-
 fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.closeActiveTabFromTabGrid() {
     val activeTabTitle =
         activity.webLayerModel.currentBrowser.activeTabModel.titleFlow.value
@@ -268,16 +232,17 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.clickOnUrlBar() {
 }
 
 /**
- * Navigates the user to a new website on the current tab.
+ * Navigates the user to a new website by clicking on the URL bar.
  *
  * Assumes that the user is in [AppNavDestination.BROWSER].
  */
-fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.loadUrlInCurrentTab(url: String) {
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.loadUrlByClickingOnBar(url: String) {
     expectThat(activity.appNavModel!!.currentDestination.value!!.route)
         .isEqualTo(AppNavDestination.BROWSER.route)
 
     // Click on the URL bar and then type in the provided URL.
     clickOnUrlBar()
+
     navigateViaUrlBar(url)
 }
 
@@ -295,14 +260,35 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.openLazyTab(url: S
     navigateViaUrlBar(url)
 }
 
-/** Clears text from the URL bar, assuming it is already visible and has text in it. */
-fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.clearUrlBar() {
-    flakyClickOnNode(hasContentDescription(getString(com.neeva.app.R.string.clear))) {
+/**
+ * Clears text from the URL bar by hitting the "clear" button, assuming it is already visible
+ * because the URL bar has text in it.
+ */
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.clearUrlBarViaClearButton() {
+    flakyClickOnNode(hasContentDescription(getString(R.string.clear))) {
         activity.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.userTypedInput.isEmpty()
     }
     waitForAssertion {
         onNodeWithTag("AutocompleteTextField")
-            .assertTextEquals(getString(com.neeva.app.R.string.url_bar_placeholder))
+            .assertTextEquals(getString(R.string.url_bar_placeholder))
+    }
+}
+
+/** Clears text from the URL bar by hitting the delete key over and over again. */
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.clearUrlBarByMashingDelete() {
+    // Delete everything in the bar.
+    waitForNodeWithTag("AutocompleteTextField").apply {
+        val input = activity.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.userTypedInput
+
+        (input.indices).forEach { _ ->
+            performKeyPress(
+                androidx.compose.ui.input.key.KeyEvent(
+                    NativeKeyEvent(NativeKeyEvent.ACTION_DOWN, NativeKeyEvent.KEYCODE_DEL)
+                )
+            )
+        }
+
+        assertTextEquals(getString(R.string.url_bar_placeholder))
     }
 }
 

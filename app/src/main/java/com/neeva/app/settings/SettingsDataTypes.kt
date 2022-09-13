@@ -130,10 +130,6 @@ enum class SettingsToggle(
     ),
 
     // Advanced / development settings:
-    AUTOMATED_TAB_MANAGEMENT(
-        primaryLabelId = R.string.settings_automated_tab_management,
-        defaultValue = false
-    ),
     DEBUG_ENABLE_DISPLAY_TABS_BY_REVERSE_CREATION_TIME(
         primaryLabelId = R.string.settings_debug_tabs_in_reverse,
         defaultValue = false,

@@ -109,10 +109,6 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    settingsToggle = SettingsToggle.AUTOMATED_TAB_MANAGEMENT
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.ENABLE_NEEVASCOPE
                 )
             )

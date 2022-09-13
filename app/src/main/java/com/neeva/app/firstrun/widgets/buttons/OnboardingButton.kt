@@ -65,7 +65,9 @@ fun OnboardingButton(
         provider = provider,
         launchLoginIntent = launchLoginIntent,
         onActivityResult = { result ->
-            firstRunModel.handleLoginActivityResult(context, result) { appNavModel.openUrl(it) }
+            firstRunModel.handleLoginActivityResult(context, result) {
+                appNavModel.openUrlInNewTab(it)
+            }
         },
         enabled = enabled
     )

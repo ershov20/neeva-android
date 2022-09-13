@@ -26,7 +26,7 @@ import com.neeva.app.UserInfoQuery
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.expectBrowserState
 import com.neeva.app.getString
-import com.neeva.app.loadUrlInCurrentTab
+import com.neeva.app.loadUrlByClickingOnBar
 import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.selectItemFromContextMenu
 import com.neeva.app.userdata.NeevaUserToken
@@ -79,10 +79,10 @@ class AddToSpaceTest : BaseBrowserTest() {
             waitForActivityStartup()
             expectBrowserState(isIncognito = false, regularTabCount = 1)
 
-            // Load the test webpage up in the existing tab.
-            loadUrlInCurrentTab(testUrl)
+            // Load the test webpage up.
+            loadUrlByClickingOnBar(testUrl)
             waitForTitle("Page 1")
-            expectBrowserState(isIncognito = false, regularTabCount = 1)
+            expectBrowserState(isIncognito = false, regularTabCount = 2)
         }
     }
 
@@ -238,7 +238,7 @@ class AddToSpaceTest : BaseBrowserTest() {
             waitForBrowserState(
                 isIncognito = true,
                 expectedNumIncognitoTabs = 1,
-                expectedNumRegularTabs = 1
+                expectedNumRegularTabs = 2
             )
             waitForTitle("Page 2")
 

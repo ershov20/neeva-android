@@ -32,10 +32,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalPopupModel
-import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.cardgrid.archived.ArchivedTabGrid
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.ui.FullScreenDialogTopBar
@@ -88,22 +86,17 @@ fun HistoryContainer(
         modifier = Modifier.fillMaxSize()
     ) { paddingValues ->
         Column(modifier = Modifier.padding(paddingValues)) {
-            val isArchiveEnabled by LocalSettingsDataModel.current
-                .getToggleState(SettingsToggle.AUTOMATED_TAB_MANAGEMENT)
-
-            if (isArchiveEnabled) {
-                TabRow(selectedTabIndex = selectedTab.ordinal) {
-                    HistorySubpage.values().forEach { subpage ->
-                        Tab(
-                            selected = selectedTab.ordinal == subpage.ordinal,
-                            onClick = { selectedTab = subpage },
-                            modifier = Modifier.height(Dimensions.SIZE_TOUCH_TARGET)
-                        ) {
-                            Icon(
-                                subpage.icon,
-                                contentDescription = stringResource(subpage.titleId)
-                            )
-                        }
+            TabRow(selectedTabIndex = selectedTab.ordinal) {
+                HistorySubpage.values().forEach { subpage ->
+                    Tab(
+                        selected = selectedTab.ordinal == subpage.ordinal,
+                        onClick = { selectedTab = subpage },
+                        modifier = Modifier.height(Dimensions.SIZE_TOUCH_TARGET)
+                    ) {
+                        Icon(
+                            subpage.icon,
+                            contentDescription = stringResource(subpage.titleId)
+                        )
                     }
                 }
             }
