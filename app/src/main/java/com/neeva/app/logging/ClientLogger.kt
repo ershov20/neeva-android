@@ -55,6 +55,7 @@ class ClientLogger(
 
     /** Logs that weren't allowed to be sent when created.  Will be sent if/when allowed. */
     private val pendingLogs = mutableListOf<PendingLog>()
+    private val pendingLogsLock = Object()
 
     /** Enables or disables logging, based on whether the user is in private browsing mode. */
     fun onProfileSwitch(useIncognito: Boolean) {
@@ -80,7 +81,7 @@ class ClientLogger(
         }
 
         if (FirstRunModel.mustShowFirstRun(sharedPreferencesModel, neevaUserToken)) {
-            pendingLogs.add(PendingLog(path, attributes))
+            addPendingLog(PendingLog(path, attributes))
             return
         }
 
@@ -128,13 +129,18 @@ class ClientLogger(
         }
     }
 
+    private fun addPendingLog(pendingLog: PendingLog) = synchronized(pendingLogsLock) {
+        pendingLogs.add(pendingLog)
+    }
+
     /** Process any logged events that we were previously unable to send. */
     fun sendPendingLogs() {
         // Iterate on a copy of the list to prevent ConcurrentModificationExceptions.
-        val copiedLogs = synchronized(this) {
-            val copy = pendingLogs.toList()
-            pendingLogs.clear()
-            return@synchronized copy
+        val copiedLogs: List<PendingLog> = synchronized(pendingLogsLock) {
+            mutableListOf<PendingLog>().apply {
+                addAll(pendingLogs)
+                pendingLogs.clear()
+            }
         }
 
         coroutineScope.launch(dispatchers.io) {
@@ -145,6 +151,6 @@ class ClientLogger(
     }
 
     companion object {
-        val TAG = ClientLogger::class.simpleName
+        private const val TAG = "ClientLogger"
     }
 }

@@ -13,6 +13,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -95,6 +96,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         /** Sends the user directly into the Zero Query page without the keyboard up. */
         const val ACTION_ZERO_QUERY = "ACTION_ZERO_QUERY"
+
+        private const val TAG = "NeevaActivity"
     }
 
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
@@ -500,9 +503,20 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
 
         if (existingFragment != null) {
-            // Re-attach the Fragment so that WebLayer knows that it is now active.
-            check(fragment == existingFragment)
-            transaction.attach(fragment)
+            if (fragment != existingFragment) {
+                // https://github.com/neevaco/neeva-android/issues/940
+                // It's not clear what causes two different Fragments to exist for the same browser
+                // profile.  Maybe two different Incognito fragments, or maybe something is
+                // happening after an Activity restart, but I haven't been able to reproduce it.
+                // Speculatively avoid the crash by removing the wrong fragment when a new Fragment
+                // is added for the same profile.
+                Log.e(TAG, "Existing fragment found that does not match the new fragment")
+                transaction.remove(existingFragment)
+                transaction.add(R.id.weblayer_fragment, fragment, fragmentTag)
+            } else {
+                // Re-attach the Fragment so that WebLayer knows that it is now active.
+                transaction.attach(fragment)
+            }
         } else {
             transaction.add(R.id.weblayer_fragment, fragment, fragmentTag)
         }
