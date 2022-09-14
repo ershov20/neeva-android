@@ -12,7 +12,6 @@ private enum class Matcher(val regex: Regex) {
 }
 
 class CanonicalUrl {
-
     // StripMobile is removing some patterns associated with mobile urls.
     fun stripMobile(url: Uri): Uri {
         var newAuthority = url.authority
@@ -30,11 +29,15 @@ class CanonicalUrl {
     }
 
     // ref: https://github.com/neevaco/neeva/blob/master/webcrawl/url.go
-    private fun canonicalURLInternal(url: Uri): Uri {
+    private fun canonicalURLInternal(url: Uri, stripMobile: Boolean = false): Uri {
         val builder = Uri.Builder()
 
-        var urlAuth = stripMobile(url).authority?.lowercase()
-        var urlPath = url.path
+        var urlAuth = if (stripMobile) {
+            stripMobile(url).authority?.lowercase()
+        } else {
+            url.authority?.lowercase()
+        }
+        var urlPath = url.encodedPath
         var urlQuery = url.encodedQuery
 
         // All wirecutter.com URLs moved permanently (301s) to nytimes.com/wirecutter.
@@ -207,7 +210,7 @@ class CanonicalUrl {
         val canonicalizedUrl = Uri.Builder()
             .scheme("https")
             .authority(urlAuth)
-            .path(urlPath)
+            .encodedPath(urlPath)
             .encodedQuery(urlQuery)
             .build()
 
@@ -245,12 +248,12 @@ class CanonicalUrl {
     }
 
     // canonicalURLV3Internal is the same as canonicalUrlInternal, but with additional logic.
-    private fun canonicalURLV3Internal(url: Uri): Uri {
-        val canonicalizedUrl = canonicalURLInternal(url)
+    private fun canonicalURLV3Internal(url: Uri, stripMobile: Boolean = false): Uri {
+        val canonicalizedUrl = canonicalURLInternal(url, stripMobile)
         if (canonicalizedUrl != Uri.EMPTY) {
             val builder = Uri.Builder()
             var urlHost = canonicalizedUrl.host
-            var urlPath = canonicalizedUrl.path
+            var urlPath = canonicalizedUrl.encodedPath
             var urlQuery = canonicalizedUrl.encodedQuery
             var trimmedHost = urlHost?.removePrefix("www.")
 
@@ -322,18 +325,18 @@ class CanonicalUrl {
             return canonicalizedUrl
                 .buildUpon()
                 .authority(urlHost)
-                .path(urlPath)
+                .encodedPath(urlPath)
                 .encodedQuery(urlQuery)
                 .build()
         }
         return Uri.EMPTY
     }
 
-    fun canonicalizeUrl(url: Uri): Uri {
-        return if (canonicalURLV3Internal(url) == Uri.EMPTY) {
+    fun canonicalizeUrl(url: Uri, stripMobile: Boolean = false): Uri {
+        return if (canonicalURLV3Internal(url, stripMobile) == Uri.EMPTY) {
             url
         } else {
-            canonicalURLV3Internal(url)
+            canonicalURLV3Internal(url, stripMobile)
         }
     }
 
