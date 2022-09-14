@@ -19,8 +19,8 @@ android {
 
         minSdk min_sdk_version
         targetSdk target_sdk_version
-        versionCode 1000
-        versionName "0.84.0"
+        versionCode 1001
+        versionName "0.84.1"
 
         manifestPlaceholders = [isolatedSplits: true]
 
