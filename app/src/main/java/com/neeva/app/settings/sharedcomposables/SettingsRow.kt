@@ -175,6 +175,7 @@ fun SettingsRow(
                     RadioButtonItem(it.title, it.description)
                 },
                 settingsController.getCookieCutterStrength().ordinal,
+                addAdditionalHorizontalPadding = true,
                 onSelect = { index ->
                     val blockingStrength = CookieCutterModel.BlockingStrength.values()[index]
                     settingsController.setCookieCutterStrength(blockingStrength)
@@ -188,6 +189,7 @@ fun SettingsRow(
                     RadioButtonItem(it.title, null)
                 },
                 settingsController.getCookieNoticeSelection().ordinal,
+                addAdditionalHorizontalPadding = true,
                 onSelect = { index ->
                     val selection = CookieCutterModel.CookieNoticeSelection.values()[index]
                     settingsController.setCookieNoticeSelection(selection)

@@ -35,6 +35,7 @@ data class RadioButtonItem(
 fun RadioButtonGroup(
     radioOptions: List<RadioButtonItem>?,
     selectedOptionIndex: Int,
+    addAdditionalHorizontalPadding: Boolean = false,
     onSelect: (Int) -> Unit
 ) {
     if (radioOptions != null && radioOptions.isNotEmpty()) {
@@ -58,14 +59,20 @@ fun RadioButtonGroup(
                 ) {
                     RadioButton(
                         selected = (index == selectedOptionIndex),
-                        onClick = { onSelect(index) }
+                        onClick = { onSelect(index) },
+                        modifier = if (addAdditionalHorizontalPadding) {
+                            Modifier.padding(horizontal = Dimensions.PADDING_MEDIUM)
+                        } else {
+                            Modifier
+                        }
                     )
                     radioOptions[index].apply {
                         StackedText(
                             primaryLabel = stringResource(title),
                             secondaryLabel = description?.let { stringResource(it) },
                             primaryMaxLines = 2,
-                            secondaryMaxLines = 2
+                            secondaryMaxLines = 2,
+                            modifier = Modifier.padding(end = Dimensions.PADDING_LARGE)
                         )
                     }
                 }
