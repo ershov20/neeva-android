@@ -20,6 +20,7 @@ import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
 
@@ -34,6 +35,7 @@ class BrowserWrapperFactory(
     private val domainProvider: DomainProvider,
     private val historyManager: HistoryManager,
     private val historyDatabase: HistoryDatabase,
+    private val incognitoSessionToken: IncognitoSessionToken,
     private val neevaConstants: NeevaConstants,
     private val neevaUser: NeevaUser,
     private val regularFaviconCache: RegularFaviconCache,
@@ -86,7 +88,8 @@ class BrowserWrapperFactory(
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
             popupModel = popupModel,
-            neevaUser = neevaUser
+            neevaUser = neevaUser,
+            incognitoSessionToken = incognitoSessionToken
         )
     }
 }

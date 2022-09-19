@@ -28,6 +28,10 @@ open class NeevaConstants(
     val appTermsURL: String = "${appURL}terms"
 
     val apolloURL: String = "${appURL}graphql"
+
+    /** Endpoint for creating new incognito sessions. */
+    val incognitoURL: String = "${appURL}incognito/create-session"
+
     open val cookieCutterLearnMoreUrl: String = "$appHelpCenterURL/hc/en-us/articles/4486326606355"
     val createOktaAccountURL: String = "${appURL}login/create"
 
@@ -37,19 +41,32 @@ open class NeevaConstants(
     val browserIdentifier = "co.neeva.app.android.browser"
 
     val loginCookie: String = "httpd~login"
-    val browserTypeCookie = Cookie.Builder()
-        .name("BrowserType")
-        .secure()
-        .domain(cookieHost)
-        .expiresAt(Long.MAX_VALUE)
-        .value("neeva-android")
-        .build()
+    val incognitoCookie: String = "httpd~incognito"
 
-    val browserVersionCookie = Cookie.Builder()
-        .name("BrowserVersion")
-        .secure()
-        .domain(cookieHost)
-        .expiresAt(Long.MAX_VALUE)
-        .value(BuildConfig.VERSION_NAME)
-        .build()
+    val browserTypeCookie = createNeevaCookie(
+        cookieName = "BrowserType",
+        cookieValue = "neeva-android"
+    )
+
+    val browserVersionCookie = createNeevaCookie(
+        cookieName = "BrowserVersion",
+        cookieValue = BuildConfig.VERSION_NAME
+    )
+
+    fun createLoginCookie(cookieValue: String) = createNeevaCookie(
+        cookieName = loginCookie,
+        cookieValue = cookieValue
+    )
+
+    fun createNeevaCookie(cookieName: String, cookieValue: String): Cookie {
+        // TODO(dan.alcantara): |expiresAt| _should_ be set to the actual expiration of the cookie
+        //                      but the app doesn't keep track of them.
+        return Cookie.Builder()
+            .name(cookieName)
+            .value(cookieValue)
+            .secure()
+            .domain(cookieHost)
+            .expiresAt(Long.MAX_VALUE)
+            .build()
+    }
 }

@@ -5,12 +5,9 @@
 package com.neeva.app.browsing
 
 import android.content.Context
-import android.net.Uri
 import android.util.Log
-import com.apollographql.apollo3.api.Optional
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.StartIncognitoMutation
 import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.cookiecutter.IncognitoTrackersAllowList
@@ -22,13 +19,14 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.IncognitoTabScreenshotManager
 import com.neeva.app.storage.favicons.IncognitoFaviconCache
-import com.neeva.app.type.StartIncognitoInput
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.withContext
+import org.chromium.weblayer.Browser
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebLayer
@@ -50,7 +48,8 @@ class IncognitoBrowserWrapper private constructor(
     scriptInjectionManager: ScriptInjectionManager,
     sharedPreferencesModel: SharedPreferencesModel,
     popupModel: PopupModel,
-    neevaUser: NeevaUser
+    neevaUser: NeevaUser,
+    private val incognitoSessionToken: IncognitoSessionToken
 ) : BaseBrowserWrapper(
     isIncognito = true,
     appContext = appContext,
@@ -94,7 +93,8 @@ class IncognitoBrowserWrapper private constructor(
         directories: Directories,
         tempDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(FOLDER_NAME),
         popupModel: PopupModel,
-        neevaUser: NeevaUser
+        neevaUser: NeevaUser,
+        incognitoSessionToken: IncognitoSessionToken
     ) : this(
         appContext = appContext,
         activityCallbackProvider = activityCallbackProvider,
@@ -121,7 +121,8 @@ class IncognitoBrowserWrapper private constructor(
             dispatchers = dispatchers
         ),
         popupModel = popupModel,
-        neevaUser = neevaUser
+        neevaUser = neevaUser,
+        incognitoSessionToken = incognitoSessionToken
     )
 
     companion object {
@@ -138,11 +139,14 @@ class IncognitoBrowserWrapper private constructor(
         suspend fun cleanUpIncognito(
             dispatchers: Dispatchers,
             incognitoProfile: Profile?,
-            cacheCleaner: CacheCleaner
+            cacheCleaner: CacheCleaner,
+            incognitoSessionToken: IncognitoSessionToken
         ) {
             // Tell WebLayer that it should destroy the incognito profile when it can.  This deletes
             // temporary files or cookies that were created while the user was in that session.
             withContext(dispatchers.main) {
+                incognitoSessionToken.clearIncognitoCookie()
+
                 incognitoProfile?.apply {
                     Log.d(TAG, "Marking incognito profile for deletion")
                     destroyAndDeleteDataFromDiskSoon {
@@ -158,57 +162,22 @@ class IncognitoBrowserWrapper private constructor(
         }
     }
 
-    /** Whether or not the mutation required to start an Incognito session has succeeded. */
-    private var isIncognitoMutationPerformed: Boolean = false
-
     override fun createBrowserFragment() = WebLayer.createBrowserFragmentWithIncognitoProfile(
         INCOGNITO_PROFILE_NAME,
         INCOGNITO_PERSISTENCE_ID
     )
 
+    override fun registerBrowserCallbacks(browser: Browser): Boolean {
+        val wasRegistered = super.registerBrowserCallbacks(browser)
+        if (!wasRegistered) return false
+
+        incognitoSessionToken.initializeCookieManager(browser)
+        return true
+    }
+
     override fun unregisterBrowserAndTabCallbacks() {
         super.unregisterBrowserAndTabCallbacks()
         onRemovedFromHierarchy(this)
-    }
-
-    override fun shouldInterceptLoad(uri: Uri): Boolean {
-        // TODO(dan.alcantara): Check what happens on slow networks.
-        return !isIncognitoMutationPerformed && uri.isNeevaUri(neevaConstants)
-    }
-
-    /** Perform the mutation necessary to get the Incognito URL. */
-    override suspend fun getReplacementUrl(uri: Uri): Uri {
-        val redirectUri: String? = withContext(dispatchers.io) {
-            // The `StartIncognito` endpoint requires sending a relative URI, which we manually
-            // construct by creating a new URI using the relevant parts.
-            val toApi = Uri.Builder()
-                .path(uri.path)
-                .encodedQuery(uri.encodedQuery)
-                .fragment(uri.fragment)
-                .build()
-
-            val response = authenticatedApolloWrapper.performMutation(
-                mutation = StartIncognitoMutation(
-                    StartIncognitoInput(
-                        redirect = Optional.presentIfNotNull(toApi.toString())
-                    )
-                ),
-                userMustBeLoggedIn = true
-            )?.response
-
-            response?.data?.result
-        }
-
-        return withContext(dispatchers.main) {
-            if (redirectUri != null) {
-                Log.i(TAG, "Incognito URI acquired; redirecting")
-                isIncognitoMutationPerformed = true
-                Uri.parse(redirectUri)
-            } else {
-                Log.w(TAG, "Failed to get redirect URI.  Falling back to original URI.")
-                uri
-            }
-        }
     }
 
     override fun onBlankTabCreated(tab: Tab) {

@@ -145,12 +145,6 @@ interface BrowserWrapper {
         onLoadStarted: () -> Unit = {}
     ): Job
 
-    /** Checks whether or not the BrowserWrapper wants to block loading of the given [uri]. */
-    fun shouldInterceptLoad(uri: Uri) = false
-
-    /** Returns a URI that should be loaded in place of the given [uri]. */
-    suspend fun getReplacementUrl(uri: Uri) = uri
-
     /** Asynchronously adds or removes the active tab from the space with given [spaceID]. */
     fun modifySpace(spaceID: String, onOpenSpace: (String) -> Unit)
 
@@ -171,5 +165,3 @@ interface BrowserWrapper {
     fun showNeevaScopeTooltip(): Boolean
     fun showNeevaScope()
 }
-
-class CookiePair(val key: String, val value: String)

@@ -868,7 +868,11 @@ abstract class BaseBrowserWrapper internal constructor(
     /** Provides access to the WebLayer profile. */
     override fun getProfile(): Profile? = browser?.profile
 
-    /** Returns a list of cookies split by key and values. */
+    /**
+     * Returns a list of cookies split by key and values.
+     *
+     * TODO(dan.alcantara): Delete this version once we add support for Preview session tokens.
+     */
     override fun getCookiePairs(uri: Uri, callback: (List<CookiePair>) -> Unit) {
         browser?.profile?.cookieManager?.apply {
             getCookie(uri) { cookiesString ->
@@ -922,13 +926,6 @@ abstract class BaseBrowserWrapper internal constructor(
         // drop the request on the floor.
         waitUntilBrowserIsReady()
 
-        // Check if the user needs to be redirected somewhere else.
-        val urlToLoad = if (shouldInterceptLoad(uri)) {
-            getReplacementUrl(uri)
-        } else {
-            uri
-        }
-
         val urlBarModelState = urlBarModel.stateFlow.value
         val inDifferentTab = when {
             // Check for an explicit instruction from the caller to use the same tab or not.
@@ -952,7 +949,7 @@ abstract class BaseBrowserWrapper internal constructor(
             var mustCreateNewTab = true
             var parentTabIdToUse = parentTabId
 
-            tabList.findTabWithSimilarUri(urlToLoad)
+            tabList.findTabWithSimilarUri(uri)
                 ?.takeUnless {
                     // Explicitly being told to load a URL in a new tab should skip searching for a
                     // pre-existing tab.
@@ -979,7 +976,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
             if (mustCreateNewTab) {
                 createTabWithUri(
-                    uri = urlToLoad,
+                    uri = uri,
                     parentTabId = parentTabIdToUse,
                     parentSpaceId = parentSpaceId,
                     isViaIntent = isViaIntent,
@@ -990,7 +987,7 @@ abstract class BaseBrowserWrapper internal constructor(
         } else {
             navigateTab(
                 tab = _activeTabModelImpl.activeTab,
-                uri = urlToLoad,
+                uri = uri,
                 stayInApp = stayInApp,
                 searchQuery = searchQuery
             )

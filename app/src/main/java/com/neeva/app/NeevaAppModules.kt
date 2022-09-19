@@ -26,6 +26,7 @@ import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserImpl
 import com.neeva.app.userdata.NeevaUserToken
@@ -199,6 +200,20 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
+    fun providesIncognitoSessionToken(
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+        neevaConstants: NeevaConstants
+    ): IncognitoSessionToken {
+        return IncognitoSessionToken(
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants
+        )
+    }
+
+    @Provides
+    @Singleton
     fun providesBrowserWrapperFactory(
         activityCallbackProvider: ActivityCallbackProvider,
         application: Application,
@@ -209,6 +224,7 @@ object NeevaAppModule {
         domainProvider: DomainProvider,
         historyDatabase: HistoryDatabase,
         historyManager: HistoryManager,
+        incognitoSessionToken: IncognitoSessionToken,
         neevaConstants: NeevaConstants,
         neevaUser: NeevaUser,
         popupModel: PopupModel,
@@ -229,6 +245,7 @@ object NeevaAppModule {
             domainProvider = domainProvider,
             historyManager = historyManager,
             historyDatabase = historyDatabase,
+            incognitoSessionToken = incognitoSessionToken,
             neevaConstants = neevaConstants,
             neevaUser = neevaUser,
             popupModel = popupModel,

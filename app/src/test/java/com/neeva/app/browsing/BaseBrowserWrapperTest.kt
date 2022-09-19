@@ -242,16 +242,6 @@ class BaseBrowserWrapperTest : BaseTest() {
                 return this@BaseBrowserWrapperTest.browser
             }
 
-            override fun shouldInterceptLoad(uri: Uri) = shouldInterceptLoad
-
-            override suspend fun getReplacementUrl(uri: Uri): Uri {
-                if (shouldInterceptLoad(uri)) {
-                    return uri.buildUpon().appendPath("incognito_redirect").build()
-                } else {
-                    throw IllegalStateException()
-                }
-            }
-
             override fun onBlankTabCreated(tab: Tab) {
                 wasBlankTabCreated = true
             }
@@ -316,46 +306,6 @@ class BaseBrowserWrapperTest : BaseTest() {
         )
         expectThat(urlCaptor.lastValue).isEqualTo(Uri.parse(neevaConstants.appURL))
         expectThat(navigateParamsCaptor.lastValue.isIntentProcessingDisabled).isEqualTo(true)
-    }
-
-    @Test
-    fun loadUrl_withIntercept_loadsRedirectedUrl() {
-        val expectedUri = Uri.parse("https://www.example.com")
-        val redirectUri = Uri.parse("https://www.example.com/incognito_redirect")
-
-        createAndAttachBrowser()
-        completeBrowserRestoration()
-        coroutineScopeRule.scope.advanceUntilIdle()
-
-        // Say that the user's Browser currently has an active tab open.
-        val numTabsBefore = browserWrapper.orderedTabList.value.size
-        val activeTab = mockTabs.last()
-        browser.setActiveTab(activeTab)
-        expectThat(browser.activeTab).isEqualTo(activeTab)
-
-        // Say that the load should be intercepted, then load the URL.
-        shouldInterceptLoad = true
-        browserWrapper.loadUrl(expectedUri)
-        coroutineScopeRule.scope.advanceUntilIdle()
-
-        // Confirm that a new tab was opened for the URL.
-        val navigateParams = argumentCaptor<NavigateParams>()
-        expectThat(browserWrapper.orderedTabList.value).hasSize(numTabsBefore + 1)
-
-        verify(browser, times(2)).createTab()
-        expectThat(browser.activeTab).isNotEqualTo(activeTab)
-
-        // The old tab shouldn't have been told to navigate anywhere.
-        verify(activeTab.navigationController, never()).navigate(eq(expectedUri), any())
-        verify(activeTab.navigationController, never())
-            .navigate(eq(redirectUri), navigateParams.capture())
-
-        // The new tab should have been told to navigate to the redirected URL.
-        verify(browser.activeTab!!.navigationController, never()).navigate(eq(expectedUri), any())
-        verify(browser.activeTab!!.navigationController)
-            .navigate(eq(redirectUri), navigateParams.capture())
-
-        expectThat(navigateParams.lastValue.isIntentProcessingDisabled).isTrue()
     }
 
     @Test

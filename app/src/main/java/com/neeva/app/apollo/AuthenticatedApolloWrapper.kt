@@ -27,15 +27,7 @@ open class AuthenticatedApolloWrapper(
         ): List<Cookie> {
             val token = neevaUserToken.getToken()
             return if (token.isNotEmpty()) {
-                listOf(
-                    Cookie.Builder()
-                        .name(neevaConstants.loginCookie)
-                        .secure()
-                        .domain(neevaConstants.appHost)
-                        .expiresAt(Long.MAX_VALUE)
-                        .value(token)
-                        .build()
-                )
+                listOf(neevaConstants.createLoginCookie(token))
             } else {
                 emptyList()
             }

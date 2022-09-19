@@ -21,6 +21,7 @@ import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
+import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -89,6 +90,7 @@ class WebLayerModel internal constructor(
     private val historyManager: HistoryManager,
     private val dispatchers: Dispatchers,
     private val neevaUser: NeevaUser,
+    private val incognitoSessionToken: IncognitoSessionToken,
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val neevaConstants: NeevaConstants,
     private val settingsDataModel: SettingsDataModel,
@@ -105,6 +107,7 @@ class WebLayerModel internal constructor(
         historyManager: HistoryManager,
         dispatchers: Dispatchers,
         neevaUser: NeevaUser,
+        incognitoSessionToken: IncognitoSessionToken,
         sharedPreferencesModel: SharedPreferencesModel,
         neevaConstants: NeevaConstants,
         settingsDataModel: SettingsDataModel,
@@ -119,6 +122,7 @@ class WebLayerModel internal constructor(
         historyManager = historyManager,
         dispatchers = dispatchers,
         neevaUser = neevaUser,
+        incognitoSessionToken = incognitoSessionToken,
         sharedPreferencesModel = sharedPreferencesModel,
         settingsDataModel = settingsDataModel,
         clientLogger = clientLogger,
@@ -289,7 +293,8 @@ class WebLayerModel internal constructor(
         IncognitoBrowserWrapper.cleanUpIncognito(
             dispatchers = dispatchers,
             incognitoProfile = incognitoProfile,
-            cacheCleaner = cacheCleaner
+            cacheCleaner = cacheCleaner,
+            incognitoSessionToken = incognitoSessionToken
         )
     }
 

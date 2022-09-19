@@ -21,6 +21,7 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -76,6 +77,7 @@ class WebLayerModelTest : BaseTest() {
     @Mock private lateinit var historyManager: HistoryManager
     @Mock private lateinit var incognitoBrowserWrapper: IncognitoBrowserWrapper
     @Mock private lateinit var incognitoProfile: Profile
+    @Mock private lateinit var incognitoSessionToken: IncognitoSessionToken
     @Mock private lateinit var neevaUser: NeevaUser
     @Mock private lateinit var neevaUserToken: NeevaUserToken
     @Mock private lateinit var regularProfile: Profile
@@ -145,6 +147,7 @@ class WebLayerModelTest : BaseTest() {
                 io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler)
             ),
             neevaUser = neevaUser,
+            incognitoSessionToken = incognitoSessionToken,
             sharedPreferencesModel = sharedPreferencesModel,
             neevaConstants = neevaConstants,
             settingsDataModel = settingsDataModel,
