@@ -103,7 +103,8 @@ class RegularBrowserWrapper(
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
         searchNavigationDao = searchNavigationDao
-    )
+    ),
+    clientLogger = clientLogger
 ) {
     companion object {
         /**

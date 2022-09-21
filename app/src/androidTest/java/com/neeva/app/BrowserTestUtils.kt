@@ -163,6 +163,21 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.visitMultipleSites
     }
 }
 
+/** Loads up single page. */
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.visitSite() {
+    val testUrl = WebpageServingRule.urlFor("big_link_element_target_blank.html")
+
+    // Load the test webpage up in the existing tab.
+    loadUrlByClickingOnBar(testUrl)
+    waitForTitle("Page 1")
+
+    activity.webLayerModel.currentBrowser.activeTabModel.apply {
+        // Can go back because hitting back will close the tab and send you back to the parent.
+        expectThat(navigationInfoFlow.value.canGoBackward).isTrue()
+        expectThat(navigationInfoFlow.value.canGoForward).isFalse()
+    }
+}
+
 /** Returns the node representing the tab with the given [title]. */
 fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.getSelectedTabNode(
     title: String

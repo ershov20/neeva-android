@@ -36,6 +36,8 @@ class LogConfig {
         AUTH_SIGN_UP_WITH_GOOGLE("AuthOptionsSignupWithGoogle", Category.FIRST_RUN),
         AUTH_SIGN_UP_WITH_MICROSOFT("AuthOptionsSignupWithMicrosoft", Category.FIRST_RUN),
         AUTH_CLOSE("AuthClose", Category.FIRST_RUN),
+
+        // First run
         FIRST_RUN_IMPRESSION("FirstRunImpression", Category.FIRST_RUN),
         LOGIN_AFTER_FIRST_RUN("LoginAfterFirstRun", Category.FIRST_RUN),
         GET_STARTED_IN_WELCOME("GetStartedInWelcome", Category.FIRST_RUN),
@@ -53,14 +55,18 @@ class LogConfig {
         ),
         SET_DEFAULT_BROWSER("SetDefaultBrowser", Category.FIRST_RUN),
         SKIP_DEFAULT_BROWSER("SkipDefaultBrowser", Category.FIRST_RUN),
-        OPEN_DEFAULT_BROWSER_URL("OpenDefaultBrowserURL", Category.FIRST_RUN)
+        OPEN_DEFAULT_BROWSER_URL("OpenDefaultBrowserURL", Category.FIRST_RUN),
+
+        // Browsing
+        BROWSER_PAGE_LOAD("PageLoad", Category.BROWSING)
     }
 
     enum class Category(val categoryName: String) {
-        UI("UI"),
-        SUGGESTIONS("Suggestion"),
+        BROWSING("Browsing"),
+        FIRST_RUN("FirstRun"),
         STABILITY("Stability"),
-        FIRST_RUN("FirstRun")
+        SUGGESTIONS("Suggestion"),
+        UI("UI"),
     }
 
     companion object {

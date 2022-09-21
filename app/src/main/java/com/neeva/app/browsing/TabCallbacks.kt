@@ -14,6 +14,8 @@ import com.neeva.app.cookiecutter.CookieCuttingPreferences
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.cookiecutter.TabCookieCutterModel
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
@@ -51,7 +53,8 @@ class TabCallbacks(
     fullscreenCallback: FullscreenCallback,
     private val cookieCutterModel: CookieCutterModel,
     domainProvider: DomainProvider,
-    private val scriptInjectionManager: ScriptInjectionManager
+    private val scriptInjectionManager: ScriptInjectionManager,
+    private val clientLogger: ClientLogger?
 ) {
     val tabCookieCutterModel = TabCookieCutterModel(
         browserFlow = browserFlow,
@@ -204,6 +207,7 @@ class TabCallbacks(
             }
 
             if (shouldRecordVisit) {
+                clientLogger?.logCounter(LogConfig.Interaction.BROWSER_PAGE_LOAD, null)
                 visitToCommit?.let { visit ->
                     val uri = navigation.uri
                     val title = tab.currentDisplayTitle

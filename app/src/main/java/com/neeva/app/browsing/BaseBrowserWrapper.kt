@@ -32,6 +32,7 @@ import com.neeva.app.cookiecutter.CookieCutterModelImpl
 import com.neeva.app.cookiecutter.ScriptInjectionManager
 import com.neeva.app.cookiecutter.TrackersAllowList
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.logging.ClientLogger
 import com.neeva.app.neevascope.NeevaScopeInfoScreen
 import com.neeva.app.neevascope.NeevaScopeLoadingScreen
 import com.neeva.app.neevascope.NeevaScopeModel
@@ -105,7 +106,8 @@ abstract class BaseBrowserWrapper internal constructor(
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val settingsDataModel: SettingsDataModel,
     override val cookieCutterModel: CookieCutterModel,
-    private val getCurrentTime: () -> Long = { System.currentTimeMillis() }
+    private val getCurrentTime: () -> Long = { System.currentTimeMillis() },
+    private val clientLogger: ClientLogger?
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
     /**
      * Constructor used to create a BaseBrowserWrapper that automatically creates various internal
@@ -134,7 +136,8 @@ abstract class BaseBrowserWrapper internal constructor(
         sharedPreferencesModel: SharedPreferencesModel,
         settingsDataModel: SettingsDataModel,
         trackerAllowList: TrackersAllowList,
-        tabList: TabList
+        tabList: TabList,
+        clientLogger: ClientLogger?
     ) : this(
         isIncognito = isIncognito,
         appContext = appContext,
@@ -177,7 +180,8 @@ abstract class BaseBrowserWrapper internal constructor(
             coroutineScope,
             dispatchers,
             settingsDataModel
-        )
+        ),
+        clientLogger = clientLogger
     )
 
     private val tabCallbackMap: HashMap<String, TabCallbacks> = HashMap()
@@ -668,6 +672,7 @@ abstract class BaseBrowserWrapper internal constructor(
             cookieCutterModel = cookieCutterModel,
             domainProvider = domainProvider,
             scriptInjectionManager = scriptInjectionManager,
+            clientLogger = clientLogger
         )
     }
 

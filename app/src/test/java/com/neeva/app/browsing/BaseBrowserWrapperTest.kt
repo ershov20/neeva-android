@@ -233,7 +233,8 @@ class BaseBrowserWrapperTest : BaseTest() {
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
             cookieCutterModel = cookieCutterModel,
-            getCurrentTime = currentTimeProvider
+            getCurrentTime = currentTimeProvider,
+            clientLogger = null
         ) {
             override fun createBrowserFragment(): Fragment =
                 this@BaseBrowserWrapperTest.browserFragment

@@ -135,7 +135,8 @@ class TabCallbacksTest : BaseTest() {
             fullscreenCallback = fullscreenCallback,
             cookieCutterModel = cookieCutterModel,
             domainProvider = domainProvider,
-            scriptInjectionManager = scriptInjectionManager
+            scriptInjectionManager = scriptInjectionManager,
+            clientLogger = null
         )
     }
 

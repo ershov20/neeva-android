@@ -75,7 +75,8 @@ class IncognitoBrowserWrapper private constructor(
     settingsDataModel = settingsDataModel,
     trackerAllowList = IncognitoTrackersAllowList(),
     scriptInjectionManager = scriptInjectionManager,
-    tabList = IncognitoTabList()
+    tabList = IncognitoTabList(),
+    clientLogger = null
 ) {
     constructor(
         appContext: Context,
