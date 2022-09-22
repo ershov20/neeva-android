@@ -138,7 +138,11 @@ abstract class TabScreenshotManager(
 
     suspend fun restoreScreenshot(tabId: String): Bitmap? {
         val file = getTabScreenshotFile(tabId)
-        return BitmapIO.loadBitmap(file, ::getInputStream)
+        return if (file.exists()) {
+            BitmapIO.loadBitmap(file, ::getInputStream)
+        } else {
+            null
+        }
     }
 
     abstract fun getInputStream(file: File): InputStream

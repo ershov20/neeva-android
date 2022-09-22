@@ -30,6 +30,7 @@ import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserImpl
 import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.PreviewSessionToken
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -195,6 +196,22 @@ object NeevaAppModule {
         return NeevaUserToken(
             sharedPreferencesModel = sharedPreferencesModel,
             neevaConstants = neevaConstants
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun providesPreviewSessionToken(
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+        neevaConstants: NeevaConstants,
+        sharedPreferencesModel: SharedPreferencesModel
+    ): PreviewSessionToken {
+        return PreviewSessionToken(
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
         )
     }
 

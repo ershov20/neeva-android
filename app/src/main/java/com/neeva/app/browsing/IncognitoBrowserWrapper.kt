@@ -23,6 +23,8 @@ import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import java.io.File
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.withContext
@@ -146,15 +148,20 @@ class IncognitoBrowserWrapper private constructor(
             // Tell WebLayer that it should destroy the incognito profile when it can.  This deletes
             // temporary files or cookies that were created while the user was in that session.
             withContext(dispatchers.main) {
-                incognitoSessionToken.clearIncognitoCookie()
-
-                incognitoProfile?.apply {
-                    Log.d(TAG, "Marking incognito profile for deletion")
-                    destroyAndDeleteDataFromDiskSoon {
-                        Log.d(TAG, "Destroyed incognito profile")
+                suspendCoroutine<Boolean> { continuation ->
+                    incognitoProfile?.apply {
+                        Log.d(TAG, "Marking incognito profile for deletion")
+                        destroyAndDeleteDataFromDiskSoon {
+                            Log.d(TAG, "Destroyed incognito profile")
+                            continuation.resume(true)
+                        }
+                    } ?: run {
+                        continuation.resume(true)
                     }
                 }
             }
+
+            incognitoSessionToken.purgeCookie()
 
             // Delete temporary files we created to store Incognito favicons and tab screenshots.
             withContext(dispatchers.io) {

@@ -181,6 +181,11 @@ class WebLayerModelTest : BaseTest() {
 
         // Because an Incognito Fragment couldn't be found, the cacheCleaner should have tried to
         // clean up everything.
+        val runnableCaptor = argumentCaptor<Runnable>()
+        verify(incognitoProfile).destroyAndDeleteDataFromDiskSoon(runnableCaptor.capture())
+        runnableCaptor.lastValue.run()
+        coroutineScopeRule.scope.advanceUntilIdle()
+
         runBlocking { verify(cacheCleaner).run() }
 
         coroutineScopeRule.scope.advanceUntilIdle()
@@ -340,9 +345,14 @@ class WebLayerModelTest : BaseTest() {
         expectThat(webLayerModel.browsersFlow.value.isCurrentlyIncognito).isFalse()
         expectThat(webLayerModel.browsersFlow.value.incognitoBrowserWrapper).isNull()
 
-        runBlocking { verify(cacheCleaner).run() }
         verify(activityCallbacks).removeIncognitoFragment()
-        verify(incognitoProfile).destroyAndDeleteDataFromDiskSoon(any())
+
+        val runnableCaptor = argumentCaptor<Runnable>()
+        verify(incognitoProfile).destroyAndDeleteDataFromDiskSoon(runnableCaptor.capture())
+        runnableCaptor.lastValue.run()
+        coroutineScopeRule.advanceUntilIdle()
+
+        runBlocking { verify(cacheCleaner).run() }
     }
 
     @Test

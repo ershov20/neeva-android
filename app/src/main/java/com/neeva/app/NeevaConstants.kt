@@ -29,8 +29,11 @@ open class NeevaConstants(
 
     val apolloURL: String = "${appURL}graphql"
 
-    /** Endpoint for creating new incognito sessions. */
+    /** Endpoint for creating new incognito session tokens. */
     val incognitoURL: String = "${appURL}incognito/create-session"
+
+    /** Endpoint for creating new preview session tokens. */
+    val previewCookieURL: String = "${appURL}preview/create-session"
 
     open val cookieCutterLearnMoreUrl: String = "$appHelpCenterURL/hc/en-us/articles/4486326606355"
     val createOktaAccountURL: String = "${appURL}login/create"
@@ -42,6 +45,7 @@ open class NeevaConstants(
 
     val loginCookie: String = "httpd~login"
     val incognitoCookie: String = "httpd~incognito"
+    val previewCookie: String = "httpd~preview"
 
     val browserTypeCookie = createNeevaCookie(
         cookieName = "BrowserType",

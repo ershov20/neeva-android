@@ -113,6 +113,11 @@ sealed class SharedPrefFolder(internal val folderName: String) {
     object Settings : SharedPrefFolder("SETTINGS")
 
     object User : SharedPrefFolder("USER") {
+        val PreviewToken = SharedPrefKey(
+            User,
+            preferenceKey = "PREVIEW_TOKEN",
+            defaultValue = ""
+        )
         val Token = SharedPrefKey(
             User,
             preferenceKey = "TOKEN",
