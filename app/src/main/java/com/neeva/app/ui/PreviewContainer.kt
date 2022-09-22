@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.apollographql.apollo3.ApolloClient
+import com.neeva.app.LocalActivityStarter
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalChromiumVersion
 import com.neeva.app.LocalClientLogger
@@ -37,6 +38,7 @@ import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.ApolloClientWrapper
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.PreviewAppNavModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.logging.ClientLogger
@@ -166,9 +168,15 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         popupModel = previewPopupModel
     )
 
+    val previewActivityStarter = ActivityStarter(
+        appContext = LocalContext.current,
+        popupModel = previewPopupModel
+    )
+
     // Provide classes that have no material impact on the Composable previews.  These can still be
     // overridden by previews that need specific state to be displayed.
     CompositionLocalProvider(
+        LocalActivityStarter provides previewActivityStarter,
         LocalAppNavModel provides PreviewAppNavModel(LocalContext.current),
         LocalClientLogger provides previewClientLogger,
         LocalChromiumVersion provides "XXX.XXX.XXX.XXX",

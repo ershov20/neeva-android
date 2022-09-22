@@ -42,6 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalActivityStarter
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.LocalPopupModel
@@ -175,7 +176,7 @@ fun SocialShareRow(
             .padding(Dimensions.PADDING_LARGE)
             .fillMaxWidth()
     ) {
-        val appNavModel = LocalAppNavModel.current
+        val activityStarter = LocalActivityStarter.current
         SocialShareButton(
             name = stringResource(id = R.string.twitter),
             iconResourceID = R.drawable.twitter_logo_blue
@@ -184,7 +185,7 @@ fun SocialShareRow(
                 Intent.ACTION_VIEW,
                 Uri.parse("http://twitter.com/share?url=$spaceURL")
             )
-            appNavModel.safeStartActivityForIntent(intent)
+            activityStarter.safeStartActivityForIntent(intent)
         }
 
         SocialShareButton(
@@ -195,7 +196,7 @@ fun SocialShareRow(
                 Intent.ACTION_VIEW,
                 Uri.parse("https://linkedin.com/shareArticle?mini=true&url=$spaceURL")
             )
-            appNavModel.safeStartActivityForIntent(intent)
+            activityStarter.safeStartActivityForIntent(intent)
         }
 
         SocialShareButton(
@@ -206,7 +207,7 @@ fun SocialShareRow(
                 Intent.ACTION_VIEW,
                 Uri.parse("https://www.facebook.com/sharer/sharer.php?u=$spaceURL")
             )
-            appNavModel.safeStartActivityForIntent(intent)
+            activityStarter.safeStartActivityForIntent(intent)
         }
 
         SocialShareButton(

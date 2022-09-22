@@ -49,6 +49,7 @@ class AppNavModelImplTest : BaseTest() {
     private lateinit var webLayerModel: WebLayerModel
 
     private lateinit var appNavModelImpl: AppNavModelImpl
+    private lateinit var activityStarter: ActivityStarter
 
     override fun setUp() {
         super.setUp()
@@ -72,8 +73,14 @@ class AppNavModelImplTest : BaseTest() {
             every { currentBrowser } answers { mockCurrentBrowser }
         }
 
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        activityStarter = ActivityStarter(
+            appContext = context,
+            popupModel = popupModel
+        )
         appNavModelImpl = AppNavModelImpl(
-            context = InstrumentationRegistry.getInstrumentation().targetContext,
+            activityStarter = activityStarter,
+            context = context,
             navController = navHostController,
             webLayerModel = webLayerModel,
             coroutineScope = coroutineScopeRule.scope,
