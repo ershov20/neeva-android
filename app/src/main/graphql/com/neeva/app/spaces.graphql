@@ -176,3 +176,10 @@ mutation LeaveSpace($input: LeaveSpaceInput!) {
 mutation DeleteSpace($input: DeleteSpaceInput!) {
   deleteSpace(input: $input)
 }
+
+mutation AddSpaceSoloACLs($input: AddSpaceSoloACLsInput!) {
+  addSpaceSoloACLs(input: $input) {
+    nonNeevanEmails
+    changedACLCount
+  }
+}

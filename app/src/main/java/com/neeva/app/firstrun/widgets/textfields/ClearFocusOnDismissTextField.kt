@@ -30,7 +30,7 @@ import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
-fun OnboardingTextField(
+fun ClearFocusOnDismissTextField(
     text: String,
     onTextChanged: (String) -> Unit,
     label: String,
@@ -98,7 +98,7 @@ fun OnboardingTextField_Email_Preview() {
             Modifier
         }
 
-        OnboardingTextField(
+        ClearFocusOnDismissTextField(
             text = email.value,
             onTextChanged = {},
             label = "Email",

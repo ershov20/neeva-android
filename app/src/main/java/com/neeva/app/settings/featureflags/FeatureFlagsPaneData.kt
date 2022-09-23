@@ -52,6 +52,10 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                     type = SettingsRowType.TOGGLE,
                     settingsToggle =
                     SettingsToggle.DEBUG_ENABLE_DISPLAY_TABS_BY_REVERSE_CREATION_TIME
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.DEBUG_ENABLE_INVITE_USER_TO_SPACE
                 )
             )
         ),

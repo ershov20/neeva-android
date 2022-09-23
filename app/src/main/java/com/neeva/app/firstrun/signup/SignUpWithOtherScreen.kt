@@ -19,7 +19,7 @@ import com.neeva.app.firstrun.OnboardingContainer
 import com.neeva.app.firstrun.widgets.OrSeparator
 import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.firstrun.widgets.buttons.ToggleOnboardingButtons
-import com.neeva.app.firstrun.widgets.textfields.OnboardingTextField
+import com.neeva.app.firstrun.widgets.textfields.ClearFocusOnDismissTextField
 import com.neeva.app.firstrun.widgets.textfields.PasswordTextField
 import com.neeva.app.firstrun.widgets.texts.BadPasswordText
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
@@ -70,7 +70,7 @@ fun SignUpWithOtherScreen(
 
         Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
 
-        OnboardingTextField(
+        ClearFocusOnDismissTextField(
             text = email.value,
             onTextChanged = { email.value = it },
             label = stringResource(id = R.string.email_label)

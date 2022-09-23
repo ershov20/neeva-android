@@ -619,23 +619,21 @@ class SpaceStore(
     }
 
     /** Toggles between making the [Space] public or private */
-    fun toggleSpacePublicACL(spaceID: String) {
+    fun setSpacePublicACL(spaceID: String, newIsPublicValue: Boolean) {
         coroutineScope.launch(dispatchers.io) {
             val space = dao.getSpaceById(spaceID) ?: return@launch
 
             stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
 
-            val isPublic = space.isPublic
-
-            val mutation = when (isPublic) {
-                true -> DeleteSpacePublicACLMutation(
-                    input = DeleteSpacePublicACLInput(
+            val mutation = when (newIsPublicValue) {
+                true -> AddSpacePublicACLMutation(
+                    input = AddSpacePublicACLInput(
                         id = Optional.presentIfNotNull(space.id)
                     )
                 )
 
-                false -> AddSpacePublicACLMutation(
-                    input = AddSpacePublicACLInput(
+                false -> DeleteSpacePublicACLMutation(
+                    input = DeleteSpacePublicACLInput(
                         id = Optional.presentIfNotNull(space.id)
                     )
                 )
@@ -646,7 +644,7 @@ class SpaceStore(
             )?.response
 
             response?.data?.let {
-                dao.upsert(space.copy(isPublic = !isPublic))
+                dao.upsert(space.copy(isPublic = newIsPublicValue))
             } ?: run {
                 val errorString = appContext.getString(R.string.error_generic)
                 popupModel.showSnackbar(errorString)

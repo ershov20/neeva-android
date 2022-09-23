@@ -21,7 +21,7 @@ import com.neeva.app.firstrun.OnboardingContainer
 import com.neeva.app.firstrun.widgets.OrSeparator
 import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.firstrun.widgets.buttons.ToggleOnboardingButtons
-import com.neeva.app.firstrun.widgets.textfields.OnboardingTextField
+import com.neeva.app.firstrun.widgets.textfields.ClearFocusOnDismissTextField
 import com.neeva.app.firstrun.widgets.texts.WelcomeHeader
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.LandscapePreviewsDark
@@ -68,7 +68,7 @@ fun SignInScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        OnboardingTextField(
+        ClearFocusOnDismissTextField(
             text = email.value,
             onTextChanged = { email.value = it },
             label = stringResource(id = R.string.email_label),

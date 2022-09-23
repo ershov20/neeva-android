@@ -23,9 +23,9 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.history.HistorySubpage
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
-import com.neeva.app.spaces.ShareSpaceUIContainer
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.spaces.share.ShareSpaceSheet
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.PopupModel
@@ -200,9 +200,9 @@ class AppNavModelImpl(
         show(AppNavDestination.EDIT_SPACE_DIALOG, navArguments = listOf(mode.name, id))
     }
 
-    override fun showShareSpaceSheet(spaceId: String) {
-        popupModel.showBottomSheet(titleResId = R.string.share_space_title) {
-            ShareSpaceUIContainer(spaceID = spaceId)
+    override fun showShareSpaceSheet(spaceID: String) {
+        popupModel.showBottomSheet(titleResId = R.string.share_space_title) { dismissBottomSheet ->
+            ShareSpaceSheet(spaceID = spaceID, dismissBottomSheet = dismissBottomSheet)
         }
     }
 

@@ -145,6 +145,10 @@ enum class SettingsToggle(
     ENABLE_NEEVASCOPE(
         primaryLabelId = R.string.settings_neevascope,
         defaultValue = false
+    ),
+    DEBUG_ENABLE_INVITE_USER_TO_SPACE(
+        primaryLabelId = R.string.space_enable_invite,
+        defaultValue = false
     );
 
     val key: String = name

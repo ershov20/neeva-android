@@ -135,7 +135,7 @@ class SettingsControllerImpl(
                 onTrackingProtectionUpdate()
             },
             SettingsToggle.DEBUG_USE_CUSTOM_DOMAIN.key to {
-                popupModel.showSnackbar("Restart for app host changes to take effect.")
+                popupModel.showSnackbar("Restart for app host changes to take effect")
             }
         )
     }

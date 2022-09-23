@@ -173,7 +173,7 @@ class PopupModel(
     /**
      * Directly removes any existing bottom sheet from the Composition.
      *
-     * If you want a smoothly animated removal, you should call make sure your Composable calls
+     * If you want a smoothly animated removal, you should make sure your Composable calls
      * the dismiss lambda provided to it when you call showBottomSheet.
      */
     internal fun removeBottomSheet() {

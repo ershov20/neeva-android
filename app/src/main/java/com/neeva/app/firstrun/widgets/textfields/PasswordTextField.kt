@@ -37,7 +37,7 @@ fun PasswordTextField(
         PasswordVisualTransformation()
     }
 
-    OnboardingTextField(
+    ClearFocusOnDismissTextField(
         text = text,
         onTextChanged = onTextChanged,
         label = label,
