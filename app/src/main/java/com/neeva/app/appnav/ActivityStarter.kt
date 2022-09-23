@@ -14,6 +14,9 @@ import com.neeva.app.ui.PopupModel
 class ActivityStarter(private val appContext: Context, private val popupModel: PopupModel) {
     fun safeStartActivityForIntent(intent: Intent) {
         try {
+            // Because we're using a non-Activity context, the Intent needs to start a new Task.
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
             appContext.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             popupModel.showSnackbar(appContext.getString(R.string.error_generic))
