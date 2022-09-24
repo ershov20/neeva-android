@@ -31,12 +31,12 @@ import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 
 @Composable
-fun ShareSpaceSheet(spaceID: String, dismissBottomSheet: () -> Unit) {
+fun ShareSpaceSheet(spaceId: String, dismissBottomSheet: () -> Unit) {
     val spaceStore = LocalSpaceStore.current
     val spaceStoreState = spaceStore.stateFlow.collectAsState()
     val space = remember(spaceStoreState.value) {
         derivedStateOf {
-            spaceStore.allSpacesFlow.value.find { it.id == spaceID }
+            spaceStore.allSpacesFlow.value.find { it.id == spaceId }
         }
     }
 

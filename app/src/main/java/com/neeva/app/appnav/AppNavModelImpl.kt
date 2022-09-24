@@ -200,9 +200,9 @@ class AppNavModelImpl(
         show(AppNavDestination.EDIT_SPACE_DIALOG, navArguments = listOf(mode.name, id))
     }
 
-    override fun showShareSpaceSheet(spaceID: String) {
+    override fun showShareSpaceSheet(spaceId: String) {
         popupModel.showBottomSheet(titleResId = R.string.share_space_title) { dismissBottomSheet ->
-            ShareSpaceSheet(spaceID = spaceID, dismissBottomSheet = dismissBottomSheet)
+            ShareSpaceSheet(spaceId = spaceId, dismissBottomSheet = dismissBottomSheet)
         }
     }
 
