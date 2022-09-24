@@ -9,6 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.NeevaConstants
 import com.neeva.app.cookiecutter.CookieCutterModel
 import com.neeva.app.settings.SettingsController
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedcomposables.SettingsPane
 import com.neeva.app.ui.theme.NeevaTheme
@@ -20,9 +21,12 @@ fun CookieCutterPane(settingsController: SettingsController, neevaConstants: Nee
             CookieCutterModel.BlockingStrength.TRACKER_REQUEST
     }
 
+    val isEnabled: Boolean =
+        settingsController.getToggleState(SettingsToggle.TRACKING_PROTECTION).value
+
     SettingsPane(
         settingsController,
-        CookieCutterPaneData(neevaConstants, isStrictModeEnabled)
+        CookieCutterPaneData(neevaConstants, isEnabled, isStrictModeEnabled)
     )
 }
 
