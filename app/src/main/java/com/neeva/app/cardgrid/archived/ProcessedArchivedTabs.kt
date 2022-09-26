@@ -28,15 +28,39 @@ internal class ProcessedArchivedTabs(private val tabs: LazyPagingItems<TabData>)
         val tabsIndex: Int? = null
     )
 
+    /**
+     * Processes the [tabs] and add extra entries representing date headers between two instances
+     * that were last active on different days.
+     *
+     * Entries that correspond to the original tabs are stored as indices into the original [tabs]
+     * list as [ArchivedTabsListEntry.tabsIndex].  To get the original [TabData] corresponding to
+     * entry, use [getTabData].
+     *
+     * EXAMPLE
+     * If the constructor is provided these 3 [tabs]:
+     * - TabData 0: Active 2022/09/10
+     * - TabData 1: Active 2022/09/10
+     * - TabData 2: Active 2022/09/03
+     *
+     * [entries] will contain the following 5 [ArchivedTabsListEntry]s:
+     * - 0: Date header for 2022/09/10
+     * - 1: Pointer to TabData 0
+     * - 2: Pointer to TabData 1
+     * - 3: Date header for 2022/09/03
+     * - 4: Pointer to TabData 2
+     */
     val entries: List<ArchivedTabsListEntry> = mutableListOf<ArchivedTabsListEntry>().apply {
         var previousDate: LocalDate? = null
         (0 until tabs.itemCount).forEach { index ->
+            // Check if this entry and the previous entry were last active on different days.
             val currentDate = tabs.peek(index)?.lastActiveMs?.toLocalDate()
             if (currentDate != null && currentDate != previousDate) {
                 // Add a header that spans the whole LazyVerticalGrid to show the date.
                 add(ArchivedTabsListEntry(date = currentDate))
             }
             previousDate = currentDate
+
+            // Add a pointer to the original tab.
             add(ArchivedTabsListEntry(tabsIndex = index))
         }
     }
@@ -47,7 +71,11 @@ internal class ProcessedArchivedTabs(private val tabs: LazyPagingItems<TabData>)
      *
      * Implicitly triggers a load for the item if it hasn't been loaded yet.
      */
-    fun getTabData(index: Int): TabData? = entries[index].tabsIndex?.let { tabs[it] }
+    fun getTabData(index: Int): TabData? {
+        return entries[index].tabsIndex
+            ?.takeIf { it >= 0 && it < tabs.itemCount }
+            ?.let { tabs[it] }
+    }
 
     fun key(index: Int): Any {
         val entry = entries[index]

@@ -112,6 +112,42 @@ class ProcessedArchivedTabsTest : BaseTest() {
     }
 
     @Test
+    fun getTabData_indexedOutOfBounds() {
+        val lastActiveTimestamps = listOf(
+            TimeUnit.DAYS.toMillis(5),
+            TimeUnit.DAYS.toMillis(5),
+            TimeUnit.DAYS.toMillis(4),
+            TimeUnit.DAYS.toMillis(3),
+            TimeUnit.DAYS.toMillis(3),
+            null
+        )
+
+        val tabDataList = createTabDataList(lastActiveTimestamps)
+        val lazyTabs = createLazyPagingItems(tabDataList)
+        val processed = ProcessedArchivedTabs(lazyTabs)
+
+        processed.apply {
+            expectThat(entries.size).isEqualTo(9)
+            expectThat(getTabData(0)).isNull()
+            expectThat(getTabData(1)).isEqualTo(tabDataList[0])
+            expectThat(getTabData(2)).isEqualTo(tabDataList[1])
+            expectThat(getTabData(3)).isNull()
+            expectThat(getTabData(4)).isEqualTo(tabDataList[2])
+            expectThat(getTabData(5)).isNull()
+            expectThat(getTabData(6)).isEqualTo(tabDataList[3])
+            expectThat(getTabData(7)).isEqualTo(tabDataList[4])
+            expectThat(getTabData(8)).isNull()
+
+            // Say that the PagedList has been emptied out.
+            every { lazyTabs.itemCount } returns 0
+
+            // Confirm that we going out of bounds doesn't cause a crash and returns null.
+            expectThat(entries.size).isEqualTo(9)
+            entries.indices.forEach { expectThat(getTabData(it)).isNull() }
+        }
+    }
+
+    @Test
     fun keys() {
         val lastActiveTimestamps = listOf(
             TimeUnit.DAYS.toMillis(5),
