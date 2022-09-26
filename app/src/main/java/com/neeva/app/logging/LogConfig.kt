@@ -56,6 +56,7 @@ class LogConfig {
         SET_DEFAULT_BROWSER("SetDefaultBrowser", Category.FIRST_RUN),
         SKIP_DEFAULT_BROWSER("SkipDefaultBrowser", Category.FIRST_RUN),
         OPEN_DEFAULT_BROWSER_URL("OpenDefaultBrowserURL", Category.FIRST_RUN),
+        REQUEST_INSTALL_REFERRER("RequestInstallReferrer", Category.FIRST_RUN),
 
         // Browsing
         BROWSER_PAGE_LOAD("PageLoad", Category.BROWSING)
@@ -85,6 +86,11 @@ class LogConfig {
 
     enum class Attributes(val attributeName: String) {
         SESSION_UUID_V2("SessionUUIDv2")
+    }
+
+    enum class FirstRunAttributes(val attributeName: String) {
+        REFERRER_RESPONSE("ReferrerResponse"),
+        INSTALL_REFERRER("Referrer")
     }
 
     enum class SuggestionAttributes(val attributeName: String) {

@@ -9,17 +9,25 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.RemoteException
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.android.installreferrer.api.InstallReferrerClient
+import com.android.installreferrer.api.InstallReferrerStateListener
+import com.android.installreferrer.api.ReferrerDetails
+import com.apollographql.apollo3.api.Optional
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.signup.PreviewModeSignUpPrompt
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.spaces.SpaceStore
+import com.neeva.app.type.ClientLogCounterAttribute
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import java.net.URISyntaxException
@@ -125,7 +133,7 @@ class NeevaActivityViewModel(
         private val webLayerModel: WebLayerModel,
         private val popupModel: PopupModel,
         private val firstRunModel: FirstRunModel,
-        private val dispatchers: Dispatchers
+        private val dispatchers: Dispatchers,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -196,6 +204,80 @@ class NeevaActivityViewModel(
         toolbarConfiguration.value = toolbarConfiguration.value.copy(
             isKeyboardOpen = isKeyboardOpen
         )
+    }
+
+    private lateinit var referrerClient: InstallReferrerClient
+
+    fun requestInstallReferrer(activity: NeevaActivity, clientLogger: ClientLogger) {
+        referrerClient = InstallReferrerClient.newBuilder(activity).build()
+        referrerClient.startConnection(object : InstallReferrerStateListener {
+            override fun onInstallReferrerSetupFinished(responseCode: Int) {
+                when (responseCode) {
+                    InstallReferrerClient.InstallReferrerResponse.OK -> {
+                        // Connection established.
+                        try {
+                            val response: ReferrerDetails = referrerClient.installReferrer
+                            val referrerUrl: String = response.installReferrer
+
+                            clientLogger.logCounter(
+                                LogConfig.Interaction.REQUEST_INSTALL_REFERRER,
+                                listOf(
+                                    ClientLogCounterAttribute(
+                                        Optional.presentIfNotNull(
+                                            LogConfig.FirstRunAttributes
+                                                .REFERRER_RESPONSE.attributeName
+                                        ),
+                                        Optional.presentIfNotNull("OK")
+                                    ),
+                                    ClientLogCounterAttribute(
+                                        Optional.presentIfNotNull(
+                                            LogConfig.FirstRunAttributes
+                                                .INSTALL_REFERRER.attributeName
+                                        ),
+                                        Optional.presentIfNotNull(referrerUrl)
+                                    )
+                                )
+                            )
+                        } catch (e: RemoteException) {
+                            Log.e(TAG, "message", e)
+                        }
+
+                        referrerClient.endConnection()
+                    }
+                    InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED -> {
+                        // API not available on the current Play Store app.
+                        clientLogger.logCounter(
+                            LogConfig.Interaction.REQUEST_INSTALL_REFERRER,
+                            listOf(
+                                ClientLogCounterAttribute(
+                                    Optional.presentIfNotNull(
+                                        LogConfig.FirstRunAttributes.REFERRER_RESPONSE.attributeName
+                                    ),
+                                    Optional.presentIfNotNull("FEATURE_NOT_SUPPORTED")
+                                )
+                            )
+                        )
+                    }
+                    InstallReferrerClient.InstallReferrerResponse.SERVICE_UNAVAILABLE -> {
+                        // Connection couldn't be established.
+                        clientLogger.logCounter(
+                            LogConfig.Interaction.REQUEST_INSTALL_REFERRER,
+                            listOf(
+                                ClientLogCounterAttribute(
+                                    Optional.presentIfNotNull(
+                                        LogConfig.FirstRunAttributes.REFERRER_RESPONSE.attributeName
+                                    ),
+                                    Optional.presentIfNotNull("SERVICE_UNAVAILABLE")
+                                )
+                            )
+                        )
+                    }
+                }
+            }
+
+            override fun onInstallReferrerServiceDisconnected() {
+            }
+        })
     }
 
     companion object {

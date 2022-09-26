@@ -61,6 +61,7 @@ import com.neeva.app.settings.SettingsControllerImpl
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
+import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.HistoryDatabase
@@ -248,6 +249,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             }
         }
 
+        lifecycleScope.launchWhenResumed {
+            if (!SharedPrefFolder.App.RequestedInstallReferrer.get(sharedPreferencesModel)) {
+                activityViewModel.requestInstallReferrer(this@NeevaActivity, clientLogger)
+                SharedPrefFolder.App.RequestedInstallReferrer.set(
+                    sharedPreferencesModel, true
+                )
+            }
+        }
+
         if (savedInstanceState != null && webLayerModel.currentBrowser.isFullscreen()) {
             // If the activity was recreated because the user entered a fullscreen video or website,
             // hide the system bars.
@@ -353,7 +363,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 webLayerModel.switchToProfile(useIncognito = false)
 
                 if (setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
-                    clientLogger.logCounter(LogConfig.Interaction.OPEN_DEFAULT_BROWSER_URL, null)
+                    clientLogger.logCounter(
+                        LogConfig.Interaction.OPEN_DEFAULT_BROWSER_URL,
+                        null
+                    )
                 }
 
                 if (Uri.parse(intent.dataString).scheme == "neeva") {
