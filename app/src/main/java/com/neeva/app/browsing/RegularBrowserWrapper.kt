@@ -30,7 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
-import org.chromium.weblayer.CookieChangedCallback
 import org.chromium.weblayer.DownloadCallback
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebLayer
@@ -131,6 +130,13 @@ class RegularBrowserWrapper(
                 suggestionsModel?.getSuggestionsFromBackend(queryText)
             }
         }
+
+        coroutineScope.launch(dispatchers.io) {
+            // If Neeva's login cookie changes, we need to refetch the user's data.
+            neevaUser.loginToken.cookieValueFlow.collectLatest {
+                neevaUser.fetch(authenticatedApolloWrapper, appContext)
+            }
+        }
     }
 
     override fun createBrowserFragment() =
@@ -143,41 +149,7 @@ class RegularBrowserWrapper(
         // Keep track of the user's login cookie, which we need for various operations.  These
         // actions should never be performed on the Incognito profile to avoid contaminating the
         // user's data with their Incognito history.
-        browser.profile.cookieManager.apply {
-            // Asynchronously parse out a pre-existing login cookie and store it locally.
-            getCookiePairs(Uri.parse(neevaConstants.appURL)) { cookies ->
-                cookies
-                    .filter { it.key == neevaConstants.loginCookie }
-                    .forEach { neevaUser.neevaUserToken.setToken(it.value) }
-            }
-
-            // If Neeva's login cookie changes, we need to save it and refetch the user's data.
-            addCookieChangedCallback(
-                Uri.parse(neevaConstants.appURL),
-                neevaConstants.loginCookie,
-                object : CookieChangedCallback() {
-                    override fun onCookieChanged(cookie: String, cause: Int) {
-                        val key = cookie.trim().substringBefore('=')
-                        if (key != neevaConstants.loginCookie || !cookie.contains('=')) return
-
-                        val value = cookie.trim().substringAfter('=')
-                        neevaUser.neevaUserToken.setToken(value)
-                        coroutineScope.launch(dispatchers.io) {
-                            neevaUser.fetch(authenticatedApolloWrapper, appContext)
-                        }
-                    }
-                }
-            )
-
-            // If we have a cookie saved in the app, set the cookie in the Profile.  This handles
-            // scenarios where the user logs via the app.
-            if (neevaUser.neevaUserToken.getToken().isNotEmpty()) {
-                setCookie(
-                    Uri.parse(neevaConstants.appURL),
-                    neevaUser.neevaUserToken.loginCookieString()
-                ) {}
-            }
-        }
+        neevaUser.loginToken.initializeCookieManager(browser)
 
         return true
     }

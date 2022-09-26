@@ -12,11 +12,13 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserImpl
-import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.userdata.UserInfo
 import dagger.hilt.android.testing.HiltAndroidTest
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
@@ -27,10 +29,13 @@ import strikt.assertions.isNullOrEmpty
 @HiltAndroidTest
 class LoginCookieInstrumentationTest : BaseHiltTest() {
     private lateinit var neevaConstants: NeevaConstants
-    private lateinit var neevaUserToken: NeevaUserToken
+    private lateinit var loginToken: LoginToken
     private lateinit var loggedInUserInfo: UserInfo
     private lateinit var neevaUser: NeevaUser
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
+
+    @Inject lateinit var coroutineScope: CoroutineScope
+    @Inject lateinit var dispatchers: Dispatchers
 
     @get:Rule
     val presetSharedPreferencesRule =
@@ -39,9 +44,14 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
     private fun setUpLoggedInUser(context: Context) {
         neevaConstants = TestNeevaConstantsModule.neevaConstants
         sharedPreferencesModel = SharedPreferencesModel(context)
-        neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
+        loginToken = LoginToken(
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
 
-        neevaUserToken.setToken("myToken")
+        loginToken.updateCachedCookie("myToken")
         loggedInUserInfo = UserInfo(
             "my-id",
             "some display name",
@@ -49,7 +59,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
             "https://www.cdn/my-image.png",
             NeevaUser.SSOProvider.GOOGLE.name
         )
-        neevaUser = NeevaUserImpl(sharedPreferencesModel, neevaUserToken)
+        neevaUser = NeevaUserImpl(sharedPreferencesModel, loginToken)
         neevaUser.setUserInfo(loggedInUserInfo)
     }
 
@@ -80,7 +90,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
                             ?.value
                     ).isEqualTo("myToken")
                 }
-            expectThat(activity.neevaUser.neevaUserToken.getToken()).isEqualTo("myToken")
+            expectThat(activity.neevaUser.loginToken.cookieValue).isEqualTo("myToken")
             expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(loggedInUserInfo)
         }
     }
@@ -94,7 +104,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
             activity.activityViewModel.signOut()
 
             // ^^ sign out should have cleared NeevaUser.data and NeevaUserToken!
-            expectThat(activity.neevaUser.neevaUserToken.getToken()).isEmpty()
+            expectThat(activity.neevaUser.loginToken.cookieValue).isEmpty()
             expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(null)
 
             activity.webLayerModel.currentBrowser

@@ -29,7 +29,7 @@ import com.neeva.app.getString
 import com.neeva.app.loadUrlByClickingOnBar
 import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.selectItemFromContextMenu
-import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.waitFor
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForBrowserState
@@ -62,7 +62,7 @@ class AddToSpaceTest : BaseBrowserTest() {
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
 
     @Inject lateinit var authenticatedApolloWrapper: AuthenticatedApolloWrapper
-    @Inject lateinit var neevaUserToken: NeevaUserToken
+    @Inject lateinit var loginToken: LoginToken
 
     private lateinit var testAuthenticatedApolloWrapper: TestAuthenticatedApolloWrapper
 
@@ -110,7 +110,7 @@ class AddToSpaceTest : BaseBrowserTest() {
 
     @Test
     fun regularProfile_afterSignIn_showsSpaces() {
-        neevaUserToken.setToken("Fake user token")
+        loginToken.updateCachedCookie("Fake user token")
 
         // Add a fake response that returns two spaces, but only one is editable by the user.
         testAuthenticatedApolloWrapper.registerTestResponse(

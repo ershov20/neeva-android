@@ -16,7 +16,7 @@ import com.neeva.app.R
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.createMainIntent
 import com.neeva.app.getString
-import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.waitFor
 import com.neeva.app.waitForNodeWithText
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
@@ -46,7 +46,7 @@ class FirstRunStartupTest : BaseBrowserTest() {
     val multiActivityTestRule = MultiActivityTestRule()
 
     @Inject lateinit var firstRunModel: FirstRunModel
-    @Inject lateinit var neevaUserToken: NeevaUserToken
+    @Inject lateinit var loginToken: LoginToken
     @Inject lateinit var authenticatedApolloWrapper: AuthenticatedApolloWrapper
 
     private lateinit var testAuthenticatedApolloWrapper: TestAuthenticatedApolloWrapper
@@ -84,7 +84,7 @@ class FirstRunStartupTest : BaseBrowserTest() {
     @Test
     fun skipFirstRunIfUserTokenIsSet() {
         // Set the user token.  First run shouldn't be shown.
-        neevaUserToken.setToken("not a real token, but it's set so first run should get skipped")
+        loginToken.updateCachedCookie("not a real token, but set so first run should get skipped")
 
         activityTestRule.launchActivity(createMainIntent())
 

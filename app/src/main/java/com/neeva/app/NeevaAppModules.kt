@@ -29,9 +29,9 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.storage.favicons.RegularFaviconCache
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.IncognitoSessionToken
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserImpl
-import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.userdata.PreviewSessionToken
 import dagger.Module
 import dagger.Provides
@@ -102,7 +102,7 @@ object NeevaAppModule {
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
         neevaConstants: NeevaConstants,
-        neevaUserToken: NeevaUserToken,
+        loginToken: LoginToken,
         sharedPreferencesModel: SharedPreferencesModel,
         settingsDataModel: SettingsDataModel
     ): ClientLogger {
@@ -111,7 +111,7 @@ object NeevaAppModule {
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
             neevaConstants = neevaConstants,
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             sharedPreferencesModel = sharedPreferencesModel,
             settingsDataModel = settingsDataModel
         )
@@ -181,11 +181,11 @@ object NeevaAppModule {
     @Provides
     @Singleton
     fun providesNeevaUser(
-        neevaUserToken: NeevaUserToken,
+        loginToken: LoginToken,
         sharedPreferencesModel: SharedPreferencesModel
     ): NeevaUser {
         return NeevaUserImpl(
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             sharedPreferencesModel = sharedPreferencesModel
         )
     }
@@ -193,12 +193,16 @@ object NeevaAppModule {
     @Provides
     @Singleton
     fun providesNeevaUserToken(
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
         sharedPreferencesModel: SharedPreferencesModel,
         neevaConstants: NeevaConstants
-    ): NeevaUserToken {
-        return NeevaUserToken(
-            sharedPreferencesModel = sharedPreferencesModel,
-            neevaConstants = neevaConstants
+    ): LoginToken {
+        return LoginToken(
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
         )
     }
 
@@ -361,11 +365,11 @@ class ApolloModule {
     @Provides
     @Singleton
     fun providesAuthenticatedApolloWrapper(
-        neevaUserToken: NeevaUserToken,
+        loginToken: LoginToken,
         neevaConstants: NeevaConstants
     ): AuthenticatedApolloWrapper {
         return AuthenticatedApolloWrapper(
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             neevaConstants = neevaConstants
         )
     }

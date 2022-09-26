@@ -9,7 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.storage.HistoryDatabase
-import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.LoginToken
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.testcommon.apollo.TestUnauthenticatedApolloWrapper
 import dagger.Module
@@ -55,11 +55,11 @@ class TestApolloModule {
     @Provides
     @Singleton
     fun providesAuthenticatedApolloWrapper(
-        neevaUserToken: NeevaUserToken,
+        loginToken: LoginToken,
         neevaConstants: NeevaConstants
     ): AuthenticatedApolloWrapper {
         return TestAuthenticatedApolloWrapper(
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             neevaConstants = neevaConstants
         )
     }

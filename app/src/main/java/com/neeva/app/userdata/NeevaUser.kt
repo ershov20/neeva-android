@@ -40,7 +40,7 @@ data class UserInfo(
             ?: SubscriptionType.Unknown
 }
 
-abstract class NeevaUser(val neevaUserToken: NeevaUserToken) {
+abstract class NeevaUser(val loginToken: LoginToken) {
     enum class SSOProvider(val url: String, val finalPath: String) {
         UNKNOWN("", ""),
         GOOGLE("neeva.co/auth/oauth2/authenticators/google", "/"),
@@ -67,8 +67,8 @@ abstract class NeevaUser(val neevaUserToken: NeevaUserToken) {
 
 class NeevaUserImpl(
     val sharedPreferencesModel: SharedPreferencesModel,
-    neevaUserToken: NeevaUserToken
-) : NeevaUser(neevaUserToken) {
+    loginToken: LoginToken
+) : NeevaUser(loginToken) {
     private val moshiJsonAdapter: JsonAdapter<UserInfo> =
         Moshi.Builder().build().adapter(UserInfo::class.java)
 
@@ -104,7 +104,7 @@ class NeevaUserImpl(
     }
 
     override fun isSignedOut(): Boolean {
-        return neevaUserToken.getToken().isEmpty()
+        return loginToken.isEmpty()
     }
 
     private fun isConnectedToInternet(context: Context): Boolean {
@@ -127,7 +127,7 @@ class NeevaUserImpl(
         context: Context,
         checkNetworkConnectivityBeforeFetch: Boolean
     ) {
-        if (neevaUserToken.getToken().isEmpty()) return
+        if (!loginToken.isNotEmpty()) return
         if (checkNetworkConnectivityBeforeFetch && !isConnectedToInternet(context)) return
 
         val responseSummary = apolloWrapper.performQuery(
@@ -179,8 +179,8 @@ class NeevaUserImpl(
 }
 
 class PreviewNeevaUser(
-    neevaUserToken: NeevaUserToken
-) : NeevaUser(neevaUserToken = neevaUserToken) {
+    loginToken: LoginToken
+) : NeevaUser(loginToken = loginToken) {
     override fun setUserInfo(newData: UserInfo) {}
     override fun clearUserInfo() {}
 

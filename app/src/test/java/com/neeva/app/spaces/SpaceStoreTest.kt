@@ -22,9 +22,9 @@ import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.type.SpaceACLLevel
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserImpl
-import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.userdata.UserInfo
 import com.neeva.testcommon.apollo.MockListSpacesQueryData
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
@@ -77,21 +77,23 @@ class SpaceStoreTest : BaseTest() {
         database = HistoryDatabase.createInMemory(context)
         val sharedPreferencesModel = SharedPreferencesModel(context)
 
-        val neevaUserToken = NeevaUserToken(
+        val loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
             sharedPreferencesModel = sharedPreferencesModel,
             neevaConstants = neevaConstants
         )
-        neevaUserToken.setToken("NotAnEmptyToken")
+        loginToken.updateCachedCookie("NotAnEmptyToken")
 
         neevaUser = NeevaUserImpl(
             sharedPreferencesModel = sharedPreferencesModel,
-            neevaUserToken = neevaUserToken
+            loginToken = loginToken
         )
 
         neevaUser.setUserInfo(UserInfo("c5rgtdldv9enb8j1gupg"))
 
         apolloWrapper = TestAuthenticatedApolloWrapper(
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             neevaConstants = neevaConstants
         )
         dispatchers = Dispatchers(
@@ -235,9 +237,9 @@ class SpaceStoreTest : BaseTest() {
     @Test
     fun refresh_skipsWhileLoggedOut() =
         runTest(coroutineScopeRule.scope.testScheduler) {
-            neevaUser.neevaUserToken.setToken("")
+            neevaUser.loginToken.updateCachedCookie("")
 
-            expectThat(neevaUser.neevaUserToken.getToken()).isEmpty()
+            expectThat(neevaUser.loginToken.cookieValue).isEmpty()
 
             spaceStore.refresh()
 

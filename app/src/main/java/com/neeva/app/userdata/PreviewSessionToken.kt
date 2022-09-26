@@ -6,6 +6,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.StateFlow
 import okhttp3.Response
 
 class PreviewSessionToken(
@@ -26,11 +27,13 @@ class PreviewSessionToken(
 
     override val cookieValue: String
         get() = SharedPrefFolder.User.PreviewToken.get(sharedPreferencesModel)
+    override val cookieValueFlow: StateFlow<String>
+        get() = SharedPrefFolder.User.PreviewToken.getFlow(sharedPreferencesModel)
 
-    override fun updateCachedCookie(cookieValue: String) {
+    override fun updateCachedCookie(newValue: String) {
         SharedPrefFolder.User.PreviewToken.set(
             sharedPreferencesModel = sharedPreferencesModel,
-            value = cookieValue
+            value = newValue
         )
     }
 

@@ -22,13 +22,11 @@ class IncognitoSessionToken(
         private const val TAG = "IncognitoSessionToken"
     }
 
-    private val cookieValueFlow = MutableStateFlow("")
+    override val cookieValueFlow = MutableStateFlow("")
     override val cookieValue: String get() = cookieValueFlow.value
 
-    fun purgeCookie() = updateCachedCookie("")
-
-    override fun updateCachedCookie(cookieValue: String) {
-        cookieValueFlow.value = cookieValue
+    override fun updateCachedCookie(newValue: String) {
+        cookieValueFlow.value = newValue
     }
 
     override suspend fun processResponse(response: Response): Boolean {

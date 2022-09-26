@@ -67,8 +67,8 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.removeViewFromParent
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserToken
 import com.neeva.app.widget.NeevaWidgetProvider
 import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -241,9 +241,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 webLayerModel.initializedBrowserFlow.collectLatest { prepareBrowser(it) }
             }
         }
-        lifecycleScope.launch {
-            fetchNeevaUserInfo()
-        }
 
         lifecycleScope.launchWhenResumed {
             withContext(dispatchers.io) {
@@ -282,12 +279,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     private fun showBrowser() = appNavModel?.showBrowser()
-
-    private suspend fun fetchNeevaUserInfo() {
-        withContext(dispatchers.io) {
-            neevaUser.fetch(apolloWrapper, applicationContext)
-        }
-    }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -366,9 +357,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 }
 
                 if (Uri.parse(intent.dataString).scheme == "neeva") {
-                    NeevaUserToken.extractAuthTokenFromIntent(intent)?.let {
-                        neevaUser.neevaUserToken.setToken(it)
-                        webLayerModel.onAuthTokenUpdated()
+                    LoginToken.extractAuthTokenFromIntent(intent)?.let {
+                        neevaUser.loginToken.updateCachedCookie(it)
                         showBrowser()
                         webLayerModel.currentBrowser.reload()
                         if (firstRunModel.shouldLogFirstLogin()) {

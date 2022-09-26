@@ -8,9 +8,12 @@ import android.content.Intent
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
+import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.NeevaConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -24,9 +27,13 @@ import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
-class NeevaUserTokenTest : BaseTest() {
+class LoginTokenTest : BaseTest() {
+    @get:Rule
+    val coroutineScopeRule = CoroutineScopeRule()
+
     @Test
     fun getToken_resultIsEmpty_returnsEmpty() {
         val sharedPreferencesModel = mock<SharedPreferencesModel> {
@@ -35,8 +42,13 @@ class NeevaUserTokenTest : BaseTest() {
             } doReturn ""
         }
         val neevaConstants = NeevaConstants()
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
-        val result = neevaUserToken.getToken()
+        val loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
+        val result = loginToken.cookieValue
         expectThat(result).isEmpty()
     }
 
@@ -48,23 +60,14 @@ class NeevaUserTokenTest : BaseTest() {
             } doReturn "whatever"
         }
         val neevaConstants = NeevaConstants()
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
-        val result = neevaUserToken.getToken()
+        val loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
+        val result = loginToken.cookieValue
         expectThat(result).isEqualTo("whatever")
-    }
-
-    @Test
-    fun loginCookieString() {
-        val sharedPreferencesModel = mock<SharedPreferencesModel> {
-            on {
-                getValue(any(), eq(SharedPrefFolder.User.Token.preferenceKey), eq(""), any())
-            } doReturn "whatever"
-        }
-
-        val neevaConstants = NeevaConstants()
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
-        val result = neevaUserToken.loginCookieString()
-        expectThat(result).isEqualTo("${neevaConstants.loginCookie}=whatever")
     }
 
     @Test
@@ -76,7 +79,7 @@ class NeevaUserTokenTest : BaseTest() {
             .appendQueryParameter("sessionKey", "expectedSession")
             .build()
         val intent = Intent(Intent.ACTION_VIEW, intentUri)
-        val result = NeevaUserToken.extractAuthTokenFromIntent(intent)
+        val result = LoginToken.extractAuthTokenFromIntent(intent)
         expectThat(result).isEqualTo("expectedSession")
     }
 
@@ -89,7 +92,7 @@ class NeevaUserTokenTest : BaseTest() {
             .appendQueryParameter("sessionKey", "expectedSession")
             .build()
         val intent = Intent(Intent.ACTION_VIEW, intentUri)
-        val result = NeevaUserToken.extractAuthTokenFromIntent(intent)
+        val result = LoginToken.extractAuthTokenFromIntent(intent)
         expectThat(result).isNull()
     }
 
@@ -102,17 +105,21 @@ class NeevaUserTokenTest : BaseTest() {
             .appendQueryParameter("sessionKey", "expectedSession")
             .build()
         val intent = Intent(Intent.ACTION_VIEW, intentUri)
-        val result = NeevaUserToken.extractAuthTokenFromIntent(intent)
+        val result = LoginToken.extractAuthTokenFromIntent(intent)
         expectThat(result).isNull()
     }
 
     @Test
-    fun setToken() {
+    fun updateCachedCookie() {
         val sharedPreferencesModel = mock<SharedPreferencesModel>()
         val neevaConstants = NeevaConstants()
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
-
-        neevaUserToken.setToken("expectedToken")
+        val loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
+        loginToken.updateCachedCookie("expectedToken")
         verify(sharedPreferencesModel).setValue(
             eq(SharedPrefFolder.User),
             eq(SharedPrefFolder.User.Token.preferenceKey),
@@ -122,12 +129,16 @@ class NeevaUserTokenTest : BaseTest() {
     }
 
     @Test
-    fun removeToken() {
+    fun purgeCachedCookie() {
         val sharedPreferencesModel = mock<SharedPreferencesModel>()
         val neevaConstants = NeevaConstants()
-        val neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
-
-        neevaUserToken.removeToken()
+        val loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
+        loginToken.purgeCachedCookie()
         verify(sharedPreferencesModel).removeValue(
             eq(SharedPrefFolder.User),
             eq(SharedPrefFolder.User.Token)

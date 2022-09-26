@@ -5,7 +5,6 @@
 package com.neeva.app.browsing
 
 import android.app.Application
-import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -199,6 +198,9 @@ class WebLayerModel internal constructor(
             this@WebLayerModel.webLayer.value = webLayer
 
             initializationState.value = LoadingState.READY
+
+            // Start watching for login cookie changes.
+            monitorLoginCookie()
         }
     }
 
@@ -298,48 +300,61 @@ class WebLayerModel internal constructor(
         )
     }
 
-    fun onAuthTokenUpdated() {
-        regularProfile.cookieManager.setCookie(
-            Uri.parse(neevaConstants.appURL),
-            neevaUser.neevaUserToken.loginCookieString()
-        ) { success ->
-            val currentUrl = regularBrowser.activeTabModel.urlFlow.value
-            if (success) {
-                SharedPrefFolder.FirstRun.HasSignedInBefore.set(
-                    sharedPreferencesModel,
-                    true
-                )
+    /** Monitors for changes in the login cookie, which happen when the user logs in or out. */
+    private fun monitorLoginCookie() {
+        coroutineScope.launch(dispatchers.main) {
+            var previousCookie: String? = null
+            neevaUser.loginToken.cookieValueFlow.collect {
+                // If previousCookie == null, then we've just started the app and have restored it
+                // from the SharedPreferences.
+                if (previousCookie != null && previousCookie != it) {
+                    neevaUser.loginToken.updateCookieManager(
+                        regularProfile.cookieManager
+                    ) { success ->
+                        if (!success) return@updateCookieManager
 
-                if (currentUrl.toString().startsWith(neevaConstants.appURL)) {
-                    regularBrowser.reload()
+                        if (neevaUser.loginToken.isNotEmpty()) {
+                            SharedPrefFolder.FirstRun.HasSignedInBefore.set(
+                                sharedPreferencesModel,
+                                true
+                            )
+                        }
+
+                        val currentUrl = regularBrowser.activeTabModel.urlFlow.value
+                        if (currentUrl.toString().startsWith(neevaConstants.appURL)) {
+                            regularBrowser.reload()
+                        }
+                    }
                 }
+
+                previousCookie = it
             }
         }
     }
 
     fun clearNeevaCookies() {
-        neevaUser.neevaUserToken.removeToken()
-        onAuthTokenUpdated()
+        neevaUser.loginToken.purgeCachedCookie()
         regularBrowser.reload()
     }
 
-    fun clearNonNeevaCookies(clearCookiesFlags: List<Int>, fromMillis: Long, toMillis: Long) {
+    private fun clearNonNeevaCookies(
+        clearCookiesFlags: List<Int>,
+        fromMillis: Long,
+        toMillis: Long
+    ) {
         if (clearCookiesFlags.isNotEmpty()) {
-            val oldNeevaAuthToken = neevaUser.neevaUserToken.getToken()
+            val oldNeevaAuthToken = neevaUser.loginToken.cookieValue
 
             regularProfile.clearBrowsingData(
                 clearCookiesFlags.toIntArray(),
                 fromMillis,
                 toMillis
             ) {
-                // Since all cookies got cleared, add back the original Neeva Cookie after it finished clearing.
-                regularProfile.cookieManager.setCookie(
-                    Uri.parse(neevaConstants.appURL),
-                    "${neevaConstants.loginCookie}=$oldNeevaAuthToken;",
-                    null
-                )
+                // Add back the login Cookie after we've finished clearing everything.
+                if (oldNeevaAuthToken.isNotEmpty()) {
+                    neevaUser.loginToken.updateCachedCookie(oldNeevaAuthToken)
+                }
             }
-            onAuthTokenUpdated()
         }
     }
 

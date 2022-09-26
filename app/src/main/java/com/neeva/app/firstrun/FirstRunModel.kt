@@ -25,8 +25,8 @@ import com.neeva.app.logging.LogConfig
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserToken
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +40,7 @@ fun interface GoogleSignInAccountProvider {
 @Singleton
 class FirstRunModel internal constructor(
     private val sharedPreferencesModel: SharedPreferencesModel,
-    private val neevaUserToken: NeevaUserToken,
+    private val loginToken: LoginToken,
     private val neevaConstants: NeevaConstants,
     private var clientLogger: ClientLogger,
     private val coroutineScope: CoroutineScope,
@@ -51,7 +51,7 @@ class FirstRunModel internal constructor(
     @Inject
     constructor(
         sharedPreferencesModel: SharedPreferencesModel,
-        neevaUserToken: NeevaUserToken,
+        loginToken: LoginToken,
         neevaConstants: NeevaConstants,
         clientLogger: ClientLogger,
         coroutineScope: CoroutineScope,
@@ -59,7 +59,7 @@ class FirstRunModel internal constructor(
         popupModel: PopupModel
     ) : this(
         sharedPreferencesModel = sharedPreferencesModel,
-        neevaUserToken = neevaUserToken,
+        loginToken = loginToken,
         neevaConstants = neevaConstants,
         clientLogger = clientLogger,
         coroutineScope = coroutineScope,
@@ -83,13 +83,13 @@ class FirstRunModel internal constructor(
 
         fun mustShowFirstRun(
             sharedPreferencesModel: SharedPreferencesModel,
-            neevaUserToken: NeevaUserToken
+            loginToken: LoginToken
         ): Boolean {
             val isFirstRunDone = SharedPrefFolder.FirstRun.FirstRunDone.get(sharedPreferencesModel)
 
             return when {
                 // User has already signed in.
-                neevaUserToken.getToken().isNotEmpty() -> false
+                loginToken.isNotEmpty() -> false
 
                 // SharedPreference has been set, so they must have gone through First Run already.
                 isFirstRunDone -> false
@@ -147,7 +147,7 @@ class FirstRunModel internal constructor(
     }
 
     fun mustShowFirstRun(): Boolean {
-        return mustShowFirstRun(sharedPreferencesModel, neevaUserToken)
+        return mustShowFirstRun(sharedPreferencesModel, loginToken)
     }
 
     fun setFirstRunDone() {

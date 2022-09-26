@@ -48,7 +48,7 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.PreviewNeevaUser
 
 /**
@@ -132,8 +132,13 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
     val previewSettingsDataModel = SettingsDataModel(previewSharedPreferencesModel)
 
     val previewNeevaConstants = NeevaConstants()
-    val previewNeevaUserToken = NeevaUserToken(previewSharedPreferencesModel, previewNeevaConstants)
-    val previewNeevaUser = PreviewNeevaUser(previewNeevaUserToken)
+    val previewLoginToken = LoginToken(
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers,
+        neevaConstants = previewNeevaConstants,
+        sharedPreferencesModel = previewSharedPreferencesModel
+    )
+    val previewNeevaUser = PreviewNeevaUser(previewLoginToken)
 
     val previewPopupModel = PopupModel(
         coroutineScope = coroutineScope,
@@ -141,7 +146,7 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
     )
 
     val previewApolloWrapper = object : AuthenticatedApolloWrapper(
-        neevaUserToken = previewNeevaUserToken,
+        loginToken = previewLoginToken,
         neevaConstants = previewNeevaConstants,
         apolloClientWrapper = object : ApolloClientWrapper {
             override fun apolloClient(): ApolloClient { TODO("Not implemented") }
@@ -153,14 +158,14 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         coroutineScope = coroutineScope,
         dispatchers = previewDispatchers,
         neevaConstants = previewNeevaConstants,
-        neevaUserToken = previewNeevaUserToken,
+        loginToken = previewLoginToken,
         sharedPreferencesModel = previewSharedPreferencesModel,
         settingsDataModel = previewSettingsDataModel
     )
 
     val previewFirstRunModel = FirstRunModel(
         sharedPreferencesModel = previewSharedPreferencesModel,
-        neevaUserToken = previewNeevaUserToken,
+        loginToken = previewLoginToken,
         neevaConstants = previewNeevaConstants,
         clientLogger = previewClientLogger,
         coroutineScope = coroutineScope,

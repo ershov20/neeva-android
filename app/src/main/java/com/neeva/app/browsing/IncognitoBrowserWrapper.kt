@@ -166,7 +166,7 @@ class IncognitoBrowserWrapper private constructor(
                 }
             }
 
-            incognitoSessionToken.purgeCookie()
+            incognitoSessionToken.purgeCachedCookie()
 
             // Delete temporary files we created to store Incognito favicons and tab screenshots.
             withContext(dispatchers.io) {

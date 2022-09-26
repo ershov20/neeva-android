@@ -13,7 +13,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.ApolloClientWrapper
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
-import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.LoginToken
 
 @OptIn(ApolloExperimental::class)
 class TestApolloClientWrapper : ApolloClientWrapper {
@@ -38,11 +38,11 @@ class TestApolloClientWrapper : ApolloClientWrapper {
 
 @OptIn(ApolloExperimental::class)
 class TestAuthenticatedApolloWrapper(
-    neevaUserToken: NeevaUserToken,
+    loginToken: LoginToken,
     neevaConstants: NeevaConstants,
     val testApolloClientWrapper: TestApolloClientWrapper = TestApolloClientWrapper()
 ) : AuthenticatedApolloWrapper(
-    neevaUserToken = neevaUserToken,
+    loginToken = loginToken,
     neevaConstants = neevaConstants,
     apolloClientWrapper = testApolloClientWrapper
 ) {

@@ -41,7 +41,7 @@ class NeevaUserTest : BaseTest() {
     private lateinit var dispatchers: Dispatchers
     private lateinit var mockWebLayerModel: WebLayerModel
     private lateinit var neevaConstants: NeevaConstants
-    private lateinit var neevaUserToken: NeevaUserToken
+    private lateinit var loginToken: LoginToken
     private lateinit var userInfo: UserInfo
     private lateinit var neevaUser: NeevaUser
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
@@ -56,7 +56,7 @@ class NeevaUserTest : BaseTest() {
         setUpLoggedInUser(context)
         setUpMockWeblayerModel()
         apolloWrapper = TestAuthenticatedApolloWrapper(
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             neevaConstants = neevaConstants
         )
         coroutineScopeRule.scope.advanceUntilIdle()
@@ -64,8 +64,13 @@ class NeevaUserTest : BaseTest() {
 
     private fun setUpLoggedInUser(context: Context) {
         sharedPreferencesModel = SharedPreferencesModel(context)
-        neevaUserToken = NeevaUserToken(sharedPreferencesModel, neevaConstants)
-        neevaUserToken.setToken("myToken")
+        loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
+        loginToken.updateCachedCookie("myToken")
         userInfo = UserInfo(
             "my-id",
             "some display name",
@@ -73,7 +78,7 @@ class NeevaUserTest : BaseTest() {
             "https://www.cdn/my-image.png",
             NeevaUser.SSOProvider.GOOGLE.name
         )
-        neevaUser = NeevaUserImpl(sharedPreferencesModel, neevaUserToken)
+        neevaUser = NeevaUserImpl(sharedPreferencesModel, loginToken)
         neevaUser.setUserInfo(userInfo)
     }
 
@@ -136,7 +141,7 @@ class NeevaUserTest : BaseTest() {
 
     @Test
     fun clearUser_dataIsEmpty_clearsNeevaUserInfo() {
-        val neevaUser = NeevaUserImpl(sharedPreferencesModel, neevaUserToken)
+        val neevaUser = NeevaUserImpl(sharedPreferencesModel, loginToken)
         neevaUser.clearUserInfo()
         expectThat(neevaUser.userInfoFlow.value).isEqualTo(null)
     }

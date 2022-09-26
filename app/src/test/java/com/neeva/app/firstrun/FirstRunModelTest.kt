@@ -20,7 +20,7 @@ import com.neeva.app.logging.ClientLogger
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.LoginToken
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -54,13 +54,15 @@ class FirstRunModelTest : BaseTest() {
 
         context = ApplicationProvider.getApplicationContext()
         val sharedPreferencesModel = SharedPreferencesModel(context)
-        val neevaUserToken = NeevaUserToken(
+        val loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
             sharedPreferencesModel = sharedPreferencesModel,
             neevaConstants = neevaConstants
         )
 
         apolloWrapper = TestAuthenticatedApolloWrapper(
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             neevaConstants = neevaConstants
         )
 
@@ -71,7 +73,7 @@ class FirstRunModelTest : BaseTest() {
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = coroutineScopeRule.dispatchers,
             neevaConstants = neevaConstants,
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             sharedPreferencesModel = sharedPreferencesModel,
             settingsDataModel = settingsDataModel
         )
@@ -84,7 +86,7 @@ class FirstRunModelTest : BaseTest() {
 
         firstRunModel = FirstRunModel(
             sharedPreferencesModel = sharedPreferencesModel,
-            neevaUserToken = neevaUserToken,
+            loginToken = loginToken,
             neevaConstants = neevaConstants,
             clientLogger = clientLogger,
             coroutineScope = coroutineScopeRule.scope,

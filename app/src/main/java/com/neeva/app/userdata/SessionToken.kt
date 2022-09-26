@@ -17,6 +17,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.Cookie
@@ -25,6 +26,7 @@ import okhttp3.Response
 import okhttp3.internal.EMPTY_REQUEST
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.CookieChangedCallback
+import org.chromium.weblayer.CookieManager
 
 /**
  * Payload received when creating new preview or incognito sessions.
@@ -46,21 +48,29 @@ data class CreateSessionPayload(
 )
 
 /**
- * Manages various session tokens used by the Neeva backend.
+ * Manages various session cookies used by the Neeva backend.
  * See https://docs.google.com/document/d/1rRStjSXig6HfbaXPl4cXbJH_jGkRpTWdTIGsY7G9Gx0/edit#
+ *
+ * Session cookies are synced with the WebLayer [Browser]:
+ * - Changing the cookie value in the app will update the [Browser] via [updateCookieManager]
+ * - Changing the cookie value in the [Browser] will update the app via [CookieChangedCallback]
  */
 abstract class SessionToken(
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
     private val neevaConstants: NeevaConstants,
-    protected val endpointURL: String,
+    protected val endpointURL: String?,
     protected val cookieName: String
 ) {
     companion object {
         private const val TAG = "SessionToken"
     }
 
-    protected abstract val cookieValue: String
+    abstract val cookieValue: String
+    abstract val cookieValueFlow: StateFlow<String>
+
+    fun isEmpty(): Boolean = !isNotEmpty()
+    fun isNotEmpty(): Boolean = cookieValue.isNotEmpty()
 
     protected val createSessionPayloadAdapter: JsonAdapter<CreateSessionPayload> =
         Moshi.Builder().build().adapter(CreateSessionPayload::class.java)
@@ -73,41 +83,68 @@ abstract class SessionToken(
     private var requestJob: Job? = null
 
     open fun initializeCookieManager(browser: Browser) {
-        browser.takeIfAlive()?.profile?.cookieManager?.apply {
-            // Detect and save any changes to the session cookie.
-            addCookieChangedCallback(
-                Uri.parse(neevaConstants.appURL),
-                cookieName,
-                object : CookieChangedCallback() {
-                    override fun onCookieChanged(cookieNameAndValue: String, cause: Int) {
-                        cookieNameAndValue.toCookiePair()
-                            ?.takeIf { it.key == cookieName }
-                            ?.let { updateCachedCookie(it.value) }
+        val cookieManager = browser.takeIfAlive()?.profile?.cookieManager ?: return
+
+        // Detect and save any changes to the session cookie.
+        cookieManager.addCookieChangedCallback(
+            Uri.parse(neevaConstants.appURL),
+            cookieName,
+            object : CookieChangedCallback() {
+                override fun onCookieChanged(cookieNameAndValue: String, cause: Int) {
+                    // We don't get the latest value when we're told that the cookie has changed
+                    // so we have to manually get it again.
+                    coroutineScope.launch {
+                        val (isBrowserAlive, cookiePair) = browser.getCurrentCookieValue()
+                        if (isBrowserAlive) {
+                            cookiePair?.value
+                                ?.let { updateCachedCookie(it) }
+                                ?: run { purgeCachedCookie() }
+                        }
                     }
                 }
-            )
-
-            // Copy the cookie back from our storage, if we have one set.
-            if (cookieValue.isNotEmpty()) {
-                updateCookieManager(browser)
             }
+        )
 
-            requestNewCookie(browser)
+        // Copy the cookie back from our storage, if we have one set.
+        if (cookieValue.isNotEmpty()) {
+            updateCookieManager(browser)
         }
+
+        requestNewCookie(browser)
     }
 
     @MainThread
-    fun updateCookieManager(browser: Browser) {
-        browser.takeIfAlive()?.profile?.cookieManager?.setCookie(
+    fun updateCookieManager(
+        cookieManager: CookieManager,
+        callback: (success: Boolean) -> Unit = {}
+    ) {
+        cookieManager.setCookie(
             Uri.parse(neevaConstants.appURL),
             "$cookieName=$cookieValue"
         ) { success ->
             if (!success) Log.e(TAG, "Failed to set $cookieName in Browser")
+            callback(success)
         }
     }
 
-    fun requestNewCookie(browser: Browser) {
-        if (requestJob?.isActive == true) return
+    @MainThread
+    fun updateCookieManager(browser: Browser, callback: (success: Boolean) -> Unit = {}) {
+        browser.takeIfAlive()?.let {
+            updateCookieManager(
+                cookieManager = it.profile.cookieManager,
+                callback = callback
+            )
+        } ?: run {
+            callback(false)
+        }
+    }
+
+    /**
+     * Fires a network request to the backend to ask for a new session cookie, if we don't already
+     * have one.
+     */
+    open fun requestNewCookie(browser: Browser) {
+        if (endpointURL == null || requestJob?.isActive == true) return
 
         // If we've already got a token, don't get a new one.
         if (cookieValue.isNotEmpty()) {
@@ -116,11 +153,11 @@ abstract class SessionToken(
         }
 
         requestJob = coroutineScope.launch {
-            val existingCookie = withContext(dispatchers.main) {
-                val cookies = browser.getNeevaCookiePairs()
-                cookies
-                    .firstOrNull { it.key == cookieName }
-                    ?.value
+            val (isBrowserAlive, existingCookie) = browser.getCurrentCookieValue()
+
+            if (!isBrowserAlive) {
+                Log.i(TAG, "Browser is not available; cannot get $cookieName")
+                return@launch
             }
 
             if (existingCookie != null) {
@@ -154,7 +191,8 @@ abstract class SessionToken(
     @Throws(IOException::class, IllegalStateException::class)
     abstract suspend fun processResponse(response: Response): Boolean
 
-    protected abstract fun updateCachedCookie(cookieValue: String)
+    abstract fun updateCachedCookie(newValue: String)
+    open fun purgeCachedCookie() = updateCachedCookie("")
 
     fun getSessionCookies(): List<Cookie> {
         return if (cookieValue.isNotEmpty()) {
@@ -172,22 +210,24 @@ abstract class SessionToken(
     abstract fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean
 
     /** Returns a list of cookies split by key and values. */
-    private suspend fun Browser.getNeevaCookiePairs(): List<CookiePair> {
-        val cookies = suspendCoroutine<List<CookiePair>> { continuation ->
-            takeIfAlive()?.profile?.cookieManager?.getCookie(
-                Uri.parse(neevaConstants.appURL)
-            ) { cookiesString ->
-                // WebLayer returns all cookies joined together by `;` characters.
-                val cookies = cookiesString
-                    .split(";")
-                    .mapNotNull { cookie -> cookie.toCookiePair() }
-                continuation.resume(cookies)
-            } ?: run {
-                continuation.resume(emptyList())
+    private suspend fun Browser.getCurrentCookieValue(): Pair<Boolean, CookiePair?> {
+        return withContext(dispatchers.main) {
+            suspendCoroutine { continuation ->
+                takeIfAlive()?.profile?.cookieManager
+                    ?.getCookie(Uri.parse(neevaConstants.appURL)) { cookiesString ->
+                        // WebLayer returns all cookies joined together by `;` characters.
+                        val cookie = cookiesString
+                            .split(";")
+                            .mapNotNull { cookie -> cookie.toCookiePair() }
+                            .firstOrNull { it.key == cookieName }
+                        continuation.resume(Pair(true, cookie))
+                    }
+                    ?: run {
+                        // The browser isn't available.
+                        continuation.resume(Pair(false, null))
+                    }
             }
         }
-
-        return cookies
     }
 
     protected fun String.toCookiePair(): CookiePair? {

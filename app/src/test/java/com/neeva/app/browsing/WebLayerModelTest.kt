@@ -22,9 +22,10 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.userdata.IncognitoSessionToken
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserToken
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -78,8 +79,8 @@ class WebLayerModelTest : BaseTest() {
     @Mock private lateinit var incognitoBrowserWrapper: IncognitoBrowserWrapper
     @Mock private lateinit var incognitoProfile: Profile
     @Mock private lateinit var incognitoSessionToken: IncognitoSessionToken
+    @Mock private lateinit var loginToken: LoginToken
     @Mock private lateinit var neevaUser: NeevaUser
-    @Mock private lateinit var neevaUserToken: NeevaUserToken
     @Mock private lateinit var regularProfile: Profile
     @Mock private lateinit var settingsDataModel: SettingsDataModel
     @Mock private lateinit var webLayerFactory: WebLayerFactory
@@ -112,12 +113,13 @@ class WebLayerModelTest : BaseTest() {
 
         neevaConstants = NeevaConstants()
 
-        neevaUser = mock {
-            on { neevaUserToken } doReturn neevaUserToken
+        loginToken = mock {
+            on { cookieValue } doReturn "fake token"
+            on { cookieValueFlow } doReturn MutableStateFlow("fake token")
         }
 
-        neevaUserToken = mock {
-            on { getToken() } doReturn "fake token"
+        neevaUser = mock {
+            on { loginToken } doReturn loginToken
         }
 
         regularProfile = mock {
@@ -340,11 +342,10 @@ class WebLayerModelTest : BaseTest() {
 
         // Switch to the regular profile.
         webLayerModel.switchToProfile(false)
-        coroutineScopeRule.scope.advanceUntilIdle()
+        coroutineScopeRule.advanceUntilIdle()
 
         expectThat(webLayerModel.browsersFlow.value.isCurrentlyIncognito).isFalse()
         expectThat(webLayerModel.browsersFlow.value.incognitoBrowserWrapper).isNull()
-
         verify(activityCallbacks).removeIncognitoFragment()
 
         val runnableCaptor = argumentCaptor<Runnable>()

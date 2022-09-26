@@ -23,7 +23,7 @@ import com.neeva.app.suggestions.toNavSuggestion
 import com.neeva.app.suggestions.toQueryRowSuggestion
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
-import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.LoginToken
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,7 +64,7 @@ class SuggestionsModelTest : BaseTest() {
     private lateinit var historyManager: HistoryManager
     private lateinit var model: SuggestionsModel
     private lateinit var neevaConstants: NeevaConstants
-    private lateinit var neevaUserToken: NeevaUserToken
+    private lateinit var loginToken: LoginToken
     private lateinit var siteSuggestions: MutableStateFlow<List<NavSuggestion>>
     private lateinit var urlBarIsEditing: MutableStateFlow<Boolean>
     private lateinit var urlBarText: MutableStateFlow<TextFieldValue>
@@ -86,8 +86,8 @@ class SuggestionsModelTest : BaseTest() {
         Mockito.`when`(historyManager.historySuggestions).thenReturn(siteSuggestions)
 
         neevaConstants = NeevaConstants()
-        neevaUserToken = mock()
-        apolloWrapper = TestAuthenticatedApolloWrapper(neevaUserToken, neevaConstants)
+        loginToken = mock()
+        apolloWrapper = TestAuthenticatedApolloWrapper(loginToken, neevaConstants)
 
         val settingsDataModel = mock<SettingsDataModel> {
             on {

@@ -22,7 +22,7 @@ import com.neeva.app.type.ClientLogCounter
 import com.neeva.app.type.ClientLogCounterAttribute
 import com.neeva.app.type.ClientLogEnvironment
 import com.neeva.app.type.ClientLogInput
-import com.neeva.app.userdata.NeevaUserToken
+import com.neeva.app.userdata.LoginToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -41,7 +41,7 @@ class ClientLogger(
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
     private val neevaConstants: NeevaConstants,
-    private val neevaUserToken: NeevaUserToken,
+    private val loginToken: LoginToken,
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val settingsDataModel: SettingsDataModel
 ) {
@@ -80,7 +80,7 @@ class ClientLogger(
             return
         }
 
-        if (FirstRunModel.mustShowFirstRun(sharedPreferencesModel, neevaUserToken)) {
+        if (FirstRunModel.mustShowFirstRun(sharedPreferencesModel, loginToken)) {
             addPendingLog(PendingLog(path, attributes))
             return
         }
