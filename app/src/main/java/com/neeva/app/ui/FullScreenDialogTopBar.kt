@@ -4,10 +4,11 @@
 
 package com.neeva.app.ui
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,6 +20,7 @@ import com.neeva.app.R
 import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FullScreenDialogTopBar(
     title: String,
@@ -26,7 +28,7 @@ fun FullScreenDialogTopBar(
     buttonTitle: String? = null,
     onButtonPressed: (() -> Unit)? = null
 ) {
-    SmallTopAppBar(
+    TopAppBar(
         title = {
             Text(
                 text = title,
@@ -36,7 +38,7 @@ fun FullScreenDialogTopBar(
                 style = MaterialTheme.typography.titleLarge
             )
         },
-        colors = TopAppBarDefaults.mediumTopAppBarColors(MaterialTheme.colorScheme.surface),
+        modifier = Modifier.zIndex(1.0f),
         navigationIcon = {
             RowActionIconButton(
                 iconParams = RowActionIconParams(
@@ -56,7 +58,7 @@ fun FullScreenDialogTopBar(
                 }
             }
         },
-        modifier = Modifier.zIndex(1.0f)
+        colors = TopAppBarDefaults.mediumTopAppBarColors(MaterialTheme.colorScheme.surface)
     )
 }
 

@@ -7,6 +7,7 @@ package com.neeva.app
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.runtime.Composable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
@@ -84,7 +85,9 @@ class NeevaActivityViewModelTest : BaseTest() {
         }
 
         popupModel = mock {
-            on { showBottomSheet(any(), any()) } doAnswer {}
+            on {
+                showBottomSheet(any(), any<@Composable (dismiss: () -> Unit) -> Unit>())
+            } doAnswer {}
         }
 
         firstRunModel = mock {

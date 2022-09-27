@@ -534,6 +534,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         transaction.commitNow()
     }
 
+    @Suppress("DEPRECATION")
     override fun onBackPressed() {
         val browserWrapper = webLayerModel.currentBrowser
         when {

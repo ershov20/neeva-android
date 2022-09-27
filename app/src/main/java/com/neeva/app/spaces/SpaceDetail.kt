@@ -33,8 +33,9 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.rememberDismissState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SmallTopAppBar
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -236,6 +237,7 @@ fun SpaceDetail(spaceID: String?) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpaceDetailToolbar(
     lazyListState: LazyListState,
@@ -259,15 +261,7 @@ fun SpaceDetailToolbar(
         R.drawable.ic_show_descriptions
     }
 
-    SmallTopAppBar(
-        navigationIcon = {
-            RowActionIconButton(
-                iconParams = RowActionIconParams(
-                    onTapAction = { appNavModel.popBackStack() },
-                    actionType = RowActionIconParams.ActionType.BACK
-                )
-            )
-        },
+    TopAppBar(
         title = {
             AnimatedVisibility(
                 visible = isTitleVisible,
@@ -281,6 +275,14 @@ fun SpaceDetailToolbar(
                     secondaryTextStyle = MaterialTheme.typography.bodySmall
                 )
             }
+        },
+        navigationIcon = {
+            RowActionIconButton(
+                iconParams = RowActionIconParams(
+                    onTapAction = { appNavModel.popBackStack() },
+                    actionType = RowActionIconParams.ActionType.BACK
+                )
+            )
         },
         actions = {
             val onEditSpace = {
@@ -355,23 +357,40 @@ fun SpaceDetailToolbar(
                 }
 
                 if (!space.isDefaultSpace) {
-                    menuItems.add(MenuAction(id = removeLabelId, icon = Icons.Outlined.Delete))
+                    menuItems.add(
+                        MenuAction(
+                            id = removeLabelId,
+                            icon = Icons.Outlined.Delete
+                        )
+                    )
                     menuActions[removeLabelId] = {
                         showRemoveSpaceConfirmationDialog.value = true
                     }
                 }
 
                 menuItems.add(
-                    MenuAction(id = R.string.space_edit_on_web, icon = Icons.Outlined.ExitToApp)
+                    MenuAction(
+                        id = R.string.space_edit_on_web,
+                        icon = Icons.Outlined.ExitToApp
+                    )
                 )
-                menuActions[R.string.space_edit_on_web] = { appNavModel.openUrlInNewTab(spaceUrl) }
+                menuActions[R.string.space_edit_on_web] =
+                    { appNavModel.openUrlInNewTab(spaceUrl) }
 
                 if (canEdit && isTitleVisible) {
-                    menuItems.add(MenuAction(id = R.string.space_edit, icon = Icons.Outlined.Edit))
+                    menuItems.add(
+                        MenuAction(
+                            id = R.string.space_edit,
+                            icon = Icons.Outlined.Edit
+                        )
+                    )
                     menuActions[R.string.space_edit] = onEditSpace
 
                     menuItems.add(
-                        MenuAction(id = R.string.space_add_space_item, icon = Icons.Outlined.Add)
+                        MenuAction(
+                            id = R.string.space_add_space_item,
+                            icon = Icons.Outlined.Add
+                        )
                     )
                     menuActions[R.string.space_add_space_item] = onAddToSpace
                 }
@@ -396,7 +415,7 @@ fun SpaceDetailToolbar(
                     onMenuItem = { id -> menuActions[id]?.invoke() }
                 )
             }
-        },
+        }
     )
 }
 
