@@ -27,7 +27,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
@@ -44,6 +46,7 @@ import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.createCheckerboardBitmap
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.HeavyDivider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -90,9 +93,9 @@ fun FeedbackView(
 ) {
     val currentURL by currentURLFlow.collectAsState()
 
-    val feedback = rememberSaveable { mutableStateOf("") }
-    val shareScreenshot = rememberSaveable { mutableStateOf(true) }
-    val shareUrl = rememberSaveable { mutableStateOf(true) }
+    var feedback by rememberSaveable { mutableStateOf("") }
+    var shareScreenshot by rememberSaveable { mutableStateOf(true) }
+    var shareUrl by rememberSaveable { mutableStateOf(true) }
 
     // Update the URL that will be sent whenever the URL of the current page changes.
     val urlToSend = rememberSaveable(currentURL) { mutableStateOf(currentURL.toString()) }
@@ -102,12 +105,13 @@ fun FeedbackView(
             FullScreenDialogTopBar(
                 title = stringResource(R.string.feedback),
                 onBackPressed = onDismiss,
+                isButtonEnabled = feedback.isNotEmpty(),
                 buttonTitle = stringResource(R.string.send),
                 onButtonPressed = {
                     onSubmitFeedback(
-                        feedback.value,
-                        urlToSend.value.takeIf { shareUrl.value },
-                        shareScreenshot.value
+                        feedback,
+                        urlToSend.value.takeIf { shareUrl },
+                        shareScreenshot
                     )
                 }
             )
@@ -141,13 +145,10 @@ fun FeedbackView(
 
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
-                // Feedback text box
-                OutlinedTextField(
-                    value = feedback.value,
-                    onValueChange = { newValue -> feedback.value = newValue },
-                    placeholder = {
-                        Text(stringResource(R.string.submit_feedback_textfield_placeholder))
-                    },
+                HeavyDivider()
+
+                Text(
+                    text = stringResource(R.string.submit_feedback_textfield_placeholder),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = Dimensions.PADDING_LARGE)
@@ -155,14 +156,26 @@ fun FeedbackView(
 
                 Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
+                // Feedback text box
+                OutlinedTextField(
+                    value = feedback,
+                    onValueChange = { newValue -> feedback = newValue },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = Dimensions.PADDING_LARGE)
+                        .testTag("feedbackField")
+                )
+
+                Spacer(Modifier.height(Dimensions.PADDING_LARGE))
+
                 // Share URL text box
                 NeevaSwitch(
                     primaryLabel = stringResource(R.string.submit_feedback_view_share_url),
-                    isChecked = shareUrl.value,
-                    onCheckedChange = { shareUrl.value = it }
+                    isChecked = shareUrl,
+                    onCheckedChange = { shareUrl = it }
                 )
 
-                AnimatedExpandShrink(isVisible = shareUrl.value) {
+                AnimatedExpandShrink(isVisible = shareUrl) {
                     OutlinedTextField(
                         value = urlToSend.value,
                         onValueChange = { urlToSend.value = it },
@@ -179,11 +192,11 @@ fun FeedbackView(
 
                     NeevaSwitch(
                         primaryLabel = stringResource(R.string.submit_feedback_share_screenshot),
-                        isChecked = shareScreenshot.value,
-                        onCheckedChange = { shareScreenshot.value = it }
+                        isChecked = shareScreenshot,
+                        onCheckedChange = { shareScreenshot = it }
                     )
 
-                    AnimatedExpandShrink(isVisible = shareScreenshot.value) {
+                    AnimatedExpandShrink(isVisible = shareScreenshot) {
                         ScreenshotThumbnail(
                             bitmap = screenshot,
                             modifier = Modifier.padding(horizontal = Dimensions.PADDING_LARGE)

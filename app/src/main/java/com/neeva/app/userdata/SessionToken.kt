@@ -72,13 +72,16 @@ abstract class SessionToken(
     fun isEmpty(): Boolean = !isNotEmpty()
     fun isNotEmpty(): Boolean = cookieValue.isNotEmpty()
 
-    protected val createSessionPayloadAdapter: JsonAdapter<CreateSessionPayload> =
+    protected val createSessionPayloadAdapter: JsonAdapter<CreateSessionPayload> by lazy {
         Moshi.Builder().build().adapter(CreateSessionPayload::class.java)
+    }
 
-    private val neevaOkHttpClient = NeevaOkHttpClient(
-        neevaConstants = neevaConstants,
-        createAdditionalCookies = ::getSessionCookies
-    )
+    private val neevaOkHttpClient by lazy {
+        NeevaOkHttpClient(
+            neevaConstants = neevaConstants,
+            createAdditionalCookies = ::getSessionCookies
+        )
+    }
 
     private var requestJob: Job? = null
 

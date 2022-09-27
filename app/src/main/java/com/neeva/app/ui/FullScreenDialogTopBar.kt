@@ -25,6 +25,7 @@ import com.neeva.app.ui.widgets.RowActionIconParams
 fun FullScreenDialogTopBar(
     title: String,
     onBackPressed: () -> Unit,
+    isButtonEnabled: Boolean = true,
     buttonTitle: String? = null,
     onButtonPressed: (() -> Unit)? = null
 ) {
@@ -50,7 +51,10 @@ fun FullScreenDialogTopBar(
         },
         actions = {
             if (buttonTitle != null && onButtonPressed != null) {
-                TextButton(onClick = { onButtonPressed() }) {
+                TextButton(
+                    onClick = { onButtonPressed() },
+                    enabled = isButtonEnabled
+                ) {
                     Text(
                         text = buttonTitle,
                         maxLines = 1

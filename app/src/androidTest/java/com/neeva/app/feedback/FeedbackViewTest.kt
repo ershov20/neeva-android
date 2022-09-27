@@ -5,6 +5,7 @@
 package com.neeva.app.feedback
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -29,6 +30,7 @@ import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.waitFor
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNavDestination
+import com.neeva.app.waitForNode
 import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForUrl
@@ -91,8 +93,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             // Send just the user's message.
             waitForNodeWithText(getString(R.string.submit_feedback_view_share_url)).performClick()
             waitForNodeWithText(getString(R.string.submit_feedback_share_screenshot)).performClick()
-            waitForNodeWithText(getString(R.string.submit_feedback_textfield_placeholder))
-                .performTextInput("Test message")
+            waitForNode(hasTestTag("feedbackField")).performTextInput("Test message")
 
             // Mock out the response.
             val sendFeedbackMutation =
@@ -138,8 +139,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             // Send just the user's message.
             waitForNodeWithText(getString(R.string.submit_feedback_view_share_url)).performClick()
             waitForNodeWithText(getString(R.string.submit_feedback_share_screenshot)).performClick()
-            waitForNodeWithText(getString(R.string.submit_feedback_textfield_placeholder))
-                .performTextInput("Test message")
+            waitForNode(hasTestTag("feedbackField")).performTextInput("Test message")
 
             // Mock out the response.
             val sendFeedbackMutation =
@@ -179,8 +179,7 @@ class FeedbackViewTest : BaseBrowserTest() {
 
             // Send the user's message and the URL, but remove the screenshot.
             waitForNodeWithText(getString(R.string.submit_feedback_share_screenshot)).performClick()
-            waitForNodeWithText(getString(R.string.submit_feedback_textfield_placeholder))
-                .performTextInput("Test message")
+            waitForNode(hasTestTag("feedbackField")).performTextInput("Test message")
 
             // Mock out the response.
             val sendFeedbackMutation =
@@ -224,8 +223,7 @@ class FeedbackViewTest : BaseBrowserTest() {
                 performTextClearance()
                 performTextInput("Replaced URL")
             }
-            waitForNodeWithText(getString(R.string.submit_feedback_textfield_placeholder))
-                .performTextInput("Test message")
+            waitForNode(hasTestTag("feedbackField")).performTextInput("Test message")
 
             // Mock out the response.
             val sendFeedbackMutation =
@@ -264,8 +262,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             waitForNavDestination(AppNavDestination.FEEDBACK)
 
             // Edit the feedback message.
-            waitForNodeWithText(getString(R.string.submit_feedback_textfield_placeholder))
-                .performTextInput("Test message")
+            waitForNode(hasTestTag("feedbackField")).performTextInput("Test message")
 
             // Yank the screenshot out of the FeedbackViewModel directly to construct the mutation,
             // then mock out the response.
