@@ -10,8 +10,8 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
-import com.neeva.app.cookiecutter.IncognitoTrackersAllowList
-import com.neeva.app.cookiecutter.ScriptInjectionManager
+import com.neeva.app.contentfilter.IncognitoTrackersAllowList
+import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel

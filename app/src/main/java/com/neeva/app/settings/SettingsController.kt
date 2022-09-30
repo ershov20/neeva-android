@@ -13,7 +13,7 @@ import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.archived.ArchivingOptionsDialog
-import com.neeva.app.cookiecutter.CookieCutterModel
+import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.settings.clearbrowsing.TimeClearingOption
 import com.neeva.app.settings.defaultbrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
@@ -61,12 +61,12 @@ interface SettingsController {
     //endregion
 
     //region Cookie Cutter Data
-    fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength
-    fun setCookieCutterStrength(strength: CookieCutterModel.BlockingStrength)
-    fun getCookieNoticeSelection(): CookieCutterModel.CookieNoticeSelection
-    fun setCookieNoticeSelection(selection: CookieCutterModel.CookieNoticeSelection)
-    fun getCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies>
-    fun setCookieNoticePreferences(preferences: Set<CookieCutterModel.CookieNoticeCookies>)
+    fun getContentFilterStrength(): ContentFilterModel.BlockingStrength
+    fun setContentFilterStrength(strength: ContentFilterModel.BlockingStrength)
+    fun getCookieNoticeSelection(): ContentFilterModel.CookieNoticeSelection
+    fun setCookieNoticeSelection(selection: ContentFilterModel.CookieNoticeSelection)
+    fun getCookieNoticePreferences(): Set<ContentFilterModel.CookieNoticeCookies>
+    fun setCookieNoticePreferences(preferences: Set<ContentFilterModel.CookieNoticeCookies>)
     //endregion
 
     //region Set Default Android Browser
@@ -153,7 +153,7 @@ class SettingsControllerImpl(
                     ArchivingOptionsDialog(popupModel::removeDialog)
                 }
             },
-            R.string.cookie_cutter to { appNavModel.showCookieCutterSettings() },
+            R.string.content_filter to { appNavModel.showContentFilterSettings() },
             R.string.settings_licenses to { appNavModel.showLicenses() }
         )
         if (isSignedOut()) {
@@ -212,53 +212,53 @@ class SettingsControllerImpl(
         return settingsDataModel.getSettingsToggleValue(SettingsToggle.IS_ADVANCED_SETTINGS_ALLOWED)
     }
 
-    override fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength {
-        return settingsDataModel.getCookieCutterStrength()
+    override fun getContentFilterStrength(): ContentFilterModel.BlockingStrength {
+        return settingsDataModel.getContentFilterStrength()
     }
 
-    override fun setCookieCutterStrength(strength: CookieCutterModel.BlockingStrength) {
-        settingsDataModel.setCookieCutterStrength(strength)
+    override fun setContentFilterStrength(strength: ContentFilterModel.BlockingStrength) {
+        settingsDataModel.setContentFilterStrength(strength)
         onTrackingProtectionUpdate()
     }
 
-    override fun getCookieNoticeSelection(): CookieCutterModel.CookieNoticeSelection {
+    override fun getCookieNoticeSelection(): ContentFilterModel.CookieNoticeSelection {
         return if (getCookieNoticePreferences().isEmpty())
-            CookieCutterModel.CookieNoticeSelection.DECLINE_COOKIES
-        else CookieCutterModel.CookieNoticeSelection.ACCEPT_COOKIES
+            ContentFilterModel.CookieNoticeSelection.DECLINE_COOKIES
+        else ContentFilterModel.CookieNoticeSelection.ACCEPT_COOKIES
     }
 
-    override fun setCookieNoticeSelection(selection: CookieCutterModel.CookieNoticeSelection) {
+    override fun setCookieNoticeSelection(selection: ContentFilterModel.CookieNoticeSelection) {
         when (selection) {
-            CookieCutterModel.CookieNoticeSelection.ACCEPT_COOKIES -> {
+            ContentFilterModel.CookieNoticeSelection.ACCEPT_COOKIES -> {
                 // only set cookie notices this way if we are switching from DECLINE_COOKIES
                 // otherwise, keep the user's existing preferences and just show the preferences
                 // pane
                 if (
                     getCookieNoticeSelection() ===
-                    CookieCutterModel.CookieNoticeSelection.DECLINE_COOKIES
+                    ContentFilterModel.CookieNoticeSelection.DECLINE_COOKIES
                 ) {
                     setCookieNoticePreferences(
-                        EnumSet.allOf(CookieCutterModel.CookieNoticeCookies::class.java)
+                        EnumSet.allOf(ContentFilterModel.CookieNoticeCookies::class.java)
                     )
                 }
 
                 // prompt for more settings
                 appNavModel.showCookiePreferences()
             }
-            CookieCutterModel.CookieNoticeSelection.DECLINE_COOKIES -> {
+            ContentFilterModel.CookieNoticeSelection.DECLINE_COOKIES -> {
                 setCookieNoticePreferences(
-                    EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
+                    EnumSet.noneOf(ContentFilterModel.CookieNoticeCookies::class.java)
                 )
             }
         }
     }
 
-    override fun getCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies> {
+    override fun getCookieNoticePreferences(): Set<ContentFilterModel.CookieNoticeCookies> {
         return settingsDataModel.getCookieNoticePreferences()
     }
 
     override fun setCookieNoticePreferences(
-        preferences: Set<CookieCutterModel.CookieNoticeCookies>
+        preferences: Set<ContentFilterModel.CookieNoticeCookies>
     ) {
         settingsDataModel.setCookieNoticePreferences(preferences)
     }
@@ -383,26 +383,27 @@ val mockSettingsControllerImpl by lazy {
 
         override fun signOut() {}
 
-        override fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength {
-            return CookieCutterModel.BlockingStrength.TRACKER_COOKIE
+        override fun getContentFilterStrength(): ContentFilterModel.BlockingStrength {
+            return ContentFilterModel.BlockingStrength.TRACKER_COOKIE
         }
 
-        override fun setCookieCutterStrength(
-            strength: CookieCutterModel.BlockingStrength
+        override fun setContentFilterStrength(
+            strength: ContentFilterModel.BlockingStrength
         ) {}
 
-        override fun getCookieNoticeSelection(): CookieCutterModel.CookieNoticeSelection {
-            return CookieCutterModel.CookieNoticeSelection.DECLINE_COOKIES
+        override fun getCookieNoticeSelection(): ContentFilterModel.CookieNoticeSelection {
+            return ContentFilterModel.CookieNoticeSelection.DECLINE_COOKIES
         }
 
-        override fun setCookieNoticeSelection(selection: CookieCutterModel.CookieNoticeSelection) {}
+        override fun setCookieNoticeSelection(selection: ContentFilterModel.CookieNoticeSelection) {
+        }
 
-        override fun getCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies> {
-            return EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
+        override fun getCookieNoticePreferences(): Set<ContentFilterModel.CookieNoticeCookies> {
+            return EnumSet.noneOf(ContentFilterModel.CookieNoticeCookies::class.java)
         }
 
         override fun setCookieNoticePreferences(
-            preferences: Set<CookieCutterModel.CookieNoticeCookies>
+            preferences: Set<ContentFilterModel.CookieNoticeCookies>
         ) {}
 
         override fun clearBrowsingData(

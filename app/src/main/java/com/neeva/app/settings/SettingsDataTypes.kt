@@ -91,7 +91,8 @@ enum class SettingsToggle(
         defaultValue = false
     ),
     TRACKING_PROTECTION(
-        primaryLabelId = R.string.cookie_cutter,
+        primaryLabelId = R.string.content_filter,
+        secondaryLabelId = R.string.content_filter_toggle_description,
         defaultValue = true
     ),
     AD_BLOCKING(
@@ -122,7 +123,7 @@ enum class SettingsToggle(
         defaultValue = false
     ),
     CLEAR_BROWSING_TRACKING_PROTECTION(
-        primaryLabelId = R.string.tracking_protection,
+        primaryLabelId = R.string.content_filter,
         defaultValue = false
     ),
     IS_ADVANCED_SETTINGS_ALLOWED(

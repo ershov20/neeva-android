@@ -91,7 +91,7 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                 ),
                 SettingsRowData(
                     type = SettingsRowType.NAVIGATION,
-                    primaryLabelId = R.string.cookie_cutter
+                    primaryLabelId = R.string.content_filter
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,

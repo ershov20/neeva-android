@@ -12,7 +12,7 @@ import androidx.lifecycle.Lifecycle
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.urlbar.URLBarModel
-import com.neeva.app.cookiecutter.CookieCutterModel
+import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
@@ -43,7 +43,7 @@ interface BrowserWrapper {
     val suggestionsModel: SuggestionsModel?
     val neevaScopeModel: NeevaScopeModel
     val urlBarModel: URLBarModel
-    val cookieCutterModel: CookieCutterModel
+    val contentFilterModel: ContentFilterModel
 
     /** List of tabs ordered by how they should appear in the CardGrid. */
     val orderedTabList: StateFlow<List<TabInfo>>

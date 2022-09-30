@@ -1,8 +1,8 @@
 package com.neeva.app.cookiecutter
 
 import com.neeva.app.BaseScreenshotTest
-import com.neeva.app.cookiecutter.ui.icon.IncognitoIconButtonPreview
-import com.neeva.app.cookiecutter.ui.icon.ShieldIconButtonPreview
+import com.neeva.app.contentfilter.ui.icon.IncognitoIconButtonPreview
+import com.neeva.app.contentfilter.ui.icon.ShieldIconButtonPreview
 import org.junit.Test
 
 class ShieldIconButtonScreenshotTest : BaseScreenshotTest() {

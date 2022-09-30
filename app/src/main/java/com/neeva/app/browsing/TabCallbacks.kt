@@ -8,11 +8,11 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
 import com.neeva.app.browsing.TabInfo.TabOpenType
-import com.neeva.app.cookiecutter.CookieCutterCallbacks
-import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.cookiecutter.CookieCuttingPreferences
-import com.neeva.app.cookiecutter.ScriptInjectionManager
-import com.neeva.app.cookiecutter.TabCookieCutterModel
+import com.neeva.app.contentfilter.ContentFilterCallbacks
+import com.neeva.app.contentfilter.ContentFilterModel
+import com.neeva.app.contentfilter.ContentFilteringPreferences
+import com.neeva.app.contentfilter.ScriptInjectionManager
+import com.neeva.app.contentfilter.TabContentFilterModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
@@ -51,19 +51,19 @@ class TabCallbacks(
     private val activityCallbackProvider: ActivityCallbackProvider,
     private val registerNewTab: (tab: Tab, type: Int) -> Unit,
     fullscreenCallback: FullscreenCallback,
-    private val cookieCutterModel: CookieCutterModel,
+    private val contentFilterModel: ContentFilterModel,
     domainProvider: DomainProvider,
     private val scriptInjectionManager: ScriptInjectionManager,
     private val clientLogger: ClientLogger?
 ) {
-    val tabCookieCutterModel = TabCookieCutterModel(
+    val tabContentFilterModel = TabContentFilterModel(
         browserFlow = browserFlow,
         tabId = tab.guid,
-        trackingDataFlow = cookieCutterModel.trackingDataFlow,
-        enableCookieNoticeSuppression = cookieCutterModel.enableTrackingProtection,
-        cookieNoticeBlockedFlow = cookieCutterModel.cookieNoticeBlockedFlow,
+        trackingDataFlow = contentFilterModel.trackingDataFlow,
+        enableCookieNoticeSuppression = contentFilterModel.enableTrackingProtection,
+        cookieNoticeBlockedFlow = contentFilterModel.cookieNoticeBlockedFlow,
         domainProvider = domainProvider,
-        trackersAllowList = cookieCutterModel.trackersAllowList
+        trackersAllowList = contentFilterModel.trackersAllowList
     )
 
     /**
@@ -117,7 +117,7 @@ class TabCallbacks(
         override fun onNavigationStarted(navigation: Navigation) {
             // reset cookie cutter
             contentFilterCallback.onContentFilterStatsUpdated()
-            tabCookieCutterModel.cookieNoticeBlocked = false
+            tabContentFilterModel.cookieNoticeBlocked = false
 
             tabList.updateIsCrashed(tab.guid, isCrashed = false)
 
@@ -138,7 +138,7 @@ class TabCallbacks(
                 scriptInjectionManager.injectNavigationCompletedScripts(
                     navigation.uri,
                     tab,
-                    tabCookieCutterModel
+                    tabContentFilterModel
                 )
             }
 
@@ -286,19 +286,19 @@ class TabCallbacks(
 
     private val contentFilterCallback = object : ContentFilterCallback() {
         override fun onContentFilterStatsUpdated() {
-            tabCookieCutterModel.updateStats(tab.contentFilterStats)
+            tabContentFilterModel.updateStats(tab.contentFilterStats)
         }
     }
 
-    private val cookieCutterCallbacks = object : CookieCutterCallbacks() {
-        override fun onGetPreferences(): CookieCuttingPreferences {
-            return CookieCuttingPreferences.fromSet(
-                cookieCutterModel.cookieCuttingPreferences.value
+    private val cookieCutterCallbacks = object : ContentFilterCallbacks() {
+        override fun onGetPreferences(): ContentFilteringPreferences {
+            return ContentFilteringPreferences.fromSet(
+                contentFilterModel.cookieCuttingPreferences.value
             )
         }
 
         override fun onNoticeHandled() {
-            tabCookieCutterModel.cookieNoticeBlocked = true
+            tabContentFilterModel.cookieNoticeBlocked = true
         }
 
         override fun onIsFlagged(origin: String): Boolean {

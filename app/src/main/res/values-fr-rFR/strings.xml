@@ -491,12 +491,6 @@
     <!-- [Settings][Toggle] Part two of a toggle that will close all of a user's incognito tabs when they leave incognito mode. -->
     <string name="settings_close_incognito_when_switching_body">Lorsque vous quittez le mode privé</string>
 
-    <!-- [Settings][Toggle][a11y] Allows users to either enable or disable tracking protection, or show the Cookie Cutter popup. -->
-    <string name="tracking_protection">Blocage des traqueurs</string>
-
-    <!-- [Settings][a11y] Tells users that they are in incognito and allows them to show the Cookie Cutter popup. -->
-    <string name="tracking_protection_incognito_content_description">Blocage des traqueurs en mode privé</string>
-
     <!-- [Settings][Button] Sends the user to view Neeva's privacy policy. -->
     <string name="settings_privacy_policy">Politique de confidentialité</string>
 
@@ -535,14 +529,11 @@
     <!-- [Settings][Button] Logs the user out of the app. -->
     <string name="settings_sign_out">Se déconnecter</string>
 
-    <!-- [Settings][Header] Groups together settings related to JavaScript tracking on web sites. -->
-    <string name="settings_trackers">Blocage des traqueurs</string>
+    <!-- [Settings][Header] Groups together settings related to JavaScript tracking & ad blocking on web sites. -->
     <string name="blocking_strength_standard_title">Standard</string>
     <string name="blocking_strength_standard_description">Bloque la plupart des traqueurs. Minimise les perturbations au niveau des publicités et de la fonctionnalité des sites.</string>
     <string name="blocking_strength_strict_title">Stricts</string>
     <string name="blocking_strength_strict_description">Bloque la plupart des traqueurs. Peut bloquer des publicités et d\'autres fonctionnalités sur certains sites.</string>
-
-    <!-- [Settings][Header] Settings related to Ad blocking on web sites. -->
     <string name="ad_blocking_title">Blocage des publicités</string>
     <string name="ad_blocking_description">Disponible uniquement en mode strict.</string>
 
@@ -688,25 +679,22 @@
 
 
     <!-- [Cookie Cutter] String displayed when we have a number is too big to fit on screen.  Example: 150 would be displayed as "99+" -->
-    <string name="cookie_cutter_too_many_items">%1$d +</string>
-
-    <!-- [Cookie Cutter] Section header for the number of website trackers that we've blocked. -->
-    <string name="cookie_cutter_trackers">Traqueurs</string>
+    <string name="content_filter_too_many_items">%1$d +</string>
 
     <!-- [Cookie Cutter] Section header for the number of website cookie popups that we've blocked. -->
-    <string name="cookie_cutter_popups">Fenêtres contextuelles de gestion des cookies</string>
+    <string name="content_filter_popups">Fenêtres contextuelles de gestion des cookies</string>
 
     <!-- [Cookie Cutter] Section header for the list of companies that we've blocked from tracking you. -->
-    <string name="cookie_cutter_whos_tracking_you">Qui vous suit</string>
+    <string name="content_filter_whos_tracking_you">Qui vous suit</string>
 
     <!-- [Cookie Cutter] Name of the "Cookie Cutter" feature. -->
-    <string name="cookie_cutter">Bloqueur de cookies</string>
+    <string name="content_filter">Bloqueur de cookies</string>
 
     <!-- [Cookie Cutter] Sends the user to the settings page for the "Cookie Cutter" feature. -->
-    <string name="cookie_cutter_settings">Paramètres du bloqueur de cookies</string>
+    <string name="content_filter_settings">Paramètres du bloqueur de cookies</string>
 
     <!-- [Cookie Cutter] Subtitle for a switch that allows a user to turn off Cookie Cutter. -->
-    <string name="cookie_cutter_subtitle">Le site semble ne pas fonctionner correctement ? Essayez de désactiver la fonctionnalité.</string>
+    <string name="content_filter_subtitle">Le site semble ne pas fonctionner correctement ? Essayez de désactiver la fonctionnalité.</string>
 
 
 

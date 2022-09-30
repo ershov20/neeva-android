@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter.ui.popover
+package com.neeva.app.contentfilter.ui.popover
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
@@ -10,16 +10,16 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.neeva.app.appnav.AppNavModel
-import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.cookiecutter.PreviewTrackersAllowList
-import com.neeva.app.cookiecutter.TrackersAllowList
-import com.neeva.app.cookiecutter.TrackingData
-import com.neeva.app.cookiecutter.TrackingEntity
+import com.neeva.app.contentfilter.ContentFilterModel
+import com.neeva.app.contentfilter.PreviewTrackersAllowList
+import com.neeva.app.contentfilter.TrackersAllowList
+import com.neeva.app.contentfilter.TrackingData
+import com.neeva.app.contentfilter.TrackingEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
-/** Stores all controller and state logic needed in [CookieCutterPopover] UI. */
-interface CookieCutterPopoverModel {
+/** Stores all controller and state logic needed in [ContentFilterPopover] UI. */
+interface ContentFilterPopoverModel {
     val trackingDataFlow: StateFlow<TrackingData?>
     val cookieNoticeBlocked: StateFlow<Boolean>
     val trackersAllowList: TrackersAllowList
@@ -27,34 +27,34 @@ interface CookieCutterPopoverModel {
     val urlFlow: StateFlow<Uri>
 
     val onReloadTab: () -> Unit
-    fun openCookieCutterSettings()
+    fun openContentFilterSettings()
     fun openPopover()
     fun dismissPopover()
 }
 
 @Composable
-fun rememberCookieCutterPopoverModel(
+fun rememberContentFilterPopoverModel(
     appNavModel: AppNavModel,
     reloadTab: () -> Unit,
-    cookieCutterModel: CookieCutterModel,
+    contentFilterModel: ContentFilterModel,
     urlFlow: StateFlow<Uri>
-): CookieCutterPopoverModel {
+): ContentFilterPopoverModel {
     val popoverVisible = remember { mutableStateOf(false) }
 
-    return remember(appNavModel, cookieCutterModel, popoverVisible, urlFlow) {
-        CookieCutterPopoverModelImpl(
+    return remember(appNavModel, contentFilterModel, popoverVisible, urlFlow) {
+        ContentFilterPopoverModelImpl(
             appNavModel = appNavModel,
             popoverVisible = popoverVisible,
-            trackingDataFlow = cookieCutterModel.trackingDataFlow,
-            cookieNoticeBlocked = cookieCutterModel.cookieNoticeBlockedFlow,
-            trackersAllowList = cookieCutterModel.trackersAllowList,
+            trackingDataFlow = contentFilterModel.trackingDataFlow,
+            cookieNoticeBlocked = contentFilterModel.cookieNoticeBlockedFlow,
+            trackersAllowList = contentFilterModel.trackersAllowList,
             urlFlow = urlFlow,
             onReloadTab = reloadTab
         )
     }
 }
 
-class CookieCutterPopoverModelImpl(
+class ContentFilterPopoverModelImpl(
     private val appNavModel: AppNavModel,
     override val popoverVisible: MutableState<Boolean>,
     override val trackingDataFlow: StateFlow<TrackingData?>,
@@ -62,10 +62,10 @@ class CookieCutterPopoverModelImpl(
     override val trackersAllowList: TrackersAllowList,
     override val urlFlow: StateFlow<Uri>,
     override val onReloadTab: () -> Unit
-) : CookieCutterPopoverModel {
-    override fun openCookieCutterSettings() {
+) : ContentFilterPopoverModel {
+    override fun openContentFilterSettings() {
         dismissPopover()
-        appNavModel.showCookieCutterSettings()
+        appNavModel.showContentFilterSettings()
     }
 
     override fun openPopover() {
@@ -77,7 +77,7 @@ class CookieCutterPopoverModelImpl(
     }
 }
 
-class PreviewCookieCutterPopoverModel(
+class PreviewContentFilterPopoverModel(
     trackingData: TrackingData = TrackingData(
         numTrackers = 999,
         trackingEntities = mapOf(
@@ -87,7 +87,7 @@ class PreviewCookieCutterPopoverModel(
             TrackingEntity.CRITEO to 19
         )
     )
-) : CookieCutterPopoverModel {
+) : ContentFilterPopoverModel {
     override val trackingDataFlow: StateFlow<TrackingData?> = MutableStateFlow(trackingData)
     override val cookieNoticeBlocked = MutableStateFlow(true)
     override val trackersAllowList = PreviewTrackersAllowList()
@@ -95,7 +95,7 @@ class PreviewCookieCutterPopoverModel(
     override val urlFlow: StateFlow<Uri> = MutableStateFlow(Uri.parse("www.neeva.com"))
     override val onReloadTab: () -> Unit = { }
 
-    override fun openCookieCutterSettings() {}
+    override fun openContentFilterSettings() {}
     override fun openPopover() {}
     override fun dismissPopover() {}
 }

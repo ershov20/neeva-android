@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter
+package com.neeva.app.contentfilter
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -24,13 +24,13 @@ import strikt.assertions.isFalse
 import strikt.assertions.isTrue
 
 /**
- * Tests that the TabCookieCutterModel updates the stats properly
+ * Tests that the TabContentFilterModel updates the stats properly
  */
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
 @Config(manifest = Config.NONE)
-class TabCookieCutterModelTest : BaseTest() {
-    private lateinit var model: TabCookieCutterModel
+class TabContentFilterModelTest : BaseTest() {
+    private lateinit var model: TabContentFilterModel
     private lateinit var domainProviderImpl: DomainProviderImpl
     private lateinit var cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
     private lateinit var trackersAllowList: TrackersAllowList
@@ -46,7 +46,7 @@ class TabCookieCutterModelTest : BaseTest() {
             coEvery { getHostAllowsTrackers("example.com") } returns true
         }
 
-        model = TabCookieCutterModel(
+        model = TabContentFilterModel(
             browserFlow = MutableStateFlow(null),
             tabId = "tab guid 1",
             trackingDataFlow = MutableStateFlow(null),

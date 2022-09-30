@@ -36,7 +36,7 @@ object TestNeevaConstantsModule {
         appHelpCenterURL = "http://127.0.0.1:8000/help.html"
     ) {
         // no local equivalent for cookie cutter url, but this should suffice for testing
-        override val cookieCutterLearnMoreUrl = "http://127.0.0.1:8000/help.html"
+        override val contentFilterLearnMoreUrl = "http://127.0.0.1:8000/help.html"
     }
 
     @Provides

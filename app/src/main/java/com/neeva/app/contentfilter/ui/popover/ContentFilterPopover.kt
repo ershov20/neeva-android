@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter.ui.popover
+package com.neeva.app.contentfilter.ui.popover
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.neeva.app.R
-import com.neeva.app.cookiecutter.TrackersAllowList
-import com.neeva.app.cookiecutter.TrackingData
-import com.neeva.app.cookiecutter.TrackingEntity
+import com.neeva.app.contentfilter.TrackersAllowList
+import com.neeva.app.contentfilter.TrackingData
+import com.neeva.app.contentfilter.TrackingEntity
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
@@ -39,8 +39,8 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.NavigationRow
 
 @Composable
-fun CookieCutterPopover(
-    cookieCutterPopoverModel: CookieCutterPopoverModel,
+fun ContentFilterPopover(
+    contentFilterPopoverModel: ContentFilterPopoverModel,
     modifier: Modifier = Modifier
 ) {
     // TODO(kobec): the offset does not work in landscape
@@ -49,47 +49,47 @@ fun CookieCutterPopover(
     }
     Popup(
         offset = IntOffset(x = 0, y = topOffset),
-        onDismissRequest = cookieCutterPopoverModel::dismissPopover,
+        onDismissRequest = contentFilterPopoverModel::dismissPopover,
         properties = PopupProperties(focusable = true)
     ) {
-        CookieCutterPopoverContent(
-            cookieCutterPopoverModel = cookieCutterPopoverModel,
+        ContentFilterPopoverContent(
+            contentFilterPopoverModel = contentFilterPopoverModel,
             modifier = modifier
         )
     }
 }
 
 @Composable
-private fun CookieCutterPopoverContent(
-    cookieCutterPopoverModel: CookieCutterPopoverModel,
+private fun ContentFilterPopoverContent(
+    contentFilterPopoverModel: ContentFilterPopoverModel,
     modifier: Modifier = Modifier
 ) {
-    val hostFlow by cookieCutterPopoverModel.urlFlow.collectAsState()
+    val hostFlow by contentFilterPopoverModel.urlFlow.collectAsState()
     val host = hostFlow.host ?: ""
 
     // Default to saying that trackers are disallowed to avoid the TrackingDataDisplay UI appearing
     // and then disappearing immediately.
-    val trackersAllowList = cookieCutterPopoverModel.trackersAllowList
+    val trackersAllowList = contentFilterPopoverModel.trackersAllowList
     val allowsTrackersFlow by trackersAllowList
         .getHostAllowsTrackersFlow(host)
         .collectAsState(true)
-    val isCookieCutterEnabled = !allowsTrackersFlow
+    val isContentFilterEnabled = !allowsTrackersFlow
 
-    CookieCutterPopoverContent(
+    ContentFilterPopoverContent(
         host = host,
-        isCookieCutterEnabled = isCookieCutterEnabled,
+        isContentFilterEnabled = isContentFilterEnabled,
         trackersAllowList = trackersAllowList,
-        cookieCutterPopoverModel = cookieCutterPopoverModel,
+        contentFilterPopoverModel = contentFilterPopoverModel,
         modifier = modifier
     )
 }
 
 @Composable
-private fun CookieCutterPopoverContent(
+private fun ContentFilterPopoverContent(
     host: String,
-    isCookieCutterEnabled: Boolean,
+    isContentFilterEnabled: Boolean,
     trackersAllowList: TrackersAllowList,
-    cookieCutterPopoverModel: CookieCutterPopoverModel,
+    contentFilterPopoverModel: ContentFilterPopoverModel,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -105,18 +105,18 @@ private fun CookieCutterPopoverContent(
                 .fillMaxWidth()
         ) {
             TrackingDataDisplay(
-                visible = isCookieCutterEnabled,
-                cookieCutterPopoverModel = cookieCutterPopoverModel
+                visible = isContentFilterEnabled,
+                contentFilterPopoverModel = contentFilterPopoverModel
             )
 
             // Cookie Cutter Popover Settings:
             TrackingDataSurface {
                 Column {
-                    CookieCutterPopoverSwitch(
-                        cookieCutterEnabled = isCookieCutterEnabled,
+                    ContentFilterPopoverSwitch(
+                        contentFilterEnabled = isContentFilterEnabled,
                         host = host,
                         trackersAllowList = trackersAllowList,
-                        onSuccess = { cookieCutterPopoverModel.onReloadTab() }
+                        onSuccess = { contentFilterPopoverModel.onReloadTab() }
                     )
 
                     Spacer(
@@ -127,8 +127,8 @@ private fun CookieCutterPopoverContent(
                     )
 
                     NavigationRow(
-                        primaryLabel = stringResource(R.string.cookie_cutter_settings),
-                        onClick = cookieCutterPopoverModel::openCookieCutterSettings
+                        primaryLabel = stringResource(R.string.content_filter_settings),
+                        onClick = contentFilterPopoverModel::openContentFilterSettings
                     )
                 }
             }
@@ -136,7 +136,7 @@ private fun CookieCutterPopoverContent(
     }
 }
 
-private val previewCookieCutterPopoverModel = PreviewCookieCutterPopoverModel(
+private val previewContentFilterPopoverModel = PreviewContentFilterPopoverModel(
     trackingData = TrackingData(
         numTrackers = 999,
         trackingEntities = mapOf(
@@ -148,10 +148,10 @@ private val previewCookieCutterPopoverModel = PreviewCookieCutterPopoverModel(
 
 @PortraitPreviews
 @Composable
-private fun CookieCutterPopoverContentPreview_Light_Partial() {
+private fun ContentFilterPopoverContentPreview_Light_Partial() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
-        CookieCutterPopoverContent(
-            cookieCutterPopoverModel = previewCookieCutterPopoverModel
+        ContentFilterPopoverContent(
+            contentFilterPopoverModel = previewContentFilterPopoverModel
         )
     }
 }
@@ -159,26 +159,26 @@ private fun CookieCutterPopoverContentPreview_Light_Partial() {
 @PortraitPreviews
 @LandscapePreviews
 @Composable
-private fun CookieCutterPopoverContentPreview_Light_Full() {
+private fun ContentFilterPopoverContentPreview_Light_Full() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
-        CookieCutterPopoverContent(
+        ContentFilterPopoverContent(
             host = "unused",
-            isCookieCutterEnabled = true,
-            trackersAllowList = previewCookieCutterPopoverModel.trackersAllowList,
-            cookieCutterPopoverModel = previewCookieCutterPopoverModel
+            isContentFilterEnabled = true,
+            trackersAllowList = previewContentFilterPopoverModel.trackersAllowList,
+            contentFilterPopoverModel = previewContentFilterPopoverModel
         )
     }
 }
 
 @PortraitPreviewsDark
 @Composable
-private fun CookieCutterPopoverContentPreview_Dark() {
+private fun ContentFilterPopoverContentPreview_Dark() {
     NeevaThemePreviewContainer(useDarkTheme = true) {
-        CookieCutterPopoverContent(
+        ContentFilterPopoverContent(
             host = "unused",
-            isCookieCutterEnabled = true,
-            trackersAllowList = previewCookieCutterPopoverModel.trackersAllowList,
-            cookieCutterPopoverModel = previewCookieCutterPopoverModel
+            isContentFilterEnabled = true,
+            trackersAllowList = previewContentFilterPopoverModel.trackersAllowList,
+            contentFilterPopoverModel = previewContentFilterPopoverModel
         )
     }
 }

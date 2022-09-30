@@ -22,8 +22,8 @@ import com.neeva.app.history.HistoryContainer
 import com.neeva.app.history.HistorySubpage.Companion.toHistorySubpage
 import com.neeva.app.settings.LicensesPane
 import com.neeva.app.settings.clearbrowsing.ClearBrowsingPane
-import com.neeva.app.settings.cookiecutter.CookieCutterPane
-import com.neeva.app.settings.cookiecutter.CookiePreferencesPane
+import com.neeva.app.settings.contentfilter.ContentFilterPane
+import com.neeva.app.settings.contentfilter.CookiePreferencesPane
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserPane
 import com.neeva.app.settings.featureflags.FeatureFlagsPane
 import com.neeva.app.settings.main.MainSettingsPane
@@ -79,8 +79,8 @@ fun AppNav(
             )
         }
 
-        composable(AppNavDestination.COOKIE_CUTTER_SETTINGS.route) {
-            CookieCutterPane(
+        composable(AppNavDestination.CONTENT_FILTER_SETTINGS.route) {
+            ContentFilterPane(
                 settingsController = settingsControllerImpl,
                 neevaConstants = neevaConstants
             )

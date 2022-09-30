@@ -6,7 +6,7 @@ package com.neeva.app.settings
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import com.neeva.app.cookiecutter.CookieCutterModel
+import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.settings.clearbrowsing.TimeClearingOption
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -24,11 +24,11 @@ import java.util.EnumSet
  */
 class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
     private val toggleMap = mutableMapOf<String, MutableState<Boolean>>()
-    private val cookieCutterMode = mutableStateOf(
-        CookieCutterModel.BlockingStrength.valueOf(
+    private val contentFilterMode = mutableStateOf(
+        ContentFilterModel.BlockingStrength.valueOf(
             getSharedPrefValue(
-                CookieCutterModel.BLOCKING_STRENGTH_SHARED_PREF_KEY,
-                CookieCutterModel.BlockingStrength.TRACKER_COOKIE.name
+                ContentFilterModel.BLOCKING_STRENGTH_SHARED_PREF_KEY,
+                ContentFilterModel.BlockingStrength.TRACKER_COOKIE.name
             )
         )
     )
@@ -78,23 +78,23 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         setSharedPrefValue(settingsToggle.key, newToggleValue)
     }
 
-    fun getCookieCutterStrength(): CookieCutterModel.BlockingStrength {
-        return cookieCutterMode.value
+    fun getContentFilterStrength(): ContentFilterModel.BlockingStrength {
+        return contentFilterMode.value
     }
 
-    fun setCookieCutterStrength(strength: CookieCutterModel.BlockingStrength) {
-        setSharedPrefValue(CookieCutterModel.BLOCKING_STRENGTH_SHARED_PREF_KEY, strength.name)
-        cookieCutterMode.value = strength
+    fun setContentFilterStrength(strength: ContentFilterModel.BlockingStrength) {
+        setSharedPrefValue(ContentFilterModel.BLOCKING_STRENGTH_SHARED_PREF_KEY, strength.name)
+        contentFilterMode.value = strength
     }
 
-    fun getCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies> {
+    fun getCookieNoticePreferences(): Set<ContentFilterModel.CookieNoticeCookies> {
         return cookieNoticePreferences.value
     }
 
-    private fun loadCookieNoticePreferences(): Set<CookieCutterModel.CookieNoticeCookies> {
+    private fun loadCookieNoticePreferences(): Set<ContentFilterModel.CookieNoticeCookies> {
         // first get the serialized value
         val serialized = getSharedPrefValue(
-            CookieCutterModel.COOKIE_NOTICE_PREFERENCES_SHARED_PREF_KEY,
+            ContentFilterModel.COOKIE_NOTICE_PREFERENCES_SHARED_PREF_KEY,
             ""
         )
 
@@ -102,24 +102,24 @@ class SettingsDataModel(val sharedPreferencesModel: SharedPreferencesModel) {
         val list = serialized.split(";")
             .filter { it.isNotEmpty() }
             .map {
-                CookieCutterModel.CookieNoticeCookies.values()[it.toInt()]
+                ContentFilterModel.CookieNoticeCookies.values()[it.toInt()]
             }
 
         // copyOf throws if called with an empty list
         return if (list.isEmpty()) {
-            EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
+            EnumSet.noneOf(ContentFilterModel.CookieNoticeCookies::class.java)
         } else {
             EnumSet.copyOf(list)
         }
     }
 
-    fun setCookieNoticePreferences(selection: Set<CookieCutterModel.CookieNoticeCookies>) {
+    fun setCookieNoticePreferences(selection: Set<ContentFilterModel.CookieNoticeCookies>) {
         cookieNoticePreferences.value = selection
 
         // serialize the selected cookies into a single value
         val serialized = selection.joinToString(";") { it.ordinal.toString() }
 
-        setSharedPrefValue(CookieCutterModel.COOKIE_NOTICE_PREFERENCES_SHARED_PREF_KEY, serialized)
+        setSharedPrefValue(ContentFilterModel.COOKIE_NOTICE_PREFERENCES_SHARED_PREF_KEY, serialized)
     }
 
     fun getTimeClearingOptionIndex(): MutableState<Int> {

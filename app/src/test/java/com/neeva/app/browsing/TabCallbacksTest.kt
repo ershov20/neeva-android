@@ -10,10 +10,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
-import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.cookiecutter.ScriptInjectionManager
-import com.neeva.app.cookiecutter.TrackersAllowList
-import com.neeva.app.cookiecutter.TrackingData
+import com.neeva.app.contentfilter.ContentFilterModel
+import com.neeva.app.contentfilter.ScriptInjectionManager
+import com.neeva.app.contentfilter.TrackersAllowList
+import com.neeva.app.contentfilter.TrackingData
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.favicons.FaviconCache
@@ -56,7 +56,7 @@ class TabCallbacksTest : BaseTest() {
 
     private lateinit var activityCallbackProvider: ActivityCallbackProvider
     private lateinit var browserFlow: StateFlow<Browser?>
-    private lateinit var cookieCutterModel: CookieCutterModel
+    private lateinit var contentFilterModel: ContentFilterModel
     private lateinit var navigationController: NavigationController
     private lateinit var tabList: TabList
 
@@ -78,7 +78,7 @@ class TabCallbacksTest : BaseTest() {
         trackingDataFlow = MutableStateFlow(null)
         enableTrackingProtection = mutableStateOf(true)
 
-        cookieCutterModel = mockk {
+        contentFilterModel = mockk {
             every { cookieNoticeBlockedFlow } returns this@TabCallbacksTest.cookieNoticeBlockedFlow
             every { trackingDataFlow } returns this@TabCallbacksTest.trackingDataFlow
             every { enableTrackingProtection }.returns(
@@ -133,7 +133,7 @@ class TabCallbacksTest : BaseTest() {
             activityCallbackProvider = activityCallbackProvider,
             registerNewTab = registerNewTab,
             fullscreenCallback = fullscreenCallback,
-            cookieCutterModel = cookieCutterModel,
+            contentFilterModel = contentFilterModel,
             domainProvider = domainProvider,
             scriptInjectionManager = scriptInjectionManager,
             clientLogger = null

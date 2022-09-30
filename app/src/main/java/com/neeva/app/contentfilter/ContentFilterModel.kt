@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter
+package com.neeva.app.contentfilter
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.MutableState
@@ -19,7 +19,7 @@ import kotlinx.coroutines.withContext
 import org.chromium.weblayer.ContentFilterManager
 import org.chromium.weblayer.ContentFilterMode
 
-interface CookieCutterModel {
+interface ContentFilterModel {
     val trackersAllowList: TrackersAllowList
     val trackingDataFlow: MutableStateFlow<TrackingData?>
     val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
@@ -82,12 +82,12 @@ interface CookieCutterModel {
     }
 }
 
-class CookieCutterModelImpl(
+class ContentFilterModelImpl(
     override val trackersAllowList: TrackersAllowList,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
     private val settingsDataModel: SettingsDataModel
-) : CookieCutterModel {
+) : ContentFilterModel {
     private lateinit var contentFilterManager: ContentFilterManager
 
     override val trackingDataFlow = MutableStateFlow<TrackingData?>(null)
@@ -119,12 +119,12 @@ class CookieCutterModelImpl(
         contentFilterManager.disableAllRulesFiles()
 
         if (enableTrackingProtection.value) {
-            val blockingStrength = settingsDataModel.getCookieCutterStrength()
+            val blockingStrength = settingsDataModel.getContentFilterStrength()
             contentFilterManager.setMode(blockingStrength.mode)
 
             contentFilterManager.enableRulesFile("easyprivacy")
             if (enableAdBlocking.value &&
-                blockingStrength == CookieCutterModel.BlockingStrength.TRACKER_REQUEST
+                blockingStrength == ContentFilterModel.BlockingStrength.TRACKER_REQUEST
             ) {
                 contentFilterManager.enableRulesFile("easylist")
             }
@@ -146,14 +146,14 @@ class CookieCutterModelImpl(
     }
 }
 
-class PreviewCookieCutterModel : CookieCutterModel {
+class PreviewContentFilterModel : ContentFilterModel {
     override val trackersAllowList = PreviewTrackersAllowList()
     override val trackingDataFlow: MutableStateFlow<TrackingData?> = MutableStateFlow(null)
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection: MutableState<Boolean> = mutableStateOf(true)
     override val enableAdBlocking: MutableState<Boolean> = mutableStateOf(false)
     override val cookieCuttingPreferences =
-        mutableStateOf(emptySet<CookieCutterModel.CookieNoticeCookies>())
+        mutableStateOf(emptySet<ContentFilterModel.CookieNoticeCookies>())
     override fun setUpTrackingProtection(manager: ContentFilterManager) {}
     override fun updateTrackingProtectionConfiguration() {}
 }

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter.ui.popover
+package com.neeva.app.contentfilter.ui.popover
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandIn
@@ -32,16 +32,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.R
-import com.neeva.app.cookiecutter.TrackingData
-import com.neeva.app.cookiecutter.TrackingEntity
+import com.neeva.app.contentfilter.TrackingData
+import com.neeva.app.contentfilter.TrackingEntity
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
-fun TrackingDataDisplay(visible: Boolean, cookieCutterPopoverModel: CookieCutterPopoverModel) {
-    val trackingData by cookieCutterPopoverModel.trackingDataFlow.collectAsState()
-    val cookieNoticeBlocked by cookieCutterPopoverModel.cookieNoticeBlocked.collectAsState()
+fun TrackingDataDisplay(visible: Boolean, contentFilterPopoverModel: ContentFilterPopoverModel) {
+    val trackingData by contentFilterPopoverModel.trackingDataFlow.collectAsState()
+    val cookieNoticeBlocked by contentFilterPopoverModel.cookieNoticeBlocked.collectAsState()
 
     AnimatedVisibility(
         visible = visible,
@@ -79,7 +79,7 @@ fun TrackingDataDisplayContent(
     Column(Modifier.fillMaxWidth()) {
         Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max)) {
             TrackingDataNumberBox(
-                label = stringResource(id = R.string.cookie_cutter_trackers),
+                label = stringResource(id = R.string.content_filter_ads_and_trackers),
                 value = trackingData?.numTrackers ?: 0,
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )
@@ -87,7 +87,7 @@ fun TrackingDataDisplayContent(
             Spacer(Modifier.width(Dimensions.PADDING_SMALL))
 
             TrackingDataNumberBox(
-                label = stringResource(id = R.string.cookie_cutter_popups),
+                label = stringResource(id = R.string.content_filter_popups),
                 value = if (wasCookieNoticeBlocked) 1 else 0,
                 modifier = Modifier.weight(1f).fillMaxHeight()
             )

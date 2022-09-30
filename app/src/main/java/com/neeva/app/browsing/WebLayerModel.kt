@@ -391,8 +391,8 @@ class WebLayerModel internal constructor(
     fun getRegularProfileFaviconCache(): FaviconCache = regularBrowser.faviconCache
 
     fun updateBrowsersCookieCutterConfig() {
-        regularBrowser.updateCookieCutterConfigAndRefreshTabs()
-        incognitoBrowser?.updateCookieCutterConfigAndRefreshTabs()
+        regularBrowser.updateContentFilterConfigAndRefreshTabs()
+        incognitoBrowser?.updateContentFilterConfigAndRefreshTabs()
     }
 
     private fun shouldDestroyIncognitoOnSwitch(): Boolean {

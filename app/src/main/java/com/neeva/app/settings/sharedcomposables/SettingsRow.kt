@@ -17,7 +17,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
 import com.neeva.app.LocalChromiumVersion
 import com.neeva.app.R
-import com.neeva.app.cookiecutter.CookieCutterModel
+import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
@@ -171,27 +171,27 @@ fun SettingsRow(
 
         SettingsRowType.COOKIE_CUTTER_BLOCKING_STRENGTH -> {
             RadioButtonGroup(
-                CookieCutterModel.BlockingStrength.values().map {
+                ContentFilterModel.BlockingStrength.values().map {
                     RadioButtonItem(it.title, it.description)
                 },
-                settingsController.getCookieCutterStrength().ordinal,
+                settingsController.getContentFilterStrength().ordinal,
                 addAdditionalHorizontalPadding = true,
                 onSelect = { index ->
-                    val blockingStrength = CookieCutterModel.BlockingStrength.values()[index]
-                    settingsController.setCookieCutterStrength(blockingStrength)
+                    val blockingStrength = ContentFilterModel.BlockingStrength.values()[index]
+                    settingsController.setContentFilterStrength(blockingStrength)
                 }
             )
         }
 
         SettingsRowType.COOKIE_CUTTER_NOTICE_SELECTION -> {
             RadioButtonGroup(
-                CookieCutterModel.CookieNoticeSelection.values().map {
+                ContentFilterModel.CookieNoticeSelection.values().map {
                     RadioButtonItem(it.title, null)
                 },
                 settingsController.getCookieNoticeSelection().ordinal,
                 addAdditionalHorizontalPadding = true,
                 onSelect = { index ->
-                    val selection = CookieCutterModel.CookieNoticeSelection.values()[index]
+                    val selection = ContentFilterModel.CookieNoticeSelection.values()[index]
                     settingsController.setCookieNoticeSelection(selection)
                 }
             )
@@ -199,7 +199,7 @@ fun SettingsRow(
 
         SettingsRowType.COOKIE_PREFERENCE_SELECTION -> {
             CheckBoxGroup(
-                checkBoxOptions = CookieCutterModel.CookieNoticeCookies.values().map {
+                checkBoxOptions = ContentFilterModel.CookieNoticeCookies.values().map {
                     CheckBoxItem(it.title, it.description)
                 },
                 selectedOptionsIndex = settingsController.getCookieNoticePreferences()
@@ -207,9 +207,9 @@ fun SettingsRow(
                 onCheckedChange = { index, checked ->
                     val newSet = settingsController.getCookieNoticePreferences().toMutableSet()
                     if (checked) {
-                        newSet.add(CookieCutterModel.CookieNoticeCookies.values()[index])
+                        newSet.add(ContentFilterModel.CookieNoticeCookies.values()[index])
                     } else {
-                        newSet.remove(CookieCutterModel.CookieNoticeCookies.values()[index])
+                        newSet.remove(ContentFilterModel.CookieNoticeCookies.values()[index])
                     }
                     settingsController.setCookieNoticePreferences(newSet)
                 }

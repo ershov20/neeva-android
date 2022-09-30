@@ -31,7 +31,7 @@ interface AppNavModel {
     fun showBrowser(forceUserToStayInCardGrid: Boolean = true)
     fun showCardGrid()
     fun showClearBrowsingSettings()
-    fun showCookieCutterSettings()
+    fun showContentFilterSettings()
     fun showCookiePreferences()
     fun showDefaultBrowserSettings()
     fun showFeedback()
@@ -78,7 +78,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showBrowser(forceUserToStayInCardGrid: Boolean) {}
     override fun showCardGrid() {}
     override fun showClearBrowsingSettings() {}
-    override fun showCookieCutterSettings() {}
+    override fun showContentFilterSettings() {}
     override fun showCookiePreferences() {}
     override fun showDefaultBrowserSettings() {}
     override fun showFeedback() {}

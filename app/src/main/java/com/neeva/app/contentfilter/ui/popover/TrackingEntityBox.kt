@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter.ui.popover
+package com.neeva.app.contentfilter.ui.popover
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -27,7 +27,7 @@ import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 import com.neeva.app.R
-import com.neeva.app.cookiecutter.TrackingEntity
+import com.neeva.app.contentfilter.TrackingEntity
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
@@ -43,7 +43,7 @@ internal fun TrackingEntityBox(trackingEntities: Map<TrackingEntity, Int>?) {
         }
     }
 
-    TrackingDataBox(label = stringResource(id = R.string.cookie_cutter_whos_tracking_you)) {
+    TrackingDataBox(label = stringResource(id = R.string.content_filter_whos_tracking_you)) {
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()

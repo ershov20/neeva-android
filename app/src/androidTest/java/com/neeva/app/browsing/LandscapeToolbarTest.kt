@@ -57,8 +57,9 @@ class LandscapeToolbarTest : BaseBrowserTest() {
                 .assertIsDisplayed()
             waitForNodeWithContentDescription(getString(R.string.toolbar_tabs_and_spaces))
                 .assertIsDisplayed()
-            waitForNodeWithContentDescription(getString(R.string.tracking_protection))
-                .assertIsDisplayed()
+            waitForNodeWithContentDescription(
+                getString(R.string.content_filter_content_description)
+            ).assertIsDisplayed()
         }
     }
 
@@ -80,7 +81,7 @@ class LandscapeToolbarTest : BaseBrowserTest() {
             waitForNodeWithContentDescription(getString(R.string.toolbar_tabs_and_spaces))
                 .assertIsDisplayed()
             waitForNodeWithContentDescription(
-                getString(R.string.tracking_protection_incognito_content_description)
+                getString(R.string.content_filter_incognito_content_description)
             ).assertIsDisplayed()
         }
     }

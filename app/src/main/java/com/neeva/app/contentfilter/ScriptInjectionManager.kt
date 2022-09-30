@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter
+package com.neeva.app.contentfilter
 
 import android.content.Context
 import android.net.Uri
@@ -53,14 +53,14 @@ class ScriptInjectionManager(
     fun injectNavigationCompletedScripts(
         uri: Uri,
         tab: Tab,
-        tabCookieCutterModel: TabCookieCutterModel
+        tabContentFilterModel: TabContentFilterModel
     ) {
         coroutineScope.launch(dispatchers.main) {
             if (tab.isDestroyed) return@launch
 
             // If our preferences say we shouldn't activate cookie cutter, then don't. This depends
             // on whether or not cookie cutter is enabled globally, and on a per-site basis.
-            if (!tabCookieCutterModel.shouldInjectCookieEngine(uri.host ?: "")) {
+            if (!tabContentFilterModel.shouldInjectCookieEngine(uri.host ?: "")) {
                 return@launch
             }
 

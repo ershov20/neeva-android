@@ -85,7 +85,7 @@ class LongPressChildTabBehaviorTest : BaseBrowserTest() {
             )
             waitForTitle("Page 2")
             onNodeWithContentDescription(
-                getString(R.string.tracking_protection_incognito_content_description)
+                getString(R.string.content_filter_incognito_content_description)
             ).assertExists()
 
             // Make sure we've still got the same number of regular profile tabs open.

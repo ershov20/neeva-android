@@ -12,7 +12,7 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.urlbar.PreviewUrlBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelState
-import com.neeva.app.cookiecutter.PreviewCookieCutterModel
+import com.neeva.app.contentfilter.PreviewContentFilterModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -60,7 +60,7 @@ class BrowserToolbarModelImpl(
     override val useSingleBrowserToolbar get() = toolbarConfiguration.useSingleBrowserToolbar
     override val isUpdateAvailable get() = toolbarConfiguration.isUpdateAvailable
 
-    override val cookieCutterModel get() = browserWrapper.cookieCutterModel
+    override val contentFilterModel get() = browserWrapper.contentFilterModel
 }
 
 /** Empty [BrowserToolbarModel] that just provides state data. */
@@ -94,5 +94,5 @@ internal class PreviewBrowserToolbarModel(
     override val tabProgressFlow get() = MutableStateFlow(tabProgressValue)
     override val trackersFlow get() = MutableStateFlow(trackers)
     override val urlBarModel get() = PreviewUrlBarModel(urlBarModelStateValue)
-    override val cookieCutterModel get() = PreviewCookieCutterModel()
+    override val contentFilterModel get() = PreviewContentFilterModel()
 }

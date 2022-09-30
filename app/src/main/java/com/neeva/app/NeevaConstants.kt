@@ -35,7 +35,7 @@ open class NeevaConstants(
     /** Endpoint for creating new preview session tokens. */
     val previewCookieURL: String = "${appURL}preview/create-session"
 
-    open val cookieCutterLearnMoreUrl: String = "$appHelpCenterURL/hc/en-us/articles/4486326606355"
+    open val contentFilterLearnMoreUrl: String = "$appHelpCenterURL/hc/en-us/articles/4486326606355"
     val createOktaAccountURL: String = "${appURL}login/create"
 
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")

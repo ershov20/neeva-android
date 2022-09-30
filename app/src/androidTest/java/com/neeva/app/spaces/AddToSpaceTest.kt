@@ -93,7 +93,7 @@ class AddToSpaceTest : BaseBrowserTest() {
         androidComposeRule.apply {
             // Make sure that we're still in regular mode.
             onNodeWithContentDescription(
-                getString(R.string.tracking_protection_incognito_content_description)
+                getString(R.string.content_filter_incognito_content_description)
             ).assertDoesNotExist()
 
             // Clicking on the "Add to Space" button should show the intro bottom sheet.
@@ -135,7 +135,7 @@ class AddToSpaceTest : BaseBrowserTest() {
         androidComposeRule.apply {
             // Make sure that we're still in regular mode.
             onNodeWithContentDescription(
-                getString(R.string.tracking_protection_incognito_content_description)
+                getString(R.string.content_filter_incognito_content_description)
             ).assertDoesNotExist()
 
             // Confirm that the URL isn't in any of the user's Spaces.
@@ -244,7 +244,7 @@ class AddToSpaceTest : BaseBrowserTest() {
 
             // Makre sure we're in incognito.
             onNodeWithContentDescription(
-                getString(R.string.tracking_protection_incognito_content_description)
+                getString(R.string.content_filter_incognito_content_description)
             ).assertExists()
 
             // Confirm that the add to space button is disabled.  Clicking should do nothing.

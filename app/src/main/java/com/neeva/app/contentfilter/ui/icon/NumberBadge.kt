@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter.ui.icon
+package com.neeva.app.contentfilter.ui.icon
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -37,7 +37,7 @@ private fun BadgeImage(number: Int, maxNumber: Int, modifier: Modifier) {
     val text = if (number in 0..maxNumber) {
         number.toString()
     } else {
-        stringResource(id = R.string.cookie_cutter_too_many_items, maxNumber)
+        stringResource(id = R.string.content_filter_too_many_items, maxNumber)
     }
     val height = 16.dp
     val width = when {

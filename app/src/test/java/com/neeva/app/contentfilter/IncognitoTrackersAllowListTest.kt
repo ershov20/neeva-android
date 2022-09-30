@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter
+package com.neeva.app.contentfilter
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest

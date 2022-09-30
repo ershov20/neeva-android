@@ -13,7 +13,7 @@ import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.BrowserWrapperFactory
 import com.neeva.app.browsing.CacheCleaner
 import com.neeva.app.browsing.WebLayerFactory
-import com.neeva.app.cookiecutter.ScriptInjectionManager
+import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.downloads.DownloadCallbackImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger

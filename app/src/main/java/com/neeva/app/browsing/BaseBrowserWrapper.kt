@@ -27,10 +27,10 @@ import com.neeva.app.browsing.findinpage.FindInPageModel
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
-import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.cookiecutter.CookieCutterModelImpl
-import com.neeva.app.cookiecutter.ScriptInjectionManager
-import com.neeva.app.cookiecutter.TrackersAllowList
+import com.neeva.app.contentfilter.ContentFilterModel
+import com.neeva.app.contentfilter.ContentFilterModelImpl
+import com.neeva.app.contentfilter.ScriptInjectionManager
+import com.neeva.app.contentfilter.TrackersAllowList
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.neevascope.NeevaScopeInfoScreen
@@ -107,7 +107,7 @@ abstract class BaseBrowserWrapper internal constructor(
     private val scriptInjectionManager: ScriptInjectionManager,
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val settingsDataModel: SettingsDataModel,
-    override val cookieCutterModel: CookieCutterModel,
+    override val contentFilterModel: ContentFilterModel,
     private val getCurrentTime: () -> Long = { System.currentTimeMillis() },
     private val clientLogger: ClientLogger?
 ) : BrowserWrapper, FaviconCache.ProfileProvider {
@@ -179,7 +179,7 @@ abstract class BaseBrowserWrapper internal constructor(
         scriptInjectionManager = scriptInjectionManager,
         sharedPreferencesModel = sharedPreferencesModel,
         settingsDataModel = settingsDataModel,
-        cookieCutterModel = CookieCutterModelImpl(
+        contentFilterModel = ContentFilterModelImpl(
             trackerAllowList,
             coroutineScope,
             dispatchers,
@@ -303,15 +303,15 @@ abstract class BaseBrowserWrapper internal constructor(
         }
     }
 
-    fun updateCookieCutterConfigAndRefreshTabs() {
-        cookieCutterModel.updateTrackingProtectionConfiguration()
+    fun updateContentFilterConfigAndRefreshTabs() {
+        contentFilterModel.updateTrackingProtectionConfiguration()
         val activeTab = getActiveTab()
         tabList.forEach {
             val tabCallbacks = tabCallbackMap[it] ?: return@forEach
             if (it == activeTab?.guid) {
                 reloadAndUpdateStats(activeTab)
             } else {
-                tabCallbacks.tabCookieCutterModel.reloadUponForeground = true
+                tabCallbacks.tabContentFilterModel.reloadUponForeground = true
             }
         }
     }
@@ -326,14 +326,14 @@ abstract class BaseBrowserWrapper internal constructor(
             if (it == activeTab.guid) {
                 reloadAndUpdateStats(activeTab)
             } else if (domain?.startsWith(activeTabDomain) == true) {
-                tabCallbacks.tabCookieCutterModel.reloadUponForeground = true
+                tabCallbacks.tabContentFilterModel.reloadUponForeground = true
             }
         }
     }
 
     private fun reloadAndUpdateStats(tab: Tab) {
         tab.navigationController.reload()
-        tabCallbackMap[tab.guid]?.tabCookieCutterModel?.updateStats(tab.contentFilterStats)
+        tabCallbackMap[tab.guid]?.tabContentFilterModel?.updateStats(tab.contentFilterStats)
     }
 
     private val browserControlsOffsetCallback = object : BrowserControlsOffsetCallback() {
@@ -404,7 +404,7 @@ abstract class BaseBrowserWrapper internal constructor(
         browser.setMinimumSurfaceSize(displaySize.width(), displaySize.height())
 
         // Configure content filtering
-        cookieCutterModel.setUpTrackingProtection(browser.profile.contentFilterManager)
+        contentFilterModel.setUpTrackingProtection(browser.profile.contentFilterManager)
 
         // Set the Views that WebLayer will use as placeholders for our toolbar.
         //
@@ -598,12 +598,12 @@ abstract class BaseBrowserWrapper internal constructor(
         reregisterTabIfNecessary(tab)
 
         tab?.guid?.let { guid ->
-            val tabCookieCutterModel = tabCallbackMap[guid]?.tabCookieCutterModel
+            val tabCookieCutterModel = tabCallbackMap[guid]?.tabContentFilterModel
 
             if (settingsDataModel.getSettingsToggleValue(SettingsToggle.TRACKING_PROTECTION)) {
-                cookieCutterModel.trackingDataFlow.value =
+                contentFilterModel.trackingDataFlow.value =
                     tabCookieCutterModel?.currentTrackingData()
-                cookieCutterModel.cookieNoticeBlockedFlow.value =
+                contentFilterModel.cookieNoticeBlockedFlow.value =
                     tabCookieCutterModel?.cookieNoticeBlocked ?: false
             }
 
@@ -679,7 +679,7 @@ abstract class BaseBrowserWrapper internal constructor(
             activityCallbackProvider = activityCallbackProvider,
             registerNewTab = this::registerNewTab,
             fullscreenCallback = fullscreenCallback,
-            cookieCutterModel = cookieCutterModel,
+            contentFilterModel = contentFilterModel,
             domainProvider = domainProvider,
             scriptInjectionManager = scriptInjectionManager,
             clientLogger = clientLogger

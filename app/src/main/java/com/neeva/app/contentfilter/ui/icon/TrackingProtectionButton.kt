@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter.ui.icon
+package com.neeva.app.contentfilter.ui.icon
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.neeva.app.R
-import com.neeva.app.cookiecutter.TrackingData
+import com.neeva.app.contentfilter.TrackingData
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import kotlinx.coroutines.flow.StateFlow
@@ -69,7 +69,7 @@ fun TrackingProtectionButton(
                 Icon(
                     painter = painterResource(R.drawable.ic_incognito),
                     contentDescription = stringResource(
-                        R.string.tracking_protection_incognito_content_description
+                        R.string.content_filter_incognito_content_description
                     ),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = iconModifier
@@ -77,7 +77,9 @@ fun TrackingProtectionButton(
             } else {
                 Icon(
                     painter = painterResource(R.drawable.ic_shield),
-                    contentDescription = stringResource(R.string.tracking_protection),
+                    contentDescription = stringResource(
+                        R.string.content_filter_content_description
+                    ),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = iconModifier
                 )

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter
+package com.neeva.app.contentfilter
 
 import android.net.Uri
 import androidx.compose.runtime.State
 import com.neeva.app.browsing.getActiveTabId
-import com.neeva.app.cookiecutter.TrackingEntity.Companion.trackingEntityForHost
+import com.neeva.app.contentfilter.TrackingEntity.Companion.trackingEntityForHost
 import com.neeva.app.publicsuffixlist.DomainProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -49,7 +49,7 @@ data class TrackingData(
     }
 }
 
-class TabCookieCutterModel(
+class TabContentFilterModel(
     private val browserFlow: StateFlow<Browser?>,
     private val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
     private val enableCookieNoticeSuppression: State<Boolean>,

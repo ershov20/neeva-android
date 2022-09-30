@@ -39,11 +39,11 @@ import com.neeva.app.browsing.findinpage.FindInPageToolbar
 import com.neeva.app.browsing.findinpage.PreviewFindInPageModel
 import com.neeva.app.browsing.urlbar.URLBar
 import com.neeva.app.browsing.urlbar.URLBarModelState
-import com.neeva.app.cookiecutter.ui.icon.TrackingProtectionButton
-import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopover
-import com.neeva.app.cookiecutter.ui.popover.CookieCutterPopoverModel
-import com.neeva.app.cookiecutter.ui.popover.PreviewCookieCutterPopoverModel
-import com.neeva.app.cookiecutter.ui.popover.rememberCookieCutterPopoverModel
+import com.neeva.app.contentfilter.ui.icon.TrackingProtectionButton
+import com.neeva.app.contentfilter.ui.popover.ContentFilterPopover
+import com.neeva.app.contentfilter.ui.popover.ContentFilterPopoverModel
+import com.neeva.app.contentfilter.ui.popover.PreviewContentFilterPopoverModel
+import com.neeva.app.contentfilter.ui.popover.rememberContentFilterPopoverModel
 import com.neeva.app.neevascope.NeevaScopeTooltip
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.overflowmenu.OverflowMenuItemId
@@ -64,10 +64,10 @@ fun BrowserToolbarContainer(topOffset: Float) {
         .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE)
 
     val appNavModel = LocalAppNavModel.current
-    val cookieCutterPopoverModel = rememberCookieCutterPopoverModel(
+    val contentFilterPopoverModel = rememberContentFilterPopoverModel(
         appNavModel = appNavModel,
         reloadTab = browserToolbarModel::reloadAfterContentFilterAllowListUpdate,
-        cookieCutterModel = browserToolbarModel.cookieCutterModel,
+        contentFilterModel = browserToolbarModel.contentFilterModel,
         urlFlow = urlFlow
     )
 
@@ -75,7 +75,7 @@ fun BrowserToolbarContainer(topOffset: Float) {
         findInPageModel = findInPageModel,
         showNeevaScopeTooltip = showNeevaScopeTooltip,
         enableNeevaScope = enableNeevaScope,
-        cookieCutterPopoverModel = cookieCutterPopoverModel,
+        contentFilterPopoverModel = contentFilterPopoverModel,
         modifier = Modifier
             .offset(y = topOffsetDp)
             .background(MaterialTheme.colorScheme.background)
@@ -94,7 +94,7 @@ fun BrowserToolbar(
     findInPageModel: FindInPageModel,
     showNeevaScopeTooltip: Boolean,
     enableNeevaScope: Boolean,
-    cookieCutterPopoverModel: CookieCutterPopoverModel,
+    contentFilterPopoverModel: ContentFilterPopoverModel,
     modifier: Modifier = Modifier,
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
@@ -145,8 +145,8 @@ fun BrowserToolbar(
 
                             TrackingProtectionButton(
                                 showIncognitoBadge = browserToolbarModel.isIncognito,
-                                trackingDataFlow = cookieCutterPopoverModel.trackingDataFlow,
-                                onClick = cookieCutterPopoverModel::openPopover
+                                trackingDataFlow = contentFilterPopoverModel.trackingDataFlow,
+                                onClick = contentFilterPopoverModel::openPopover
                             )
 
                             if (browserToolbarModel.useSingleBrowserToolbar) {
@@ -200,10 +200,10 @@ fun BrowserToolbar(
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
 
-                if (cookieCutterPopoverModel.popoverVisible.value) {
+                if (contentFilterPopoverModel.popoverVisible.value) {
                     // The popover will be aligned to the top left of the enclosing Box.
-                    CookieCutterPopover(
-                        cookieCutterPopoverModel = cookieCutterPopoverModel
+                    ContentFilterPopover(
+                        contentFilterPopoverModel = contentFilterPopoverModel
                     )
                 }
 
@@ -232,7 +232,7 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean, enableNeevaS
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = enableNeevaScope,
-                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
+                contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
     }
@@ -263,7 +263,7 @@ internal fun ToolbarPreview_Focus(useSingleBrowserToolbar: Boolean) {
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = false,
-                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
+                contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
     }
@@ -295,7 +295,7 @@ internal fun ToolbarPreview_Typing(useSingleBrowserToolbar: Boolean) {
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = false,
-                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
+                contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
     }
@@ -326,7 +326,7 @@ internal fun ToolbarPreview_Search(useSingleBrowserToolbar: Boolean) {
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = false,
-                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
+                contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
     }
@@ -359,7 +359,7 @@ internal fun ToolbarPreview_Loading(useSingleBrowserToolbar: Boolean) {
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
                 enableNeevaScope = false,
-                cookieCutterPopoverModel = PreviewCookieCutterPopoverModel()
+                contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
     }

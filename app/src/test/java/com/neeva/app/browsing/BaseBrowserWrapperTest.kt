@@ -22,9 +22,9 @@ import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.findinpage.FindInPageModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelImpl
 import com.neeva.app.browsing.urlbar.URLBarModelState
-import com.neeva.app.cookiecutter.CookieCutterModel
-import com.neeva.app.cookiecutter.ScriptInjectionManager
-import com.neeva.app.cookiecutter.TrackersAllowList
+import com.neeva.app.contentfilter.ContentFilterModel
+import com.neeva.app.contentfilter.ScriptInjectionManager
+import com.neeva.app.contentfilter.TrackersAllowList
 import com.neeva.app.createMockNavigationController
 import com.neeva.app.downloads.DownloadCallbackImpl
 import com.neeva.app.history.HistoryManager
@@ -103,7 +103,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     // Default mocks automatically initialized via Mockito.mockitoSession().initMocks().
     @Mock private lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Mock private lateinit var contentFilterManager: ContentFilterManager
-    @Mock private lateinit var cookieCutterModel: CookieCutterModel
+    @Mock private lateinit var contentFilterModel: ContentFilterModel
     @Mock private lateinit var cookieManager: CookieManager
     @Mock private lateinit var domainProvider: DomainProvider
     @Mock private lateinit var downloadCallback: DownloadCallbackImpl
@@ -199,12 +199,12 @@ class BaseBrowserWrapperTest : BaseTest() {
                 )
         }
 
-        cookieCutterModel = mock {
+        contentFilterModel = mock {
             on { trackingDataFlow } doReturn MutableStateFlow(null)
             on { enableTrackingProtection } doReturn mutableStateOf(true)
             on { cookieNoticeBlockedFlow } doReturn MutableStateFlow(false)
             on { cookieCuttingPreferences } doReturn mutableStateOf(
-                EnumSet.noneOf(CookieCutterModel.CookieNoticeCookies::class.java)
+                EnumSet.noneOf(ContentFilterModel.CookieNoticeCookies::class.java)
             )
             on { trackersAllowList } doReturn trackersAllowList
         }
@@ -235,7 +235,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
-            cookieCutterModel = cookieCutterModel,
+            contentFilterModel = contentFilterModel,
             getCurrentTime = currentTimeProvider,
             clientLogger = null
         ) {

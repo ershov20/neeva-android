@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.settings.cookiecutter
+package com.neeva.app.settings.contentfilter
 
 import android.net.Uri
 import androidx.annotation.StringRes
@@ -15,13 +15,13 @@ import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
-class CookieCutterPaneData(
+class ContentFilterPaneData(
     neevaConstants: NeevaConstants,
     isEnabled: Boolean,
     isStrictModeEnabled: @Composable () -> Boolean
 ) : SettingsPaneDataInterface {
     @StringRes
-    override val topAppBarTitleResId: Int = R.string.cookie_cutter
+    override val topAppBarTitleResId: Int = R.string.content_filter
     override val shouldShowUserName: Boolean = false
     override val data: List<SettingsGroupData> =
         mutableListOf(
@@ -37,7 +37,7 @@ class CookieCutterPaneData(
             if (isEnabled) {
                 add(
                     SettingsGroupData(
-                        R.string.settings_trackers,
+                        R.string.settings_trackers_and_ads,
                         listOf(
                             SettingsRowData(
                                 type = SettingsRowType.COOKIE_CUTTER_BLOCKING_STRENGTH
@@ -64,7 +64,7 @@ class CookieCutterPaneData(
                             SettingsRowData(
                                 type = SettingsRowType.LINK,
                                 primaryLabelId = R.string.learn_more,
-                                url = Uri.parse(neevaConstants.cookieCutterLearnMoreUrl)
+                                url = Uri.parse(neevaConstants.contentFilterLearnMoreUrl)
                             )
                         )
                     )

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.cookiecutter
+package com.neeva.app.contentfilter
 
 import android.util.Log
 import com.squareup.moshi.JsonAdapter
@@ -12,14 +12,14 @@ import org.chromium.weblayer.WebMessage
 import org.chromium.weblayer.WebMessageCallback
 import org.chromium.weblayer.WebMessageReplyProxy
 
-abstract class CookieCutterCallbacks : WebMessageCallback() {
+abstract class ContentFilterCallbacks : WebMessageCallback() {
     companion object {
         const val MESSAGE_STARTED = "started"
         const val MESSAGE_PROVIDER_LOG = "provider_log"
         const val MESSAGE_GET_IS_FLAGGED = "is_flagged"
         const val MESSAGE_NOTICE_HANDLED = "notice_handled"
         const val MESSAGE_GET_PREFERENCES = "get_preferences"
-        private val TAG = CookieCutterCallbacks::class.simpleName
+        private val TAG = ContentFilterCallbacks::class.simpleName
 
         private val moshi: Moshi = Moshi.Builder().build()
         private val messageAdapter = moshi.adapter<CookieEngineMessage<Any>>(
@@ -27,10 +27,10 @@ abstract class CookieCutterCallbacks : WebMessageCallback() {
         )
 
         private val prefsMessageAdapter =
-            moshi.adapter<CookieEngineMessage<CookieCuttingPreferences>>(
+            moshi.adapter<CookieEngineMessage<ContentFilteringPreferences>>(
                 Types.newParameterizedType(
                     CookieEngineMessage::class.java,
-                    CookieCuttingPreferences::class.java
+                    ContentFilteringPreferences::class.java
                 )
             )
 
@@ -98,7 +98,7 @@ abstract class CookieCutterCallbacks : WebMessageCallback() {
         replyProxy.postMessage(WebMessage(json))
     }
 
-    abstract fun onGetPreferences(): CookieCuttingPreferences
+    abstract fun onGetPreferences(): ContentFilteringPreferences
     abstract fun onNoticeHandled()
     abstract fun onIsFlagged(origin: String): Boolean
     abstract fun onLogProvider(providerId: String)
