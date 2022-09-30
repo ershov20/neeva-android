@@ -16,7 +16,6 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
-import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
@@ -39,7 +38,6 @@ import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import kotlinx.coroutines.flow.StateFlow
 
-val LocalActivityStarter = compositionLocalOf<ActivityStarter> { error("Not set") }
 val LocalAppNavModel = compositionLocalOf<AppNavModel> { error("Not set") }
 val LocalBrowserToolbarModel = compositionLocalOf<BrowserToolbarModel> { error("Not set") }
 val LocalBrowserWrapper = compositionLocalOf<BrowserWrapper> { error("Not set") }

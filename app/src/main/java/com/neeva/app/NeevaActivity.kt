@@ -38,7 +38,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
-import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.appnav.AppNavModelImpl
@@ -103,7 +102,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
-    @Inject lateinit var activityStarter: ActivityStarter
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
@@ -158,7 +156,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
                 appNavModel = remember(navController) {
                     AppNavModelImpl(
-                        activityStarter = activityStarter,
                         context = context,
                         navController = navController,
                         webLayerModel = webLayerModel,
@@ -197,7 +194,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
                 NeevaTheme {
                     CompositionLocalProvider(
-                        LocalActivityStarter provides activityStarter,
                         LocalAppNavModel provides appNavModel!!,
                         LocalCardsPaneModel provides cardsPaneModel!!,
                         LocalChromiumVersion provides WebLayer.getSupportedFullVersion(context),

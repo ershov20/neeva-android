@@ -30,7 +30,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.chromium.weblayer.Browser
-import org.chromium.weblayer.DownloadCallback
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebLayer
 
@@ -47,7 +46,6 @@ class RegularBrowserWrapper(
     directories: Directories,
     dispatchers: Dispatchers,
     domainProvider: DomainProvider,
-    downloadCallback: DownloadCallback,
     historyManager: HistoryManager,
     hostInfoDao: HostInfoDao,
     searchNavigationDao: SearchNavigationDao,
@@ -91,7 +89,6 @@ class RegularBrowserWrapper(
         dispatchers = dispatchers
     ),
     domainProvider = domainProvider,
-    downloadCallback = downloadCallback,
     neevaConstants = neevaConstants,
     scriptInjectionManager = scriptInjectionManager,
     sharedPreferencesModel = sharedPreferencesModel,

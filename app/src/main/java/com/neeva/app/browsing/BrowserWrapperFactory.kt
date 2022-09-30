@@ -23,7 +23,6 @@ import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.CoroutineScope
-import org.chromium.weblayer.DownloadCallback
 
 class BrowserWrapperFactory(
     private val activityCallbackProvider: ActivityCallbackProvider,
@@ -34,7 +33,6 @@ class BrowserWrapperFactory(
     private val directories: Directories,
     private val dispatchers: Dispatchers,
     private val domainProvider: DomainProvider,
-    private val downloadCallback: DownloadCallback,
     private val historyManager: HistoryManager,
     private val historyDatabase: HistoryDatabase,
     private val incognitoSessionToken: IncognitoSessionToken,
@@ -57,7 +55,6 @@ class BrowserWrapperFactory(
             directories = directories,
             dispatchers = dispatchers,
             domainProvider = domainProvider,
-            downloadCallback = downloadCallback,
             historyManager = historyManager,
             hostInfoDao = historyDatabase.hostInfoDao(),
             searchNavigationDao = historyDatabase.searchNavigationDao(),
@@ -85,7 +82,6 @@ class BrowserWrapperFactory(
             authenticatedApolloWrapper = authenticatedApolloWrapper,
             unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
             domainProvider = domainProvider,
-            downloadCallback = downloadCallback,
             onRemovedFromHierarchy = onRemovedFromHierarchy,
             neevaConstants = neevaConstants,
             scriptInjectionManager = scriptInjectionManager,

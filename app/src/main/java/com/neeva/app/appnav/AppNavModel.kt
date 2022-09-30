@@ -5,6 +5,7 @@
 package com.neeva.app.appnav
 
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
@@ -54,6 +55,10 @@ interface AppNavModel {
 
     fun openUrlViaIntent(uri: Uri)
 
+    /** Safely fire an Intent out. */
+    fun safeStartActivityForIntent(intent: Intent)
+    // endregion
+
     // region Dialogs
     fun showAddToSpace()
     // endregion
@@ -96,6 +101,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}
     override fun openUrlViaIntent(uri: Uri) {}
+    override fun safeStartActivityForIntent(intent: Intent) {}
     override fun showAddToSpace() {}
     override fun shareCurrentPage() {}
     override fun shareSpace(space: Space) {}

@@ -840,18 +840,4 @@
 
     <!-- [NeevaScope] Sends the user to the support page  -->
     <string name="neevascope_contact_us">Contact us via Support</string>
-
-
-
-    <!-- [Downloads] Text for the snackbar popup notification that indicates the download has started for a given file. -->
-    <string name="download_started">Download started for: %1$s</string>
-
-    <!-- [Downloads] Text for the snackbar popup notification that indicates the download has failed for a given file. -->
-    <string name="download_failed">Failed to download: %1$s</string>
-
-    <!-- [Downloads] Text for the snackbar popup notification that indicates the download has completed for a given file. -->
-    <string name="download_completed">Download completed for: %1$s</string>
-
-    <!-- [Downloads] Action Label Text for the snackbar popup notification to view the newly completed download.  -->
-    <string name="download_view">View</string>
 </resources>
