@@ -180,9 +180,10 @@ class RegularProfileZeroQueryViewModel @Inject constructor(
                 // Add some default search suggestions if the user hasn't performed enough to
                 // fill out the section.
                 val updatedList = originalList.toMutableList()
-                DefaultSuggestions.DEFAULT_SEARCH_SUGGESTIONS.forEach { query ->
+                DefaultSuggestions.DEFAULT_SEARCH_SUGGESTIONS.forEach { queryStringId ->
                     if (updatedList.size >= NUM_SUGGESTED_QUERIES) return@forEach
 
+                    val query = appContext.getString(queryStringId)
                     val suggestion = query.toSearchSuggest(neevaConstants)
                     if (updatedList.none { it.query == suggestion.query }) {
                         updatedList.add(suggestion)

@@ -18,6 +18,7 @@ import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
 import com.neeva.app.clickOnUrlBar
 import com.neeva.app.expectBrowserState
+import com.neeva.app.getString
 import com.neeva.app.navigateViaUrlBar
 import com.neeva.app.visitMultipleSitesInNewTabs
 import com.neeva.app.waitForActivityStartup
@@ -51,8 +52,11 @@ class RegularProfileZeroQueryTest : BaseBrowserTest() {
 
     @Test
     fun suggestedSearchesSectionExpandsAndCollapses() {
-        val suggestions = DefaultSuggestions.DEFAULT_SEARCH_SUGGESTIONS
         androidComposeRule.apply {
+            val suggestions = DefaultSuggestions.DEFAULT_SEARCH_SUGGESTIONS.map {
+                getString(it)
+            }
+
             clickOnUrlBar()
 
             waitForNodeWithTag("RegularProfileZeroQuery").apply {

@@ -330,13 +330,43 @@
     <!-- [Spaces][Button] Displayed on a button that sends the user to sign up for an account. -->
     <string name="space_intro_cta">Sign up to get started</string>
 
+    <!-- [Spaces] Title for the bottom sheet that the user uses to share their current Space with somebody else. -->
     <string name="share_space_title">Share Space</string>
+
+    <!-- [Spaces] When sharing a Space to another user, this text is used for the dropdown menu item "Can View" permission option. Granting a given user "Can View" permissions means the given user can only view the Space but is not allowed to comment or edit it. -->
+    <string name="share_space_can_view_permission">Can view</string>
+
+    <!-- [Spaces] When sharing a Space to another user, this text is used for the dropdown menu item "Can Comment" permission option. Granting a given user "Can Comment" permissions means the given user can view and comment in the Space but is not allowed to edit it. -->
+    <string name="share_space_can_comment_permission">Can comment</string>
+
+    <!-- [Spaces] When sharing a Space to another user, this text is used for the dropdown menu item "Can Edit" permission option. Granting a given user "Can Edit" permissions means the given user can view, comment, and edit the Space. This is not the same as owning the Space. -->
+    <string name="share_space_can_edit_permission">Can edit</string>
+
+    <!-- [Spaces] Title of Dropdown Menu in the given Space that allows user to choose what permissions they will grant the user they invite. -->
+    <string name="share_space_permissions">Permissions</string>
+
+    <!-- [Spaces] A snackbar popup message confirming that the invitation filled out by the Share Space bottom sheet has been sent. -->
+    <string name="share_space_confirmation_message">Invitation sent</string>
 
     <!-- [Spaces][Toggle] Displayed on a toggle that allows users to share a link to view their Space. -->
     <string name="enable_link">Enable sharable link</string>
 
     <!-- [Spaces][Toggle] Displayed on a toggle that allows users to share a link to view their Space. -->
     <string name="enable_link_subtitle">Anyone with the link can view</string>
+
+    <!-- [Spaces] Text for the collapsible header for inviting users to their Space.-->
+    <string name="space_invite_someone">Invite someone</string>
+
+
+
+    <!-- [Spaces][ Label for the optional message textfield title for inviting users to their Space. -->
+    <string name="space_note_label">Message (optional)</string>
+
+    <!-- [Spaces][Button] Label for the invitation button that notifies users that they have been invited to this Space. -->
+    <string name="space_invite_label">Invite</string>
+
+    <!-- [Spaces] Enables inviting people to your Space. -->
+    <string name="space_enable_invite" translatable="false">Enable Invite To Space</string>
 
     <string name="shown_as_owner">You will be shown as the owner of the Space</string>
 
@@ -491,6 +521,12 @@
     <!-- [Settings][Toggle] Part two of a toggle that will close all of a user's incognito tabs when they leave incognito mode. -->
     <string name="settings_close_incognito_when_switching_body">When leaving incognito mode</string>
 
+    <!-- [Settings][Toggle][a11y] Allows users to view / control content filtering. -->
+    <string name="content_filter_content_description">Content protection</string>
+
+    <!-- [Settings][a11y] Tells users that they are in incognito and allows them to view / control content filtering. -->
+    <string name="content_filter_incognito_content_description">Incognito content protection</string>
+
     <!-- [Settings][Button] Sends the user to view Neeva's privacy policy. -->
     <string name="settings_privacy_policy">Privacy policy</string>
 
@@ -530,6 +566,7 @@
     <string name="settings_sign_out">Sign out</string>
 
     <!-- [Settings][Header] Groups together settings related to JavaScript tracking & ad blocking on web sites. -->
+    <string name="settings_trackers_and_ads">Tracker &amp; ad blocking</string>
     <string name="blocking_strength_standard_title">Standard</string>
     <string name="blocking_strength_standard_description">Blocks most trackers. Minimises disruption to ads and other functionality.</string>
     <string name="blocking_strength_strict_title">Strict</string>
@@ -555,7 +592,7 @@
     <string name="cookie_cutting_individual_disclaimer">If a site does not support selecting these options individually, then all non-essential cookies for the site will be accepted.</string>
 
     <!-- [Settings] Disclaimer noting that essential cookies are mandatory and cannot be blocked by the app -->
-    <string name="cookie_cutting_essential_disclaimer">Essential cookies are used by sites to remember things like your login information and preferences. These cookies cannot be blocked by Cookie Cutter.</string>
+    <string name="cookie_cutting_essential_disclaimer">Essential cookies are used by sites to remember things like your login information and preferences. These cookies cannot be blocked by Neeva Shield.</string>
 
     <!-- [Settings] Header for settings enabling features that are currently under development. -->
     <string name="settings_features_under_development">Features under development</string>
@@ -678,22 +715,28 @@
 
 
 
-    <!-- [Cookie Cutter] String displayed when we have a number is too big to fit on screen.  Example: 150 would be displayed as "99+" -->
+    <!-- [Content Filter] String displayed when we have a number is too big to fit on screen.  Example: 150 would be displayed as "99+" -->
     <string name="content_filter_too_many_items">%1$d+</string>
 
-    <!-- [Cookie Cutter] Section header for the number of website cookie popups that we've blocked. -->
+    <!-- [Content Filter] Section header for the number of website trackers that we've blocked. -->
+    <string name="content_filter_ads_and_trackers">Ads &amp; trackers</string>
+
+    <!-- [Content Filter] Section header for the number of website cookie popups that we've blocked. -->
     <string name="content_filter_popups">Cookie pop-ups</string>
 
-    <!-- [Cookie Cutter] Section header for the list of companies that we've blocked from tracking you. -->
+    <!-- [Content Filter] Section header for the list of companies that we've blocked from tracking you. -->
     <string name="content_filter_whos_tracking_you">Who\'s tracking you</string>
 
-    <!-- [Cookie Cutter] Name of the "Cookie Cutter" feature. -->
-    <string name="content_filter">Cookie Cutter</string>
+    <!-- [Content Filter] Name of the Content Filter feature. -->
+    <string name="content_filter">Neeva Shield</string>
 
-    <!-- [Cookie Cutter] Sends the user to the settings page for the "Cookie Cutter" feature. -->
-    <string name="content_filter_settings">Cookie Cutter settings</string>
+    <!-- [Content Filter] Notice about enabling / disabling content filter for all sites. -->
+    <string name="content_filter_toggle_description">Disabling it will turn off Neeva Shield on all sites. Changing it will reload your tabs.</string>
 
-    <!-- [Cookie Cutter] Subtitle for a switch that allows a user to turn off Cookie Cutter. -->
+    <!-- [Content Filter] Sends the user to the settings page for the Content Filter feature. -->
+    <string name="content_filter_settings">Neeva Shield settings</string>
+
+    <!-- [Content Filter] Subtitle for a switch that allows a user to turn off the Content Filter. -->
     <string name="content_filter_subtitle">Site appears broken? Try deactivating.</string>
 
 
@@ -795,4 +838,8 @@
 
     <!-- [NeevaScope] Sends the user to the support page  -->
     <string name="neevascope_contact_us">Contact us via Support</string>
+
+    <string name="default_search_suggestion_1">Tech news</string>
+    <string name="default_search_suggestion_2">Fruit Tart Recipes</string>
+    <string name="default_search_suggestion_3" translatable="false">React Hooks</string>
 </resources>

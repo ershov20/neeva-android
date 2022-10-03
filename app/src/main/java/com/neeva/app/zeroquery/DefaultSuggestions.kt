@@ -4,6 +4,7 @@
 
 package com.neeva.app.zeroquery
 
+import com.neeva.app.R
 import com.neeva.app.storage.entities.Favicon
 import com.neeva.app.storage.entities.Site
 
@@ -79,6 +80,8 @@ object DefaultSuggestions {
     )
 
     val DEFAULT_SEARCH_SUGGESTIONS = listOf(
-        "Best Headphones", "Lemon Bar Recipe", "React Hooks"
+        R.string.default_search_suggestion_1,
+        R.string.default_search_suggestion_2,
+        R.string.default_search_suggestion_3
     )
 }
