@@ -92,6 +92,8 @@ Whenever you fetch updates from the repository, make sure that you re-run `boots
 You should now be able to build and run the project.  In the toolbar, you can select the emulator that you set up earlier, then hit the **Run 'app'** button (or select `Menu > Run > Run 'app'`).
 
 ### Building a release (or staging) version of the app
+Building the release version will require you to have signing keys. If you don't have them, then you can use the `staging` build variant. 
+
 A release version of the app includes `WebLayerSupport.apk` as a feature split within the Neeva app bundle (`neeva.aab`).
 
 Run `scripts/build-release.sh` to generate the app bundle `build/release/neeva.aab`.
