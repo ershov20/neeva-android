@@ -338,9 +338,6 @@
     <!-- [Spaces] When sharing a Space to another user, this text is used for the dropdown menu item "Can Edit" permission option. Granting a given user "Can Edit" permissions means the given user can view, comment, and edit the Space. This is not the same as owning the Space. -->
     <string name="share_space_can_edit_permission">Can edit</string>
 
-    <!-- [Spaces] Title of Dropdown Menu in the given Space that allows user to choose what permissions they will grant the user they invite. -->
-    <string name="share_space_permissions">Permissions</string>
-
     <!-- [Spaces] A snackbar popup message confirming that the invitation filled out by the Share Space bottom sheet has been sent. -->
     <string name="share_space_confirmation_message">Invitation sent</string>
 

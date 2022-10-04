@@ -14,20 +14,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
@@ -76,10 +78,10 @@ fun SocialShareRow(
     onMore: () -> Unit
 ) {
     Row(
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-            .padding(Dimensions.PADDING_LARGE)
             .fillMaxWidth()
+            .padding(horizontal = Dimensions.PADDING_LARGE, vertical = Dimensions.PADDING_SMALL)
     ) {
         val appNavModel = LocalAppNavModel.current
         SocialShareButton(
@@ -107,21 +109,9 @@ fun SocialShareRow(
         }
 
         SocialShareButton(
-            name = stringResource(id = R.string.facebook),
-            iconResourceID = R.drawable.facebook_logo
-        ) {
-            val intent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("https://www.facebook.com/sharer/sharer.php?u=$spaceURL")
-            )
-            onTogglePublic()
-            appNavModel.safeStartActivityForIntent(intent)
-        }
-
-        SocialShareButton(
             name = stringResource(id = R.string.copy_link),
             iconResourceID = R.drawable.ic_link,
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onBackground),
+            tint = MaterialTheme.colorScheme.primary,
             onClick = {
                 onTogglePublic()
                 onCopyLink()
@@ -130,7 +120,8 @@ fun SocialShareRow(
 
         SocialShareButton(
             name = stringResource(id = R.string.more),
-            icon = Icons.Default.Share,
+            icon = Icons.Outlined.Share,
+            tint = MaterialTheme.colorScheme.primary,
             onClick = {
                 onTogglePublic()
                 onMore()
@@ -140,22 +131,23 @@ fun SocialShareRow(
 }
 
 @Composable
-fun RowScope.SocialShareButton(
+fun SocialShareButton(
     name: String,
     iconResourceID: Int? = null,
-    colorFilter: ColorFilter? = null,
     icon: ImageVector? = null,
+    tint: Color? = null,
     onClick: (() -> Unit)? = null,
 ) {
+    val buttonSize = 56.dp
     Column(
-        verticalArrangement = Arrangement.spacedBy(Dimensions.PADDING_TINY),
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.weight(1.0f)
+        modifier = Modifier.width(width = buttonSize)
     ) {
         Surface(
             color = MaterialTheme.colorScheme.surface,
             shape = CircleShape,
             modifier = Modifier
+                .size(buttonSize)
                 .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.surfaceVariant,
@@ -166,22 +158,23 @@ fun RowScope.SocialShareButton(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .clickable(enabled = onClick != null, onClick = onClick ?: {})
-                    .padding(Dimensions.PADDING_MEDIUM)
+                    .padding(Dimensions.PADDING_LARGE)
             ) {
                 when {
                     icon != null -> Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        modifier = Modifier.size(Dimensions.SIZE_ICON_SMALL)
+                        tint = tint ?: LocalContentColor.current,
+                        modifier = Modifier.size(Dimensions.SIZE_ICON_MEDIUM)
                     )
 
-                    iconResourceID != null -> Image(
-                        painterResource(id = iconResourceID),
-                        contentDescription = null,
-                        modifier = Modifier.size(Dimensions.SIZE_ICON_SMALL),
-                        colorFilter = colorFilter
-                    )
-
+                    iconResourceID != null ->
+                        Image(
+                            painterResource(id = iconResourceID),
+                            contentDescription = null,
+                            colorFilter = tint?.let { ColorFilter.tint(it) },
+                            modifier = Modifier.size(Dimensions.SIZE_ICON_MEDIUM)
+                        )
                     else -> {}
                 }
             }
@@ -189,11 +182,10 @@ fun RowScope.SocialShareButton(
 
         Text(
             text = name,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
-            overflow = TextOverflow.Ellipsis,
-            maxLines = 1
+            overflow = TextOverflow.Ellipsis
         )
     }
 }

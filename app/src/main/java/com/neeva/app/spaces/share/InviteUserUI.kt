@@ -4,6 +4,7 @@
 package com.neeva.app.spaces.share
 
 import android.util.Patterns
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -70,6 +71,7 @@ fun InviteUserUI(
             ) {
                 item {
                     Column(
+                        verticalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
                             .padding(Dimensions.PADDING_MEDIUM)
                             .fillMaxHeight()
@@ -84,7 +86,10 @@ fun InviteUserUI(
 
                         ACLDropdownPicker(selectedACLLevel)
 
-                        Spacer(Modifier.height(Dimensions.PADDING_MEDIUM))
+                        // For some reason the ExposedDropdownMenuBox has an additional 8.dp of
+                        // hidden padding below it. Not sure why, it could be a bug as it is
+                        // Experimental.
+                        Spacer(Modifier.height(Dimensions.PADDING_TINY))
 
                         ClearFocusOnDismissTextField(
                             text = note.value,
@@ -154,7 +159,6 @@ private fun ACLDropdownPicker(selectedACLLevel: MutableState<SpaceACLLevel>) {
             value = getACLText(selectedACLLevel.value),
             onValueChange = {},
             readOnly = true,
-            label = { Text(text = stringResource(id = R.string.share_space_permissions)) },
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
             },
