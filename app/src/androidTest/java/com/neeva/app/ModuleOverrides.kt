@@ -14,6 +14,7 @@ import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.testcommon.apollo.TestUnauthenticatedApolloWrapper
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
 import javax.inject.Singleton
@@ -24,25 +25,24 @@ import javax.inject.Singleton
     replaces = [NeevaConstantsModule::class]
 )
 object TestNeevaConstantsModule {
-    /**
-     * Sends the user to localhost instead of out to the real Neeva site.  Cookies are still set on
-     * neeva.com to avoid WebLayer complaining about setting a secure cookie on an http site.
-     */
-    val neevaConstants = object : NeevaConstants(
-        appHost = "127.0.0.1:8000",
-        appURL = "http://127.0.0.1:8000/",
-        cookieHost = "neeva.com",
-        cookieURL = "https://neeva.com",
-        appHelpCenterURL = "http://127.0.0.1:8000/help.html"
-    ) {
-        // no local equivalent for cookie cutter url, but this should suffice for testing
-        override val contentFilterLearnMoreUrl = "http://127.0.0.1:8000/help.html"
-    }
-
     @Provides
     @Singleton
-    fun providesNeevaConstants(): NeevaConstants {
-        return neevaConstants
+    fun providesNeevaConstants(@ApplicationContext context: Context): NeevaConstants {
+        /**
+         * Sends the user to localhost instead of out to the real Neeva site.  Cookies are still set on
+         * neeva.com to avoid WebLayer complaining about setting a secure cookie on an http site.
+         */
+        return object : NeevaConstants(
+            appHost = "127.0.0.1:8000",
+            appURL = "http://127.0.0.1:8000/",
+            cookieHost = "neeva.com",
+            cookieURL = "https://neeva.com",
+            appHelpCenterURL = "http://127.0.0.1:8000/help.html",
+            downloadDirectory = context.cacheDir
+        ) {
+            // no local equivalent for cookie cutter url, but this should suffice for testing
+            override val contentFilterLearnMoreUrl = "http://127.0.0.1:8000/help.html"
+        }
     }
 }
 

@@ -41,4 +41,5 @@ dependencies {
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
     implementation "com.apollographql.apollo3:apollo-testing-support:$apollo_version"
     implementation "junit:junit:$junit_version"
+    implementation "androidx.test:rules:$androidx_test_rules_version"
 }

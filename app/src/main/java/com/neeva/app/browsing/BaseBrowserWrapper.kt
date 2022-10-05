@@ -8,7 +8,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.net.Uri
-import android.os.Environment
 import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
@@ -542,13 +541,7 @@ abstract class BaseBrowserWrapper internal constructor(
                 override fun onTabAdded(tab: Tab) = registerTabCallbacks(tab)
             }
         )
-
-        val downloadDirectory = Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_DOWNLOADS
-        )
-        downloadDirectory?.let {
-            browser.profile.setDownloadDirectory(downloadDirectory)
-        }
+        browser.profile.setDownloadDirectory(neevaConstants.downloadDirectory)
 
         // Let Neeva know that it's serving an Android client.
         browser.profile.cookieManager.setCookie(

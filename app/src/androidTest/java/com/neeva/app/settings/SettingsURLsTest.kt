@@ -11,9 +11,9 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
+import com.neeva.app.NeevaConstants
 import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.TestNeevaConstantsModule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.expectBrowserState
@@ -24,6 +24,7 @@ import com.neeva.app.waitForNavDestination
 import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForUrl
 import dagger.hilt.android.testing.HiltAndroidTest
+import javax.inject.Inject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -35,6 +36,9 @@ class SettingsURLsTest : BaseBrowserTest() {
 
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
+
+    @Inject
+    lateinit var neevaConstants: NeevaConstants
 
     @Before
     override fun setUp() {
@@ -70,32 +74,32 @@ class SettingsURLsTest : BaseBrowserTest() {
         androidComposeRule.apply {
             clickOnSettingsItem(
                 labelId = R.string.settings_connected_apps,
-                expectedUrl = TestNeevaConstantsModule.neevaConstants.appConnectionsURL,
+                expectedUrl = neevaConstants.appConnectionsURL,
                 expectedTabCount = 2
             )
             clickOnSettingsItem(
                 labelId = R.string.settings_invite_friends,
-                expectedUrl = TestNeevaConstantsModule.neevaConstants.appReferralURL,
+                expectedUrl = neevaConstants.appReferralURL,
                 expectedTabCount = 3
             )
             clickOnSettingsItem(
                 labelId = R.string.settings_privacy_policy,
-                expectedUrl = TestNeevaConstantsModule.neevaConstants.appPrivacyURL,
+                expectedUrl = neevaConstants.appPrivacyURL,
                 expectedTabCount = 4
             )
             clickOnSettingsItem(
                 labelId = R.string.settings_terms,
-                expectedUrl = TestNeevaConstantsModule.neevaConstants.appTermsURL,
+                expectedUrl = neevaConstants.appTermsURL,
                 expectedTabCount = 5
             )
             clickOnSettingsItem(
                 labelId = R.string.settings_account_settings,
-                expectedUrl = TestNeevaConstantsModule.neevaConstants.appSettingsURL,
+                expectedUrl = neevaConstants.appSettingsURL,
                 expectedTabCount = 6
             )
             clickOnSettingsItem(
                 labelId = R.string.settings_welcome_tours,
-                expectedUrl = TestNeevaConstantsModule.neevaConstants.appWelcomeToursURL,
+                expectedUrl = neevaConstants.appWelcomeToursURL,
                 expectedTabCount = 7
             )
         }

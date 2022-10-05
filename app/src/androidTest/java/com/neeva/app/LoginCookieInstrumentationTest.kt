@@ -28,7 +28,9 @@ import strikt.assertions.isNullOrEmpty
 
 @HiltAndroidTest
 class LoginCookieInstrumentationTest : BaseHiltTest() {
-    private lateinit var neevaConstants: NeevaConstants
+    @Inject
+    lateinit var neevaConstants: NeevaConstants
+
     private lateinit var loginToken: LoginToken
     private lateinit var loggedInUserInfo: UserInfo
     private lateinit var neevaUser: NeevaUser
@@ -42,7 +44,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
         PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
     private fun setUpLoggedInUser(context: Context) {
-        neevaConstants = TestNeevaConstantsModule.neevaConstants
+        neevaConstants = neevaConstants
         sharedPreferencesModel = SharedPreferencesModel(context)
         loginToken = LoginToken(
             coroutineScope = coroutineScope,

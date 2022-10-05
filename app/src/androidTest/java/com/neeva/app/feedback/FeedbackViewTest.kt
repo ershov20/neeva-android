@@ -19,7 +19,6 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
 import com.neeva.app.SendFeedbackMutation
-import com.neeva.app.TestNeevaConstantsModule
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.expectBrowserState
@@ -75,7 +74,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             // Not super happy with this test because is actively loads the real Neeva website.
             waitForNodeWithText(getString(R.string.submit_feedback_help_center_link)).performClick()
             waitForNavDestination(AppNavDestination.BROWSER)
-            waitForUrl(TestNeevaConstantsModule.neevaConstants.appHelpCenterURL)
+            waitForUrl(neevaConstants.appHelpCenterURL)
             expectBrowserState(isIncognito = false, regularTabCount = 2)
         }
     }

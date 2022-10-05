@@ -5,6 +5,8 @@
 package com.neeva.app
 
 import android.net.Uri
+import android.os.Environment
+import java.io.File
 import okhttp3.Cookie
 
 open class NeevaConstants(
@@ -13,7 +15,10 @@ open class NeevaConstants(
     val cookieHost: String = appHost,
     val cookieURL: String = "https://$cookieHost/",
     val appHelpCenterURL: String = "https://help.$appHost/",
-    val appWelcomeToursURL: String = "$appURL#modal-hello"
+    val appWelcomeToursURL: String = "$appURL#modal-hello",
+    val downloadDirectory: File = Environment.getExternalStoragePublicDirectory(
+        Environment.DIRECTORY_DOWNLOADS
+    )
 ) {
     val appSearchURL: String = "${appURL}search"
     val appSpacesURL: String = "${appURL}spaces"

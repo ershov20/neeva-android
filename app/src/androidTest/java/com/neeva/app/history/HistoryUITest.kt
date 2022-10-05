@@ -18,9 +18,9 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.Lifecycle
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
+import com.neeva.app.NeevaConstants
 import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
-import com.neeva.app.TestNeevaConstantsModule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.clickOnNodeWithContentDescription
 import com.neeva.app.clickOnNodeWithText
@@ -43,6 +43,7 @@ import com.neeva.app.waitForTitle
 import com.neeva.app.waitForUrl
 import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import javax.inject.Inject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -52,6 +53,9 @@ import strikt.assertions.isTrue
 
 @HiltAndroidTest
 class HistoryUITest : BaseBrowserTest() {
+    @Inject
+    lateinit var neevaConstants: NeevaConstants
+
     private val testUrl = WebpageServingRule.urlFor("big_link_element_target_blank.html")
 
     @get:Rule
@@ -227,7 +231,7 @@ class HistoryUITest : BaseBrowserTest() {
             // Click on "Manage Neeva Memory".  It should open a new tab to load the Neeva URL.
             clickOnNodeWithText(getString(R.string.settings_manage_neeva_memory))
             waitForNavDestination(AppNavDestination.BROWSER)
-            waitForUrl(TestNeevaConstantsModule.neevaConstants.appManageMemory)
+            waitForUrl(neevaConstants.appManageMemory)
             expectBrowserState(isIncognito = false, regularTabCount = 2)
         }
     }
