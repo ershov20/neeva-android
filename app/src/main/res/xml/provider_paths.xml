@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2022 Neeva Inc. All rights reserved. Use of this source code is governed by a
+BSD-style license that can be found in the LICENSE file. -->
+<paths>
+    <!-- Enables app FileProvider to generate safe uris for files in the Download directory.
+    [path] was set by using the constant string from Environment.DIRECTORY_DOWNLOADS -->
+    <external-path name="download_directory" path="Download"/>
+    <!-- Enables test FileProvider to generate safe uris for the cache test directory. -->
+    <cache-path name="cached_directory_for_tests" path="testDownloads" />
+</paths>

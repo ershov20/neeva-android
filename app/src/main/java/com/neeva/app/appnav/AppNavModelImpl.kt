@@ -5,12 +5,10 @@
 package com.neeva.app.appnav
 
 import android.app.DownloadManager
-import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
-import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
@@ -43,6 +41,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 class AppNavModelImpl(
+    private val activityStarter: ActivityStarter,
     private val context: Context,
     override val navController: NavHostController,
     private val webLayerModel: WebLayerModel,
@@ -161,25 +160,20 @@ class AppNavModelImpl(
     }
 
     override fun openAndroidDefaultBrowserSettings() {
-        safeStartActivityForIntent(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+        activityStarter.safeStartActivityForIntent(
+            Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
+        )
     }
 
     override fun showAdditionalLicenses() {
-        safeStartActivityForIntent(Intent(context, OssLicensesMenuActivity::class.java))
+        activityStarter.safeStartActivityForIntent(
+            Intent(context, OssLicensesMenuActivity::class.java)
+        )
     }
 
     override fun openUrlViaIntent(uri: Uri) {
-        safeStartActivityForIntent(Intent(Intent.ACTION_VIEW, uri))
+        activityStarter.safeStartActivityForIntent(Intent(Intent.ACTION_VIEW, uri))
         showBrowser()
-    }
-
-    override fun safeStartActivityForIntent(intent: Intent) {
-        try {
-            context.startActivity(intent)
-        } catch (e: ActivityNotFoundException) {
-            popupModel.showSnackbar(context.getString(R.string.error_generic))
-            Log.e(TAG, "Failed to start Activity for $intent")
-        }
     }
 
     override fun showCardGrid() = show(AppNavDestination.CARD_GRID)
@@ -251,7 +245,7 @@ class AppNavModelImpl(
             putExtra(Intent.EXTRA_TITLE, space.name)
         }
 
-        safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
+        activityStarter.safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
     }
 
     override fun showSignInFlow() {
@@ -288,7 +282,7 @@ class AppNavModelImpl(
             putExtra(Intent.EXTRA_TITLE, activeTabModel.titleFlow.value)
         }
 
-        safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
+        activityStarter.safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
     }
 
     override fun onMenuItem(id: OverflowMenuItemId) {
@@ -330,7 +324,9 @@ class AppNavModelImpl(
             }
 
             OverflowMenuItemId.DOWNLOADS -> {
-                safeStartActivityForIntent(Intent(DownloadManager.ACTION_VIEW_DOWNLOADS))
+                activityStarter.safeStartActivityForIntent(
+                    Intent(DownloadManager.ACTION_VIEW_DOWNLOADS)
+                )
             }
 
             OverflowMenuItemId.SPACES_WEBSITE -> {

@@ -29,6 +29,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
+import org.chromium.weblayer.DownloadCallback
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebLayer
@@ -42,6 +43,7 @@ class IncognitoBrowserWrapper private constructor(
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
     domainProvider: DomainProvider,
+    downloadCallback: DownloadCallback,
     private val incognitoFaviconCache: IncognitoFaviconCache,
     neevaConstants: NeevaConstants,
     private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
@@ -72,6 +74,7 @@ class IncognitoBrowserWrapper private constructor(
     historyManager = null,
     tabScreenshotManager = tabScreenshotManager,
     domainProvider = domainProvider,
+    downloadCallback = downloadCallback,
     neevaConstants = neevaConstants,
     sharedPreferencesModel = sharedPreferencesModel,
     settingsDataModel = settingsDataModel,
@@ -88,6 +91,7 @@ class IncognitoBrowserWrapper private constructor(
         authenticatedApolloWrapper: ApolloWrapper,
         unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
         domainProvider: DomainProvider,
+        downloadCallback: DownloadCallback,
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
         neevaConstants: NeevaConstants,
         scriptInjectionManager: ScriptInjectionManager,
@@ -106,6 +110,7 @@ class IncognitoBrowserWrapper private constructor(
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
         domainProvider = domainProvider,
+        downloadCallback = downloadCallback,
         incognitoFaviconCache = IncognitoFaviconCache(
             appContext,
             tempDirectory,

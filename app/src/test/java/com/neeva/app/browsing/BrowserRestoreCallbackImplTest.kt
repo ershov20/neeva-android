@@ -166,6 +166,7 @@ class BrowserRestoreCallbackImplTest {
                         actualData.capture(),
                         eq(true)
                     )
+
                     expectThat(actualData.lastValue).isEqualTo(
                         expectedData.copy(lastActiveMs = actualData.lastValue.lastActiveMs)
                     )

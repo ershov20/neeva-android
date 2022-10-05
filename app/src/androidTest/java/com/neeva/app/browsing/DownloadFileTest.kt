@@ -11,7 +11,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.rule.GrantPermissionRule
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
+import com.neeva.app.R
 import com.neeva.app.clickOnNodeWithText
+import com.neeva.app.getString
 import com.neeva.app.loadUrlByClickingOnBar
 import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.waitForActivityStartup
@@ -48,11 +50,11 @@ class DownloadFileTest : BaseBrowserTest() {
                     longPressOnBrowserView()
                     waitForNodeWithText("$imageLinkUrl?page_index=2").assertExists()
                     waitForNodeWithText("Image alt title").assertExists()
-                    waitForNodeWithText("Download image").assertExists()
+                    waitForNodeWithText(getString(R.string.menu_download_image)).assertExists()
                     onNodeWithTag("MenuHeaderImage").assertExists()
 
                     // Start the first download
-                    clickOnNodeWithText("Download image")
+                    clickOnNodeWithText(getString(R.string.menu_download_image))
                     waitForIdle()
                 }
             )
@@ -72,10 +74,10 @@ class DownloadFileTest : BaseBrowserTest() {
                 openContextMenuAndDownload = {
                     longPressOnBrowserView()
                     waitForNodeWithText("$linkUrl?page_index=2").assertExists()
-                    waitForNodeWithText("Download link").assertExists()
+                    waitForNodeWithText(getString(R.string.menu_download_link)).assertExists()
 
                     // Start the first download
-                    clickOnNodeWithText("Download link")
+                    clickOnNodeWithText(getString(R.string.menu_download_link))
                     waitForIdle()
                 }
             )
@@ -95,13 +97,46 @@ class DownloadFileTest : BaseBrowserTest() {
                 openContextMenuAndDownload = {
                     longPressOnBrowserView()
                     waitForNodeWithText("$videoLinkUrl?page_index=2").assertExists()
-                    waitForNodeWithText("Download video").assertExists()
+                    waitForNodeWithText(getString(R.string.menu_download_video)).assertExists()
 
                     // Start the first download
-                    clickOnNodeWithText("Download video")
+                    clickOnNodeWithText(getString(R.string.menu_download_video))
                     waitForIdle()
                 }
             )
+        }
+    }
+
+    @Test
+    fun downloadFile_openingFile_doesNotCrash() {
+        val imageLinkUrl = WebpageServingRule.urlFor("image_link_element.html")
+        androidComposeRule.apply {
+            activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+            waitForActivityStartup()
+            waitForBrowserState(isIncognito = false, expectedNumRegularTabs = 1)
+
+            // Load the test webpage up in the existing tab.
+            loadUrlByClickingOnBar(imageLinkUrl)
+
+            longPressOnBrowserView()
+            waitForNodeWithText("$imageLinkUrl?page_index=2").assertExists()
+            waitForNodeWithText("Image alt title").assertExists()
+            waitForNodeWithText(getString(R.string.menu_download_image)).assertExists()
+            onNodeWithTag("MenuHeaderImage").assertExists()
+
+            // Start the download
+            clickOnNodeWithText(getString(R.string.menu_download_image))
+
+            // Attempt to view the download by pressing "View" from the snackbar popup
+            waitForNodeWithText(
+                activity.getString(
+                    R.string.download_completed,
+                    "image.png"
+                )
+            ).assertExists()
+            clickOnNodeWithText(getString(R.string.download_view))
+
+            waitForIdle()
         }
     }
 

@@ -8,11 +8,13 @@ import android.app.Application
 import android.content.Context
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
+import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.BrowserWrapperFactory
 import com.neeva.app.browsing.CacheCleaner
 import com.neeva.app.browsing.WebLayerFactory
 import com.neeva.app.contentfilter.ScriptInjectionManager
+import com.neeva.app.downloads.DownloadCallbackImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -39,6 +41,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import org.chromium.weblayer.DownloadCallback
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -243,6 +246,7 @@ object NeevaAppModule {
         directories: Directories,
         dispatchers: Dispatchers,
         domainProvider: DomainProvider,
+        downloadCallback: DownloadCallback,
         historyDatabase: HistoryDatabase,
         historyManager: HistoryManager,
         incognitoSessionToken: IncognitoSessionToken,
@@ -254,7 +258,7 @@ object NeevaAppModule {
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
         spaceStore: SpaceStore,
-        unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
+        unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper
     ): BrowserWrapperFactory {
         return BrowserWrapperFactory(
             activityCallbackProvider = activityCallbackProvider,
@@ -264,6 +268,7 @@ object NeevaAppModule {
             directories = directories,
             dispatchers = dispatchers,
             domainProvider = domainProvider,
+            downloadCallback = downloadCallback,
             historyManager = historyManager,
             historyDatabase = historyDatabase,
             incognitoSessionToken = incognitoSessionToken,
@@ -291,6 +296,29 @@ object NeevaAppModule {
     @Singleton
     fun providesWebLayerFactory(@ApplicationContext appContext: Context): WebLayerFactory {
         return WebLayerFactory(appContext)
+    }
+
+    @Provides
+    @Singleton
+    fun providesActivityStarter(
+        @ApplicationContext context: Context,
+        popupModel: PopupModel
+    ): ActivityStarter {
+        return ActivityStarter(appContext = context, popupModel = popupModel)
+    }
+
+    @Provides
+    @Singleton
+    fun providesDownloadCallback(
+        @ApplicationContext appContext: Context,
+        popupModel: PopupModel,
+        activityStarter: ActivityStarter
+    ): DownloadCallback {
+        return DownloadCallbackImpl(
+            popupModel = popupModel,
+            appContext = appContext,
+            activityStarter = activityStarter
+        )
     }
 }
 

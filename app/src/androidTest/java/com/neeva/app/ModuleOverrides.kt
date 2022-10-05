@@ -17,6 +17,7 @@ import dagger.Provides
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
+import java.io.File
 import javax.inject.Singleton
 
 @Module
@@ -38,7 +39,7 @@ object TestNeevaConstantsModule {
             cookieHost = "neeva.com",
             cookieURL = "https://neeva.com",
             appHelpCenterURL = "http://127.0.0.1:8000/help.html",
-            downloadDirectory = context.cacheDir
+            downloadDirectory = File(context.cacheDir, "/testDownloads")
         ) {
             // no local equivalent for cookie cutter url, but this should suffice for testing
             override val contentFilterLearnMoreUrl = "http://127.0.0.1:8000/help.html"

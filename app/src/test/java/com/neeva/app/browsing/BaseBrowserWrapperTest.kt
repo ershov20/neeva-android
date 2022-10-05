@@ -26,6 +26,7 @@ import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.contentfilter.TrackersAllowList
 import com.neeva.app.createMockNavigationController
+import com.neeva.app.downloads.DownloadCallbackImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -105,6 +106,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var contentFilterModel: ContentFilterModel
     @Mock private lateinit var cookieManager: CookieManager
     @Mock private lateinit var domainProvider: DomainProvider
+    @Mock private lateinit var downloadCallback: DownloadCallbackImpl
     @Mock private lateinit var faviconCache: FaviconCache
     @Mock private lateinit var findInPageModel: FindInPageModelImpl
     @Mock private lateinit var fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
@@ -219,6 +221,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
             domainProvider = domainProvider,
+            downloadCallback = downloadCallback,
             suggestionsModel = suggestionsModel,
             neevaScopeModel = neevaScopeModel,
             faviconCache = faviconCache,

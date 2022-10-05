@@ -71,6 +71,7 @@ import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserEmbeddabilityMode
 import org.chromium.weblayer.BrowserRestoreCallback
+import org.chromium.weblayer.DownloadCallback
 import org.chromium.weblayer.NavigateParams
 import org.chromium.weblayer.Navigation
 import org.chromium.weblayer.NavigationCallback
@@ -100,6 +101,7 @@ abstract class BaseBrowserWrapper internal constructor(
     private val historyManager: HistoryManager?,
     private val tabScreenshotManager: TabScreenshotManager,
     private val domainProvider: DomainProvider,
+    private val downloadCallback: DownloadCallback,
     protected val neevaConstants: NeevaConstants,
     private val scriptInjectionManager: ScriptInjectionManager,
     private val sharedPreferencesModel: SharedPreferencesModel,
@@ -130,6 +132,7 @@ abstract class BaseBrowserWrapper internal constructor(
         historyManager: HistoryManager?,
         tabScreenshotManager: TabScreenshotManager,
         domainProvider: DomainProvider,
+        downloadCallback: DownloadCallback,
         neevaConstants: NeevaConstants,
         scriptInjectionManager: ScriptInjectionManager,
         sharedPreferencesModel: SharedPreferencesModel,
@@ -170,6 +173,7 @@ abstract class BaseBrowserWrapper internal constructor(
         historyManager = historyManager,
         tabScreenshotManager = tabScreenshotManager,
         domainProvider = domainProvider,
+        downloadCallback = downloadCallback,
         neevaConstants = neevaConstants,
         scriptInjectionManager = scriptInjectionManager,
         sharedPreferencesModel = sharedPreferencesModel,
@@ -500,6 +504,11 @@ abstract class BaseBrowserWrapper internal constructor(
      */
     protected abstract fun onBlankTabCreated(tab: Tab)
 
+    private fun setUpDownloads(browser: Browser) {
+        browser.profile.setDownloadDirectory(neevaConstants.downloadDirectory)
+        browser.profile.setDownloadCallback(downloadCallback)
+    }
+
     @CallSuper
     protected open fun registerBrowserCallbacks(browser: Browser): Boolean {
         if (tabListRestorer != null) {
@@ -532,6 +541,8 @@ abstract class BaseBrowserWrapper internal constructor(
             tabListRestorer = it
         }
 
+        setUpDownloads(browser)
+
         browser.registerTabListCallback(tabListCallback)
         browser.registerBrowserControlsOffsetCallback(browserControlsOffsetCallback)
 
@@ -541,7 +552,6 @@ abstract class BaseBrowserWrapper internal constructor(
                 override fun onTabAdded(tab: Tab) = registerTabCallbacks(tab)
             }
         )
-        browser.profile.setDownloadDirectory(neevaConstants.downloadDirectory)
 
         // Let Neeva know that it's serving an Android client.
         browser.profile.cookieManager.setCookie(
