@@ -91,21 +91,28 @@ Whenever you fetch updates from the repository, make sure that you re-run `boots
 
 You should now be able to build and run the project.  In the toolbar, you can select the emulator that you set up earlier, then hit the **Run 'app'** button (or select `Menu > Run > Run 'app'`).
 
-### Building a release (or staging) version of the app
-Building the release version will require you to have signing keys. If you don't have them, then you can use the `staging` build variant. 
+## Building a release (or staging) version of the app
+Building the `release` version will require you to have the environment variable `NEEVA_REPO` set to the location of your neeva repo checkout.
 
-A release version of the app includes `WebLayerSupport.apk` as a feature split within the Neeva app bundle (`neeva.aab`).
-
-Run `scripts/build-release.sh` to generate the app bundle `build/release/neeva.aab`.
-
-Alternatively, within Android Studio, you can set the active Build Variant to  `release` or `staging` and build the app from there. To then assemble `neeva.aab`, you can run:
+A release/staging version of the app includes `WebLayerSupport.apk` as a feature split within the Neeva app bundle (`neeva.aab`), so you don't need to install WebLayer separately. 
 
 ```
-# To make a release bundle:
-scripts/make-bundle.sh release
+# Ensure that you have the proper environment variables set up:
+export NEEVA_REPO="path/to/neeva"
 
-# To make a staging bundle:
-scripts/make-bundle.sh staging
+# If you want to push your build to the Play Store, set these variables too:
+export NEEVA_KEYSTORE_PATH="path/to/playstore_signing_key"
+export NEEVA_KEYSTORE_PASS="playstore signing password"
+```
+
+```
+# To generate the app bundle `build/release/neeva.aab`, run: 
+scripts/build-release.sh
+
+# If you only want to test the release build, kill the script when prompted if "Build uploaded to App/Play Store?"
+
+# If you want to build staging:
+scripts/build-staging.sh
 ```
 
 You can then install the resulting app bundle to your device:
