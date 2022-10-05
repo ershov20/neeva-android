@@ -519,10 +519,10 @@
     <string name="settings_close_incognito_when_switching_body">Lorsque vous quittez le mode privé</string>
 
     <!-- [Settings][Toggle][a11y] Allows users to view / control content filtering. -->
-    <string name="content_filter_content_description">Content protection</string>
+    <string name="content_filter_content_description">Protection du contenu</string>
 
     <!-- [Settings][a11y] Tells users that they are in incognito and allows them to view / control content filtering. -->
-    <string name="content_filter_incognito_content_description">Incognito content protection</string>
+    <string name="content_filter_incognito_content_description">Protection du contenu en navigation privée</string>
 
     <!-- [Settings][Button] Sends the user to view Neeva's privacy policy. -->
     <string name="settings_privacy_policy">Politique de confidentialité</string>
@@ -563,7 +563,7 @@
     <string name="settings_sign_out">Se déconnecter</string>
 
     <!-- [Settings][Header] Groups together settings related to JavaScript tracking & ad blocking on web sites. -->
-    <string name="settings_trackers_and_ads">Tracker &amp; ad blocking</string>
+    <string name="settings_trackers_and_ads">Suivi et blocage des publicités</string>
     <string name="blocking_strength_standard_title">Standard</string>
     <string name="blocking_strength_standard_description">Bloque la plupart des traqueurs. Minimise les perturbations au niveau des publicités et de la fonctionnalité des sites.</string>
     <string name="blocking_strength_strict_title">Stricts</string>
@@ -589,7 +589,7 @@
     <string name="cookie_cutting_individual_disclaimer">Si un site ne prend pas en charge la sélection individuelle de ces options, tous les cookies non essentiels du site seront acceptés.</string>
 
     <!-- [Settings] Disclaimer noting that essential cookies are mandatory and cannot be blocked by the app -->
-    <string name="cookie_cutting_essential_disclaimer">Essential cookies are used by sites to remember things like your login information and preferences. These cookies cannot be blocked by Neeva Shield.</string>
+    <string name="cookie_cutting_essential_disclaimer">Les cookies essentiels sont utilisés par les sites pour enregistrer des éléments tels que vos informations de connexion et vos préférences. Ces cookies ne peuvent pas être bloqués par Neeva Shield.</string>
 
     <!-- [Settings] Header for settings enabling features that are currently under development. -->
     <string name="settings_features_under_development">Fonctionnalités en cours de développement</string>
@@ -716,7 +716,7 @@
     <string name="content_filter_too_many_items">%1$d +</string>
 
     <!-- [Content Filter] Section header for the number of website trackers that we've blocked. -->
-    <string name="content_filter_ads_and_trackers">Ads &amp; trackers</string>
+    <string name="content_filter_ads_and_trackers">Publicités et traqueurs</string>
 
     <!-- [Content Filter] Section header for the number of website cookie popups that we've blocked. -->
     <string name="content_filter_popups">Fenêtres contextuelles de gestion des cookies</string>
@@ -728,10 +728,10 @@
     <string name="content_filter">Neeva Shield</string>
 
     <!-- [Content Filter] Notice about enabling / disabling content filter for all sites. -->
-    <string name="content_filter_toggle_description">Disabling it will turn off Neeva Shield on all sites. Changing it will reload your tabs.</string>
+    <string name="content_filter_toggle_description">Si vous désactivez ce paramètre, Neeva Shield sera inactif sur tous les sites. Si vous le modifiez, vos onglets seront actualisés.</string>
 
     <!-- [Content Filter] Sends the user to the settings page for the Content Filter feature. -->
-    <string name="content_filter_settings">Neeva Shield settings</string>
+    <string name="content_filter_settings">Paramètres Neeva Shield</string>
 
     <!-- [Content Filter] Subtitle for a switch that allows a user to turn off the Content Filter. -->
     <string name="content_filter_subtitle">Le site semble ne pas fonctionner correctement ? Essayez de désactiver la fonctionnalité.</string>
@@ -837,6 +837,6 @@
     <string name="neevascope_contact_us">Contactez-nous via l\'assistance</string>
 
     <string name="default_search_suggestion_1">Actualités technologiques</string>
-    <string name="default_search_suggestion_2">Fruit Tart Recipes</string>
+    <string name="default_search_suggestion_2">Recette de tarte aux fruits</string>
     <string name="default_search_suggestion_3" translatable="false">React Hooks</string>
 </resources>

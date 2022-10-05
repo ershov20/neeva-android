@@ -836,7 +836,7 @@
     <!-- [NeevaScope] Sends the user to the support page  -->
     <string name="neevascope_contact_us">Contact us via Support</string>
 
-    <string name="default_search_suggestion_1">Tech news</string>
+    <string name="default_search_suggestion_1">Tech News</string>
     <string name="default_search_suggestion_2">Fruit Tart Recipes</string>
     <string name="default_search_suggestion_3" translatable="false">React Hooks</string>
 </resources>
