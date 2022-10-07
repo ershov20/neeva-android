@@ -91,10 +91,7 @@ class ClientLogger(
         }
 
         val mutableAttributes = attributes?.toMutableList() ?: ArrayList()
-        if (path.category == LogConfig.Category.FIRST_RUN ||
-            path.category == LogConfig.Category.STABILITY ||
-            path.category == LogConfig.Category.BROWSING
-        ) {
+        if (LogConfig.shouldAddSessionID(path)) {
             val sessionIdAttribute = ClientLogCounterAttribute(
                 Optional.presentIfNotNull(LogConfig.Attributes.SESSION_UUID_V2.attributeName),
                 Optional.presentIfNotNull(LogConfig.sessionID(sharedPreferencesModel))

@@ -59,7 +59,9 @@ class LogConfig {
         REQUEST_INSTALL_REFERRER("RequestInstallReferrer", Category.FIRST_RUN),
 
         // Browsing
-        BROWSER_PAGE_LOAD("PageLoad", Category.BROWSING)
+        NAVIGATION_INBOUND("NavigationInbound", Category.BROWSING),
+        NAVIGATION_OUTBOUND("NavigationOutbound", Category.BROWSING),
+        PREVIEW_SEARCH("PreviewSearch", Category.BROWSING)
     }
 
     enum class Category(val categoryName: String) {
@@ -81,6 +83,35 @@ class LogConfig {
                 )
             }
             return sessionId
+        }
+
+        // When add/remove a new interaction to this list make sure
+        // it's updated on the server side as well
+        private val sessionIDAllowList = listOf(
+            Interaction.APP_ENTER_FOREGROUND,
+            Interaction.AUTH_IMPRESSION_LANDING,
+            Interaction.AUTH_IMPRESSION_OTHER,
+            Interaction.AUTH_IMPRESSION_SIGN_IN,
+            Interaction.AUTH_SIGN_UP_WITH_GOOGLE,
+            Interaction.AUTH_SIGN_UP_WITH_MICROSOFT,
+            Interaction.AUTH_CLOSE,
+            Interaction.FIRST_RUN_IMPRESSION,
+            Interaction.LOGIN_AFTER_FIRST_RUN,
+            Interaction.GET_STARTED_IN_WELCOME,
+            Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_IMP,
+            Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_OPEN,
+            Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_REMIND,
+            Interaction.SET_DEFAULT_BROWSER,
+            Interaction.SKIP_DEFAULT_BROWSER,
+            Interaction.OPEN_DEFAULT_BROWSER_URL,
+            Interaction.REQUEST_INSTALL_REFERRER,
+            Interaction.NAVIGATION_INBOUND,
+            Interaction.NAVIGATION_OUTBOUND,
+            Interaction.PREVIEW_SEARCH
+        )
+
+        fun shouldAddSessionID(interaction: Interaction): Boolean {
+            return sessionIDAllowList.contains(interaction)
         }
     }
 

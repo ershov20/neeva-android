@@ -7,6 +7,7 @@ package com.neeva.app.browsing
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.contentfilter.ContentFilterCallbacks
 import com.neeva.app.contentfilter.ContentFilterModel
@@ -19,6 +20,7 @@ import com.neeva.app.logging.LogConfig
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Visit
 import com.neeva.app.storage.favicons.FaviconCache
+import com.neeva.app.userdata.NeevaUser
 import java.util.Date
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -54,7 +56,9 @@ class TabCallbacks(
     private val contentFilterModel: ContentFilterModel,
     domainProvider: DomainProvider,
     private val scriptInjectionManager: ScriptInjectionManager,
-    private val clientLogger: ClientLogger?
+    private val clientLogger: ClientLogger?,
+    private val neevaConstants: NeevaConstants,
+    private val neevaUser: NeevaUser
 ) {
     val tabContentFilterModel = TabContentFilterModel(
         browserFlow = browserFlow,
@@ -207,7 +211,8 @@ class TabCallbacks(
             }
 
             if (shouldRecordVisit) {
-                clientLogger?.logCounter(LogConfig.Interaction.BROWSER_PAGE_LOAD, null)
+                logNavigation(navigation.uri)
+
                 visitToCommit?.let { visit ->
                     val uri = navigation.uri
                     val title = tab.currentDisplayTitle
@@ -222,6 +227,34 @@ class TabCallbacks(
                 }
                 visitToCommit = null
             }
+        }
+    }
+
+    /**
+     * This logs the following navigations:
+     *   - PreviewSearch: log a search event for signed out/preview user
+     *   - NavigationInbound: log any navigation event within neeva.com domain except search
+     *   - NavigationOutbound: log any navigation event outside of neeva.com
+     */
+    private fun logNavigation(uri: Uri) {
+        when {
+            uri.isNeevaSearchUri(neevaConstants) ->
+                if (neevaUser.isSignedOut()) {
+                    clientLogger?.logCounter(
+                        LogConfig.Interaction.PREVIEW_SEARCH,
+                        null
+                    )
+                }
+            uri.isNeevaUri(neevaConstants) ->
+                clientLogger?.logCounter(
+                    LogConfig.Interaction.NAVIGATION_INBOUND,
+                    null
+                )
+            else ->
+                clientLogger?.logCounter(
+                    LogConfig.Interaction.NAVIGATION_OUTBOUND,
+                    null
+                )
         }
     }
 

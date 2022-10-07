@@ -61,7 +61,7 @@ class ClientLoggerTest : BaseBrowserTest() {
             expectThat(
                 containsEvent(
                     testAuthenticatedApolloWrapper.testApolloClientWrapper.performedOperations,
-                    LogConfig.Interaction.BROWSER_PAGE_LOAD
+                    LogConfig.Interaction.NAVIGATION_INBOUND
                 )
             ).isTrue()
         }
@@ -75,7 +75,7 @@ class ClientLoggerTest : BaseBrowserTest() {
                     val counter = log[0].counter
                     if (counter is Optional.Present &&
                         counter.value?.path ==
-                        LogConfig.Interaction.BROWSER_PAGE_LOAD.interactionName
+                        interaction.interactionName
                     ) {
                         return true
                     }

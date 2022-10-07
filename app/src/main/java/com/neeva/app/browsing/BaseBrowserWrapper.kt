@@ -675,7 +675,9 @@ abstract class BaseBrowserWrapper internal constructor(
             contentFilterModel = contentFilterModel,
             domainProvider = domainProvider,
             scriptInjectionManager = scriptInjectionManager,
-            clientLogger = clientLogger
+            clientLogger = clientLogger,
+            neevaConstants = neevaConstants,
+            neevaUser = neevaUser
         )
     }
 
