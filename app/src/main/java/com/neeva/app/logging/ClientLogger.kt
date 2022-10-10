@@ -4,6 +4,7 @@
 
 package com.neeva.app.logging
 
+import android.net.Uri
 import android.util.Log
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.BuildConfig
@@ -12,6 +13,8 @@ import com.neeva.app.LogMutation
 import com.neeva.app.NeevaBrowser
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.browsing.isNeevaSearchUri
+import com.neeva.app.browsing.isNeevaUri
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
@@ -144,6 +147,33 @@ class ClientLogger(
         coroutineScope.launch(dispatchers.io) {
             copiedLogs.forEach {
                 logCounterInternal(it.path, it.attributes)
+            }
+        }
+    }
+
+    /**
+     * This logs the following navigations:
+     *   - PreviewSearch: log a search event for signed out/preview user
+     *   - NavigationInbound: log any navigation event within neeva.com domain except search
+     *   - NavigationOutbound: log any navigation event outside of neeva.com
+     */
+    fun logNavigation(uri: Uri) {
+        when {
+            uri.isNeevaSearchUri(neevaConstants) -> {
+                if (loginToken.isEmpty()) {
+                    logCounter(
+                        LogConfig.Interaction.PREVIEW_SEARCH,
+                        null
+                    )
+                }
+            }
+
+            uri.isNeevaUri(neevaConstants) -> {
+                logCounter(LogConfig.Interaction.NAVIGATION_INBOUND, null)
+            }
+
+            else -> {
+                logCounter(LogConfig.Interaction.NAVIGATION_OUTBOUND, null)
             }
         }
     }

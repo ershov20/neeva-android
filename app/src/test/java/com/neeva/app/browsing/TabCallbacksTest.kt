@@ -10,7 +10,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
-import com.neeva.app.NeevaConstants
 import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.contentfilter.TrackersAllowList
@@ -18,7 +17,6 @@ import com.neeva.app.contentfilter.TrackingData
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.favicons.FaviconCache
-import com.neeva.app.userdata.NeevaUser
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -55,7 +53,6 @@ class TabCallbacksTest : BaseTest() {
     @MockK lateinit var registerNewTab: (tab: Tab, type: Int) -> Unit
     @MockK lateinit var scriptInjectionManager: ScriptInjectionManager
     @MockK lateinit var trackersAllowList: TrackersAllowList
-    @MockK lateinit var neevaUser: NeevaUser
 
     private lateinit var activityCallbackProvider: ActivityCallbackProvider
     private lateinit var browserFlow: StateFlow<Browser?>
@@ -139,9 +136,7 @@ class TabCallbacksTest : BaseTest() {
             contentFilterModel = contentFilterModel,
             domainProvider = domainProvider,
             scriptInjectionManager = scriptInjectionManager,
-            clientLogger = null,
-            neevaConstants = NeevaConstants(),
-            neevaUser = neevaUser
+            clientLogger = null
         )
     }
 
