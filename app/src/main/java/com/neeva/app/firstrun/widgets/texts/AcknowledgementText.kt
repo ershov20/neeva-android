@@ -14,7 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
-import com.neeva.app.NeevaConstants
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.R
 import com.neeva.app.firstrun.FirstRunConstants
 import com.neeva.app.ui.LightDarkPreviewContainer
@@ -62,7 +62,7 @@ fun AcknowledgementText(
 @Composable
 fun AcknowledgementTextPreview() {
     LightDarkPreviewContainer {
-        val neevaConstants = NeevaConstants()
+        val neevaConstants = LocalNeevaConstants.current
         AcknowledgementText(
             appTermsURL = neevaConstants.appTermsURL,
             appPrivacyURL = neevaConstants.appPrivacyURL

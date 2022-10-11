@@ -114,7 +114,7 @@ fun SignUpLanding_Light_Preview() {
                 onClose = {},
                 navigateToSignIn = {},
                 showSignUpWithOther = {},
-                neevaConstants = NeevaConstants()
+                neevaConstants = LocalNeevaConstants.current
             )
         }
     }
@@ -132,7 +132,7 @@ fun SignUpLanding_Dark_Preview() {
                 onClose = {},
                 navigateToSignIn = {},
                 showSignUpWithOther = {},
-                neevaConstants = NeevaConstants()
+                neevaConstants = LocalNeevaConstants.current
             )
         }
     }

@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.neeva.app.Dispatchers
 import com.neeva.app.LocalDispatchers
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalSpaceStore
 import com.neeva.app.NeevaConstants
@@ -143,7 +144,7 @@ class SpacesGridPreviews : BooleanPreviewParameterProvider<SpacesGridPreviews.Pa
                     }
                 },
                 dispatchers = previewDispatchers,
-                neevaConstants = NeevaConstants()
+                neevaConstants = LocalNeevaConstants.current
             )
         }
     }

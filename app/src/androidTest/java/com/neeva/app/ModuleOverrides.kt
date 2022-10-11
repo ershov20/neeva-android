@@ -37,9 +37,10 @@ object TestNeevaConstantsModule {
         return object : NeevaConstants(
             appHost = "127.0.0.1:8000",
             appURL = "http://127.0.0.1:8000/",
-            appHelpCenterURL = "http://127.0.0.1:8000/help.html",
-            downloadDirectory = File(context.cacheDir, "/testDownloads")
+            appHelpCenterURL = "http://127.0.0.1:8000/help.html"
         ) {
+            override val downloadDirectory = File(context.cacheDir, "/testDownloads")
+
             // No local equivalent for cookie cutter url, but this should suffice for testing.
             override val contentFilterLearnMoreUrl = "http://127.0.0.1:8000/help.html"
 

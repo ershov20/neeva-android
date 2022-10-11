@@ -5,14 +5,16 @@
 package com.neeva.app.settings.contentfilter
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaConstants
 import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedcomposables.SettingsPane
-import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.NeevaThemePreviewContainer
+import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.PortraitPreviewsDark
 
 @Composable
 fun ContentFilterPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
@@ -30,24 +32,24 @@ fun ContentFilterPane(settingsController: SettingsController, neevaConstants: Ne
     )
 }
 
-@Preview(name = "Content Filter Pane, 1x font size", locale = "en")
-@Preview(name = "Content Filter Pane, 2x font size", locale = "en", fontScale = 2.0f)
-@Preview(name = "Content Filter Pane, RTL, 1x font size", locale = "he")
-@Preview(name = "Content Filter Pane, RTL, 2x font size", locale = "he", fontScale = 2.0f)
+@PortraitPreviews
 @Composable
 fun ContentFilterSettings_Preview() {
-    NeevaTheme {
-        ContentFilterPane(mockSettingsControllerImpl, NeevaConstants())
+    NeevaThemePreviewContainer(
+        useDarkTheme = false,
+        addBorder = false
+    ) {
+        ContentFilterPane(mockSettingsControllerImpl, LocalNeevaConstants.current)
     }
 }
 
-@Preview(name = "Content Filter Pane Dark, 1x font size", locale = "en")
-@Preview(name = "Content Filter Pane Dark, 2x font size", locale = "en", fontScale = 2.0f)
-@Preview(name = "Content Filter Pane Dark, RTL, 1x font size", locale = "he")
-@Preview(name = "Content Filter Pane Dark, RTL, 2x font size", locale = "he", fontScale = 2.0f)
+@PortraitPreviewsDark
 @Composable
 fun ContentFilterSettings_Dark_Preview() {
-    NeevaTheme(useDarkTheme = true) {
-        ContentFilterPane(mockSettingsControllerImpl, NeevaConstants())
+    NeevaThemePreviewContainer(
+        useDarkTheme = true,
+        addBorder = false
+    ) {
+        ContentFilterPane(mockSettingsControllerImpl, LocalNeevaConstants.current)
     }
 }

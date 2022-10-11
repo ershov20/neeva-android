@@ -24,7 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.neeva.app.NeevaConstants
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.R
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
@@ -100,7 +100,7 @@ private fun ZeroQuerySuggestedSitePreview_SmallContainer() {
         }
 
         val containerSize = 96.dp
-        val neevaConstants = NeevaConstants()
+        val neevaConstants = LocalNeevaConstants.current
         Box(modifier = Modifier.width(containerSize)) {
             ZeroQuerySuggestedSite(
                 faviconBitmap = Uri.parse(neevaConstants.appURL).toBitmap(),
@@ -125,7 +125,7 @@ private fun ZeroQuerySuggestedSitePreview_LargeContainer() {
         }
 
         val containerSize = 300.dp
-        val neevaConstants = NeevaConstants()
+        val neevaConstants = LocalNeevaConstants.current
         Box(modifier = Modifier.width(containerSize)) {
             ZeroQuerySuggestedSite(
                 faviconBitmap = Uri.parse(neevaConstants.appURL).toBitmap(),

@@ -13,10 +13,7 @@ import okhttp3.Cookie
 open class NeevaConstants(
     val appHost: String = "neeva.com",
     val appURL: String = "https://$appHost/",
-    val appHelpCenterURL: String = "https://help.$appHost/",
-    val downloadDirectory: File = Environment.getExternalStoragePublicDirectory(
-        Environment.DIRECTORY_DOWNLOADS
-    )
+    val appHelpCenterURL: String = "https://help.$appHost/"
 ) {
     val appWelcomeToursURL: String = "$appURL#modal-hello"
     val appSearchURL: String = "${appURL}search"
@@ -43,6 +40,12 @@ open class NeevaConstants(
     val createOktaAccountURL: String = "${appURL}login/create"
 
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
+
+    open val downloadDirectory: File by lazy {
+        Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_DOWNLOADS
+        )
+    }
 
     /** Identifies the Android client when making backend requests. */
     val browserIdentifier = "co.neeva.app.android.browser"

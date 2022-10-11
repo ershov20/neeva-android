@@ -7,6 +7,7 @@ package com.neeva.app.settings.main
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import com.neeva.app.LocalChromiumVersion
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaConstants
 import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.mockSettingsControllerImpl
@@ -24,7 +25,7 @@ fun MainSettingsPane(settingsController: SettingsController, neevaConstants: Nee
 fun SettingsMain_Preview() {
     NeevaThemePreviewContainer(useDarkTheme = false, addBorder = false) {
         CompositionLocalProvider(LocalChromiumVersion provides "XXX.XXX.XXX.XXX") {
-            MainSettingsPane(mockSettingsControllerImpl, NeevaConstants())
+            MainSettingsPane(mockSettingsControllerImpl, LocalNeevaConstants.current)
         }
     }
 }
@@ -34,7 +35,7 @@ fun SettingsMain_Preview() {
 fun SettingsMain_Dark_Preview() {
     NeevaThemePreviewContainer(useDarkTheme = true, addBorder = false) {
         CompositionLocalProvider(LocalChromiumVersion provides "XXX.XXX.XXX.XXX") {
-            MainSettingsPane(mockSettingsControllerImpl, NeevaConstants())
+            MainSettingsPane(mockSettingsControllerImpl, LocalNeevaConstants.current)
         }
     }
 }

@@ -22,7 +22,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.neeva.app.NeevaConstants
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.R
 import com.neeva.app.storage.entities.Favicon.Companion.toBitmap
 import com.neeva.app.ui.TwoBooleanPreviewContainer
@@ -101,7 +101,7 @@ fun FaviconView(
 private fun FaviconViewPreviews() {
     TwoBooleanPreviewContainer { showBackground, showBitmap ->
         val bitmap = if (showBitmap) {
-            Uri.parse(NeevaConstants().appURL).toBitmap()
+            Uri.parse(LocalNeevaConstants.current.appURL).toBitmap()
         } else {
             null
         }
