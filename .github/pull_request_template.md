@@ -13,10 +13,12 @@ or attempting to add new functionality
 * Link to where the change is discussed (e.g. meeting notes, design docs)
 
 ### How was this tested?
-- [ ] I tested this manually
+- [ ] I tested this manually on `debug`
+- [ ] I tested this manually on `staging` or `release`
 - [ ] I added automated tests
 - [ ] Existing automated tests cover some of my changes
 - [ ] Existing automated tests cover all of my changes
+- [ ] I checked that `@Previews` still work in Android Studio
 
 ### Manual test cases
 If manually tested, describe the different scenarios you followed to ensure
