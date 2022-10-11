@@ -22,7 +22,8 @@
         android:roundIcon="@mipmap/ic_neeva_logo"
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
-        android:theme="@style/Theme.NeevaSearchBrowser">
+        android:theme="@style/Theme.NeevaSearchBrowser"
+        android:taskAffinity="">
 
         <provider
             android:name="androidx.core.content.FileProvider"
