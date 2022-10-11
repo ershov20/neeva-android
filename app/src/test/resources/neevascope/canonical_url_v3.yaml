@@ -124,3 +124,7 @@
   out: https://www.amazon.com/s?k=pearl+necklaces&page=2
 - url: https://www.amazon.com/pearl-necklaces/s?k=pearl+necklaces
   out: https://www.amazon.com/s?k=pearl+necklaces
+- url: https://en.wikipedia.org/wiki/Bob's_Burgers
+  out: https://en.wikipedia.org/wiki/bob's_burgers
+- url: https://en.wikipedia.org/wiki/bob's_burgers
+  out: https://en.wikipedia.org/wiki/bob's_burgers

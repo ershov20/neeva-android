@@ -85,6 +85,11 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "SHOW_TRY_NEEVASCOPE_TOOLTIP",
             defaultValue = true
         )
+        val DownloadRequestId = SharedPrefKey(
+            App,
+            preferenceKey = "DOWNLOAD_REQUEST_ID",
+            defaultValue = ""
+        )
         val RequestedInstallReferrer = SharedPrefKey(
             App,
             preferenceKey = "REQUESTED_INSTALL_REFERRER",

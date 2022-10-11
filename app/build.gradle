@@ -175,6 +175,7 @@ dependencies {
     implementation 'androidx.security:security-crypto-ktx:1.1.0-alpha03'
     implementation "androidx.preference:preference-ktx:$androidx_preference_version"
     implementation 'androidx.window:window:1.0.0'
+    implementation "androidx.work:work-runtime-ktx:2.7.1"
     implementation "com.apollographql.apollo3:apollo-runtime:$apollo_version"
     implementation "com.google.accompanist:accompanist-navigation-animation:$accompanist_version"
     implementation "com.google.accompanist:accompanist-flowlayout:$accompanist_version"
@@ -194,7 +195,7 @@ dependencies {
     testImplementation 'androidx.test.espresso:espresso-intents:3.4.0'
     testImplementation "androidx.test.ext:junit-ktx:$androidx_test_junit_version"
     testImplementation "com.apollographql.apollo3:apollo-testing-support:$apollo_version"
-    testImplementation 'com.squareup.okhttp3:mockwebserver:4.10.0'
+    testImplementation "com.squareup.okhttp3:mockwebserver:4.10.0"
     testImplementation "io.mockk:mockk:1.12.4"
     testImplementation "io.strikt:strikt-core:$strikt_version"
     testImplementation 'org.mockito.kotlin:mockito-kotlin:4.0.0'

@@ -226,10 +226,11 @@ fun String.toInterval(appContext: Context): String {
     if (this.isEmpty()) return ""
 
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z z")
-    val date = this
-        .let {
-            ZonedDateTime.parse(it, formatter)
-        }.toLocalDate()
+    val date = try {
+        ZonedDateTime.parse(this, formatter).toLocalDate()
+    } catch (e: Exception) {
+        return ""
+    }
 
     return when {
         Period.between(date, LocalDate.now()).years > 0 -> {

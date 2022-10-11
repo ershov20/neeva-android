@@ -30,7 +30,8 @@ class BloomFilterTest : BaseTest() {
 
     @Test
     fun canonicalizeUrl_with_canonical_url_v3() {
-        val file = this.javaClass.classLoader?.getResourceAsStream("canonical_url_v3.yaml")
+        val file = this.javaClass.classLoader
+            ?.getResourceAsStream("neevascope/canonical_url_v3.yaml")
         val yaml = Yaml()
         val parsed: ArrayList<Map<String, String>> = yaml.load(file)
 
@@ -81,7 +82,7 @@ class BloomFilterTest : BaseTest() {
             "https://pastebin.com/64GuVi2F/04457"
         )
 
-        val file = File("src/test/resources/test_urls_out.bin")
+        val file = File("src/test/resources/neevascope/test_urls_out.bin")
         val filter = BloomFilter()
         filter.loadFilter(Uri.fromFile(file))
 
@@ -101,12 +102,32 @@ class BloomFilterTest : BaseTest() {
             "https://www.rand.org/pubs/monographs/MG840.html",
         )
 
-        val file = File("src/test/resources/test_urls_out.bin")
+        val file = File("src/test/resources/neevascope/test_urls_out.bin")
         val filter = BloomFilter()
         filter.loadFilter(Uri.fromFile(file))
 
         testUrls.forEach { url ->
             expectThat(filter.mayContain(url)).isEqualTo(false)
+        }
+    }
+
+    @Test
+    fun testRedditFilter() {
+        val filter = BloomFilter()
+        val binFile = File("src/test/resources/neevascope/reddit.bin")
+        filter.loadFilter(Uri.fromFile(binFile))
+
+        val testFile = File("src/test/resources/neevascope/reddit_test.txt")
+        val testUrls = testFile.readLines().filterNot { it.isBlank() }
+
+        val knownErrors = listOf(
+            "https://en.wikipedia.org/wiki/ry%c5%abzabur%c5%8d_%c5%8ctomo"
+        )
+
+        for (url: String in testUrls) {
+            if (knownErrors.contains(url)) { return }
+            val canonicalizedUrl = CanonicalUrl().canonicalizeUrl(Uri.parse(url))
+            expectThat(filter.mayContain(canonicalizedUrl.toString())).isEqualTo(true)
         }
     }
 }
