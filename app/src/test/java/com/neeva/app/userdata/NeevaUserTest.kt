@@ -23,6 +23,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.kotlin.mock
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -35,6 +36,8 @@ class NeevaUserTest : BaseTest() {
     @Rule
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
+
+    @Mock private lateinit var previewSessionToken: PreviewSessionToken
 
     private lateinit var context: Context
     private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
@@ -57,6 +60,7 @@ class NeevaUserTest : BaseTest() {
         setUpMockWeblayerModel()
         apolloWrapper = TestAuthenticatedApolloWrapper(
             loginToken = loginToken,
+            previewSessionToken = previewSessionToken,
             neevaConstants = neevaConstants
         )
         coroutineScopeRule.scope.advanceUntilIdle()

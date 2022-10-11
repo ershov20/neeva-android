@@ -14,12 +14,12 @@ interface ApolloWrapper {
     suspend fun <D : Query.Data> performQuery(
         query: Query<D>,
         userMustBeLoggedIn: Boolean
-    ): ApolloResponseSummary<D>?
+    ): ApolloResponseSummary<D>
 
     suspend fun <D : Mutation.Data> performMutation(
         mutation: Mutation<D>,
         userMustBeLoggedIn: Boolean
-    ): ApolloResponseSummary<D>?
+    ): ApolloResponseSummary<D>
 }
 data class ApolloResponseSummary <D : Operation.Data>(
     val response: ApolloResponse<D>?,

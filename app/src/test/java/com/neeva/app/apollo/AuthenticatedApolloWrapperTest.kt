@@ -11,7 +11,8 @@ import com.apollographql.apollo3.api.Operation
 import com.neeva.app.BaseTest
 import com.neeva.app.NeevaConstants
 import com.neeva.app.SearchQuery
-import com.neeva.app.userdata.IncognitoSessionToken
+import com.neeva.app.userdata.LoginToken
+import com.neeva.app.userdata.PreviewSessionToken
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -27,63 +28,91 @@ import strikt.assertions.isNull
 import strikt.assertions.isTrue
 
 @RunWith(AndroidJUnit4::class)
-class IncognitoApolloWrapperTest : BaseTest() {
+class AuthenticatedApolloWrapperTest : BaseTest() {
     @MockK lateinit var apolloClientWrapper: ApolloClientWrapper
 
-    private lateinit var incognitoSessionToken: IncognitoSessionToken
-    private lateinit var neevaConstants: NeevaConstants
-    private lateinit var apolloWrapper: IncognitoApolloWrapper
+    private lateinit var loginToken: LoginToken
+    private lateinit var previewToken: PreviewSessionToken
 
-    private var incognitoCookie: String = ""
+    private lateinit var neevaConstants: NeevaConstants
+    private lateinit var apolloWrapper: AuthenticatedApolloWrapper
+
+    private var loginCookie: String = ""
+    private var previewCookie: String = ""
 
     override fun setUp() {
         super.setUp()
 
-        incognitoSessionToken = mockk {
-            coEvery { getOrFetchCookie() } answers { incognitoCookie }
+        loginToken = mockk {
+            coEvery { getOrFetchCookie() } answers { loginCookie }
+            every { isEmpty() } answers { loginCookie.isEmpty() }
+            every { isNotEmpty() } answers { loginCookie.isNotEmpty() }
+        }
+        previewToken = mockk {
+            coEvery { getOrFetchCookie() } answers { previewCookie }
         }
 
         neevaConstants = NeevaConstants()
-        apolloWrapper = IncognitoApolloWrapper(
-            incognitoSessionToken = incognitoSessionToken,
+        apolloWrapper = AuthenticatedApolloWrapper(
+            loginToken = loginToken,
+            previewSessionToken = previewToken,
             neevaConstants = neevaConstants,
             apolloClientWrapper = apolloClientWrapper
         )
     }
 
     @Test
-    fun prepareForOperation_withSetToken_ignoresUserMustBeLoggedIn() {
-        incognitoCookie = "not empty"
+    fun prepareForOperation_withLoginTokenAndNoPreviewToken_doesNotTryToGetPreviewToken() {
+        loginCookie = "not empty"
+        previewCookie = ""
 
         expectThat(
             runBlocking { apolloWrapper.prepareForOperation(userMustBeLoggedIn = false) }
         ).isTrue()
-        coVerify(exactly = 1) { incognitoSessionToken.getOrFetchCookie() }
+        coVerify(exactly = 0) { previewToken.getOrFetchCookie() }
 
         expectThat(
             runBlocking { apolloWrapper.prepareForOperation(userMustBeLoggedIn = true) }
         ).isTrue()
-        coVerify(exactly = 2) { incognitoSessionToken.getOrFetchCookie() }
+        coVerify(exactly = 0) { previewToken.getOrFetchCookie() }
     }
 
     @Test
-    fun prepareForOperation_withNoToken_checksLoginRequirement() {
-        incognitoCookie = ""
+    fun prepareForOperation_withLoginTokenUnset_checksForSetPreviewToken() {
+        loginCookie = ""
+        previewCookie = "preview cookie"
 
         expectThat(
             runBlocking { apolloWrapper.prepareForOperation(userMustBeLoggedIn = false) }
         ).isTrue()
-        coVerify(exactly = 1) { incognitoSessionToken.getOrFetchCookie() }
+        coVerify(exactly = 1) { previewToken.getOrFetchCookie() }
+
+        expectThat(
+            runBlocking { apolloWrapper.prepareForOperation(userMustBeLoggedIn = true) }
+        ).isTrue()
+        coVerify(exactly = 2) { previewToken.getOrFetchCookie() }
+    }
+
+    @Test
+    fun prepareForOperation_withNeitherTokenSet_checksIfUserMustBeLoggedIn() {
+        loginCookie = ""
+        previewCookie = ""
+
+        expectThat(
+            runBlocking { apolloWrapper.prepareForOperation(userMustBeLoggedIn = false) }
+        ).isTrue()
+        coVerify(exactly = 1) { previewToken.getOrFetchCookie() }
 
         expectThat(
             runBlocking { apolloWrapper.prepareForOperation(userMustBeLoggedIn = true) }
         ).isFalse()
-        coVerify(exactly = 2) { incognitoSessionToken.getOrFetchCookie() }
+        coVerify(exactly = 2) { previewToken.getOrFetchCookie() }
     }
 
     @Test
-    fun performQuery_withNoTokenSet_requestsTokenBeforeExecuting() {
-        incognitoCookie = ""
+    fun performQuery_withNeitherTokenSet_requestsPreviewTokenBeforeExecuting() {
+        loginCookie = ""
+        previewCookie = ""
 
         val response = mockk<ApolloResponse<SearchQuery.Data>> {
             every { hasErrors() } returns false
@@ -94,10 +123,10 @@ class IncognitoApolloWrapperTest : BaseTest() {
         }
 
         every { apolloClientWrapper.query<SearchQuery.Data>(any()) } returns apolloCall
-        coEvery { incognitoSessionToken.getOrFetchCookie() } answers {
+        coEvery { previewToken.getOrFetchCookie() } answers {
             // Say that the cookie becomes valid when `getOrFetchCookie()` is called.
-            incognitoCookie = "now valid cookie"
-            incognitoCookie
+            previewCookie = "now valid cookie"
+            previewCookie
         }
 
         runBlocking {
@@ -109,11 +138,14 @@ class IncognitoApolloWrapperTest : BaseTest() {
             expectThat(result.exception).isNull()
         }
 
-        coVerify(exactly = 1) { incognitoSessionToken.getOrFetchCookie() }
+        coVerify(exactly = 1) { previewToken.getOrFetchCookie() }
     }
 
     @Test
-    fun performQuery_ifFailsToRetrieveToken_failsToPerformQuery() {
+    fun performQuery_ifFailsToRetrieveTokenAndLoginRequired_failsToPerformQuery() {
+        loginCookie = ""
+        previewCookie = ""
+
         val response = mockk<ApolloResponse<SearchQuery.Data>> {
             every { hasErrors() } returns false
         }
@@ -125,10 +157,10 @@ class IncognitoApolloWrapperTest : BaseTest() {
         }
 
         every { apolloClientWrapper.query<SearchQuery.Data>(any()) } returns apolloCall
-        coEvery { incognitoSessionToken.getOrFetchCookie() } answers {
+        coEvery { previewToken.getOrFetchCookie() } answers {
             // Say that the cookie stays invalid.
-            incognitoCookie = ""
-            incognitoCookie
+            previewCookie = ""
+            previewCookie
         }
 
         runBlocking {
@@ -139,6 +171,6 @@ class IncognitoApolloWrapperTest : BaseTest() {
             expectThat(result.response).isNull()
         }
 
-        coVerify(exactly = 1) { incognitoSessionToken.getOrFetchCookie() }
+        coVerify(exactly = 1) { previewToken.getOrFetchCookie() }
     }
 }

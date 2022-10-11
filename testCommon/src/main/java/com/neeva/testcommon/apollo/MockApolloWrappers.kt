@@ -14,6 +14,7 @@ import com.neeva.app.apollo.ApolloClientWrapper
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.userdata.LoginToken
+import com.neeva.app.userdata.PreviewSessionToken
 
 @OptIn(ApolloExperimental::class)
 class TestApolloClientWrapper : ApolloClientWrapper {
@@ -39,10 +40,12 @@ class TestApolloClientWrapper : ApolloClientWrapper {
 @OptIn(ApolloExperimental::class)
 class TestAuthenticatedApolloWrapper(
     loginToken: LoginToken,
+    previewSessionToken: PreviewSessionToken,
     neevaConstants: NeevaConstants,
     val testApolloClientWrapper: TestApolloClientWrapper = TestApolloClientWrapper()
 ) : AuthenticatedApolloWrapper(
     loginToken = loginToken,
+    previewSessionToken = previewSessionToken,
     neevaConstants = neevaConstants,
     apolloClientWrapper = testApolloClientWrapper
 ) {

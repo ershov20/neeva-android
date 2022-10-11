@@ -16,12 +16,7 @@ class IncognitoApolloWrapper(
     }
 ) : BaseApolloWrapper(apolloClientWrapper) {
     override suspend fun prepareForOperation(userMustBeLoggedIn: Boolean): Boolean {
-        var cookieValue = incognitoSessionToken.getCurrentCookieValue()
-        if (cookieValue.isNullOrEmpty()) {
-            incognitoSessionToken.requestNewCookie()
-            cookieValue = incognitoSessionToken.waitForRequest()
-        }
-
+        val cookieValue = incognitoSessionToken.getOrFetchCookie()
         return !userMustBeLoggedIn || !cookieValue.isNullOrEmpty()
     }
 }

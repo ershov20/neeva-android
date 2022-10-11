@@ -149,10 +149,9 @@ class RegularBrowserWrapper(
         val wasRegistered = super.registerBrowserCallbacks(browser)
         if (!wasRegistered) return false
 
-        // Keep track of the user's login cookie, which we need for various operations.  These
-        // actions should never be performed on the Incognito profile to avoid contaminating the
-        // user's data with their Incognito history.
-        neevaUser.loginToken.initializeCookieManager(browser)
+        // Initialize the CookieManager of the regular profile so that we can keep the session
+        // cookies in sync.
+        authenticatedApolloWrapper.initializeCookieManager(browser)
 
         return true
     }

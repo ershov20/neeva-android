@@ -364,10 +364,12 @@ class ApolloModule {
     @Singleton
     fun providesAuthenticatedApolloWrapper(
         loginToken: LoginToken,
+        previewSessionToken: PreviewSessionToken,
         neevaConstants: NeevaConstants
     ): AuthenticatedApolloWrapper {
         return AuthenticatedApolloWrapper(
             loginToken = loginToken,
+            previewSessionToken = previewSessionToken,
             neevaConstants = neevaConstants
         )
     }

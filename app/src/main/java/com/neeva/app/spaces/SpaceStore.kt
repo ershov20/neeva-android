@@ -129,7 +129,7 @@ class SpaceStore(
 
             val response = unauthenticatedApolloWrapper.performQuery(
                 GetSpacesDataQuery(Optional.presentIfNotNull(listOf(id))), false
-            )?.response
+            ).response
             val space = response?.data?.getSpace?.space?.first() ?: return@map null
             space.pageMetadata?.pageID?.let { pageID ->
                 val name = space.space?.name ?: return@let null
@@ -232,7 +232,7 @@ class SpaceStore(
             unauthenticatedApolloWrapper.performQuery(
                 GetSpacesDataQuery(Optional.presentIfNotNull(listOf(MAKER_COMMUNITY_SPACE_ID))),
                 userMustBeLoggedIn = false
-            )?.response
+            ).response
 
         val entities = response?.data?.getSpace?.space?.first()?.space?.entities
             ?.filter {
@@ -291,7 +291,7 @@ class SpaceStore(
         val response =
             authenticatedApolloWrapper.performQuery(
                 ListSpacesQuery(), userMustBeLoggedIn = true
-            )?.response?.data ?: return@withContext false
+            ).response?.data ?: return@withContext false
 
         // If there are no spaces to process, but the response was fine, just indicate success.
         val listSpaces = response.listSpaces ?: return@withContext true
@@ -329,7 +329,7 @@ class SpaceStore(
         val spacesDataResponse = authenticatedApolloWrapper.performQuery(
             GetSpacesDataQuery(Optional.presentIfNotNull(spacesToFetch.map { it.id })),
             userMustBeLoggedIn = true
-        )?.response?.data ?: return@withContext false
+        ).response?.data ?: return@withContext false
 
         spacesDataResponse.getSpace?.space?.forEach { spaceQuery ->
             val spaceID = spaceQuery.pageMetadata?.pageID ?: return@forEach
@@ -440,7 +440,7 @@ class SpaceStore(
         val response = authenticatedApolloWrapper.performMutation(
             createAddToSpaceMutation(space, url, title, description),
             userMustBeLoggedIn = true
-        )?.response
+        ).response
 
         return@withContext response?.data?.entityId?.let {
             Log.i(TAG, "Added item to space with id=$it")
@@ -482,7 +482,7 @@ class SpaceStore(
                     )
                 ),
                 userMustBeLoggedIn = true
-            )?.response
+            ).response
 
             response?.data?.let {
                 Log.i(TAG, "Updated space item with id=${item.id}")
@@ -504,7 +504,7 @@ class SpaceStore(
                     )
                 ),
                 userMustBeLoggedIn = true
-            )?.response
+            ).response
 
             response?.data?.let {
                 Log.i(TAG, "Updated space with id=${space.id}")
@@ -525,20 +525,20 @@ class SpaceStore(
                     )
                 ),
                 userMustBeLoggedIn = true
-            )?.response
+            ).response
 
             response?.data?.let { dao.deleteSpaceItem(item) }
             stateFlow.value = State.READY
         }
     }
 
-    suspend fun removeFromSpace(space: Space, uri: Uri): Boolean {
+    private suspend fun removeFromSpace(space: Space, uri: Uri): Boolean {
         val spaceID = space.id
         stateFlow.value = State.UPDATING_DB_AFTER_MUTATION
         val response = authenticatedApolloWrapper.performMutation(
             createDeleteSpaceResultByURLMutation(space, uri),
             userMustBeLoggedIn = true
-        )?.response
+        ).response
 
         return response?.data?.deleteSpaceResultByURL?.let {
             val successString =
@@ -579,7 +579,7 @@ class SpaceStore(
             val response = authenticatedApolloWrapper.performMutation(
                 mutation,
                 userMustBeLoggedIn = true
-            )?.response
+            ).response
 
             response?.data?.let {
                 dao.deleteSpace(space)
@@ -600,7 +600,7 @@ class SpaceStore(
             val response = authenticatedApolloWrapper.performMutation(
                 CreateSpaceMutation(name = spaceName),
                 userMustBeLoggedIn = true
-            )?.response
+            ).response
 
             response?.data?.createSpace?.let {
                 popupModel.showSnackbar(
@@ -641,7 +641,7 @@ class SpaceStore(
             val response = authenticatedApolloWrapper.performMutation(
                 mutation,
                 userMustBeLoggedIn = true
-            )?.response
+            ).response
 
             response?.data?.let {
                 dao.upsert(space.copy(isPublic = newIsPublicValue))

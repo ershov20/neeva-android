@@ -10,6 +10,7 @@ import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.userdata.LoginToken
+import com.neeva.app.userdata.PreviewSessionToken
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.testcommon.apollo.TestUnauthenticatedApolloWrapper
 import dagger.Module
@@ -76,10 +77,12 @@ class TestApolloModule {
     @Singleton
     fun providesAuthenticatedApolloWrapper(
         loginToken: LoginToken,
+        previewSessionToken: PreviewSessionToken,
         neevaConstants: NeevaConstants
     ): AuthenticatedApolloWrapper {
         return TestAuthenticatedApolloWrapper(
             loginToken = loginToken,
+            previewSessionToken = previewSessionToken,
             neevaConstants = neevaConstants
         )
     }

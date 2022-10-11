@@ -337,7 +337,7 @@ class WebLayerModel internal constructor(
 
         coroutineScope.launch(dispatchers.main) {
             // Save the login token before it gets wiped.
-            val loginCookie = neevaUser.loginToken.getCurrentCookieValue()
+            val loginCookie = neevaUser.loginToken.getOrFetchCookie()
 
             suspendCoroutine { continuation ->
                 regularProfile.clearBrowsingData(

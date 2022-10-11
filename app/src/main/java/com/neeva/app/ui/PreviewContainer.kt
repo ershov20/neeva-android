@@ -50,6 +50,7 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.PreviewNeevaUser
+import com.neeva.app.userdata.PreviewSessionToken
 
 /**
  * Show a bunch of previews for the same Composable in a Column to reduce the number of previews has
@@ -138,6 +139,11 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         neevaConstants = previewNeevaConstants,
         sharedPreferencesModel = previewSharedPreferencesModel
     )
+    val previewPreviewSessionToken = PreviewSessionToken(
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers,
+        neevaConstants = previewNeevaConstants,
+    )
     val previewNeevaUser = PreviewNeevaUser(previewLoginToken)
 
     val previewPopupModel = PopupModel(
@@ -147,6 +153,7 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
 
     val previewApolloWrapper = object : AuthenticatedApolloWrapper(
         loginToken = previewLoginToken,
+        previewSessionToken = previewPreviewSessionToken,
         neevaConstants = previewNeevaConstants,
         apolloClientWrapper = object : ApolloClientWrapper {
             override fun apolloClient(): ApolloClient { TODO("Not implemented") }

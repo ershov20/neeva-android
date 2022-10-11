@@ -21,12 +21,14 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
+import com.neeva.app.userdata.PreviewSessionToken
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.robolectric.annotation.Config
@@ -41,6 +43,8 @@ class FirstRunModelTest : BaseTest() {
     @Rule
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
+
+    @Mock private lateinit var previewSessionToken: PreviewSessionToken
 
     private lateinit var context: Context
     private lateinit var firstRunModel: FirstRunModel
@@ -63,6 +67,7 @@ class FirstRunModelTest : BaseTest() {
 
         apolloWrapper = TestAuthenticatedApolloWrapper(
             loginToken = loginToken,
+            previewSessionToken = previewSessionToken,
             neevaConstants = neevaConstants
         )
 

@@ -15,6 +15,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import okhttp3.Response
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -216,6 +217,7 @@ class SessionTokenTest : BaseTest() {
         coroutineScopeRule.advanceUntilIdle()
 
         // Fire the callback with a cookie string that doesn't have the session cookie in it.
+        // After the callback is fired, we'll expect the Browser to be updated with the new value.
         val getCookieCallbackSlot = CapturingSlot<Callback<String>>()
         verify {
             cookieManager.getCookie(
@@ -223,8 +225,6 @@ class SessionTokenTest : BaseTest() {
                 capture(getCookieCallbackSlot)
             )
         }
-
-        // After the callback is fired, we'll expect the Browser to be updated with the new value.
         every {
             cookieManager.setCookie(
                 eq(Uri.parse(neevaConstants.appURL)),
@@ -232,7 +232,6 @@ class SessionTokenTest : BaseTest() {
                 any()
             )
         } returns Unit
-
         getCookieCallbackSlot.captured.onResult("unusedcookie=unusedvalue;")
         coroutineScopeRule.advanceUntilIdle()
 
@@ -252,6 +251,7 @@ class SessionTokenTest : BaseTest() {
         coroutineScopeRule.advanceUntilIdle()
 
         // Fire the callback with a cookie string that doesn't have the session cookie in it.
+        // After the callback is fired, we'll expect the Browser to be updated with the new value.
         val getCookieCallbackSlot = CapturingSlot<Callback<String>>()
         verify {
             cookieManager.getCookie(
@@ -259,8 +259,6 @@ class SessionTokenTest : BaseTest() {
                 capture(getCookieCallbackSlot)
             )
         }
-
-        // After the callback is fired, we'll expect the Browser to be updated with the new value.
         getCookieCallbackSlot.captured.onResult("unusedcookie=unusedvalue;")
         coroutineScopeRule.advanceUntilIdle()
 
@@ -270,5 +268,36 @@ class SessionTokenTest : BaseTest() {
 
         // The cookie should still be empty.
         expectThat(sessionToken.cachedValue).isEqualTo("")
+    }
+
+    @Test
+    fun getCurrentCookieValue_ifCookieIsEmpty_requestsCookie() {
+        // Initialize the cookie with an empty value so that we try to fetch one when needed.
+        initializeSessionToken(initialCookieValue = "", serverResponse = "response processed")
+        sessionToken.initializeCookieManager(browser, requestCookieIfEmpty = false)
+        coroutineScopeRule.advanceUntilIdle()
+
+        // The cookie should still be empty.
+        expectThat(sessionToken.cachedValue).isEqualTo("")
+
+        // Call getCurrentCookieValue, which should perform a network request to get the cookie.
+        coroutineScopeRule.scope.launch {
+            sessionToken.getOrFetchCookie()
+        }
+        coroutineScopeRule.advanceUntilIdle()
+
+        // Return a useless cookie from the Browser by firing the callback.
+        val getCookieCallbacks = mutableListOf<Callback<String>>()
+        verify {
+            cookieManager.getCookie(
+                eq(Uri.parse(neevaConstants.appURL)),
+                capture(getCookieCallbacks)
+            )
+        }
+        getCookieCallbacks.last().onResult("unusedcookie=unusedvalue;")
+        coroutineScopeRule.advanceUntilIdle()
+
+        // A network request should have caused a new cookie to be set.
+        expectThat(sessionToken.cachedValue).isEqualTo("response processed")
     }
 }

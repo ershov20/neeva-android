@@ -69,7 +69,7 @@ abstract class SessionToken(
     /**
      * Cached version of the session token.  The actual source of truth is the WebLayer [Browser]
      * and its [CookieManager], but storing it is helpful for performing network requests.  If you
-     * need the most up-to-date version of the token, call [getCurrentCookieValue].
+     * need the most up-to-date version of the token, call [getCookieFromBrowser].
      */
     abstract val cachedValue: String
 
@@ -81,7 +81,7 @@ abstract class SessionToken(
      * use it after it's already been destroyed, we just store a weak reference to it that can be
      * ignored whenever the [Browser] dies.
      */
-    private var weakBrowser: WeakReference<Browser> = WeakReference(null)
+    protected var weakBrowser: WeakReference<Browser> = WeakReference(null)
 
     protected val createSessionPayloadAdapter: JsonAdapter<CreateSessionPayload> by lazy {
         Moshi.Builder().build().adapter(CreateSessionPayload::class.java)
@@ -127,7 +127,7 @@ abstract class SessionToken(
         // We don't get the latest value when we're told that the cookie has changed
         // so we have to manually get it again.
         coroutineScope.launch(dispatchers.main) {
-            val (isBrowserAlive, cookiePair) = weakBrowser.getCurrentCookieValue()
+            val (isBrowserAlive, cookiePair) = weakBrowser.getCookieFromBrowser()
             if (isBrowserAlive) {
                 val currentCookieValue = cookiePair?.value ?: ""
                 updateCachedCookie(currentCookieValue)
@@ -214,15 +214,6 @@ abstract class SessionToken(
     }
 
     /**
-     * Waits for any ongoing cookie request to complete, then fetches and returns the cookie from
-     * the [CookieManager].
-     */
-    suspend fun waitForRequest(): String? {
-        requestJob?.join()
-        return getCurrentCookieValue()
-    }
-
-    /**
      * Processes the network response triggered by [requestNewCookie] and saves the result back to
      * WebLayer's [Browser]'s [CookieManager].
      */
@@ -257,12 +248,30 @@ abstract class SessionToken(
         }
     }
 
-    /** Retrieves the cookie value directly from the WebLayer [Browser] -- if one is available. */
-    suspend fun getCurrentCookieValue(): String? {
-        return weakBrowser.getCurrentCookieValue().second?.value
+    /**
+     * Retrieves the cookie value directly from the WebLayer [Browser] -- if one is available.
+     *
+     * If no cookie is available (because we have never fetched the cookie, or because the cookie
+     * expired), we make one attempt to request the cookie and return that result.
+     */
+    open suspend fun getOrFetchCookie(): String? {
+        var cookieValue = weakBrowser.getCookieFromBrowser().second?.value
+
+        if (cookieValue.isNullOrEmpty()) {
+            // Calling requestNewCookie() starts an async job to fetch a new cookie that gets stored
+            // inside of the WebLayer Browser's CookieManager.
+            requestNewCookie()
+
+            // Wait for the job to complete and then pull it out of the CookeManager.
+            requestJob?.join()
+            cookieValue = weakBrowser.getCookieFromBrowser().second?.value
+        }
+
+        return cookieValue
     }
 
-    private suspend fun WeakReference<Browser>.getCurrentCookieValue(): Pair<Boolean, CookiePair?> {
+    protected
+    suspend fun WeakReference<Browser>.getCookieFromBrowser(): Pair<Boolean, CookiePair?> {
         return withContext(dispatchers.main) {
             suspendCoroutine { continuation ->
                 get()?.takeIfAlive()?.profile?.cookieManager

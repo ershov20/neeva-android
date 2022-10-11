@@ -24,6 +24,7 @@ import com.neeva.app.suggestions.toQueryRowSuggestion
 import com.neeva.app.type.QuerySuggestionSource
 import com.neeva.app.type.QuerySuggestionType
 import com.neeva.app.userdata.LoginToken
+import com.neeva.app.userdata.PreviewSessionToken
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,13 +65,14 @@ class SuggestionsModelTest : BaseTest() {
     private lateinit var historyManager: HistoryManager
     private lateinit var model: SuggestionsModel
     private lateinit var neevaConstants: NeevaConstants
-    private lateinit var loginToken: LoginToken
     private lateinit var siteSuggestions: MutableStateFlow<List<NavSuggestion>>
     private lateinit var urlBarIsEditing: MutableStateFlow<Boolean>
     private lateinit var urlBarText: MutableStateFlow<TextFieldValue>
     private lateinit var testDispatcher: Dispatchers
 
-    @Mock lateinit var domainProvider: DomainProvider
+    @Mock private lateinit var domainProvider: DomainProvider
+    @Mock private lateinit var loginToken: LoginToken
+    @Mock private lateinit var previewSessionToken: PreviewSessionToken
 
     override fun setUp() {
         super.setUp()
@@ -86,8 +88,11 @@ class SuggestionsModelTest : BaseTest() {
         Mockito.`when`(historyManager.historySuggestions).thenReturn(siteSuggestions)
 
         neevaConstants = NeevaConstants()
-        loginToken = mock()
-        apolloWrapper = TestAuthenticatedApolloWrapper(loginToken, neevaConstants)
+        apolloWrapper = TestAuthenticatedApolloWrapper(
+            loginToken = loginToken,
+            previewSessionToken = previewSessionToken,
+            neevaConstants = neevaConstants
+        )
 
         val settingsDataModel = mock<SettingsDataModel> {
             on {

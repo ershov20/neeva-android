@@ -80,7 +80,7 @@ class NeevaScopeModel(
             searchResult = apolloWrapper.performQuery(
                 SearchQuery(query = query),
                 userMustBeLoggedIn = false
-            )?.response?.data
+            ).response?.data
         } catch (e: Exception) {
             // TODO(https://github.com/neevaco/neeva-android/issues/826): Show error states
             Log.e(TAG, "Caught exception while performing query. ", e)
@@ -99,7 +99,7 @@ class NeevaScopeModel(
             cheatsheetInfo = apolloWrapper.performQuery(
                 CheatsheetInfoQuery(input = input, title = title),
                 userMustBeLoggedIn = false
-            )?.response?.data
+            ).response?.data
         } catch (e: Exception) {
             // TODO(https://github.com/neevaco/neeva-android/issues/826): Show error states
             Log.e(TAG, "Caught exception while performing query. ", e)

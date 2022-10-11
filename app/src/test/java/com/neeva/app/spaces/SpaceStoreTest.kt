@@ -25,9 +25,11 @@ import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserImpl
+import com.neeva.app.userdata.PreviewSessionToken
 import com.neeva.app.userdata.UserInfo
 import com.neeva.testcommon.apollo.MockListSpacesQueryData
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
+import com.neeva.testcommon.apollo.TestUnauthenticatedApolloWrapper
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -36,7 +38,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.kotlin.mock
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
@@ -56,17 +57,19 @@ class SpaceStoreTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
-    @Mock
-    private lateinit var popupModel: PopupModel
+    @Mock private lateinit var popupModel: PopupModel
+    @Mock private lateinit var previewSessionToken: PreviewSessionToken
 
     private lateinit var context: Context
     private lateinit var neevaUser: NeevaUser
     private lateinit var database: HistoryDatabase
-    private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
     private lateinit var spaceStore: SpaceStore
     private lateinit var file: File
     private lateinit var dispatchers: Dispatchers
     private lateinit var neevaConstants: NeevaConstants
+
+    private lateinit var authenticatedApolloWrapper: TestAuthenticatedApolloWrapper
+    private lateinit var unauthenticatedApolloWrapper: TestUnauthenticatedApolloWrapper
 
     override fun setUp() {
         super.setUp()
@@ -92,10 +95,15 @@ class SpaceStoreTest : BaseTest() {
 
         neevaUser.setUserInfo(UserInfo("c5rgtdldv9enb8j1gupg"))
 
-        apolloWrapper = TestAuthenticatedApolloWrapper(
+        authenticatedApolloWrapper = TestAuthenticatedApolloWrapper(
             loginToken = loginToken,
+            previewSessionToken = previewSessionToken,
             neevaConstants = neevaConstants
         )
+        unauthenticatedApolloWrapper = TestUnauthenticatedApolloWrapper(
+            neevaConstants = neevaConstants
+        )
+
         dispatchers = Dispatchers(
             main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
             io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
@@ -104,8 +112,8 @@ class SpaceStoreTest : BaseTest() {
             appContext = context,
             historyDatabase = database,
             coroutineScope = coroutineScopeRule.scope,
-            unauthenticatedApolloWrapper = mock(),
-            authenticatedApolloWrapper = apolloWrapper,
+            unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
+            authenticatedApolloWrapper = authenticatedApolloWrapper,
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
             popupModel = popupModel,
@@ -158,11 +166,11 @@ class SpaceStoreTest : BaseTest() {
 
             expectThat(oldDirectory.exists()).isTrue()
 
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 MockListSpacesQueryData.LIST_SPACES_QUERY_RESPONSE
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY,
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY_RESPONSE
             )
@@ -179,17 +187,17 @@ class SpaceStoreTest : BaseTest() {
             // Confirm old directory is gone.
             expectThat(oldDirectory.exists()).isFalse()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(2)
                 expectThat(get(0)).isA<ListSpacesQuery>()
                 expectThat(get(1)).isA<GetSpacesDataQuery>()
             }
 
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 RESPONSE_LIST_SPACE_QUERY_WITH_FIRST_SPACE_DELETED_AND_SECOND_UPDATED
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY,
                 RESPONSE_GET_SPACES_DATA_QUERY_SECOND_SPACE_ONLY
             )
@@ -199,7 +207,7 @@ class SpaceStoreTest : BaseTest() {
 
             // Confirm SPACE_1 directory remains because the cleanup only runs once.
             expectThat(directory.exists()).isTrue()
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(4)
                 expectThat(get(2)).isA<ListSpacesQuery>()
                 expectThat(get(3)).isA<GetSpacesDataQuery>()
@@ -209,15 +217,15 @@ class SpaceStoreTest : BaseTest() {
     @Test
     fun refresh_schedulesAnExtraRefresh() =
         runTest(coroutineScopeRule.scope.testScheduler) {
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 MockListSpacesQueryData.LIST_SPACES_QUERY_RESPONSE
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY,
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY_RESPONSE
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 MockListSpacesQueryData.LIST_SPACES_QUERY_RESPONSE
             )
@@ -226,7 +234,7 @@ class SpaceStoreTest : BaseTest() {
             spaceStore.refresh()
             coroutineScopeRule.scope.testScheduler.advanceUntilIdle()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(3)
                 expectThat(get(0)).isA<ListSpacesQuery>()
                 expectThat(get(1)).isA<GetSpacesDataQuery>()
@@ -243,7 +251,9 @@ class SpaceStoreTest : BaseTest() {
 
             spaceStore.refresh()
 
-            expectThat(apolloWrapper.testApolloClientWrapper.performedOperations).isEmpty()
+            expectThat(
+                authenticatedApolloWrapper.testApolloClientWrapper.performedOperations
+            ).isEmpty()
         }
 
     @Test fun convertApolloSpace_withMissingData_returnsNull() =
@@ -286,7 +296,7 @@ class SpaceStoreTest : BaseTest() {
     fun refresh_withValidSpaceListQueryResponse_returnsBothSpaces() =
         runTest(coroutineScopeRule.scope.testScheduler) {
             // Only allow the response to fetch the user's Spaces to succeed.
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 MockListSpacesQueryData.LIST_SPACES_QUERY_RESPONSE
             )
@@ -306,7 +316,7 @@ class SpaceStoreTest : BaseTest() {
                 expectThat(database.spaceDao().getItemsFromSpace(id)).isEmpty()
             }
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(2)
                 expectThat(get(0)).isA<ListSpacesQuery>()
                 expectThat(get(1)).isA<GetSpacesDataQuery>()
@@ -316,11 +326,11 @@ class SpaceStoreTest : BaseTest() {
     @Test
     fun refresh_withValidResponses_returnsAllData() =
         runTest(coroutineScopeRule.scope.testScheduler) {
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 MockListSpacesQueryData.LIST_SPACES_QUERY_RESPONSE
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY,
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY_RESPONSE
             )
@@ -372,7 +382,7 @@ class SpaceStoreTest : BaseTest() {
                 )
             ).isTrue()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(2)
                 expectThat(get(0)).isA<ListSpacesQuery>()
                 expectThat(get(1)).isA<GetSpacesDataQuery>()
@@ -382,11 +392,11 @@ class SpaceStoreTest : BaseTest() {
     @Test
     fun refresh_updatesWhenSpaceTimestampChanges() =
         runTest(coroutineScopeRule.scope.testScheduler) {
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 MockListSpacesQueryData.LIST_SPACES_QUERY_RESPONSE
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY,
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY_RESPONSE
             )
@@ -427,17 +437,17 @@ class SpaceStoreTest : BaseTest() {
                 spaceStore.spaceStoreContainsUrl(Uri.parse("https://reddit.com/r/android"))
             ).isFalse()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(2)
                 expectThat(get(0)).isA<ListSpacesQuery>()
                 expectThat(get(1)).isA<GetSpacesDataQuery>()
             }
 
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 RESPONSE_LIST_SPACE_QUERY_WITH_SECOND_SPACE_UPDATED
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 GetSpacesDataQuery(
                     ids = Optional.presentIfNotNull(
                         listOf(MockListSpacesQueryData.SPACE_2.pageMetadata!!.pageID!!)
@@ -481,7 +491,7 @@ class SpaceStoreTest : BaseTest() {
                 )
             ).isTrue()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(4)
                 expectThat(get(2)).isA<ListSpacesQuery>()
                 expectThat(get(3)).isA<GetSpacesDataQuery>()
@@ -491,11 +501,11 @@ class SpaceStoreTest : BaseTest() {
     @Test
     fun addToSpace_mutatesAndUpdatesLocalStateOnly() =
         runTest(coroutineScopeRule.scope.testScheduler) {
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 MockListSpacesQueryData.LIST_SPACES_QUERY_RESPONSE
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY,
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY_RESPONSE
             )
@@ -535,13 +545,13 @@ class SpaceStoreTest : BaseTest() {
                 spaceStore.spaceStoreContainsUrl(Uri.parse("https://reddit.com/r/android"))
             ).isFalse()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(2)
                 expectThat(get(0)).isA<ListSpacesQuery>()
                 expectThat(get(1)).isA<GetSpacesDataQuery>()
             }
 
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 SpaceStore.createAddToSpaceMutation(
                     space = MockListSpacesQueryData.SPACE_2
                         .toSpace(neevaUser.userInfoFlow.value!!.id)!!,
@@ -559,7 +569,7 @@ class SpaceStoreTest : BaseTest() {
 
             expectThat(success).isTrue()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(3)
                 expectThat(get(0)).isA<ListSpacesQuery>()
                 expectThat(get(1)).isA<GetSpacesDataQuery>()
@@ -572,11 +582,11 @@ class SpaceStoreTest : BaseTest() {
     @Test
     fun deleteFromSpace_mutatesAndUpdatesLocalStateOnly() =
         runTest(coroutineScopeRule.scope.testScheduler) {
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.LIST_SPACES_QUERY,
                 MockListSpacesQueryData.LIST_SPACES_QUERY_RESPONSE
             )
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY,
                 MockListSpacesQueryData.GET_SPACES_DATA_BOTH_SPACES_QUERY_RESPONSE
             )
@@ -615,7 +625,7 @@ class SpaceStoreTest : BaseTest() {
                 spaceStore.spaceStoreContainsUrl(Uri.parse("https://reddit.com/r/android"))
             ).isFalse()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(2)
                 expectThat(get(0)).isA<ListSpacesQuery>()
                 expectThat(get(1)).isA<GetSpacesDataQuery>()
@@ -625,7 +635,7 @@ class SpaceStoreTest : BaseTest() {
                 .getItemsFromSpace(MockListSpacesQueryData.SPACE_2.pageMetadata?.pageID!!)
                 .first()
                 .url!!
-            apolloWrapper.registerTestResponse(
+            authenticatedApolloWrapper.registerTestResponse(
                 SpaceStore.createDeleteSpaceResultByURLMutation(
                     MockListSpacesQueryData.SPACE_2.toSpace(neevaUser.userInfoFlow.value!!.id)!!,
                     urlToRemove
@@ -641,7 +651,7 @@ class SpaceStoreTest : BaseTest() {
 
             expectThat(success).isTrue()
 
-            apolloWrapper.testApolloClientWrapper.performedOperations.apply {
+            authenticatedApolloWrapper.testApolloClientWrapper.performedOperations.apply {
                 expectThat(this).hasSize(3)
                 expectThat(get(2)).isA<DeleteSpaceResultByURLMutation>()
             }

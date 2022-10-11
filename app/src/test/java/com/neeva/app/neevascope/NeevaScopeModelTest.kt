@@ -19,6 +19,7 @@ import com.neeva.app.type.UserPreference
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserImpl
+import com.neeva.app.userdata.PreviewSessionToken
 import com.neeva.app.userdata.UserInfo
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,6 +28,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
@@ -39,6 +41,8 @@ class NeevaScopeModelTest : BaseTest() {
     @Rule
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
+
+    @Mock private lateinit var previewSessionToken: PreviewSessionToken
 
     private lateinit var dispatchers: Dispatchers
     private lateinit var neevaScopeModel: NeevaScopeModel
@@ -69,6 +73,7 @@ class NeevaScopeModelTest : BaseTest() {
 
         apolloWrapper = TestAuthenticatedApolloWrapper(
             loginToken = loginToken,
+            previewSessionToken = previewSessionToken,
             neevaConstants = neevaConstants
         )
 

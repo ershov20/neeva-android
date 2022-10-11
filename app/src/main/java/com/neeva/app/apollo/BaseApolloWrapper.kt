@@ -28,7 +28,7 @@ abstract class BaseApolloWrapper(
     override suspend fun <D : Query.Data> performQuery(
         query: Query<D>,
         userMustBeLoggedIn: Boolean
-    ): ApolloResponseSummary<D>? {
+    ): ApolloResponseSummary<D> {
         return performOperation(apolloClientWrapper.query(query), userMustBeLoggedIn)
     }
 
@@ -36,7 +36,7 @@ abstract class BaseApolloWrapper(
     override suspend fun <D : Mutation.Data> performMutation(
         mutation: Mutation<D>,
         userMustBeLoggedIn: Boolean
-    ): ApolloResponseSummary<D>? {
+    ): ApolloResponseSummary<D> {
         return performOperation(apolloClientWrapper.mutation(mutation), userMustBeLoggedIn)
     }
 

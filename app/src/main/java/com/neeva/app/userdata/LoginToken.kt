@@ -13,6 +13,7 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.Response
+import org.chromium.weblayer.Browser
 
 /** Manages the login cookie that tracks whether the user is signed in or not. */
 class LoginToken(
@@ -53,6 +54,17 @@ class LoginToken(
      * If this function returns true, then the user is logged out.
      */
     fun isEmpty(): Boolean = cachedValue.isEmpty()
+    fun isNotEmpty(): Boolean = !isEmpty()
+
+    /**
+     * Retrieves the cookie value directly from the WebLayer [Browser] -- if one is available.
+     *
+     * Because user input is required to get a login cookie, we make no attempt to fire a network
+     * request to fetch a login cookie if no cookie is set.
+     */
+    override suspend fun getOrFetchCookie(): String? {
+        return weakBrowser.getCookieFromBrowser().second?.value
+    }
 
     override fun updateCachedCookie(newValue: String) {
         if (cachedValue == newValue) return

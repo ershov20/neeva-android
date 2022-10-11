@@ -134,8 +134,8 @@ class NeevaUserImpl(
             query = UserInfoQuery(),
             userMustBeLoggedIn = false
         )
-        val response = responseSummary?.response
-        val exception = responseSummary?.exception
+        val response = responseSummary.response
+        val exception = responseSummary.exception
 
         // Clear UserInfo if the exception is not caused by a user's bad network connectivity
         if (
