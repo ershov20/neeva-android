@@ -13,6 +13,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
 import androidx.compose.ui.input.key.NativeKeyEvent
+import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.IdlingResource
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -70,6 +71,19 @@ fun longPressOnBrowserView() {
             MotionEvent.BUTTON_PRIMARY
         )
     )
+}
+
+fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.flakyLongPressOnBrowserView(
+    expectedCondition: () -> Boolean
+) {
+    try {
+        longPressOnBrowserView()
+        waitFor { expectedCondition() }
+    } catch (e: ComposeTimeoutException) {
+        Log.e(TAG, "Failed to long press on browser.  Trying again.")
+        longPressOnBrowserView()
+        waitFor("Failed to long press on browser.") { expectedCondition() }
+    }
 }
 
 /**

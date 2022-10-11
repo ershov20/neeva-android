@@ -12,10 +12,11 @@ import androidx.test.rule.GrantPermissionRule
 import com.neeva.app.BaseBrowserTest
 import com.neeva.app.NeevaActivity
 import com.neeva.app.R
+import com.neeva.app.assertionToBoolean
 import com.neeva.app.clickOnNodeWithText
+import com.neeva.app.flakyLongPressOnBrowserView
 import com.neeva.app.getString
 import com.neeva.app.loadUrlByClickingOnBar
-import com.neeva.app.longPressOnBrowserView
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForBrowserState
 import com.neeva.app.waitForNodeWithText
@@ -32,7 +33,7 @@ class DownloadFileTest : BaseBrowserTest() {
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
 
     @get:Rule
-    var mRuntimePermissionRule = GrantPermissionRule.grant(
+    val runtimePermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
         Manifest.permission.WRITE_EXTERNAL_STORAGE
     )
 
@@ -47,8 +48,11 @@ class DownloadFileTest : BaseBrowserTest() {
                 fileName = "image.png",
                 filesToDownload = 110,
                 openContextMenuAndDownload = {
-                    longPressOnBrowserView()
-                    waitForNodeWithText("$imageLinkUrl?page_index=2").assertExists()
+                    flakyLongPressOnBrowserView {
+                        return@flakyLongPressOnBrowserView assertionToBoolean {
+                            waitForNodeWithText("$imageLinkUrl?page_index=2").assertExists()
+                        }
+                    }
                     waitForNodeWithText("Image alt title").assertExists()
                     waitForNodeWithText(getString(R.string.menu_download_image)).assertExists()
                     onNodeWithTag("MenuHeaderImage").assertExists()
@@ -62,7 +66,7 @@ class DownloadFileTest : BaseBrowserTest() {
     }
 
     @Test
-    fun downloadLink_UniqueRenamingFrom1To100AndOnwards() {
+    fun downloadLink_whenDownloadingOneFile_successfullySavesFile() {
         val linkUrl = WebpageServingRule.urlFor("big_link_element.html")
 
         androidComposeRule.apply {
@@ -72,11 +76,14 @@ class DownloadFileTest : BaseBrowserTest() {
                 fileName = "big_link_element.html",
                 filesToDownload = 1,
                 openContextMenuAndDownload = {
-                    longPressOnBrowserView()
-                    waitForNodeWithText("$linkUrl?page_index=2").assertExists()
+                    flakyLongPressOnBrowserView {
+                        return@flakyLongPressOnBrowserView assertionToBoolean {
+                            waitForNodeWithText("$linkUrl?page_index=2").assertExists()
+                        }
+                    }
                     waitForNodeWithText(getString(R.string.menu_download_link)).assertExists()
 
-                    // Start the first download
+                    // Start the download
                     clickOnNodeWithText(getString(R.string.menu_download_link))
                     waitForIdle()
                 }
@@ -85,7 +92,7 @@ class DownloadFileTest : BaseBrowserTest() {
     }
 
     @Test
-    fun downloadVideo_UniqueRenamingFrom1To100AndOnwards() {
+    fun downloadVideo_whenDownloadingOneFile_successfullySavesFile() {
         val videoLinkUrl = WebpageServingRule.urlFor("video_link_element.html")
 
         androidComposeRule.apply {
@@ -95,11 +102,14 @@ class DownloadFileTest : BaseBrowserTest() {
                 fileName = "video.mov",
                 filesToDownload = 1,
                 openContextMenuAndDownload = {
-                    longPressOnBrowserView()
-                    waitForNodeWithText("$videoLinkUrl?page_index=2").assertExists()
+                    flakyLongPressOnBrowserView {
+                        return@flakyLongPressOnBrowserView assertionToBoolean {
+                            waitForNodeWithText("$videoLinkUrl?page_index=2").assertExists()
+                        }
+                    }
                     waitForNodeWithText(getString(R.string.menu_download_video)).assertExists()
 
-                    // Start the first download
+                    // Start the download
                     clickOnNodeWithText(getString(R.string.menu_download_video))
                     waitForIdle()
                 }
@@ -118,8 +128,12 @@ class DownloadFileTest : BaseBrowserTest() {
             // Load the test webpage up in the existing tab.
             loadUrlByClickingOnBar(imageLinkUrl)
 
-            longPressOnBrowserView()
-            waitForNodeWithText("$imageLinkUrl?page_index=2").assertExists()
+            flakyLongPressOnBrowserView {
+                return@flakyLongPressOnBrowserView assertionToBoolean {
+                    waitForNodeWithText("$imageLinkUrl?page_index=2").assertExists()
+                }
+            }
+
             waitForNodeWithText("Image alt title").assertExists()
             waitForNodeWithText(getString(R.string.menu_download_image)).assertExists()
             onNodeWithTag("MenuHeaderImage").assertExists()
