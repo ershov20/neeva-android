@@ -18,6 +18,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
 import java.io.File
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -36,13 +37,30 @@ object TestNeevaConstantsModule {
         return object : NeevaConstants(
             appHost = "127.0.0.1:8000",
             appURL = "http://127.0.0.1:8000/",
-            cookieHost = "neeva.com",
-            cookieURL = "https://neeva.com",
             appHelpCenterURL = "http://127.0.0.1:8000/help.html",
             downloadDirectory = File(context.cacheDir, "/testDownloads")
         ) {
-            // no local equivalent for cookie cutter url, but this should suffice for testing
+            // No local equivalent for cookie cutter url, but this should suffice for testing.
             override val contentFilterLearnMoreUrl = "http://127.0.0.1:8000/help.html"
+
+            override fun createPersistentNeevaCookieString(
+                cookieName: String,
+                cookieValue: String,
+                isSessionToken: Boolean,
+                durationMinutes: Int
+            ): String {
+                // Creates a cookie string that doesn't explicitly define the Domain, which OkHttp
+                // requires for its Cookie builder.
+                val durationSeconds = TimeUnit.MINUTES.toSeconds(durationMinutes.toLong())
+                return StringBuilder()
+                    .append("$cookieName=$cookieValue")
+                    .append("; max-age=$durationSeconds")
+                    .append("; secure")
+                    .apply {
+                        if (isSessionToken) append("; HttpOnly")
+                    }
+                    .toString()
+            }
         }
     }
 }

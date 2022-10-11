@@ -371,14 +371,17 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
                 if (Uri.parse(intent.dataString).scheme == "neeva") {
                     LoginToken.extractAuthTokenFromIntent(intent)?.let {
-                        neevaUser.loginToken.updateCachedCookie(it)
-                        showBrowser()
-                        webLayerModel.currentBrowser.reload()
-                        if (firstRunModel.shouldLogFirstLogin()) {
-                            clientLogger.logCounter(
-                                LogConfig.Interaction.LOGIN_AFTER_FIRST_RUN, null
-                            )
-                            firstRunModel.setShouldLogFirstLogin(false)
+                        lifecycleScope.launch(dispatchers.main) {
+                            neevaUser.loginToken.updateCookieManager(newValue = it) {
+                                showBrowser()
+
+                                if (firstRunModel.shouldLogFirstLogin()) {
+                                    clientLogger.logCounter(
+                                        LogConfig.Interaction.LOGIN_AFTER_FIRST_RUN, null
+                                    )
+                                    firstRunModel.setShouldLogFirstLogin(false)
+                                }
+                            }
                         }
                     }
                 } else {

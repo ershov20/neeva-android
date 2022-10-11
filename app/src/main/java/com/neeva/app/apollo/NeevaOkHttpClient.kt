@@ -3,6 +3,7 @@ package com.neeva.app.apollo
 import androidx.annotation.CallSuper
 import androidx.compose.ui.text.intl.Locale
 import com.neeva.app.BuildConfig
+import com.neeva.app.NeevaBrowser
 import com.neeva.app.NeevaConstants
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -25,6 +26,10 @@ class NeevaOkHttpClient(
     /** Appends all the cookies required for the server to act on our requests. */
     @CallSuper
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
+        // We can't create OkHttp Cookies for the instrumentation tests because 127.0.0.1 is an
+        // illegal domain.  Just avoid passing any of them in.
+        if (NeevaBrowser.isBeingInstrumented()) return emptyList()
+
         return mutableListOf<Cookie>().apply {
             add(neevaConstants.browserTypeCookie)
             add(neevaConstants.browserVersionCookie)

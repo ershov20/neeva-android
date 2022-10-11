@@ -81,7 +81,6 @@ class RegularBrowserWrapper(
         appContext = appContext
     ),
     popupModel = popupModel,
-    neevaUser = neevaUser,
     faviconCache = regularFaviconCache,
     spaceStore = spaceStore,
     historyManager = historyManager,
@@ -132,9 +131,13 @@ class RegularBrowserWrapper(
         }
 
         coroutineScope.launch(dispatchers.io) {
-            // If Neeva's login cookie changes, we need to refetch the user's data.
-            neevaUser.loginToken.cookieValueFlow.collectLatest {
-                neevaUser.fetch(authenticatedApolloWrapper, appContext)
+            neevaUser.loginToken.cachedValueFlow.collectLatest {
+                if (neevaUser.isSignedOut()) {
+                    neevaUser.clearUserInfo()
+                } else {
+                    // If Neeva's login cookie changes, we need to refetch the user's data.
+                    neevaUser.fetch(authenticatedApolloWrapper, appContext)
+                }
             }
         }
     }

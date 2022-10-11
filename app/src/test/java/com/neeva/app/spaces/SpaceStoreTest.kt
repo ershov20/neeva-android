@@ -239,7 +239,7 @@ class SpaceStoreTest : BaseTest() {
         runTest(coroutineScopeRule.scope.testScheduler) {
             neevaUser.loginToken.updateCachedCookie("")
 
-            expectThat(neevaUser.loginToken.cookieValue).isEmpty()
+            expectThat(neevaUser.loginToken.cachedValue).isEmpty()
 
             spaceStore.refresh()
 

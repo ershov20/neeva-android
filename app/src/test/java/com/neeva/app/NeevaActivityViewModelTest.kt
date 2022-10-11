@@ -15,6 +15,7 @@ import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,6 +48,7 @@ class NeevaActivityViewModelTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
+    @Mock private lateinit var loginToken: LoginToken
     @Mock private lateinit var neevaActivity: NeevaActivity
     @Mock private lateinit var spaceStore: SpaceStore
 
@@ -81,6 +83,7 @@ class NeevaActivityViewModelTest : BaseTest() {
         }
 
         neevaUser = mock {
+            on { loginToken } doReturn loginToken
             on { isSignedOut() } doReturn false
         }
 
@@ -114,8 +117,7 @@ class NeevaActivityViewModelTest : BaseTest() {
         runBlocking {
             verify(spaceStore).deleteAllData()
         }
-        verify(neevaUser).clearUserInfo()
-        verify(webLayerModel).clearNeevaCookies()
+        verify(loginToken).purgeCachedCookie(any())
     }
 
     @Test

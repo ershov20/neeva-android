@@ -89,7 +89,7 @@ class FirstRunModel internal constructor(
 
             return when {
                 // User has already signed in.
-                loginToken.isNotEmpty() -> false
+                !loginToken.isEmpty() -> false
 
                 // SharedPreference has been set, so they must have gone through First Run already.
                 isFirstRunDone -> false

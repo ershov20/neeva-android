@@ -11,7 +11,7 @@ open class UnauthenticatedApolloWrapper(
     neevaConstants: NeevaConstants,
     apolloClientWrapper: ApolloClientWrapper = OkHttpApolloClientWrapper(neevaConstants)
 ) : BaseApolloWrapper(apolloClientWrapper) {
-    override fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean {
+    override suspend fun prepareForOperation(userMustBeLoggedIn: Boolean): Boolean {
         return !userMustBeLoggedIn
     }
 }

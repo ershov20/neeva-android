@@ -114,8 +114,8 @@ class WebLayerModelTest : BaseTest() {
         neevaConstants = NeevaConstants()
 
         loginToken = mock {
-            on { cookieValue } doReturn "fake token"
-            on { cookieValueFlow } doReturn MutableStateFlow("fake token")
+            on { cachedValue } doReturn "fake token"
+            on { cachedValueFlow } doReturn MutableStateFlow("fake token")
         }
 
         neevaUser = mock {
@@ -409,6 +409,7 @@ class WebLayerModelTest : BaseTest() {
             SettingsToggle.CLEAR_CACHE to false
         )
         webLayerModel.clearBrowsingData(clearingOptions, fromMillis = 0, toMillis = 2)
+        coroutineScopeRule.advanceUntilIdle()
 
         verify(historyManager, never()).clearHistory(any())
         verify(regularProfile).clearBrowsingData(
@@ -429,6 +430,7 @@ class WebLayerModelTest : BaseTest() {
         )
 
         webLayerModel.clearBrowsingData(clearingOptions, fromMillis = 0, toMillis = 2)
+        coroutineScopeRule.advanceUntilIdle()
 
         verify(historyManager, never()).clearHistory(eq(0))
         verify(regularProfile).clearBrowsingData(
@@ -448,6 +450,8 @@ class WebLayerModelTest : BaseTest() {
             SettingsToggle.CLEAR_CACHE to true
         )
         webLayerModel.clearBrowsingData(clearingOptions, fromMillis = 0, toMillis = 2)
+        coroutineScopeRule.advanceUntilIdle()
+
         verify(regularProfile).clearBrowsingData(
             eq(listOf(BrowsingDataType.COOKIES_AND_SITE_DATA, BrowsingDataType.CACHE).toIntArray()),
             eq(0),

@@ -110,8 +110,6 @@ class AddToSpaceTest : BaseBrowserTest() {
 
     @Test
     fun regularProfile_afterSignIn_showsSpaces() {
-        loginToken.updateCachedCookie("Fake user token")
-
         // Add a fake response that returns two spaces, but only one is editable by the user.
         testAuthenticatedApolloWrapper.registerTestResponse(
             UserInfoQuery(),
@@ -133,6 +131,14 @@ class AddToSpaceTest : BaseBrowserTest() {
         startAppAndLoadWebPage()
 
         androidComposeRule.apply {
+            activity.runOnUiThread {
+                loginToken.updateCookieManager("Fake user token")
+            }
+
+            waitFor {
+                loginToken.cachedValue == "Fake user token"
+            }
+
             // Make sure that we're still in regular mode.
             onNodeWithContentDescription(
                 getString(R.string.content_filter_incognito_content_description)

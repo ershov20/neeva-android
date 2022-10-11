@@ -15,7 +15,7 @@ open class AuthenticatedApolloWrapper(
         loginToken.getSessionCookies()
     }
 ) : BaseApolloWrapper(apolloClientWrapper) {
-    override fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean {
-        return !userMustBeLoggedIn || loginToken.isNotEmpty()
+    override suspend fun prepareForOperation(userMustBeLoggedIn: Boolean): Boolean {
+        return !userMustBeLoggedIn || !loginToken.isEmpty()
     }
 }

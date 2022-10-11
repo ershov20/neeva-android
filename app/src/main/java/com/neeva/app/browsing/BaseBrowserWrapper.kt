@@ -48,7 +48,6 @@ import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.userdata.NeevaUser
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableDeferred
@@ -91,7 +90,6 @@ abstract class BaseBrowserWrapper internal constructor(
     override val suggestionsModel: SuggestionsModel?,
     override val neevaScopeModel: NeevaScopeModel,
     private val popupModel: PopupModel,
-    private val neevaUser: NeevaUser,
     final override val faviconCache: FaviconCache,
     protected val spaceStore: SpaceStore?,
     private val tabList: TabList,
@@ -126,7 +124,6 @@ abstract class BaseBrowserWrapper internal constructor(
         suggestionsModel: SuggestionsModel?,
         neevaScopeModel: NeevaScopeModel,
         popupModel: PopupModel,
-        neevaUser: NeevaUser,
         faviconCache: FaviconCache,
         spaceStore: SpaceStore?,
         historyManager: HistoryManager?,
@@ -149,7 +146,6 @@ abstract class BaseBrowserWrapper internal constructor(
         suggestionsModel = suggestionsModel,
         neevaScopeModel = neevaScopeModel,
         popupModel = popupModel,
-        neevaUser = neevaUser,
         faviconCache = faviconCache,
         spaceStore = spaceStore,
         tabList = tabList,
@@ -553,17 +549,7 @@ abstract class BaseBrowserWrapper internal constructor(
             }
         )
 
-        // Let Neeva know that it's serving an Android client.
-        browser.profile.cookieManager.setCookie(
-            Uri.parse(neevaConstants.cookieURL),
-            neevaConstants.browserTypeCookie.toString(),
-            null
-        )
-        browser.profile.cookieManager.setCookie(
-            Uri.parse(neevaConstants.cookieURL),
-            neevaConstants.browserVersionCookie.toString(),
-            null
-        )
+        setBrowserCookies()
 
         browser.registerBrowserRestoreCallback(restorer)
         if (!browser.isRestoringPreviousState) {
@@ -577,6 +563,23 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         return true
+    }
+
+    /** Sets cookies that let Neeva know that it's serving the Android client. */
+    internal fun setBrowserCookies() {
+        browser.takeIfAlive()?.profile?.cookieManager?.apply {
+            setCookie(
+                Uri.parse(neevaConstants.appURL),
+                neevaConstants.browserTypeCookieString,
+                null
+            )
+
+            setCookie(
+                Uri.parse(neevaConstants.appURL),
+                neevaConstants.browserVersionCookieString,
+                null
+            )
+        }
     }
 
     /**
@@ -1095,7 +1098,7 @@ abstract class BaseBrowserWrapper internal constructor(
             val isLoading by neevaScopeModel.isLoading.collectAsState()
 
             when {
-                neevaUser.isSignedOut() || isOnNeevaSearch -> {
+                isOnNeevaSearch -> {
                     NeevaScopeInfoScreen(onTapAction = onDismiss)
                 }
 

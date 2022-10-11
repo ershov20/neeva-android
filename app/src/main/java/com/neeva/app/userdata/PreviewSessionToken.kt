@@ -3,38 +3,29 @@ package com.neeva.app.userdata
 import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.sharedprefs.SharedPrefFolder
-import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.StateFlow
 import okhttp3.Response
 
 class PreviewSessionToken(
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
-    neevaConstants: NeevaConstants,
-    private val sharedPreferencesModel: SharedPreferencesModel
+    neevaConstants: NeevaConstants
 ) : SessionToken(
     coroutineScope = coroutineScope,
     dispatchers = dispatchers,
     neevaConstants = neevaConstants,
     endpointURL = neevaConstants.previewCookieURL,
-    cookieName = neevaConstants.previewCookie
+    cookieName = neevaConstants.previewCookieKey
 ) {
     companion object {
         private const val TAG = "PreviewSessionToken"
     }
 
-    override val cookieValue: String
-        get() = SharedPrefFolder.User.PreviewToken.get(sharedPreferencesModel)
-    override val cookieValueFlow: StateFlow<String>
-        get() = SharedPrefFolder.User.PreviewToken.getFlow(sharedPreferencesModel)
+    private var _cachedValue: String = ""
+    override val cachedValue: String get() = _cachedValue
 
     override fun updateCachedCookie(newValue: String) {
-        SharedPrefFolder.User.PreviewToken.set(
-            sharedPreferencesModel = sharedPreferencesModel,
-            value = newValue
-        )
+        _cachedValue = newValue
     }
 
     override suspend fun processResponse(response: Response): Boolean {
@@ -75,7 +66,7 @@ class PreviewSessionToken(
 
             result.resultCode == 1 && result.sessionKey != null -> {
                 Log.d(TAG, "New $cookieName session started.")
-                updateCachedCookie(result.sessionKey)
+                updateCookieManagerAsync(result.sessionKey, result.sessionDuration)
                 return true
             }
 
@@ -85,9 +76,5 @@ class PreviewSessionToken(
         }
 
         return false
-    }
-
-    override fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean {
-        return !userMustBeLoggedIn || cookieValue.isNotEmpty()
     }
 }

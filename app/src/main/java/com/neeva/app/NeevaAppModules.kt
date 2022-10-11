@@ -211,14 +211,12 @@ object NeevaAppModule {
     fun providesPreviewSessionToken(
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
-        neevaConstants: NeevaConstants,
-        sharedPreferencesModel: SharedPreferencesModel
+        neevaConstants: NeevaConstants
     ): PreviewSessionToken {
         return PreviewSessionToken(
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
-            neevaConstants = neevaConstants,
-            sharedPreferencesModel = sharedPreferencesModel
+            neevaConstants = neevaConstants
         )
     }
 

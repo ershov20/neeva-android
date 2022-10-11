@@ -49,8 +49,12 @@ class ClientLogger(
     private val settingsDataModel: SettingsDataModel
 ) {
     private val environment: ClientLogEnvironment = when {
+        // We allow instrumentation tests to hit "Prod" because we inject a TestApolloClientWrapper
+        // that blocks all network access while allowing us to provide predefined responses.
         NeevaBrowser.isBeingInstrumented() -> ClientLogEnvironment.Prod
+
         BuildConfig.DEBUG -> ClientLogEnvironment.Dev
+
         else -> ClientLogEnvironment.Prod
     }
 

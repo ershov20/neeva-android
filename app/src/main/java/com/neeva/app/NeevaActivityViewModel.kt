@@ -172,10 +172,10 @@ class NeevaActivityViewModel(
             }
     }
 
-    fun signOut() {
+    /** Signs the user out of the app and the website. */
+    fun signOut(callback: (Boolean) -> Unit = {}) {
         viewModelScope.launch(dispatchers.io) { spaceStore.deleteAllData() }
-        neevaUser.clearUserInfo()
-        webLayerModel.clearNeevaCookies()
+        neevaUser.loginToken.purgeCachedCookie(callback)
     }
 
     fun fireExternalIntentForUri(activity: NeevaActivity, uri: Uri, closeTabIfSuccessful: Boolean) {

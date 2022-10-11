@@ -13,7 +13,6 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import okhttp3.Response
-import org.chromium.weblayer.Browser
 
 /** Manages the login cookie that tracks whether the user is signed in or not. */
 class LoginToken(
@@ -26,7 +25,7 @@ class LoginToken(
     dispatchers = dispatchers,
     neevaConstants = neevaConstants,
     endpointURL = null,
-    cookieName = neevaConstants.loginCookie
+    cookieName = neevaConstants.loginCookieKey
 ) {
     companion object {
         fun extractAuthTokenFromIntent(intent: Intent?): String? {
@@ -43,29 +42,44 @@ class LoginToken(
         }
     }
 
-    override val cookieValue: String
+    override val cachedValue: String
         get() = SharedPrefFolder.User.Token.get(sharedPreferencesModel)
-    override val cookieValueFlow: StateFlow<String>
+    val cachedValueFlow: StateFlow<String>
         get() = SharedPrefFolder.User.Token.getFlow(sharedPreferencesModel)
 
+    /**
+     * Returns whether or not we have a login cookie cached.
+     *
+     * If this function returns true, then the user is logged out.
+     */
+    fun isEmpty(): Boolean = cachedValue.isEmpty()
+
     override fun updateCachedCookie(newValue: String) {
-        if (cookieValue == newValue) return
-        SharedPrefFolder.User.Token.set(
-            sharedPreferencesModel = sharedPreferencesModel,
-            value = newValue,
-            mustCommitImmediately = true
-        )
+        if (cachedValue == newValue) return
+
+        if (newValue.isEmpty()) {
+            SharedPrefFolder.User.Token.remove(
+                sharedPreferencesModel = sharedPreferencesModel
+            )
+        } else if (cachedValue != newValue) {
+            SharedPrefFolder.User.Token.set(
+                sharedPreferencesModel = sharedPreferencesModel,
+                value = newValue,
+                mustCommitImmediately = true
+            )
+        }
     }
 
-    override fun purgeCachedCookie() {
-        SharedPrefFolder.User.Token.remove(sharedPreferencesModel)
+    override fun purgeCachedCookie(callback: (success: Boolean) -> Unit) {
+        updateCookieManager("") { success ->
+            if (success) {
+                updateCachedCookie("")
+            }
+            callback(success)
+        }
     }
 
     /** No-op: The user has to provide login credentials via the sign-in flow. */
-    override fun requestNewCookie(browser: Browser) {}
+    override fun requestNewCookie() {}
     override suspend fun processResponse(response: Response): Boolean = false
-
-    override fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean {
-        return !userMustBeLoggedIn || isNotEmpty()
-    }
 }

@@ -7,19 +7,18 @@ package com.neeva.app
 import android.net.Uri
 import android.os.Environment
 import java.io.File
+import java.util.concurrent.TimeUnit
 import okhttp3.Cookie
 
 open class NeevaConstants(
     val appHost: String = "neeva.com",
     val appURL: String = "https://$appHost/",
-    val cookieHost: String = appHost,
-    val cookieURL: String = "https://$cookieHost/",
     val appHelpCenterURL: String = "https://help.$appHost/",
-    val appWelcomeToursURL: String = "$appURL#modal-hello",
     val downloadDirectory: File = Environment.getExternalStoragePublicDirectory(
         Environment.DIRECTORY_DOWNLOADS
     )
 ) {
+    val appWelcomeToursURL: String = "$appURL#modal-hello"
     val appSearchURL: String = "${appURL}search"
     val appSpacesURL: String = "${appURL}spaces"
     val appConnectionsURL: String = "${appURL}connections"
@@ -48,34 +47,75 @@ open class NeevaConstants(
     /** Identifies the Android client when making backend requests. */
     val browserIdentifier = "co.neeva.app.android.browser"
 
-    val loginCookie: String = "httpd~login"
-    val incognitoCookie: String = "httpd~incognito"
-    val previewCookie: String = "httpd~preview"
+    val loginCookieKey: String = "httpd~login"
+    val incognitoCookieKey: String = "httpd~incognito"
+    val previewCookieKey: String = "httpd~preview"
 
-    val browserTypeCookie = createNeevaCookie(
-        cookieName = "BrowserType",
-        cookieValue = "neeva-android"
-    )
+    val browserTypeCookie: Cookie by lazy {
+        createPersistentNeevaOkHttpCookie(
+            cookieName = "BrowserType",
+            cookieValue = "neeva-android",
+            isSessionToken = false
+        )
+    }
+    val browserTypeCookieString: String by lazy {
+        createPersistentNeevaCookieString(
+            cookieName = "BrowserType",
+            cookieValue = "neeva-android",
+            isSessionToken = false
+        )
+    }
+    val browserVersionCookie: Cookie by lazy {
+        createPersistentNeevaOkHttpCookie(
+            cookieName = "BrowserVersion",
+            cookieValue = BuildConfig.VERSION_NAME,
+            isSessionToken = false
+        )
+    }
+    val browserVersionCookieString: String by lazy {
+        createPersistentNeevaCookieString(
+            cookieName = "BrowserVersion",
+            cookieValue = BuildConfig.VERSION_NAME,
+            isSessionToken = false
+        )
+    }
 
-    val browserVersionCookie = createNeevaCookie(
-        cookieName = "BrowserVersion",
-        cookieValue = BuildConfig.VERSION_NAME
-    )
-
-    fun createLoginCookie(cookieValue: String) = createNeevaCookie(
-        cookieName = loginCookie,
-        cookieValue = cookieValue
-    )
-
-    fun createNeevaCookie(cookieName: String, cookieValue: String): Cookie {
-        // TODO(dan.alcantara): |expiresAt| _should_ be set to the actual expiration of the cookie
-        //                      but the app doesn't keep track of them.
+    fun createPersistentNeevaOkHttpCookie(
+        cookieName: String,
+        cookieValue: String,
+        isSessionToken: Boolean,
+        durationMinutes: Int = Int.MAX_VALUE
+    ): Cookie {
         return Cookie.Builder()
             .name(cookieName)
             .value(cookieValue)
+            .expiresAt(
+                TimeUnit.MINUTES.toMillis(durationMinutes.toLong()) + System.currentTimeMillis()
+            )
             .secure()
-            .domain(cookieHost)
-            .expiresAt(Long.MAX_VALUE)
+            .apply {
+                // The website requires session tokens to be set as "HttpOnly".
+                if (isSessionToken) {
+                    httpOnly()
+                    hostOnlyDomain(appHost)
+                } else {
+                    domain(appHost)
+                }
+            }
             .build()
+    }
+
+    open fun createPersistentNeevaCookieString(
+        cookieName: String,
+        cookieValue: String,
+        isSessionToken: Boolean,
+        durationMinutes: Int = Int.MAX_VALUE
+    ): String {
+        return createPersistentNeevaOkHttpCookie(
+            cookieName = cookieName,
+            cookieValue = cookieValue,
+            isSessionToken = isSessionToken,
+            durationMinutes = durationMinutes
+        ).toString()
     }
 }

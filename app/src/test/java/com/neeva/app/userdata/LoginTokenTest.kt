@@ -13,10 +13,15 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import org.chromium.weblayer.Browser
+import org.chromium.weblayer.Callback
+import org.chromium.weblayer.CookieManager
+import org.chromium.weblayer.Profile
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -26,6 +31,7 @@ import strikt.api.expectThat
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
+import strikt.assertions.startsWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -48,7 +54,7 @@ class LoginTokenTest : BaseTest() {
             neevaConstants = neevaConstants,
             sharedPreferencesModel = sharedPreferencesModel
         )
-        val result = loginToken.cookieValue
+        val result = loginToken.cachedValue
         expectThat(result).isEmpty()
     }
 
@@ -66,7 +72,7 @@ class LoginTokenTest : BaseTest() {
             neevaConstants = neevaConstants,
             sharedPreferencesModel = sharedPreferencesModel
         )
-        val result = loginToken.cookieValue
+        val result = loginToken.cachedValue
         expectThat(result).isEqualTo("whatever")
     }
 
@@ -138,7 +144,37 @@ class LoginTokenTest : BaseTest() {
             neevaConstants = neevaConstants,
             sharedPreferencesModel = sharedPreferencesModel
         )
+
+        val cookieManager: CookieManager = mock {}
+
+        val profile: Profile = mock {
+            on { getCookieManager() } doReturn cookieManager
+        }
+
+        val browser: Browser = mock {
+            on { isDestroyed } doReturn false
+            on { getProfile() } doReturn profile
+        }
+        loginToken.initializeCookieManager(browser, requestCookieIfEmpty = false)
+
         loginToken.purgeCachedCookie()
+        coroutineScopeRule.advanceUntilIdle()
+
+        // Confirm that we tried to update the WebLayer CookieManager with an empty value, then fire
+        // the callback to make it proceed.
+        val cookieCaptor = argumentCaptor<String>()
+        val callbackCaptor = argumentCaptor<Callback<Boolean>>()
+        verify(cookieManager).setCookie(
+            eq(Uri.parse(neevaConstants.appURL)),
+            cookieCaptor.capture(),
+            callbackCaptor.capture()
+        )
+
+        // Confirm that the browser was told to clear the cookie with an empty value.
+        expectThat(cookieCaptor.lastValue).startsWith("httpd~login=;")
+        callbackCaptor.lastValue.onResult(true)
+        coroutineScopeRule.advanceUntilIdle()
+
         verify(sharedPreferencesModel).removeValue(
             eq(SharedPrefFolder.User),
             eq(SharedPrefFolder.User.Token)

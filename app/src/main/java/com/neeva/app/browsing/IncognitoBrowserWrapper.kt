@@ -8,8 +8,7 @@ import android.content.Context
 import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
-import com.neeva.app.apollo.ApolloWrapper
-import com.neeva.app.apollo.UnauthenticatedApolloWrapper
+import com.neeva.app.apollo.IncognitoApolloWrapper
 import com.neeva.app.contentfilter.IncognitoTrackersAllowList
 import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.neevascope.NeevaScopeModel
@@ -21,7 +20,6 @@ import com.neeva.app.storage.IncognitoTabScreenshotManager
 import com.neeva.app.storage.favicons.IncognitoFaviconCache
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.IncognitoSessionToken
-import com.neeva.app.userdata.NeevaUser
 import java.io.File
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
@@ -38,8 +36,7 @@ import org.chromium.weblayer.WebLayer
 class IncognitoBrowserWrapper private constructor(
     appContext: Context,
     activityCallbackProvider: ActivityCallbackProvider,
-    private val authenticatedApolloWrapper: ApolloWrapper,
-    private val unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
+    private val incognitoApolloWrapper: IncognitoApolloWrapper,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
     domainProvider: DomainProvider,
@@ -52,7 +49,6 @@ class IncognitoBrowserWrapper private constructor(
     scriptInjectionManager: ScriptInjectionManager,
     sharedPreferencesModel: SharedPreferencesModel,
     popupModel: PopupModel,
-    neevaUser: NeevaUser,
     private val incognitoSessionToken: IncognitoSessionToken
 ) : BaseBrowserWrapper(
     isIncognito = true,
@@ -62,13 +58,12 @@ class IncognitoBrowserWrapper private constructor(
     activityCallbackProvider = activityCallbackProvider,
     suggestionsModel = null,
     neevaScopeModel = NeevaScopeModel(
-        apolloWrapper = unauthenticatedApolloWrapper,
+        apolloWrapper = incognitoApolloWrapper,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
         appContext = appContext
     ),
     popupModel = popupModel,
-    neevaUser = neevaUser,
     faviconCache = incognitoFaviconCache,
     spaceStore = null,
     historyManager = null,
@@ -84,29 +79,28 @@ class IncognitoBrowserWrapper private constructor(
     clientLogger = null
 ) {
     constructor(
+        activityCallbackProvider: ActivityCallbackProvider,
         appContext: Context,
         coroutineScope: CoroutineScope,
+        directories: Directories,
         dispatchers: Dispatchers,
-        activityCallbackProvider: ActivityCallbackProvider,
-        authenticatedApolloWrapper: ApolloWrapper,
-        unauthenticatedApolloWrapper: UnauthenticatedApolloWrapper,
         domainProvider: DomainProvider,
         downloadCallback: DownloadCallback,
-        onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
+        incognitoSessionToken: IncognitoSessionToken,
         neevaConstants: NeevaConstants,
-        scriptInjectionManager: ScriptInjectionManager,
-        sharedPreferencesModel: SharedPreferencesModel,
-        settingsDataModel: SettingsDataModel,
-        directories: Directories,
-        tempDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(FOLDER_NAME),
+        onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
         popupModel: PopupModel,
-        neevaUser: NeevaUser,
-        incognitoSessionToken: IncognitoSessionToken
+        scriptInjectionManager: ScriptInjectionManager,
+        settingsDataModel: SettingsDataModel,
+        sharedPreferencesModel: SharedPreferencesModel,
+        tempDirectory: Deferred<File> = directories.cacheSubdirectoryAsync(FOLDER_NAME)
     ) : this(
         appContext = appContext,
         activityCallbackProvider = activityCallbackProvider,
-        authenticatedApolloWrapper = authenticatedApolloWrapper,
-        unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
+        incognitoApolloWrapper = IncognitoApolloWrapper(
+            incognitoSessionToken = incognitoSessionToken,
+            neevaConstants = neevaConstants
+        ),
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
         domainProvider = domainProvider,
@@ -119,8 +113,6 @@ class IncognitoBrowserWrapper private constructor(
         ),
         neevaConstants = neevaConstants,
         onRemovedFromHierarchy = onRemovedFromHierarchy,
-        scriptInjectionManager = scriptInjectionManager,
-        sharedPreferencesModel = sharedPreferencesModel,
         settingsDataModel = settingsDataModel,
         tabScreenshotManager = IncognitoTabScreenshotManager(
             appContext = appContext,
@@ -128,8 +120,9 @@ class IncognitoBrowserWrapper private constructor(
             coroutineScope = coroutineScope,
             dispatchers = dispatchers
         ),
+        scriptInjectionManager = scriptInjectionManager,
+        sharedPreferencesModel = sharedPreferencesModel,
         popupModel = popupModel,
-        neevaUser = neevaUser,
         incognitoSessionToken = incognitoSessionToken
     )
 
@@ -184,7 +177,10 @@ class IncognitoBrowserWrapper private constructor(
         val wasRegistered = super.registerBrowserCallbacks(browser)
         if (!wasRegistered) return false
 
-        incognitoSessionToken.initializeCookieManager(browser)
+        incognitoSessionToken.initializeCookieManager(
+            browser = browser,
+            requestCookieIfEmpty = true
+        )
         return true
     }
 

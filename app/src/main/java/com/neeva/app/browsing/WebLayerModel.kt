@@ -24,6 +24,8 @@ import com.neeva.app.userdata.IncognitoSessionToken
 import com.neeva.app.userdata.NeevaUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -304,26 +306,20 @@ class WebLayerModel internal constructor(
     private fun monitorLoginCookie() {
         coroutineScope.launch(dispatchers.main) {
             var previousCookie: String? = null
-            neevaUser.loginToken.cookieValueFlow.collect {
+            neevaUser.loginToken.cachedValueFlow.collect {
                 // If previousCookie == null, then we've just started the app and have restored it
                 // from the SharedPreferences.
                 if (previousCookie != null && previousCookie != it) {
-                    neevaUser.loginToken.updateCookieManager(
-                        regularProfile.cookieManager
-                    ) { success ->
-                        if (!success) return@updateCookieManager
+                    if (!neevaUser.isSignedOut()) {
+                        SharedPrefFolder.FirstRun.HasSignedInBefore.set(
+                            sharedPreferencesModel,
+                            true
+                        )
+                    }
 
-                        if (neevaUser.loginToken.isNotEmpty()) {
-                            SharedPrefFolder.FirstRun.HasSignedInBefore.set(
-                                sharedPreferencesModel,
-                                true
-                            )
-                        }
-
-                        val currentUrl = regularBrowser.activeTabModel.urlFlow.value
-                        if (currentUrl.toString().startsWith(neevaConstants.appURL)) {
-                            regularBrowser.reload()
-                        }
+                    val currentUrl = regularBrowser.activeTabModel.urlFlow.value
+                    if (currentUrl.toString().startsWith(neevaConstants.appURL)) {
+                        regularBrowser.reload()
                     }
                 }
 
@@ -332,29 +328,32 @@ class WebLayerModel internal constructor(
         }
     }
 
-    fun clearNeevaCookies() {
-        neevaUser.loginToken.purgeCachedCookie()
-        regularBrowser.reload()
-    }
-
     private fun clearNonNeevaCookies(
         clearCookiesFlags: List<Int>,
         fromMillis: Long,
         toMillis: Long
     ) {
-        if (clearCookiesFlags.isNotEmpty()) {
-            val oldNeevaAuthToken = neevaUser.loginToken.cookieValue
+        if (clearCookiesFlags.isEmpty()) return
 
-            regularProfile.clearBrowsingData(
-                clearCookiesFlags.toIntArray(),
-                fromMillis,
-                toMillis
-            ) {
-                // Add back the login Cookie after we've finished clearing everything.
-                if (oldNeevaAuthToken.isNotEmpty()) {
-                    neevaUser.loginToken.updateCachedCookie(oldNeevaAuthToken)
+        coroutineScope.launch(dispatchers.main) {
+            // Save the login token before it gets wiped.
+            val loginCookie = neevaUser.loginToken.getCurrentCookieValue()
+
+            suspendCoroutine { continuation ->
+                regularProfile.clearBrowsingData(
+                    clearCookiesFlags.toIntArray(),
+                    fromMillis,
+                    toMillis
+                ) {
+                    continuation.resume(Unit)
                 }
             }
+
+            // Add back the expected Neeva cookies after we've finished clearing everything.
+            if (!loginCookie.isNullOrEmpty()) {
+                neevaUser.loginToken.updateCookieManager(loginCookie)
+            }
+            regularBrowser.setBrowserCookies()
         }
     }
 

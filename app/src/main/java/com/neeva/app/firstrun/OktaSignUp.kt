@@ -58,7 +58,7 @@ object OktaSignUp {
         val response = client.newCall(request).execute()
 
         cookieJar
-            .authCookie(loginCookie = neevaConstants.loginCookie)
+            .authCookie(loginCookie = neevaConstants.loginCookieKey)
             ?.let { cookie ->
                 val intent = Intent(Intent.ACTION_VIEW)
                 intent.data = Uri.parse("neeva://login/cb?sessionKey=${cookie.value}")

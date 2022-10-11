@@ -17,8 +17,12 @@ import com.apollographql.apollo3.exception.ApolloNetworkException
 abstract class BaseApolloWrapper(
     private val apolloClientWrapper: ApolloClientWrapper
 ) : ApolloWrapper {
-    /** Returns whether or not the operation is allowed to be performed. */
-    abstract fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean
+    /**
+     * Prepares to run an operation (e.g. fetches a session token if we don't have one).
+     *
+     * Returns false if the operation cannot be performed.
+     */
+    abstract suspend fun prepareForOperation(userMustBeLoggedIn: Boolean): Boolean
 
     @CallSuper
     override suspend fun <D : Query.Data> performQuery(
@@ -40,7 +44,7 @@ abstract class BaseApolloWrapper(
         call: ApolloCall<D>,
         userMustBeLoggedIn: Boolean
     ): ApolloResponseSummary<D> {
-        if (!mayPerformOperation(userMustBeLoggedIn)) {
+        if (!prepareForOperation(userMustBeLoggedIn)) {
             Log.w(TAG, "Not allowed to perform operation: ${call.operation}")
             return ApolloResponseSummary(null, null)
         }

@@ -39,7 +39,6 @@ import com.neeva.app.storage.entities.TabData
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.suggestions.SuggestionsModel
 import com.neeva.app.ui.PopupModel
-import com.neeva.app.userdata.NeevaUser
 import java.util.EnumSet
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -117,7 +116,6 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
     @Mock private lateinit var scriptInjectionManager: ScriptInjectionManager
     @Mock private lateinit var popupModel: PopupModel
-    @Mock private lateinit var neevaUser: NeevaUser
     @Mock private lateinit var trackersAllowList: TrackersAllowList
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
@@ -216,14 +214,10 @@ class BaseBrowserWrapperTest : BaseTest() {
             appContext = context,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = coroutineScopeRule.dispatchers,
-            popupModel = popupModel,
             activityCallbackProvider = activityCallbackProvider,
-            neevaUser = neevaUser,
-            neevaConstants = neevaConstants,
-            domainProvider = domainProvider,
-            downloadCallback = downloadCallback,
             suggestionsModel = suggestionsModel,
             neevaScopeModel = neevaScopeModel,
+            popupModel = popupModel,
             faviconCache = faviconCache,
             spaceStore = spaceStore,
             tabList = tabList,
@@ -232,9 +226,12 @@ class BaseBrowserWrapperTest : BaseTest() {
             _findInPageModel = findInPageModel,
             historyManager = historyManager,
             tabScreenshotManager = tabScreenshotManager,
+            domainProvider = domainProvider,
+            downloadCallback = downloadCallback,
+            neevaConstants = neevaConstants,
             scriptInjectionManager = scriptInjectionManager,
-            settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
+            settingsDataModel = settingsDataModel,
             contentFilterModel = contentFilterModel,
             getCurrentTime = currentTimeProvider,
             clientLogger = null

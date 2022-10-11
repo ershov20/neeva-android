@@ -189,7 +189,7 @@ class SpaceStore(
     }
 
     suspend fun refresh() {
-        if (neevaUser.loginToken.isEmpty()) {
+        if (neevaUser.isSignedOut()) {
             fetchCommunitySpaces(appSpacesURL = neevaConstants.appSpacesURL)
             return
         }

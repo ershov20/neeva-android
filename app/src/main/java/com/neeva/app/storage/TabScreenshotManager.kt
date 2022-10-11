@@ -68,8 +68,6 @@ abstract class TabScreenshotManager(
             return
         }
 
-        val captureStack = Throwable()
-
         // Kick off taking a screenshot and asynchronously wait for WebLayer to finish.  While it
         // would be nice to put it into the coroutine below using a suspendCoroutine, the
         // suspendCoroutine doesn't play nicely with a timeout.
@@ -77,11 +75,7 @@ abstract class TabScreenshotManager(
         tab.captureScreenShot(0.5f) { thumbnail, errorCode ->
             if (errorCode != 0) {
                 val errorName = ScreenshotErrors.values().getOrNull(errorCode)?.name
-                Log.w(
-                    TAG,
-                    "Failed to create tab thumbnail: Tab=$tab, Error=$errorCode $errorName",
-                    captureStack
-                )
+                Log.w(TAG, "Failed to create tab thumbnail: Tab=$tab, Error=$errorCode $errorName")
             }
             deferredThumbnail.complete(thumbnail)
         }

@@ -4,55 +4,45 @@
 
 package com.neeva.app
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
-import androidx.lifecycle.Lifecycle
-import androidx.test.core.app.ActivityScenario
-import androidx.test.platform.app.InstrumentationRegistry
-import com.neeva.app.sharedprefs.SharedPreferencesModel
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.type.SubscriptionType
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.userdata.NeevaUserImpl
+import com.neeva.app.userdata.NeevaUserImpl.Companion.toUserInfo
 import com.neeva.app.userdata.UserInfo
+import com.neeva.testcommon.WebpageServingRule
+import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isEmpty
-import strikt.assertions.isEqualTo
-import strikt.assertions.isNullOrEmpty
+import strikt.assertions.isNull
 
 @HiltAndroidTest
 class LoginCookieInstrumentationTest : BaseHiltTest() {
-    @Inject
-    lateinit var neevaConstants: NeevaConstants
-
-    private lateinit var loginToken: LoginToken
     private lateinit var loggedInUserInfo: UserInfo
-    private lateinit var neevaUser: NeevaUser
-    private lateinit var sharedPreferencesModel: SharedPreferencesModel
 
-    @Inject lateinit var coroutineScope: CoroutineScope
-    @Inject lateinit var dispatchers: Dispatchers
+    @Inject lateinit var authenticatedApolloWrapper: AuthenticatedApolloWrapper
+    @Inject lateinit var loginToken: LoginToken
+    @Inject lateinit var neevaConstants: NeevaConstants
+    @Inject lateinit var neevaUser: NeevaUser
+
+    private lateinit var testApolloWrapper: TestAuthenticatedApolloWrapper
+
+    @get:Rule
+    val webpageServingRule = WebpageServingRule()
 
     @get:Rule
     val presetSharedPreferencesRule =
         PresetSharedPreferencesRule(skipFirstRun = false, skipNeevaScopeTooltip = true)
 
-    private fun setUpLoggedInUser(context: Context) {
-        neevaConstants = neevaConstants
-        sharedPreferencesModel = SharedPreferencesModel(context)
-        loginToken = LoginToken(
-            coroutineScope = coroutineScope,
-            dispatchers = dispatchers,
-            neevaConstants = neevaConstants,
-            sharedPreferencesModel = sharedPreferencesModel
-        )
+    @get:Rule(order = 10000)
+    val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
 
+    private fun setUpLoggedInUser() {
         loginToken.updateCachedCookie("myToken")
         loggedInUserInfo = UserInfo(
             "my-id",
@@ -61,63 +51,164 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
             "https://www.cdn/my-image.png",
             NeevaUser.SSOProvider.GOOGLE.name
         )
-        neevaUser = NeevaUserImpl(sharedPreferencesModel, loginToken)
+
         neevaUser.setUserInfo(loggedInUserInfo)
     }
 
-    private fun onActivityStartedTest(context: Context, test: (activity: NeevaActivity) -> Unit) {
-        val intent = Intent.makeMainActivity(ComponentName(context, NeevaActivity::class.java))
-        ActivityScenario.launch<NeevaActivity>(intent).use { scenario ->
-            scenario.moveToState(Lifecycle.State.RESUMED)
-            scenario.onActivity { activity: NeevaActivity ->
-                test(activity)
+    override fun setUp() {
+        super.setUp()
+        testApolloWrapper = authenticatedApolloWrapper as TestAuthenticatedApolloWrapper
+        setUpLoggedInUser()
+    }
+
+    private fun waitForUserInfoQuery() {
+        androidComposeRule.apply {
+            waitFor {
+                testApolloWrapper.testApolloClientWrapper.performedOperations.any {
+                    (it as? UserInfoQuery) != null
+                }
             }
-            scenario.close()
         }
     }
 
     @Test
-    fun signedIn_whenLoggedIn_UserDataCachedAndNeevaUserTokenAndLoginCookieExists() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        setUpLoggedInUser(context)
+    fun sessionToken_whenNotSignedIn_clearsCachedData() {
+        androidComposeRule.apply {
+            startActivity()
+            waitForUserInfoQuery()
 
-        onActivityStartedTest(context) { activity ->
-            // because NeevaUser.fetch() is run on a fake token ("myToken")
-            // ApolloWrapper should give a null response. This should not clear the user data.
-            // The token + cookies should still be set to "myToken".
-            activity.webLayerModel.currentBrowser
-                .getCookiePairs(Uri.parse(neevaConstants.appURL)) {
-                    expectThat(
-                        it.find { cookiePair -> cookiePair.key == neevaConstants.loginCookie }
-                            ?.value
-                    ).isEqualTo("myToken")
-                }
-            expectThat(activity.neevaUser.loginToken.cookieValue).isEqualTo("myToken")
-            expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(loggedInUserInfo)
+            expectThat(activity.neevaUser.loginToken.cachedValue).isEmpty()
+            expectThat(activity.neevaUser.userInfoFlow.value).isNull()
+        }
+    }
+
+    @Test
+    fun sessionToken_whenBrowserTokenUpdated_updatesCachedTokenAndFetchesUserInfo() {
+        androidComposeRule.apply {
+            startActivity()
+            waitForUserInfoQuery()
+
+            // There is no login token set in the browser, so we should end up clearing out the
+            // cached data.
+            expectThat(activity.neevaUser.loginToken.cachedValue).isEmpty()
+            expectThat(activity.neevaUser.userInfoFlow.value).isNull()
+
+            // Reset the GraphQL operations that have been performed.
+            testApolloWrapper.testApolloClientWrapper.performedOperations.clear()
+
+            // Say that a fetch of the UserInfo will return new data.
+            val newUserInfoResponse = UserInfoQuery.Data(
+                user = UserInfoQuery.User(
+                    id = "new-id",
+                    profile = UserInfoQuery.Profile(
+                        displayName = "updated display name",
+                        email = "email@neeva.co",
+                        pictureURL = "http://127.0.0.1:8000/favicon.ico"
+                    ),
+                    flags = emptyList(),
+                    featureFlags = emptyList(),
+                    authProvider = NeevaUser.SSOProvider.GOOGLE.name,
+                    subscriptionType = SubscriptionType.Basic
+                )
+            )
+            testApolloWrapper.registerTestResponse(
+                operation = UserInfoQuery(),
+                response = newUserInfoResponse
+            )
+
+            // Update the token in the Browser.  Flows should update the cached value of the cookie.
+            activity.runOnUiThread {
+                loginToken.updateCookieManager(newValue = "newToken")
+            }
+            waitFor { loginToken.cachedValue == "newToken" }
+
+            // The cached value getting updated should result in an attempt to refetch UserInfo.
+            waitForUserInfoQuery()
+            val expectedNewUserInfo = newUserInfoResponse.user!!.toUserInfo()
+            waitFor {
+                neevaUser.userInfoFlow.value == expectedNewUserInfo
+            }
+
+            // Reset the ApolloWrapper's state so that trying to perform a UserInfoQuery will fail.
+            testApolloWrapper.registerTestResponse(
+                operation = UserInfoQuery(),
+                response = null
+            )
+            testApolloWrapper.testApolloClientWrapper.performedOperations.clear()
+
+            // Update the cookie to trigger the flows.
+            activity.runOnUiThread {
+                loginToken.updateCookieManager(newValue = "evenNewerToken")
+            }
+            waitFor { loginToken.cachedValue == "evenNewerToken" }
+
+            // The cached value getting updated should result in an attempt to refetch UserInfo,
+            // which will fail because we didn't mock out the response.
+            waitForUserInfoQuery()
+            waitFor {
+                neevaUser.userInfoFlow.value == expectedNewUserInfo
+            }
         }
     }
 
     @Test
     fun signOut_whenLoggedIn_clearsUserAndNeevaUserTokenAndCookies() {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        setUpLoggedInUser(context)
+        androidComposeRule.apply {
+            startActivity()
+            waitForUserInfoQuery()
 
-        onActivityStartedTest(context) { activity ->
-            activity.activityViewModel.signOut()
+            // There is no login token set in the browser, so we should end up clearing out the
+            // cached data.
+            expectThat(activity.neevaUser.loginToken.cachedValue).isEmpty()
+            expectThat(activity.neevaUser.userInfoFlow.value).isNull()
 
-            // ^^ sign out should have cleared NeevaUser.data and NeevaUserToken!
-            expectThat(activity.neevaUser.loginToken.cookieValue).isEmpty()
-            expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(null)
+            // Reset the GraphQL operations that have been performed.
+            testApolloWrapper.testApolloClientWrapper.performedOperations.clear()
 
-            activity.webLayerModel.currentBrowser
-                .getCookiePairs(Uri.parse(neevaConstants.appURL)) {
-                    expectThat(
-                        it.find {
-                            cookiePair ->
-                            cookiePair.key == neevaConstants.loginCookie
-                        }?.value
-                    ).isNullOrEmpty()
+            // Say that a fetch of the UserInfo will return new data.
+            val newUserInfoResponse = UserInfoQuery.Data(
+                user = UserInfoQuery.User(
+                    id = "new-id",
+                    profile = UserInfoQuery.Profile(
+                        displayName = "updated display name",
+                        email = "email@neeva.co",
+                        pictureURL = "http://127.0.0.1:8000/favicon.ico"
+                    ),
+                    flags = emptyList(),
+                    featureFlags = emptyList(),
+                    authProvider = NeevaUser.SSOProvider.GOOGLE.name,
+                    subscriptionType = SubscriptionType.Basic
+                )
+            )
+            testApolloWrapper.registerTestResponse(
+                operation = UserInfoQuery(),
+                response = newUserInfoResponse
+            )
+
+            // Update the token in the Browser.  Flows should update the cached value of the cookie.
+            activity.runOnUiThread {
+                loginToken.updateCookieManager(newValue = "newToken")
+            }
+            waitFor { loginToken.cachedValue == "newToken" }
+
+            // The cached value getting updated should result in an attempt to refetch UserInfo.
+            waitForUserInfoQuery()
+            val expectedNewUserInfo = newUserInfoResponse.user!!.toUserInfo()
+            waitFor {
+                neevaUser.userInfoFlow.value == expectedNewUserInfo
+            }
+
+            // Signing out should clear everything.
+            var success: Boolean? = null
+            runOnUiThread {
+                activity.activityViewModel.signOut {
+                    success = it
                 }
+            }
+
+            waitFor { neevaUser.loginToken.cachedValue.isEmpty() }
+            waitFor { neevaUser.userInfoFlow.value == null }
+            waitFor { success == true }
         }
     }
 }

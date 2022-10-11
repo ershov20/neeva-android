@@ -4,7 +4,6 @@ import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import okhttp3.Response
 
 class IncognitoSessionToken(
@@ -16,17 +15,17 @@ class IncognitoSessionToken(
     dispatchers = dispatchers,
     neevaConstants = neevaConstants,
     endpointURL = neevaConstants.incognitoURL,
-    cookieName = neevaConstants.incognitoCookie
+    cookieName = neevaConstants.incognitoCookieKey
 ) {
     companion object {
         private const val TAG = "IncognitoSessionToken"
     }
 
-    override val cookieValueFlow = MutableStateFlow("")
-    override val cookieValue: String get() = cookieValueFlow.value
+    private var _cachedValue: String = ""
+    override val cachedValue: String get() = _cachedValue
 
     override fun updateCachedCookie(newValue: String) {
-        cookieValueFlow.value = newValue
+        _cachedValue = newValue
     }
 
     override suspend fun processResponse(response: Response): Boolean {
@@ -57,7 +56,7 @@ class IncognitoSessionToken(
 
             resultCode == 1 && result.sessionKey != null -> {
                 Log.d(TAG, "New incognito session started.")
-                updateCachedCookie(result.sessionKey)
+                updateCookieManagerAsync(result.sessionKey, result.sessionDuration)
                 return true
             }
 
@@ -67,9 +66,5 @@ class IncognitoSessionToken(
         }
 
         return false
-    }
-
-    override fun mayPerformOperation(userMustBeLoggedIn: Boolean): Boolean {
-        return !userMustBeLoggedIn
     }
 }

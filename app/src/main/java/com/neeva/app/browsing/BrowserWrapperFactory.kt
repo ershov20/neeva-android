@@ -77,23 +77,20 @@ class BrowserWrapperFactory(
         onRemovedFromHierarchy: (incognitoBrowserWrapper: IncognitoBrowserWrapper) -> Unit
     ): IncognitoBrowserWrapper {
         return IncognitoBrowserWrapper(
+            activityCallbackProvider = activityCallbackProvider,
             appContext = application,
             coroutineScope = coroutineScope,
             directories = directories,
             dispatchers = dispatchers,
-            activityCallbackProvider = activityCallbackProvider,
-            authenticatedApolloWrapper = authenticatedApolloWrapper,
-            unauthenticatedApolloWrapper = unauthenticatedApolloWrapper,
             domainProvider = domainProvider,
             downloadCallback = downloadCallback,
-            onRemovedFromHierarchy = onRemovedFromHierarchy,
+            incognitoSessionToken = incognitoSessionToken,
             neevaConstants = neevaConstants,
+            onRemovedFromHierarchy = onRemovedFromHierarchy,
+            popupModel = popupModel,
             scriptInjectionManager = scriptInjectionManager,
             settingsDataModel = settingsDataModel,
-            sharedPreferencesModel = sharedPreferencesModel,
-            popupModel = popupModel,
-            neevaUser = neevaUser,
-            incognitoSessionToken = incognitoSessionToken
+            sharedPreferencesModel = sharedPreferencesModel
         )
     }
 }

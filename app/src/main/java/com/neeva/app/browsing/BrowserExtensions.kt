@@ -14,12 +14,12 @@ private const val TAG = "BrowserExtensions"
 fun Browser?.takeIfAlive(): Browser? {
     return when {
         this == null -> {
-            Log.w(TAG, "Browser is null", Throwable())
+            Log.i(TAG, "Browser is null", Throwable())
             null
         }
 
         this.isDestroyed -> {
-            Log.e(TAG, "Browser is destroyed", Throwable())
+            Log.w(TAG, "Browser is destroyed", Throwable())
             null
         }
 

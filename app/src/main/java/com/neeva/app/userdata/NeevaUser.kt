@@ -127,7 +127,7 @@ class NeevaUserImpl(
         context: Context,
         checkNetworkConnectivityBeforeFetch: Boolean
     ) {
-        if (!loginToken.isNotEmpty()) return
+        if (loginToken.isEmpty()) return
         if (checkNetworkConnectivityBeforeFetch && !isConnectedToInternet(context)) return
 
         val responseSummary = apolloWrapper.performQuery(
@@ -151,30 +151,32 @@ class NeevaUserImpl(
             if (response.hasErrors()) {
                 clearUserInfo()
             } else {
-                setUserInfo(
-                    UserInfo(
-                        id = userQuery.id,
-                        displayName = userQuery.profile.displayName,
-                        email = userQuery.profile.email,
-                        pictureURL = userQuery.profile.pictureURL,
-                        ssoProviderString = (
-                            SSOProvider.values()
-                                .firstOrNull { it.url == userQuery.authProvider }
-                                ?: SSOProvider.UNKNOWN
-                            ).name,
-                        subscriptionTypeString = (
-                            SubscriptionType.values()
-                                .firstOrNull { it == userQuery.subscriptionType }
-                                ?: SubscriptionType.Unknown
-                            ).name
-                    )
-                )
+                setUserInfo(userQuery.toUserInfo())
             }
         }
     }
 
     companion object {
         private const val TAG = "NeevaUserImpl"
+
+        fun UserInfoQuery.User.toUserInfo(): UserInfo {
+            return UserInfo(
+                id = id,
+                displayName = profile.displayName,
+                email = profile.email,
+                pictureURL = profile.pictureURL,
+                ssoProviderString = (
+                    SSOProvider.values()
+                        .firstOrNull { it.url == authProvider }
+                        ?: SSOProvider.UNKNOWN
+                    ).name,
+                subscriptionTypeString = (
+                    SubscriptionType.values()
+                        .firstOrNull { it == subscriptionType }
+                        ?: SubscriptionType.Unknown
+                    ).name
+            )
+        }
     }
 }
 

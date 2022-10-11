@@ -30,12 +30,14 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyPress
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
+import androidx.lifecycle.Lifecycle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.GeneralClickAction
 import androidx.test.espresso.action.GeneralLocation
 import androidx.test.espresso.action.Press
 import androidx.test.espresso.action.Tap
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.cardgrid.SelectedScreen
 import com.neeva.testcommon.WebpageServingRule
@@ -470,6 +472,12 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForCardGridScr
     waitFor {
         activity.cardsPaneModel?.selectedScreen?.value == expectedSubscreen
     }
+}
+
+/** Starts the NeevaActivity and waits for it to finish initialization. */
+fun AndroidComposeTestRule<ActivityScenarioRule<NeevaActivity>, NeevaActivity>.startActivity() {
+    activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
+    waitForActivityStartup()
 }
 
 /** Tries to wait for when the NeevaActivity can start to be interacted with. */
