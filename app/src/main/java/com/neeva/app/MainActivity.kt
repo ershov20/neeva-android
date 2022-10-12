@@ -4,6 +4,7 @@
 
 package com.neeva.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
@@ -33,6 +34,7 @@ class MainActivity : AppCompatActivity() {
 
         val newIntent = intent.apply {
             setClass(this@MainActivity, activityClass)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
 
         val options = ActivityOptionsCompat.makeCustomAnimation(this, 0, 0).toBundle()

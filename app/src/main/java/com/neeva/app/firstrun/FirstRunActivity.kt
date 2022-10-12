@@ -26,7 +26,6 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.neeva.app.Dispatchers
 import com.neeva.app.LocalClientLogger
 import com.neeva.app.LocalNeevaConstants
-import com.neeva.app.MainActivity
 import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.appnav.Transitions
@@ -181,7 +180,8 @@ class FirstRunActivity : AppCompatActivity() {
         clientLogger.sendPendingLogs()
 
         val newIntent = intent.apply {
-            setClass(this@FirstRunActivity, MainActivity::class.java)
+            setClass(this@FirstRunActivity, NeevaActivity::class.java)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
             when (intent.action) {
                 null, Intent.ACTION_MAIN -> {
@@ -195,6 +195,6 @@ class FirstRunActivity : AppCompatActivity() {
         // Nullify the transition animation to hide the fact that we're switching Activities.
         val options = ActivityOptionsCompat.makeCustomAnimation(this, 0, 0).toBundle()
         ContextCompat.startActivity(this@FirstRunActivity, newIntent, options)
-        finish()
+        finishAndRemoveTask()
     }
 }
