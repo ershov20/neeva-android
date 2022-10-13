@@ -207,8 +207,8 @@ fun BrowserToolbar(
                     )
                 }
 
-                if (showNeevaScopeTooltip) {
-                    NeevaScopeTooltip(browserToolbarModel.useSingleBrowserToolbar)
+                if (browserToolbarModel.useSingleBrowserToolbar && showNeevaScopeTooltip) {
+                    NeevaScopeTooltip(isLandscape = true)
                 }
             }
         }

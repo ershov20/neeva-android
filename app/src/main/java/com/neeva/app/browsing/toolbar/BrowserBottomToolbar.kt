@@ -86,7 +86,7 @@ fun BrowserBottomToolbar(
 
             if (isNeevaScopeEnabled) {
                 if (showNeevaScopeTooltip) {
-                    NeevaScopeTooltip(browserToolbarModel.useSingleBrowserToolbar)
+                    NeevaScopeTooltip(isLandscape = false)
                 }
                 NeevaScopeButton(
                     isIncognito = isIncognito,

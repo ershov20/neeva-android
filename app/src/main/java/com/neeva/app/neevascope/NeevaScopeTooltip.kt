@@ -73,10 +73,10 @@ fun Tooltip(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val bottomOffset = with(LocalDensity.current) {
-        dimensionResource(id = R.dimen.bottom_toolbar_height).roundToPx() - TIP_SIZE.roundToPx() / 2
+        dimensionResource(id = R.dimen.bottom_toolbar_height).roundToPx() * 2 + TIP_SIZE.roundToPx()
     }
     val topOffset = with(LocalDensity.current) {
-        dimensionResource(id = R.dimen.top_toolbar_height).roundToPx() - TIP_SIZE.roundToPx()
+        TIP_SIZE.roundToPx()
     }
     val endOffset = with(LocalDensity.current) {
         Dimensions.SIZE_ICON_TOOLBAR.roundToPx() * 2 + Dimensions.PADDING_SMALL.roundToPx() * 3
@@ -96,9 +96,9 @@ fun Tooltip(
                     (windowSize.width - popupContentSize.width) / 2
                 },
                 y = if (isLandscape) {
-                    popupContentSize.height - topOffset
+                    anchorBounds.bottom - topOffset
                 } else {
-                    windowSize.height - popupContentSize.height / 2 - bottomOffset
+                    anchorBounds.top - bottomOffset
                 }
             )
         }
