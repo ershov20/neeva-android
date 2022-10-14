@@ -288,7 +288,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         return result
     }
 
-    private fun showBrowser() = appNavModel?.showBrowser()
+    private fun showBrowser() = lifecycleScope.launch(dispatchers.main) {
+        // Speculative fix for https://github.com/neevaco/neeva-android/issues/939
+        // Wait until the first Compose has completed, which should mean that the NavGraph has been
+        // set up with all of the destinations.
+        firstComposeCompleted.await()
+        appNavModel?.showBrowser()
+    }
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
@@ -323,64 +329,50 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     }
 
     /** Processes the given [intent] when everything is initialized. */
-    private fun processIntent(intent: Intent?) {
-        lifecycleScope.launch {
-            firstComposeCompleted.await()
-            processIntentInternal(intent)
-        }
-    }
+    private fun processIntent(intent: Intent?) = lifecycleScope.launch(dispatchers.main) {
+        // Wait until the NavGraph has been set up.
+        firstComposeCompleted.await()
 
-    /** Don't call this: call [processIntent] to ensure we're ready before processing the Intent. */
-    private fun processIntentInternal(intent: Intent?) {
+        val switchToRegularProfile = suspend {
+            webLayerModel.switchToProfile(useIncognito = false)
+            webLayerModel.currentBrowser.waitUntilBrowserIsReady()
+        }
+
         when (intent?.action) {
             ACTION_NEW_TAB -> {
-                lifecycleScope.launch {
-                    webLayerModel.switchToProfile(useIncognito = false)
-                    webLayerModel.currentBrowser.waitUntilBrowserIsReady()
-                    appNavModel?.openLazyTab()
-                }
+                switchToRegularProfile()
+                appNavModel?.openLazyTab()
             }
 
             ACTION_ZERO_QUERY -> {
-                lifecycleScope.launch {
-                    webLayerModel.switchToProfile(useIncognito = false)
-                    webLayerModel.currentBrowser.waitUntilBrowserIsReady()
-                    appNavModel?.openLazyTab(focusUrlBar = false)
-                }
+                switchToRegularProfile()
+                appNavModel?.openLazyTab(focusUrlBar = false)
             }
 
             ACTION_SHOW_SPACES -> {
-                lifecycleScope.launch {
-                    webLayerModel.currentBrowser.waitUntilBrowserIsReady()
-
-                    // Switching to spaces will automatically kick the user out of Incognito.
-                    cardsPaneModel?.switchScreen(SelectedScreen.SPACES)
-                    appNavModel?.showCardGrid()
-                }
+                switchToRegularProfile()
+                cardsPaneModel?.switchScreen(SelectedScreen.SPACES)
+                appNavModel?.showCardGrid()
             }
 
             Intent.ACTION_VIEW -> {
-                webLayerModel.switchToProfile(useIncognito = false)
+                switchToRegularProfile()
 
                 if (setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
-                    clientLogger.logCounter(
-                        LogConfig.Interaction.OPEN_DEFAULT_BROWSER_URL,
-                        null
-                    )
+                    clientLogger.logCounter(LogConfig.Interaction.OPEN_DEFAULT_BROWSER_URL, null)
                 }
 
                 if (Uri.parse(intent.dataString).scheme == "neeva") {
+                    // An Intent was fired that might have a login cookie.  If it's there, save it.
                     LoginToken.extractAuthTokenFromIntent(intent)?.let {
-                        lifecycleScope.launch(dispatchers.main) {
-                            neevaUser.loginToken.updateCookieManager(newValue = it) {
-                                showBrowser()
+                        neevaUser.loginToken.updateCookieManager(newValue = it) {
+                            showBrowser()
 
-                                if (firstRunModel.shouldLogFirstLogin()) {
-                                    clientLogger.logCounter(
-                                        LogConfig.Interaction.LOGIN_AFTER_FIRST_RUN, null
-                                    )
-                                    firstRunModel.setShouldLogFirstLogin(false)
-                                }
+                            if (firstRunModel.shouldLogFirstLogin()) {
+                                clientLogger.logCounter(
+                                    LogConfig.Interaction.LOGIN_AFTER_FIRST_RUN, null
+                                )
+                                firstRunModel.setShouldLogFirstLogin(false)
                             }
                         }
                     }
@@ -390,15 +382,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                             uri = it,
                             inNewTab = true,
                             isViaIntent = true,
-                            onLoadStarted = this::showBrowser
+                            onLoadStarted = ::showBrowser
                         )
                     }
                 }
             }
 
             Intent.ACTION_WEB_SEARCH -> {
-                webLayerModel.switchToProfile(useIncognito = false)
-
+                switchToRegularProfile()
                 intent.extras?.getString(SearchManager.QUERY)?.let {
                     val searchUri = it.toSearchUri(neevaConstants)
 
@@ -406,7 +397,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         uri = searchUri,
                         inNewTab = true,
                         isViaIntent = true,
-                        onLoadStarted = this::showBrowser
+                        onLoadStarted = ::showBrowser
                     )
                 }
             }

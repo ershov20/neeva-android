@@ -66,6 +66,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserControlsOffsetCallback
 import org.chromium.weblayer.BrowserEmbeddabilityMode
@@ -1005,7 +1006,10 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         urlBarModel.clearFocus()
-        onLoadStarted()
+
+        withContext(dispatchers.main) {
+            onLoadStarted()
+        }
     }
 
     /** Asynchronously adds or removes the active tab from the space with given [spaceID]. */
