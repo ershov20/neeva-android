@@ -15,11 +15,6 @@ class BrowserToolbarScreenshotTest : BaseScreenshotTest() {
     }
 
     @Test
-    fun toolbarPreview_Blank_NeevaScopeEnabled_Landscape() = runScreenshotTest {
-        ToolbarPreview_Blank_NeevaScopeEnabled_Landscape()
-    }
-
-    @Test
     fun toolbarPreview_Focus_Portrait() = runScreenshotTest {
         ToolbarPreview_Focus_Portrait()
     }

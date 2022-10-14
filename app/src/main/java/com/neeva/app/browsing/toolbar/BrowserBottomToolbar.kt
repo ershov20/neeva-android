@@ -22,11 +22,9 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.neevascope.NeevaScopeTooltip
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 
@@ -37,13 +35,10 @@ fun BrowserBottomToolbar(
     modifier: Modifier = Modifier
 ) {
     val browserWrapper = LocalBrowserWrapper.current
-    val settingsDataModel = LocalSettingsDataModel.current
     val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
     BrowserBottomToolbar(
         isIncognito = browserWrapper.isIncognito,
         showNeevaScopeTooltip = browserWrapper.showNeevaScopeTooltip(),
-        isNeevaScopeEnabled = settingsDataModel
-            .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE),
         modifier = modifier.offset(y = bottomOffsetDp)
     )
 }
@@ -52,11 +47,8 @@ fun BrowserBottomToolbar(
 fun BrowserBottomToolbar(
     isIncognito: Boolean,
     showNeevaScopeTooltip: Boolean = false,
-    isNeevaScopeEnabled: Boolean = false,
     modifier: Modifier = Modifier
 ) {
-    val browserToolbarModel = LocalBrowserToolbarModel.current
-
     val backgroundColor = if (isIncognito) {
         MaterialTheme.colorScheme.inverseSurface
     } else {
@@ -84,15 +76,13 @@ fun BrowserBottomToolbar(
                 modifier = Modifier.weight(1.0f)
             )
 
-            if (isNeevaScopeEnabled) {
-                if (showNeevaScopeTooltip) {
-                    NeevaScopeTooltip(isLandscape = false)
-                }
-                NeevaScopeButton(
-                    isIncognito = isIncognito,
-                    modifier = Modifier.weight(1.0f)
-                )
+            if (showNeevaScopeTooltip) {
+                NeevaScopeTooltip(isLandscape = false)
             }
+            NeevaScopeButton(
+                isIncognito = isIncognito,
+                modifier = Modifier.weight(1.0f)
+            )
 
             AddToSpaceButton(
                 modifier = Modifier.weight(1.0f)
@@ -110,21 +100,11 @@ fun BrowserBottomToolbar(
 fun BottomToolbarPreview_Regular() {
     OneBooleanPreviewContainer { isIncognito ->
         CompositionLocalProvider(
-            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(isIncognito = isIncognito)
+            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
+                isIncognito = isIncognito
+            )
         ) {
             BrowserBottomToolbar(isIncognito = isIncognito)
-        }
-    }
-}
-
-@PortraitPreviews
-@Composable
-fun BottomToolbarPreview_NeevaScopeEnabled() {
-    OneBooleanPreviewContainer { isIncognito ->
-        CompositionLocalProvider(
-            LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(isIncognito = isIncognito)
-        ) {
-            BrowserBottomToolbar(isIncognito = isIncognito, isNeevaScopeEnabled = true)
         }
     }
 }

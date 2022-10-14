@@ -10,11 +10,6 @@ class BrowserBottomToolbarScreenshotTest : BaseScreenshotTest() {
     }
 
     @Test
-    fun bottomToolbarPreview_NeevaScopeEnabled() = runScreenshotTest {
-        BottomToolbarPreview_NeevaScopeEnabled()
-    }
-
-    @Test
     fun bottomToolbarPreview_CanGoBackward() = runScreenshotTest {
         BottomToolbarPreview_CanGoBackward()
     }

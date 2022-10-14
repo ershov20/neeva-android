@@ -1071,14 +1071,12 @@ abstract class BaseBrowserWrapper internal constructor(
     override suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
 
     override fun showNeevaScopeTooltip(): Boolean {
-        val isNeevaScopeEnabled =
-            settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE)
         val showTryNeevaScopeTooltip =
             SharedPrefFolder.App.ShowTryNeevaScopeTooltip.get(sharedPreferencesModel)
         val isDisplayingUrl =
             activeTabModel.displayedInfoFlow.value.mode == ActiveTabModel.DisplayMode.URL
 
-        if (isNeevaScopeEnabled && showTryNeevaScopeTooltip && isDisplayingUrl) {
+        if (showTryNeevaScopeTooltip && isDisplayingUrl) {
             SharedPrefFolder.App.ShowTryNeevaScopeTooltip.set(sharedPreferencesModel, false)
             return true
         }

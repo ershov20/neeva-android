@@ -31,7 +31,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.findinpage.FindInPageModel
@@ -47,7 +46,6 @@ import com.neeva.app.contentfilter.ui.popover.rememberContentFilterPopoverModel
 import com.neeva.app.neevascope.NeevaScopeTooltip
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.overflowmenu.OverflowMenuItemId
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -60,9 +58,6 @@ fun BrowserToolbarContainer(topOffset: Float) {
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
 
     val showNeevaScopeTooltip = LocalBrowserWrapper.current.showNeevaScopeTooltip()
-    val enableNeevaScope = LocalSettingsDataModel.current
-        .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE)
-
     val appNavModel = LocalAppNavModel.current
     val contentFilterPopoverModel = rememberContentFilterPopoverModel(
         appNavModel = appNavModel,
@@ -74,7 +69,6 @@ fun BrowserToolbarContainer(topOffset: Float) {
     BrowserToolbar(
         findInPageModel = findInPageModel,
         showNeevaScopeTooltip = showNeevaScopeTooltip,
-        enableNeevaScope = enableNeevaScope,
         contentFilterPopoverModel = contentFilterPopoverModel,
         modifier = Modifier
             .offset(y = topOffsetDp)
@@ -93,7 +87,6 @@ fun BrowserToolbarContainer(topOffset: Float) {
 fun BrowserToolbar(
     findInPageModel: FindInPageModel,
     showNeevaScopeTooltip: Boolean,
-    enableNeevaScope: Boolean,
     contentFilterPopoverModel: ContentFilterPopoverModel,
     modifier: Modifier = Modifier,
 ) {
@@ -172,13 +165,11 @@ fun BrowserToolbar(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             if (browserToolbarModel.useSingleBrowserToolbar) {
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
-                                if (enableNeevaScope) {
-                                    NeevaScopeButton(
-                                        isLandscape = true,
-                                        isIncognito = browserToolbarModel.isIncognito
-                                    )
-                                    Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
-                                }
+                                NeevaScopeButton(
+                                    isLandscape = true,
+                                    isIncognito = browserToolbarModel.isIncognito
+                                )
+                                Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                                 AddToSpaceButton()
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                                 TabSwitcherButton()
@@ -216,7 +207,7 @@ fun BrowserToolbar(
 }
 
 @Composable
-internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean, enableNeevaScope: Boolean) {
+internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
     OneBooleanPreviewContainer { isIncognito ->
         CompositionLocalProvider(
             LocalBrowserToolbarModel provides PreviewBrowserToolbarModel(
@@ -231,7 +222,6 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean, enableNeevaS
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
-                enableNeevaScope = enableNeevaScope,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
@@ -242,7 +232,7 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean, enableNeevaS
 @Preview("Blank, RTL", locale = "he")
 @Composable
 fun ToolbarPreview_Blank_Portrait() {
-    ToolbarPreview_Blank(false, false)
+    ToolbarPreview_Blank(false)
 }
 
 @Composable
@@ -262,7 +252,6 @@ internal fun ToolbarPreview_Focus(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
-                enableNeevaScope = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
@@ -294,7 +283,6 @@ internal fun ToolbarPreview_Typing(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
-                enableNeevaScope = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
@@ -325,7 +313,6 @@ internal fun ToolbarPreview_Search(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
-                enableNeevaScope = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
@@ -358,7 +345,6 @@ internal fun ToolbarPreview_Loading(useSingleBrowserToolbar: Boolean) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
                 showNeevaScopeTooltip = false,
-                enableNeevaScope = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }

@@ -10,13 +10,7 @@ import com.neeva.app.ui.LandscapePreviews
 @LandscapePreviews
 @Composable
 fun ToolbarPreview_Blank_Landscape() {
-    ToolbarPreview_Blank(true, false)
-}
-
-@LandscapePreviews
-@Composable
-fun ToolbarPreview_Blank_NeevaScopeEnabled_Landscape() {
-    ToolbarPreview_Blank(true, true)
+    ToolbarPreview_Blank(true)
 }
 
 @LandscapePreviews

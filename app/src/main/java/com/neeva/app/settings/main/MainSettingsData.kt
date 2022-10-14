@@ -105,15 +105,6 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
             )
         ),
         SettingsGroupData(
-            R.string.settings_features_under_development,
-            listOf(
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    settingsToggle = SettingsToggle.ENABLE_NEEVASCOPE
-                )
-            )
-        ),
-        SettingsGroupData(
             R.string.settings_support,
             listOf(
                 SettingsRowData(
