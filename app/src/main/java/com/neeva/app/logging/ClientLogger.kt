@@ -5,7 +5,10 @@
 package com.neeva.app.logging
 
 import android.net.Uri
+import android.os.RemoteException
 import android.util.Log
+import com.android.installreferrer.api.InstallReferrerClient
+import com.android.installreferrer.api.ReferrerDetails
 import com.apollographql.apollo3.api.Optional
 import com.neeva.app.BuildConfig
 import com.neeva.app.Dispatchers
@@ -178,6 +181,82 @@ class ClientLogger(
 
             else -> {
                 logCounter(LogConfig.Interaction.NAVIGATION_OUTBOUND, null)
+            }
+        }
+    }
+
+    /**
+     * This logs the Google Play API referrer URI response
+     */
+    fun logReferrer(referrerClient: InstallReferrerClient, responseCode: Int) {
+        when (responseCode) {
+            InstallReferrerClient.InstallReferrerResponse.OK -> {
+                // Connection established.
+                try {
+                    val response: ReferrerDetails = referrerClient.installReferrer
+                    val referrerUrl: String = response.installReferrer
+
+                    val referrerType = when {
+                        referrerUrl.contains("organic") -> "organic"
+                        else -> "paid"
+                    }
+
+                    logCounter(
+                        LogConfig.Interaction.REQUEST_INSTALL_REFERRER,
+                        listOf(
+                            ClientLogCounterAttribute(
+                                Optional.presentIfNotNull(
+                                    LogConfig.FirstRunAttributes.REFERRER_RESPONSE.attributeName
+                                ),
+                                Optional.presentIfNotNull("OK")
+                            ),
+                            ClientLogCounterAttribute(
+                                Optional.presentIfNotNull(
+                                    LogConfig.FirstRunAttributes.INSTALL_REFERRER.attributeName
+                                ),
+                                Optional.presentIfNotNull(referrerUrl)
+                            ),
+                            ClientLogCounterAttribute(
+                                Optional.presentIfNotNull(
+                                    LogConfig.FirstRunAttributes.REFERRER_TYPE.attributeName
+                                ),
+                                Optional.presentIfNotNull(referrerType)
+                            )
+                        )
+                    )
+                } catch (e: RemoteException) {
+                    Log.e(TAG, "Failed to get installReferrer", e)
+                }
+
+                referrerClient.endConnection()
+            }
+            InstallReferrerClient.InstallReferrerResponse.FEATURE_NOT_SUPPORTED -> {
+                // API not available on the current Play Store app.
+                logCounter(
+                    LogConfig.Interaction.REQUEST_INSTALL_REFERRER,
+                    listOf(
+                        ClientLogCounterAttribute(
+                            Optional.presentIfNotNull(
+                                LogConfig.FirstRunAttributes.REFERRER_RESPONSE.attributeName
+                            ),
+                            Optional.presentIfNotNull("FEATURE_NOT_SUPPORTED")
+                        )
+                    )
+                )
+            }
+            InstallReferrerClient.InstallReferrerResponse.SERVICE_UNAVAILABLE -> {
+                // Connection couldn't be established.
+                logCounter(
+                    LogConfig.Interaction.REQUEST_INSTALL_REFERRER,
+                    listOf(
+                        ClientLogCounterAttribute(
+                            Optional.presentIfNotNull(
+                                LogConfig.FirstRunAttributes.REFERRER_RESPONSE.attributeName
+                            ),
+                            Optional.presentIfNotNull("SERVICE_UNAVAILABLE")
+                        )
+                    )
+                )
             }
         }
     }

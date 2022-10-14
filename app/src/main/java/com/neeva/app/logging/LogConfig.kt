@@ -121,7 +121,8 @@ class LogConfig {
 
     enum class FirstRunAttributes(val attributeName: String) {
         REFERRER_RESPONSE("ReferrerResponse"),
-        INSTALL_REFERRER("Referrer")
+        INSTALL_REFERRER("Referrer"),
+        REFERRER_TYPE("ReferrerType")
     }
 
     enum class SuggestionAttributes(val attributeName: String) {
