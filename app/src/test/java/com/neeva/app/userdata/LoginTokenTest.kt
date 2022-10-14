@@ -25,6 +25,8 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -135,8 +137,12 @@ class LoginTokenTest : BaseTest() {
     }
 
     @Test
-    fun purgeCachedCookie() {
-        val sharedPreferencesModel = mock<SharedPreferencesModel>()
+    fun initializeCookieManager_withPresetCookie_syncsCachedCookieBackToBrowser() {
+        val sharedPreferencesModel = mock<SharedPreferencesModel> {
+            on {
+                getValue(any(), eq(SharedPrefFolder.User.Token.preferenceKey), eq(""), any())
+            } doReturn "preset"
+        }
         val neevaConstants = NeevaConstants()
         val loginToken = LoginToken(
             coroutineScope = coroutineScopeRule.scope,
@@ -156,15 +162,101 @@ class LoginTokenTest : BaseTest() {
             on { getProfile() } doReturn profile
         }
         loginToken.initializeCookieManager(browser, requestCookieIfEmpty = false)
+        coroutineScopeRule.advanceUntilIdle()
 
+        // The cookie was preset, so we should have tried to sync the cookie from the cache back to
+        // the browser during initialization.
+        val cookieCaptor = argumentCaptor<String>()
+        val callbackCaptor = argumentCaptor<Callback<Boolean>>()
+        verify(cookieManager, times(1)).setCookie(
+            eq(Uri.parse(neevaConstants.appURL)),
+            cookieCaptor.capture(),
+            callbackCaptor.capture()
+        )
+        expectThat(cookieCaptor.lastValue).startsWith("httpd~login=preset;")
+        callbackCaptor.lastValue.onResult(true)
+    }
+
+    @Test
+    fun initializeCookieManager_withNoPresetCookie_doesNotSyncCachedCookieBackToBrowser() {
+        val sharedPreferencesModel = mock<SharedPreferencesModel> {
+            on {
+                getValue(any(), eq(SharedPrefFolder.User.Token.preferenceKey), eq(""), any())
+            } doReturn ""
+        }
+        val neevaConstants = NeevaConstants()
+        val loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
+
+        val cookieManager: CookieManager = mock {}
+
+        val profile: Profile = mock {
+            on { getCookieManager() } doReturn cookieManager
+        }
+
+        val browser: Browser = mock {
+            on { isDestroyed } doReturn false
+            on { getProfile() } doReturn profile
+        }
+        loginToken.initializeCookieManager(browser, requestCookieIfEmpty = false)
+        coroutineScopeRule.advanceUntilIdle()
+
+        // The cookie was empty, so we should not have tried to sync the cookie from the cache back
+        // to the browser during initialization.
+        verify(cookieManager, never()).setCookie(eq(Uri.parse(neevaConstants.appURL)), any(), any())
+    }
+
+    @Test
+    fun purgeCachedCookie() {
+        val sharedPreferencesModel = mock<SharedPreferencesModel> {
+            on {
+                getValue(any(), eq(SharedPrefFolder.User.Token.preferenceKey), eq(""), any())
+            } doReturn "preset"
+        }
+        val neevaConstants = NeevaConstants()
+        val loginToken = LoginToken(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel
+        )
+
+        val cookieManager: CookieManager = mock {}
+
+        val profile: Profile = mock {
+            on { getCookieManager() } doReturn cookieManager
+        }
+
+        val browser: Browser = mock {
+            on { isDestroyed } doReturn false
+            on { getProfile() } doReturn profile
+        }
+        loginToken.initializeCookieManager(browser, requestCookieIfEmpty = false)
+        coroutineScopeRule.advanceUntilIdle()
+
+        // The cookie was preset, so we should have tried to sync the cookie from the cache back to
+        // the browser during initialization.
+        val cookieCaptor = argumentCaptor<String>()
+        val callbackCaptor = argumentCaptor<Callback<Boolean>>()
+        verify(cookieManager, times(1)).setCookie(
+            eq(Uri.parse(neevaConstants.appURL)),
+            cookieCaptor.capture(),
+            callbackCaptor.capture()
+        )
+        expectThat(cookieCaptor.lastValue).startsWith("httpd~login=preset;")
+        callbackCaptor.lastValue.onResult(true)
+
+        // Clear out the cookie.
         loginToken.purgeCachedCookie()
         coroutineScopeRule.advanceUntilIdle()
 
         // Confirm that we tried to update the WebLayer CookieManager with an empty value, then fire
         // the callback to make it proceed.
-        val cookieCaptor = argumentCaptor<String>()
-        val callbackCaptor = argumentCaptor<Callback<Boolean>>()
-        verify(cookieManager).setCookie(
+        verify(cookieManager, times(2)).setCookie(
             eq(Uri.parse(neevaConstants.appURL)),
             cookieCaptor.capture(),
             callbackCaptor.capture()

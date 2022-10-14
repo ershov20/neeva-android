@@ -19,11 +19,18 @@ import org.junit.Rule
 import org.junit.Test
 import strikt.api.expectThat
 import strikt.assertions.isEmpty
+import strikt.assertions.isEqualTo
 import strikt.assertions.isNull
 
 @HiltAndroidTest
 class LoginCookieInstrumentationTest : BaseHiltTest() {
-    private lateinit var loggedInUserInfo: UserInfo
+    private val loggedInUserInfo: UserInfo = UserInfo(
+        "my-id",
+        "some display name",
+        "email@neeva.co",
+        "https://www.cdn/my-image.png",
+        NeevaUser.SSOProvider.GOOGLE.name
+    )
 
     @Inject lateinit var authenticatedApolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var loginToken: LoginToken
@@ -44,14 +51,6 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
 
     private fun setUpLoggedInUser() {
         loginToken.updateCachedCookie("myToken")
-        loggedInUserInfo = UserInfo(
-            "my-id",
-            "some display name",
-            "email@neeva.co",
-            "https://www.cdn/my-image.png",
-            NeevaUser.SSOProvider.GOOGLE.name
-        )
-
         neevaUser.setUserInfo(loggedInUserInfo)
     }
 
@@ -75,10 +74,20 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
     fun sessionToken_whenNotSignedIn_clearsCachedData() {
         androidComposeRule.apply {
             startActivity()
-            waitForUserInfoQuery()
 
-            expectThat(activity.neevaUser.loginToken.cachedValue).isEmpty()
+            // We haven't set up a response, so the UserInfo query will fail.  We should keep the
+            // old data anyway.
+            waitForUserInfoQuery()
+            expectThat(loginToken.cachedValue).isEqualTo("myToken")
+            expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(loggedInUserInfo)
+
+            // Clear out the cookie.
+            loginToken.updateCachedCookie("")
+
+            expectThat(loginToken.cachedValue).isEmpty()
             expectThat(activity.neevaUser.userInfoFlow.value).isNull()
+
+            activityRule.scenario.close()
         }
     }
 
@@ -86,12 +95,12 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
     fun sessionToken_whenBrowserTokenUpdated_updatesCachedTokenAndFetchesUserInfo() {
         androidComposeRule.apply {
             startActivity()
-            waitForUserInfoQuery()
 
-            // There is no login token set in the browser, so we should end up clearing out the
-            // cached data.
-            expectThat(activity.neevaUser.loginToken.cachedValue).isEmpty()
-            expectThat(activity.neevaUser.userInfoFlow.value).isNull()
+            // We haven't set up a response, so the UserInfo query will fail.  We should keep the
+            // old data anyway.
+            waitForUserInfoQuery()
+            expectThat(loginToken.cachedValue).isEqualTo("myToken")
+            expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(loggedInUserInfo)
 
             // Reset the GraphQL operations that have been performed.
             testApolloWrapper.testApolloClientWrapper.performedOperations.clear()
@@ -155,12 +164,12 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
     fun signOut_whenLoggedIn_clearsUserAndNeevaUserTokenAndCookies() {
         androidComposeRule.apply {
             startActivity()
-            waitForUserInfoQuery()
 
-            // There is no login token set in the browser, so we should end up clearing out the
-            // cached data.
-            expectThat(activity.neevaUser.loginToken.cachedValue).isEmpty()
-            expectThat(activity.neevaUser.userInfoFlow.value).isNull()
+            // We haven't set up a response, so the UserInfo query will fail.  We should keep the
+            // old data anyway.
+            waitForUserInfoQuery()
+            expectThat(loginToken.cachedValue).isEqualTo("myToken")
+            expectThat(activity.neevaUser.userInfoFlow.value).isEqualTo(loggedInUserInfo)
 
             // Reset the GraphQL operations that have been performed.
             testApolloWrapper.testApolloClientWrapper.performedOperations.clear()

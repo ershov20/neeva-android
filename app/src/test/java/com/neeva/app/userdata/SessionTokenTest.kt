@@ -31,6 +31,7 @@ import org.junit.runner.RunWith
 import strikt.api.expectThat
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
+import strikt.assertions.startsWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -110,6 +111,7 @@ class SessionTokenTest : BaseTest() {
         val expectedCookieString = "${neevaConstants.previewCookieKey}=test cookie value"
 
         sessionToken.initializeCookieManager(browser, requestCookieIfEmpty = false)
+        coroutineScopeRule.advanceUntilIdle()
 
         // The SessionToken should have hooked into the CookieManager.
         val callbackSlot = CapturingSlot<CookieChangedCallback>()
@@ -147,11 +149,27 @@ class SessionTokenTest : BaseTest() {
     fun cookieChangedCallback_withLiveBrowserAndMissingCookie_clearsCachedCookie() {
         initializeSessionToken(initialCookieValue = "preset")
 
+        val cookieSlot = CapturingSlot<String>()
+        val setCookieCallbackSlot = CapturingSlot<Callback<Boolean>>()
+        every {
+            cookieManager.setCookie(
+                eq(Uri.parse(neevaConstants.appURL)),
+                capture(cookieSlot),
+                capture(setCookieCallbackSlot)
+            )
+        } returns Unit
+
         // Expect that the Browser is initialized with the "preset" value.
         sessionToken.initializeCookieManager(browser, requestCookieIfEmpty = false)
         coroutineScopeRule.advanceUntilIdle()
 
+        // Let the callback fire so that [initializeCookieManager] can complete.
+        setCookieCallbackSlot.captured.onResult(true)
+        coroutineScopeRule.advanceUntilIdle()
+
         // The SessionToken should have hooked into the CookieManager via a CookieChangedCallback.
+        expectThat(cookieSlot.captured).startsWith("${neevaConstants.previewCookieKey}=preset")
+
         val callbackSlot = CapturingSlot<CookieChangedCallback>()
         verify {
             cookieManager.addCookieChangedCallback(
@@ -185,6 +203,17 @@ class SessionTokenTest : BaseTest() {
     fun cookieChangedCallback_withDeadBrowser_doesNothingInCookieChangedCallback() {
         initializeSessionToken(initialCookieValue = "")
         sessionToken.initializeCookieManager(browser, requestCookieIfEmpty = false)
+        coroutineScopeRule.advanceUntilIdle()
+
+        val getCookieCallback = CapturingSlot<Callback<String>>()
+        verify(exactly = 1) {
+            cookieManager.getCookie(
+                eq(Uri.parse(neevaConstants.appURL)),
+                capture(getCookieCallback)
+            )
+        }
+        getCookieCallback.captured.onResult("")
+        coroutineScopeRule.advanceUntilIdle()
 
         // The SessionToken should have hooked into the CookieManager.
         val callbackSlot = CapturingSlot<CookieChangedCallback>()
@@ -204,8 +233,13 @@ class SessionTokenTest : BaseTest() {
         callbackSlot.captured.onCookieChanged("unused", CookieChangeCause.INSERTED)
         coroutineScopeRule.advanceUntilIdle()
 
-        // We shouldn't have tried to do anything with the CookieManager.
-        verify(exactly = 0) { cookieManager.getCookie(any(), any()) }
+        // We shouldn't have tried to do anything with the CookieManager after the browser died.
+        verify(exactly = 1) {
+            cookieManager.getCookie(
+                eq(Uri.parse(neevaConstants.appURL)),
+                any()
+            )
+        }
         verify(exactly = 0) { cookieManager.setCookie(any(), any(), any()) }
     }
 

@@ -6,7 +6,7 @@ package com.neeva.app
 
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.isActive
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.TestScope
@@ -17,8 +17,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import strikt.api.expectThat
-import strikt.assertions.isTrue
 
 /**
  * Manages a CoroutineScope for testing kotlin coroutines and Flows.  The scope is automatically
@@ -58,9 +56,6 @@ class CoroutineScopeRule : TestRule {
     /** Runs any pending tasks and confirms that the CoroutineScope didn't cancel or crash. */
     fun advanceUntilIdle() {
         scope.advanceUntilIdle()
-
-        // If this line fails, then your test crashed.  Set a breakpoint here, run your test in
-        // debug mode, and examine the contents of the TestScope to see the crash stack.
-        expectThat(scope.isActive).isTrue()
+        scope.ensureActive()
     }
 }
