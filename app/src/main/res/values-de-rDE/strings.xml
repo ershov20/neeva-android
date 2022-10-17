@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2022 Neeva Inc. All rights reserved. -->
-<!-- Use of this source code is governed by a BSD-style license that can be -->
-<!-- found in the LICENSE file. -->
-
 <!-- When adding new strings:
      1. Find a section grouping that the new string can fit in.
 
@@ -839,4 +835,16 @@
     <string name="default_search_suggestion_1">Tech-News</string>
     <string name="default_search_suggestion_2">Rezept für obsttörtchen</string>
     <string name="default_search_suggestion_3" translatable="false">React Hooks</string>
+
+    <!-- [Downloads] Text for the snackbar popup notification that indicates the download has started for a given file. -->
+    <string name="download_started">Download von %1$s gestartet</string>
+
+    <!-- [Downloads] Text for the snackbar popup notification that indicates the download has failed for a given file. -->
+    <string name="download_failed">Download von %1$s fehlgeschlagen</string>
+
+    <!-- [Downloads] Text for the snackbar popup notification that indicates the download has completed for a given file. -->
+    <string name="download_completed">Download von %1$s abgeschlossen</string>
+
+    <!-- [Downloads] Action Label Text for the snackbar popup notification to view the newly completed download.  -->
+    <string name="download_view">Anzeigen</string>
 </resources>
