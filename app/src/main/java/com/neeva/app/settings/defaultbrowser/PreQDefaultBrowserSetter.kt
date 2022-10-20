@@ -26,8 +26,12 @@ class PreQDefaultBrowserSetter(
 
     override fun isNeevaTheDefaultBrowser(): Boolean {
         val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(neevaConstants.appURL))
+
+        // resolveActivity() is deprecated in API level 33, but we support down to API level 28.
+        @Suppress("DEPRECATION")
         val resolveInfo: ResolveInfo? =
             packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+
         // Look at https://github.com/neevaco/neeva-android/issues/408 if it is not working the right way.
         if (resolveInfo != null) {
             val defaultBrowserPackageName: String = resolveInfo.activityInfo.packageName

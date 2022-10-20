@@ -124,7 +124,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     internal val activityViewModel: NeevaActivityViewModel by viewModels {
         NeevaActivityViewModel.Factory(
-            intent,
             neevaUser,
             spaceStore,
             webLayerModel,
@@ -149,6 +148,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         activityCallbackProvider.activityCallbacks = WeakReference(this)
 
         activityViewModel.determineScreenConfiguration(this)
+        if (savedInstanceState == null) {
+            activityViewModel.pendingLaunchIntent = intent
+        }
+
         setContentView(R.layout.main)
 
         findViewById<ComposeView>(R.id.browser_ui).apply {
@@ -432,7 +435,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         )
 
         // Check if there are any Intents that have URLs that need to be loaded.
-        activityViewModel.getPendingLaunchIntent()?.let { processIntent(it) }
+        activityViewModel.pendingLaunchIntent?.let { processIntent(it) }
 
         isBrowserPreparedFlow.value = true
     }

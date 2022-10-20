@@ -98,7 +98,6 @@ class NeevaActivityViewModelTest : BaseTest() {
         }
 
         neevaActivityViewModel = NeevaActivityViewModel(
-            pendingLaunchIntent = null,
             neevaUser = neevaUser,
             webLayerModel = webLayerModel,
             popupModel = popupModel,

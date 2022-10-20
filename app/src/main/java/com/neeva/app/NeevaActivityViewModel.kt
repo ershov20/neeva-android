@@ -52,9 +52,6 @@ data class ToolbarConfiguration(
 )
 
 class NeevaActivityViewModel(
-    /** Intent that must be processed once WebLayer has finished initializing. */
-    private var pendingLaunchIntent: Intent?,
-
     private val neevaUser: NeevaUser,
     private val spaceStore: SpaceStore,
     private val webLayerModel: WebLayerModel,
@@ -63,6 +60,19 @@ class NeevaActivityViewModel(
     private val dispatchers: Dispatchers,
     overrideCoroutineScope: CoroutineScope? = null
 ) : ViewModel() {
+    /**
+     * Intent that must be processed once WebLayer has finished initializing.
+     *
+     * This field can only be used once per set() call -- it will be nulled out automatically when
+     * get() is called.
+     */
+    var pendingLaunchIntent: Intent? = null
+        get() {
+            val intentToReturn = field
+            field = null
+            return intentToReturn
+        }
+
     internal val toolbarConfiguration = MutableStateFlow(ToolbarConfiguration())
 
     init {
@@ -80,22 +90,6 @@ class NeevaActivityViewModel(
             }
             .flowOn(dispatchers.main)
             .launchIn(overrideCoroutineScope ?: viewModelScope)
-    }
-
-    /**
-     * Returns an Intent that needs to be processed when everything has been initialized.
-     * Subsequent calls will return no Intent.
-     *
-     * This mechanism relies on the ViewModel being created and kept alive across the Activity's
-     * lifecycle.  When the Activity creates the ViewModel for the first time, it is constructed
-     * using the Intent used to start the Activity.  If the Activity is alive when a new Intent
-     * comes in, or if the Activity is recreated due to a configuration change, the ViewModel stays
-     * alive so we know not to process the Intent again.
-     */
-    fun getPendingLaunchIntent(): Intent? {
-        val intentToReturn = pendingLaunchIntent
-        pendingLaunchIntent = null
-        return intentToReturn
     }
 
     fun determineScreenConfiguration(context: Context) {
@@ -122,7 +116,6 @@ class NeevaActivityViewModel(
     }
 
     class Factory(
-        private val pendingLaunchIntent: Intent?,
         private val neevaUser: NeevaUser,
         private val spaceStore: SpaceStore,
         private val webLayerModel: WebLayerModel,
@@ -134,7 +127,6 @@ class NeevaActivityViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(NeevaActivityViewModel::class.java)) {
                 return NeevaActivityViewModel(
-                    pendingLaunchIntent = pendingLaunchIntent,
                     neevaUser = neevaUser,
                     spaceStore = spaceStore,
                     webLayerModel = webLayerModel,

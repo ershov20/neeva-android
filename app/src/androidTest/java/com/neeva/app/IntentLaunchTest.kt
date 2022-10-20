@@ -4,6 +4,9 @@
 
 package com.neeva.app
 
+import android.app.SearchManager
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
@@ -311,6 +314,25 @@ class IntentLaunchTest : BaseBrowserTest() {
             // Confirm that the user is in the Spaces CardGrid.
             waitForCardGridScreen(SelectedScreen.SPACES)
             waitForNodeWithContentDescription(getString(R.string.space_create)).assertIsDisplayed()
+        }
+
+        activityTestRule.finishActivity()
+    }
+
+    @Test
+    fun sanitizeIntent_givenUnparcelable_returnsNull() {
+        // Incorrectly implemented parcelable that exists only in the test package.
+        val testOnlyParcelable = object : Parcelable {
+            override fun describeContents() = 0
+            override fun writeToParcel(dest: Parcel, flags: Int) {}
+        }
+
+        val brokenIntent = createViewIntent("neeva:login?sessionKey=whatever")
+            .putExtra(SearchManager.QUERY, testOnlyParcelable)
+        activityTestRule.launchActivity(brokenIntent)
+
+        androidComposeRule.apply {
+            waitForActivityStartup()
         }
 
         activityTestRule.finishActivity()
