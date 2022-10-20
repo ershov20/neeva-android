@@ -1,12 +1,11 @@
 # Build arguments go here.
-# ld arguments go here.
-# # See "gn args <out_dir> --list" for available build arguments.
+# See "gn args <out_dir> --list" for available build arguments.
 target_os = "android"
-target_cpu = "arm64"        # Use x86 or x64 for emulators (latter is 64 bit x86).
+target_cpu = "arm"
+is_debug = false
 is_java_debug = false
 symbol_level = 1
-is_debug = false      
-is_official_build = true    # Seems to make the build less crashy.
+is_official_build = true
 proprietary_codecs=true
 ffmpeg_branding="Chrome"
 cc_wrapper = "ccache"
