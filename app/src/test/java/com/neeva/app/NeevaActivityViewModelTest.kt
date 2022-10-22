@@ -89,7 +89,7 @@ class NeevaActivityViewModelTest : BaseTest() {
 
         popupModel = mock {
             on {
-                showBottomSheet(any(), any<@Composable (dismiss: () -> Unit) -> Unit>())
+                showBottomSheet(any(), any(), any<@Composable (dismiss: () -> Unit) -> Unit>())
             } doAnswer {}
         }
 

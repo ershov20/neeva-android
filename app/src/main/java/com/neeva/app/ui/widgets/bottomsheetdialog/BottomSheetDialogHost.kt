@@ -19,6 +19,7 @@ fun BottomSheetDialogHost() {
     bottomSheetDialogHostState?.let { hostState ->
         BottomSheetDialog(
             state = hostState.swipeableState,
+            hasHalfwayState = hostState.hasHalfwayState,
             titleResId = hostState.titleResId,
             onGone = popupModel::removeBottomSheet
         ) { dismiss ->

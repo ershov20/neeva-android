@@ -58,6 +58,7 @@ data class BottomSheetDialogHostState(
         confirmStateChange = { true }
     ),
     val titleResId: Int? = null,
+    val hasHalfwayState: Boolean = true,
     val content: @Composable (dismiss: () -> Unit) -> Unit = {}
 )
 
@@ -154,6 +155,7 @@ class PopupModel(
      */
     fun showBottomSheet(
         titleResId: Int? = null,
+        hasHalfwayState: Boolean = true,
         content: @Composable (dismiss: () -> Unit) -> Unit = {}
     ) {
         _bottomSheetDialogState.value?.let {
@@ -165,6 +167,7 @@ class PopupModel(
         } ?: run {
             _bottomSheetDialogState.value = BottomSheetDialogHostState(
                 titleResId = titleResId,
+                hasHalfwayState = hasHalfwayState,
                 content = content
             )
         }

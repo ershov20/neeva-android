@@ -55,16 +55,23 @@ enum class BottomSheetDialogStates {
 @Composable
 fun BottomSheetDialog(
     state: SwipeableState<BottomSheetDialogStates>,
+    hasHalfwayState: Boolean,
     modifier: Modifier = Modifier,
     @StringRes titleResId: Int? = null,
     onGone: () -> Unit,
     content: @Composable (dismissDialog: () -> Unit) -> Unit
 ) {
-    // Animate the bottom sheet coming in halfway.
+    // Animate the bottom sheet coming in
     var drawScrim by remember { mutableStateOf(false) }
     LaunchedEffect(true) {
         drawScrim = true
-        state.animateTo(BottomSheetDialogStates.HALF)
+        state.animateTo(
+            if (hasHalfwayState) {
+                BottomSheetDialogStates.HALF
+            } else {
+                BottomSheetDialogStates.FULL
+            }
+        )
     }
 
     // Call onGone when the dialog is GONE so that we can remove it from the Composition.
@@ -94,11 +101,18 @@ fun BottomSheetDialog(
         // Set up the anchor points so that the dialog can be expanded to take up the whole screen.
         val maxHeightPx = with(LocalDensity.current) { maxHeight.toPx() }
         val anchors: Map<Float, BottomSheetDialogStates> = remember(maxHeightPx) {
-            mapOf(
-                maxHeightPx to BottomSheetDialogStates.GONE,
-                maxHeightPx / 2 to BottomSheetDialogStates.HALF,
-                0f to BottomSheetDialogStates.FULL
-            )
+            if (hasHalfwayState) {
+                mapOf(
+                    maxHeightPx to BottomSheetDialogStates.GONE,
+                    maxHeightPx / 2 to BottomSheetDialogStates.HALF,
+                    0f to BottomSheetDialogStates.FULL
+                )
+            } else {
+                mapOf(
+                    maxHeightPx to BottomSheetDialogStates.GONE,
+                    0f to BottomSheetDialogStates.FULL
+                )
+            }
         }
 
         if (drawScrim) {

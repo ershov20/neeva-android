@@ -213,7 +213,8 @@ class AppNavModelImpl(
                 null
             } else {
                 R.string.toolbar_save_to_space
-            }
+            },
+            hasHalfwayState = !neevaUser.isSignedOut()
         ) { onDismissRequested ->
             val spaceStore = LocalSpaceStore.current
             val browserWrapper = webLayerModel.currentBrowser

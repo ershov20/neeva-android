@@ -317,14 +317,8 @@
     <!-- [Spaces][Menu item][a11y] Shows additional information about the items in the current Space.  Displayed either as text in a menu or provided as a TalkBack string on an icon button. -->
     <string name="space_detail_show_descriptions">Show descriptions</string>
 
-    <!-- [Spaces][Colloquial][Dialog] Promotional title for a dialog that encourages users to sign up for an account to be able to use the Spaces feature. -->
-    <string name="space_intro_title">Kill the clutter</string>
-
     <!-- [Spaces][Dialog] Promotional benefits of using Neeva Spaces. -->
     <string name="space_intro_body">Save and share content instantly. Stay organized by adding images, websites and documents to a Space today.</string>
-
-    <!-- [Spaces][Button] Displayed on a button that sends the user to sign up for an account. -->
-    <string name="space_intro_cta">Sign up to get started</string>
 
     <!-- [Spaces] Title for the bottom sheet that the user uses to share their current Space with somebody else. -->
     <string name="share_space_title">Share Space</string>
