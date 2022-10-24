@@ -65,7 +65,7 @@ class AppNavModelImplTest : BaseTest() {
 
         mockCurrentBrowser = mockk {
             every { isIncognito } returns false
-            every { userMustStayInCardGridFlow } returns MutableStateFlow(false)
+            every { userMustStayInTabSwitcherFlow } returns MutableStateFlow(false)
         }
         mockInitializedBrowserFlow = MutableStateFlow(mockCurrentBrowser)
         webLayerModel = mockk {

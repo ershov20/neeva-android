@@ -213,8 +213,8 @@ abstract class BaseBrowserWrapper internal constructor(
     override val findInPageModel: FindInPageModel get() = _findInPageModel
     override val urlBarModel: URLBarModel get() = _urlBarModel
 
-    /** Tracks whether the user needs to be kept in the CardGrid if they're on that screen. */
-    final override val userMustStayInCardGridFlow: StateFlow<Boolean>
+    /** Tracks whether the user needs to be kept in the tab switcher if they're on that screen. */
+    final override val userMustStayInTabSwitcherFlow: StateFlow<Boolean>
 
     private var tabListRestorer: BrowserRestoreCallback? = null
 
@@ -227,11 +227,26 @@ abstract class BaseBrowserWrapper internal constructor(
     init {
         faviconCache.profileProvider = FaviconCache.ProfileProvider { getProfile() }
 
-        userMustStayInCardGridFlow = orderedTabList
+        userMustStayInTabSwitcherFlow = orderedTabList
             .combine(_urlBarModel.isLazyTab) { tabs, isLazyTab ->
-                // If the user has no open tabs (explicitly ignoring tabs being closed), keep them
-                // in the card grid instead of sending them back out to the browser.
-                tabs.filterNot { it.isClosing }.isEmpty() && !isLazyTab
+                // Explicitly ignore tabs that are in the process of being closed.  If the currently
+                // active tab is being closed, this will be caught by the case where there are no
+                // active and open tabs.
+                val notClosing = tabs.filterNot { it.isClosing }
+
+                when {
+                    // If the user has no open tabs (explicitly ignoring tabs being closed), keep
+                    // them in the tab switcher instead of sending them back out to the browser.  If
+                    // the user is lazily opening a tab, then they should be allowed out so that
+                    // they can enter a URL into the browser view.
+                    notClosing.isEmpty() && !isLazyTab -> true
+
+                    // If there are no active tabs, don't go back to the browser because WebLayer
+                    // will send them to an about:blank tab.
+                    notClosing.none { it.isSelected } -> true
+
+                    else -> false
+                }
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, false)
 
@@ -259,8 +274,7 @@ abstract class BaseBrowserWrapper internal constructor(
             }
 
             // Remove the tab from our local state.
-            val tabIndex = tabList.indexOf(tabId)
-            val tabInfo = tabList.remove(tabId)
+            tabList.remove(tabId)
 
             // If the active tab is a child of the removed tab, update it so that we have the
             // correct navigation info.
@@ -269,12 +283,6 @@ abstract class BaseBrowserWrapper internal constructor(
             // Remove all the callbacks associated with the tab to avoid any callbacks after the tab
             // gets destroyed.
             unregisterTabCallbacks(tabId)
-
-            // If there is currently no tab marked as active, pick a new one.
-            val activeTab = getActiveTab()
-            if (activeTab == null) {
-                setNextActiveTab(tabInfo, tabIndex)
-            }
         }
 
         override fun onTabAdded(tab: Tab) {
@@ -660,7 +668,6 @@ abstract class BaseBrowserWrapper internal constructor(
                 Log.w(TAG, "\tBrowser was destroyed: ${previousTabInstance?.browser?.isDestroyed}")
                 unregisterTabCallbacks(tab.guid)
             } else {
-                Log.d(TAG, "Keeping previous tab callbacks")
                 return
             }
         }
@@ -753,13 +760,17 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     private fun setNextActiveTab(closedTabInfo: TabInfo?, closedTabIndex: Int) {
+        // If the user manually closed the tab from the tab switcher, don't auto-select another.
+        if (closedTabInfo?.isClosing == true) return
+
         // Send the user back to the tab's parent.
         val parentTabId = closedTabInfo?.data?.parentTabId
         if (browserFlow.setActiveTab(parentTabId)) {
             return
         }
 
-        // Pick the tab immediately before the closed one.
+        // Select the tab immediately before the current one.
+        // TODO(dan.alcantara): Look for another tab in the same time bucket.
         val newIndex = (closedTabIndex - 1).coerceAtLeast(0)
         val newIndexTabId = orderedTabList.value.getOrNull(newIndex)?.id
         if (browserFlow.setActiveTab(newIndexTabId)) {
@@ -768,18 +779,13 @@ abstract class BaseBrowserWrapper internal constructor(
     }
 
     override fun startClosingTab(id: String) {
-        val tabIndex = tabList.indexOf(id)
-        val tabInfo = tabList.getTabInfo(id)
         tabList.updateIsClosing(tabId = id, newIsClosing = true)
-
-        // If the tab being closed is the active tab, mark a different tab as active.
-        if (getActiveTab()?.guid == id) {
-            setNextActiveTab(tabInfo, tabIndex)
-        }
+        _activeTabModelImpl.onTabClosingChanged(closingTabId = id)
     }
 
     override fun cancelClosingTab(id: String) {
         tabList.updateIsClosing(id, newIsClosing = false)
+        _activeTabModelImpl.onTabClosingChanged(closingTabId = id)
     }
 
     override fun closeTab(id: String) {
@@ -871,8 +877,8 @@ abstract class BaseBrowserWrapper internal constructor(
         return tabList.hasNoTabs(ignoreClosingTabs)
     }
 
-    /** Returns true if the user should be forced to go to the card grid. */
-    override fun userMustBeShownCardGrid(): Boolean = userMustStayInCardGridFlow.value
+    /** Returns true if the user should be forced to go to the tab switcher. */
+    override fun userMustBeShownTabSwitcher(): Boolean = userMustStayInTabSwitcherFlow.value
 
     override fun isFullscreen(): Boolean = fullscreenCallback.isFullscreen()
     override fun exitFullscreen(): Boolean = fullscreenCallback.exitFullscreen()

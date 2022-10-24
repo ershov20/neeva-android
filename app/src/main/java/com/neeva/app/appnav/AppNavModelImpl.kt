@@ -80,7 +80,7 @@ class AppNavModelImpl(
      */
     private fun updateBackEnablingJob(browserWrapper: BrowserWrapper) {
         backEnablingJob?.cancel()
-        backEnablingJob = browserWrapper.userMustStayInCardGridFlow
+        backEnablingJob = browserWrapper.userMustStayInTabSwitcherFlow
             .combine(currentDestination) { mustStay, currentDestination ->
                 mustStay && currentDestination?.route == AppNavDestination.CARD_GRID.route
             }
@@ -130,7 +130,9 @@ class AppNavModelImpl(
             }
         }
 
-        if (webLayerModel.currentBrowser.userMustBeShownCardGrid() && forceUserToStayInCardGrid) {
+        if (webLayerModel.currentBrowser.userMustBeShownTabSwitcher() &&
+            forceUserToStayInCardGrid
+        ) {
             showCardGrid()
         }
     }

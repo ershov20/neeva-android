@@ -341,6 +341,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             webLayerModel.currentBrowser.waitUntilBrowserIsReady()
         }
 
+        var uriToLoad: Uri? = null
+
         when (intent?.action) {
             ACTION_NEW_TAB -> {
                 switchToRegularProfile()
@@ -380,33 +382,28 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         }
                     }
                 } else {
-                    intent.data?.let {
-                        webLayerModel.currentBrowser.loadUrl(
-                            uri = it,
-                            inNewTab = true,
-                            isViaIntent = true,
-                            onLoadStarted = ::showBrowser
-                        )
-                    }
+                    uriToLoad = intent.data
                 }
             }
 
             Intent.ACTION_WEB_SEARCH -> {
                 switchToRegularProfile()
-                intent.extras?.getString(SearchManager.QUERY)?.let {
-                    val searchUri = it.toSearchUri(neevaConstants)
-
-                    webLayerModel.currentBrowser.loadUrl(
-                        uri = searchUri,
-                        inNewTab = true,
-                        isViaIntent = true,
-                        onLoadStarted = ::showBrowser
-                    )
-                }
+                uriToLoad = intent.extras
+                    ?.getString(SearchManager.QUERY)
+                    ?.toSearchUri(neevaConstants)
             }
 
             // Don't know what to do with it.
             else -> {}
+        }
+
+        uriToLoad?.let {
+            webLayerModel.currentBrowser.loadUrl(
+                uri = it,
+                inNewTab = true,
+                isViaIntent = true,
+                onLoadStarted = ::showBrowser
+            )
         }
     }
 

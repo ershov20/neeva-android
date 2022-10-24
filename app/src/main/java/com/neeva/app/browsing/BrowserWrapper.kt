@@ -52,7 +52,7 @@ interface BrowserWrapper {
     val shouldDisplayCrashedTab: Flow<Boolean>
 
     /** Tracks whether the user needs to be kept in the CardGrid if they're on that screen. */
-    val userMustStayInCardGridFlow: StateFlow<Boolean>
+    val userMustStayInTabSwitcherFlow: StateFlow<Boolean>
 
     /** Gets the [Fragment] created by WebLayer for this Browser. */
     fun getFragment(): Fragment?
@@ -91,7 +91,7 @@ interface BrowserWrapper {
     fun hasNoTabs(ignoreClosingTabs: Boolean = false): Boolean
 
     /** Returns true if the user should be forced to go to the card grid. */
-    fun userMustBeShownCardGrid(): Boolean
+    fun userMustBeShownTabSwitcher(): Boolean
 
     /** Returns a list of cookies split by key and values. */
     fun getCookiePairs(uri: Uri, callback: (List<CookiePair>) -> Unit)

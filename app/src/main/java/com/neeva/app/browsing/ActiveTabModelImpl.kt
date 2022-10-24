@@ -125,6 +125,13 @@ class ActiveTabModelImpl(
         }
     }
 
+    internal fun onTabClosingChanged(closingTabId: String) {
+        val activeTabGuid = activeTab?.guid ?: return
+        if (closingTabId == activeTabGuid) {
+            updateNavigationInfo()
+        }
+    }
+
     fun reload() {
         activeTab?.navigationController?.reload()
     }
@@ -281,7 +288,11 @@ class ActiveTabModelImpl(
     private fun updateNavigationInfo() {
         val canGoBackward = activeTab.let { currentTab ->
             when {
-                currentTab == null -> false
+                currentTab == null || currentTab.isDestroyed -> false
+
+                // If the user is closing the current tab, then don't let them go backward to the
+                // browser to see it.
+                tabList.getTabInfo(currentTab.guid)?.isClosing == true -> false
 
                 // The user can go backwards in their navigation history.
                 currentTab.navigationController.canGoBack() -> true
@@ -290,12 +301,9 @@ class ActiveTabModelImpl(
                 tabList.isParentTabInList(currentTab.guid) -> true
 
                 // Try to send the user back to the Space that opened it.
-                tabList.getTabInfo(currentTab.guid)?.data?.parentSpaceId
-                    ?.let { parentSpaceId -> spaceStore?.doesSpaceExist(parentSpaceId) }
-                    ?: false ->
-                    {
-                        true
-                    }
+                tabList.getTabInfo(currentTab.guid)?.data
+                    ?.parentSpaceId
+                    ?.let { spaceStore?.doesSpaceExist(it) } == true -> true
 
                 // The user can be re-shown the query results that led them to this tab.
                 tabList.getSearchNavigationInfo(currentTab.guid, 0) != null -> true

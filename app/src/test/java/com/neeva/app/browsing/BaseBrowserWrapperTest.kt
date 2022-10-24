@@ -192,9 +192,16 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         urlBarModel = mock {
             on { stateFlow } doAnswer { urlBarModelStateFlow }
-            on { isLazyTab } doReturn(
+
+            on { isLazyTab } doAnswer {
                 urlBarModelStateFlow.map { it.isLazyTab }.distinctUntilChanged()
+            }
+
+            on { showZeroQuery(any(), eq(true)) } doAnswer {
+                urlBarModelStateFlow.value = urlBarModelStateFlow.value.copy(
+                    isLazyTab = true
                 )
+            }
         }
 
         contentFilterModel = mock {
@@ -744,5 +751,67 @@ class BaseBrowserWrapperTest : BaseTest() {
         expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(2)
         expectThat(browserWrapper.orderedTabList.value.map { it.id })
             .containsExactly(ids[1], ids[3])
+    }
+
+    @Test
+    fun userMustStayInCardGridFlow_withZeroTabs_keepsUserInCardGrid() {
+        createAndAttachBrowser()
+        completeBrowserRestoration()
+        coroutineScopeRule.advanceUntilIdle()
+
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+        expectThat(browserWrapper.userMustStayInTabSwitcherFlow.value).isFalse()
+
+        browserWrapper.closeTab(tabList.orderedTabList.value[0].id)
+        coroutineScopeRule.advanceUntilIdle()
+
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(0)
+        expectThat(browserWrapper.userMustStayInTabSwitcherFlow.value).isTrue()
+    }
+
+    @Test
+    fun userMustStayInCardGridFlow_withClosingTab_keepsUserInCardGrid() {
+        createAndAttachBrowser()
+        completeBrowserRestoration()
+        coroutineScopeRule.advanceUntilIdle()
+
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+        expectThat(browserWrapper.userMustStayInTabSwitcherFlow.value).isFalse()
+
+        val tabId = tabList.orderedTabList.value[0].id
+        browserWrapper.startClosingTab(tabId)
+        coroutineScopeRule.advanceUntilIdle()
+
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+        expectThat(browserWrapper.userMustStayInTabSwitcherFlow.value).isTrue()
+
+        browserWrapper.closeTab(tabId)
+        coroutineScopeRule.advanceUntilIdle()
+
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(0)
+        expectThat(browserWrapper.userMustStayInTabSwitcherFlow.value).isTrue()
+    }
+
+    @Test
+    fun userMustStayInCardGridFlow_afterCancelingTabClose_allowsUserToLeaveCardGrid() {
+        createAndAttachBrowser()
+        completeBrowserRestoration()
+        coroutineScopeRule.advanceUntilIdle()
+
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+        expectThat(browserWrapper.userMustStayInTabSwitcherFlow.value).isFalse()
+
+        val tabId = tabList.orderedTabList.value[0].id
+        browserWrapper.startClosingTab(tabId)
+        coroutineScopeRule.advanceUntilIdle()
+
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+        expectThat(browserWrapper.userMustStayInTabSwitcherFlow.value).isTrue()
+
+        browserWrapper.cancelClosingTab(tabId)
+        coroutineScopeRule.advanceUntilIdle()
+
+        expectThat(browserWrapper.orderedTabList.value.size).isEqualTo(1)
+        expectThat(browserWrapper.userMustStayInTabSwitcherFlow.value).isFalse()
     }
 }
