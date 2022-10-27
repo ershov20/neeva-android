@@ -24,10 +24,11 @@ Once those are installed, you can run a version of this command to add them to y
 ```
 # Assuming that you've installed the tools to the default directories:  
 # To set the correct sdkmanager, avdmanager, emulator executables
-echo "export ANDROID_HOME=\"$HOME/Library/Android/sdk\"" >> ~/.zshrc
-echo "export PATH=\"\$PATH:$ANDROID_HOME/platform-tools\"" >> ~/.zshrc
-echo "export PATH=\"\$PATH:$ANDROID_HOME/cmdline-tools/latest/bin\"" >> ~/.zshrc
-echo "export PATH=\"\$PATH:$ANDROID_HOME/emulator\"" >> ~/.zshrc
+ANDROID_HOME_TMP=$HOME/Library/Android/sdk
+echo "export ANDROID_HOME=\"$ANDROID_HOME_TMP\"" >> ~/.zshrc
+echo "export PATH=\"\$PATH:$ANDROID_HOME_TMP/platform-tools\"" >> ~/.zshrc
+echo "export PATH=\"\$PATH:$ANDROID_HOME_TMP/cmdline-tools/latest/bin\"" >> ~/.zshrc
+echo "export PATH=\"\$PATH:$ANDROID_HOME_TMP/emulator\"" >> ~/.zshrc
 
 source ~/.zshrc
 
