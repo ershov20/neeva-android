@@ -11,6 +11,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.IncognitoApolloWrapper
 import com.neeva.app.contentfilter.IncognitoTrackersAllowList
 import com.neeva.app.contentfilter.ScriptInjectionManager
+import com.neeva.app.neevascope.BloomFilterManager
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
@@ -45,6 +46,7 @@ class IncognitoBrowserWrapper private constructor(
     neevaConstants: NeevaConstants,
     private val onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
     settingsDataModel: SettingsDataModel,
+    bloomFilterManager: BloomFilterManager,
     tabScreenshotManager: IncognitoTabScreenshotManager,
     scriptInjectionManager: ScriptInjectionManager,
     sharedPreferencesModel: SharedPreferencesModel,
@@ -61,12 +63,17 @@ class IncognitoBrowserWrapper private constructor(
         apolloWrapper = incognitoApolloWrapper,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
-        appContext = appContext
+        appContext = appContext,
+        bloomFilterManager = bloomFilterManager,
+        neevaConstants = neevaConstants,
+        sharedPreferencesModel = sharedPreferencesModel,
+        settingsDataModel = settingsDataModel
     ),
     popupModel = popupModel,
     faviconCache = incognitoFaviconCache,
     spaceStore = null,
     historyManager = null,
+    bloomFilterManager = bloomFilterManager,
     tabScreenshotManager = tabScreenshotManager,
     domainProvider = domainProvider,
     downloadCallback = downloadCallback,
@@ -90,6 +97,7 @@ class IncognitoBrowserWrapper private constructor(
         neevaConstants: NeevaConstants,
         onRemovedFromHierarchy: (IncognitoBrowserWrapper) -> Unit,
         popupModel: PopupModel,
+        bloomFilterManager: BloomFilterManager,
         scriptInjectionManager: ScriptInjectionManager,
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
@@ -114,6 +122,7 @@ class IncognitoBrowserWrapper private constructor(
         neevaConstants = neevaConstants,
         onRemovedFromHierarchy = onRemovedFromHierarchy,
         settingsDataModel = settingsDataModel,
+        bloomFilterManager = bloomFilterManager,
         tabScreenshotManager = IncognitoTabScreenshotManager(
             appContext = appContext,
             filesDir = tempDirectory,

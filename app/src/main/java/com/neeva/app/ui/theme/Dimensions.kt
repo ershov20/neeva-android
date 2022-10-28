@@ -25,6 +25,8 @@ object Dimensions {
     val SIZE_ICON_MEDIUM = 24.dp
     val SIZE_ICON_TOOLBAR = 21.dp
 
+    val NEEVASCOPE_TIP_SIZE = 8.dp
+
     val SCROLL_GRADIENT_INDICATOR = 48.dp
 
     /** Default size of a Material icon. */

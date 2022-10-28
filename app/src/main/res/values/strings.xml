@@ -751,6 +751,9 @@
     <!-- [NeevaScope][Button] User acknowledges that they understand what the feature does and dismisses the dialog. -->
     <string name="neevascope_got_it">Got it!</string>
 
+    <!-- [NeevaScope] Label for the NeevaScope reddit tooltip. -->
+    <string name="neevascope_reddit_tooltip">See what people have said about this page</string>
+
     <!-- [NeevaScope][Colloquial] Tells the user that we are getting information about the current web page.
          This is a pun because the "NeevaScope" feature is like a "telescope". -->
     <string name="neevascope_loading">Your NeevaScope is coming into focus…</string>

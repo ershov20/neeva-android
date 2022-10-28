@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -15,14 +18,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.R
 import com.neeva.app.ui.PortraitPreviews
@@ -71,10 +77,12 @@ fun ShareButton(modifier: Modifier = Modifier) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NeevaScopeButton(
     isLandscape: Boolean = false,
     isIncognito: Boolean = false,
+    showRedditDot: MutableState<Boolean> = mutableStateOf(false),
     modifier: Modifier = Modifier
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
@@ -89,15 +97,31 @@ fun NeevaScopeButton(
     }
 
     IconButton(
-        onClick = browserToolbarModel::showNeevaScope,
+        onClick = {
+            browserToolbarModel.showNeevaScope()
+            showRedditDot.value = false
+        },
         modifier = modifier
     ) {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_neeva_logo),
-            contentDescription = stringResource(id = R.string.neevascope),
-            modifier = Modifier.size(Dimensions.SIZE_ICON_TOOLBAR),
-            tint = iconColor
-        )
+        BadgedBox(
+            badge = {
+                Badge(
+                    modifier = Modifier.size(8.dp),
+                    containerColor = if (showRedditDot.value) {
+                        Color.Blue
+                    } else {
+                        Color.Transparent
+                    }
+                ) {}
+            }
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_neeva_logo),
+                contentDescription = stringResource(id = R.string.neevascope),
+                modifier = Modifier.size(Dimensions.SIZE_ICON_TOOLBAR),
+                tint = iconColor
+            )
+        }
     }
 }
 

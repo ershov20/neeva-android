@@ -13,6 +13,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -22,9 +25,11 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
+import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.neevascope.NeevaScopeTooltip
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 
@@ -36,9 +41,13 @@ fun BrowserBottomToolbar(
 ) {
     val browserWrapper = LocalBrowserWrapper.current
     val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
+
+    val settingsDataModel = LocalSettingsDataModel.current
+    val isNeevaScopeTooltipEnabled: Boolean =
+        settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
     BrowserBottomToolbar(
         isIncognito = browserWrapper.isIncognito,
-        showNeevaScopeTooltip = browserWrapper.showNeevaScopeTooltip(),
+        isNeevaScopeTooltipEnabled = isNeevaScopeTooltipEnabled,
         modifier = modifier.offset(y = bottomOffsetDp)
     )
 }
@@ -46,9 +55,12 @@ fun BrowserBottomToolbar(
 @Composable
 fun BrowserBottomToolbar(
     isIncognito: Boolean,
-    showNeevaScopeTooltip: Boolean = false,
+    isNeevaScopeTooltipEnabled: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val browserToolbarModel = LocalBrowserToolbarModel.current
+    val showRedditDot = remember { mutableStateOf(false) }
+
     val backgroundColor = if (isIncognito) {
         MaterialTheme.colorScheme.inverseSurface
     } else {
@@ -76,11 +88,19 @@ fun BrowserBottomToolbar(
                 modifier = Modifier.weight(1.0f)
             )
 
-            if (showNeevaScopeTooltip) {
-                NeevaScopeTooltip(isLandscape = false)
+            if (isNeevaScopeTooltipEnabled) {
+                browserToolbarModel.getNeevaScopeModel()?.let {
+                    NeevaScopeTooltip(
+                        neevaScopeModel = it,
+                        showRedditDot = showRedditDot,
+                        isLandscape = false
+                    )
+                }
             }
+
             NeevaScopeButton(
                 isIncognito = isIncognito,
+                showRedditDot = showRedditDot,
                 modifier = Modifier.weight(1.0f)
             )
 

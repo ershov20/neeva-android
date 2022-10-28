@@ -13,6 +13,7 @@ import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.urlbar.PreviewUrlBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.contentfilter.PreviewContentFilterModel
+import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +29,9 @@ class BrowserToolbarModelImpl(
     override fun reload() = browserWrapper.reload()
     override fun reloadAfterContentFilterAllowListUpdate() =
         browserWrapper.reloadAfterContentFilterAllowListUpdate()
+
     override fun showNeevaScope() = browserWrapper.showNeevaScope()
+    override fun getNeevaScopeModel(): NeevaScopeModel = browserWrapper.neevaScopeModel
 
     override fun share() = appNavModel.shareCurrentPage()
     override fun onAddToSpace() = appNavModel.showAddToSpace()
@@ -82,6 +85,7 @@ internal class PreviewBrowserToolbarModel(
     override fun reloadAfterContentFilterAllowListUpdate() {}
     override fun share() {}
     override fun showNeevaScope() {}
+    override fun getNeevaScopeModel(): NeevaScopeModel? { return null }
     override fun onAddToSpace() {}
     override fun onMenuItem(id: OverflowMenuItemId) {}
     override fun onTabSwitcher() {}

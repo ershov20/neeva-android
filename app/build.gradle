@@ -194,6 +194,7 @@ dependencies {
 
     testImplementation 'androidx.test.espresso:espresso-intents:3.4.0'
     testImplementation "androidx.test.ext:junit-ktx:$androidx_test_junit_version"
+    testImplementation 'androidx.work:work-testing:2.7.1'
     testImplementation "com.apollographql.apollo3:apollo-testing-support:$apollo_version"
     testImplementation "com.squareup.okhttp3:mockwebserver:4.10.0"
     testImplementation "io.mockk:mockk:1.12.4"

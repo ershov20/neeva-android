@@ -9,6 +9,8 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.work.ListenableWorker
+import androidx.work.testing.TestListenableWorkerBuilder
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import java.io.File
@@ -20,6 +22,7 @@ import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -158,5 +161,28 @@ class BloomFilterDownloaderTest : BaseTest() {
         expectThat(filterRequest.requestUrl?.toString()).isEqualTo("$serverUrl/filter")
 
         expectThat(file.exists()).isFalse()
+    }
+
+    @Test
+    fun enqueueDownloadTask_withValidUrl_enqueueSuccess() {
+        val worker = TestListenableWorkerBuilder<BloomFilterDownloadWorker>(appContext).build()
+        BloomFilterConfiguration.redditConfiguration.localUri = fileDir.toUri()
+
+        runBlocking {
+            val result = worker.doWork()
+            expectThat(result).isEqualTo(ListenableWorker.Result.success())
+        }
+    }
+
+    @Test
+    fun enqueueDownloadTask_withInvalidUrl_assertionError() {
+        val worker = TestListenableWorkerBuilder<BloomFilterDownloadWorker>(appContext).build()
+        BloomFilterConfiguration.redditConfiguration.localUri = Uri.parse("www.example.com")
+
+        assertThrows(AssertionError::class.java) {
+            runBlocking {
+                worker.doWork()
+            }
+        }
     }
 }

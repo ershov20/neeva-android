@@ -13,6 +13,7 @@ import com.neeva.app.contentfilter.RegularTrackersAllowList
 import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
+import com.neeva.app.neevascope.BloomFilterManager
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
@@ -58,7 +59,8 @@ class RegularBrowserWrapper(
     sharedPreferencesModel: SharedPreferencesModel,
     settingsDataModel: SettingsDataModel,
     spaceStore: SpaceStore,
-    popupModel: PopupModel
+    popupModel: PopupModel,
+    bloomFilterManager: BloomFilterManager
 ) : BaseBrowserWrapper(
     isIncognito = false,
     appContext = appContext,
@@ -78,12 +80,17 @@ class RegularBrowserWrapper(
         apolloWrapper = authenticatedApolloWrapper,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
-        appContext = appContext
+        appContext = appContext,
+        bloomFilterManager = bloomFilterManager,
+        neevaConstants = neevaConstants,
+        sharedPreferencesModel = sharedPreferencesModel,
+        settingsDataModel = settingsDataModel
     ),
     popupModel = popupModel,
     faviconCache = regularFaviconCache,
     spaceStore = spaceStore,
     historyManager = historyManager,
+    bloomFilterManager = bloomFilterManager,
     tabScreenshotManager = RegularTabScreenshotManager(
         filesDir = directories.cacheDirectory,
         coroutineScope = coroutineScope,

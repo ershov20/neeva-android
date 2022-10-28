@@ -80,11 +80,6 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             defaultValue = CollapsingSectionState.EXPANDED,
             enumFromString = { it.toCollapsingSectionState() }
         )
-        val ShowTryNeevaScopeTooltip = SharedPrefKey(
-            App,
-            preferenceKey = "SHOW_TRY_NEEVASCOPE_TOOLTIP",
-            defaultValue = true
-        )
         val DownloadRequestId = SharedPrefKey(
             App,
             preferenceKey = "DOWNLOAD_REQUEST_ID",
@@ -94,6 +89,11 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             App,
             preferenceKey = "REQUESTED_INSTALL_REFERRER",
             defaultValue = false
+        )
+        val NeevaScopeTooltipCount = SharedPrefKey(
+            App,
+            preferenceKey = "SHOW_NEEVASCOPE_TOOLTIP_COUNT",
+            defaultValue = 5
         )
     }
 

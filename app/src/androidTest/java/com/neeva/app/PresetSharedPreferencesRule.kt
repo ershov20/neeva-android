@@ -29,9 +29,9 @@ class PresetSharedPreferencesRule(
                 }
 
                 if (skipNeevaScopeTooltip) {
-                    SharedPrefFolder.App.ShowTryNeevaScopeTooltip.set(
+                    SharedPrefFolder.App.NeevaScopeTooltipCount.set(
                         sharedPreferencesModel,
-                        false
+                        0
                     )
                 }
 

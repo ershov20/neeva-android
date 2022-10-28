@@ -20,6 +20,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
+import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.findinpage.FindInPageModel
@@ -46,6 +49,7 @@ import com.neeva.app.contentfilter.ui.popover.rememberContentFilterPopoverModel
 import com.neeva.app.neevascope.NeevaScopeTooltip
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.overflowmenu.OverflowMenuItemId
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -57,7 +61,6 @@ fun BrowserToolbarContainer(topOffset: Float) {
 
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
 
-    val showNeevaScopeTooltip = LocalBrowserWrapper.current.showNeevaScopeTooltip()
     val appNavModel = LocalAppNavModel.current
     val contentFilterPopoverModel = rememberContentFilterPopoverModel(
         appNavModel = appNavModel,
@@ -66,10 +69,14 @@ fun BrowserToolbarContainer(topOffset: Float) {
         urlFlow = urlFlow
     )
 
+    val settingsDataModel = LocalSettingsDataModel.current
+    val isNeevaScopeTooltipEnabled: Boolean =
+        settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
+
     BrowserToolbar(
         findInPageModel = findInPageModel,
-        showNeevaScopeTooltip = showNeevaScopeTooltip,
         contentFilterPopoverModel = contentFilterPopoverModel,
+        isNeevaScopeTooltipEnabled = isNeevaScopeTooltipEnabled,
         modifier = Modifier
             .offset(y = topOffsetDp)
             .background(MaterialTheme.colorScheme.background)
@@ -86,8 +93,8 @@ fun BrowserToolbarContainer(topOffset: Float) {
 @Composable
 fun BrowserToolbar(
     findInPageModel: FindInPageModel,
-    showNeevaScopeTooltip: Boolean,
     contentFilterPopoverModel: ContentFilterPopoverModel,
+    isNeevaScopeTooltipEnabled: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
@@ -95,6 +102,8 @@ fun BrowserToolbar(
         .value.isEditing
     val findInPageInfo = findInPageModel.findInPageInfoFlow.collectAsState().value
     val navigationInfoFlow = browserToolbarModel.navigationInfoFlow.collectAsState()
+
+    val showRedditDot = remember { mutableStateOf(false) }
 
     Surface(
         color = MaterialTheme.colorScheme.background,
@@ -167,6 +176,7 @@ fun BrowserToolbar(
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
                                 NeevaScopeButton(
                                     isLandscape = true,
+                                    showRedditDot = showRedditDot,
                                     isIncognito = browserToolbarModel.isIncognito
                                 )
                                 Spacer(modifier = Modifier.width(Dimensions.PADDING_SMALL))
@@ -198,8 +208,14 @@ fun BrowserToolbar(
                     )
                 }
 
-                if (browserToolbarModel.useSingleBrowserToolbar && showNeevaScopeTooltip) {
-                    NeevaScopeTooltip(isLandscape = true)
+                if (browserToolbarModel.useSingleBrowserToolbar && isNeevaScopeTooltipEnabled) {
+                    browserToolbarModel.getNeevaScopeModel()?.let {
+                        NeevaScopeTooltip(
+                            neevaScopeModel = it,
+                            showRedditDot = showRedditDot,
+                            isLandscape = true
+                        )
+                    }
                 }
             }
         }
@@ -221,7 +237,6 @@ internal fun ToolbarPreview_Blank(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                showNeevaScopeTooltip = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
@@ -251,7 +266,6 @@ internal fun ToolbarPreview_Focus(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                showNeevaScopeTooltip = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
@@ -282,7 +296,6 @@ internal fun ToolbarPreview_Typing(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                showNeevaScopeTooltip = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
@@ -312,7 +325,6 @@ internal fun ToolbarPreview_Search(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                showNeevaScopeTooltip = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }
@@ -344,7 +356,6 @@ internal fun ToolbarPreview_Loading(useSingleBrowserToolbar: Boolean) {
         ) {
             BrowserToolbar(
                 findInPageModel = PreviewFindInPageModel(),
-                showNeevaScopeTooltip = false,
                 contentFilterPopoverModel = PreviewContentFilterPopoverModel()
             )
         }

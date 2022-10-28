@@ -9,6 +9,7 @@ import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.urlbar.URLBarModel
 import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.contentfilter.ContentFilterModel
+import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import kotlinx.coroutines.flow.StateFlow
 
@@ -17,7 +18,10 @@ abstract class BrowserToolbarModel {
     abstract fun goForward()
     abstract fun reload()
     abstract fun reloadAfterContentFilterAllowListUpdate()
+
     abstract fun showNeevaScope()
+    abstract fun getNeevaScopeModel(): NeevaScopeModel?
+
     abstract fun share()
     abstract fun onAddToSpace()
     abstract fun onMenuItem(id: OverflowMenuItemId)

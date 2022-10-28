@@ -105,6 +105,9 @@ class BloomFilterDownloadWorker(
     val appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
+    companion object {
+        private const val TAG = "BloomFilterDownloadWorker"
+    }
 
     private val reddit = BloomFilterConfiguration.redditConfiguration
 
@@ -120,8 +123,8 @@ class BloomFilterDownloadWorker(
 
     private suspend fun downloadFile() = withContext(Dispatchers.IO) {
         // Check url validity
-        assert(reddit.checksumUrl.toString().endsWith(".bin"))
-        assert(reddit.filterUrl.toString().endsWith(".json"))
+        assert(reddit.checksumUrl.toString().endsWith(".json"))
+        assert(reddit.filterUrl.toString().endsWith(".bin"))
         assert(reddit.localUri.scheme == "file")
 
         BloomFilterDownloader(reddit.checksumUrl, reddit.filterUrl, reddit.localUri)

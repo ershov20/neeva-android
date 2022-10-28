@@ -17,6 +17,7 @@ import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.downloads.DownloadCallbackImpl
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
+import com.neeva.app.neevascope.BloomFilterManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsDataModel
@@ -253,6 +254,7 @@ object NeevaAppModule {
         popupModel: PopupModel,
         regularFaviconCache: RegularFaviconCache,
         scriptInjectionManager: ScriptInjectionManager,
+        bloomFilterManager: BloomFilterManager,
         settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel,
         spaceStore: SpaceStore,
@@ -275,6 +277,7 @@ object NeevaAppModule {
             popupModel = popupModel,
             regularFaviconCache = regularFaviconCache,
             scriptInjectionManager = scriptInjectionManager,
+            bloomFilterManager = bloomFilterManager,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
             spaceStore = spaceStore,
@@ -316,6 +319,24 @@ object NeevaAppModule {
             popupModel = popupModel,
             appContext = appContext,
             activityStarter = activityStarter
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun providesBloomFilterManager(
+        @ApplicationContext appContext: Context,
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+        sharedPreferencesModel: SharedPreferencesModel,
+        settingsDataModel: SettingsDataModel
+    ): BloomFilterManager {
+        return BloomFilterManager(
+            appContext = appContext,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            sharedPreferencesModel = sharedPreferencesModel,
+            settingsDataModel = settingsDataModel
         )
     }
 }

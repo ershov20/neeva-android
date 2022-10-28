@@ -32,6 +32,7 @@ import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.contentfilter.TrackersAllowList
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
+import com.neeva.app.neevascope.BloomFilterManager
 import com.neeva.app.neevascope.NeevaScopeInfoScreen
 import com.neeva.app.neevascope.NeevaScopeLoadingScreen
 import com.neeva.app.neevascope.NeevaScopeModel
@@ -39,7 +40,6 @@ import com.neeva.app.neevascope.NeevaScopeResultScreen
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
-import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
@@ -98,6 +98,7 @@ abstract class BaseBrowserWrapper internal constructor(
     private val _urlBarModel: URLBarModelImpl,
     private val _findInPageModel: FindInPageModelImpl,
     private val historyManager: HistoryManager?,
+    private val bloomFilterManager: BloomFilterManager,
     private val tabScreenshotManager: TabScreenshotManager,
     private val domainProvider: DomainProvider,
     private val downloadCallback: DownloadCallback,
@@ -128,6 +129,7 @@ abstract class BaseBrowserWrapper internal constructor(
         faviconCache: FaviconCache,
         spaceStore: SpaceStore?,
         historyManager: HistoryManager?,
+        bloomFilterManager: BloomFilterManager,
         tabScreenshotManager: TabScreenshotManager,
         domainProvider: DomainProvider,
         downloadCallback: DownloadCallback,
@@ -168,6 +170,7 @@ abstract class BaseBrowserWrapper internal constructor(
         ),
         _findInPageModel = FindInPageModelImpl(),
         historyManager = historyManager,
+        bloomFilterManager = bloomFilterManager,
         tabScreenshotManager = tabScreenshotManager,
         domainProvider = domainProvider,
         downloadCallback = downloadCallback,
@@ -224,6 +227,8 @@ abstract class BaseBrowserWrapper internal constructor(
     /** Tracks configuration changes that affect the bottom toolbar. */
     private var bottomToolbarExistsJob: Job? = null
 
+    private val urlFlow: StateFlow<Uri> = activeTabModel.urlFlow
+
     init {
         faviconCache.profileProvider = FaviconCache.ProfileProvider { getProfile() }
 
@@ -252,6 +257,16 @@ abstract class BaseBrowserWrapper internal constructor(
 
         coroutineScope.launch {
             browserFlow.collectLatest { _urlBarModel.onBrowserChanged(it) }
+        }
+
+        coroutineScope.launch {
+            urlFlow.collectLatest {
+                if (
+                    settingsDataModel.getToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP).value
+                ) {
+                    neevaScopeModel.updateUrl(it)
+                }
+            }
         }
     }
 
@@ -1076,30 +1091,14 @@ abstract class BaseBrowserWrapper internal constructor(
     /** Suspends the coroutine until the browser has finished initialization and restoration. */
     override suspend fun waitUntilBrowserIsReady() = isBrowserReady.await()
 
-    override fun showNeevaScopeTooltip(): Boolean {
-        val showTryNeevaScopeTooltip =
-            SharedPrefFolder.App.ShowTryNeevaScopeTooltip.get(sharedPreferencesModel)
-        val isDisplayingUrl =
-            activeTabModel.displayedInfoFlow.value.mode == ActiveTabModel.DisplayMode.URL
-
-        if (showTryNeevaScopeTooltip && isDisplayingUrl) {
-            SharedPrefFolder.App.ShowTryNeevaScopeTooltip.set(sharedPreferencesModel, false)
-            return true
-        }
-        return false
-    }
-
+    // region: NeevaScope
     override fun showNeevaScope() {
+        val currentUrl = urlFlow.value
         val isOnNeevaSearch =
             activeTabModel.displayedInfoFlow.value.mode != ActiveTabModel.DisplayMode.URL
 
-        var currentUrl: Uri? = null
-        coroutineScope.launch {
-            currentUrl = activeTabModel.urlFlow.value
-            neevaScopeModel.updateQuery(
-                currentUrl.toString(),
-                activeTabModel.titleFlow.value
-            )
+        if (currentUrl != Uri.EMPTY) {
+            neevaScopeModel.updateQuery(currentUrl.toString(), activeTabModel.titleFlow.value)
         }
 
         popupModel.showBottomSheet { onDismiss ->
@@ -1123,8 +1122,15 @@ abstract class BaseBrowserWrapper internal constructor(
                     )
                 }
             }
+
+            if (neevaScopeModel.promoCache[currentUrl]?.showRedditDot == true) {
+                neevaScopeModel.performRedditPromoTransition(
+                    NeevaScopeModel.PromoTransition.DISMISS_DOT
+                )
+            }
         }
     }
+    // endregion
 
     private fun getActiveTab(): Tab? = browserFlow.getActiveTab()
     private fun getTab(id: String?): Tab? = browserFlow.getTab(id)

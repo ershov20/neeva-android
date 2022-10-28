@@ -9,9 +9,15 @@ import android.net.Uri
 import android.util.Log
 import com.neeva.app.CheatsheetInfoQuery
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.SearchQuery
 import com.neeva.app.apollo.ApolloWrapper
+import com.neeva.app.browsing.isNeevaUri
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import java.time.LocalDate
 import java.time.Period
 import java.time.ZonedDateTime
@@ -38,11 +44,20 @@ data class NeevaScopeResult(
     val recipe: NeevaScopeRecipe?
 )
 
+enum class NeevaScopePromoType {
+    TRY_NEEVASCOPE,
+    TRY_UGC
+}
+
 class NeevaScopeModel(
     private val apolloWrapper: ApolloWrapper,
     coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
-    appContext: Context
+    appContext: Context,
+    val bloomFilterManager: BloomFilterManager,
+    private val neevaConstants: NeevaConstants,
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val settingsDataModel: SettingsDataModel
 ) {
     companion object {
         private const val MEMORIZED_QUERY_COUNT_THRESHOLD = 5
@@ -50,6 +65,21 @@ class NeevaScopeModel(
         val TAG = NeevaScopeModel::class.simpleName
     }
 
+    data class RedditPromoState(
+        var showRedditTooltip: Boolean,
+        var showRedditDot: Boolean
+    ) {
+        companion object {
+            val missFilter = RedditPromoState(showRedditTooltip = false, showRedditDot = false)
+            val hitFilter = RedditPromoState(showRedditTooltip = true, showRedditDot = false)
+        }
+    }
+
+    enum class PromoTransition {
+        DISMISS_TOOLTIP, DISMISS_DOT
+    }
+
+    // region NeevaScope content
     private val _searchQuery = MutableStateFlow<NeevaScopeSearchQuery?>(value = null)
     val searchQuery: StateFlow<NeevaScopeSearchQuery?> get() = _searchQuery
     private val _isLoading = MutableStateFlow(value = false)
@@ -72,6 +102,28 @@ class NeevaScopeModel(
         }
         .flowOn(dispatchers.io)
         .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+    // endregion
+
+    // region NeevaScope promo
+    private val _urlFlow = MutableStateFlow<Uri>(value = Uri.EMPTY)
+    val urlFlow: StateFlow<Uri> get() = _urlFlow
+
+    private val _promoCache: MutableMap<Uri, RedditPromoState> = mutableMapOf()
+    val promoCache: Map<Uri, RedditPromoState> get() = _promoCache
+
+    val showRedditDot: Boolean get() = promoCache[urlFlow.value]?.showRedditDot ?: false
+
+    val neevaScopeTooltipTypeFlow: StateFlow<NeevaScopePromoType?> = urlFlow
+        .map {
+            updateNeevaScopePromoType(it)
+        }
+        .flowOn(dispatchers.io)
+        .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+    // endregion
+
+    fun updateQuery(query: String, title: String) {
+        _searchQuery.value = NeevaScopeSearchQuery(query = query, title = title)
+    }
 
     private suspend fun performNeevaScopeQuery(query: String): SearchQuery.Data? {
         var searchResult: SearchQuery.Data? = null
@@ -162,8 +214,93 @@ class NeevaScopeModel(
         )
     }
 
-    fun updateQuery(query: String, title: String) {
-        _searchQuery.value = NeevaScopeSearchQuery(query = query, title = title)
+    fun updateUrl(url: Uri) {
+        _urlFlow.value = url
+    }
+
+    /**
+     * Update NeevaScope promo type of current website
+     *
+     * @param uri the URI to get the NeevaScope promo state
+     * @return the [NeevaScopePromoType] TRY_UGC if the current website hits the bloom filter,
+     * TRY_NEEVASCOPE if it does not hit the filter
+     */
+    fun updateNeevaScopePromoType(uri: Uri): NeevaScopePromoType? {
+        if (uri == Uri.EMPTY || uri.isNeevaUri(neevaConstants)) return null
+
+        updateRedditPromoState(uri)
+
+        if (promoCache[uri]?.showRedditTooltip == true) {
+            return NeevaScopePromoType.TRY_UGC
+        } else {
+            return NeevaScopePromoType.TRY_NEEVASCOPE
+        }
+    }
+
+    /**
+     * Check if current website hits the bloom filter and store in the promoCache
+     *
+     * @param uri the URI to look for in the bloom filter
+     */
+    private fun updateRedditPromoState(uri: Uri) {
+        val canonUrl = CanonicalUrl().canonicalizeUrl(uri, true)
+        if (canonUrl == Uri.EMPTY) {
+            _promoCache[uri] = RedditPromoState.missFilter
+            return
+        }
+
+        val filterResult: Boolean? = bloomFilterManager.contains(canonUrl.toString())
+        when (filterResult) {
+            // The filter is still loading.
+            null -> return
+
+            true -> _promoCache[uri] = RedditPromoState.hitFilter
+            false -> _promoCache[uri] = RedditPromoState.missFilter
+        }
+    }
+
+    /**
+     * Perform the promo transition and update the promoCache
+     *
+     * @param transition The PromoTransition to update the promo state of current uri
+     */
+    fun performRedditPromoTransition(transition: PromoTransition) {
+        val state = promoCache[urlFlow.value] ?: RedditPromoState.missFilter
+
+        when (transition) {
+            PromoTransition.DISMISS_TOOLTIP -> {
+                // If uri hits bloom filter, blue dot will appear after dismissing tooltip
+                if (state.showRedditTooltip) {
+                    state.showRedditDot = true
+                } else {
+                    SharedPrefFolder.App.NeevaScopeTooltipCount.set(
+                        sharedPreferencesModel,
+                        SharedPrefFolder.App.NeevaScopeTooltipCount.get(sharedPreferencesModel) - 1
+                    )
+                }
+
+                if (SharedPrefFolder.App.NeevaScopeTooltipCount.get(sharedPreferencesModel) <= 0) {
+                    state.showRedditTooltip = false
+                }
+            }
+            PromoTransition.DISMISS_DOT -> {
+                state.showRedditDot = false
+                SharedPrefFolder.App.NeevaScopeTooltipCount.set(
+                    sharedPreferencesModel,
+                    SharedPrefFolder.App.NeevaScopeTooltipCount.get(sharedPreferencesModel) - 1
+                )
+
+                if (SharedPrefFolder.App.NeevaScopeTooltipCount.get(sharedPreferencesModel) <= 0) {
+                    state.showRedditTooltip = false
+                }
+            }
+        }
+
+        if (SharedPrefFolder.App.NeevaScopeTooltipCount.get(sharedPreferencesModel) <= 0) {
+            settingsDataModel.setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, false)
+        }
+
+        _promoCache[urlFlow.value] = state
     }
 }
 

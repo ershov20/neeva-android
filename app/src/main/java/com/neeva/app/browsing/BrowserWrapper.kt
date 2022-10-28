@@ -162,6 +162,7 @@ interface BrowserWrapper {
 
     fun reloadAfterContentFilterAllowListUpdate()
 
-    fun showNeevaScopeTooltip(): Boolean
+    // region: NeevaScope
     fun showNeevaScope()
+    // endregion
 }

@@ -12,6 +12,7 @@ import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
+import com.neeva.app.neevascope.BloomFilterManager
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -42,6 +43,7 @@ class BrowserWrapperFactory(
     private val neevaUser: NeevaUser,
     private val regularFaviconCache: RegularFaviconCache,
     private val scriptInjectionManager: ScriptInjectionManager,
+    private val bloomFilterManager: BloomFilterManager,
     private val settingsDataModel: SettingsDataModel,
     private val sharedPreferencesModel: SharedPreferencesModel,
     private val spaceStore: SpaceStore,
@@ -65,6 +67,7 @@ class BrowserWrapperFactory(
             neevaUser = neevaUser,
             regularFaviconCache = regularFaviconCache,
             scriptInjectionManager = scriptInjectionManager,
+            bloomFilterManager = bloomFilterManager,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel,
             spaceStore = spaceStore,
@@ -89,6 +92,7 @@ class BrowserWrapperFactory(
             onRemovedFromHierarchy = onRemovedFromHierarchy,
             popupModel = popupModel,
             scriptInjectionManager = scriptInjectionManager,
+            bloomFilterManager = bloomFilterManager,
             settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel
         )

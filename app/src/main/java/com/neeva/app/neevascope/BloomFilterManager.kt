@@ -17,6 +17,8 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.neeva.app.Dispatchers
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import java.io.File
@@ -51,12 +53,16 @@ class BloomFilterManager(
     val appContext: Context,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
-    private val sharedPreferencesModel: SharedPreferencesModel
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val settingsDataModel: SettingsDataModel
 ) {
     companion object {
         private const val TAG = "BloomFilterManager"
         private const val DIRECTORY_BLOOM_FILTER = "bloom_filter"
     }
+
+    val filterDownloadEnabled =
+        settingsDataModel.getSettingsToggleValue(SettingsToggle.BLOOM_FILTER_DOWNLOAD)
 
     val reddit = BloomFilterConfiguration.redditConfiguration
     val bloomFilter = BloomFilter()
@@ -91,30 +97,8 @@ class BloomFilterManager(
             return
         }
 
-        val workerRequestId = SharedPrefFolder.App.DownloadRequestId.get(sharedPreferencesModel)
-        if (workerRequestId == "") {
-            workManager.enqueueUniquePeriodicWork(
-                TAG,
-                ExistingPeriodicWorkPolicy.KEEP,
-                createWorkerRequest()
-            )
-        } else {
-            val workInfo =
-                workManager.getWorkInfoById(UUID.fromString(workerRequestId)).get()
-
-            /**
-             * isFinished() returns true if the State of WorkRequest is considered finished.
-             * @return True for SUCCEEDED, FAILED, and CANCELLED states
-             * Note that PeriodicWorkRequests will never enter this state (they will simply go back
-             * to ENQUEUED and be eligible to run again)
-             */
-            if (workInfo == null || workInfo.state.isFinished) {
-                workManager.enqueueUniquePeriodicWork(
-                    TAG,
-                    ExistingPeriodicWorkPolicy.REPLACE,
-                    createWorkerRequest()
-                )
-            }
+        if (filterDownloadEnabled) {
+            enqueueBloomFilterDownloadWorkRequest()
         }
 
         if (!reddit.localUri.toFile().exists()) return
@@ -126,8 +110,36 @@ class BloomFilterManager(
         }
     }
 
+    private fun enqueueBloomFilterDownloadWorkRequest() {
+        val workRequestId = SharedPrefFolder.App.DownloadRequestId.get(sharedPreferencesModel)
+        if (workRequestId == "") {
+            workManager.enqueueUniquePeriodicWork(
+                TAG,
+                ExistingPeriodicWorkPolicy.KEEP,
+                createWorkRequest()
+            )
+        } else {
+            val workInfo =
+                workManager.getWorkInfoById(UUID.fromString(workRequestId)).get()
+
+            /**
+             * isFinished() returns true if the State of WorkRequest is considered finished.
+             * @return True for SUCCEEDED, FAILED, and CANCELLED states
+             * Note that PeriodicWorkRequests will never enter this state (they will simply go back
+             * to ENQUEUED and be eligible to run again)
+             */
+            if (workInfo == null || workInfo.state.isFinished) {
+                workManager.enqueueUniquePeriodicWork(
+                    TAG,
+                    ExistingPeriodicWorkPolicy.REPLACE,
+                    createWorkRequest()
+                )
+            }
+        }
+    }
+
     @SuppressLint("IdleBatteryChargingConstraints")
-    private fun createWorkerRequest(): PeriodicWorkRequest {
+    private fun createWorkRequest(): PeriodicWorkRequest {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.UNMETERED)
             .setRequiresCharging(true)
@@ -135,17 +147,17 @@ class BloomFilterManager(
             .setRequiresStorageNotLow(true)
             .build()
 
-        val workerRequest =
+        val workRequest =
             PeriodicWorkRequestBuilder<BloomFilterDownloadWorker>(Duration.ofHours(24L))
                 .setConstraints(constraints)
                 .build()
 
         SharedPrefFolder.App.DownloadRequestId.set(
             sharedPreferencesModel = sharedPreferencesModel,
-            value = workerRequest.id.toString()
+            value = workRequest.id.toString()
         )
 
-        return workerRequest
+        return workRequest
     }
 
     private suspend fun getFilterBinaryFile(name: String): File {

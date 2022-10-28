@@ -28,6 +28,7 @@ import com.neeva.app.contentfilter.TrackersAllowList
 import com.neeva.app.createMockNavigationController
 import com.neeva.app.downloads.DownloadCallbackImpl
 import com.neeva.app.history.HistoryManager
+import com.neeva.app.neevascope.BloomFilterManager
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
@@ -113,6 +114,7 @@ class BaseBrowserWrapperTest : BaseTest() {
     @Mock private lateinit var spaceStore: SpaceStore
     @Mock private lateinit var suggestionsModel: SuggestionsModel
     @Mock private lateinit var neevaScopeModel: NeevaScopeModel
+    @Mock private lateinit var bloomFilterManager: BloomFilterManager
     @Mock private lateinit var tabScreenshotManager: TabScreenshotManager
     @Mock private lateinit var scriptInjectionManager: ScriptInjectionManager
     @Mock private lateinit var popupModel: PopupModel
@@ -120,6 +122,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
     private lateinit var navigationInfoFlow: MutableStateFlow<ActiveTabModel.NavigationInfo>
     private lateinit var urlBarModelStateFlow: MutableStateFlow<URLBarModelState>
+    private lateinit var urlFlow: MutableStateFlow<Uri>
     private lateinit var mockTabs: MutableList<Tab>
 
     private var activeTab: Tab? = null
@@ -144,12 +147,14 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         navigationInfoFlow = MutableStateFlow(ActiveTabModel.NavigationInfo())
         urlBarModelStateFlow = MutableStateFlow(URLBarModelState())
+        urlFlow = MutableStateFlow(Uri.EMPTY)
         mockTabs = mutableListOf()
 
         activeTabModelImpl = mock {
             var currentActiveTab: Tab? = null
 
             on { navigationInfoFlow } doReturn navigationInfoFlow
+            on { urlFlow } doReturn urlFlow
             on { activeTab } doAnswer { currentActiveTab }
             on { onActiveTabChanged(any()) } doAnswer {
                 currentActiveTab = it.arguments[0] as Tab?
@@ -232,6 +237,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             _urlBarModel = urlBarModel,
             _findInPageModel = findInPageModel,
             historyManager = historyManager,
+            bloomFilterManager = bloomFilterManager,
             tabScreenshotManager = tabScreenshotManager,
             domainProvider = domainProvider,
             downloadCallback = downloadCallback,

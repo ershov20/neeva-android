@@ -14,6 +14,7 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.SearchQuery
+import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.UserPreference
 import com.neeva.app.userdata.LoginToken
@@ -29,13 +30,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.containsExactly
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNull
 
 @RunWith(AndroidJUnit4::class)
-@Config(manifest = Config.NONE)
 @OptIn(ExperimentalCoroutinesApi::class)
 class NeevaScopeModelTest : BaseTest() {
     @Rule
@@ -50,6 +50,10 @@ class NeevaScopeModelTest : BaseTest() {
     private lateinit var neevaConstants: NeevaConstants
     private lateinit var neevaUser: NeevaUser
     private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
+    private lateinit var sharedPreferencesModel: SharedPreferencesModel
+    private lateinit var settingsDataModel: SettingsDataModel
+
+    @Mock private lateinit var bloomFilterManager: BloomFilterManager
 
     override fun setUp() {
         super.setUp()
@@ -57,10 +61,13 @@ class NeevaScopeModelTest : BaseTest() {
         neevaConstants = NeevaConstants()
 
         context = ApplicationProvider.getApplicationContext()
+        sharedPreferencesModel = SharedPreferencesModel(context)
+        settingsDataModel = SettingsDataModel(sharedPreferencesModel)
+
         val loginToken = LoginToken(
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = coroutineScopeRule.dispatchers,
-            sharedPreferencesModel = SharedPreferencesModel(context),
+            sharedPreferencesModel = sharedPreferencesModel,
             neevaConstants = neevaConstants
         )
         loginToken.updateCachedCookie("NotAnEmptyToken")
@@ -86,7 +93,11 @@ class NeevaScopeModelTest : BaseTest() {
             apolloWrapper = apolloWrapper,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = dispatchers,
-            appContext = context
+            appContext = context,
+            bloomFilterManager = bloomFilterManager,
+            neevaConstants = neevaConstants,
+            sharedPreferencesModel = sharedPreferencesModel,
+            settingsDataModel = settingsDataModel
         )
     }
 
@@ -172,6 +183,22 @@ class NeevaScopeModelTest : BaseTest() {
             .isEqualTo("r/airsoft")
         expectThat("https://www.reddit.com/airsoft/comments/airsoft_maryland".toDiscussionSlash())
             .isEqualTo(null)
+    }
+
+    @Test
+    fun updateNeevaScopePromoType_withValidUrl_returnTypeTryNeevaScope() {
+        val neevaScopePromoType = neevaScopeModel.updateNeevaScopePromoType(
+            Uri.parse("https://www.example.com")
+        )
+        expectThat(neevaScopePromoType).isEqualTo(NeevaScopePromoType.TRY_NEEVASCOPE)
+    }
+
+    @Test
+    fun updateNeevaScopePromoType_withNeevaUri_returnNull() {
+        val neevaScopePromoType = neevaScopeModel.updateNeevaScopePromoType(
+            Uri.parse("https://neeva.com")
+        )
+        expectThat(neevaScopePromoType).isNull()
     }
 
     companion object {
