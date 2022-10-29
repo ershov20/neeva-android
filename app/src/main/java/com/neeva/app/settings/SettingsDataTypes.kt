@@ -133,7 +133,7 @@ enum class SettingsToggle(
     // NeevaScope:
     ENABLE_NEEVASCOPE_TOOLTIP(
         primaryLabelId = R.string.settings_debug_enable_neevascope_tooltip,
-        defaultValue = true
+        defaultValue = false,
     ),
     BLOOM_FILTER_DOWNLOAD(
         primaryLabelId = R.string.settings_debug_enable_bloomfilter_download,

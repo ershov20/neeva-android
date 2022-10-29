@@ -196,7 +196,7 @@ fun Tooltip(
         if (isRedditTooltip) {
             LaunchedEffect(showTooltip) {
                 delay(TimeUnit.SECONDS.toMillis(4))
-                dismissLambda
+                dismissLambda()
             }
         }
 
