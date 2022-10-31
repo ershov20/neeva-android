@@ -23,7 +23,6 @@ interface CardsPaneModel {
     val previousScreen: MutableState<SelectedScreen?>
 
     fun switchScreen(newSelectedScreen: SelectedScreen)
-    fun showBrowser()
     fun showArchivedTabs()
 
     fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo)
@@ -103,17 +102,13 @@ class CardsPaneModelImpl(
         }
     }
 
-    override fun showBrowser() {
-        appNavModel.showBrowser()
-    }
-
     override fun showArchivedTabs() {
         appNavModel.showArchivedTabs()
     }
 
     override fun selectTab(browserWrapper: BrowserWrapper, tab: TabInfo) {
         browserWrapper.selectTab(tab.id)
-        showBrowser()
+        appNavModel.showBrowser(forceUserToStayInCardGrid = false)
     }
 
     override fun closeTab(browserWrapper: BrowserWrapper, tab: TabInfo) {

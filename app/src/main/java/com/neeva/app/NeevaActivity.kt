@@ -291,12 +291,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         return result
     }
 
-    private fun showBrowser() = lifecycleScope.launch(dispatchers.main) {
-        // Speculative fix for https://github.com/neevaco/neeva-android/issues/939
-        // Wait until the first Compose has completed, which should mean that the NavGraph has been
-        // set up with all of the destinations.
-        firstComposeCompleted.await()
-        appNavModel?.showBrowser()
+    private fun showBrowser(forceUserToStayInCardGrid: Boolean = true) {
+        lifecycleScope.launch(dispatchers.main) {
+            // Speculative fix for https://github.com/neevaco/neeva-android/issues/939
+            // Wait until the first Compose has completed, which should mean that the NavGraph has
+            // been set up with all of the destinations.
+            firstComposeCompleted.await()
+            appNavModel?.showBrowser(forceUserToStayInCardGrid = forceUserToStayInCardGrid)
+        }
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -402,7 +404,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 uri = it,
                 inNewTab = true,
                 isViaIntent = true,
-                onLoadStarted = ::showBrowser
+                onLoadStarted = { showBrowser(forceUserToStayInCardGrid = false) }
             )
         }
     }
