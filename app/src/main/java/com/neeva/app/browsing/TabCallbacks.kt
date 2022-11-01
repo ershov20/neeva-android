@@ -7,12 +7,14 @@ package com.neeva.app.browsing
 import android.graphics.Bitmap
 import android.net.Uri
 import android.util.Log
+import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.contentfilter.ContentFilterCallbacks
 import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.contentfilter.ContentFilteringPreferences
 import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.contentfilter.TabContentFilterModel
+import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.publicsuffixlist.DomainProvider
@@ -53,7 +55,8 @@ class TabCallbacks(
     private val contentFilterModel: ContentFilterModel,
     domainProvider: DomainProvider,
     private val scriptInjectionManager: ScriptInjectionManager,
-    private val clientLogger: ClientLogger?
+    private val clientLogger: ClientLogger?,
+    private val neevaConstants: NeevaConstants
 ) {
     val tabContentFilterModel = TabContentFilterModel(
         browserFlow = browserFlow,
@@ -114,6 +117,13 @@ class TabCallbacks(
         var visitToCommit: Visit? = null
 
         override fun onNavigationStarted(navigation: Navigation) {
+            // Prevent WebLayer from trying to fire an Intent out if we detect that the user is
+            // being sent to our backend for login authentication.  This is necessary because the
+            // backend will send a `neeva:` URI that gets Intented out.
+            if (FirstRunModel.isNeevaLoginUri(navigation.uri, neevaConstants)) {
+                navigation.disableIntentProcessing()
+            }
+
             // reset cookie cutter
             contentFilterCallback.onContentFilterStatsUpdated()
             tabContentFilterModel.cookieNoticeBlocked = false

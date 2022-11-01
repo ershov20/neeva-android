@@ -36,9 +36,7 @@ class LoginToken(
                 return null
             }
 
-            // The URI is not hierarchical because of a backend bug, so none of the nicer
-            // getQueryForKey calls work.
-            val token = dataUri.query?.substringAfter("sessionKey=")
+            val token = dataUri.getQueryParameter("sessionKey")
             return if (token.isNullOrEmpty()) null else token
         }
     }

@@ -74,6 +74,9 @@ class FirstRunModel internal constructor(
         private const val PREVIEW_MODE_COUNT_THRESHOLD = 10
         private const val SERVER_CLIENT_ID =
             "892902198757-84tm1f14ne0pa6n3dmeehgeo5mk4mhl9.apps.googleusercontent.com"
+        private const val AUTH_PATH_GOOGLE_LOGIN = "login-mobile"
+        private const val AUTH_PATH_DEFAULT_LOGIN = "login"
+
         const val TAG = "FirstRunModel"
 
         fun setFirstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
@@ -98,6 +101,18 @@ class FirstRunModel internal constructor(
                 else -> true
             }
         }
+
+        fun isNeevaLoginUri(uri: Uri, neevaConstants: NeevaConstants): Boolean {
+            return when {
+                uri.host != neevaConstants.appHost -> false
+
+                uri.pathSegments.size != 1 -> false
+                uri.pathSegments.first() == AUTH_PATH_DEFAULT_LOGIN -> true
+                uri.pathSegments.first() == AUTH_PATH_GOOGLE_LOGIN -> true
+
+                else -> false
+            }
+        }
     }
 
     private lateinit var googleSignInClient: GoogleSignInClient
@@ -113,9 +128,9 @@ class FirstRunModel internal constructor(
         authorizationCode: String = ""
     ): Uri {
         val path = if (provider == NeevaUser.SSOProvider.GOOGLE && identityToken.isNotEmpty()) {
-            "login-mobile"
+            AUTH_PATH_GOOGLE_LOGIN
         } else {
-            "login"
+            AUTH_PATH_DEFAULT_LOGIN
         }
 
         // TODO remove this temporary hack. There is a leftover callback check that doesn't handle
@@ -128,7 +143,7 @@ class FirstRunModel internal constructor(
         }
         val builder = Uri.Builder()
             .scheme("https")
-            .authority("neeva.com")
+            .authority(neevaConstants.appHost)
             .path(path)
             .appendQueryParameter("provider", provider.url)
             .appendQueryParameter("finalPath", provider.finalPath)
@@ -253,21 +268,22 @@ class FirstRunModel internal constructor(
         onSuccess: (Uri) -> Unit
     ) {
         extractLoginUri(result)
-            ?.let(onSuccess) ?: run {
-            openInCustomTabs(
-                context = context,
-                uri = authUri(
-                    signup = intentParamFlow.value?.signup ?: false,
-                    provider = intentParamFlow.value?.provider ?: NeevaUser.SSOProvider.GOOGLE,
-                    loginHint = intentParamFlow.value?.emailProvided ?: ""
+            ?.let { onSuccess(it) }
+            ?: run {
+                openInCustomTabs(
+                    context = context,
+                    uri = authUri(
+                        signup = intentParamFlow.value?.signup ?: false,
+                        provider = intentParamFlow.value?.provider ?: NeevaUser.SSOProvider.GOOGLE,
+                        loginHint = intentParamFlow.value?.emailProvided ?: ""
+                    )
                 )
-            )
-        }
+            }
     }
 
     private fun extractLoginUri(result: ActivityResult): Uri? {
         val data = result.takeIf { it.resultCode == Activity.RESULT_OK }?.data ?: run {
-            Log.e(TAG, "ActivityResult was not successful")
+            Log.e(TAG, "ActivityResult was not successful: ${result.resultCode}")
             return null
         }
 

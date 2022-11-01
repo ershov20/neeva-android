@@ -10,6 +10,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
+import com.neeva.app.NeevaConstants
 import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.contentfilter.TrackersAllowList
@@ -58,6 +59,7 @@ class TabCallbacksTest : BaseTest() {
     private lateinit var browserFlow: StateFlow<Browser?>
     private lateinit var contentFilterModel: ContentFilterModel
     private lateinit var navigationController: NavigationController
+    private lateinit var neevaConstants: NeevaConstants
     private lateinit var tabList: TabList
 
     private lateinit var browser: Browser
@@ -122,6 +124,10 @@ class TabCallbacksTest : BaseTest() {
         } returns Unit
         every { scriptInjectionManager.initializeMessagePassing(tab, any()) } returns Unit
 
+        neevaConstants = mockk {
+            every { appHost } returns "neeva.com"
+        }
+
         tabCallbacks = TabCallbacks(
             browserFlow = browserFlow,
             isIncognito = false,
@@ -136,7 +142,8 @@ class TabCallbacksTest : BaseTest() {
             contentFilterModel = contentFilterModel,
             domainProvider = domainProvider,
             scriptInjectionManager = scriptInjectionManager,
-            clientLogger = null
+            clientLogger = null,
+            neevaConstants = neevaConstants
         )
     }
 
