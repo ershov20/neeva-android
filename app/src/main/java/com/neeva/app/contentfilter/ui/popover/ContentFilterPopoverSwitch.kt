@@ -4,6 +4,7 @@
 
 package com.neeva.app.contentfilter.ui.popover
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -19,13 +20,15 @@ import com.neeva.app.ui.NeevaSwitch
 internal fun ContentFilterPopoverSwitch(
     contentFilterEnabled: Boolean,
     host: String,
+    subtitle: Int = R.string.content_filter_subtitle,
     trackersAllowList: TrackersAllowList,
     onSuccess: () -> Unit
 ) {
     val allowClickingSwitch = remember { mutableStateOf(true) }
     NeevaSwitch(
         primaryLabel = stringResource(id = R.string.content_filter),
-        secondaryLabel = stringResource(id = R.string.content_filter_subtitle),
+        secondaryLabel = stringResource(id = subtitle),
+        primaryColor = MaterialTheme.colorScheme.onSurface,
         isChecked = contentFilterEnabled,
         enabled = allowClickingSwitch.value,
         onCheckedChange = {

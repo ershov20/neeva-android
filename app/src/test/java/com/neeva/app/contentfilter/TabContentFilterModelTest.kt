@@ -33,6 +33,7 @@ class TabContentFilterModelTest : BaseTest() {
     private lateinit var model: TabContentFilterModel
     private lateinit var domainProviderImpl: DomainProviderImpl
     private lateinit var cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
+    private lateinit var easyListRuleBlockedFlow: MutableStateFlow<Boolean>
     private lateinit var trackersAllowList: TrackersAllowList
 
     override fun setUp() {
@@ -40,6 +41,7 @@ class TabContentFilterModelTest : BaseTest() {
 
         domainProviderImpl = DomainProviderImpl(RuntimeEnvironment.getApplication())
         cookieNoticeBlockedFlow = MutableStateFlow(false)
+        easyListRuleBlockedFlow = MutableStateFlow(false)
 
         trackersAllowList = mockk {
             coEvery { getHostAllowsTrackers(any()) } returns false
@@ -51,6 +53,7 @@ class TabContentFilterModelTest : BaseTest() {
             tabId = "tab guid 1",
             trackingDataFlow = MutableStateFlow(null),
             cookieNoticeBlockedFlow = cookieNoticeBlockedFlow,
+            easyListRuleBlockedFlow = easyListRuleBlockedFlow,
             enableCookieNoticeSuppression = mutableStateOf(true),
             domainProvider = domainProviderImpl,
             trackersAllowList = trackersAllowList

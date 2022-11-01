@@ -1,4 +1,4 @@
-package com.neeva.app.cookiecutter
+package com.neeva.app.contentfilter
 
 import com.neeva.app.BaseScreenshotTest
 import com.neeva.app.contentfilter.ui.icon.IncognitoIconButtonPreview

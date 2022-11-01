@@ -213,6 +213,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             on { trackingDataFlow } doReturn MutableStateFlow(null)
             on { enableTrackingProtection } doReturn mutableStateOf(true)
             on { cookieNoticeBlockedFlow } doReturn MutableStateFlow(false)
+            on { easyListRuleBlockedFlow } doReturn MutableStateFlow(false)
             on { cookieCuttingPreferences } doReturn mutableStateOf(
                 EnumSet.noneOf(ContentFilterModel.CookieNoticeCookies::class.java)
             )

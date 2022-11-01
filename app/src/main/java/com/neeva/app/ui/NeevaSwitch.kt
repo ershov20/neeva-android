@@ -12,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.getClickableAlpha
@@ -54,6 +55,7 @@ fun NeevaSwitch(
 fun NeevaSwitch(
     primaryLabel: String,
     secondaryLabel: String? = null,
+    primaryColor: Color? = null,
     isChecked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     enabled: Boolean = true
@@ -63,6 +65,7 @@ fun NeevaSwitch(
             StackedText(
                 primaryLabel = primaryLabel,
                 secondaryLabel = secondaryLabel,
+                primaryColor = primaryColor,
                 primaryMaxLines = Int.MAX_VALUE,
                 secondaryMaxLines = Int.MAX_VALUE,
                 enabled = enabled

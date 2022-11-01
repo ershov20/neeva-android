@@ -64,6 +64,7 @@ class TabCallbacks(
         trackingDataFlow = contentFilterModel.trackingDataFlow,
         enableCookieNoticeSuppression = contentFilterModel.enableTrackingProtection,
         cookieNoticeBlockedFlow = contentFilterModel.cookieNoticeBlockedFlow,
+        easyListRuleBlockedFlow = contentFilterModel.easyListRuleBlockedFlow,
         domainProvider = domainProvider,
         trackersAllowList = contentFilterModel.trackersAllowList
     )
@@ -297,6 +298,8 @@ class TabCallbacks(
     private val contentFilterCallback = object : ContentFilterCallback() {
         override fun onContentFilterStatsUpdated() {
             tabContentFilterModel.updateStats(tab.contentFilterStats)
+            tabContentFilterModel.easyListRuleBlocked =
+                tab.getContentFilterStats("easylist").isNotEmpty()
         }
     }
 

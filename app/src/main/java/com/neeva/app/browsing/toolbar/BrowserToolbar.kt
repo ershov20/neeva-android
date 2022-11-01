@@ -20,7 +20,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,6 +33,7 @@ import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalSettingsDataModel
+import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.browsing.findinpage.FindInPageModel
@@ -42,7 +42,9 @@ import com.neeva.app.browsing.findinpage.PreviewFindInPageModel
 import com.neeva.app.browsing.urlbar.URLBar
 import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.contentfilter.ui.icon.TrackingProtectionButton
+import com.neeva.app.contentfilter.ui.popover.ContentFilterOnboardingContent
 import com.neeva.app.contentfilter.ui.popover.ContentFilterPopover
+import com.neeva.app.contentfilter.ui.popover.ContentFilterPopoverContent
 import com.neeva.app.contentfilter.ui.popover.ContentFilterPopoverModel
 import com.neeva.app.contentfilter.ui.popover.PreviewContentFilterPopoverModel
 import com.neeva.app.contentfilter.ui.popover.rememberContentFilterPopoverModel
@@ -50,6 +52,7 @@ import com.neeva.app.neevascope.NeevaScopeTooltip
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
@@ -62,6 +65,7 @@ fun BrowserToolbarContainer(topOffset: Float) {
     val topOffsetDp = with(LocalDensity.current) { topOffset.toDp() }
 
     val appNavModel = LocalAppNavModel.current
+
     val contentFilterPopoverModel = rememberContentFilterPopoverModel(
         appNavModel = appNavModel,
         reloadTab = browserToolbarModel::reloadAfterContentFilterAllowListUpdate,
@@ -87,6 +91,46 @@ fun BrowserToolbarContainer(topOffset: Float) {
     BackHandler(enabled = isEditing) {
         // This is the main mechanism for setting isEditing to false:
         browserToolbarModel.urlBarModel.clearFocus()
+    }
+}
+
+@Composable
+fun BrowserToolbarContentFilterPopover(
+    contentFilterPopoverModel: ContentFilterPopoverModel
+) {
+    val sharedPreference = LocalSharedPreferencesModel.current
+
+    val didShowAdBlockOnboarding = SharedPrefFolder.FirstRun.didShowAdBlockOnboarding
+        .getFlow(sharedPreference).collectAsState()
+
+    if ((
+        contentFilterPopoverModel.cookieNoticeBlocked.collectAsState().value ||
+            contentFilterPopoverModel.easyListRuleBlocked.collectAsState().value
+        ) &&
+        !didShowAdBlockOnboarding.value
+    ) {
+        contentFilterPopoverModel.openOnboardingPopover()
+    }
+
+    if (contentFilterPopoverModel.shouldShowOnboardingPopover.value) {
+        ContentFilterPopover(
+            onDismissRequest = contentFilterPopoverModel::dismissOnboardingPopover,
+            content = {
+                ContentFilterOnboardingContent(
+                    contentFilterPopoverModel = contentFilterPopoverModel
+                )
+            }
+        )
+    } else if (contentFilterPopoverModel.popoverVisible.value) {
+        // The popover will be aligned to the top left of the enclosing Box.
+        ContentFilterPopover(
+            onDismissRequest = contentFilterPopoverModel::dismissPopover,
+            content = {
+                ContentFilterPopoverContent(
+                    contentFilterPopoverModel = contentFilterPopoverModel
+                )
+            }
+        )
     }
 }
 
@@ -201,12 +245,9 @@ fun BrowserToolbar(
                     modifier = Modifier.align(Alignment.BottomCenter)
                 )
 
-                if (contentFilterPopoverModel.popoverVisible.value) {
-                    // The popover will be aligned to the top left of the enclosing Box.
-                    ContentFilterPopover(
-                        contentFilterPopoverModel = contentFilterPopoverModel
-                    )
-                }
+                BrowserToolbarContentFilterPopover(
+                    contentFilterPopoverModel = contentFilterPopoverModel
+                )
 
                 if (browserToolbarModel.useSingleBrowserToolbar && isNeevaScopeTooltipEnabled) {
                     browserToolbarModel.getNeevaScopeModel()?.let {

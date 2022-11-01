@@ -14,12 +14,17 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -150,35 +155,76 @@ fun RegularProfileZeroQuery(
         }
 
         if (neevaUser.isSignedOut()) {
-            if (communitySpaces.isNotEmpty()) {
+            if (isFirstRun) {
                 item {
-                    Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
-                }
-
-                collapsingSection(
-                    label = R.string.community_spaces,
-                    collapsingSectionState = isCommunitySpacesExpanded,
-                    onUpdateCollapsingSectionState = {
-                        zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
-                    }
-                ) {
-                    items(
-                        if (isFirstRun) {
-                            communitySpaces.take(3)
-                        } else {
-                            communitySpaces
-                        },
-                        key = { it.spaceRowData.id }
-                    ) { data ->
-                        val spaceRowData = data.spaceRowData
-                        val thumbnail = data.bitmap
-                        SpaceRow(
-                            spaceName = spaceRowData.name,
-                            isSpacePublic = spaceRowData.isPublic,
-                            thumbnail = thumbnail?.asImageBitmap(),
-                            isCurrentUrlInSpace = null
+                    Surface(
+                        shape = RoundedCornerShape(Dimensions.RADIUS_SMALL),
+                        shadowElevation = 2.dp,
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        modifier = Modifier.padding(Dimensions.PADDING_LARGE)
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.Start,
+                            modifier = Modifier.fillMaxWidth().padding(Dimensions.PADDING_HUGE)
                         ) {
-                            appNavModel.showSpaceDetail(spaceRowData.id)
+                            val padding = 10.dp
+
+                            Icon(
+                                painter = painterResource(R.drawable.ic_shield),
+                                contentDescription = stringResource(
+                                    R.string.content_filter_content_description
+                                ),
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier
+                                    .size(50.dp)
+                                    .offset(x = -padding)
+                            )
+
+                            Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
+
+                            Text(
+                                text = stringResource(id = R.string.first_run_ad_block_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+
+                            Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
+
+                            Text(
+                                text = stringResource(id = R.string.first_run_ad_block_subtitle),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
+                    }
+                }
+            } else {
+                if (communitySpaces.isNotEmpty()) {
+                    item {
+                        Spacer(modifier = Modifier.height(Dimensions.PADDING_SMALL))
+                    }
+
+                    collapsingSection(
+                        label = R.string.community_spaces,
+                        collapsingSectionState = isCommunitySpacesExpanded,
+                        onUpdateCollapsingSectionState = {
+                            zeroQueryModel.advanceState(ZeroQueryPrefs.CommunitySpacesState)
+                        }
+                    ) {
+                        items(
+                            communitySpaces,
+                            key = { it.spaceRowData.id }
+                        ) { data ->
+                            val spaceRowData = data.spaceRowData
+                            val thumbnail = data.bitmap
+                            SpaceRow(
+                                spaceName = spaceRowData.name,
+                                isSpacePublic = spaceRowData.isPublic,
+                                thumbnail = thumbnail?.asImageBitmap(),
+                                isCurrentUrlInSpace = null
+                            ) {
+                                appNavModel.showSpaceDetail(spaceRowData.id)
+                            }
                         }
                     }
                 }

@@ -118,6 +118,11 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "SHOULD_LOG_FIRST_LOGIN",
             defaultValue = false
         )
+        val didShowAdBlockOnboarding = SharedPrefKey(
+            FirstRun,
+            preferenceKey = "DID_SHOW_AD_BLOCK_ONBOARDING",
+            defaultValue = true
+        )
     }
 
     object Settings : SharedPrefFolder("SETTINGS")

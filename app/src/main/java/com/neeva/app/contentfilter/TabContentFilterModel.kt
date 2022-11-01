@@ -52,6 +52,7 @@ data class TrackingData(
 class TabContentFilterModel(
     private val browserFlow: StateFlow<Browser?>,
     private val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>,
+    private val easyListRuleBlockedFlow: MutableStateFlow<Boolean>,
     private val enableCookieNoticeSuppression: State<Boolean>,
     private val tabId: String,
     private val trackersAllowList: TrackersAllowList,
@@ -68,6 +69,15 @@ class TabContentFilterModel(
             // if we're active, i.e. have the rights to update the main flow directly, then do so
             if (browserFlow.getActiveTabId() == tabId) {
                 cookieNoticeBlockedFlow.value = value
+            }
+        }
+
+    var easyListRuleBlocked = false
+        set(value) {
+            field = value
+
+            if (browserFlow.getActiveTabId() == tabId) {
+                easyListRuleBlockedFlow.value = value
             }
         }
 

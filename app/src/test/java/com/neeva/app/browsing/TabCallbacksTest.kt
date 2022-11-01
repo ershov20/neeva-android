@@ -68,6 +68,7 @@ class TabCallbacksTest : BaseTest() {
 
     // CookieCutterModel related mocks.
     private lateinit var cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
+    private lateinit var easyListRuleBlockedFlow: MutableStateFlow<Boolean>
     private lateinit var trackingDataFlow: MutableStateFlow<TrackingData?>
     private lateinit var enableTrackingProtection: MutableState<Boolean>
 
@@ -77,11 +78,13 @@ class TabCallbacksTest : BaseTest() {
         super.setUp()
 
         cookieNoticeBlockedFlow = MutableStateFlow(false)
+        easyListRuleBlockedFlow = MutableStateFlow(false)
         trackingDataFlow = MutableStateFlow(null)
         enableTrackingProtection = mutableStateOf(true)
 
         contentFilterModel = mockk {
             every { cookieNoticeBlockedFlow } returns this@TabCallbacksTest.cookieNoticeBlockedFlow
+            every { easyListRuleBlockedFlow } returns this@TabCallbacksTest.easyListRuleBlockedFlow
             every { trackingDataFlow } returns this@TabCallbacksTest.trackingDataFlow
             every { enableTrackingProtection }.returns(
                 this@TabCallbacksTest.enableTrackingProtection
@@ -116,6 +119,7 @@ class TabCallbacksTest : BaseTest() {
             every { setNewTabCallback(any()) } returns Unit
             every { registerTabCallback(any()) } returns Unit
             every { setContentFilterCallback(any()) } returns Unit
+            every { getContentFilterStats(any()) } returns mapOf()
             every { isDestroyed } returns false
         }
 

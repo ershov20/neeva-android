@@ -9,12 +9,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.contentfilter.PreviewTrackersAllowList
 import com.neeva.app.contentfilter.TrackersAllowList
 import com.neeva.app.contentfilter.TrackingData
 import com.neeva.app.contentfilter.TrackingEntity
+import com.neeva.app.sharedprefs.SharedPrefFolder
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -22,14 +25,18 @@ import kotlinx.coroutines.flow.StateFlow
 interface ContentFilterPopoverModel {
     val trackingDataFlow: StateFlow<TrackingData?>
     val cookieNoticeBlocked: StateFlow<Boolean>
+    val easyListRuleBlocked: StateFlow<Boolean>
     val trackersAllowList: TrackersAllowList
     val popoverVisible: MutableState<Boolean>
+    val shouldShowOnboardingPopover: MutableState<Boolean>
     val urlFlow: StateFlow<Uri>
 
     val onReloadTab: () -> Unit
     fun openContentFilterSettings()
     fun openPopover()
     fun dismissPopover()
+    fun openOnboardingPopover()
+    fun dismissOnboardingPopover()
 }
 
 @Composable
@@ -40,13 +47,25 @@ fun rememberContentFilterPopoverModel(
     urlFlow: StateFlow<Uri>
 ): ContentFilterPopoverModel {
     val popoverVisible = remember { mutableStateOf(false) }
+    val shouldShowOnboardingPopover = remember { mutableStateOf(false) }
 
-    return remember(appNavModel, contentFilterModel, popoverVisible, urlFlow) {
+    val sharedPreferenceModel = LocalSharedPreferencesModel.current
+
+    return remember(
+        appNavModel,
+        contentFilterModel,
+        popoverVisible,
+        shouldShowOnboardingPopover,
+        urlFlow
+    ) {
         ContentFilterPopoverModelImpl(
             appNavModel = appNavModel,
             popoverVisible = popoverVisible,
+            sharedPreferenceModel = sharedPreferenceModel,
+            shouldShowOnboardingPopover = shouldShowOnboardingPopover,
             trackingDataFlow = contentFilterModel.trackingDataFlow,
             cookieNoticeBlocked = contentFilterModel.cookieNoticeBlockedFlow,
+            easyListRuleBlocked = contentFilterModel.easyListRuleBlockedFlow,
             trackersAllowList = contentFilterModel.trackersAllowList,
             urlFlow = urlFlow,
             onReloadTab = reloadTab
@@ -57,8 +76,11 @@ fun rememberContentFilterPopoverModel(
 class ContentFilterPopoverModelImpl(
     private val appNavModel: AppNavModel,
     override val popoverVisible: MutableState<Boolean>,
+    private val sharedPreferenceModel: SharedPreferencesModel,
+    override val shouldShowOnboardingPopover: MutableState<Boolean>,
     override val trackingDataFlow: StateFlow<TrackingData?>,
     override val cookieNoticeBlocked: StateFlow<Boolean>,
+    override val easyListRuleBlocked: StateFlow<Boolean>,
     override val trackersAllowList: TrackersAllowList,
     override val urlFlow: StateFlow<Uri>,
     override val onReloadTab: () -> Unit
@@ -75,6 +97,16 @@ class ContentFilterPopoverModelImpl(
     override fun dismissPopover() {
         popoverVisible.value = false
     }
+
+    override fun openOnboardingPopover() {
+        popoverVisible.value = false
+        shouldShowOnboardingPopover.value = true
+    }
+
+    override fun dismissOnboardingPopover() {
+        SharedPrefFolder.FirstRun.didShowAdBlockOnboarding.set(sharedPreferenceModel, true)
+        shouldShowOnboardingPopover.value = false
+    }
 }
 
 class PreviewContentFilterPopoverModel(
@@ -86,16 +118,23 @@ class PreviewContentFilterPopoverModel(
             TrackingEntity.WARNERMEDIA to 4,
             TrackingEntity.CRITEO to 19
         )
-    )
+    ),
+    cookieNoticeBlocked: Boolean = false,
+    easyListRuleBlocked: Boolean = false
+
 ) : ContentFilterPopoverModel {
     override val trackingDataFlow: StateFlow<TrackingData?> = MutableStateFlow(trackingData)
-    override val cookieNoticeBlocked = MutableStateFlow(true)
+    override val cookieNoticeBlocked = MutableStateFlow(cookieNoticeBlocked)
+    override val easyListRuleBlocked = MutableStateFlow(easyListRuleBlocked)
     override val trackersAllowList = PreviewTrackersAllowList()
     override val popoverVisible = mutableStateOf(false)
+    override val shouldShowOnboardingPopover = mutableStateOf(false)
     override val urlFlow: StateFlow<Uri> = MutableStateFlow(Uri.parse("www.neeva.com"))
     override val onReloadTab: () -> Unit = { }
 
     override fun openContentFilterSettings() {}
     override fun openPopover() {}
     override fun dismissPopover() {}
+    override fun openOnboardingPopover() {}
+    override fun dismissOnboardingPopover() {}
 }

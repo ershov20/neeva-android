@@ -40,8 +40,8 @@ import com.neeva.app.ui.widgets.NavigationRow
 
 @Composable
 fun ContentFilterPopover(
-    contentFilterPopoverModel: ContentFilterPopoverModel,
-    modifier: Modifier = Modifier
+    onDismissRequest: (() -> Unit)? = null,
+    content: @Composable () -> Unit
 ) {
     // TODO(kobec): the offset does not work in landscape
     val topOffset = with(LocalDensity.current) {
@@ -49,18 +49,15 @@ fun ContentFilterPopover(
     }
     Popup(
         offset = IntOffset(x = 0, y = topOffset),
-        onDismissRequest = contentFilterPopoverModel::dismissPopover,
+        onDismissRequest = onDismissRequest,
         properties = PopupProperties(focusable = true)
     ) {
-        ContentFilterPopoverContent(
-            contentFilterPopoverModel = contentFilterPopoverModel,
-            modifier = modifier
-        )
+        content()
     }
 }
 
 @Composable
-private fun ContentFilterPopoverContent(
+fun ContentFilterPopoverContent(
     contentFilterPopoverModel: ContentFilterPopoverModel,
     modifier: Modifier = Modifier
 ) {
@@ -136,15 +133,17 @@ private fun ContentFilterPopoverContent(
     }
 }
 
-private val previewContentFilterPopoverModel = PreviewContentFilterPopoverModel(
-    trackingData = TrackingData(
-        numTrackers = 999,
-        trackingEntities = mapOf(
-            TrackingEntity.GOOGLE to 500,
-            TrackingEntity.AMAZON to 38
+private val previewContentFilterPopoverModel by lazy {
+    PreviewContentFilterPopoverModel(
+        trackingData = TrackingData(
+            numTrackers = 999,
+            trackingEntities = mapOf(
+                TrackingEntity.GOOGLE to 500,
+                TrackingEntity.AMAZON to 38
+            )
         )
     )
-)
+}
 
 @PortraitPreviews
 @Composable

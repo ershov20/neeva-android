@@ -422,6 +422,33 @@
     <!-- [First run] Promotional text describing Neeva. -->
     <string name="first_run_ad_free">The first ad-free, private search engine</string>
 
+    <!-- [First run] Title text describing Neeva ad block is activated by default. -->
+    <string name="first_run_ad_block_title">Neeva Ad Blocker is activated</string>
+
+    <!-- [First run][Button] Dismiss ad block onboarding popup. -->
+    <string name="first_run_ad_block_dismiss">"Cool, thanks!"</string>
+
+    <!-- [First Run] Subtitle for a switch that allows a user to turn off the Content Filter for onboarding screen. -->
+    <string name="first_run_ad_block_switch_subtitle">Site appears broken? Deactivate Neeva Shield for this site.</string>
+
+    <!-- [First Run] ad block onboarding popup checkmark badge meaning. -->
+    <string name="first_run_ad_block_checkmark_badge">Enabled</string>
+
+    <!-- [First Run] ad block onboarding popup disabled badge meaning. -->
+    <string name="first_run_ad_block_remove_badge">Disabled</string>
+
+    <!-- [Zero query] Ad block onboarding text describing an ad was blocked on the page -->
+    <string name="first_ad_blocked">Neeva blocked ads and trackers on this page!</string>
+
+    <!-- [Zero query] Cookie notice onboarding text describing a cookie notice was blocked on the page -->
+    <string name="first_cookie_notice_blocked">Neeva blocked a cookie popup on this page!</string>
+
+    <!-- [Zero query] content filter onboarding text describing content filter is disabled on the page -->
+    <string name="content_filter_onboarding_disabled">Want Neeva to block ads, trackers and cookie popups on this page?</string>
+
+    <!-- [First run] Title subtitle describing Neeva ad block is activated by default. -->
+    <string name="first_run_ad_block_subtitle">Browse faster without spammy, screen-filling ads. Experience the web without ads today.</string>
+
     <!-- [First run][Button] Allows the user to move past the welcome screen. -->
     <string name="get_started">Get started</string>
 

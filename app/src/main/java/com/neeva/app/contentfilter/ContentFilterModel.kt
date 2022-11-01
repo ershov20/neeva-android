@@ -23,6 +23,7 @@ interface ContentFilterModel {
     val trackersAllowList: TrackersAllowList
     val trackingDataFlow: MutableStateFlow<TrackingData?>
     val cookieNoticeBlockedFlow: MutableStateFlow<Boolean>
+    val easyListRuleBlockedFlow: MutableStateFlow<Boolean>
     val enableTrackingProtection: MutableState<Boolean>
     val enableAdBlocking: MutableState<Boolean>
     val cookieCuttingPreferences: State<Set<CookieNoticeCookies>>
@@ -92,6 +93,7 @@ class ContentFilterModelImpl(
 
     override val trackingDataFlow = MutableStateFlow<TrackingData?>(null)
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
+    override val easyListRuleBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection = settingsDataModel
         .getToggleState(SettingsToggle.TRACKING_PROTECTION)
     override val enableAdBlocking = settingsDataModel
@@ -150,6 +152,7 @@ class PreviewContentFilterModel : ContentFilterModel {
     override val trackersAllowList = PreviewTrackersAllowList()
     override val trackingDataFlow: MutableStateFlow<TrackingData?> = MutableStateFlow(null)
     override val cookieNoticeBlockedFlow = MutableStateFlow(false)
+    override val easyListRuleBlockedFlow = MutableStateFlow(false)
     override val enableTrackingProtection: MutableState<Boolean> = mutableStateOf(true)
     override val enableAdBlocking: MutableState<Boolean> = mutableStateOf(false)
     override val cookieCuttingPreferences =

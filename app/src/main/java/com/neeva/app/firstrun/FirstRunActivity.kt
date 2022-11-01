@@ -29,6 +29,7 @@ import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.appnav.Transitions
+import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.SettingsDataModel
@@ -79,6 +80,13 @@ class FirstRunActivity : AppCompatActivity() {
             neevaConstants = neevaConstants,
             clientLogger = clientLogger
         )
+
+        // opt new users into strict mode and show ad block onboarding
+        // TODO: remove this when we figure out how we persist default values for new users
+        settingsDataModel.setContentFilterStrength(
+            ContentFilterModel.BlockingStrength.TRACKER_REQUEST
+        )
+        firstRunModel.setAdBlockOnboardingPreference()
 
         setContent {
             NeevaTheme {
