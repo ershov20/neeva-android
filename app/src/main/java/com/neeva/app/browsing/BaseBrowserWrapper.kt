@@ -634,8 +634,26 @@ abstract class BaseBrowserWrapper internal constructor(
         }
     }
 
-    override fun reregisterActiveTabIfNecessary() {
-        reregisterTabIfNecessary(browserFlow.getActiveTab())
+    override fun onActivityStart(allowNullActiveTab: Boolean) {
+        browserFlow.getActiveTab()
+            ?.let {
+                // Make sure that all of the callbacks have been registered.
+                reregisterTabIfNecessary(it)
+            }
+            ?: run {
+                // https://github.com/neevaco/neeva-android/issues/807
+                // Clicking on a link can result in a new tab being created.  If that link results
+                // in WebLayer firing an Intent out to another app to handle the link, WebLayer will
+                // automatically close it without setting a new active tab, resulting in the user
+                // being shown about:blank in the browser.  Because WebLayer's TabListCallback tells
+                // us to set the active tab to null before removing the tab, our normal code for
+                // making the parent tab active when an active child tab closes doesn't fire.
+                // As a workaround, just set the most recently used tab to be active.
+                tabList.orderedTabList.value
+                    .takeUnless { allowNullActiveTab }
+                    ?.maxByOrNull { it.data.lastActiveMs }
+                    ?.let { browserFlow.setActiveTab(it.id) }
+            }
     }
 
     /**

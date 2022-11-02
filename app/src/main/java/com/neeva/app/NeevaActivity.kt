@@ -313,10 +313,16 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
     override fun onStart() {
         super.onStart()
+
         activityViewModel.checkForUpdates(this)
         clientLogger.logCounter(LogConfig.Interaction.APP_ENTER_FOREGROUND, null)
         updateWidgets()
-        webLayerModel.currentBrowser.reregisterActiveTabIfNecessary()
+
+        // If the user isn't in the tab switcher when the app is brought back to the foreground,
+        // force a tab to be set as active.
+        val userIsViewingTabSwitcher =
+            appNavModel?.currentDestination?.value?.route == AppNavDestination.CARD_GRID?.route
+        webLayerModel.currentBrowser.onActivityStart(allowNullActiveTab = userIsViewingTabSwitcher)
     }
 
     private fun updateWidgets() {

@@ -349,8 +349,6 @@ class TabCallbacks(
         tab.setContentFilterCallback(null)
         tab.unregisterTabCallback(tabCallback)
         scriptInjectionManager.unregisterMessagePassing(tab)
-        // TODO unregister content filter callback
-        //  https://github.com/neevaco/neeva-android/issues/597
     }
 
     companion object {

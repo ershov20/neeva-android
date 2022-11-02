@@ -158,7 +158,7 @@ interface BrowserWrapper {
     suspend fun allowScreenshots(allowScreenshots: Boolean)
     // endregion
 
-    fun reregisterActiveTabIfNecessary()
+    fun onActivityStart(allowNullActiveTab: Boolean)
 
     fun reloadAfterContentFilterAllowListUpdate()
 
