@@ -172,6 +172,7 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
 
     val previewFirstRunModel = FirstRunModel(
         sharedPreferencesModel = previewSharedPreferencesModel,
+        settingsDataModel = previewSettingsDataModel,
         loginToken = previewLoginToken,
         neevaConstants = previewNeevaConstants,
         clientLogger = previewClientLogger,

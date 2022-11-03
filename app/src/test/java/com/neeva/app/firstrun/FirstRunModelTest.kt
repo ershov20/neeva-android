@@ -91,6 +91,7 @@ class FirstRunModelTest : BaseTest() {
 
         firstRunModel = FirstRunModel(
             sharedPreferencesModel = sharedPreferencesModel,
+            settingsDataModel = settingsDataModel,
             loginToken = loginToken,
             neevaConstants = neevaConstants,
             clientLogger = clientLogger,

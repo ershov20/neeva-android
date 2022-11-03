@@ -64,6 +64,10 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.BLOOM_FILTER_DOWNLOAD
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.DEBUG_ENABLE_NATIVE_GOOGLE_LOGIN
                 )
             )
         ),

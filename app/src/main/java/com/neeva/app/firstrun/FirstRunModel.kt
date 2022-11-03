@@ -16,12 +16,15 @@ import androidx.browser.customtabs.CustomTabsIntent
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
@@ -40,6 +43,7 @@ fun interface GoogleSignInAccountProvider {
 @Singleton
 class FirstRunModel internal constructor(
     private val sharedPreferencesModel: SharedPreferencesModel,
+    private val settingsDataModel: SettingsDataModel,
     private val loginToken: LoginToken,
     private val neevaConstants: NeevaConstants,
     private var clientLogger: ClientLogger,
@@ -51,6 +55,7 @@ class FirstRunModel internal constructor(
     @Inject
     constructor(
         sharedPreferencesModel: SharedPreferencesModel,
+        settingsDataModel: SettingsDataModel,
         loginToken: LoginToken,
         neevaConstants: NeevaConstants,
         clientLogger: ClientLogger,
@@ -59,6 +64,7 @@ class FirstRunModel internal constructor(
         popupModel: PopupModel
     ) : this(
         sharedPreferencesModel = sharedPreferencesModel,
+        settingsDataModel = settingsDataModel,
         loginToken = loginToken,
         neevaConstants = neevaConstants,
         clientLogger = clientLogger,
@@ -232,6 +238,10 @@ class FirstRunModel internal constructor(
         emailProvided: String?,
         passwordProvided: String? = null
     ) {
+        val isNativeGoogleLoginEnabled = settingsDataModel.getSettingsToggleValue(
+            SettingsToggle.DEBUG_ENABLE_NATIVE_GOOGLE_LOGIN
+        )
+
         if (signup && provider == NeevaUser.SSOProvider.OKTA &&
             emailProvided != null &&
             passwordProvided != null
@@ -246,6 +256,19 @@ class FirstRunModel internal constructor(
                 )
             }
             return
+        } else if (provider == NeevaUser.SSOProvider.GOOGLE && isNativeGoogleLoginEnabled) {
+            // Fallback to custom tabs for Google sign in if the context is not an Activity
+            val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(SERVER_CLIENT_ID)
+                .requestServerAuthCode(SERVER_CLIENT_ID, true)
+                .requestEmail()
+                .build()
+
+            googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
+
+            intentParamFlow.value?.resultLauncher
+                ?.launch(googleSignInClient.signInIntent)
+                ?.let { return }
         }
 
         val intent = CustomTabsIntent.Builder()

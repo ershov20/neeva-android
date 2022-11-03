@@ -156,6 +156,10 @@ enum class SettingsToggle(
     DEBUG_ENABLE_INVITE_USER_TO_SPACE(
         primaryLabelId = R.string.space_enable_invite,
         defaultValue = false
+    ),
+    DEBUG_ENABLE_NATIVE_GOOGLE_LOGIN(
+        primaryLabelId = R.string.settings_debug_enable_native_google_login,
+        defaultValue = false
     );
 
     val key: String = name

@@ -27,6 +27,7 @@
     <string name="settings_debug_tabs_in_reverse">Reverse sort tabs by creation time when archiving</string>
     <string name="settings_debug_enable_neevascope_tooltip">Enable NeevaScope tooltip</string>
     <string name="settings_debug_enable_bloomfilter_download">Enable Bloom Filter file download</string>
+    <string name="settings_debug_enable_native_google_login">Enable native Google login</string>
 
     <!-- Debug strings for Previews -->
     <string name="debug_short_url">www.url.com</string>
