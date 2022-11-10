@@ -42,6 +42,7 @@ import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.appnav.AppNavModelImpl
+import com.neeva.app.billing.NeevaBillingClient
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.BrowserWrapper
@@ -105,6 +106,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Inject lateinit var activityStarter: ActivityStarter
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
+    @Inject lateinit var billingClient: NeevaBillingClient
     @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var domainProvider: DomainProvider
@@ -258,6 +260,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 SharedPrefFolder.App.RequestedInstallReferrer.set(
                     sharedPreferencesModel, true
                 )
+            }
+        }
+
+        // TODO(kobec): remove when Billing is ready
+        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_BILLING)) {
+            lifecycleScope.launch {
+                repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                    billingClient.setUp()
+                }
             }
         }
 

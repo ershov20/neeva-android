@@ -248,6 +248,9 @@ dependencies {
     implementation "androidx.paging:paging-compose:1.0.0-alpha16"
     implementation "androidx.paging:paging-runtime-ktx:$androidx_paging_version"
     testImplementation "androidx.paging:paging-common-ktx:$androidx_paging_version"
+
+    // Billing
+    implementation "com.android.billingclient:billing-ktx:$billing_version"
 }
 
 hilt {

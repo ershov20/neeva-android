@@ -9,6 +9,7 @@ import android.content.Context
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.appnav.ActivityStarter
+import com.neeva.app.billing.NeevaBillingClient
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.BrowserWrapperFactory
 import com.neeva.app.browsing.CacheCleaner
@@ -338,6 +339,15 @@ object NeevaAppModule {
             sharedPreferencesModel = sharedPreferencesModel,
             settingsDataModel = settingsDataModel
         )
+    }
+
+    @Provides
+    @Singleton
+    fun providesNeevaBillingClient(
+        @ApplicationContext appContext: Context,
+        dispatchers: Dispatchers
+    ): NeevaBillingClient {
+        return NeevaBillingClient(appContext, dispatchers)
     }
 }
 
