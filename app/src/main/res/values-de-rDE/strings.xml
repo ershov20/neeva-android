@@ -420,6 +420,33 @@
     <!-- [First run] Promotional text describing Neeva. -->
     <string name="first_run_ad_free">Die erste werbefreie, private Suchmaschine</string>
 
+    <!-- [First run] Title text describing Neeva ad block is activated by default. -->
+    <string name="first_run_ad_block_title">Neeva Ad Blocker ist aktiviert</string>
+
+    <!-- [First run][Button] Dismiss ad block onboarding popup. -->
+    <string name="first_run_ad_block_dismiss">"Cool, danke!"</string>
+
+    <!-- [First Run] Subtitle for a switch that allows a user to turn off the Content Filter for onboarding screen. -->
+    <string name="first_run_ad_block_switch_subtitle">Die Website scheint, nicht richtig zu funktionieren? Deaktivieren Sie Neeva Shield für diese Website.</string>
+
+    <!-- [First Run] ad block onboarding popup checkmark badge meaning. -->
+    <string name="first_run_ad_block_checkmark_badge">Aktiviert</string>
+
+    <!-- [First Run] ad block onboarding popup disabled badge meaning. -->
+    <string name="first_run_ad_block_remove_badge">Deaktiviert</string>
+
+    <!-- [Zero query] Ad block onboarding text describing an ad was blocked on the page -->
+    <string name="first_ad_blocked">Neeva blockiert Werbung und Tracker auf dieser Seite!</string>
+
+    <!-- [Zero query] Cookie notice onboarding text describing a cookie notice was blocked on the page -->
+    <string name="first_cookie_notice_blocked">Neeva hat ein Cookie-Banner auf dieser Seite blockiert!</string>
+
+    <!-- [Zero query] content filter onboarding text describing content filter is disabled on the page -->
+    <string name="content_filter_onboarding_disabled">Möchten Sie, dass Neeva Werbeanzeigen, Tracker und Cookie-Banner auf dieser Seite blockiert?</string>
+
+    <!-- [First run] Title subtitle describing Neeva ad block is activated by default. -->
+    <string name="first_run_ad_block_subtitle">Surfen Sie schneller ohne Spam-artige, bildschirmfüllende Werbung. Erleben Sie jetzt das Internet ohne Werbung.</string>
+
     <!-- [First run][Button] Allows the user to move past the welcome screen. -->
     <string name="get_started">Erste Schritte</string>
 
@@ -748,6 +775,9 @@
 
     <!-- [NeevaScope][Button] User acknowledges that they understand what the feature does and dismisses the dialog. -->
     <string name="neevascope_got_it">Alles klar!</string>
+
+    <!-- [NeevaScope] Label for the NeevaScope reddit tooltip. -->
+    <string name="neevascope_reddit_tooltip">Sehen Sie, was andere über diese Seite gesagt haben</string>
 
     <!-- [NeevaScope][Colloquial] Tells the user that we are getting information about the current web page.
          This is a pun because the "NeevaScope" feature is like a "telescope". -->

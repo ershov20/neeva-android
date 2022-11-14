@@ -420,6 +420,33 @@
     <!-- [First run] Promotional text describing Neeva. -->
     <string name="first_run_ad_free">Le premier moteur de recherche privée sans publicité</string>
 
+    <!-- [First run] Title text describing Neeva ad block is activated by default. -->
+    <string name="first_run_ad_block_title">Le bloqueur de publicités Neeva est activé</string>
+
+    <!-- [First run][Button] Dismiss ad block onboarding popup. -->
+    <string name="first_run_ad_block_dismiss">"Super, merci !"</string>
+
+    <!-- [First Run] Subtitle for a switch that allows a user to turn off the Content Filter for onboarding screen. -->
+    <string name="first_run_ad_block_switch_subtitle">Le site semble ne pas fonctionner correctement ? Désactivez Neeva Shield pour ce site.</string>
+
+    <!-- [First Run] ad block onboarding popup checkmark badge meaning. -->
+    <string name="first_run_ad_block_checkmark_badge">Activé</string>
+
+    <!-- [First Run] ad block onboarding popup disabled badge meaning. -->
+    <string name="first_run_ad_block_remove_badge">Désactivé</string>
+
+    <!-- [Zero query] Ad block onboarding text describing an ad was blocked on the page -->
+    <string name="first_ad_blocked">Neeva a bloqué des publicités et des traqueurs sur cette page !</string>
+
+    <!-- [Zero query] Cookie notice onboarding text describing a cookie notice was blocked on the page -->
+    <string name="first_cookie_notice_blocked">Neeva a bloqué une fenêtre contextuelle de gestion des cookies sur cette page !</string>
+
+    <!-- [Zero query] content filter onboarding text describing content filter is disabled on the page -->
+    <string name="content_filter_onboarding_disabled">Vous souhaitez que Neeva bloque les publicités, les traqueurs et les fenêtres contextuelles de gestion des cookies sur cette page ?</string>
+
+    <!-- [First run] Title subtitle describing Neeva ad block is activated by default. -->
+    <string name="first_run_ad_block_subtitle">Naviguez plus rapidement sans rencontrer de publicités intrusives et envahissantes. Profitez du Web sans publicités dès aujourd\'hui.</string>
+
     <!-- [First run][Button] Allows the user to move past the welcome screen. -->
     <string name="get_started">Démarrer</string>
 
@@ -748,6 +775,9 @@
 
     <!-- [NeevaScope][Button] User acknowledges that they understand what the feature does and dismisses the dialog. -->
     <string name="neevascope_got_it">J\'ai compris !</string>
+
+    <!-- [NeevaScope] Label for the NeevaScope reddit tooltip. -->
+    <string name="neevascope_reddit_tooltip">Découvrez ce que les internautes ont pensé de cette page</string>
 
     <!-- [NeevaScope][Colloquial] Tells the user that we are getting information about the current web page.
          This is a pun because the "NeevaScope" feature is like a "telescope". -->
