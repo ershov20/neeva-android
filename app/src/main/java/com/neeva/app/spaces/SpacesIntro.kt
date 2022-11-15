@@ -58,7 +58,10 @@ fun SpacesIntro(
     val configuration = LocalConfiguration.current
     val localDensity = LocalDensity.current
     var viewHeight by remember(configuration.orientation) { mutableStateOf(0.dp) }
-    Surface(Modifier.fillMaxSize()) {
+    Surface(
+        color = MaterialTheme.colorScheme.background,
+        modifier = Modifier.fillMaxSize()
+    ) {
         Box(
             Modifier
                 .fillMaxSize()
