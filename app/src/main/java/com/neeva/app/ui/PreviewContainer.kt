@@ -148,7 +148,8 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
 
     val previewPopupModel = PopupModel(
         coroutineScope = coroutineScope,
-        dispatchers = previewDispatchers
+        dispatchers = previewDispatchers,
+        sharedPreferencesModel = previewSharedPreferencesModel
     )
 
     val previewApolloWrapper = object : AuthenticatedApolloWrapper(

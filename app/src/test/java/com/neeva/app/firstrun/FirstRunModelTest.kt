@@ -82,7 +82,11 @@ class FirstRunModelTest : BaseTest() {
             sharedPreferencesModel = sharedPreferencesModel,
             settingsDataModel = settingsDataModel
         )
-        val popupModel = PopupModel(coroutineScopeRule.scope, coroutineScopeRule.dispatchers)
+        val popupModel = PopupModel(
+            coroutineScopeRule.scope,
+            coroutineScopeRule.dispatchers,
+            sharedPreferencesModel
+        )
 
         val signInAccount = mock<GoogleSignInAccount> {
             on { idToken } doReturn "valid_token"

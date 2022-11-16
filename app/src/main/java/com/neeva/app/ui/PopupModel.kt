@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.neeva.app.Dispatchers
+import com.neeva.app.sharedprefs.SharedPrefFolder
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.bottomsheetdialog.BottomSheetDialogStates
 import kotlinx.coroutines.CoroutineScope
@@ -67,6 +69,7 @@ data class BottomSheetDialogHostState(
 class PopupModel(
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
+    sharedPreferencesModel: SharedPreferencesModel,
     val snackbarHostState: SnackbarHostState = SnackbarHostState()
 ) {
     private var currentSnackbarJob: Job? = null
@@ -78,6 +81,12 @@ class PopupModel(
     private val _bottomSheetDialogState = MutableStateFlow<BottomSheetDialogHostState?>(null)
     val bottomSheetDialogState: StateFlow<BottomSheetDialogHostState?>
         get() = _bottomSheetDialogState
+
+    // Check whether any type of promo has been shown during current session
+    // Ad block promo will always show for both new user and existing user during the first run
+    val canShowPromo: Boolean = bottomSheetDialogState.value == null &&
+        SharedPrefFolder.FirstRun.FirstRunDone.get(sharedPreferencesModel) &&
+        SharedPrefFolder.FirstRun.DidShowAdBlockOnboarding.get(sharedPreferencesModel)
 
     fun dismissSnackbar() {
         currentSnackbarJob

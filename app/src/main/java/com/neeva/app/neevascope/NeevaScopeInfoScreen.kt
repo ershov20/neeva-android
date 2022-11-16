@@ -5,8 +5,10 @@
 package com.neeva.app.neevascope
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.firstrun.widgets.buttons.CloseButton
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
@@ -40,10 +43,18 @@ import com.neeva.app.ui.theme.NeevaTheme
 
 @Composable
 fun NeevaScopeInfoScreen(
-    onTapAction: () -> Unit
+    @StringRes buttonTextId: Int,
+    tapButton: () -> Unit,
+    dismissSheet: () -> Unit
 ) {
-    Surface {
-        BoxWithConstraints {
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Box {
+            CloseButton(
+                onClick = dismissSheet,
+                modifier = Modifier.align(Alignment.TopStart)
+            )
+        }
+        BoxWithConstraints(modifier = Modifier.fillMaxHeight()) {
             if (constraints.maxWidth > constraints.maxHeight) {
                 // Landscape
                 Row(modifier = Modifier.fillMaxSize()) {
@@ -77,7 +88,8 @@ fun NeevaScopeInfoScreen(
                         Spacer(modifier = Modifier.height(Dimensions.PADDING_LARGE))
 
                         NeevaScopeInfoButton(
-                            onTapAction = onTapAction,
+                            buttonTextId = buttonTextId,
+                            onClick = tapButton,
                             modifier = Modifier
                                 .align(Alignment.CenterHorizontally)
                         )
@@ -87,6 +99,7 @@ fun NeevaScopeInfoScreen(
                 // Portrait
                 Column(
                     modifier = Modifier
+                        .align(Alignment.Center)
                         .padding(horizontal = Dimensions.PADDING_HUGE)
                         .verticalScroll(rememberScrollState())
                 ) {
@@ -107,7 +120,8 @@ fun NeevaScopeInfoScreen(
                     )
 
                     NeevaScopeInfoButton(
-                        onTapAction = onTapAction,
+                        buttonTextId = buttonTextId,
+                        onClick = tapButton,
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
@@ -152,18 +166,19 @@ fun NeevaScopeInfoBody() {
 
 @Composable
 fun NeevaScopeInfoButton(
-    onTapAction: () -> Unit,
+    @StringRes buttonTextId: Int,
+    onClick: () -> Unit,
     modifier: Modifier
 ) {
     Button(
-        onClick = onTapAction,
+        onClick = onClick,
         modifier = modifier
             .defaultMinSize(minHeight = dimensionResource(R.dimen.min_touch_target_size))
             .height(48.dp)
             .fillMaxWidth()
     ) {
         Text(
-            text = stringResource(id = R.string.neevascope_got_it),
+            text = stringResource(id = buttonTextId),
             style = MaterialTheme.typography.labelLarge
         )
     }
@@ -175,7 +190,9 @@ fun NeevaScopeInfoButton(
 fun NeevaScopeInfo_Light_Preview() {
     NeevaTheme {
         NeevaScopeInfoScreen(
-            onTapAction = {}
+            buttonTextId = R.string.neevascope_got_it,
+            tapButton = {},
+            dismissSheet = {}
         )
     }
 }
@@ -190,7 +207,9 @@ fun NeevaScopeInfo_Light_Preview() {
 fun NeevaScopeInfo_Dark_Preview() {
     NeevaTheme(useDarkTheme = true) {
         NeevaScopeInfoScreen(
-            onTapAction = {}
+            buttonTextId = R.string.neevascope_got_it,
+            tapButton = {},
+            dismissSheet = {}
         )
     }
 }

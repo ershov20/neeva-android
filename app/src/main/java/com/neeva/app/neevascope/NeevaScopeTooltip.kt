@@ -80,6 +80,7 @@ fun NeevaScopeTooltip(
                 }
             )
         }
+
         else -> {}
     }
 }
@@ -121,7 +122,6 @@ fun NeevaScopeRedditTooltip(
     Tooltip(
         showTooltip = remember { mutableStateOf(true) },
         isLandscape = isLandscape,
-        isRedditTooltip = true,
         performPromoTransition = performPromoTransition,
         horizontalPadding = Dimensions.PADDING_MEDIUM,
         verticalPadding = Dimensions.PADDING_SMALL,
@@ -149,7 +149,6 @@ fun NeevaScopeRedditTooltip(
 fun Tooltip(
     showTooltip: MutableState<Boolean>,
     isLandscape: Boolean = false,
-    isRedditTooltip: Boolean = false,
     performPromoTransition: (() -> Unit)? = null,
     horizontalPadding: Dp,
     verticalPadding: Dp,
@@ -193,11 +192,9 @@ fun Tooltip(
             if (performPromoTransition != null) performPromoTransition()
         }
 
-        if (isRedditTooltip) {
-            LaunchedEffect(showTooltip) {
-                delay(TimeUnit.SECONDS.toMillis(4))
-                dismissLambda()
-            }
+        LaunchedEffect(showTooltip) {
+            delay(TimeUnit.SECONDS.toMillis(4))
+            dismissLambda()
         }
 
         Popup(

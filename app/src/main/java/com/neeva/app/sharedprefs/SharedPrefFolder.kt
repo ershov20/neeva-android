@@ -90,6 +90,11 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "REQUESTED_INSTALL_REFERRER",
             defaultValue = false
         )
+        val SeenNeevaScopeIntro = SharedPrefKey(
+            App,
+            preferenceKey = "SEEN_NEEVASCOPE_INTRO",
+            defaultValue = false
+        )
         val NeevaScopeTooltipCount = SharedPrefKey(
             App,
             preferenceKey = "SHOW_NEEVASCOPE_TOOLTIP_COUNT",
@@ -118,7 +123,7 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "SHOULD_LOG_FIRST_LOGIN",
             defaultValue = false
         )
-        val didShowAdBlockOnboarding = SharedPrefKey(
+        val DidShowAdBlockOnboarding = SharedPrefKey(
             FirstRun,
             preferenceKey = "DID_SHOW_AD_BLOCK_ONBOARDING",
             defaultValue = true

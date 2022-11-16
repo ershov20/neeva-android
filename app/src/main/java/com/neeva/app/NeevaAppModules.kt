@@ -123,9 +123,10 @@ object NeevaAppModule {
     @Singleton
     fun providesPopupModel(
         coroutineScope: CoroutineScope,
-        dispatchers: Dispatchers
+        dispatchers: Dispatchers,
+        sharedPreferencesModel: SharedPreferencesModel
     ): PopupModel {
-        return PopupModel(coroutineScope, dispatchers)
+        return PopupModel(coroutineScope, dispatchers, sharedPreferencesModel)
     }
 
     @Provides

@@ -104,7 +104,7 @@ class ContentFilterPopoverModelImpl(
     }
 
     override fun dismissOnboardingPopover() {
-        SharedPrefFolder.FirstRun.didShowAdBlockOnboarding.set(sharedPreferenceModel, true)
+        SharedPrefFolder.FirstRun.DidShowAdBlockOnboarding.set(sharedPreferenceModel, true)
         shouldShowOnboardingPopover.value = false
     }
 }

@@ -777,6 +777,7 @@
 
     <!-- [NeevaScope][Button] User acknowledges that they understand what the feature does and dismisses the dialog. -->
     <string name="neevascope_got_it">Got it!</string>
+    <string name="neevascope_lets_try_it">Let\'s try it!</string>
 
     <!-- [NeevaScope] Label for the NeevaScope reddit tooltip. -->
     <string name="neevascope_reddit_tooltip">See what people have said about this page</string>

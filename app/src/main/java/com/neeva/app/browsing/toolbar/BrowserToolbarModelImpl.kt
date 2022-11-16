@@ -15,11 +15,19 @@ import com.neeva.app.browsing.urlbar.URLBarModelState
 import com.neeva.app.contentfilter.PreviewContentFilterModel
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
+import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
+import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.ui.PopupModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class BrowserToolbarModelImpl(
     private val appNavModel: AppNavModel,
+    private val popupModel: PopupModel,
+    private val settingsDataModel: SettingsDataModel,
+    private val sharedPreferencesModel: SharedPreferencesModel,
     private val browserWrapper: BrowserWrapper,
     private val toolbarConfiguration: ToolbarConfiguration,
     private val neevaConstants: NeevaConstants
@@ -32,6 +40,15 @@ class BrowserToolbarModelImpl(
 
     override fun showNeevaScope() = browserWrapper.showNeevaScope()
     override fun getNeevaScopeModel(): NeevaScopeModel = browserWrapper.neevaScopeModel
+    override fun shouldShowNeevaScopeTooltip(): Boolean {
+        val didShowAdBlockOnboarding =
+            SharedPrefFolder.FirstRun.DidShowAdBlockOnboarding.get(sharedPreferencesModel)
+        val enableTrackingProtection =
+            browserWrapper.contentFilterModel.enableTrackingProtection.value
+
+        return settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP) &&
+            popupModel.canShowPromo && (!enableTrackingProtection || didShowAdBlockOnboarding)
+    }
 
     override fun share() = appNavModel.shareCurrentPage()
     override fun onAddToSpace() = appNavModel.showAddToSpace()
@@ -86,6 +103,7 @@ internal class PreviewBrowserToolbarModel(
     override fun share() {}
     override fun showNeevaScope() {}
     override fun getNeevaScopeModel(): NeevaScopeModel? { return null }
+    override fun shouldShowNeevaScopeTooltip(): Boolean { return false }
     override fun onAddToSpace() {}
     override fun onMenuItem(id: OverflowMenuItemId) {}
     override fun onTabSwitcher() {}

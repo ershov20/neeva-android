@@ -73,7 +73,6 @@ class IncognitoBrowserWrapper private constructor(
     faviconCache = incognitoFaviconCache,
     spaceStore = null,
     historyManager = null,
-    bloomFilterManager = bloomFilterManager,
     tabScreenshotManager = tabScreenshotManager,
     domainProvider = domainProvider,
     downloadCallback = downloadCallback,

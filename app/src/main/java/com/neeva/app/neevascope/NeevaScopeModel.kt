@@ -7,6 +7,8 @@ package com.neeva.app.neevascope
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import com.neeva.app.CheatsheetInfoQuery
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
@@ -18,6 +20,8 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.storage.favicons.FaviconCache
+import com.neeva.app.ui.PopupModel
 import java.time.LocalDate
 import java.time.Period
 import java.time.ZonedDateTime
@@ -301,6 +305,91 @@ class NeevaScopeModel(
         }
 
         _promoCache[urlFlow.value] = state
+    }
+
+    fun showNeevaScopeResult(
+        currentUrl: Uri,
+        currentTitle: String,
+        isOnNeevaSearch: Boolean,
+        faviconCache: FaviconCache,
+        popupModel: PopupModel
+    ) {
+        // If user clicks on the X button instead of "Let' try it" button on non-Neeva page,
+        // do not update the SeenNeevaScopeIntro immediately.
+        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)) {
+            SharedPrefFolder.App.SeenNeevaScopeIntro.set(sharedPreferencesModel, true)
+        }
+
+        if (currentUrl != Uri.EMPTY) {
+            updateQuery(currentUrl.toString(), currentTitle)
+        }
+
+        val seenNeevaScopeIntroFlow =
+            SharedPrefFolder.App.SeenNeevaScopeIntro.getFlow(sharedPreferencesModel)
+
+        popupModel.showBottomSheet(
+            hasHalfwayState = !isOnNeevaSearch && seenNeevaScopeIntroFlow.value
+        ) { onDismiss ->
+            val isLoading by isLoading.collectAsState()
+            val seenNeevaScopeIntro by seenNeevaScopeIntroFlow.collectAsState()
+
+            when {
+                isOnNeevaSearch -> {
+                    NeevaScopeInfoScreen(
+                        buttonTextId = R.string.neevascope_got_it,
+                        tapButton = {
+                            if (!seenNeevaScopeIntro) {
+                                settingsDataModel
+                                    .setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, true)
+                            }
+                            onDismiss()
+                        },
+                        dismissSheet = onDismiss
+                    )
+                }
+
+                !seenNeevaScopeIntro -> {
+                    NeevaScopeInfoScreen(
+                        buttonTextId = R.string.neevascope_lets_try_it,
+                        tapButton = {
+                            SharedPrefFolder.App.SeenNeevaScopeIntro.set(
+                                sharedPreferencesModel,
+                                true
+                            )
+                        },
+                        dismissSheet = {
+                            settingsDataModel
+                                .setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, true)
+                            onDismiss()
+                        }
+                    )
+                }
+
+                isLoading -> {
+                    NeevaScopeLoadingScreen()
+                }
+
+                else -> {
+                    settingsDataModel
+                        .setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, false)
+
+                    NeevaScopeResultScreen(
+                        neevascopeModel = this,
+                        onDismiss = onDismiss,
+                        faviconCache = faviconCache,
+                        currentUrl = currentUrl
+                    )
+                }
+            }
+
+            if (
+                settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
+            ) {
+                if (promoCache[currentUrl]?.showRedditDot == true) {
+                    performRedditPromoTransition(PromoTransition.DISMISS_DOT)
+                }
+            }
+        }
     }
 }
 

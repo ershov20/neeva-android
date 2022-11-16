@@ -46,6 +46,9 @@ import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalNeevaConstants
+import com.neeva.app.LocalPopupModel
+import com.neeva.app.LocalSettingsDataModel
+import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.R
 import com.neeva.app.ToolbarConfiguration
 import com.neeva.app.browsing.BrowserWrapper
@@ -194,6 +197,9 @@ private fun BoxScope.BrowserOverlay(
 
     val appNavModel = LocalAppNavModel.current
     val urlBarModel = browserWrapper.urlBarModel
+    val settingsDataModel = LocalSettingsDataModel.current
+    val sharedPreferencesModel = LocalSharedPreferencesModel.current
+    val popupModel = LocalPopupModel.current
     val neevaConstants = LocalNeevaConstants.current
 
     val toolbarConfiguration by toolbarConfigurationFlow.collectAsState()
@@ -204,6 +210,9 @@ private fun BoxScope.BrowserOverlay(
     val browserToolbarModel = remember(appNavModel, browserWrapper, toolbarConfiguration) {
         BrowserToolbarModelImpl(
             appNavModel,
+            popupModel,
+            settingsDataModel,
+            sharedPreferencesModel,
             browserWrapper,
             toolbarConfiguration,
             neevaConstants

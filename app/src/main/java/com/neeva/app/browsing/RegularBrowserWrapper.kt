@@ -90,7 +90,6 @@ class RegularBrowserWrapper(
     faviconCache = regularFaviconCache,
     spaceStore = spaceStore,
     historyManager = historyManager,
-    bloomFilterManager = bloomFilterManager,
     tabScreenshotManager = RegularTabScreenshotManager(
         filesDir = directories.cacheDirectory,
         coroutineScope = coroutineScope,

@@ -238,7 +238,6 @@ class BaseBrowserWrapperTest : BaseTest() {
             _urlBarModel = urlBarModel,
             _findInPageModel = findInPageModel,
             historyManager = historyManager,
-            bloomFilterManager = bloomFilterManager,
             tabScreenshotManager = tabScreenshotManager,
             domainProvider = domainProvider,
             downloadCallback = downloadCallback,

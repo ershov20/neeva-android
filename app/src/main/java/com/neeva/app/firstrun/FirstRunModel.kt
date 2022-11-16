@@ -176,7 +176,7 @@ class FirstRunModel internal constructor(
     }
 
     fun setAdBlockOnboardingPreference() {
-        SharedPrefFolder.FirstRun.didShowAdBlockOnboarding.set(
+        SharedPrefFolder.FirstRun.DidShowAdBlockOnboarding.set(
             sharedPreferencesModel,
             false
         )

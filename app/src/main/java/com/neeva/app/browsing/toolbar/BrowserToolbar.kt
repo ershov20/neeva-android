@@ -32,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
@@ -51,7 +50,6 @@ import com.neeva.app.contentfilter.ui.popover.rememberContentFilterPopoverModel
 import com.neeva.app.neevascope.NeevaScopeTooltip
 import com.neeva.app.overflowmenu.OverflowMenu
 import com.neeva.app.overflowmenu.OverflowMenuItemId
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
@@ -73,14 +71,9 @@ fun BrowserToolbarContainer(topOffset: Float) {
         urlFlow = urlFlow
     )
 
-    val settingsDataModel = LocalSettingsDataModel.current
-    val isNeevaScopeTooltipEnabled: Boolean =
-        settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
-
     BrowserToolbar(
         findInPageModel = findInPageModel,
         contentFilterPopoverModel = contentFilterPopoverModel,
-        isNeevaScopeTooltipEnabled = isNeevaScopeTooltipEnabled,
         modifier = Modifier
             .offset(y = topOffsetDp)
             .background(MaterialTheme.colorScheme.background)
@@ -98,10 +91,10 @@ fun BrowserToolbarContainer(topOffset: Float) {
 fun BrowserToolbarContentFilterPopover(
     contentFilterPopoverModel: ContentFilterPopoverModel
 ) {
-    val sharedPreference = LocalSharedPreferencesModel.current
+    val sharedPreferencesModel = LocalSharedPreferencesModel.current
 
-    val didShowAdBlockOnboarding = SharedPrefFolder.FirstRun.didShowAdBlockOnboarding
-        .getFlow(sharedPreference).collectAsState()
+    val didShowAdBlockOnboarding = SharedPrefFolder.FirstRun.DidShowAdBlockOnboarding
+        .getFlow(sharedPreferencesModel).collectAsState()
 
     if ((
         contentFilterPopoverModel.cookieNoticeBlocked.collectAsState().value ||
@@ -138,7 +131,6 @@ fun BrowserToolbarContentFilterPopover(
 fun BrowserToolbar(
     findInPageModel: FindInPageModel,
     contentFilterPopoverModel: ContentFilterPopoverModel,
-    isNeevaScopeTooltipEnabled: Boolean = false,
     modifier: Modifier = Modifier,
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
@@ -249,7 +241,10 @@ fun BrowserToolbar(
                     contentFilterPopoverModel = contentFilterPopoverModel
                 )
 
-                if (browserToolbarModel.useSingleBrowserToolbar && isNeevaScopeTooltipEnabled) {
+                if (
+                    browserToolbarModel.useSingleBrowserToolbar &&
+                    browserToolbarModel.shouldShowNeevaScopeTooltip()
+                ) {
                     browserToolbarModel.getNeevaScopeModel()?.let {
                         NeevaScopeTooltip(
                             neevaScopeModel = it,

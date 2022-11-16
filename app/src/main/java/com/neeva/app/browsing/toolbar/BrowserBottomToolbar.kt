@@ -25,11 +25,9 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalBrowserToolbarModel
 import com.neeva.app.LocalBrowserWrapper
-import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.R
 import com.neeva.app.browsing.ActiveTabModel
 import com.neeva.app.neevascope.NeevaScopeTooltip
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 
@@ -42,12 +40,8 @@ fun BrowserBottomToolbar(
     val browserWrapper = LocalBrowserWrapper.current
     val bottomOffsetDp = with(LocalDensity.current) { bottomOffset.toDp() }
 
-    val settingsDataModel = LocalSettingsDataModel.current
-    val isNeevaScopeTooltipEnabled: Boolean =
-        settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
     BrowserBottomToolbar(
         isIncognito = browserWrapper.isIncognito,
-        isNeevaScopeTooltipEnabled = isNeevaScopeTooltipEnabled,
         modifier = modifier.offset(y = bottomOffsetDp)
     )
 }
@@ -55,7 +49,6 @@ fun BrowserBottomToolbar(
 @Composable
 fun BrowserBottomToolbar(
     isIncognito: Boolean,
-    isNeevaScopeTooltipEnabled: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val browserToolbarModel = LocalBrowserToolbarModel.current
@@ -88,7 +81,7 @@ fun BrowserBottomToolbar(
                 modifier = Modifier.weight(1.0f)
             )
 
-            if (isNeevaScopeTooltipEnabled) {
+            if (browserToolbarModel.shouldShowNeevaScopeTooltip()) {
                 browserToolbarModel.getNeevaScopeModel()?.let {
                     NeevaScopeTooltip(
                         neevaScopeModel = it,

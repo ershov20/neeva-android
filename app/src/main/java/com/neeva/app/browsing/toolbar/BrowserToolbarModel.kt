@@ -21,6 +21,7 @@ abstract class BrowserToolbarModel {
 
     abstract fun showNeevaScope()
     abstract fun getNeevaScopeModel(): NeevaScopeModel?
+    abstract fun shouldShowNeevaScopeTooltip(): Boolean
 
     abstract fun share()
     abstract fun onAddToSpace()

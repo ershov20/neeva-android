@@ -4,12 +4,15 @@
 
 package com.neeva.app.ui
 
+import android.content.Context
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
+import com.neeva.app.sharedprefs.SharedPreferencesModel
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -34,10 +37,16 @@ class PopupModelTest : BaseTest() {
     private lateinit var snackbarHostState: SnackbarHostState
     private lateinit var showCallbacks: MutableList<CompletableDeferred<SnackbarResult>>
 
+    private lateinit var context: Context
+    private lateinit var sharedPreferencesModel: SharedPreferencesModel
+
     private lateinit var popupModel: PopupModel
 
     override fun setUp() {
         super.setUp()
+
+        context = ApplicationProvider.getApplicationContext()
+        sharedPreferencesModel = SharedPreferencesModel(context)
 
         showCallbacks = mutableListOf()
         snackbarHostState = mockk {
@@ -51,7 +60,8 @@ class PopupModelTest : BaseTest() {
         popupModel = PopupModel(
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = coroutineScopeRule.dispatchers,
-            snackbarHostState = snackbarHostState
+            snackbarHostState = snackbarHostState,
+            sharedPreferencesModel = sharedPreferencesModel
         )
     }
 
