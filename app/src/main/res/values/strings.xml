@@ -869,6 +869,9 @@
     <!-- [NeevaScope] Sends the user to the support page  -->
     <string name="neevascope_contact_us">Contact us via Support</string>
 
+    <!-- [NeevaScope] Tells the user there is no result about the current website  -->
+    <string name="neevascope_no_result">NeevaScope couldn’t find anything related to this site</string>
+
     <string name="default_search_suggestion_1">Tech news</string>
     <string name="default_search_suggestion_2">Fruit Tart Recipes</string>
     <string name="default_search_suggestion_3" translatable="false">React Hooks</string>

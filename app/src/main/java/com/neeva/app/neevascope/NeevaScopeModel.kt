@@ -102,6 +102,13 @@ class NeevaScopeModel(
 
             _isLoading.value = false
 
+            if (
+                searchResultsData?.search?.resultGroup?.isEmpty() == true &&
+                cheatsheetInfoData?.getCheatsheetInfo == null
+            ) {
+                return@map null
+            }
+
             return@map updateNeevaScopeResult(searchResultsData, cheatsheetInfoData, appContext)
         }
         .flowOn(dispatchers.io)

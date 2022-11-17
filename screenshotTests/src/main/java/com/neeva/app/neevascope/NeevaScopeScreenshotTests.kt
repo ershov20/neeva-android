@@ -23,4 +23,14 @@ class NeevaScopeScreenshotTests : BaseScreenshotTest() {
     fun supportSection_Preview() = runScreenshotTest {
         SupportSection_Preview()
     }
+
+    @Test
+    fun neevaScopeNoResultScreen_Preview() = runScreenshotTest {
+        NeevaScopeNoResultScreen_Preview()
+    }
+
+    @Test
+    fun neevaScopeLoadingScreen_Preview() = runScreenshotTest {
+        NeevaScopeLoadingScreen_Preview()
+    }
 }

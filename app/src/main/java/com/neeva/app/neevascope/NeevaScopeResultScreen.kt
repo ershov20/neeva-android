@@ -6,10 +6,15 @@ package com.neeva.app.neevascope
 
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,8 +40,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaConstants
@@ -49,6 +56,8 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaScopeTheme
 
 private const val NUMBER_COLLAPSED = 3
+private val NORESULT_IMAGE_WIDTH = 244.dp
+private val NORESULT_IMAGE_HEIGHT = 132.dp
 
 @Composable
 fun NeevaScopeResultScreen(
@@ -59,17 +68,21 @@ fun NeevaScopeResultScreen(
 ) {
     val appNavModel = LocalAppNavModel.current
     val neevaConstants = LocalNeevaConstants.current
-    val searches by neevascopeModel.searchFlow.collectAsState(initial = null)
+    val searches by neevascopeModel.searchFlow.collectAsState()
 
-    NeevaScopeResultScreen(
-        openUrl = appNavModel::openUrlInNewTab,
-        showFeedback = appNavModel::showFeedback,
-        onDismiss = onDismiss,
-        searches = searches,
-        faviconCache = faviconCache,
-        currentUrl = currentUrl,
-        neevaConstants = neevaConstants
-    )
+    if (searches != null) {
+        NeevaScopeResultScreen(
+            openUrl = appNavModel::openUrlInNewTab,
+            showFeedback = appNavModel::showFeedback,
+            onDismiss = onDismiss,
+            searches = searches,
+            faviconCache = faviconCache,
+            currentUrl = currentUrl,
+            neevaConstants = neevaConstants
+        )
+    } else {
+        NeevaScopeNoResultScreen(appNavModel::showFeedback, onDismiss)
+    }
 }
 
 @Composable
@@ -94,9 +107,7 @@ fun NeevaScopeResultScreen(
 
     val showFullRecipe = remember { mutableStateOf(false) }
 
-    CompositionLocalProvider(
-        LocalTextStyle.provides(MaterialTheme.typography.bodyMedium)
-    ) {
+    CompositionLocalProvider(LocalTextStyle.provides(MaterialTheme.typography.bodyMedium)) {
         Surface {
             LazyColumn(
                 modifier = Modifier
@@ -153,6 +164,72 @@ fun NeevaScopeResultScreen(
 
                 item {
                     SupportSection(showFeedback = showFeedback, onDismiss = onDismiss)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NeevaScopeNoResultScreen(
+    showFeedback: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    Surface {
+        BoxWithConstraints {
+            if (constraints.maxWidth > constraints.maxHeight) {
+                // Landscape
+                Row(modifier = Modifier.fillMaxSize().padding(Dimensions.PADDING_LARGE)) {
+                    Column(
+                        modifier = Modifier.weight(1.0f).fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.neevascope_noresult),
+                            contentDescription = null,
+                            modifier = Modifier.size(NORESULT_IMAGE_WIDTH, NORESULT_IMAGE_HEIGHT)
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1.0f)
+                            .padding(Dimensions.PADDING_LARGE)
+                            .fillMaxHeight(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Top
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.neevascope_no_result),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+
+                        SupportButton(showFeedback, onDismiss)
+                    }
+                }
+            } else {
+                // Portrait
+                Column(
+                    modifier = Modifier.padding(top = Dimensions.PADDING_MEDIUM),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(40.dp),
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.neevascope_no_result),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(horizontal = Dimensions.PADDING_HUGE)
+                    )
+
+                    Image(
+                        painter = painterResource(id = R.drawable.neevascope_noresult),
+                        contentDescription = null,
+                        modifier = Modifier.size(NORESULT_IMAGE_WIDTH, NORESULT_IMAGE_HEIGHT)
+                    )
+
+                    SupportButton(showFeedback, onDismiss)
                 }
             }
         }
@@ -225,7 +302,6 @@ fun SupportSection(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = stringResource(id = R.string.neevascope_support_body),
             style = MaterialTheme.typography.bodyLarge,
@@ -233,22 +309,30 @@ fun SupportSection(
             textAlign = TextAlign.Center
         )
 
-        TextButton(
-            onClick = {
-                showFeedback()
-                onDismiss()
-            }
-        ) {
-            Icon(
-                Icons.Outlined.HelpOutline,
-                contentDescription = null,
-                modifier = Modifier.size(Dimensions.SIZE_ICON_SMALL)
-            )
+        SupportButton(showFeedback, onDismiss)
+    }
+}
 
-            Spacer(modifier = Modifier.padding(Dimensions.PADDING_TINY))
-
-            Text(text = stringResource(id = R.string.neevascope_support))
+@Composable
+fun SupportButton(
+    showFeedback: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    TextButton(
+        onClick = {
+            showFeedback()
+            onDismiss()
         }
+    ) {
+        Icon(
+            Icons.Outlined.HelpOutline,
+            contentDescription = null,
+            modifier = Modifier.size(Dimensions.SIZE_ICON_SMALL)
+        )
+
+        Spacer(modifier = Modifier.padding(Dimensions.PADDING_TINY))
+
+        Text(text = stringResource(id = R.string.neevascope_support))
     }
 }
 
@@ -279,5 +363,14 @@ fun ShowMoreButton_Preview() {
 fun SupportSection_Preview() {
     LightDarkPreviewContainer {
         SupportSection(showFeedback = {}, onDismiss = {})
+    }
+}
+
+@PortraitPreviews
+@LandscapePreviews
+@Composable
+fun NeevaScopeNoResultScreen_Preview() {
+    LightDarkPreviewContainer {
+        NeevaScopeNoResultScreen(showFeedback = {}, onDismiss = {})
     }
 }
