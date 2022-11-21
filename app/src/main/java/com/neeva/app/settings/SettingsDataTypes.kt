@@ -26,6 +26,8 @@ data class SettingsRowData(
     val primaryLabelId: Int? = null,
     val secondaryLabelId: Int? = null,
     val url: Uri? = null,
+    val isDangerousAction: Boolean = false,
+    val buttonAction: (() -> Unit)? = null,
 
     /** If the setting is a [SettingsToggle] this is its value */
     val settingsToggle: SettingsToggle? = null,
@@ -64,7 +66,6 @@ enum class SettingsRowType {
     NAVIGATION,
     PROFILE,
     BUTTON,
-    CLEAR_DATA_BUTTON,
     SUBSCRIPTION,
     COOKIE_CUTTER_BLOCKING_STRENGTH,
     COOKIE_CUTTER_NOTICE_SELECTION,

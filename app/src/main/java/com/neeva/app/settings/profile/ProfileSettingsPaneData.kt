@@ -34,15 +34,11 @@ class ProfileSettingsPaneData(neevaConstants: NeevaConstants) : SettingsPaneData
                     type = SettingsRowType.SUBSCRIPTION,
                     primaryLabelId = R.string.settings_membership_status,
                     url = Uri.parse(neevaConstants.appMembershipURL)
-                )
-            )
-        ),
-        SettingsGroupData(
-            R.string.settings_sign_out,
-            listOf(
+                ),
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
-                    primaryLabelId = R.string.settings_sign_out
+                    primaryLabelId = R.string.settings_sign_out,
+                    isDangerousAction = true
                 )
             )
         )

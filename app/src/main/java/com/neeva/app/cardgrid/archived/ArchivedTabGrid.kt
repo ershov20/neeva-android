@@ -35,7 +35,6 @@ import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.PortraitPreviewsDark
 import com.neeva.app.ui.widgets.ClickableRow
-import com.neeva.app.ui.widgets.RowActionIconParams
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -104,10 +103,7 @@ fun ArchivedTabGrid(
                 secondaryLabel = stringResource(archiveAfterOption.resourceId),
                 primaryMaxLines = Int.MAX_VALUE,
                 secondaryMaxLines = Int.MAX_VALUE,
-                actionIconParams = RowActionIconParams(
-                    onTapAction = onShowArchiveAfterOptionDialog,
-                    actionType = RowActionIconParams.ActionType.NONE
-                )
+                onTapAction = onShowArchiveAfterOptionDialog,
             )
         }
 
@@ -115,11 +111,8 @@ fun ArchivedTabGrid(
             ClickableRow(
                 primaryLabel = stringResource(R.string.archived_tabs_clear_archived),
                 primaryMaxLines = Int.MAX_VALUE,
-                isActionDangerous = true,
-                actionIconParams = RowActionIconParams(
-                    onTapAction = onDeleteAllArchivedTabs,
-                    actionType = RowActionIconParams.ActionType.NONE
-                )
+                isDangerousAction = true,
+                onTapAction = onDeleteAllArchivedTabs,
             )
         }
 

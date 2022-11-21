@@ -25,7 +25,7 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
     override val shouldShowUserName: Boolean = false
     override val data = listOf(
         SettingsGroupData(
-            R.string.neeva,
+            R.string.settings_account,
             listOf(
                 SettingsRowData(
                     type = SettingsRowType.PROFILE,
@@ -105,21 +105,6 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
             )
         ),
         SettingsGroupData(
-            R.string.settings_support,
-            listOf(
-                SettingsRowData(
-                    type = SettingsRowType.LINK,
-                    primaryLabelId = R.string.settings_welcome_tours,
-                    url = Uri.parse(neevaConstants.appWelcomeToursURL)
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.LINK,
-                    primaryLabelId = R.string.settings_help_center,
-                    url = Uri.parse(neevaConstants.appHelpCenterURL)
-                ),
-            )
-        ),
-        SettingsGroupData(
             R.string.settings_about,
             listOf(
                 SettingsRowData(
@@ -127,6 +112,11 @@ class MainSettingsData(neevaConstants: NeevaConstants) : SettingsPaneDataInterfa
                     primaryLabelId = R.string.settings_neeva_browser_version,
                     secondaryLabelId = R.string.settings_chromium_version,
                     openUrlViaIntent = true
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.LINK,
+                    primaryLabelId = R.string.settings_help_center,
+                    url = Uri.parse(neevaConstants.appHelpCenterURL)
                 ),
                 SettingsRowData(
                     type = SettingsRowType.LINK,

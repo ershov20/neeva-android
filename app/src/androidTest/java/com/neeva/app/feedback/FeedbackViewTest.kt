@@ -5,12 +5,14 @@
 package com.neeva.app.feedback
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.Lifecycle
 import com.apollographql.apollo3.api.Operation
 import com.neeva.app.BaseBrowserTest
@@ -30,6 +32,7 @@ import com.neeva.app.waitFor
 import com.neeva.app.waitForActivityStartup
 import com.neeva.app.waitForNavDestination
 import com.neeva.app.waitForNode
+import com.neeva.app.waitForNodeWithContentDescription
 import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
 import com.neeva.app.waitForUrl
@@ -70,9 +73,12 @@ class FeedbackViewTest : BaseBrowserTest() {
             openOverflowMenuAndClickItem(R.string.feedback)
             waitForNavDestination(AppNavDestination.FEEDBACK)
 
-            // Click on "Visit our help center".  It should open a new tab to load the Neeva URL.
-            // Not super happy with this test because is actively loads the real Neeva website.
-            waitForNodeWithText(getString(R.string.submit_feedback_help_center_link)).performClick()
+            waitForNodeWithText(
+                getString(R.string.submit_feedback_help_center_link),
+                substring = true
+            ).performTouchInput {
+                click(position = percentOffset(x = 0.95f, y = 0.25f))
+            }
             waitForNavDestination(AppNavDestination.BROWSER)
             waitForUrl(neevaConstants.appHelpCenterURL)
             expectBrowserState(isIncognito = false, regularTabCount = 2)
@@ -91,7 +97,7 @@ class FeedbackViewTest : BaseBrowserTest() {
 
             // Send just the user's message.
             waitForNodeWithText(getString(R.string.submit_feedback_view_share_url)).performClick()
-            waitForNodeWithText(getString(R.string.submit_feedback_share_screenshot)).performClick()
+            waitForNodeWithText(getString(R.string.submit_feedback_screenshot)).performClick()
             waitForNode(hasTestTag("feedbackField")).performTextInput("Test message")
 
             // Mock out the response.
@@ -137,7 +143,7 @@ class FeedbackViewTest : BaseBrowserTest() {
 
             // Send just the user's message.
             waitForNodeWithText(getString(R.string.submit_feedback_view_share_url)).performClick()
-            waitForNodeWithText(getString(R.string.submit_feedback_share_screenshot)).performClick()
+            waitForNodeWithText(getString(R.string.submit_feedback_screenshot)).performClick()
             waitForNode(hasTestTag("feedbackField")).performTextInput("Test message")
 
             // Mock out the response.
@@ -154,7 +160,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             )
 
             // Click the button to submit feedback.
-            waitForNodeWithText(getString(R.string.send)).performClick()
+            waitForNodeWithContentDescription(getString(R.string.send)).performClick()
 
             // Confirm that the acknowledgement snackbar appeared.
             waitForNodeWithText(getString(R.string.submit_feedback_acknowledgement))
@@ -177,7 +183,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             waitForNavDestination(AppNavDestination.FEEDBACK)
 
             // Send the user's message and the URL, but remove the screenshot.
-            waitForNodeWithText(getString(R.string.submit_feedback_share_screenshot)).performClick()
+            waitForNodeWithText(getString(R.string.submit_feedback_screenshot)).performClick()
             waitForNode(hasTestTag("feedbackField")).performTextInput("Test message")
 
             // Mock out the response.
@@ -194,7 +200,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             )
 
             // Click the button to submit feedback.
-            waitForNodeWithText(getString(R.string.send)).performClick()
+            waitForNodeWithContentDescription(getString(R.string.send)).performClick()
 
             // Confirm that the acknowledgement snackbar appeared.
             waitForNodeWithText(getString(R.string.submit_feedback_acknowledgement))
@@ -217,7 +223,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             waitForNavDestination(AppNavDestination.FEEDBACK)
 
             // Send the user's message and an edited URL, but remove the screenshot.
-            waitForNodeWithText(getString(R.string.submit_feedback_share_screenshot)).performClick()
+            waitForNodeWithText(getString(R.string.submit_feedback_screenshot)).performClick()
             waitForNodeWithTag("Feedback URL").apply {
                 performTextClearance()
                 performTextInput("Replaced URL")
@@ -238,7 +244,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             )
 
             // Click the button to submit feedback.
-            waitForNodeWithText(getString(R.string.send)).performClick()
+            waitForNodeWithContentDescription(getString(R.string.send)).performClick()
 
             // Confirm that the acknowledgement snackbar appeared.
             waitForNodeWithText(getString(R.string.submit_feedback_acknowledgement))
@@ -279,7 +285,7 @@ class FeedbackViewTest : BaseBrowserTest() {
             )
 
             // Click the button to submit feedback.
-            waitForNodeWithText(getString(R.string.send)).performClick()
+            waitForNodeWithContentDescription(getString(R.string.send)).performClick()
 
             // Confirm that the acknowledgement snackbar appeared.
             waitForNodeWithText(getString(R.string.submit_feedback_acknowledgement))

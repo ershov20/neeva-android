@@ -53,7 +53,7 @@ fun FaviconView(
             RectangleShape
         }
     ) {
-        val sizeModifier = Modifier.size(Dimensions.SIZE_ICON)
+        val sizeModifier = Modifier.size(Dimensions.SIZE_ICON_MEDIUM)
         Box(
             contentAlignment = Alignment.Center,
             modifier = if (drawContainer) {

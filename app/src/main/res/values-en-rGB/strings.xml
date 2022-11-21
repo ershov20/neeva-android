@@ -550,9 +550,6 @@
     <!-- [Settings][Button] Sends the user to view Neeva's privacy policy. -->
     <string name="settings_privacy_policy">Privacy policy</string>
 
-    <!-- [Settings][Header] Groups items related to getting help. -->
-    <string name="settings_support">Support</string>
-
     <!-- [Settings][Button] Sends the user to the Neeva homepage to learn how to use the product. -->
     <string name="settings_welcome_tours">Welcome tours</string>
 
@@ -703,7 +700,7 @@
     <string name="submit_feedback_help_center_link">Visit our help center!</string>
 
     <!-- [Feedback][Toggle] Lets the user decide whether or not they want to share a screenshot with their feedback. -->
-    <string name="submit_feedback_share_screenshot">Share screenshot</string>
+    <string name="submit_feedback_screenshot">Share screenshot</string>
 
     <!-- [Feedback][a11y] TalkBack description saying that the image being described will be sent to us. -->
     <string name="submit_feedback_share_screenshot_preview">Screenshot that will be shared with Neeva</string>

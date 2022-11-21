@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
@@ -56,7 +58,8 @@ fun BaseSuggestionRow_Preview() {
             onTapRow = {},
             actionIconParams = RowActionIconParams(
                 onTapAction = {},
-                actionType = RowActionIconParams.ActionType.REFINE
+                actionType = RowActionIconParams.ActionType.REFINE,
+                contentDescription = stringResource(id = R.string.refine),
             ).takeIf { showAction },
             iconParams = RowActionStartIconParams()
         ) {

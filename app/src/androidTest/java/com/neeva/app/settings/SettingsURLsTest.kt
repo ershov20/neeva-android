@@ -97,11 +97,6 @@ class SettingsURLsTest : BaseBrowserTest() {
                 expectedUrl = neevaConstants.appSettingsURL,
                 expectedTabCount = 6
             )
-            clickOnSettingsItem(
-                labelId = R.string.settings_welcome_tours,
-                expectedUrl = neevaConstants.appWelcomeToursURL,
-                expectedTabCount = 7
-            )
         }
     }
 }

@@ -11,14 +11,11 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.R
-import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsButtonRow
 import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.layouts.BaseRowLayout
-import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.ui.widgets.RowActionIconButton
-import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.StackedText
 import com.neeva.app.ui.widgets.icons.SSOImagePainter
 import com.neeva.app.ui.widgets.icons.getFormattedSSOProviderName
@@ -34,9 +31,9 @@ fun ProfileRowContainer(
 ) {
     when {
         (isSignedOut && onClick != null) || userInfo == null -> {
-            SettingsButtonRow(
+            ClickableRow(
                 primaryLabel = stringResource(R.string.settings_sign_in_to_join_neeva),
-                onClick = onClick
+                onTapAction = onClick
             )
         }
 
@@ -84,19 +81,6 @@ fun ProfileRow(
                 painter = painter, circlePicture = circlePicture,
                 showSingleLetterPictureIfAvailable = showSingleLetterPictureIfAvailable
             )
-        },
-        endComposable = if (onClick != null) {
-            {
-                RowActionIconButton(
-                    RowActionIconParams(
-                        onTapAction = onClick,
-                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
-                        size = Dimensions.SIZE_ICON_SMALL
-                    )
-                )
-            }
-        } else {
-            null
         }
     ) {
         StackedText(primaryLabel = primaryLabel ?: "", secondaryLabel = secondaryLabel)

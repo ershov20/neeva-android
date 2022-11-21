@@ -3,8 +3,6 @@
 // found in the LICENSE file.
 
 package com.neeva.app.ui.widgets
-
-import android.content.Context
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -22,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -33,12 +30,11 @@ import com.neeva.app.ui.theme.Dimensions
 data class RowActionIconParams(
     val onTapAction: () -> Unit,
     val actionType: ActionType,
-    val contentDescription: String? = null,
+    val contentDescription: String?,
     val size: Dp = Dimensions.SIZE_ICON_MEDIUM,
     val enabled: Boolean = true
 ) {
     enum class ActionType {
-        NONE,
         ADD,
         BACK,
         COPY,
@@ -52,34 +48,38 @@ data class RowActionIconParams(
         SHARE,
         SHOW_PAGE_INFO
     }
-
-    fun getContentDescriptionString(context: Context): String? {
-        if (contentDescription != null) return contentDescription
-
-        return when (actionType) {
-            ActionType.REFINE -> context.getString(R.string.refine)
-            ActionType.REFRESH -> context.getString(R.string.reload)
-
-            else -> null
-        }
-    }
 }
 
 @Composable
-fun RowActionIconButton(iconParams: RowActionIconParams) {
-    if (iconParams.actionType == RowActionIconParams.ActionType.NONE) return
+fun RowActionIconButton(params: RowActionIconParams) {
+    RowActionIconButton(
+        onTapAction = params.onTapAction,
+        enabled = params.enabled,
+        actionType = params.actionType,
+        contentDescription = params.contentDescription,
+        size = params.size,
+    )
+}
 
+@Composable
+fun RowActionIconButton(
+    onTapAction: () -> Unit,
+    enabled: Boolean = true,
+    actionType: RowActionIconParams.ActionType,
+    contentDescription: String? = null,
+    size: Dp = Dimensions.SIZE_ICON_MEDIUM
+) {
     CompositionLocalProvider(
         LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
     ) {
         IconButton(
-            onClick = iconParams.onTapAction,
-            enabled = iconParams.enabled
+            onClick = onTapAction,
+            enabled = enabled
         ) {
             RowActionIcon(
-                actionType = iconParams.actionType,
-                contentDescription = iconParams.getContentDescriptionString(LocalContext.current),
-                size = iconParams.size
+                actionType = actionType,
+                contentDescription = contentDescription,
+                size = size
             )
         }
     }
@@ -197,7 +197,5 @@ fun RowActionIcon(
                 modifier = modifier
             )
         }
-
-        else -> {}
     }
 }

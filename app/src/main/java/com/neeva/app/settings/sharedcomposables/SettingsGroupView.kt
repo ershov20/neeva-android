@@ -27,7 +27,7 @@ fun SettingsGroupView(
             .wrapContentHeight(align = Alignment.Bottom)
     ) {
         if (settingsController.isAdvancedSettingsAllowed() || !groupData.isForDebugOnly) {
-            groupData.titleId?.let { SectionHeader(it) }
+            SectionHeader(groupData.titleId)
 
             SettingRowsView(
                 settingsController,

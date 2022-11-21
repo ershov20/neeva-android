@@ -75,6 +75,10 @@ val previewCardGridTitles by lazy {
 @Preview(locale = "he")
 annotation class PortraitPreviews
 
+@Preview(locale = "en")
+@Preview(locale = "en", fontScale = 2.0f)
+annotation class NoTextPortraitPreviews
+
 @Preview(locale = "en", uiMode = UI_MODE_NIGHT_YES)
 @Preview(locale = "en", fontScale = 2.0f, uiMode = UI_MODE_NIGHT_YES)
 @Preview(locale = "fr", uiMode = UI_MODE_NIGHT_YES)

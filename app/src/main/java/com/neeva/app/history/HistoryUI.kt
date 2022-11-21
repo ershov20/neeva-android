@@ -7,7 +7,6 @@ package com.neeva.app.history
 import android.graphics.Bitmap
 import android.icu.util.Calendar
 import android.net.Uri
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -52,6 +51,7 @@ import com.neeva.app.ui.toLocalDate
 import com.neeva.app.ui.widgets.AutocompleteTextField
 import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.PillSurface
+import com.neeva.app.ui.widgets.RowActionIconButton
 import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.RowActionStartIconParams
 import java.util.Date
@@ -143,11 +143,14 @@ private fun HistoryUI(
         item {
             ClickableRow(
                 primaryLabel = stringResource(R.string.settings_clear_browsing_data),
-                actionIconParams = RowActionIconParams(
-                    onTapAction = onClearHistory,
-                    actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
-                    size = Dimensions.SIZE_ICON_SMALL
-                )
+                onTapAction = onClearHistory,
+                endComposable = {
+                    RowActionIconButton(
+                        onTapAction = onClearHistory,
+                        actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
+                        size = Dimensions.SIZE_ICON_SMALL
+                    )
+                }
             )
         }
 

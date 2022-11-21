@@ -278,9 +278,10 @@ fun SpaceDetailToolbar(
         },
         navigationIcon = {
             RowActionIconButton(
-                iconParams = RowActionIconParams(
+                RowActionIconParams(
                     onTapAction = { appNavModel.popBackStack() },
-                    actionType = RowActionIconParams.ActionType.BACK
+                    actionType = RowActionIconParams.ActionType.BACK,
+                    contentDescription = null,
                 )
             )
         },
@@ -302,7 +303,7 @@ fun SpaceDetailToolbar(
 
             if (canEdit && !isTitleVisible) {
                 RowActionIconButton(
-                    iconParams = RowActionIconParams(
+                    RowActionIconParams(
                         onTapAction = onAddToSpace,
                         actionType = RowActionIconParams.ActionType.ADD,
                         contentDescription = stringResource(R.string.space_add_space_item)
@@ -310,7 +311,7 @@ fun SpaceDetailToolbar(
                 )
 
                 RowActionIconButton(
-                    iconParams = RowActionIconParams(
+                    RowActionIconParams(
                         onTapAction = onEditSpace,
                         actionType = RowActionIconParams.ActionType.EDIT,
                         contentDescription = stringResource(R.string.space_edit)
@@ -331,7 +332,7 @@ fun SpaceDetailToolbar(
             }
 
             RowActionIconButton(
-                iconParams = RowActionIconParams(
+                RowActionIconParams(
                     onTapAction = {
                         space?.let {
                             if (it.userACL == SpaceACLLevel.Owner) {
@@ -341,7 +342,8 @@ fun SpaceDetailToolbar(
                             }
                         }
                     },
-                    actionType = RowActionIconParams.ActionType.SHARE
+                    actionType = RowActionIconParams.ActionType.SHARE,
+                    contentDescription = null,
                 )
             )
 

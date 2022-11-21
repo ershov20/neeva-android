@@ -9,7 +9,6 @@ import androidx.compose.ui.res.stringResource
 import com.neeva.app.R
 import com.neeva.app.ui.OneBooleanPreviewContainer
 import com.neeva.app.ui.PortraitPreviews
-import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun NavigationRow(
@@ -25,12 +24,7 @@ fun NavigationRow(
         secondaryLabel = secondaryLabel,
         primaryMaxLines = primaryMaxLines,
         secondaryMaxLines = secondaryMaxLines,
-        actionIconParams = RowActionIconParams(
-            onTapAction = onClick,
-            actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
-            size = Dimensions.SIZE_ICON_SMALL,
-            enabled = enabled
-        ),
+        onTapAction = onClick,
         enabled = enabled
     )
 }

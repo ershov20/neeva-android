@@ -22,19 +22,16 @@ object Dimensions {
     val SIZE_TOUCH_TARGET = 48.dp
 
     val SIZE_ICON_SMALL = 16.dp
-    val SIZE_ICON_MEDIUM = 24.dp
+    val SIZE_ICON_MEDIUM = 24.dp /** Default size of a Material icon. */
     val SIZE_ICON_TOOLBAR = 21.dp
 
     val NEEVASCOPE_TIP_SIZE = 8.dp
 
     val SCROLL_GRADIENT_INDICATOR = 48.dp
 
-    /** Default size of a Material icon. */
-    val SIZE_ICON = 24.dp
-
     /**
      * Pre-calculated value for full-bleed Composables that need to match the size of an icon
      * wrapped inside of a container with PADDING_SMALL on all sides.
      */
-    val SIZE_ICON_INCLUDING_PADDING = SIZE_ICON + (PADDING_SMALL * 2)
+    val SIZE_ICON_INCLUDING_PADDING = this.SIZE_ICON_MEDIUM + (PADDING_SMALL * 2)
 }

@@ -108,7 +108,7 @@ fun SpaceHeaderStats(
         if (isPublic) {
             Icon(
                 painterResource(id = R.drawable.ic_group),
-                modifier = Modifier.size(Dimensions.SIZE_ICON),
+                modifier = Modifier.size(Dimensions.SIZE_ICON_MEDIUM),
                 tint = MaterialTheme.colorScheme.onBackground,
                 contentDescription = null
             )

@@ -57,7 +57,8 @@ fun NavSuggestionRowPreview_LongLabels() {
             actionIconParams = onTapEdit?.let {
                 RowActionIconParams(
                     onTapAction = it,
-                    actionType = RowActionIconParams.ActionType.REFINE
+                    actionType = RowActionIconParams.ActionType.REFINE,
+                    contentDescription = stringResource(R.string.refine),
                 )
             }
         )
@@ -82,7 +83,8 @@ fun NavSuggestionRowPreview_ShortLabels() {
             actionIconParams = onTapEdit?.let {
                 RowActionIconParams(
                     onTapAction = it,
-                    actionType = RowActionIconParams.ActionType.REFINE
+                    actionType = RowActionIconParams.ActionType.REFINE,
+                    contentDescription = stringResource(R.string.refine),
                 )
             }
         )

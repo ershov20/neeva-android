@@ -63,7 +63,8 @@ class FeedbackViewOpensAndClosesTest : BaseBrowserTest() {
 
             // Wait for the Support screen to show up.
             waitForNavDestination(AppNavDestination.FEEDBACK)
-            onNodeWithText(getString(R.string.submit_feedback_help_center_title)).assertExists()
+            onNodeWithText(getString(R.string.submit_feedback_help_center_title), substring = true)
+                .assertExists()
             waitForIdle()
 
             // Go back to the previous screen.

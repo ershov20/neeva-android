@@ -13,35 +13,38 @@ import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.layouts.BaseRowLayout
 import com.neeva.app.ui.theme.Dimensions
 
+/**
+ * @param contentDescription will default to [primaryLabel] if omitted
+ * */
 @Composable
 fun ClickableRow(
     primaryLabel: String,
     secondaryLabel: String? = null,
     primaryMaxLines: Int = 1,
     secondaryMaxLines: Int = 1,
-    isActionDangerous: Boolean = false,
-    actionIconParams: RowActionIconParams,
-    applyVerticalPadding: Boolean = true,
+    contentDescription: String? = null,
+    isDangerousAction: Boolean = false,
+    onTapAction: (() -> Unit)? = null,
+    onDoubleTapAction: (() -> Unit)? = null,
+    onLongTapAction: (() -> Unit)? = null,
+    endComposable: @Composable (() -> Unit)? = null,
     enabled: Boolean = true
 ) {
-    val backgroundColor = MaterialTheme.colorScheme.surface
     BaseRowLayout(
-        onTapRow = actionIconParams.onTapAction.takeIf { enabled },
-        onTapRowContentDescription = actionIconParams.contentDescription,
-        endComposable = if (actionIconParams.actionType != RowActionIconParams.ActionType.NONE) {
-            { RowActionIconButton(actionIconParams) }
-        } else {
-            null
-        },
-        backgroundColor = backgroundColor,
-        applyVerticalPadding = applyVerticalPadding
+        onTapRow = onTapAction.takeIf { enabled },
+        onDoubleTapRow = onDoubleTapAction.takeIf { enabled },
+        onLongTap = onLongTapAction.takeIf { enabled },
+        onTapRowContentDescription = contentDescription ?: primaryLabel,
+        endComposable = endComposable,
+        backgroundColor = MaterialTheme.colorScheme.surface,
+        applyVerticalPadding = true
     ) {
         StackedText(
             primaryLabel = primaryLabel,
             secondaryLabel = secondaryLabel,
             primaryMaxLines = primaryMaxLines,
             secondaryMaxLines = secondaryMaxLines,
-            primaryColor = if (isActionDangerous) {
+            primaryColor = if (isDangerousAction) {
                 MaterialTheme.colorScheme.error
             } else {
                 MaterialTheme.colorScheme.onSurface
@@ -57,11 +60,14 @@ fun ClickableRowPreviewNavigate() {
     LightDarkPreviewContainer {
         ClickableRow(
             primaryLabel = stringResource(id = R.string.debug_long_string_primary),
-            actionIconParams = RowActionIconParams(
-                onTapAction = {},
-                RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
-                size = Dimensions.SIZE_ICON_SMALL
-            )
+            onTapAction = {},
+            endComposable = {
+                RowActionIconButton(
+                    onTapAction = {},
+                    actionType = RowActionIconParams.ActionType.NAVIGATE_TO_SCREEN,
+                    size = Dimensions.SIZE_ICON_SMALL
+                )
+            }
         )
     }
 }
@@ -72,11 +78,14 @@ fun ClickableRowPreviewOpenUrl() {
     LightDarkPreviewContainer {
         ClickableRow(
             primaryLabel = stringResource(id = R.string.debug_long_string_primary),
-            actionIconParams = RowActionIconParams(
-                onTapAction = {},
-                RowActionIconParams.ActionType.OPEN_URL,
-                size = Dimensions.SIZE_ICON_SMALL
-            )
+            onTapAction = {},
+            endComposable = {
+                RowActionIconButton(
+                    onTapAction = {},
+                    actionType = RowActionIconParams.ActionType.OPEN_URL,
+                    size = Dimensions.SIZE_ICON_SMALL
+                )
+            }
         )
     }
 }
@@ -87,10 +96,13 @@ fun ClickableRowPreviewRefine() {
     LightDarkPreviewContainer {
         ClickableRow(
             primaryLabel = stringResource(id = R.string.debug_long_string_primary),
-            actionIconParams = RowActionIconParams(
-                onTapAction = {},
-                RowActionIconParams.ActionType.REFINE
-            )
+            endComposable = {
+                RowActionIconButton(
+                    onTapAction = {},
+                    actionType = RowActionIconParams.ActionType.REFINE,
+                    contentDescription = stringResource(R.string.refine),
+                )
+            }
         )
     }
 }

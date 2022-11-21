@@ -5,13 +5,11 @@
 package com.neeva.app.settings.sharedcomposables
 
 import android.net.Uri
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
@@ -22,18 +20,17 @@ import com.neeva.app.settings.SettingsController
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
-import com.neeva.app.settings.clearbrowsing.ClearDataButtonContainer
 import com.neeva.app.settings.defaultbrowser.SetDefaultBrowserRow
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.profile.ProfileRowContainer
 import com.neeva.app.settings.profile.SubscriptionRow
 import com.neeva.app.settings.sharedcomposables.subcomponents.CheckBoxGroup
 import com.neeva.app.settings.sharedcomposables.subcomponents.CheckBoxItem
-import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsButtonRow
 import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsLinkRow
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.NeevaSwitch
-import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.layouts.BaseRowLayout
+import com.neeva.app.ui.widgets.ClickableRow
 import com.neeva.app.ui.widgets.NavigationRow
 import com.neeva.app.ui.widgets.RadioButtonGroup
 import com.neeva.app.ui.widgets.RadioButtonItem
@@ -75,11 +72,12 @@ fun SettingsRow(
 
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
-            SettingsButtonRow(
+            ClickableRow(
                 primaryLabel = rowDataValues.primaryLabel,
                 secondaryLabel = rowDataValues.secondaryLabel,
-                onClick = onClick,
-                onDoubleClick = onDoubleClick
+                isDangerousAction = rowData.isDangerousAction,
+                onTapAction = rowData.buttonAction ?: onClick,
+                onDoubleTapAction = onDoubleClick
             )
         }
 
@@ -93,15 +91,13 @@ fun SettingsRow(
         }
 
         SettingsRowType.TEXT -> {
-            Text(
-                rowDataValues.primaryLabel,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(
-                    vertical = Dimensions.PADDING_TINY,
-                    horizontal = Dimensions.PADDING_LARGE
+            BaseRowLayout {
+                Text(
+                    rowDataValues.primaryLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            )
+            }
         }
 
         SettingsRowType.TOGGLE -> {
@@ -139,14 +135,6 @@ fun SettingsRow(
                     )
                 }
             }
-        }
-
-        SettingsRowType.CLEAR_DATA_BUTTON -> {
-            ClearDataButtonContainer(
-                getToggleState = settingsController::getToggleState,
-                rowData = rowData,
-                onClearBrowsingData = settingsController::clearBrowsingData
-            )
         }
 
         SettingsRowType.PROFILE -> {

@@ -14,22 +14,23 @@ import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 import com.neeva.app.settings.SettingsToggle
 
-class ClearBrowsingPaneData(neevaConstants: NeevaConstants) : SettingsPaneDataInterface {
+class ClearBrowsingPaneData(
+    neevaConstants: NeevaConstants,
+    onClearDataButtonTapped: () -> Unit,
+) : SettingsPaneDataInterface {
     @StringRes
     override val topAppBarTitleResId: Int = R.string.settings_clear_browsing_data
     override val shouldShowUserName: Boolean = false
     override val data = listOf(
         SettingsGroupData(
             R.string.clear_browsing_data_on_this_device,
-            timeClearingOptionToggles
-        ),
-        SettingsGroupData(
-            rows = listOf(
+            timeClearingOptionToggles +
                 SettingsRowData(
-                    type = SettingsRowType.CLEAR_DATA_BUTTON,
-                    primaryLabelId = R.string.settings_clear_selected_data_on_device
-                ),
-            )
+                    type = SettingsRowType.BUTTON,
+                    primaryLabelId = R.string.settings_clear_selected_data_on_device,
+                    isDangerousAction = true,
+                    buttonAction = onClearDataButtonTapped
+                )
         ),
         SettingsGroupData(
             R.string.settings_data_in_neeva_memory,
@@ -42,6 +43,7 @@ class ClearBrowsingPaneData(neevaConstants: NeevaConstants) : SettingsPaneDataIn
             )
         ),
     )
+
     companion object {
         val timeClearingOptionToggles = listOf(
             SettingsRowData(

@@ -158,7 +158,7 @@ fun PullToRefreshBox(verticalOverscroll: Float) {
                     Icon(
                         modifier = Modifier
                             .padding(Dimensions.PADDING_MEDIUM)
-                            .size(Dimensions.SIZE_ICON),
+                            .size(Dimensions.SIZE_ICON_MEDIUM),
                         imageVector = Icons.Default.Refresh,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimary
@@ -168,7 +168,7 @@ fun PullToRefreshBox(verticalOverscroll: Float) {
                         color = Color.Transparent,
                         modifier = Modifier
                             .padding(Dimensions.PADDING_MEDIUM)
-                            .size(Dimensions.SIZE_ICON)
+                            .size(Dimensions.SIZE_ICON_MEDIUM)
                     ) {
                         Canvas(modifier = Modifier.fillMaxSize()) {
                             drawArc(

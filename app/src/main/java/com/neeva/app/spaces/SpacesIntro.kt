@@ -157,7 +157,7 @@ fun SpacesIntro(
 
     ) {
         val paddingForCloseButton = Dimensions.PADDING_HUGE
-        val closeButtonSize = Dimensions.SIZE_ICON
+        val closeButtonSize = Dimensions.SIZE_ICON_MEDIUM
         val contentOverlapsWithCloseButton =
             (heightOfContent + paddingForCloseButton * 2 + closeButtonSize) > viewHeight
 

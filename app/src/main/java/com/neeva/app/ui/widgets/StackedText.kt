@@ -26,7 +26,7 @@ import com.neeva.app.ui.theme.getClickableAlpha
 fun StackedText(
     primaryLabel: String,
     secondaryLabel: String? = null,
-    primaryTextStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    primaryTextStyle: TextStyle = MaterialTheme.typography.titleMedium,
     secondaryTextStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     primaryMaxLines: Int = 1,
     secondaryMaxLines: Int = 1,

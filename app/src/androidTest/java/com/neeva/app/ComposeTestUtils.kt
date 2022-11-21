@@ -151,8 +151,9 @@ fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.waitForNo
 
 /** Wait for a Composable to appear with the given text, then click on it. */
 fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.waitForNodeWithText(
-    text: String
-) = waitForNode(hasText(text))
+    text: String,
+    substring: Boolean = false
+) = waitForNode(hasText(text, substring = substring))
 
 fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.waitForNode(
     matcher: SemanticsMatcher

@@ -11,7 +11,8 @@ import com.neeva.app.R
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.ui.widgets.ClickableRow
-import com.neeva.app.ui.widgets.RowActionIconParams
+import com.neeva.app.ui.widgets.RowActionIconButton
+import com.neeva.app.ui.widgets.RowActionIconParams.ActionType.OPEN_URL
 
 @Composable
 fun SettingsLinkRow(
@@ -20,11 +21,14 @@ fun SettingsLinkRow(
 ) {
     ClickableRow(
         primaryLabel = label,
-        actionIconParams = RowActionIconParams(
-            onTapAction = openUrl,
-            actionType = RowActionIconParams.ActionType.OPEN_URL,
-            size = Dimensions.SIZE_ICON_SMALL
-        )
+        onTapAction = openUrl,
+        endComposable = {
+            RowActionIconButton(
+                onTapAction = openUrl,
+                actionType = OPEN_URL,
+                size = Dimensions.SIZE_ICON_SMALL
+            )
+        }
     )
 }
 

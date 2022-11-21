@@ -58,6 +58,7 @@ interface SettingsController {
         clearingOptions: Map<SettingsToggle, Boolean>,
         timeClearingOption: TimeClearingOption
     )
+    fun showDataClearedMessage(message: String)
     //endregion
 
     //region Cookie Cutter Data
@@ -198,6 +199,10 @@ class SettingsControllerImpl(
             TimeClearingOption.EVERYTHING -> 0L
         }
         webLayerModel.clearBrowsingData(clearingOptions, fromMillis, toMillis)
+    }
+
+    override fun showDataClearedMessage(message: String) {
+        popupModel.showSnackbar(message)
     }
 
     override fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager {
@@ -410,6 +415,8 @@ val mockSettingsControllerImpl by lazy {
             clearingOptions: Map<SettingsToggle, Boolean>,
             timeClearingOption: TimeClearingOption
         ) {}
+
+        override fun showDataClearedMessage(message: String) {}
 
         override fun getSetDefaultAndroidBrowserManager(): SetDefaultAndroidBrowserManager {
             return FakeSetDefaultAndroidBrowserManager()

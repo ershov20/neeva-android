@@ -138,7 +138,7 @@ fun SpaceCard(
     val lockComposable = @Composable {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier.size(Dimensions.SIZE_ICON)
+            modifier = Modifier.size(Dimensions.SIZE_ICON_MEDIUM)
         ) {
             Icon(
                 Icons.Default.Lock,

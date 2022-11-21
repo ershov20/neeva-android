@@ -35,6 +35,9 @@ import com.neeva.app.ui.LightDarkPreviewContainer
  * You may find it useful to pass in a [textStyle] that passes along [LocalContentColor.current]
  * as its color.  This is because the [ClickableText] uses the non-Material 3 [BasicText] composable
  * and doesn't correctly pull the local color.
+ *
+ * If you would like similar functionality without using a HTML base string, use
+ * [PartiallyClickableString]
  */
 @Composable
 fun AnnotatedSpannable(
