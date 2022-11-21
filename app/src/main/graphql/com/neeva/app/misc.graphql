@@ -23,3 +23,10 @@ mutation SendFeedback($input: SendFeedbackV2Input!) {
   sendFeedbackV2(input: $input)
 }
 
+mutation InitializeGooglePlaySubscription  {
+  initializeGooglePlaySubscription {
+    subscriptionStatus
+    obfuscatedUserID
+    error
+  }
+}
