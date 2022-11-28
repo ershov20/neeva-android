@@ -8,11 +8,11 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.core.content.FileProvider
 import com.neeva.app.R
 import com.neeva.app.ui.PopupModel
 import java.io.File
+import timber.log.Timber
 
 class ActivityStarter(private val appContext: Context, private val popupModel: PopupModel) {
     fun safeStartActivityForIntent(intent: Intent) {
@@ -23,7 +23,7 @@ class ActivityStarter(private val appContext: Context, private val popupModel: P
             appContext.startActivity(intent)
         } catch (e: ActivityNotFoundException) {
             popupModel.showSnackbar(appContext.getString(R.string.error_generic))
-            Log.e(TAG, "Failed to start Activity for $intent")
+            Timber.e("Failed to start Activity for $intent")
         }
     }
 
@@ -47,11 +47,7 @@ class ActivityStarter(private val appContext: Context, private val popupModel: P
             safeStartActivityForIntent(openFileIntent)
         } catch (e: Exception) {
             popupModel.showSnackbar(appContext.getString(R.string.error_generic))
-            Log.e(TAG, "Failed to open file because of:", e)
+            Timber.e("Failed to open file because of:", e)
         }
-    }
-
-    companion object {
-        private const val TAG = "ActivityStarter"
     }
 }

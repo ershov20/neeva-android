@@ -6,7 +6,6 @@ package com.neeva.app
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.annotation.WorkerThread
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
@@ -18,10 +17,9 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 import okhttp3.internal.closeQuietly
+import timber.log.Timber
 
 object ZipUtils {
-    private val TAG = ZipUtils::class.simpleName
-
     /** Extracts a ZIP file that was provided via a content:// Uri. */
     @WorkerThread
     fun extract(context: Context, contentUri: Uri, outputDirectory: File): Boolean {
@@ -40,7 +38,7 @@ object ZipUtils {
 
             true
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to unzip $contentUri", e)
+            Timber.e("Failed to unzip $contentUri", e)
             false
         } finally {
             zipStream?.closeQuietly()
@@ -61,7 +59,7 @@ object ZipUtils {
 
         outputEntryFile.parentFile?.mkdirs()
 
-        Log.d(TAG, "Unzipping: ${entry.name} to ${outputEntryFile.path}")
+        Timber.d("Unzipping: ${entry.name} to ${outputEntryFile.path}")
         FileOutputStream(outputEntryFile).use { outputStream ->
             BufferedOutputStream(outputStream, buffer.size).use { bufferedOutputStream ->
                 while (zipStream.read(buffer, 0, buffer.size).also { size = it } != -1) {
@@ -83,7 +81,7 @@ object ZipUtils {
             zipStream.flush()
             true
         } catch (exception: Exception) {
-            Log.e(TAG, "Failed to zip $file", exception)
+            Timber.e("Failed to zip $file", exception)
             false
         } finally {
             zipStream?.closeQuietly()

@@ -9,7 +9,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.core.net.toUri
 import com.apollographql.apollo3.api.Optional
@@ -64,6 +63,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 /** Manages interactions with the user's Spaces. */
 class SpaceStore(
@@ -79,7 +79,6 @@ class SpaceStore(
     directories: Directories
 ) {
     companion object {
-        private val TAG = SpaceStore::class.simpleName
         private const val DIRECTORY_NAME = "spaces"
         private const val MAX_THUMBNAIL_SIZE = 300
         const val MAKER_COMMUNITY_SPACE_ID = "xlvaUJmdPRSrcqRHPEzVPuWf4RP74EyHvz5QvxLN"
@@ -443,7 +442,7 @@ class SpaceStore(
         ).response
 
         return@withContext response?.data?.entityId?.let {
-            Log.i(TAG, "Added item to space with id=$it")
+            Timber.i("Added item to space with id=$it")
             popupModel.showSnackbar(
                 message = appContext.getString(R.string.space_added_url_to_space, space.name),
                 actionLabel = appContext.getString(R.string.space_open),
@@ -485,7 +484,7 @@ class SpaceStore(
             ).response
 
             response?.data?.let {
-                Log.i(TAG, "Updated space item with id=${item.id}")
+                Timber.i("Updated space item with id=${item.id}")
                 dao.upsert(item.copy(title = title, snippet = description))
             }
             stateFlow.value = State.READY
@@ -507,7 +506,7 @@ class SpaceStore(
             ).response
 
             response?.data?.let {
-                Log.i(TAG, "Updated space with id=${space.id}")
+                Timber.i("Updated space with id=${space.id}")
                 dao.upsert(space.copy(name = title, description = description))
             }
             stateFlow.value = State.READY
@@ -543,7 +542,7 @@ class SpaceStore(
         return response?.data?.deleteSpaceResultByURL?.let {
             val successString =
                 appContext.getString(R.string.space_removed_url_from_space, space.name)
-            Log.i(TAG, successString)
+            Timber.i(successString)
             popupModel.showSnackbar(successString)
             val spaceItem = dao.getItemsFromSpace(spaceID).find { it.url == uri }
             spaceItem?.let { dao.deleteSpaceItem(it) }
@@ -686,7 +685,7 @@ class SpaceStore(
         try {
             if (file.exists()) return@withContext file
         } catch (e: SecurityException) {
-            Log.e(TAG, "Failed to check if bitmap exists: ${file.absolutePath}", e)
+            Timber.e("Failed to check if bitmap exists: ${file.absolutePath}", e)
             return@withContext null
         }
 

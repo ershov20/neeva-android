@@ -6,7 +6,6 @@ package com.neeva.app.neevascope
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.neeva.app.CheatsheetInfoQuery
@@ -34,6 +33,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import timber.log.Timber
 
 data class NeevaScopeSearchQuery(
     val query: String,
@@ -66,7 +66,6 @@ class NeevaScopeModel(
     companion object {
         private const val MEMORIZED_QUERY_COUNT_THRESHOLD = 5
         private const val DISCUSSION_COUNT_THRESHOLD = 5
-        val TAG = NeevaScopeModel::class.simpleName
     }
 
     data class RedditPromoState(
@@ -146,7 +145,7 @@ class NeevaScopeModel(
             ).response?.data
         } catch (e: Exception) {
             // TODO(https://github.com/neevaco/neeva-android/issues/826): Show error states
-            Log.e(TAG, "Caught exception while performing query. ", e)
+            Timber.e("Caught exception while performing query. ", e)
         }
 
         return searchResult
@@ -165,7 +164,7 @@ class NeevaScopeModel(
             ).response?.data
         } catch (e: Exception) {
             // TODO(https://github.com/neevaco/neeva-android/issues/826): Show error states
-            Log.e(TAG, "Caught exception while performing query. ", e)
+            Timber.e("Caught exception while performing query. ", e)
         }
 
         return cheatsheetInfo

@@ -7,7 +7,6 @@ package com.neeva.app.neevascope
 import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.work.Constraints
@@ -29,6 +28,7 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 /**
  * Used to save info about bloom filter resource configuration.
@@ -90,10 +90,10 @@ class BloomFilterManager(
         try {
             reddit.localUri = getFilterBinaryFile("reddit.bin").toUri()
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to get filter file ", e)
+            Timber.e("Failed to get filter file ", e)
             return
         } catch (e: IllegalArgumentException) {
-            Log.e(TAG, "Failed to get filter file Uri ", e)
+            Timber.e("Failed to get filter file Uri ", e)
             return
         }
 
@@ -106,7 +106,7 @@ class BloomFilterManager(
         try {
             bloomFilter.loadFilter(reddit.localUri)
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to load filter ", e)
+            Timber.e("Failed to load filter ", e)
         }
     }
 

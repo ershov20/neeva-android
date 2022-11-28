@@ -5,7 +5,6 @@
 package com.neeva.app.history
 
 import android.net.Uri
-import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -31,6 +30,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 /** Provides access to the user's navigation history. */
 class HistoryManager(
@@ -46,8 +46,6 @@ class HistoryManager(
 
         private val HISTORY_WINDOW = TimeUnit.DAYS.toMillis(7)
         private val HISTORY_START_DATE = Date(System.currentTimeMillis() - HISTORY_WINDOW)
-
-        private val TAG = HistoryManager::class.simpleName
     }
 
     private val historyDao = historyDatabase.historyDao()
@@ -147,10 +145,10 @@ class HistoryManager(
     /** Cleans out entries from the database that are no longer necessary. */
     fun pruneDatabase() {
         val numVisitsPurged = historyDao.purgeVisitsMarkedForDeletion()
-        Log.d(TAG, "Purged $numVisitsPurged visits from the database")
+        Timber.d("Purged $numVisitsPurged visits from the database")
 
         val numSitesPurged = historyDao.deleteOrphanedSiteEntities()
-        Log.d(TAG, "Purged $numSitesPurged orphaned sites from the database")
+        Timber.d("Purged $numSitesPurged orphaned sites from the database")
     }
 
     fun clearHistory(fromMillis: Long) {

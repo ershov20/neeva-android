@@ -6,7 +6,6 @@ package com.neeva.app.browsing
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.util.Log
 import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.contentfilter.ContentFilterCallbacks
@@ -35,6 +34,7 @@ import org.chromium.weblayer.NewTabCallback
 import org.chromium.weblayer.NewTabType
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabCallback
+import timber.log.Timber
 
 /**
  * Encapsulates all callbacks related to a particular Tab's operation.
@@ -160,7 +160,7 @@ class TabCallbacks(
             // Navigation can fail if the user is still being asked if they want to open another app
             // to view the website.
             if (navigation.isUserDecidingIntentLaunch) {
-                Log.w(TAG, "Navigation failed because user is deciding intent launch")
+                Timber.w("Navigation failed because user is deciding intent launch")
                 return
             }
 
@@ -272,17 +272,17 @@ class TabCallbacks(
 
         override fun showContextMenu(params: ContextMenuParams) {
             if (tab.isDestroyed) {
-                Log.e(TAG, "Cannot display context menu: Tab is destroyed")
+                Timber.e("Cannot display context menu: Tab is destroyed")
                 return
             }
 
             if (browserFlow.getActiveTabId() != tab.guid) {
-                Log.e(TAG, "Cannot display context menu: Tab is not active")
+                Timber.e("Cannot display context menu: Tab is not active")
                 return
             }
 
             if (browserFlow.getActiveTab() != tab) {
-                Log.w(TAG, "Warning: Tab instances are not equal.  Showing context menu anyway")
+                Timber.w("Warning: Tab instances are not equal.  Showing context menu anyway")
             }
 
             activityCallbackProvider.get()?.showContextMenuForTab(params, tab)
@@ -349,9 +349,5 @@ class TabCallbacks(
         tab.setContentFilterCallback(null)
         tab.unregisterTabCallback(tabCallback)
         scriptInjectionManager.unregisterMessagePassing(tab)
-    }
-
-    companion object {
-        private val TAG = TabCallbacks::class.simpleName
     }
 }

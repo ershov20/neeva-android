@@ -4,13 +4,13 @@
 
 package com.neeva.app.contentfilter
 
-import android.util.Log
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import org.chromium.weblayer.WebMessage
 import org.chromium.weblayer.WebMessageCallback
 import org.chromium.weblayer.WebMessageReplyProxy
+import timber.log.Timber
 
 abstract class ContentFilterCallbacks : WebMessageCallback() {
     companion object {
@@ -19,7 +19,6 @@ abstract class ContentFilterCallbacks : WebMessageCallback() {
         const val MESSAGE_GET_IS_FLAGGED = "is_flagged"
         const val MESSAGE_NOTICE_HANDLED = "notice_handled"
         const val MESSAGE_GET_PREFERENCES = "get_preferences"
-        private val TAG = ContentFilterCallbacks::class.simpleName
 
         private val moshi: Moshi = Moshi.Builder().build()
         private val messageAdapter = moshi.adapter<CookieEngineMessage<Any>>(
@@ -61,8 +60,7 @@ abstract class ContentFilterCallbacks : WebMessageCallback() {
             MESSAGE_GET_PREFERENCES -> handleGetPreferences(replyProxy)
             MESSAGE_GET_IS_FLAGGED -> handleIsFlagged(replyProxy)
             MESSAGE_STARTED -> {}
-            else -> Log.w(
-                TAG,
+            else -> Timber.w(
                 "Unexpected message from Cookie Cutter engine: ${plainMessage?.type}"
             )
         }

@@ -1,7 +1,6 @@
 package com.neeva.app.userdata
 
 import android.net.Uri
-import android.util.Log
 import androidx.annotation.MainThread
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaBrowser
@@ -28,6 +27,7 @@ import okhttp3.internal.EMPTY_REQUEST
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.CookieChangedCallback
 import org.chromium.weblayer.CookieManager
+import timber.log.Timber
 
 /**
  * Payload received when creating new preview or incognito sessions.
@@ -62,10 +62,6 @@ abstract class SessionToken(
     protected val endpointURL: String?,
     val cookieName: String
 ) {
-    companion object {
-        private const val TAG = "SessionToken"
-    }
-
     /**
      * Cached version of the session token.  The actual source of truth is the WebLayer [Browser]
      * and its [CookieManager], but storing it is helpful for performing network requests.  If you
@@ -113,7 +109,7 @@ abstract class SessionToken(
             // sync it back from the browser.
             val restoredValue = cachedValue
             if (restoredValue.isNotEmpty()) {
-                Log.d(TAG, "Cached session cookie detected at startup; re-setting in Browser.")
+                Timber.d("Cached session cookie detected at startup; re-setting in Browser.")
                 suspendCoroutine { continuation ->
                     updateCookieManager(restoredValue) {
                         continuation.resume(Unit)
@@ -196,9 +192,9 @@ abstract class SessionToken(
 
         val callbackWithLog: (Boolean) -> Unit = { success ->
             if (!success) {
-                Log.e(TAG, "Failed to set $cookieName in Browser")
+                Timber.e("Failed to set $cookieName in Browser")
             } else {
-                Log.i(TAG, "Set $cookieName in Browser")
+                Timber.i("Set $cookieName in Browser")
             }
 
             callback(success)
@@ -228,9 +224,9 @@ abstract class SessionToken(
                     processResponse(response)
                 }
             } catch (e: IOException) {
-                Log.e(TAG, "Failed to request $cookieName session token", e)
+                Timber.e("Failed to request $cookieName session token", e)
             } catch (e: IllegalStateException) {
-                Log.e(TAG, "Failed to request $cookieName session token", e)
+                Timber.e("Failed to request $cookieName session token", e)
             }
         }
     }

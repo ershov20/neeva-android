@@ -6,7 +6,6 @@ package com.neeva.app.storage
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.browsing.FileEncrypter
 import java.io.File
@@ -21,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import org.chromium.weblayer.Tab
+import timber.log.Timber
 
 /**
  * Manages thumbnails for each tab to display in the tab switcher.  These thumbnails are created by
@@ -32,7 +32,6 @@ abstract class TabScreenshotManager(
     private val dispatchers: Dispatchers
 ) {
     companion object {
-        private const val TAG = "TabScreenshotManager"
         private const val DIRECTORY_TAB_SCREENSHOTS = "tab_screenshots"
         internal const val SCREENSHOT_TIMEOUT_MS = 1000L
 
@@ -75,7 +74,7 @@ abstract class TabScreenshotManager(
         tab.captureScreenShot(0.5f) { thumbnail, errorCode ->
             if (errorCode != 0) {
                 val errorName = ScreenshotErrors.values().getOrNull(errorCode)?.name
-                Log.w(TAG, "Failed to create tab thumbnail: Tab=$tab, Error=$errorCode $errorName")
+                Timber.w("Failed to create tab thumbnail: Tab=$tab, Error=$errorCode $errorName")
             }
             deferredThumbnail.complete(thumbnail)
         }
@@ -117,7 +116,7 @@ abstract class TabScreenshotManager(
                 ?.filterNot { liveTabFiles.contains(it) }
                 ?.forEach { it.delete() }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to cleanup tab screenshot directory", e)
+            Timber.e("Failed to cleanup tab screenshot directory", e)
         }
     }
 
@@ -126,7 +125,7 @@ abstract class TabScreenshotManager(
             val file = getTabScreenshotFile(tabId)
             if (file.exists()) file.delete()
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to delete thumbnail for $tabId", e)
+            Timber.e("Failed to delete thumbnail for $tabId", e)
         }
     }
 

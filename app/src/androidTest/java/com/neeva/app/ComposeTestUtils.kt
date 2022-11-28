@@ -4,7 +4,6 @@
 
 package com.neeva.app
 
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.SemanticsMatcher
@@ -20,8 +19,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.concurrent.TimeUnit
 import org.junit.rules.TestRule
+import timber.log.Timber
 
-private const val TAG = "ComposeTestUtils"
 val WAIT_TIMEOUT = TimeUnit.SECONDS.toMillis(10)
 
 fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.getString(
@@ -179,7 +178,7 @@ fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.flakyClic
         waitForNode(matcher).performClick()
         waitFor { expectedCondition() }
     } catch (e: ComposeTimeoutException) {
-        Log.e(TAG, "Failed to click using '${matcher.description}'.  Trying again.")
+        Timber.e("Failed to click using '${matcher.description}'.  Trying again.")
         waitForNode(matcher).performClick()
         waitFor("Failed to click using '${matcher.description}'") { expectedCondition() }
     }

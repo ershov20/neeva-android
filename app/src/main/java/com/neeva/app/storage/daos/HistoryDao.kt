@@ -5,7 +5,6 @@
 package com.neeva.app.storage.daos
 
 import android.net.Uri
-import android.util.Log
 import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Query
@@ -16,13 +15,11 @@ import com.neeva.app.storage.entities.Site
 import com.neeva.app.storage.entities.Visit
 import java.util.Date
 import kotlinx.coroutines.flow.Flow
+import timber.log.Timber
 
 @RewriteQueriesToDropUnusedColumns
 @Dao
 interface HistoryDao : SiteDao, VisitDao {
-    companion object {
-        private val TAG = HistoryDao::class.simpleName
-    }
 
     @Query(
         """
@@ -168,10 +165,10 @@ interface HistoryDao : SiteDao, VisitDao {
     suspend fun deleteHistoryWithinTimeframe(startTime: Date, endTime: Date) {
         // Delete any visits that happened within the given timeframe.
         val numDeletedVisits = deleteVisitsWithinTimeframe(startTime, endTime)
-        Log.d(TAG, "Deleted $numDeletedVisits entries from history")
+        Timber.d("Deleted $numDeletedVisits entries from history")
 
         // Delete Site entities that don't have any remaining Visit entities.
         val numDeletedSites = deleteOrphanedSiteEntities()
-        Log.d(TAG, "Deleted $numDeletedSites sites from history")
+        Timber.d("Deleted $numDeletedSites sites from history")
     }
 }

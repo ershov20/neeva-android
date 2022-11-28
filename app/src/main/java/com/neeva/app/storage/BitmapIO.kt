@@ -12,7 +12,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.net.Uri
 import android.util.Base64
-import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
@@ -29,11 +28,11 @@ import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
 import okhttp3.internal.closeQuietly
+import timber.log.Timber
 
 /** Helper for writing and reading [Bitmap]s to/from disk with different ways to define filename */
 object BitmapIO {
     const val DATA_URI_PREFIX = "data:image/jpeg;base64,"
-    private val TAG = BitmapIO::class.simpleName
 
     @WorkerThread
     fun saveBitmap(
@@ -69,7 +68,7 @@ object BitmapIO {
             bufferedOutputStream.flush()
             bitmapFile
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to write bitmap to storage; deleting the attempt")
+            Timber.e("Failed to write bitmap to storage; deleting the attempt")
             if (bitmapFile.exists()) {
                 bitmapFile.delete()
             }
@@ -101,10 +100,10 @@ object BitmapIO {
             bufferedStream = BufferedInputStream(inputStream)
             BitmapFactory.decodeStream(bufferedStream)
         } catch (e: FileNotFoundException) {
-            Log.d(TAG, "${e.message}")
+            Timber.d("${e.message}")
             null
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to restore bitmap", e)
+            Timber.e("Failed to restore bitmap", e)
             null
         } finally {
             bufferedStream?.closeQuietly()

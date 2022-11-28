@@ -1,7 +1,6 @@
 package com.neeva.app
 
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
@@ -12,6 +11,7 @@ import com.neeva.app.storage.BitmapIO
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.fail
 import org.junit.Rule
+import timber.log.Timber
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -38,7 +38,6 @@ import kotlin.math.abs
  */
 abstract class BaseScreenshotTest {
     companion object {
-        val TAG = BaseScreenshotTest::class.simpleName
         const val GOLDEN_SCREENSHOT_DIRECTORY = "golden"
         const val ALLOWED_FUDGE_FACTOR = 3
     }
@@ -60,19 +59,19 @@ abstract class BaseScreenshotTest {
                 append(".png")
             }
             .toString()
-        Log.d(TAG, "Running test and saving to: $filename")
+        Timber.d("Running test and saving to: $filename")
 
         composeTestRule.setContent { content() }
 
         // Take a screenshot of the hierarchy.
-        Log.d(TAG, "Taking screenshot")
+        Timber.d("Taking screenshot")
         val imageBitmap = composeTestRule.onRoot().captureToImage()
         val bitmap = imageBitmap.asAndroidBitmap()
 
         // Save the image out to disk.  This file can be retrieved from the device using
         // Android Studio's "Device File Explorer".
         runBlocking {
-            Log.d(TAG, "Saving bitmap")
+            Timber.d("Saving bitmap")
             val directory = InstrumentationRegistry.getInstrumentation().targetContext.cacheDir
             BitmapIO.saveBitmap(
                 directory = directory,
@@ -83,7 +82,7 @@ abstract class BaseScreenshotTest {
         }
 
         // Check if the "golden" image exists.
-        Log.d(TAG, "Comparing against pre-existing image")
+        Timber.d("Comparing against pre-existing image")
         val instrumentationContext = InstrumentationRegistry.getInstrumentation().context
         val goldenFiles = instrumentationContext.assets.list(GOLDEN_SCREENSHOT_DIRECTORY)!!.toList()
         if (!goldenFiles.contains(filename)) {

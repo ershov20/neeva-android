@@ -13,7 +13,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
@@ -83,6 +82,7 @@ import kotlinx.coroutines.withContext
 import org.chromium.weblayer.ContextMenuParams
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebLayer
+import timber.log.Timber
 
 @AndroidEntryPoint
 class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
@@ -99,8 +99,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
         /** Sends the user directly into the Zero Query page without the keyboard up. */
         const val ACTION_ZERO_QUERY = "ACTION_ZERO_QUERY"
-
-        private const val TAG = "NeevaActivity"
     }
 
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
@@ -530,7 +528,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 // happening after an Activity restart, but I haven't been able to reproduce it.
                 // Speculatively avoid the crash by removing the wrong fragment when a new Fragment
                 // is added for the same profile.
-                Log.e(TAG, "Existing fragment found that does not match the new fragment")
+                Timber.e("Existing fragment found that does not match the new fragment")
                 transaction.remove(existingFragment)
                 transaction.add(R.id.weblayer_fragment, fragment, fragmentTag)
             } else {

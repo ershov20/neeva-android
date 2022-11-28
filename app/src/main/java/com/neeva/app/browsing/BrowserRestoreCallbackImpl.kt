@@ -4,10 +4,10 @@
 
 package com.neeva.app.browsing
 
-import android.util.Log
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.BrowserRestoreCallback
 import org.chromium.weblayer.Tab
+import timber.log.Timber
 
 /** Handles anything that needs to be done after a Browser finishes restoration. */
 class BrowserRestoreCallbackImpl(
@@ -18,10 +18,6 @@ class BrowserRestoreCallbackImpl(
     private val onEmptyTabList: () -> Unit,
     private val afterRestoreCompleted: () -> Unit
 ) : BrowserRestoreCallback() {
-    companion object {
-        private val TAG = BrowserRestoreCallbackImpl::class.simpleName
-    }
-
     override fun onRestoreCompleted() {
         super.onRestoreCompleted()
 
@@ -38,7 +34,7 @@ class BrowserRestoreCallbackImpl(
         // Data saved to a [Tab] is only available once WebLayer has finished restoration.
         browser.tabs.forEach {
             if (tabList.getTabInfo(it.guid) == null) {
-                Log.w(TAG, "Adding missing tab with ID ${it.guid}")
+                Timber.w("Adding missing tab with ID ${it.guid}")
                 tabList.add(it)
             }
 

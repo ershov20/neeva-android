@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -33,6 +32,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 data class ToolbarConfiguration(
     /** Whether the browser is showing a single toolbar or both a top and bottom toolbar. */
@@ -142,7 +142,7 @@ class NeevaActivityViewModel(
 
     internal fun checkForUpdates(context: Context) {
         if (BuildConfig.DEBUG) {
-            Log.i(TAG, "Skipping update check for debug build")
+            Timber.i("Skipping update check for debug build")
             return
         }
 
@@ -152,10 +152,10 @@ class NeevaActivityViewModel(
                 toolbarConfiguration.value = toolbarConfiguration.value.copy(
                     isUpdateAvailable = info.updateAvailability() == UPDATE_AVAILABLE
                 )
-                Log.i(TAG, "Update check result: ${toolbarConfiguration.value.isUpdateAvailable}")
+                Timber.i("Update check result: ${toolbarConfiguration.value.isUpdateAvailable}")
             }
             .addOnFailureListener {
-                Log.w(TAG, "Failed to check for update", it)
+                Timber.w("Failed to check for update", it)
             }
     }
 
@@ -205,9 +205,5 @@ class NeevaActivityViewModel(
             override fun onInstallReferrerServiceDisconnected() {
             }
         })
-    }
-
-    companion object {
-        private val TAG = NeevaActivityViewModel::class.simpleName
     }
 }

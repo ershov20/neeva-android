@@ -8,7 +8,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.net.Uri
-import android.util.Log
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.VisibleForTesting
@@ -76,6 +75,7 @@ import org.chromium.weblayer.PageInfoDisplayOptions
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.TabListCallback
+import timber.log.Timber
 
 abstract class BaseBrowserWrapper internal constructor(
     override val isIncognito: Boolean,
@@ -396,7 +396,7 @@ abstract class BaseBrowserWrapper internal constructor(
         toolbarConfiguration: StateFlow<ToolbarConfiguration>,
         fragmentAttacher: (fragment: Fragment, isIncognito: Boolean) -> Unit
     ) = synchronized(browserInitializationLock) {
-        Log.d(TAG, "createAndAttachBrowser: incognito=$isIncognito browser=${browserFlow.value}")
+        Timber.d("createAndAttachBrowser: incognito=$isIncognito browser=${browserFlow.value}")
 
         val fragment: Fragment = _fragment ?: getOrCreateBrowserFragment().also {
             _fragment = it
@@ -409,7 +409,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
         fragmentAttacher(fragment, isIncognito)
         browserFlow.value = getBrowserFromFragment(fragment)
-        Log.d(TAG, "createAndAttachBrowser: fragment=$_fragment browser=${browserFlow.value}")
+        Timber.d("createAndAttachBrowser: fragment=$_fragment browser=${browserFlow.value}")
 
         val browser = browserFlow.value ?: throw IllegalStateException()
         registerBrowserCallbacks(browser)
@@ -688,10 +688,10 @@ abstract class BaseBrowserWrapper internal constructor(
             val previousTabInstance = tabCallbackMap[tab.guid]?.tab
             val previousTabBrowser = previousTabInstance?.browser
             if (previousTabInstance != tab || previousTabBrowser != tab.browser) {
-                Log.w(TAG, "Replacing previous tab callbacks")
-                Log.w(TAG, "\tTab was destroyed: ${previousTabInstance?.isDestroyed}")
-                Log.w(TAG, "\tBrowser refs: ${tab.browser} vs ${previousTabInstance?.browser}")
-                Log.w(TAG, "\tBrowser was destroyed: ${previousTabInstance?.browser?.isDestroyed}")
+                Timber.w("Replacing previous tab callbacks")
+                Timber.w("\tTab was destroyed: ${previousTabInstance?.isDestroyed}")
+                Timber.w("\tBrowser refs: ${tab.browser} vs ${previousTabInstance?.browser}")
+                Timber.w("\tBrowser was destroyed: ${previousTabInstance?.browser?.isDestroyed}")
                 unregisterTabCallbacks(tab.guid)
             } else {
                 return
@@ -1053,7 +1053,7 @@ abstract class BaseBrowserWrapper internal constructor(
                 url = activeTabModel.urlFlow.value,
                 title = activeTabModel.titleFlow.value,
                 onOpenSpace = onOpenSpace
-            ) ?: Log.e(TAG, "Cannot modify space in Incognito mode")
+            ) ?: Timber.e("Cannot modify space in Incognito mode")
         }
     }
 
@@ -1094,9 +1094,9 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         if (result != true) {
-            Log.e(TAG, "Failed to update mode (allowScreenshots = $allowScreenshots)")
+            Timber.e("Failed to update mode (allowScreenshots = $allowScreenshots)")
         } else {
-            Log.d(TAG, "Successfully updated mode (allowScreenshots = $allowScreenshots)")
+            Timber.d("Successfully updated mode (allowScreenshots = $allowScreenshots)")
         }
     }
 
@@ -1173,9 +1173,5 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         tab.navigationController.navigate(uri, navigateParams)
-    }
-
-    companion object {
-        private const val TAG = "BrowserWrapper"
     }
 }

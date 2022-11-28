@@ -13,6 +13,7 @@ import java.net.URLConnection
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
+import timber.log.Timber
 
 /**
  * Starts up a server on the Android device that serves web pages out of the app's assets.
@@ -23,7 +24,6 @@ import org.junit.runners.model.Statement
 class WebpageServingRule : TestRule {
     companion object {
         private const val LOCAL_TEST_URL = "http://127.0.0.1:8000"
-        private const val TAG = "WebpageServingRule"
 
         /** Returns the URL to load to be served the given [filename] from the assets. */
         fun urlFor(filename: String): String = "$LOCAL_TEST_URL/$filename"
@@ -73,7 +73,7 @@ class WebpageServingRule : TestRule {
                             val loadFilename = if (assetFiles?.any { it == filename } == true) {
                                 filename
                             } else if (assetFiles?.any { it == "$filename.html" } == true) {
-                                Log.w(TAG, "Redirecting $filename -> $filename.html")
+                                Timber.w("Redirecting $filename -> $filename.html")
                                 "$filename.html"
                             } else {
                                 throw FileNotFoundException()
@@ -93,14 +93,14 @@ class WebpageServingRule : TestRule {
                         } catch (e: FileNotFoundException) {
                             writer.write("HTTP/1.1 404 Not Found\r\n\r\n".toByteArray())
                         } catch (e: IOException) {
-                            Log.e(TAG, "Exception while serving file", e)
+                            Timber.e("Exception while serving file", e)
                             writer.write("HTTP/1.1 500 Not Implemented\r\n\r\n".toByteArray())
                         }
 
                         writer.flush()
                         writer.close()
                     } catch (e: Exception) {
-                        Log.e(TAG, "Exception caught for this socket", e)
+                        Timber.e("Exception caught for this socket", e)
                     }
                 }
             }

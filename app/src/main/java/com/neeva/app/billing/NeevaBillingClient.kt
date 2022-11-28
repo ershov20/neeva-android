@@ -6,7 +6,6 @@ package com.neeva.app.billing
 
 import android.app.Activity
 import android.content.Context
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
@@ -21,6 +20,7 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.settings.SettingsToggle
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 
 /** This class is currently incomplete! It is sandboxed by [SettingsToggle.DEBUG_ENABLE_BILLING]. */
 class NeevaBillingClient(appContext: Context, val dispatchers: Dispatchers) {
@@ -67,7 +67,7 @@ class NeevaBillingClient(appContext: Context, val dispatchers: Dispatchers) {
                     else -> {
                         val errorMessage = "BillingClient ERROR: responseCode = " +
                             "${billingResult.responseCode} " + "${billingResult.debugMessage}"
-                        Log.e(TAG, errorMessage)
+                        Timber.e(errorMessage)
                     }
                 }
             }
@@ -108,9 +108,5 @@ class NeevaBillingClient(appContext: Context, val dispatchers: Dispatchers) {
 
         val billingResult = billingClient.launchBillingFlow(activity, billingFlowParams)
         // TODO(kobec): handle result
-    }
-
-    companion object {
-        val TAG = NeevaBillingClient::class.simpleName
     }
 }

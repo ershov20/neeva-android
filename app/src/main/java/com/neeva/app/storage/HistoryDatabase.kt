@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Process
-import android.util.Log
 import androidx.annotation.WorkerThread
 import androidx.core.content.FileProvider
 import androidx.room.AutoMigration
@@ -36,6 +35,7 @@ import com.neeva.app.storage.entities.Visit
 import java.io.File
 import java.util.Date
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 
 @Database(
     entities = [
@@ -74,7 +74,6 @@ abstract class HistoryDatabase : RoomDatabase() {
     abstract fun tabDataDao(): TabDataDao
 
     companion object {
-        private val TAG = HistoryDatabase::class.simpleName
         private const val DATABASE_FILENAME = "HistoryDB"
         private const val CACHE_IMPORT_PATH = "extracted"
 
@@ -143,7 +142,7 @@ abstract class HistoryDatabase : RoomDatabase() {
                 // Purposefully done on the main thread because we need to block on having the
                 // database ready to use.
                 if (extractedDatabaseDirectory.exists()) {
-                    Log.d(TAG, "Detected database to be imported.")
+                    Timber.d("Detected database to be imported.")
 
                     // Delete the old database files.
                     val databaseDirectory = File(context.dataDir, "databases")
@@ -155,11 +154,11 @@ abstract class HistoryDatabase : RoomDatabase() {
                     extractedDatabaseDirectory.listFiles()?.forEach { file ->
                         val renamedFile = File(databaseDirectory, file.name)
                         file.renameTo(renamedFile)
-                        Log.d(TAG, "Moved ${file.path} to ${renamedFile.path}")
+                        Timber.d("Moved ${file.path} to ${renamedFile.path}")
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Failed during import of existing database", e)
+                Timber.e("Failed during import of existing database", e)
             } finally {
                 extractedDirectory.deleteRecursively()
             }
@@ -172,7 +171,7 @@ abstract class HistoryDatabase : RoomDatabase() {
     ) = withContext(dispatchers.io) {
         val databaseFile = File(openHelper.readableDatabase.path).parentFile
             ?: run {
-                Log.e(TAG, "Failed to find database")
+                Timber.e("Failed to find database")
                 return@withContext
             }
 
@@ -185,7 +184,7 @@ abstract class HistoryDatabase : RoomDatabase() {
 
             val exportedFile = File(exported, "database.zip")
             if (!ZipUtils.compress(databaseFile, exportedFile)) {
-                Log.e(TAG, "Failed to zip file")
+                Timber.e("Failed to zip file")
                 return@withContext
             }
 
@@ -206,7 +205,7 @@ abstract class HistoryDatabase : RoomDatabase() {
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             context.startActivity(sendIntent)
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to export database", e)
+            Timber.e("Failed to export database", e)
             return@withContext
         }
     }

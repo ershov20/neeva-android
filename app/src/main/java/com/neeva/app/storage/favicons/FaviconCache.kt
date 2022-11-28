@@ -6,7 +6,6 @@ package com.neeva.app.storage.favicons
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.util.Log
 import androidx.annotation.CallSuper
 import androidx.annotation.WorkerThread
 import androidx.compose.runtime.Composable
@@ -35,6 +34,7 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Profile
+import timber.log.Timber
 
 /**
  * Saves favicons to the [faviconDirectory].
@@ -49,7 +49,6 @@ abstract class FaviconCache(
     private val dispatchers: Dispatchers
 ) {
     companion object {
-        private val TAG = FaviconCache::class.simpleName
         private const val FAVICON_SUBDIRECTORY = "favicons"
     }
 
@@ -90,7 +89,7 @@ abstract class FaviconCache(
                 )
             }
         } catch (e: SecurityException) {
-            Log.e(TAG, "Failed to check if bitmap exists: ${file.absolutePath}", e)
+            Timber.e("Failed to check if bitmap exists: ${file.absolutePath}", e)
             return@withContext null
         }
 
@@ -190,7 +189,7 @@ abstract class FaviconCache(
                     ?.forEach { it.delete() }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to cleanup favicon directory", e)
+            Timber.e("Failed to cleanup favicon directory", e)
         }
     }
 }

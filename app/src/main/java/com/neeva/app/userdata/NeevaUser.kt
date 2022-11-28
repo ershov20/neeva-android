@@ -7,7 +7,6 @@ package com.neeva.app.userdata
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
 import com.apollographql.apollo3.exception.ApolloNetworkException
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.apollo.ApolloWrapper
@@ -19,6 +18,7 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import java.io.IOException
 import kotlinx.coroutines.flow.MutableStateFlow
+import timber.log.Timber
 
 @JsonClass(generateAdapter = true)
 data class UserInfo(
@@ -143,7 +143,7 @@ class NeevaUserImpl(
             (exception !is ApolloNetworkException && exception !is IllegalStateException)
         ) {
             clearUserInfo()
-            Log.e(TAG, "Could not perform UserInfoQuery fetch", exception)
+            Timber.e("Could not perform UserInfoQuery fetch", exception)
             return
         }
 
@@ -157,8 +157,6 @@ class NeevaUserImpl(
     }
 
     companion object {
-        private const val TAG = "NeevaUserImpl"
-
         fun UserInfoQuery.User.toUserInfo(): UserInfo {
             return UserInfo(
                 id = id,

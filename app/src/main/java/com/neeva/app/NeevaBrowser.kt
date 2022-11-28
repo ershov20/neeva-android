@@ -7,6 +7,7 @@ package com.neeva.app
 import android.app.Application
 import android.os.StrictMode
 import dagger.hilt.android.HiltAndroidApp
+import timber.log.Timber
 
 @HiltAndroidApp
 open class NeevaBrowser : Application() {
@@ -27,6 +28,10 @@ open class NeevaBrowser : Application() {
                     .penaltyLog()
                     .build()
             )
+        }
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
         }
 
         super.onCreate()

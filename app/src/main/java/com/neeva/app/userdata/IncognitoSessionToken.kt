@@ -1,10 +1,10 @@
 package com.neeva.app.userdata
 
-import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Response
+import timber.log.Timber
 
 class IncognitoSessionToken(
     coroutineScope: CoroutineScope,
@@ -17,10 +17,6 @@ class IncognitoSessionToken(
     endpointURL = neevaConstants.incognitoURL,
     cookieName = neevaConstants.incognitoCookieKey
 ) {
-    companion object {
-        private const val TAG = "IncognitoSessionToken"
-    }
-
     private var _cachedValue: String = ""
     override val cachedValue: String get() = _cachedValue
 
@@ -46,22 +42,22 @@ class IncognitoSessionToken(
 
         when {
             response.code == 500 || result == null || resultCode == 5 -> {
-                Log.e(TAG, "Backend error: ${result?.error}")
+                Timber.e("Backend error: ${result?.error}")
             }
 
             response.code == 200 -> {
-                Log.d(TAG, "Request successful but no cookie was created.")
+                Timber.d("Request successful but no cookie was created.")
                 return true
             }
 
             resultCode == 1 && result.sessionKey != null -> {
-                Log.d(TAG, "New incognito session started.")
+                Timber.d("New incognito session started.")
                 updateCookieManagerAsync(result.sessionKey, result.sessionDuration)
                 return true
             }
 
             else -> {
-                Log.e(TAG, "Unhandled error occurred: ${response.code}")
+                Timber.e("Unhandled error occurred: ${response.code}")
             }
         }
 

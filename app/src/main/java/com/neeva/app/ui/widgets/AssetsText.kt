@@ -4,7 +4,6 @@
 
 package com.neeva.app.ui.widgets
 
-import android.util.Log
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -18,6 +17,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.sp
 import com.neeva.app.ui.theme.Dimensions
 import java.io.InputStreamReader
+import timber.log.Timber
 
 /**
  * Loads a text file from the app's assets and displays it in a horizontally scrollable container.
@@ -37,7 +37,7 @@ fun AssetsText(assetFilename: String) {
                 }
             }
         } catch (e: Exception) {
-            Log.e("AssetsText", "Failed to open asset", e)
+            Timber.tag("AssetsText").e(e, "Failed to open asset")
         }
 
         value = stringBuilder.toString()

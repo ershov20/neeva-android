@@ -7,7 +7,6 @@ package com.neeva.app
 import android.app.SearchManager
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -15,6 +14,7 @@ import com.neeva.app.firstrun.FirstRunActivity
 import com.neeva.app.firstrun.FirstRunModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import timber.log.Timber
 
 /**
  * Activity that takes incoming Intents and sends them to the right places.
@@ -23,9 +23,6 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    companion object {
-        private const val TAG = "MainActivity"
-    }
 
     @Inject lateinit var firstRunModel: FirstRunModel
 
@@ -66,7 +63,7 @@ class MainActivity : AppCompatActivity() {
             // really matter which we pick.
             also { this?.hasExtra(SearchManager.QUERY) }
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to parse Intent; discarding", e)
+            Timber.w("Failed to parse Intent; discarding", e)
             null
         }
     }

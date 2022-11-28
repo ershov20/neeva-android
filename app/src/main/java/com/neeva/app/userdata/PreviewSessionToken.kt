@@ -1,10 +1,10 @@
 package com.neeva.app.userdata
 
-import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import kotlinx.coroutines.CoroutineScope
 import okhttp3.Response
+import timber.log.Timber
 
 class PreviewSessionToken(
     coroutineScope: CoroutineScope,
@@ -17,10 +17,6 @@ class PreviewSessionToken(
     endpointURL = neevaConstants.previewCookieURL,
     cookieName = neevaConstants.previewCookieKey
 ) {
-    companion object {
-        private const val TAG = "PreviewSessionToken"
-    }
-
     private var _cachedValue: String = ""
     override val cachedValue: String get() = _cachedValue
 
@@ -52,26 +48,26 @@ class PreviewSessionToken(
 
         when {
             response.code == 500 || result == null || resultCode == 5 -> {
-                Log.e(TAG, "Backend error: ${result?.error}")
+                Timber.e("Backend error: ${result?.error}")
             }
 
             resultCode == 2 || resultCode == 3 || resultCode == 4 -> {
-                Log.d(TAG, "No cookie was created: $resultCode")
+                Timber.d("No cookie was created: $resultCode")
             }
 
             response.code == 200 -> {
-                Log.d(TAG, "Request successful but no cookie was created: $resultCode")
+                Timber.d("Request successful but no cookie was created: $resultCode")
                 return true
             }
 
             result.resultCode == 1 && result.sessionKey != null -> {
-                Log.d(TAG, "New $cookieName session started.")
+                Timber.d("New $cookieName session started.")
                 updateCookieManagerAsync(result.sessionKey, result.sessionDuration)
                 return true
             }
 
             else -> {
-                Log.e(TAG, "Unhandled error occurred: ${response.code}")
+                Timber.e("Unhandled error occurred: ${response.code}")
             }
         }
 

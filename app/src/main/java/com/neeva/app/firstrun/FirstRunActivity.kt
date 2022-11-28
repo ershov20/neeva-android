@@ -8,7 +8,6 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContentScope
@@ -41,12 +40,11 @@ import com.neeva.app.ui.theme.NeevaTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class FirstRunActivity : AppCompatActivity() {
     companion object {
-        const val TAG = "FirstRunActivity"
-
         internal enum class Destinations {
             LANDING,
             SET_DEFAULT_BROWSER
@@ -143,7 +141,7 @@ class FirstRunActivity : AppCompatActivity() {
                                             null
                                         )
                                     } catch (e: ActivityNotFoundException) {
-                                        Log.e(TAG, "Could not launch settings", e)
+                                        Timber.e("Could not launch settings", e)
                                         sendUserToBrowser()
                                     }
                                 },

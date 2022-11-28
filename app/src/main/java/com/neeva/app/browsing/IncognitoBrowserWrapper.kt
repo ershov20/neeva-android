@@ -5,7 +5,6 @@
 package com.neeva.app.browsing
 
 import android.content.Context
-import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.IncognitoApolloWrapper
@@ -32,6 +31,7 @@ import org.chromium.weblayer.DownloadCallback
 import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebLayer
+import timber.log.Timber
 
 /** Maintains the logic for an Incognito browser profile. */
 class IncognitoBrowserWrapper private constructor(
@@ -135,8 +135,6 @@ class IncognitoBrowserWrapper private constructor(
     )
 
     companion object {
-        val TAG = IncognitoBrowserWrapper::class.simpleName
-
         internal const val INCOGNITO_PROFILE_NAME = "incognito"
         private const val INCOGNITO_PERSISTENCE_ID = "incognito_persistence_id"
 
@@ -156,9 +154,9 @@ class IncognitoBrowserWrapper private constructor(
             withContext(dispatchers.main) {
                 suspendCoroutine<Boolean> { continuation ->
                     incognitoProfile?.apply {
-                        Log.d(TAG, "Marking incognito profile for deletion")
+                        Timber.d("Marking incognito profile for deletion")
                         destroyAndDeleteDataFromDiskSoon {
-                            Log.d(TAG, "Destroyed incognito profile")
+                            Timber.d("Destroyed incognito profile")
                             continuation.resume(true)
                         }
                     } ?: run {

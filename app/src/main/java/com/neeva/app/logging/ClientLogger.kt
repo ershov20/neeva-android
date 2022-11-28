@@ -6,7 +6,6 @@ package com.neeva.app.logging
 
 import android.net.Uri
 import android.os.RemoteException
-import android.util.Log
 import com.android.installreferrer.api.InstallReferrerClient
 import com.android.installreferrer.api.ReferrerDetails
 import com.apollographql.apollo3.api.Optional
@@ -31,6 +30,7 @@ import com.neeva.app.type.ClientLogInput
 import com.neeva.app.userdata.LoginToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 enum class ClientLoggerStatus {
     ENABLED,
@@ -96,7 +96,7 @@ class ClientLogger(
         }
 
         if (!settingsDataModel.getSettingsToggleValue(SettingsToggle.LOGGING_CONSENT)) {
-            Log.i(TAG, "Blocking log because logging is disabled")
+            Timber.i("Blocking log because logging is disabled")
             return
         }
 
@@ -120,7 +120,7 @@ class ClientLogger(
 
         if (environment == ClientLogEnvironment.Dev) {
             val attributeMap = mutableAttributes.map { "${it.key}: ${it.value}" }
-            Log.d(TAG, "${path.interactionName}: ${attributeMap.joinToString(separator = ",")}")
+            Timber.d("${path.interactionName}: ${attributeMap.joinToString(separator = ",")}")
         } else {
             val logMutation = LogMutation(
                 ClientLogInput(
@@ -225,7 +225,7 @@ class ClientLogger(
                         )
                     )
                 } catch (e: RemoteException) {
-                    Log.e(TAG, "Failed to get installReferrer", e)
+                    Timber.e("Failed to get installReferrer", e)
                 }
 
                 referrerClient.endConnection()
@@ -259,9 +259,5 @@ class ClientLogger(
                 )
             }
         }
-    }
-
-    companion object {
-        private const val TAG = "ClientLogger"
     }
 }

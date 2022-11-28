@@ -5,7 +5,6 @@
 package com.neeva.app.suggestions
 
 import android.net.Uri
-import android.util.Log
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
@@ -30,6 +29,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 data class NavSuggestion(
     val url: Uri,
@@ -77,7 +77,6 @@ class SuggestionsModel(
     val clientLogger: ClientLogger,
 ) {
     companion object {
-        val TAG = SuggestionsModel::class.simpleName
     }
 
     private val _suggestionFlow = MutableStateFlow(Suggestions())
@@ -125,7 +124,7 @@ class SuggestionsModel(
                 // continued typing something else.  Keep the old suggestions displayed.
                 return
             } catch (e: Exception) {
-                Log.e(TAG, "Caught exception while performing query.  Removing suggestions", e)
+                Timber.e("Caught exception while performing query.  Removing suggestions", e)
             }
         }
 

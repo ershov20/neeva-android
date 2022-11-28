@@ -4,7 +4,6 @@
 
 package com.neeva.app.apollo
 
-import android.util.Log
 import androidx.annotation.CallSuper
 import com.apollographql.apollo3.ApolloCall
 import com.apollographql.apollo3.api.Mutation
@@ -12,6 +11,7 @@ import com.apollographql.apollo3.api.Operation
 import com.apollographql.apollo3.api.Query
 import com.apollographql.apollo3.exception.ApolloException
 import com.apollographql.apollo3.exception.ApolloNetworkException
+import timber.log.Timber
 
 /** Manages an Apollo client that can be used to fire queries and mutations at the Neeva backend. */
 abstract class BaseApolloWrapper(
@@ -45,30 +45,26 @@ abstract class BaseApolloWrapper(
         userMustBeLoggedIn: Boolean
     ): ApolloResponseSummary<D> {
         if (!prepareForOperation(userMustBeLoggedIn)) {
-            Log.w(TAG, "Not allowed to perform operation: ${call.operation}")
+            Timber.w("Not allowed to perform operation: ${call.operation}")
             return ApolloResponseSummary(null, null)
         }
 
         return try {
             val response = call.execute()
             if (response.hasErrors()) {
-                Log.e(TAG, "Response had errors: ${call.operation}")
-                response.errors?.forEach { Log.e(TAG, "\tError: ${it.message}") }
+                Timber.e("Response had errors: ${call.operation}")
+                response.errors?.forEach { Timber.e("\tError: ${it.message}") }
             }
             ApolloResponseSummary(response, null)
         } catch (e: ApolloNetworkException) {
-            Log.e(TAG, "Could not perform operation", e)
+            Timber.e("Could not perform operation", e)
             ApolloResponseSummary(null, e)
         } catch (e: IllegalStateException) {
-            Log.e(TAG, "Could not perform operation", e)
+            Timber.e("Could not perform operation", e)
             ApolloResponseSummary(null, e)
         } catch (e: ApolloException) {
-            Log.e(TAG, "Could not perform operation", e)
+            Timber.e("Could not perform operation", e)
             ApolloResponseSummary(null, e)
         }
-    }
-
-    companion object {
-        private const val TAG = "BaseApolloWrapper"
     }
 }

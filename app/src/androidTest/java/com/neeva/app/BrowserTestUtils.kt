@@ -5,7 +5,6 @@
 package com.neeva.app
 
 import android.content.pm.ActivityInfo
-import android.util.Log
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -47,8 +46,7 @@ import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isTrue
-
-private const val TAG = "BrowserTestUtils"
+import timber.log.Timber
 
 /**
  * Perform a long press on the center of the Browser.
@@ -82,7 +80,7 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.flakyLongPressOnBr
         longPressOnBrowserView()
         waitFor { expectedCondition() }
     } catch (e: ComposeTimeoutException) {
-        Log.e(TAG, "Failed to long press on browser.  Trying again.")
+        Timber.e("Failed to long press on browser.  Trying again.")
         longPressOnBrowserView()
         waitFor("Failed to long press on browser.") { expectedCondition() }
     }
@@ -340,7 +338,7 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.navigateViaUrlBar(
     waitFor {
         val actualUrl =
             it.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.uriToLoad.toString()
-        if (actualUrl != url) Log.w(TAG, "Not matching yet: $actualUrl != $url")
+        if (actualUrl != url) Timber.w("Not matching yet: $actualUrl != $url")
         actualUrl == url
     }
 
@@ -364,14 +362,14 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.navigateViaUrlBar(
                 // Wait until the URL bar state updates enough for the user to see the browser
                 // instead of the Zero Query/suggestions pane.
                 activity.webLayerModel.currentBrowser.urlBarModel.stateFlow.value.isEditing -> {
-                    Log.d(TAG, "Waiting for URL bar to leave editing mode")
+                    Timber.d("Waiting for URL bar to leave editing mode")
                     false
                 }
 
                 // If we're not in landscape, wait until the bottom toolbar becomes visible again
                 // after the keyboard goes away.
                 !isLandscape && (bottomToolbarHeight == null || bottomToolbarHeight == 0) -> {
-                    Log.d(TAG, "Waiting for bottom toolbar to appear after keyboard dismissal")
+                    Timber.d("Waiting for bottom toolbar to appear after keyboard dismissal")
                     false
                 }
 
@@ -491,7 +489,7 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForActivitySta
         return when {
             // Wait for the current browser to finish loading whatever it's loading.
             !(loadingProgress == 0 || loadingProgress == 100) -> {
-                Log.d(TAG, "Not idle -- Load in progress: $loadingProgress")
+                Timber.d("Not idle -- Load in progress: $loadingProgress")
                 false
             }
 
@@ -512,7 +510,7 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForActivitySta
 
         return when {
             !isBrowserPreparedFlow.value -> {
-                Log.d(TAG, "Not idle -- NeevaActivity has not finished prepareBrowser")
+                Timber.d("Not idle -- NeevaActivity has not finished prepareBrowser")
                 false
             }
 
@@ -520,18 +518,18 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForActivitySta
             // attached to the Compose hierarchy because some tests skip AppNavDestination.BROWSER
             // and never attach the [WebLayerContainer] composable.
             regularBrowserViewParent == null -> {
-                Log.d(TAG, "Not idle -- WebLayer Fragment not attached")
+                Timber.d("Not idle -- WebLayer Fragment not attached")
                 false
             }
 
             // The app should always have at least one regular tab on a cold start.
             webLayerModel.browsersFlow.value.regularBrowserWrapper.hasNoTabs() -> {
-                Log.d(TAG, "Not idle -- No regular profile tabs detected")
+                Timber.d("Not idle -- No regular profile tabs detected")
                 false
             }
 
             !firstComposeCompleted.isCompleted -> {
-                Log.d(TAG, "Not idle -- First compose not completed")
+                Timber.d("Not idle -- First compose not completed")
                 false
             }
 
@@ -545,5 +543,5 @@ fun <TR : TestRule> AndroidComposeTestRule<TR, NeevaActivity>.waitForActivitySta
     registerIdlingResource(testInitializationIdlingResource)
     waitForIdle()
     unregisterIdlingResource(testInitializationIdlingResource)
-    Log.d(TAG, "Proceeding with test")
+    Timber.d("Proceeding with test")
 }

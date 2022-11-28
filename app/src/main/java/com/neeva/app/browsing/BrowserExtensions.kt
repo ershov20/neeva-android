@@ -4,22 +4,20 @@
 
 package com.neeva.app.browsing
 
-import android.util.Log
 import kotlinx.coroutines.flow.StateFlow
 import org.chromium.weblayer.Browser
 import org.chromium.weblayer.Tab
-
-private const val TAG = "BrowserExtensions"
+import timber.log.Timber
 
 fun Browser?.takeIfAlive(): Browser? {
     return when {
         this == null -> {
-            Log.i(TAG, "Browser is null", Throwable())
+            Timber.i("Browser is null", Throwable())
             null
         }
 
         this.isDestroyed -> {
-            Log.w(TAG, "Browser is destroyed", Throwable())
+            Timber.w("Browser is destroyed", Throwable())
             null
         }
 

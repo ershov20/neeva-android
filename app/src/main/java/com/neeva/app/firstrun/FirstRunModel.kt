@@ -8,7 +8,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.browser.customtabs.CustomTabsClient
@@ -35,6 +34,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 fun interface GoogleSignInAccountProvider {
     fun getGoogleSignInAccount(intent: Intent?): Task<GoogleSignInAccount>
@@ -82,8 +82,6 @@ class FirstRunModel internal constructor(
             "892902198757-84tm1f14ne0pa6n3dmeehgeo5mk4mhl9.apps.googleusercontent.com"
         private const val AUTH_PATH_GOOGLE_LOGIN = "login-mobile"
         private const val AUTH_PATH_DEFAULT_LOGIN = "login"
-
-        const val TAG = "FirstRunModel"
 
         fun setFirstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
             SharedPrefFolder.FirstRun.FirstRunDone.set(sharedPreferencesModel, true)
@@ -313,7 +311,7 @@ class FirstRunModel internal constructor(
 
     private fun extractLoginUri(result: ActivityResult): Uri? {
         val data = result.takeIf { it.resultCode == Activity.RESULT_OK }?.data ?: run {
-            Log.e(TAG, "ActivityResult was not successful: ${result.resultCode}")
+            Timber.e("ActivityResult was not successful: ${result.resultCode}")
             return null
         }
 
@@ -329,7 +327,7 @@ class FirstRunModel internal constructor(
                 authorizationCode = authCode
             )
         } catch (e: ApiException) {
-            Log.e(TAG, "Failed to extract signed in account from intent", e)
+            Timber.e("Failed to extract signed in account from intent", e)
             return null
         }
     }

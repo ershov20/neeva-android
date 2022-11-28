@@ -6,7 +6,6 @@ package com.neeva.app.publicsuffixlist
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.annotation.WorkerThread
 import com.neeva.app.LoadingState
 import java.io.BufferedReader
@@ -15,6 +14,7 @@ import java.io.InputStreamReader
 import java.net.IDN
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import timber.log.Timber
 
 /**
  * Derives the registerable domain name from the provided domain.
@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.StateFlow
  */
 class DomainProviderImpl(val context: Context) : DomainProvider {
     companion object {
-        val TAG = DomainProviderImpl::class.simpleName
         const val SUFFIX_FILENAME = "public_suffix_list.dat"
     }
 
@@ -66,7 +65,7 @@ class DomainProviderImpl(val context: Context) : DomainProvider {
 
             _loadingState.value = LoadingState.READY
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to load suffix list", e)
+            Timber.e("Failed to load suffix list", e)
         } finally {
             bufferedReader?.close()
             streamReader?.close()

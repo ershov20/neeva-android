@@ -6,7 +6,6 @@ package com.neeva.app.contentfilter
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.annotation.WorkerThread
 import com.neeva.app.Dispatchers
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +15,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.WebMessageCallback
+import timber.log.Timber
 
 class ScriptInjectionManager(
     private val context: Context,
@@ -41,7 +41,7 @@ class ScriptInjectionManager(
             // in TabImpl.java shouldn't fire.
             // Because Cookie Cutter is optional, just drop the exception on the floor to avoid the
             // whole app going down.
-            Log.e(TAG, "Failed to initialize Cookie Cutter", e)
+            Timber.e("Failed to initialize Cookie Cutter", e)
         }
     }
 
@@ -83,12 +83,8 @@ class ScriptInjectionManager(
                 .bufferedReader()
                 .use { it.readText() }
         } catch (e: Exception) {
-            Log.w(TAG, "Error while fetching cookie cutter engine script, not injecting.", e)
+            Timber.w("Error while fetching cookie cutter engine script, not injecting.", e)
             null
         }
-    }
-
-    companion object {
-        private val TAG = ScriptInjectionManager::class.simpleName
     }
 }

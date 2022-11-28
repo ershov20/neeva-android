@@ -5,7 +5,6 @@
 package com.neeva.app.browsing
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.neeva.app.Dispatchers
@@ -42,6 +41,7 @@ import org.chromium.weblayer.Profile
 import org.chromium.weblayer.Tab
 import org.chromium.weblayer.UnsupportedVersionException
 import org.chromium.weblayer.WebLayer
+import timber.log.Timber
 
 data class BrowsersState(
     val regularBrowserWrapper: RegularBrowserWrapper,
@@ -130,10 +130,6 @@ class WebLayerModel internal constructor(
         overrideCoroutineScope = null,
         neevaConstants = neevaConstants
     )
-
-    companion object {
-        val TAG = WebLayerModel::class.simpleName
-    }
 
     /** [CoroutineScope] that should be used for all Flows.  May be overridden by tests. */
     private val coroutineScope = overrideCoroutineScope ?: viewModelScope
@@ -292,7 +288,7 @@ class WebLayerModel internal constructor(
     )
 
     private suspend fun cleanUpIncognito(webLayer: WebLayer) {
-        Log.d(TAG, "Cleaning up incognito profile")
+        Timber.d("Cleaning up incognito profile")
         val incognitoProfile = IncognitoBrowserWrapper.getProfile(webLayer)
         IncognitoBrowserWrapper.cleanUpIncognito(
             dispatchers = dispatchers,

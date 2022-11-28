@@ -6,7 +6,6 @@ package com.neeva.app.neevascope
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toFile
 import androidx.core.net.toUri
 import androidx.work.CoroutineWorker
@@ -25,6 +24,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okio.use
+import timber.log.Timber
 
 @JsonClass(generateAdapter = true)
 data class Checksum(
@@ -38,7 +38,6 @@ data class Checksum(
     @Json(name = "canon") val canon: String
 ) {
     companion object {
-        private const val TAG = "Checksum"
         /**
          * Hashed version of the Bloom Filter hash function.
          * Update when Bloom Filter hash function is updated.
@@ -56,13 +55,13 @@ data class Checksum(
                 val jsonAdapter = moshi.adapter(Checksum::class.java)
                 jsonAdapter.fromJson(checksumFile)
             } catch (e: NullPointerException) {
-                Log.e(TAG, "Failed to get JSON adapter for Checksum ", e)
+                Timber.e("Failed to get JSON adapter for Checksum ", e)
                 null
             } catch (e: IllegalArgumentException) {
-                Log.e(TAG, "Failed to get JSON adapter for Checksum ", e)
+                Timber.e("Failed to get JSON adapter for Checksum ", e)
                 null
             } catch (e: IOException) {
-                Log.e(TAG, "Failed to load checksum file ", e)
+                Timber.e("Failed to load checksum file ", e)
                 null
             }
         }
@@ -93,7 +92,7 @@ data class Checksum(
                 val digestBytes = digest.digest()
                 return Hex.bytesToStringLowercase(digestBytes)
             } catch (e: IOException) {
-                Log.e(TAG, "Failed to get checksum from file ", e)
+                Timber.e("Failed to get checksum from file ", e)
                 return ""
             }
         }
@@ -105,9 +104,6 @@ class BloomFilterDownloadWorker(
     val appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
-    companion object {
-        private const val TAG = "BloomFilterDownloadWorker"
-    }
 
     private val reddit = BloomFilterConfiguration.redditConfiguration
 
@@ -137,10 +133,6 @@ class BloomFilterDownloader(
     val filterUrl: URL,
     val localUri: Uri
 ) {
-    companion object {
-        private const val TAG = "BloomFilterDownloader"
-    }
-
     val okHttpClient = OkHttpClient().newBuilder().build()
 
     suspend fun download() {
@@ -177,7 +169,7 @@ class BloomFilterDownloader(
                     tempFile.renameTo(bloomFilterFile)
                 }
             } catch (e: IOException) {
-                Log.e(TAG, "Failed to download filter file ", e)
+                Timber.e("Failed to download filter file ", e)
                 return
             }
         }
@@ -187,10 +179,10 @@ class BloomFilterDownloader(
         return try {
             okHttpClient.newCall(request).execute()
         } catch (e: IOException) {
-            Log.e(TAG, "Failed to download checksum or filter file ", e)
+            Timber.e("Failed to download checksum or filter file ", e)
             null
         } catch (e: IllegalStateException) {
-            Log.e(TAG, "Failed to download checksum or filter file ", e)
+            Timber.e("Failed to download checksum or filter file ", e)
             null
         }
     }
