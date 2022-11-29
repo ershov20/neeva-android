@@ -92,6 +92,10 @@
 
     <!-- [General] Label for a widget that allows the user to type in a URL. -->
     <string name="url">URL</string>
+
+    <!-- [General] whitespace between sentences.  Used when we string multiple string resources together.  -->
+    <string name="sentence_separator" translatable="false">\u0020</string>
+
     <!-- [Error] Error message displayed when we don't have a better one to show the user. -->
     <string name="error_generic">Une erreur s\'est produite</string>
 
@@ -511,6 +515,9 @@
     <!-- [Settings][Header] Header for general settings. -->
     <string name="settings_general">Général</string>
 
+    <!-- [Settings][Header] Header for account settings. -->
+    <string name="settings_account">Compte</string>
+
     <!-- [Settings] Indicates that the user has selected Neeva as their default browser. -->
     <string name="settings_default_browser">Navigateur par défaut</string>
 
@@ -772,6 +779,7 @@
 
     <!-- [NeevaScope][Button] User acknowledges that they understand what the feature does and dismisses the dialog. -->
     <string name="neevascope_got_it">J\'ai compris !</string>
+    <string name="neevascope_lets_try_it">Faire un essai</string>
 
     <!-- [NeevaScope] Label for the NeevaScope reddit tooltip. -->
     <string name="neevascope_reddit_tooltip">Découvrez ce que les internautes ont pensé de cette page</string>
@@ -858,6 +866,9 @@
 
     <!-- [NeevaScope] Sends the user to the support page  -->
     <string name="neevascope_contact_us">Contactez-nous via l\'assistance</string>
+
+    <!-- [NeevaScope] Tells the user there is no result about the current website  -->
+    <string name="neevascope_no_result">NeevaScope n\'a rien trouvé en rapport avec ce site</string>
 
     <string name="default_search_suggestion_1">Actualités technologiques</string>
     <string name="default_search_suggestion_2">Recette de tarte aux fruits</string>

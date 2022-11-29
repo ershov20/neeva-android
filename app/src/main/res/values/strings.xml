@@ -94,7 +94,7 @@
     <string name="url">URL</string>
 
     <!-- [General] whitespace between sentences.  Used when we string multiple string resources together.  -->
-    <string name="sentence_separator">\u0020</string>
+    <string name="sentence_separator" translatable="false">\u0020</string>
 
     <!-- [Error] Error message displayed when we don't have a better one to show the user. -->
     <string name="error_generic">Something went wrong</string>
