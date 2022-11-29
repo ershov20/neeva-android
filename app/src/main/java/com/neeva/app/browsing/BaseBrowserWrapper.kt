@@ -282,7 +282,8 @@ abstract class BaseBrowserWrapper internal constructor(
             }
 
             // Remove the tab from our local state.
-            tabList.remove(tabId)
+            val tabIndex = tabList.indexOf(tabId)
+            val tabInfo = tabList.remove(tabId)
 
             // If the active tab is a child of the removed tab, update it so that we have the
             // correct navigation info.
@@ -291,6 +292,11 @@ abstract class BaseBrowserWrapper internal constructor(
             // Remove all the callbacks associated with the tab to avoid any callbacks after the tab
             // gets destroyed.
             unregisterTabCallbacks(tabId)
+
+            // If there is no active tab, try to select a new one.
+            if (getActiveTab() == null) {
+                setNextActiveTab(tabInfo, tabIndex)
+            }
         }
 
         override fun onTabAdded(tab: Tab) {
