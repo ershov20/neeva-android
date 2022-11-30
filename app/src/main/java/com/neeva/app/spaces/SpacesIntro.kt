@@ -4,12 +4,10 @@
 
 package com.neeva.app.spaces
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,8 +17,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Surface
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +31,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
@@ -49,6 +44,7 @@ import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
+import com.neeva.app.ui.widgets.StackableButtons
 
 @Composable
 fun SpacesIntro(
@@ -262,76 +258,13 @@ fun SpacesIntroContent(
             Spacer(Modifier.weight(1f))
         }
 
-        SpacesIntroButtons(
-            onClickSignIn = onClickSignIn,
-            onClickSignUp = onClickSignUp,
+        StackableButtons(
+            primaryText = stringResource(id = R.string.space_intro_cta),
+            onTapPrimary = onClickSignUp,
+            secondaryText = stringResource(id = R.string.sign_in),
+            onTapSecondary = onClickSignIn,
             modifier = Modifier.align(Alignment.End)
         )
-    }
-}
-
-/**
- * When buttons don't fit in a [Row], it uses a [Column] that puts the buttons in
- * reverse order. The reason is because we want the primary button to be:
- * the one on the right in [Row] mode and the one on the top in [Column] mode.
- *
- * In Previews, the [Column] version only shows up correctly if in Interactive Mode.
- */
-@Composable
-private fun SpacesIntroButtons(
-    onClickSignIn: () -> Unit,
-    onClickSignUp: () -> Unit,
-    modifier: Modifier
-) {
-    val paddingBetweenButtons = Dimensions.PADDING_SMALL
-    var useRowLayout by remember { mutableStateOf(true) }
-    if (useRowLayout) {
-        val onTextLayout: (TextLayoutResult) -> Unit = { result ->
-            if (result.hasVisualOverflow) {
-                useRowLayout = false
-            }
-        }
-        Row(modifier = modifier) {
-            Button(
-                onClick = onClickSignIn,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text(
-                    text = stringResource(id = R.string.sign_in),
-                    maxLines = 1,
-                    onTextLayout = onTextLayout
-                )
-            }
-            Spacer(Modifier.size(paddingBetweenButtons))
-            Button(onClick = onClickSignUp) {
-                Text(
-                    text = stringResource(id = R.string.space_intro_cta),
-                    maxLines = 1,
-                    onTextLayout = onTextLayout
-                )
-            }
-        }
-    } else {
-        Column(horizontalAlignment = Alignment.End, modifier = modifier) {
-            Button(onClick = onClickSignUp) {
-                Text(stringResource(id = R.string.space_intro_cta))
-            }
-            Spacer(Modifier.size(paddingBetweenButtons))
-            Button(
-                onClick = onClickSignIn,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Text(stringResource(id = R.string.sign_in))
-            }
-        }
     }
 }
 
