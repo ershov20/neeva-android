@@ -66,6 +66,7 @@ class NeevaScopeModel(
     companion object {
         private const val MEMORIZED_QUERY_COUNT_THRESHOLD = 5
         private const val DISCUSSION_COUNT_THRESHOLD = 5
+        private const val NEEVASCOPE_TOOLTIP_DEFAULT_COUNT = 5
     }
 
     data class RedditPromoState(
@@ -320,9 +321,10 @@ class NeevaScopeModel(
         faviconCache: FaviconCache,
         popupModel: PopupModel
     ) {
-        // If user clicks on the X button instead of "Let' try it" button on non-Neeva page,
-        // do not update the SeenNeevaScopeIntro immediately.
-        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)) {
+        // NeevaScopeTooltipCount value changes only if NeevaScope intro has been seen.
+        val neevaScopeTooltipCount =
+            SharedPrefFolder.App.NeevaScopeTooltipCount.get(sharedPreferencesModel)
+        if (neevaScopeTooltipCount != NEEVASCOPE_TOOLTIP_DEFAULT_COUNT) {
             SharedPrefFolder.App.SeenNeevaScopeIntro.set(sharedPreferencesModel, true)
         }
 
@@ -345,6 +347,10 @@ class NeevaScopeModel(
                         buttonTextId = R.string.neevascope_got_it,
                         tapButton = {
                             if (!seenNeevaScopeIntro) {
+                                SharedPrefFolder.App.SeenNeevaScopeIntro.set(
+                                    sharedPreferencesModel,
+                                    true
+                                )
                                 settingsDataModel
                                     .setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, true)
                             }
@@ -364,6 +370,8 @@ class NeevaScopeModel(
                             )
                         },
                         dismissSheet = {
+                            // If user clicks on the X button, don't update SeenNeevaScopeIntro,
+                            // because it will load NeevaScope result immediately.
                             settingsDataModel
                                 .setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, true)
                             onDismiss()
