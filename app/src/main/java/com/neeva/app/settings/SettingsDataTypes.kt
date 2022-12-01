@@ -158,6 +158,10 @@ enum class SettingsToggle(
         primaryLabelId = R.string.space_enable_invite,
         defaultValue = false
     ),
+    DEBUG_USE_CUSTOM_TABS_FOR_LOGIN(
+        primaryLabelId = R.string.settings_debug_use_custom_tabs_for_login,
+        defaultValue = true
+    ),
     DEBUG_ENABLE_NATIVE_GOOGLE_LOGIN(
         primaryLabelId = R.string.settings_debug_enable_native_google_login,
         defaultValue = false

@@ -4,8 +4,10 @@
 
 package com.neeva.app.firstrun.widgets.buttons
 
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,19 +25,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.R
-import com.neeva.app.firstrun.LaunchLoginIntentParams
+import com.neeva.app.firstrun.LaunchLoginFlowParams
+import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.PortraitPreviews
+import com.neeva.app.ui.PortraitPreviewsDark
 import com.neeva.app.ui.TwoBooleanPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.getClickableAlpha
@@ -44,6 +49,12 @@ import com.neeva.app.ui.widgets.RowActionIconParams
 import com.neeva.app.ui.widgets.icons.SSOProviderImage
 import com.neeva.app.userdata.NeevaUser
 
+fun interface OnboardingButtonListener {
+    fun onLoginFlowLaunched()
+}
+
+val LocalOnboardingButtonListener = compositionLocalOf<OnboardingButtonListener?> { null }
+
 // TODO(kobec): Make it styled differently for Okta buttons
 @Composable
 fun OnboardingButton(
@@ -51,21 +62,24 @@ fun OnboardingButton(
     passwordProvided: String? = null,
     signup: Boolean,
     provider: NeevaUser.SSOProvider,
-    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     enabled: Boolean = true
 ) {
     val firstRunModel = LocalFirstRunModel.current
     val appNavModel = LocalAppNavModel.current
     val context = LocalContext.current
+    val onboardingButtonListener = LocalOnboardingButtonListener.current
 
     OnboardingButton(
         emailProvided = emailProvided,
         passwordProvided = passwordProvided,
         signup = signup,
         provider = provider,
-        launchLoginIntent = launchLoginIntent,
-        onActivityResult = { result ->
-            firstRunModel.handleLoginActivityResult(context, result) {
+        onLaunchLoginFlow = { launcher, params ->
+            firstRunModel.launchLoginFlow(context, params, launcher)
+            onboardingButtonListener?.onLoginFlowLaunched()
+        },
+        onLaunchActivityResult = { result, params ->
+            firstRunModel.handleLoginActivityResult(context, result, params) {
                 appNavModel.openUrlInNewTab(it)
             }
         },
@@ -74,30 +88,32 @@ fun OnboardingButton(
 }
 
 @Composable
-fun OnboardingButton(
+private fun OnboardingButton(
     emailProvided: String? = null,
     passwordProvided: String? = null,
     signup: Boolean,
     provider: NeevaUser.SSOProvider,
-    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    onActivityResult: (ActivityResult) -> Unit,
+    onLaunchLoginFlow: (ActivityResultLauncher<Intent>, LaunchLoginFlowParams) -> Unit,
+    onLaunchActivityResult: (ActivityResult, LaunchLoginFlowParams) -> Unit,
     enabled: Boolean = true
 ) {
-    val resultLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult(),
-        onActivityResult
+    val launchLoginFlowParams = LaunchLoginFlowParams(
+        provider = provider,
+        signup = signup,
+        emailProvided = emailProvided,
+        passwordProvided = passwordProvided
     )
-    val onClick = {
-        launchLoginIntent(
-            LaunchLoginIntentParams(
-                provider = provider,
-                signup = signup,
-                emailProvided = emailProvided,
-                passwordProvided = passwordProvided,
-                resultLauncher = resultLauncher
-            )
-        )
+
+    val resultLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        onLaunchActivityResult(result, launchLoginFlowParams)
     }
+
+    val onClick = {
+        onLaunchLoginFlow(resultLauncher, launchLoginFlowParams)
+    }
+
     when (provider) {
         NeevaUser.SSOProvider.OKTA -> {
             NeevaOnboardingButton(
@@ -252,9 +268,7 @@ fun NeevaOnboardingButton(
     }
 }
 
-@Preview("OnboardingButton Light LTR 1x scale", locale = "en")
-@Preview("OnboardingButton Light 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("OnboardingButton Light 1x scale", locale = "he")
+@PortraitPreviews
 @Composable
 fun OnboardingButtonPreview_Light() {
     TwoBooleanPreviewContainer(useDarkTheme = false) { hasStartComposable, isEnabled ->
@@ -269,9 +283,7 @@ fun OnboardingButtonPreview_Light() {
     }
 }
 
-@Preview("OnboardingButton Dark LTR 1x scale", locale = "en")
-@Preview("OnboardingButton Dark 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("OnboardingButton Dark 1x scale", locale = "he")
+@PortraitPreviewsDark
 @Composable
 fun OnboardingButtonPreview_Dark() {
     TwoBooleanPreviewContainer(useDarkTheme = true) { hasStartComposable, isEnabled ->
@@ -286,18 +298,58 @@ fun OnboardingButtonPreview_Dark() {
     }
 }
 
-@Preview("NeevaOnboardingButton LTR 1x scale", locale = "en")
-@Preview("NeevaOnboardingButton 2x scale", locale = "en", fontScale = 2.0f)
-@Preview("NeevaOnboardingButton 1x scale", locale = "he")
+@PortraitPreviews
 @Composable
-fun NeevaOnboardingButtonPreview_Light() {
-    TwoBooleanPreviewContainer { signup, isEnabled ->
+fun NeevaOnboardingButtonPreview_LightSignup() {
+    OneBooleanPreviewContainer { enabled ->
         OnboardingButton(
-            signup = signup,
-            enabled = isEnabled,
+            signup = true,
+            enabled = enabled,
             provider = NeevaUser.SSOProvider.OKTA,
-            launchLoginIntent = {},
-            onActivityResult = {}
+            onLaunchLoginFlow = { _, _ -> },
+            onLaunchActivityResult = { _, _ -> }
+        )
+    }
+}
+
+@PortraitPreviews
+@Composable
+fun NeevaOnboardingButtonPreview_LightSignin() {
+    OneBooleanPreviewContainer { enabled ->
+        OnboardingButton(
+            signup = false,
+            enabled = enabled,
+            provider = NeevaUser.SSOProvider.OKTA,
+            onLaunchLoginFlow = { _, _ -> },
+            onLaunchActivityResult = { _, _ -> }
+        )
+    }
+}
+
+@PortraitPreviewsDark
+@Composable
+fun NeevaOnboardingButtonPreview_DarkSignup() {
+    OneBooleanPreviewContainer(useDarkTheme = true) { enabled ->
+        OnboardingButton(
+            signup = true,
+            enabled = enabled,
+            provider = NeevaUser.SSOProvider.OKTA,
+            onLaunchLoginFlow = { _, _ -> },
+            onLaunchActivityResult = { _, _ -> }
+        )
+    }
+}
+
+@PortraitPreviewsDark
+@Composable
+fun NeevaOnboardingButtonPreview_DarkSignin() {
+    OneBooleanPreviewContainer(useDarkTheme = true) { enabled ->
+        OnboardingButton(
+            signup = false,
+            enabled = enabled,
+            provider = NeevaUser.SSOProvider.OKTA,
+            onLaunchLoginFlow = { _, _ -> },
+            onLaunchActivityResult = { _, _ -> }
         )
     }
 }

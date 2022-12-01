@@ -8,6 +8,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
+import com.neeva.app.firstrun.OktaSignUpHandler
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.PreviewSessionToken
@@ -37,13 +38,14 @@ object TestNeevaConstantsModule {
          */
         return object : NeevaConstants(
             appHost = "127.0.0.1:8000",
-            appURL = "http://127.0.0.1:8000/",
-            appHelpCenterURL = "http://127.0.0.1:8000/help.html"
+            appURL = "http://127.0.0.1:8000/"
         ) {
             override val downloadDirectory = File(context.cacheDir, "/testDownloads")
 
+            override val appHelpCenterURL = "http://127.0.0.1:8000/help.html"
+
             // No local equivalent for cookie cutter url, but this should suffice for testing.
-            override val contentFilterLearnMoreUrl = "http://127.0.0.1:8000/help.html"
+            override val contentFilterLearnMoreUrl = appHelpCenterURL
 
             override fun createPersistentNeevaCookieString(
                 cookieName: String,
@@ -107,5 +109,31 @@ class TestDatabaseModule {
     fun providesHistoryDatabase(): HistoryDatabase {
         val context: Context = ApplicationProvider.getApplicationContext()
         return HistoryDatabase.createInMemory(context)
+    }
+}
+
+@Module
+@TestInstallIn(
+    components = [SingletonComponent::class],
+    replaces = [OktaModule::class]
+)
+class TestOktaModule {
+    class TestOktaSignUpHandler(
+        neevaConstants: NeevaConstants,
+    ) : OktaSignUpHandler(neevaConstants) {
+        var overrideCreateOktaAccountUrl: String? = null
+        var overrideOnLoginCookieReceivedUrl: String? = null
+
+        override val createOktaAccountURL: String
+            get() = overrideCreateOktaAccountUrl ?: super.createOktaAccountURL
+
+        override val onLoginCookieReceivedUrl: String
+            get() = overrideOnLoginCookieReceivedUrl ?: super.onLoginCookieReceivedUrl
+    }
+
+    @Provides
+    @Singleton
+    fun providesOktaSignUpHandler(neevaConstants: NeevaConstants): OktaSignUpHandler {
+        return TestOktaSignUpHandler(neevaConstants)
     }
 }

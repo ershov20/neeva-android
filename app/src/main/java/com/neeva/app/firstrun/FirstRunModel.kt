@@ -19,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.neeva.app.Dispatchers
+import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
@@ -32,7 +33,6 @@ import com.neeva.app.userdata.NeevaUser
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -42,38 +42,39 @@ fun interface GoogleSignInAccountProvider {
 
 @Singleton
 class FirstRunModel internal constructor(
-    private val sharedPreferencesModel: SharedPreferencesModel,
-    private val settingsDataModel: SettingsDataModel,
-    private val loginToken: LoginToken,
-    private val neevaConstants: NeevaConstants,
     private var clientLogger: ClientLogger,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
+    private val googleSignInAccountProvider: GoogleSignInAccountProvider,
+    private val loginToken: LoginToken,
+    private val neevaConstants: NeevaConstants,
+    private val oktaSignUpHandler: OktaSignUpHandler,
     private val popupModel: PopupModel,
-    private val googleSignInAccountProvider: GoogleSignInAccountProvider
+    private val sharedPreferencesModel: SharedPreferencesModel,
+    private val settingsDataModel: SettingsDataModel
 ) {
     @Inject
     constructor(
-        sharedPreferencesModel: SharedPreferencesModel,
-        settingsDataModel: SettingsDataModel,
-        loginToken: LoginToken,
-        neevaConstants: NeevaConstants,
         clientLogger: ClientLogger,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
-        popupModel: PopupModel
+        loginToken: LoginToken,
+        neevaConstants: NeevaConstants,
+        oktaSignUpHandler: OktaSignUpHandler,
+        popupModel: PopupModel,
+        settingsDataModel: SettingsDataModel,
+        sharedPreferencesModel: SharedPreferencesModel
     ) : this(
-        sharedPreferencesModel = sharedPreferencesModel,
-        settingsDataModel = settingsDataModel,
-        loginToken = loginToken,
-        neevaConstants = neevaConstants,
         clientLogger = clientLogger,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
+        googleSignInAccountProvider = GoogleSignIn::getSignedInAccountFromIntent,
+        loginToken = loginToken,
+        neevaConstants = neevaConstants,
+        oktaSignUpHandler = oktaSignUpHandler,
         popupModel = popupModel,
-        googleSignInAccountProvider = GoogleSignInAccountProvider {
-            GoogleSignIn.getSignedInAccountFromIntent(it)
-        }
+        sharedPreferencesModel = sharedPreferencesModel,
+        settingsDataModel = settingsDataModel
     )
 
     companion object {
@@ -117,14 +118,51 @@ class FirstRunModel internal constructor(
                 else -> false
             }
         }
+
+        /**
+         * Returns a URI that we can use to sign the user in or sign the user up via the website.
+         *
+         * Instead of using Custom Tabs or trying to call Google's login API, this function assumes that
+         * the user is trying to log in via a tab inside of our own browser and sets the parameters in a
+         * way that the backend expects for a web-based login.
+         *
+         * @param signup Whether or not the user is signing up for a new account.
+         * @param provider Service that the user wants to use when creating an account or signing in.
+         * @param oktaLoginHint Indicates what email address the user wants to use when using Okta.
+         */
+        internal fun getWebAuthUri(
+            neevaConstants: NeevaConstants,
+            signup: Boolean,
+            provider: NeevaUser.SSOProvider,
+            oktaLoginHint: String,
+        ): Uri {
+            return Uri
+                .parse(neevaConstants.appURL)
+                .buildUpon()
+                .path(AUTH_PATH_DEFAULT_LOGIN)
+                .appendQueryParameter("provider", provider.url)
+                .appendQueryParameter("finalPath", provider.finalPath)
+                .appendQueryParameter("signup", signup.toString())
+                .apply {
+                    if (provider == NeevaUser.SSOProvider.OKTA) {
+                        appendQueryParameter("loginHint", oktaLoginHint)
+                    }
+                }
+                .build()
+        }
     }
 
     private lateinit var googleSignInClient: GoogleSignInClient
 
-    /** Holds the [LaunchLoginIntentParams] for the latest login */
-    private val intentParamFlow = MutableStateFlow<LaunchLoginIntentParams?>(null)
-
-    private fun authUri(
+    /**
+     * Returns a URI that we can use to log the user in or sign the user up using Custom Tabs.
+     *
+     * This version should be used with Custom Tabs or with the native Google login APIs to ensure
+     * that tokens provided by Google are sent to the backend to finish authentication.  When using
+     * this URI, the backend assumes that the client has performed some part of the authentication
+     * process before contacting it and redirects the user accordingly.
+     */
+    private fun getCustomTabsLaunchUri(
         signup: Boolean,
         provider: NeevaUser.SSOProvider,
         loginHint: String = "",
@@ -203,7 +241,7 @@ class FirstRunModel internal constructor(
         return previewQueries % PREVIEW_MODE_COUNT_THRESHOLD == 0
     }
 
-    fun logEvent(interaction: LogConfig.Interaction) {
+    private fun logEvent(interaction: LogConfig.Interaction) {
         clientLogger.logCounter(interaction, null)
     }
 
@@ -229,28 +267,56 @@ class FirstRunModel internal constructor(
         context.startActivity(intent)
     }
 
-    private fun launchCustomTabsLoginIntent(
+    /**
+     * Sends the user to a screen that can be used to sign up or log in to Neeva via a particular
+     * identify provider.
+     */
+    fun launchLoginFlow(
         context: Context,
-        provider: NeevaUser.SSOProvider,
-        signup: Boolean,
-        emailProvided: String?,
-        passwordProvided: String? = null
+        launchLoginFlowParams: LaunchLoginFlowParams,
+        activityResultLauncher: ActivityResultLauncher<Intent>
     ) {
+        when (launchLoginFlowParams.provider) {
+            NeevaUser.SSOProvider.MICROSOFT -> {
+                logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_MICROSOFT)
+            }
+
+            NeevaUser.SSOProvider.GOOGLE -> {
+                logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_GOOGLE)
+            }
+
+            NeevaUser.SSOProvider.OKTA -> {
+                // TODO(danalcantara): Not sure why nothing is logged here.
+            }
+
+            else -> {
+                // Not possible to log in with other cases.
+                return
+            }
+        }
+
+        val provider = launchLoginFlowParams.provider
+        val signup = launchLoginFlowParams.signup
+        val emailProvided = launchLoginFlowParams.emailProvided
+
+        val useCustomTabs = settingsDataModel.getSettingsToggleValue(
+            SettingsToggle.DEBUG_USE_CUSTOM_TABS_FOR_LOGIN
+        )
         val isNativeGoogleLoginEnabled = settingsDataModel.getSettingsToggleValue(
             SettingsToggle.DEBUG_ENABLE_NATIVE_GOOGLE_LOGIN
         )
 
-        if (signup && provider == NeevaUser.SSOProvider.OKTA &&
+        if (signup &&
+            provider == NeevaUser.SSOProvider.OKTA &&
             emailProvided != null &&
-            passwordProvided != null
+            launchLoginFlowParams.passwordProvided != null
         ) {
             coroutineScope.launch(dispatchers.io) {
-                OktaSignUp.createOktaAccount(
+                oktaSignUpHandler.createOktaAccount(
                     activityContext = context,
                     popupModel = popupModel,
-                    neevaConstants = neevaConstants,
                     emailProvided = emailProvided,
-                    passwordProvided = passwordProvided
+                    passwordProvided = launchLoginFlowParams.passwordProvided
                 )
             }
             return
@@ -263,27 +329,34 @@ class FirstRunModel internal constructor(
                 .build()
 
             googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
-
-            intentParamFlow.value?.resultLauncher
-                ?.launch(googleSignInClient.signInIntent)
-                ?.let { return }
+            activityResultLauncher.launch(googleSignInClient.signInIntent)
+        } else if (useCustomTabs) {
+            val intent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .build()
+                .intent
+                .setPackage(CustomTabsClient.getPackageName(context, listOf("com.android.chrome")))
+                .setData(
+                    getCustomTabsLaunchUri(
+                        signup = signup,
+                        provider = provider,
+                        loginHint = emailProvided ?: ""
+                    )
+                )
+            context.startActivity(intent)
+        } else {
+            val intent = Intent(Intent.ACTION_VIEW)
+                .setData(
+                    getWebAuthUri(
+                        neevaConstants = neevaConstants,
+                        signup = signup,
+                        provider = provider,
+                        oktaLoginHint = emailProvided ?: ""
+                    )
+                )
+                .setClass(context, NeevaActivity::class.java)
+            context.startActivity(intent)
         }
-
-        val intent = CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .build()
-            .intent
-        intent.setPackage(
-            CustomTabsClient.getPackageName(
-                context, listOf("com.android.chrome")
-            )
-        )
-        intent.data = authUri(
-            signup,
-            provider,
-            emailProvided ?: ""
-        )
-        context.startActivity(intent)
     }
 
     /**
@@ -293,23 +366,27 @@ class FirstRunModel internal constructor(
     fun handleLoginActivityResult(
         context: Context,
         result: ActivityResult,
+        launchLoginFlowParams: LaunchLoginFlowParams,
         onSuccess: (Uri) -> Unit
     ) {
-        extractLoginUri(result)
+        extractLoginUri(result, launchLoginFlowParams)
             ?.let { onSuccess(it) }
             ?: run {
                 openInCustomTabs(
                     context = context,
-                    uri = authUri(
-                        signup = intentParamFlow.value?.signup ?: false,
-                        provider = intentParamFlow.value?.provider ?: NeevaUser.SSOProvider.GOOGLE,
-                        loginHint = intentParamFlow.value?.emailProvided ?: ""
+                    uri = getCustomTabsLaunchUri(
+                        signup = launchLoginFlowParams.signup,
+                        provider = launchLoginFlowParams.provider,
+                        loginHint = launchLoginFlowParams.emailProvided ?: ""
                     )
                 )
             }
     }
 
-    private fun extractLoginUri(result: ActivityResult): Uri? {
+    private fun extractLoginUri(
+        result: ActivityResult,
+        launchLoginFlowParams: LaunchLoginFlowParams,
+    ): Uri? {
         val data = result.takeIf { it.resultCode == Activity.RESULT_OK }?.data ?: run {
             Timber.e("ActivityResult was not successful: ${result.resultCode}")
             return null
@@ -320,9 +397,9 @@ class FirstRunModel internal constructor(
             val idToken = account.result.idToken ?: return null
             val authCode = account.result.serverAuthCode ?: return null
 
-            return authUri(
-                signup = intentParamFlow.value?.signup ?: false,
-                provider = intentParamFlow.value?.provider ?: NeevaUser.SSOProvider.GOOGLE,
+            return getCustomTabsLaunchUri(
+                signup = launchLoginFlowParams.signup,
+                provider = launchLoginFlowParams.provider,
                 identityToken = idToken,
                 authorizationCode = authCode
             )
@@ -331,54 +408,11 @@ class FirstRunModel internal constructor(
             return null
         }
     }
-
-    fun getLaunchLoginIntent(
-        context: Context,
-    ): (LaunchLoginIntentParams) -> Unit {
-        return { launchLoginIntentParams ->
-            intentParamFlow.value = launchLoginIntentParams
-
-            when (launchLoginIntentParams.provider) {
-                NeevaUser.SSOProvider.MICROSOFT -> {
-                    launchCustomTabsLoginIntent(
-                        context = context,
-                        provider = NeevaUser.SSOProvider.MICROSOFT,
-                        signup = launchLoginIntentParams.signup,
-                        emailProvided = launchLoginIntentParams.emailProvided
-                    )
-                    logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_MICROSOFT)
-                }
-
-                NeevaUser.SSOProvider.GOOGLE -> {
-                    launchCustomTabsLoginIntent(
-                        context = context,
-                        provider = NeevaUser.SSOProvider.GOOGLE,
-                        signup = launchLoginIntentParams.signup,
-                        emailProvided = launchLoginIntentParams.emailProvided
-                    )
-                    logEvent(LogConfig.Interaction.AUTH_SIGN_UP_WITH_GOOGLE)
-                }
-
-                NeevaUser.SSOProvider.OKTA -> {
-                    launchCustomTabsLoginIntent(
-                        context = context,
-                        provider = NeevaUser.SSOProvider.OKTA,
-                        signup = launchLoginIntentParams.signup,
-                        emailProvided = launchLoginIntentParams.emailProvided,
-                        passwordProvided = launchLoginIntentParams.passwordProvided
-                    )
-                }
-
-                else -> { }
-            }
-        }
-    }
 }
 
-data class LaunchLoginIntentParams(
+data class LaunchLoginFlowParams(
     val provider: NeevaUser.SSOProvider,
     val signup: Boolean,
     val emailProvided: String? = null,
-    val passwordProvided: String? = null,
-    val resultLauncher: ActivityResultLauncher<Intent>
+    val passwordProvided: String? = null
 )

@@ -21,6 +21,7 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
+import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.PreviewSessionToken
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +45,7 @@ class FirstRunModelTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
+    @Mock private lateinit var oktaSignUpHandler: OktaSignUpHandler
     @Mock private lateinit var previewSessionToken: PreviewSessionToken
 
     private lateinit var context: Context
@@ -94,15 +96,16 @@ class FirstRunModelTest : BaseTest() {
         }
 
         firstRunModel = FirstRunModel(
-            sharedPreferencesModel = sharedPreferencesModel,
-            settingsDataModel = settingsDataModel,
-            loginToken = loginToken,
-            neevaConstants = neevaConstants,
             clientLogger = clientLogger,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = coroutineScopeRule.dispatchers,
+            googleSignInAccountProvider = { Tasks.forResult(signInAccount) },
+            oktaSignUpHandler = oktaSignUpHandler,
+            loginToken = loginToken,
+            neevaConstants = neevaConstants,
             popupModel = popupModel,
-            googleSignInAccountProvider = { Tasks.forResult(signInAccount) }
+            sharedPreferencesModel = sharedPreferencesModel,
+            settingsDataModel = settingsDataModel
         )
     }
 
@@ -120,7 +123,15 @@ class FirstRunModelTest : BaseTest() {
             val onSuccess = { _: Uri -> onSuccessCalled = true }
 
             firstRunModel.handleLoginActivityResult(
-                context, activityResult, onSuccess = onSuccess
+                context,
+                activityResult,
+                onSuccess = onSuccess,
+                launchLoginFlowParams = LaunchLoginFlowParams(
+                    provider = NeevaUser.SSOProvider.GOOGLE,
+                    signup = false,
+                    emailProvided = "unused@gmail.com",
+                    passwordProvided = null
+                )
             )
 
             expectThat(onSuccessCalled).isTrue()
@@ -136,7 +147,17 @@ class FirstRunModelTest : BaseTest() {
             var onSuccessCalled = false
             val onSuccess = { _: Uri -> onSuccessCalled = true }
 
-            firstRunModel.handleLoginActivityResult(context, activityResult, onSuccess = onSuccess)
+            firstRunModel.handleLoginActivityResult(
+                context,
+                activityResult,
+                onSuccess = onSuccess,
+                launchLoginFlowParams = LaunchLoginFlowParams(
+                    provider = NeevaUser.SSOProvider.GOOGLE,
+                    signup = false,
+                    emailProvided = "unused@gmail.com",
+                    passwordProvided = null
+                )
+            )
 
             expectThat(onSuccessCalled).isFalse()
         }

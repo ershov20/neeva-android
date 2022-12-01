@@ -9,12 +9,14 @@ import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.Lifecycle
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.concurrent.TimeUnit
@@ -131,9 +133,10 @@ fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>
 
 /** Wait for a Composable to appear with the given text, then click on it. */
 fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.clickOnNodeWithText(
-    text: String
+    text: String,
+    substring: Boolean = false
 ) {
-    waitForNodeWithText(text).assertHasClickAction().performClick()
+    waitForNodeWithText(text, substring).assertHasClickAction().performClick()
     waitForIdle()
 }
 
@@ -172,16 +175,36 @@ fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.waitForNo
  */
 fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.flakyClickOnNode(
     matcher: SemanticsMatcher,
-    expectedCondition: () -> Boolean
+    expectedCondition: (SemanticsNodeInteraction) -> Boolean
 ) {
     try {
-        waitForNode(matcher).performClick()
-        waitFor { expectedCondition() }
+        val nodeInteraction = waitForNode(matcher)
+        nodeInteraction.performClick()
+        waitFor { expectedCondition(nodeInteraction) }
     } catch (e: ComposeTimeoutException) {
         Timber.e("Failed to click using '${matcher.description}'.  Trying again.")
-        waitForNode(matcher).performClick()
-        waitFor("Failed to click using '${matcher.description}'") { expectedCondition() }
+        val nodeInteraction = waitForNode(matcher)
+        nodeInteraction.performClick()
+        waitFor("Failed to click using '${matcher.description}'.  Aborting.") {
+            expectedCondition(nodeInteraction)
+        }
     }
+}
+
+/** Click on a text field and type into it. */
+fun <R : TestRule, A : ComponentActivity> AndroidComposeTestRule<R, A>.performTextInput(
+    matcher: SemanticsMatcher,
+    text: String
+) {
+    // Compose will sometimes fail to actually focus on the TextField, so we have to make sure that
+    // it's actually ready to type into before doing it.
+    flakyClickOnNode(matcher) {
+        assertionToBoolean {
+            it.assertIsFocused()
+        }
+    }
+    waitForNode(matcher).performTextInput(text)
+    waitForIdle()
 }
 
 inline fun assertionToBoolean(assertion: () -> Unit): Boolean {

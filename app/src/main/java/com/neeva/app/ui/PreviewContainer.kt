@@ -41,6 +41,7 @@ import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.PreviewAppNavModel
 import com.neeva.app.firstrun.FirstRunModel
+import com.neeva.app.firstrun.OktaSignUpHandler
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.previewDispatchers
 import com.neeva.app.publicsuffixlist.previewDomainProvider
@@ -171,20 +172,21 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         settingsDataModel = previewSettingsDataModel
     )
 
-    val previewFirstRunModel = FirstRunModel(
-        sharedPreferencesModel = previewSharedPreferencesModel,
-        settingsDataModel = previewSettingsDataModel,
-        loginToken = previewLoginToken,
-        neevaConstants = previewNeevaConstants,
-        clientLogger = previewClientLogger,
-        coroutineScope = coroutineScope,
-        dispatchers = previewDispatchers,
-        popupModel = previewPopupModel
-    )
-
     val previewActivityStarter = ActivityStarter(
         appContext = LocalContext.current,
         popupModel = previewPopupModel
+    )
+
+    val previewFirstRunModel = FirstRunModel(
+        clientLogger = previewClientLogger,
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers,
+        loginToken = previewLoginToken,
+        neevaConstants = previewNeevaConstants,
+        oktaSignUpHandler = OktaSignUpHandler(previewNeevaConstants),
+        popupModel = previewPopupModel,
+        settingsDataModel = previewSettingsDataModel,
+        sharedPreferencesModel = previewSharedPreferencesModel
     )
 
     // Provide classes that have no material impact on the Composable previews.  These can still be

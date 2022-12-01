@@ -17,7 +17,6 @@ import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
-import com.neeva.app.firstrun.LaunchLoginIntentParams
 import com.neeva.app.firstrun.OnboardingContainer
 import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
 import com.neeva.app.firstrun.widgets.texts.AcknowledgementText
@@ -33,7 +32,6 @@ import com.neeva.app.userdata.NeevaUser
 
 @Composable
 fun SignUpLandingContainer(
-    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     onOpenUrl: (Uri) -> Unit,
     onClose: () -> Unit,
     navigateToSignIn: () -> Unit,
@@ -45,7 +43,6 @@ fun SignUpLandingContainer(
         useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn
     ) { modifier ->
         SignUpLandingScreen(
-            launchLoginIntent = launchLoginIntent,
             onOpenUrl = onOpenUrl,
             showSignUpWithOther = showSignUpWithOther,
             neevaConstants = neevaConstants,
@@ -56,7 +53,6 @@ fun SignUpLandingContainer(
 
 @Composable
 fun SignUpLandingScreen(
-    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     onOpenUrl: (Uri) -> Unit,
     showSignUpWithOther: () -> Unit,
     neevaConstants: NeevaConstants,
@@ -78,8 +74,7 @@ fun SignUpLandingScreen(
 
         OnboardingButton(
             signup = true,
-            provider = NeevaUser.SSOProvider.GOOGLE,
-            launchLoginIntent = launchLoginIntent
+            provider = NeevaUser.SSOProvider.GOOGLE
         )
 
         Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
@@ -109,7 +104,6 @@ fun SignUpLanding_Light_Preview() {
     PreviewCompositionLocals {
         NeevaTheme {
             SignUpLandingContainer(
-                launchLoginIntent = {},
                 onOpenUrl = {},
                 onClose = {},
                 navigateToSignIn = {},
@@ -127,7 +121,6 @@ fun SignUpLanding_Dark_Preview() {
     PreviewCompositionLocals {
         NeevaTheme(useDarkTheme = true) {
             SignUpLandingContainer(
-                launchLoginIntent = {},
                 onOpenUrl = {},
                 onClose = {},
                 navigateToSignIn = {},

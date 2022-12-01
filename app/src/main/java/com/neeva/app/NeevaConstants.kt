@@ -12,8 +12,7 @@ import okhttp3.Cookie
 
 open class NeevaConstants(
     val appHost: String = "neeva.com",
-    val appURL: String = "https://$appHost/",
-    val appHelpCenterURL: String = "https://help.$appHost/"
+    val appURL: String = "https://$appHost/"
 ) {
     val appWelcomeToursURL: String = "$appURL#modal-hello"
     val appSearchURL: String = "${appURL}search"
@@ -30,13 +29,18 @@ open class NeevaConstants(
 
     val apolloURL: String = "${appURL}graphql"
 
+    open val appHelpCenterURL: String = "https://help.$appHost/"
+
     /** Endpoint for creating new incognito session tokens. */
     val incognitoURL: String = "${appURL}incognito/create-session"
 
     /** Endpoint for creating new preview session tokens. */
     val previewCookieURL: String = "${appURL}preview/create-session"
 
-    open val contentFilterLearnMoreUrl: String = "$appHelpCenterURL/hc/en-us/articles/4486326606355"
+    open val contentFilterLearnMoreUrl: String by lazy {
+        "$appHelpCenterURL/hc/en-us/articles/4486326606355"
+    }
+
     val createOktaAccountURL: String = "${appURL}login/create"
 
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")

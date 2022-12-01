@@ -14,7 +14,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.R
-import com.neeva.app.firstrun.LaunchLoginIntentParams
 import com.neeva.app.firstrun.OnboardingContainer
 import com.neeva.app.firstrun.widgets.OrSeparator
 import com.neeva.app.firstrun.widgets.buttons.OnboardingButton
@@ -34,7 +33,6 @@ import com.neeva.app.userdata.NeevaUser
 
 @Composable
 fun SignUpWithOtherContainer(
-    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
     onClose: () -> Unit,
     navigateToSignIn: () -> Unit
 ) {
@@ -42,18 +40,12 @@ fun SignUpWithOtherContainer(
         showBrowser = onClose,
         useSignUpStickyFooter = true, stickyFooterOnClick = navigateToSignIn
     ) { modifier ->
-        SignUpWithOtherScreen(
-            launchLoginIntent = launchLoginIntent,
-            modifier = modifier
-        )
+        SignUpWithOtherScreen(modifier = modifier)
     }
 }
 
 @Composable
-fun SignUpWithOtherScreen(
-    launchLoginIntent: (LaunchLoginIntentParams) -> Unit,
-    modifier: Modifier
-) {
+fun SignUpWithOtherScreen(modifier: Modifier) {
     val email = rememberSaveable { mutableStateOf("") }
     val password = rememberSaveable { mutableStateOf("") }
 
@@ -90,8 +82,7 @@ fun SignUpWithOtherScreen(
             emailProvided = email.value,
             passwordProvided = password.value,
             signup = true,
-            provider = NeevaUser.SSOProvider.OKTA,
-            launchLoginIntent = launchLoginIntent
+            provider = NeevaUser.SSOProvider.OKTA
         )
 
         Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
@@ -102,8 +93,7 @@ fun SignUpWithOtherScreen(
 
         ToggleOnboardingButtons(
             signup = true,
-            emailProvided = email.value,
-            launchLoginIntent = launchLoginIntent
+            emailProvided = email.value
         )
 
         Spacer(modifier = Modifier.height(Dimensions.PADDING_MEDIUM))
@@ -117,7 +107,6 @@ fun SignUpOther_Light_Preview() {
     PreviewCompositionLocals {
         NeevaTheme {
             SignUpWithOtherContainer(
-                launchLoginIntent = {},
                 onClose = {},
                 navigateToSignIn = {}
             )
@@ -132,7 +121,6 @@ fun SignUpOther_Dark_Preview() {
     PreviewCompositionLocals {
         NeevaTheme(useDarkTheme = true) {
             SignUpWithOtherContainer(
-                launchLoginIntent = {},
                 onClose = {},
                 navigateToSignIn = {}
             )

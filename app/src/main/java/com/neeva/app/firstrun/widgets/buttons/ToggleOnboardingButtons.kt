@@ -9,20 +9,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.neeva.app.firstrun.LaunchLoginIntentParams
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
 fun ToggleOnboardingButtons(
     signup: Boolean,
-    emailProvided: String,
-    launchLoginIntent: (LaunchLoginIntentParams) -> Unit
+    emailProvided: String
 ) {
     OnboardingButton(
         emailProvided = emailProvided,
         signup = signup,
-        provider = NeevaUser.SSOProvider.GOOGLE,
-        launchLoginIntent = launchLoginIntent
+        provider = NeevaUser.SSOProvider.GOOGLE
     )
 
     Spacer(modifier = Modifier.height(20.dp))
@@ -30,7 +27,6 @@ fun ToggleOnboardingButtons(
     OnboardingButton(
         emailProvided = emailProvided,
         signup = signup,
-        provider = NeevaUser.SSOProvider.MICROSOFT,
-        launchLoginIntent = launchLoginIntent
+        provider = NeevaUser.SSOProvider.MICROSOFT
     )
 }

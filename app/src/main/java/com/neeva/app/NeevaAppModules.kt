@@ -16,6 +16,7 @@ import com.neeva.app.browsing.CacheCleaner
 import com.neeva.app.browsing.WebLayerFactory
 import com.neeva.app.contentfilter.ScriptInjectionManager
 import com.neeva.app.downloads.DownloadCallbackImpl
+import com.neeva.app.firstrun.OktaSignUpHandler
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.neevascope.BloomFilterManager
@@ -414,5 +415,15 @@ class ApolloModule {
         return UnauthenticatedApolloWrapper(
             neevaConstants = neevaConstants
         )
+    }
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
+class OktaModule {
+    @Provides
+    @Singleton
+    fun providesOktaSignUpHandler(neevaConstants: NeevaConstants): OktaSignUpHandler {
+        return OktaSignUpHandler(neevaConstants)
     }
 }

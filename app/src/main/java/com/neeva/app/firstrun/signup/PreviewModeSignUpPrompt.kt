@@ -9,14 +9,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.R
 import com.neeva.app.firstrun.rememberSignInFlowNavModel
+import com.neeva.app.firstrun.widgets.buttons.LocalOnboardingButtonListener
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.LandscapePreviewsDark
 import com.neeva.app.ui.PortraitPreviews
@@ -30,29 +30,27 @@ fun PreviewModeSignUpPrompt(
     query: String,
     onDismiss: () -> Unit
 ) {
-    val context = LocalContext.current
     val appNavModel = LocalAppNavModel.current
-    val firstRunModel = LocalFirstRunModel.current
     val signInFlowNavModel = rememberSignInFlowNavModel()
     val neevaConstants = LocalNeevaConstants.current
 
-    SignUpLandingScreen(
-        launchLoginIntent = {
-            firstRunModel.getLaunchLoginIntent(context).invoke(it)
-            onDismiss()
-        },
-        onOpenUrl = {
-            appNavModel.openUrlInNewTab(it)
-            onDismiss()
-        },
-        showSignUpWithOther = {
-            signInFlowNavModel.navigateToSignUpWithOther()
-            onDismiss()
-        },
-        neevaConstants = neevaConstants,
-        primaryLabelString = stringResource(id = R.string.preview_overlay_prompt, query),
-        modifier = Modifier.padding(Dimensions.PADDING_LARGE)
-    )
+    CompositionLocalProvider(
+        LocalOnboardingButtonListener provides onDismiss
+    ) {
+        SignUpLandingScreen(
+            onOpenUrl = {
+                appNavModel.openUrlInNewTab(it)
+                onDismiss()
+            },
+            showSignUpWithOther = {
+                signInFlowNavModel.navigateToSignUpWithOther()
+                onDismiss()
+            },
+            neevaConstants = neevaConstants,
+            primaryLabelString = stringResource(id = R.string.preview_overlay_prompt, query),
+            modifier = Modifier.padding(Dimensions.PADDING_LARGE)
+        )
+    }
 }
 
 @PortraitPreviews

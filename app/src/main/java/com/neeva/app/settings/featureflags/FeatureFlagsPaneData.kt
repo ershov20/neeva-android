@@ -67,6 +67,10 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.DEBUG_USE_CUSTOM_TABS_FOR_LOGIN
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.DEBUG_ENABLE_NATIVE_GOOGLE_LOGIN
                 ),
                 SettingsRowData(

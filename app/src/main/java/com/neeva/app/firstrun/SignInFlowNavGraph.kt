@@ -92,7 +92,6 @@ fun NavGraphBuilder.signInFlowNavGraph() {
             val signInFlowNavModel = rememberSignInFlowNavModel()
 
             SignUpLandingContainer(
-                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
                 onOpenUrl = {
                     firstRunModel.openInCustomTabs(context, it)
                 },
@@ -115,7 +114,6 @@ fun NavGraphBuilder.signInFlowNavGraph() {
             val firstRunModel = LocalFirstRunModel.current
             val signInFlowNavModel = rememberSignInFlowNavModel()
             SignUpWithOtherContainer(
-                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
                 onClose = firstRunModel.getOnCloseOnboarding(signInFlowNavModel::exitSignInFlow),
                 navigateToSignIn = signInFlowNavModel::navigateToSignIn
             )
@@ -134,7 +132,6 @@ fun NavGraphBuilder.signInFlowNavGraph() {
             val firstRunModel = LocalFirstRunModel.current
             val signInFlowNavModel = rememberSignInFlowNavModel()
             SignInScreenContainer(
-                launchLoginIntent = firstRunModel.getLaunchLoginIntent(LocalContext.current),
                 onClose = firstRunModel.getOnCloseOnboarding(signInFlowNavModel::exitSignInFlow),
                 navigateToSignUp = signInFlowNavModel::navigateBackToSignUpLandingPage
             )

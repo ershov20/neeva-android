@@ -206,6 +206,7 @@ dependencies {
 
     androidTestImplementation 'androidx.test.espresso:espresso-intents:3.4.0'
     androidTestImplementation "com.apollographql.apollo3:apollo-testing-support:$apollo_version"
+    androidTestImplementation "com.squareup.okhttp3:mockwebserver:4.10.0"
     androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlin_coroutines_version"
     androidTestImplementation "io.strikt:strikt-core:$strikt_version"
     androidTestImplementation "androidx.test.ext:junit-ktx:$androidx_test_junit_version"

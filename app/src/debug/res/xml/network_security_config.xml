@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright 2022 Neeva Inc. All rights reserved. -->
+<!-- Use of this source code is governed by a BSD-style license that can be -->
+<!-- found in the LICENSE file. -->
+
+<network-security-config>
+    <!-- Allow OkHttp's MockWebServer to work in instrumentation tests. -->
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">localhost</domain>
+    </domain-config>
+
+    <!-- Disallow random http:// traffic by default. -->
+    <base-config cleartextTrafficPermitted="false" />
+</network-security-config>

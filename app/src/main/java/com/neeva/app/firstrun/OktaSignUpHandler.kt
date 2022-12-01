@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.neeva.app.BuildConfig
+import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.ui.PopupModel
@@ -23,15 +24,20 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
+import okio.IOException
 
-object OktaSignUp {
+open class OktaSignUpHandler(
+    private val neevaConstants: NeevaConstants,
+) {
+    protected open val createOktaAccountURL: String = neevaConstants.createOktaAccountURL
+    protected open val onLoginCookieReceivedUrl: String = "neeva://login/cb?sessionKey="
+
     suspend fun createOktaAccount(
         activityContext: Context,
         popupModel: PopupModel,
-        neevaConstants: NeevaConstants,
         emailProvided: String,
         passwordProvided: String = "",
-        marketingEmailOptOut: Boolean = false
+        marketingEmailOptOut: Boolean = false,
     ) {
         val salt = generateSalt()
         val passwordSaltedAndEncoded = (salt + passwordProvided).sha512().base64()
@@ -51,45 +57,51 @@ object OktaSignUp {
             .addHeader("Content-Type", "application/json")
             .addHeader("X-Neeva-Client-ID", neevaConstants.browserIdentifier)
             .addHeader("X-Neeva-Client-Version", BuildConfig.VERSION_NAME)
-            .url(neevaConstants.createOktaAccountURL)
+            .url(createOktaAccountURL)
             .build()
         val cookieJar = FirstRunCookieJar()
         val client = OkHttpClient.Builder().cookieJar(cookieJar).build()
-        val response = client.newCall(request).execute()
 
-        cookieJar
-            .authCookie(loginCookie = neevaConstants.loginCookieKey)
-            ?.let { cookie ->
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.data = Uri.parse("neeva://login/cb?sessionKey=${cookie.value}")
-                activityContext.startActivity(intent)
-            }
-        if (!response.isSuccessful) {
-            val errorMsg = when (
-                moshi
-                    .adapter(OktaSignupErrorResponse::class.java)
-                    .fromJson(response.body?.string() ?: "")?.error
-            ) {
-                "UsedEmail" -> {
-                    activityContext.getString(R.string.used_email_error)
+        var errorMessageResId: Int? = null
+        var loginCookieValue: String? = null
+        try {
+            client.newCall(request).execute().use { response ->
+                cookieJar.authCookie(loginCookie = neevaConstants.loginCookieKey)?.let { cookie ->
+                    loginCookieValue = cookie.value
+                    return@use
                 }
-                "InvalidEmail" -> {
-                    activityContext.getString(R.string.invalid_email_error)
-                }
-                "InvalidRequest" -> {
-                    activityContext.getString(R.string.invalid_request_error)
-                }
-                "InvalidToken" -> {
-                    activityContext.getString(R.string.invalid_token_error)
-                }
-                "UsedToken" -> {
-                    activityContext.getString(R.string.invalid_token_error)
-                }
-                else -> {
-                    activityContext.getString(R.string.generic_signup_error)
+
+                errorMessageResId = R.string.generic_signup_error
+                if (!response.isSuccessful) {
+                    errorMessageResId = when (
+                        moshi
+                            .adapter(OktaSignupErrorResponse::class.java)
+                            .fromJson(response.body?.string() ?: "")
+                            ?.error
+                    ) {
+                        "UsedEmail" -> R.string.used_email_error
+                        "InvalidEmail" -> R.string.invalid_email_error
+                        "InvalidRequest" -> R.string.invalid_request_error
+                        "InvalidToken" -> R.string.invalid_token_error
+                        "UsedToken" -> R.string.invalid_token_error
+                        else -> R.string.generic_signup_error
+                    }
                 }
             }
-            popupModel.showSnackbar(errorMsg)
+        } catch (e: IOException) {
+            errorMessageResId = R.string.generic_signup_error
+        }
+
+        errorMessageResId?.let { popupModel.showSnackbar(activityContext.getString(it)) }
+
+        loginCookieValue?.let {
+            // Fire an Intent that will allow NeevaActivity to process the result of the sign up the
+            // same way the other login flows pass cookies in.
+            val intent = Intent()
+                .setAction(Intent.ACTION_VIEW)
+                .setClass(activityContext, NeevaActivity::class.java)
+                .setData(Uri.parse("$onLoginCookieReceivedUrl$loginCookieValue"))
+            activityContext.startActivity(intent)
         }
     }
 
@@ -128,7 +140,8 @@ data class OktaSignupErrorResponse(
 )
 
 class FirstRunCookieJar : CookieJar {
-    lateinit var cookies: List<Cookie>
+    internal var cookies: List<Cookie> = emptyList()
+
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
         return mutableListOf()
     }
