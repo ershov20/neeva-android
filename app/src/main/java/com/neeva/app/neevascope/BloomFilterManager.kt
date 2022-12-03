@@ -4,7 +4,6 @@
 
 package com.neeva.app.neevascope
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toFile
@@ -138,12 +137,10 @@ class BloomFilterManager(
         }
     }
 
-    @SuppressLint("IdleBatteryChargingConstraints")
     private fun createWorkRequest(): PeriodicWorkRequest {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.UNMETERED)
             .setRequiresCharging(true)
-            .setRequiresDeviceIdle(true)
             .setRequiresStorageNotLow(true)
             .build()
 
