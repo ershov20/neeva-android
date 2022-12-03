@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaConstants
 import com.neeva.app.settings.SettingsController
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.mockSettingsControllerImpl
 import com.neeva.app.settings.sharedcomposables.SettingsPane
 import com.neeva.app.ui.NeevaThemePreviewContainer
@@ -16,7 +17,9 @@ import com.neeva.app.ui.PortraitPreviewsDark
 
 @Composable
 fun ProfileSettingsPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
-    SettingsPane(settingsController, ProfileSettingsPaneData(neevaConstants))
+    val billingEnabled = settingsController
+        .getToggleState(SettingsToggle.DEBUG_ENABLE_BILLING).value
+    SettingsPane(settingsController, ProfileSettingsPaneData(neevaConstants, billingEnabled))
 }
 
 @PortraitPreviews

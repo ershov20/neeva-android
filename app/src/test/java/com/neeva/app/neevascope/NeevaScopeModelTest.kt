@@ -14,6 +14,8 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.SearchQuery
+import com.neeva.app.billing.billingclient.BillingClientController
+import com.neeva.app.network.NetworkHandler
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.UserPreference
@@ -53,7 +55,9 @@ class NeevaScopeModelTest : BaseTest() {
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
     private lateinit var settingsDataModel: SettingsDataModel
 
+    @Mock private lateinit var billingClientController: BillingClientController
     @Mock private lateinit var bloomFilterManager: BloomFilterManager
+    @Mock private lateinit var networkHandler: NetworkHandler
 
     override fun setUp() {
         super.setUp()
@@ -74,7 +78,9 @@ class NeevaScopeModelTest : BaseTest() {
 
         neevaUser = NeevaUserImpl(
             sharedPreferencesModel = SharedPreferencesModel(context),
-            loginToken = loginToken
+            loginToken = loginToken,
+            networkHandler = networkHandler,
+            billingClientController = billingClientController
         )
         neevaUser.setUserInfo(UserInfo("c5rgtdldv9enb8j1gupg"))
 

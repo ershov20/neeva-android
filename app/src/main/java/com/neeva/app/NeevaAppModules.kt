@@ -9,7 +9,8 @@ import android.content.Context
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.appnav.ActivityStarter
-import com.neeva.app.billing.NeevaBillingClient
+import com.neeva.app.billing.billingclient.BillingClientController
+import com.neeva.app.billing.billingclient.BillingClientWrapper
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.BrowserWrapperFactory
 import com.neeva.app.browsing.CacheCleaner
@@ -20,6 +21,7 @@ import com.neeva.app.firstrun.OktaSignUpHandler
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.neevascope.BloomFilterManager
+import com.neeva.app.network.NetworkHandler
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.publicsuffixlist.DomainProviderImpl
 import com.neeva.app.settings.SettingsDataModel
@@ -186,11 +188,15 @@ object NeevaAppModule {
     @Singleton
     fun providesNeevaUser(
         loginToken: LoginToken,
-        sharedPreferencesModel: SharedPreferencesModel
+        sharedPreferencesModel: SharedPreferencesModel,
+        networkHandler: NetworkHandler,
+        billingClientController: BillingClientController
     ): NeevaUser {
         return NeevaUserImpl(
             loginToken = loginToken,
-            sharedPreferencesModel = sharedPreferencesModel
+            sharedPreferencesModel = sharedPreferencesModel,
+            networkHandler = networkHandler,
+            billingClientController = billingClientController
         )
     }
 
@@ -345,11 +351,40 @@ object NeevaAppModule {
 
     @Provides
     @Singleton
-    fun providesNeevaBillingClient(
+    fun providesBillingClientWrapper(
         @ApplicationContext appContext: Context,
-        dispatchers: Dispatchers
-    ): NeevaBillingClient {
-        return NeevaBillingClient(appContext, dispatchers)
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+    ): BillingClientWrapper {
+        return BillingClientWrapper(
+            appContext = appContext,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun providesBillingClientController(
+        authenticatedApolloWrapper: AuthenticatedApolloWrapper,
+        billingClientWrapper: BillingClientWrapper,
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+        settingsDataModel: SettingsDataModel
+    ): BillingClientController {
+        return BillingClientController(
+            authenticatedApolloWrapper = authenticatedApolloWrapper,
+            billingClientWrapper = billingClientWrapper,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            settingsDataModel = settingsDataModel
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun providesNetworkHandler(@ApplicationContext appContext: Context): NetworkHandler {
+        return NetworkHandler(appContext = appContext)
     }
 }
 

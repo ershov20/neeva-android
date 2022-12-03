@@ -17,6 +17,8 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
+import com.neeva.app.billing.billingclient.BillingClientController
+import com.neeva.app.network.NetworkHandler
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.Directories
 import com.neeva.app.storage.HistoryDatabase
@@ -59,6 +61,8 @@ class SpaceStoreTest : BaseTest() {
 
     @Mock private lateinit var popupModel: PopupModel
     @Mock private lateinit var previewSessionToken: PreviewSessionToken
+    @Mock private lateinit var networkHandler: NetworkHandler
+    @Mock private lateinit var billingClientController: BillingClientController
 
     private lateinit var context: Context
     private lateinit var neevaUser: NeevaUser
@@ -90,7 +94,9 @@ class SpaceStoreTest : BaseTest() {
 
         neevaUser = NeevaUserImpl(
             sharedPreferencesModel = sharedPreferencesModel,
-            loginToken = loginToken
+            loginToken = loginToken,
+            networkHandler = networkHandler,
+            billingClientController = billingClientController
         )
 
         neevaUser.setUserInfo(UserInfo("c5rgtdldv9enb8j1gupg"))

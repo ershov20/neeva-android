@@ -19,6 +19,7 @@ import androidx.navigation.NavHostController
 import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.AppNav
 import com.neeva.app.appnav.AppNavModel
+import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.browsing.toolbar.BrowserToolbarModel
@@ -62,6 +63,7 @@ val LocalRegularProfileZeroQueryViewModel = compositionLocalOf<RegularProfileZer
 val LocalSettingsController = compositionLocalOf<SettingsController> { error("Not set") }
 val LocalSettingsDataModel = compositionLocalOf<SettingsDataModel> { error("Not set") }
 val LocalSharedPreferencesModel = compositionLocalOf<SharedPreferencesModel> { error("Not set") }
+val LocalSubscriptionManager = compositionLocalOf<SubscriptionManager> { error("Not set") }
 val LocalSpaceStore = compositionLocalOf<SpaceStore> { error("Not set") }
 
 @OptIn(ExperimentalMaterial3Api::class)

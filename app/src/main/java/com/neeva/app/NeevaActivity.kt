@@ -41,7 +41,8 @@ import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.appnav.AppNavModelImpl
-import com.neeva.app.billing.NeevaBillingClient
+import com.neeva.app.billing.SubscriptionManager
+import com.neeva.app.billing.billingclient.BillingClientController
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.ActivityCallbacks
 import com.neeva.app.browsing.BrowserWrapper
@@ -104,7 +105,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var activityCallbackProvider: ActivityCallbackProvider
     @Inject lateinit var activityStarter: ActivityStarter
     @Inject lateinit var apolloWrapper: AuthenticatedApolloWrapper
-    @Inject lateinit var billingClient: NeevaBillingClient
+    @Inject lateinit var billingClientController: BillingClientController
     @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var domainProvider: DomainProvider
@@ -198,6 +199,14 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                     )
                 }
 
+                val subscriptionManager = remember(appNavModel) {
+                    SubscriptionManager(
+                        context = context,
+                        appNavModel = appNavModel!!,
+                        billingClientController = billingClientController
+                    )
+                }
+
                 NeevaTheme {
                     CompositionLocalProvider(
                         LocalActivityStarter provides activityStarter,
@@ -217,6 +226,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         LocalSettingsController provides settingsControllerImpl,
                         LocalSettingsDataModel provides settingsDataModel,
                         LocalSharedPreferencesModel provides sharedPreferencesModel,
+                        LocalSubscriptionManager provides subscriptionManager,
                         LocalSpaceStore provides spaceStore,
                         LocalRegularProfileZeroQueryViewModel provides zeroQueryViewModel
                     ) {
@@ -265,7 +275,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         if (settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_BILLING)) {
             lifecycleScope.launch {
                 repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                    billingClient.setUp()
+                    billingClientController.onResume()
                 }
             }
         }
@@ -290,6 +300,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         popupModel.dismissSnackbar()
         webLayerModel.currentBrowser.takeScreenshotOfActiveTab()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        billingClientController.onDestroy()
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {

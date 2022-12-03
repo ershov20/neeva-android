@@ -137,6 +137,10 @@ class SettingsControllerImpl(
             },
             SettingsToggle.DEBUG_USE_CUSTOM_DOMAIN.key to {
                 popupModel.showSnackbar("Restart for app host changes to take effect")
+                onSignOut()
+            },
+            SettingsToggle.DEBUG_ENABLE_BILLING.key to {
+                popupModel.showSnackbar("Restart for billing changes to take effect")
             }
         )
     }
@@ -155,7 +159,8 @@ class SettingsControllerImpl(
                 }
             },
             R.string.content_filter to { appNavModel.showContentFilterSettings() },
-            R.string.settings_licenses to { appNavModel.showLicenses() }
+            R.string.settings_licenses to { appNavModel.showLicenses() },
+            R.string.settings_debug_launch_billing_flow to { appNavModel.showBillingFlow() }
         )
         if (isSignedOut()) {
             navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showSignInFlow() }

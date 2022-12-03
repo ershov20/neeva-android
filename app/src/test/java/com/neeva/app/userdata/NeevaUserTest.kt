@@ -12,7 +12,9 @@ import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.UserInfoQuery
+import com.neeva.app.billing.billingclient.BillingClientController
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.network.NetworkHandler
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,6 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.robolectric.annotation.Config
 import strikt.api.expectThat
@@ -38,12 +41,14 @@ class NeevaUserTest : BaseTest() {
     val coroutineScopeRule = CoroutineScopeRule()
 
     @Mock private lateinit var previewSessionToken: PreviewSessionToken
+    @Mock private lateinit var billingClientController: BillingClientController
 
     private lateinit var context: Context
     private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
     private lateinit var dispatchers: Dispatchers
     private lateinit var mockWebLayerModel: WebLayerModel
     private lateinit var neevaConstants: NeevaConstants
+    private lateinit var networkHandler: NetworkHandler
     private lateinit var loginToken: LoginToken
     private lateinit var userInfo: UserInfo
     private lateinit var neevaUser: NeevaUser
@@ -56,6 +61,9 @@ class NeevaUserTest : BaseTest() {
         // Set up each test to simulate a signed-in user. Calls to fetch() should overwrite UserInfo
         neevaConstants = NeevaConstants()
         context = ApplicationProvider.getApplicationContext()
+        networkHandler = mock {
+            on { isConnectedToInternet() } doReturn true
+        }
         setUpLoggedInUser(context)
         setUpMockWeblayerModel()
         apolloWrapper = TestAuthenticatedApolloWrapper(
@@ -82,7 +90,12 @@ class NeevaUserTest : BaseTest() {
             "https://www.cdn/my-image.png",
             NeevaUser.SSOProvider.GOOGLE.name
         )
-        neevaUser = NeevaUserImpl(sharedPreferencesModel, loginToken)
+        neevaUser = NeevaUserImpl(
+            sharedPreferencesModel = sharedPreferencesModel,
+            loginToken = loginToken,
+            networkHandler = networkHandler,
+            billingClientController = billingClientController
+        )
         neevaUser.setUserInfo(userInfo)
     }
 
@@ -117,7 +130,7 @@ class NeevaUserTest : BaseTest() {
         )
         coroutineScopeRule.scope.advanceUntilIdle()
         runBlocking {
-            neevaUser.fetch(apolloWrapper, context, checkNetworkConnectivityBeforeFetch = false)
+            neevaUser.fetch(apolloWrapper, context)
         }
         expectThat(neevaUser.userInfoFlow.value).isEqualTo(null)
     }
@@ -126,8 +139,12 @@ class NeevaUserTest : BaseTest() {
     fun fetch_noWifi_doesNotClearUser() {
         apolloWrapper.registerTestResponse(UserInfoQuery(), null)
         coroutineScopeRule.scope.advanceUntilIdle()
+        networkHandler = mock {
+            on { isConnectedToInternet() } doReturn false
+        }
+        setUpLoggedInUser(context)
         runBlocking {
-            neevaUser.fetch(apolloWrapper, context, checkNetworkConnectivityBeforeFetch = true)
+            neevaUser.fetch(apolloWrapper, context)
         }
         expectThat(neevaUser.userInfoFlow.value).isEqualTo(userInfo)
     }
@@ -138,14 +155,19 @@ class NeevaUserTest : BaseTest() {
         apolloWrapper.registerTestResponse(UserInfoQuery(), null)
         coroutineScopeRule.scope.advanceUntilIdle()
         runBlocking {
-            neevaUser.fetch(apolloWrapper, context, checkNetworkConnectivityBeforeFetch = false)
+            neevaUser.fetch(apolloWrapper, context)
         }
         expectThat(neevaUser.userInfoFlow.value).isEqualTo(userInfo)
     }
 
     @Test
     fun clearUser_dataIsEmpty_clearsNeevaUserInfo() {
-        val neevaUser = NeevaUserImpl(sharedPreferencesModel, loginToken)
+        val neevaUser = NeevaUserImpl(
+            sharedPreferencesModel = sharedPreferencesModel,
+            loginToken = loginToken,
+            networkHandler = networkHandler,
+            billingClientController = billingClientController
+        )
         neevaUser.clearUserInfo()
         expectThat(neevaUser.userInfoFlow.value).isEqualTo(null)
     }
@@ -166,7 +188,7 @@ class NeevaUserTest : BaseTest() {
         apolloWrapper.registerTestResponse(UserInfoQuery(), USER_RESPONSE)
         coroutineScopeRule.scope.advanceUntilIdle()
         runBlocking {
-            neevaUser.fetch(apolloWrapper, context, checkNetworkConnectivityBeforeFetch = false)
+            neevaUser.fetch(apolloWrapper, context)
         }
 
         expectThat(neevaUser.userInfoFlow.value).isEqualTo(

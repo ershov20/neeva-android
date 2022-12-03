@@ -188,6 +188,8 @@ class AppNavModelImpl(
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showSettings() = show(AppNavDestination.SETTINGS)
+    override fun showSignInFlow() = show(AppNavDestination.SIGN_IN_FLOW)
+    override fun showBillingFlow() = show(AppNavDestination.BILLING_FLOW)
 
     override fun showSpaceDetail(spaceId: String) {
         // We set the detailedSpaceIDFlow value in case we need to fetch the Space.
@@ -249,10 +251,6 @@ class AppNavModelImpl(
         }
 
         activityStarter.safeStartActivityForIntent(Intent.createChooser(sendIntent, null))
-    }
-
-    override fun showSignInFlow() {
-        show(AppNavDestination.SIGN_IN_FLOW)
     }
 
     override fun showHistory() = show(
