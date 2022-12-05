@@ -117,5 +117,9 @@ class TabInfoTest : BaseTest() {
         ).apply {
             expectThat(getAgeGroup(ageGroupCalculator)).isEqualTo(AgeGroup.TODAY)
         }
+
+        baseTabInfo.copy(data = TabInfo.PersistedData(isPinned = true)).apply {
+            expectThat(getAgeGroup(ageGroupCalculator)).isEqualTo(AgeGroup.PINNED)
+        }
     }
 }

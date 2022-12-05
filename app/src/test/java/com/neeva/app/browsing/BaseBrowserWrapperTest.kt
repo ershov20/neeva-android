@@ -156,7 +156,7 @@ class BaseBrowserWrapperTest : BaseTest() {
             on { navigationInfoFlow } doReturn navigationInfoFlow
             on { urlFlow } doReturn urlFlow
             on { activeTab } doAnswer { currentActiveTab }
-            on { onActiveTabChanged(any()) } doAnswer {
+            on { onActiveTabChanged(any(), any()) } doAnswer {
                 currentActiveTab = it.arguments[0] as Tab?
             }
         }
@@ -471,7 +471,7 @@ class BaseBrowserWrapperTest : BaseTest() {
 
         // The Browser should have been asked to create a new tab and then navigate to the URL.
         expectThat(browser.activeTab).isNotEqualTo(oldActiveTab)
-        verify(activeTabModelImpl).onActiveTabChanged(eq(browser.activeTab))
+        verify(activeTabModelImpl).onActiveTabChanged(eq(browser.activeTab), any())
         verify(browser, times(2)).createTab()
 
         val tab: Tab = mockTabs.last()

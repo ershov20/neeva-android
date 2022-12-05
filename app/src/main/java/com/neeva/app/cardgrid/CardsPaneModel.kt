@@ -13,6 +13,7 @@ import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.cardgrid.tabs.TabContextMenu
 import com.neeva.app.ui.PopupModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.collectLatest
@@ -31,6 +32,8 @@ interface CardsPaneModel {
     fun closeAllTabs(browserWrapper: BrowserWrapper)
 
     fun selectSpace(browserWrapper: BrowserWrapper, spaceUrl: Uri)
+
+    fun showContextMenu(browserWrapper: BrowserWrapper, tab: TabInfo)
 }
 
 class CardsPaneModelImpl(
@@ -136,5 +139,15 @@ class CardsPaneModelImpl(
     override fun selectSpace(browserWrapper: BrowserWrapper, spaceUrl: Uri) {
         val id = spaceUrl.pathSegments.last() ?: return
         appNavModel.showSpaceDetail(id)
+    }
+
+    override fun showContextMenu(browserWrapper: BrowserWrapper, tab: TabInfo) {
+        popupModel.showContextMenu { onDismissRequested ->
+            TabContextMenu(
+                tab = tab,
+                browserWrapper = browserWrapper,
+                onDismissRequested = onDismissRequested
+            )
+        }
     }
 }

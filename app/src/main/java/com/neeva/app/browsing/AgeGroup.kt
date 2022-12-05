@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 enum class AgeGroup(@StringRes val resourceId: Int) {
+    PINNED(R.string.pinned_tab_header),
     TODAY(R.string.archived_tabs_today),
     YESTERDAY(R.string.archived_tabs_yesterday),
     LAST_7_DAYS(R.string.archived_tabs_last_seven_days),

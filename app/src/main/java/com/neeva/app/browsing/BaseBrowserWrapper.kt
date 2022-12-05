@@ -611,7 +611,7 @@ abstract class BaseBrowserWrapper internal constructor(
      * @param tab Tab that will become active.
      */
     fun changeActiveTab(tab: Tab?) {
-        _activeTabModelImpl.onActiveTabChanged(tab)
+        _activeTabModelImpl.onActiveTabChanged(tab, isBrowserReady)
         tabList.updatedSelectedTab(tab?.guid)
 
         reregisterTabIfNecessary(tab)
@@ -1179,5 +1179,11 @@ abstract class BaseBrowserWrapper internal constructor(
         }
 
         tab.navigationController.navigate(uri, navigateParams)
+    }
+
+    override fun pinTab(id: String, pin: Boolean) {
+        browser?.tabs
+            ?.find { it.guid == id }
+            ?.let { tabList.updateIsPinned(tab = it, isPinned = pin) }
     }
 }

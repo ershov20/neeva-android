@@ -159,6 +159,20 @@ abstract class TabList {
             }
     }
 
+    fun updateIsPinned(tab: Tab, isPinned: Boolean) {
+        if (tab.isDestroyed) return
+
+        tabInfoMap[tab.guid]?.let { existingTabInfo ->
+            setPersistedInfo(
+                tab = tab,
+                newData = existingTabInfo.data.copy(
+                    isPinned = isPinned
+                ),
+                persist = true
+            )
+        }
+    }
+
     fun updateParentInfo(
         tab: Tab,
         parentTabId: String?,

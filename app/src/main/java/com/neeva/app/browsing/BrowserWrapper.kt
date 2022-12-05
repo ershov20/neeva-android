@@ -71,6 +71,7 @@ interface BrowserWrapper {
     suspend fun waitUntilBrowserIsReady(): Boolean
 
     fun selectTab(id: String): Boolean
+    fun pinTab(id: String, pin: Boolean)
     fun startClosingTab(id: String)
     fun cancelClosingTab(id: String)
     fun closeTab(id: String)

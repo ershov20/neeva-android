@@ -12,7 +12,9 @@ import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,6 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import org.chromium.weblayer.Navigation
 import org.chromium.weblayer.NavigationCallback
 import org.chromium.weblayer.ScrollNotificationType
@@ -32,7 +35,7 @@ import org.chromium.weblayer.TabCallback
  * Provides an API to use activeTab [Tab] and update respective Stateflow values.
  */
 class ActiveTabModelImpl(
-    coroutineScope: CoroutineScope,
+    private val coroutineScope: CoroutineScope,
     dispatchers: Dispatchers,
     private val neevaConstants: NeevaConstants,
     private val tabScreenshotManager: TabScreenshotManager,
@@ -93,7 +96,10 @@ class ActiveTabModelImpl(
 
     private val _isGestureActive = MutableStateFlow(false)
 
-    internal fun onActiveTabChanged(newActiveTab: Tab?) {
+    internal fun onActiveTabChanged(
+        newActiveTab: Tab?,
+        isBrowserReady: CompletableDeferred<Boolean>
+    ) {
         val previousTab = activeTab
         previousTab?.apply {
             unregisterTabCallback(selectedTabCallback)
@@ -113,8 +119,15 @@ class ActiveTabModelImpl(
         // Update all the state to account for the currently selected tab's information.
         updateNavigationInfo()
         updateUrl(newActiveTab?.currentDisplayUrl ?: Uri.EMPTY)
-        newActiveTab?.let { tabList.updateTimestamp(newActiveTab, System.currentTimeMillis()) }
         _titleFlow.value = newActiveTab?.currentDisplayTitle ?: ""
+
+        coroutineScope.launch {
+            // Wait until the tabs and their data have been restored before updating the timestamp.
+            isBrowserReady.await()
+            newActiveTab?.let {
+                tabList.updateTimestamp(newActiveTab, System.currentTimeMillis())
+            }
+        }
     }
 
     internal fun onTabRemoved(removedTabId: String) {

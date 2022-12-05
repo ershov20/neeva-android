@@ -76,6 +76,10 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.DEBUG_ENABLE_BILLING
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.TOGGLE,
+                    settingsToggle = SettingsToggle.DEBUG_ENABLE_TAB_CONTEXT_MENU
                 )
             )
         ),

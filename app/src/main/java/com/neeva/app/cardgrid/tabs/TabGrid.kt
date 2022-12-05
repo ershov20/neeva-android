@@ -60,6 +60,9 @@ fun TabGrid(
     cardsPaneModel: CardsPaneModel,
     modifier: Modifier = Modifier
 ) {
+    val settingsDataModel = LocalSettingsDataModel.current
+    val enableTabContextMenu =
+        settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_TAB_CONTEXT_MENU)
     val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
 
     TabGrid(
@@ -67,6 +70,11 @@ fun TabGrid(
         onSelectTab = { tabInfo -> cardsPaneModel.selectTab(browserWrapper, tabInfo) },
         onCloseTabs = { tabInfo -> cardsPaneModel.closeTab(browserWrapper, tabInfo) },
         onShowArchivedTabs = { cardsPaneModel.showArchivedTabs() },
+        onLongPressTab = { tabInfo ->
+            if (enableTabContextMenu) {
+                cardsPaneModel.showContextMenu(browserWrapper, tabInfo)
+            }
+        },
         tabs = tabs,
         faviconCache = browserWrapper.faviconCache,
         screenshotProvider = browserWrapper::restoreScreenshotOfTab,
@@ -80,6 +88,7 @@ fun TabGrid(
     onSelectTab: (TabInfo) -> Unit,
     onCloseTabs: (TabInfo) -> Unit,
     onShowArchivedTabs: () -> Unit,
+    onLongPressTab: (TabInfo) -> Unit,
     tabs: List<TabInfo>,
     faviconCache: FaviconCache,
     screenshotProvider: suspend (tabId: String) -> Bitmap?,
@@ -96,6 +105,7 @@ fun TabGrid(
         onSelectTab = onSelectTab,
         onCloseTabs = onCloseTabs,
         onShowArchivedTabs = onShowArchivedTabs,
+        onLongPressTab = onLongPressTab,
         visibleTabs = visibleTabs,
         faviconCache = faviconCache,
         screenshotProvider = screenshotProvider,
@@ -109,6 +119,7 @@ fun ChronologicalTabGrid(
     onSelectTab: (TabInfo) -> Unit,
     onCloseTabs: (TabInfo) -> Unit,
     onShowArchivedTabs: () -> Unit,
+    onLongPressTab: (TabInfo) -> Unit,
     visibleTabs: List<TabInfo>,
     faviconCache: FaviconCache,
     screenshotProvider: suspend (tabId: String) -> Bitmap?,
@@ -163,6 +174,7 @@ fun ChronologicalTabGrid(
                     tabInfo = tab,
                     onSelect = { onSelectTab(tab) },
                     onClose = { onCloseTabs(tab) },
+                    onLongPress = { onLongPressTab(tab) },
                     faviconCache = faviconCache,
                     screenshotProvider = screenshotProvider
                 )
@@ -320,6 +332,7 @@ private fun TabGridPreview(
                 onSelectTab = {},
                 onCloseTabs = {},
                 onShowArchivedTabs = {},
+                onLongPressTab = {},
                 tabs = tabs,
                 faviconCache = previewFaviconCache,
                 screenshotProvider = { null }

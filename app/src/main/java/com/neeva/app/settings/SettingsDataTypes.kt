@@ -169,6 +169,10 @@ enum class SettingsToggle(
     DEBUG_ENABLE_BILLING(
         primaryLabelId = R.string.settings_debug_enable_billing,
         defaultValue = false
+    ),
+    DEBUG_ENABLE_TAB_CONTEXT_MENU(
+        primaryLabelId = R.string.settings_debug_enable_tab_context_menu,
+        defaultValue = false
     );
 
     val key: String = name

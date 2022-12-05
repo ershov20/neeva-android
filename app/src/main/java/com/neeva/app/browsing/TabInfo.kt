@@ -75,13 +75,15 @@ data class TabInfo(
         val parentTabId: String? = null,
         val parentSpaceId: String? = null,
         val lastActiveMs: Long = System.currentTimeMillis(),
-        val openType: TabOpenType = TabOpenType.DEFAULT
+        val openType: TabOpenType = TabOpenType.DEFAULT,
+        val isPinned: Boolean = false
     ) {
         companion object {
             const val KEY_PARENT_TAB_ID = "PARENT_TAB_ID"
             const val KEY_PARENT_SPACE_ID = "PARENT_SPACE_ID"
             const val KEY_LAST_ACTIVE_MS = "LAST_ACTIVE_MS"
             const val KEY_OPEN_TYPE = "OPEN_TYPE"
+            const val KEY_IS_PINNED = "IS_PINNED"
         }
 
         constructor(
@@ -98,13 +100,15 @@ data class TabInfo(
             },
             openType = TabOpenType.values()
                 .firstOrNull { it.name == map[KEY_OPEN_TYPE] }
-                ?: TabOpenType.DEFAULT
+                ?: TabOpenType.DEFAULT,
+            isPinned = map[KEY_IS_PINNED]?.toBooleanStrictOrNull() ?: false
         )
 
         fun toMap(): Map<String, String> {
             return mutableMapOf<String, String>().apply {
                 put(KEY_OPEN_TYPE, openType.name)
                 put(KEY_LAST_ACTIVE_MS, lastActiveMs.toString())
+                put(KEY_IS_PINNED, isPinned.toString())
 
                 if (parentSpaceId != null) {
                     put(KEY_PARENT_SPACE_ID, parentSpaceId)
@@ -119,7 +123,9 @@ data class TabInfo(
 
     /** Determines which [AgeGroup] applies to this tab, according to when it was last active. */
     fun getAgeGroup(ageGroupCalculator: AgeGroupCalculator): AgeGroup {
-        return if (isSelected) {
+        return if (data.isPinned) {
+            AgeGroup.PINNED
+        } else if (isSelected) {
             AgeGroup.TODAY
         } else {
             ageGroupCalculator.getAgeBucket(data.lastActiveMs)

@@ -15,6 +15,7 @@ import com.neeva.app.browsing.ActiveTabModel.DisplayMode
 import com.neeva.app.browsing.TabInfo.TabOpenType
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.storage.TabScreenshotManager
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.chromium.weblayer.Tab
@@ -57,6 +58,7 @@ class ActiveTabModelImplTest : BaseTest() {
     private lateinit var neevaSearchTab: MockHarness
     private lateinit var neevaSpacesTab: MockHarness
     private lateinit var tabList: TabList
+    private lateinit var isBrowserReady: CompletableDeferred<Boolean>
 
     @Before
     override fun setUp() {
@@ -64,6 +66,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
         neevaConstants = NeevaConstants()
         tabList = IncognitoTabList()
+        isBrowserReady = CompletableDeferred(true)
 
         model = ActiveTabModelImpl(
             coroutineScope = coroutineScopeRule.scope,
@@ -113,7 +116,7 @@ class ActiveTabModelImplTest : BaseTest() {
         }
 
         // Set the first tab as active.
-        model.onActiveTabChanged(mainTab.tab)
+        model.onActiveTabChanged(mainTab.tab, isBrowserReady)
 
         // Confirm that the flows all updated.
         model.apply {
@@ -137,7 +140,7 @@ class ActiveTabModelImplTest : BaseTest() {
             )
         )
         secondTab.mockNavigationController.controller.goBack()
-        model.onActiveTabChanged(secondTab.tab)
+        model.onActiveTabChanged(secondTab.tab, isBrowserReady)
 
         model.apply {
             expectThat(activeTab).isEqualTo(secondTab.tab)
@@ -169,7 +172,7 @@ class ActiveTabModelImplTest : BaseTest() {
         }
 
         // Set the first tab as active and confirm the flows were updated.
-        model.onActiveTabChanged(mainTab.tab)
+        model.onActiveTabChanged(mainTab.tab, isBrowserReady)
         model.apply {
             expectThat(activeTab).isEqualTo(mainTab.tab)
             expectThat(progressFlow.value).isEqualTo(100)
@@ -184,7 +187,7 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(mainTab.mockNavigationController.callbacks.size).isEqualTo(1)
 
         // Say that there's no active tab anymore.
-        model.onActiveTabChanged(null)
+        model.onActiveTabChanged(null, isBrowserReady)
         model.apply {
             expectThat(activeTab).isEqualTo(null)
             expectThat(progressFlow.value).isEqualTo(100)
@@ -203,7 +206,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
     @Test
     fun mode_onNeevaHomepage_showsPlaceholder() {
-        model.onActiveTabChanged(neevaHomepageTab.tab)
+        model.onActiveTabChanged(neevaHomepageTab.tab, isBrowserReady)
         expectThat(model.activeTab).isEqualTo(neevaHomepageTab.tab)
 
         model.apply {
@@ -222,7 +225,7 @@ class ActiveTabModelImplTest : BaseTest() {
     @Test
     fun displayedText_showsDomainAndQuery() {
         // A tab with a Neeva search URL should show the search query in the URL bar.
-        model.onActiveTabChanged(neevaSearchTab.tab)
+        model.onActiveTabChanged(neevaSearchTab.tab, isBrowserReady)
         model.apply {
             expectThat(activeTab).isEqualTo(neevaSearchTab.tab)
             expectThat(progressFlow.value).isEqualTo(100)
@@ -237,7 +240,7 @@ class ActiveTabModelImplTest : BaseTest() {
         expectThat(neevaSearchTab.mockNavigationController.callbacks).hasSize(1)
 
         // A tab with a non-search URL should show the URL directly in the URL bar.
-        model.onActiveTabChanged(neevaSpacesTab.tab)
+        model.onActiveTabChanged(neevaSpacesTab.tab, isBrowserReady)
         model.apply {
             expectThat(activeTab).isEqualTo(neevaSpacesTab.tab)
             expectThat(progressFlow.value).isEqualTo(100)
@@ -268,7 +271,7 @@ class ActiveTabModelImplTest : BaseTest() {
         }
 
         // Set the first tab as active and confirm the flows were updated.
-        model.onActiveTabChanged(mainTab.tab)
+        model.onActiveTabChanged(mainTab.tab, isBrowserReady)
         model.apply {
             expectThat(model.activeTab).isEqualTo(mainTab.tab)
             expectThat(model.progressFlow.value).isEqualTo(100)
@@ -313,7 +316,7 @@ class ActiveTabModelImplTest : BaseTest() {
 
     @Test
     fun reload_withActiveTab_reloadsTab() {
-        model.onActiveTabChanged(mainTab.tab)
+        model.onActiveTabChanged(mainTab.tab, isBrowserReady)
         model.reload()
         verify(mainTab.mockNavigationController.controller, times(1)).reload()
     }
@@ -324,7 +327,7 @@ class ActiveTabModelImplTest : BaseTest() {
         val harness = MockHarness(
             navigations = listOf(Uri.parse("https://www.site.com/"))
         )
-        model.onActiveTabChanged(harness.tab)
+        model.onActiveTabChanged(harness.tab, isBrowserReady)
 
         // There is no way to go back because there's only one URL.
         val firstGoBackResult = model.goBack()
@@ -364,7 +367,7 @@ class ActiveTabModelImplTest : BaseTest() {
             parentTabId = parentTabHarness.tabId
         )
 
-        model.onActiveTabChanged(childTabHarness.tab)
+        model.onActiveTabChanged(childTabHarness.tab, isBrowserReady)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
@@ -401,7 +404,7 @@ class ActiveTabModelImplTest : BaseTest() {
             searchQuery = "triggering query"
         )
 
-        model.onActiveTabChanged(childTabHarness.tab)
+        model.onActiveTabChanged(childTabHarness.tab, isBrowserReady)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
@@ -430,7 +433,7 @@ class ActiveTabModelImplTest : BaseTest() {
             parentSpaceId = "parentSpaceId"
         )
 
-        model.onActiveTabChanged(childTabHarness.tab)
+        model.onActiveTabChanged(childTabHarness.tab, isBrowserReady)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
@@ -459,7 +462,7 @@ class ActiveTabModelImplTest : BaseTest() {
             parentSpaceId = "parentSpaceId"
         )
 
-        model.onActiveTabChanged(childTabHarness.tab)
+        model.onActiveTabChanged(childTabHarness.tab, isBrowserReady)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isFalse()
 
         // Hit "back" on the child tab.  Nothing should have happened.
@@ -496,7 +499,7 @@ class ActiveTabModelImplTest : BaseTest() {
         // Remove the parent tab.
         tabList.remove(parentTabHarness.tabId)
 
-        model.onActiveTabChanged(childTabHarness.tab)
+        model.onActiveTabChanged(childTabHarness.tab, isBrowserReady)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Hit "back" on the child tab.
@@ -526,7 +529,7 @@ class ActiveTabModelImplTest : BaseTest() {
             parentTabId = parentTabHarness.tabId
         )
 
-        model.onActiveTabChanged(childTabHarness.tab)
+        model.onActiveTabChanged(childTabHarness.tab, isBrowserReady)
         expectThat(model.navigationInfoFlow.value.canGoBackward).isTrue()
 
         // Say that the parent tab has been removed.
@@ -559,7 +562,7 @@ class ActiveTabModelImplTest : BaseTest() {
                 Uri.parse("http://third.net"),
             )
         )
-        model.onActiveTabChanged(harness.tab)
+        model.onActiveTabChanged(harness.tab, isBrowserReady)
 
         // Say that the user got to the last two navigations via SAYT.
         tabList.updateQueryNavigation(
@@ -624,7 +627,7 @@ class ActiveTabModelImplTest : BaseTest() {
         val harness = MockHarness(
             navigations = listOf(Uri.parse("https://www.site.com/"))
         )
-        model.onActiveTabChanged(harness.tab)
+        model.onActiveTabChanged(harness.tab, isBrowserReady)
 
         model.goForward()
         verify(harness.mockNavigationController.controller, never()).goForward()

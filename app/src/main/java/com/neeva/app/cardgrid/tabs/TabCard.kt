@@ -61,6 +61,7 @@ fun TabCard(
     tabInfo: TabInfo,
     onSelect: () -> Unit,
     onClose: () -> Unit,
+    onLongPress: () -> Unit,
     faviconCache: FaviconCache,
     screenshotProvider: suspend (id: String) -> Bitmap?
 ) {
@@ -70,6 +71,7 @@ fun TabCard(
     Card(
         label = tabInfo.title ?: tabInfo.url?.toString() ?: "",
         onSelect = onSelect,
+        onLongPress = onLongPress,
         labelStartComposable = {
             FaviconView(
                 bitmap = faviconBitmap,
@@ -134,10 +136,11 @@ private fun TabCardPreview_LongString() {
                 id = "unimportant",
                 url = Uri.parse("https://www.reddit.com"),
                 title = title,
-                isSelected = false
+                isSelected = false,
             ),
             onSelect = {},
             onClose = {},
+            onLongPress = {},
             faviconCache = previewFaviconCache,
             screenshotProvider = { createCheckerboardBitmap(false) }
         )
@@ -160,6 +163,7 @@ private fun TabCardPreview_ShortTitleSelected() {
             ),
             onSelect = {},
             onClose = {},
+            onLongPress = {},
             faviconCache = previewFaviconCache,
             screenshotProvider = { createCheckerboardBitmap(false) }
         )

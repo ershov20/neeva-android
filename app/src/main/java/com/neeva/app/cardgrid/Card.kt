@@ -4,7 +4,8 @@
 
 package com.neeva.app.cardgrid
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,16 +23,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import com.neeva.app.ui.theme.Dimensions
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun Card(
     label: String,
     onSelect: () -> Unit,
+    onLongPress: (() -> Unit)? = {},
     modifier: Modifier = Modifier,
     labelStartComposable: @Composable (() -> Unit)? = null,
     labelEndComposable: @Composable (() -> Unit)? = null,
     topContent: @Composable () -> Unit
 ) {
-    Surface(modifier = modifier.clickable { onSelect() }) {
+    Surface(
+        modifier = modifier
+            .combinedClickable(enabled = true, onLongClick = onLongPress, onClick = onSelect)
+    ) {
         Column(
             modifier = Modifier.padding(Dimensions.PADDING_SMALL),
             horizontalAlignment = Alignment.CenterHorizontally
