@@ -46,7 +46,7 @@ abstract class NeevaUser(val loginToken: LoginToken) {
         GOOGLE("neeva.co/auth/oauth2/authenticators/google", "/"),
         APPLE("neeva.co/auth/oauth2/authenticators/apple", "/"),
         MICROSOFT("neeva.co/auth/oauth2/authenticators/microsoft", "/"),
-        OKTA("neeva.co/auth/oauth2/authenticators/okta", "/?nva")
+        OKTA("neeva.co/auth/oauth2/authenticators/okta", "/")
     }
 
     // TODO(kobec): can use a CompletableDeferred and ask spaces.refresh() to await()

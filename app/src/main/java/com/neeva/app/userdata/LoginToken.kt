@@ -4,8 +4,6 @@
 
 package com.neeva.app.userdata
 
-import android.content.Intent
-import android.net.Uri
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.sharedprefs.SharedPrefFolder
@@ -28,19 +26,6 @@ class LoginToken(
     endpointURL = null,
     cookieName = neevaConstants.loginCookieKey
 ) {
-    companion object {
-        fun extractAuthTokenFromIntent(intent: Intent?): String? {
-            val dataString = intent?.dataString ?: return null
-            val dataUri = Uri.parse(dataString)
-            if (dataUri.scheme != "neeva" || dataUri.host != "login") {
-                return null
-            }
-
-            val token = dataUri.getQueryParameter("sessionKey")
-            return if (token.isNullOrEmpty()) null else token
-        }
-    }
-
     override val cachedValue: String
         get() = SharedPrefFolder.User.Token.get(sharedPreferencesModel)
     val cachedValueFlow: StateFlow<String>

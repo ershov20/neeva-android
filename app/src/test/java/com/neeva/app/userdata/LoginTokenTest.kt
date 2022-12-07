@@ -4,7 +4,6 @@
 
 package com.neeva.app.userdata
 
-import android.content.Intent
 import android.net.Uri
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
@@ -32,7 +31,6 @@ import org.robolectric.annotation.Config
 import strikt.api.expectThat
 import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
-import strikt.assertions.isNull
 import strikt.assertions.startsWith
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -76,45 +74,6 @@ class LoginTokenTest : BaseTest() {
         )
         val result = loginToken.cachedValue
         expectThat(result).isEqualTo("whatever")
-    }
-
-    @Test
-    fun extractAuthTokenFromIntent_givenValidString_getsItBack() {
-        val intentUri = Uri.Builder()
-            .scheme("neeva")
-            .authority("login")
-            .appendQueryParameter("somethingBefore", "whatever")
-            .appendQueryParameter("sessionKey", "expectedSession")
-            .build()
-        val intent = Intent(Intent.ACTION_VIEW, intentUri)
-        val result = LoginToken.extractAuthTokenFromIntent(intent)
-        expectThat(result).isEqualTo("expectedSession")
-    }
-
-    @Test
-    fun extractAuthTokenFromIntent_withWrongScheme_returnsNull() {
-        val intentUri = Uri.Builder()
-            .scheme("https")
-            .authority("login")
-            .appendQueryParameter("somethingBefore", "whatever")
-            .appendQueryParameter("sessionKey", "expectedSession")
-            .build()
-        val intent = Intent(Intent.ACTION_VIEW, intentUri)
-        val result = LoginToken.extractAuthTokenFromIntent(intent)
-        expectThat(result).isNull()
-    }
-
-    @Test
-    fun extractAuthTokenFromIntent_withWrongAuthority_returnsNull() {
-        val intentUri = Uri.Builder()
-            .scheme("neeva")
-            .authority("wrongauthority.com")
-            .appendQueryParameter("somethingBefore", "whatever")
-            .appendQueryParameter("sessionKey", "expectedSession")
-            .build()
-        val intent = Intent(Intent.ACTION_VIEW, intentUri)
-        val result = LoginToken.extractAuthTokenFromIntent(intent)
-        expectThat(result).isNull()
     }
 
     @Test

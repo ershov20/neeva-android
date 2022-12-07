@@ -170,19 +170,14 @@ class FirstRunModel internal constructor(
         authorizationCode: String = ""
     ): Uri {
         val path = if (provider == NeevaUser.SSOProvider.GOOGLE && identityToken.isNotEmpty()) {
+            // Used to tell the backend that we're using the native Google login library and have
+            // already completed part of the login process.
             AUTH_PATH_GOOGLE_LOGIN
         } else {
+            // Standard web oauth login.
             AUTH_PATH_DEFAULT_LOGIN
         }
 
-        // TODO remove this temporary hack. There is a leftover callback check that doesn't handle
-        // Android in the neeva.com/login path. We should add Android case for that path and delete
-        // this.
-        val callback = if (provider == NeevaUser.SSOProvider.GOOGLE && identityToken.isNotEmpty()) {
-            "android"
-        } else {
-            "ios"
-        }
         val builder = Uri.Builder()
             .scheme("https")
             .authority(neevaConstants.appHost)
@@ -191,7 +186,7 @@ class FirstRunModel internal constructor(
             .appendQueryParameter("finalPath", provider.finalPath)
             .appendQueryParameter("signup", signup.toString())
             .appendQueryParameter("ignoreCountryCode", "true")
-            .appendQueryParameter("loginCallbackType", callback)
+            .appendQueryParameter("loginCallbackType", "android")
             .appendQueryParameter("identityToken", identityToken)
             .appendQueryParameter("authorizationCode", authorizationCode)
         return when (provider) {

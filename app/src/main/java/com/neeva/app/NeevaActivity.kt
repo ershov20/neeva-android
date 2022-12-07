@@ -54,6 +54,7 @@ import com.neeva.app.cardgrid.CardsPaneModelImpl
 import com.neeva.app.cardgrid.SelectedScreen
 import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.firstrun.FirstRunModel
+import com.neeva.app.firstrun.LoginCallbackIntentParams
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
@@ -69,13 +70,14 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.removeViewFromParent
 import com.neeva.app.ui.theme.NeevaTheme
-import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.widget.NeevaWidgetProvider
 import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -401,9 +403,33 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
 
                 if (Uri.parse(intent.dataString).scheme == "neeva") {
                     // An Intent was fired that might have a login cookie.  If it's there, save it.
-                    LoginToken.extractAuthTokenFromIntent(intent)?.let {
-                        neevaUser.loginToken.updateCookieManager(newValue = it) {
+                    LoginCallbackIntentParams.fromLoginCallbackIntent(intent)?.let { params ->
+                        if (params.sessionKey == null || params.retryCode != null) {
+                            popupModel.showSnackbar(getString(params.getErrorResourceId()))
+                        } else {
+                            // Update the Browser's cookie jar with the login cookie.
+                            val wasCookieJarUpdated = suspendCoroutine { continuation ->
+                                neevaUser.loginToken.updateCookieManager(
+                                    newValue = params.sessionKey
+                                ) {
+                                    continuation.resume(it)
+                                }
+                            }
+
+                            if (!wasCookieJarUpdated) {
+                                // Tell the user something went wrong and that they couldn't be
+                                // signed in.  The only way to gracefully recover here is to send
+                                // the user to the website we were originally going to send them to
+                                // in the hopes that they try signing in again later.
+                                popupModel.showSnackbar(getString(R.string.error_generic))
+                            }
+
+                            // Send the user to a URL created by appending the [finalPath] to the
+                            // base Neeva URL.
                             showBrowser()
+                            uriToLoad = Uri.parse(neevaConstants.appURL).buildUpon()
+                                .apply { params.finalPath?.let { path(it) } }
+                                .build()
 
                             if (firstRunModel.shouldLogFirstLogin()) {
                                 clientLogger.logCounter(
