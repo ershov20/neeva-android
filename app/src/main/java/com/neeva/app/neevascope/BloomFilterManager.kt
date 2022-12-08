@@ -7,7 +7,7 @@ package com.neeva.app.neevascope
 import android.content.Context
 import android.net.Uri
 import androidx.core.net.toFile
-import androidx.core.net.toUri
+import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -19,11 +19,10 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
-import java.io.File
 import java.io.IOException
 import java.net.URL
-import java.time.Duration
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -56,8 +55,7 @@ class BloomFilterManager(
     private val settingsDataModel: SettingsDataModel
 ) {
     companion object {
-        private const val TAG = "BloomFilterManager"
-        private const val DIRECTORY_BLOOM_FILTER = "bloom_filter"
+        private const val TAG = "BloomFilterDownloadWork"
     }
 
     val filterDownloadEnabled =
@@ -86,21 +84,11 @@ class BloomFilterManager(
      * running queries against the loaded Bloom Filters.
      * */
     private suspend fun load() {
-        try {
-            reddit.localUri = getFilterBinaryFile("reddit.bin").toUri()
-        } catch (e: IOException) {
-            Timber.e("Failed to get filter file ", e)
-            return
-        } catch (e: IllegalArgumentException) {
-            Timber.e("Failed to get filter file Uri ", e)
-            return
-        }
-
         if (filterDownloadEnabled) {
             enqueueBloomFilterDownloadWorkRequest()
         }
 
-        if (!reddit.localUri.toFile().exists()) return
+        if (reddit.localUri == Uri.EMPTY || !reddit.localUri.toFile().exists()) return
 
         try {
             bloomFilter.loadFilter(reddit.localUri)
@@ -145,7 +133,9 @@ class BloomFilterManager(
             .build()
 
         val workRequest =
-            PeriodicWorkRequestBuilder<BloomFilterDownloadWorker>(Duration.ofHours(24L))
+            PeriodicWorkRequestBuilder<BloomFilterDownloadWorker>(24, TimeUnit.HOURS)
+                .addTag(TAG)
+                .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 5, TimeUnit.HOURS)
                 .setConstraints(constraints)
                 .build()
 
@@ -155,11 +145,5 @@ class BloomFilterManager(
         )
 
         return workRequest
-    }
-
-    private suspend fun getFilterBinaryFile(name: String): File {
-        val file = File(appContext.cacheDir, DIRECTORY_BLOOM_FILTER)
-        if (!file.exists()) file.mkdir()
-        return File(file, name)
     }
 }

@@ -67,6 +67,7 @@ class NeevaScopeModel(
         private const val MEMORIZED_QUERY_COUNT_THRESHOLD = 5
         private const val DISCUSSION_COUNT_THRESHOLD = 5
         private const val NEEVASCOPE_TOOLTIP_DEFAULT_COUNT = 5
+        private const val BLOOM_FILTER_DOWNLOAD_WORK_TAG = "BloomFilterDownloadWork"
     }
 
     data class RedditPromoState(
@@ -308,7 +309,7 @@ class NeevaScopeModel(
         }
 
         if (SharedPrefFolder.App.NeevaScopeTooltipCount.get(sharedPreferencesModel) <= 0) {
-            settingsDataModel.setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, false)
+            completeNeevaScopeOnboarding()
         }
 
         _promoCache[urlFlow.value] = state
@@ -384,8 +385,12 @@ class NeevaScopeModel(
                 }
 
                 else -> {
-                    settingsDataModel
-                        .setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, false)
+                    if (
+                        settingsDataModel
+                            .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
+                    ) {
+                        completeNeevaScopeOnboarding()
+                    }
 
                     NeevaScopeResultScreen(
                         neevascopeModel = this,
@@ -403,6 +408,14 @@ class NeevaScopeModel(
                     performRedditPromoTransition(PromoTransition.DISMISS_DOT)
                 }
             }
+        }
+    }
+
+    private fun completeNeevaScopeOnboarding() {
+        settingsDataModel.setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, false)
+        // If NeevaScope onboarding is completed, work request of filter download will be cancelled
+        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.BLOOM_FILTER_DOWNLOAD)) {
+            bloomFilterManager.workManager.cancelAllWorkByTag(BLOOM_FILTER_DOWNLOAD_WORK_TAG)
         }
     }
 }

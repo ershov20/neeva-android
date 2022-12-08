@@ -104,15 +104,32 @@ class BloomFilterDownloadWorker(
     val appContext: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(appContext, workerParams) {
+    companion object {
+        private const val DIRECTORY_BLOOM_FILTER = "bloom_filter"
+        private const val MAX_RETRY_COUNT = 1
+    }
 
     private val reddit = BloomFilterConfiguration.redditConfiguration
 
     override suspend fun doWork(): Result {
+        // This runAttemptCount gets reset between periods for periodic work.
+        if (runAttemptCount > MAX_RETRY_COUNT) { return Result.failure() }
+
+        try {
+            reddit.localUri = getFilterBinaryFile("reddit.bin").toUri()
+        } catch (e: IOException) {
+            Timber.e("Failed to get filter file ", e)
+            return Result.retry()
+        } catch (e: IllegalArgumentException) {
+            Timber.e("Failed to get filter file Uri ", e)
+            return Result.retry()
+        }
+
         downloadFile()
 
         // Indicate whether the download work finished successfully with the Result
         if (reddit.localUri == Uri.EMPTY || !reddit.localUri.toFile().exists()) {
-            return Result.failure()
+            return Result.retry()
         }
         return Result.success()
     }
@@ -125,6 +142,12 @@ class BloomFilterDownloadWorker(
 
         BloomFilterDownloader(reddit.checksumUrl, reddit.filterUrl, reddit.localUri)
             .download()
+    }
+
+    private suspend fun getFilterBinaryFile(name: String): File {
+        val file = File(appContext.cacheDir, DIRECTORY_BLOOM_FILTER)
+        if (!file.exists()) file.mkdir()
+        return File(file, name)
     }
 }
 

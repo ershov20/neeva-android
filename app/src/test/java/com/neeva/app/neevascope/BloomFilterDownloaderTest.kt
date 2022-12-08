@@ -22,7 +22,6 @@ import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
-import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -166,23 +165,10 @@ class BloomFilterDownloaderTest : BaseTest() {
     @Test
     fun enqueueDownloadTask_withValidUrl_enqueueSuccess() {
         val worker = TestListenableWorkerBuilder<BloomFilterDownloadWorker>(appContext).build()
-        BloomFilterConfiguration.redditConfiguration.localUri = fileDir.toUri()
 
         runBlocking {
             val result = worker.doWork()
             expectThat(result).isEqualTo(ListenableWorker.Result.success())
-        }
-    }
-
-    @Test
-    fun enqueueDownloadTask_withInvalidUrl_assertionError() {
-        val worker = TestListenableWorkerBuilder<BloomFilterDownloadWorker>(appContext).build()
-        BloomFilterConfiguration.redditConfiguration.localUri = Uri.parse("www.example.com")
-
-        assertThrows(AssertionError::class.java) {
-            runBlocking {
-                worker.doWork()
-            }
         }
     }
 }
