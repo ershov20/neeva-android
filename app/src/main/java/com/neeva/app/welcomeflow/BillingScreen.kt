@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.billing
+package com.neeva.app.welcomeflow
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Box

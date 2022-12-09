@@ -93,7 +93,11 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
                     primaryLabelId = R.string.settings_debug_open_500_tabs
-                )
+                ),
+                SettingsRowData(
+                    type = SettingsRowType.BUTTON,
+                    primaryLabelId = R.string.settings_debug_launch_welcome_flow
+                ),
             )
         ),
         SettingsGroupData(

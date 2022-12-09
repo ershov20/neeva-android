@@ -189,7 +189,7 @@ class AppNavModelImpl(
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showSettings() = show(AppNavDestination.SETTINGS)
     override fun showSignInFlow() = show(AppNavDestination.SIGN_IN_FLOW)
-    override fun showBillingFlow() = show(AppNavDestination.BILLING_FLOW)
+    override fun showWelcomeFlow() = show(AppNavDestination.WELCOME_FLOW)
 
     override fun showSpaceDetail(spaceId: String) {
         // We set the detailedSpaceIDFlow value in case we need to fetch the Space.

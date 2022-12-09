@@ -47,7 +47,7 @@ interface AppNavModel {
     fun showShareSpaceSheet(spaceId: String)
     fun showSignInFlow()
 
-    fun showBillingFlow()
+    fun showWelcomeFlow()
     // endregion
 
     // region External screens
@@ -95,7 +95,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {}
     override fun showShareSpaceSheet(spaceId: String) {}
     override fun showSignInFlow() {}
-    override fun showBillingFlow() {}
+    override fun showWelcomeFlow() {}
     override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}
     override fun openUrlViaIntent(uri: Uri) {}

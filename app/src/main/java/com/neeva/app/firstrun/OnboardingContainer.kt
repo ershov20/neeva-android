@@ -51,7 +51,9 @@ fun OnboardingContainer(
                     content(
                         Modifier
                             .fillMaxHeight()
-                            .padding(horizontal = dimensionResource(id = R.dimen.first_run_padding))
+                            .padding(
+                                horizontal = dimensionResource(id = R.dimen.welcome_flow_padding)
+                            )
                     )
                 }
 

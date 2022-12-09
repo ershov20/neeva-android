@@ -13,7 +13,7 @@ import com.neeva.app.R
 /** Official colors defined from https://www.figma.com/file/axgC8GRRAo588urHgfIba7/Colors */
 object ColorPalette {
     object Brand {
-        val Blue = Color(0xff415aff)
+        val Blue = Color(0xFF0F63F9)
         val BlueVariant = Color(0xff1c3bc7)
         val Seafoam = Color(0xffd6eee6)
         val Polar = Color(0xffd4f0f5)

@@ -94,7 +94,7 @@ private fun FullScreenDialogTopBar(
             RowActionIconButton(
                 RowActionIconParams(
                     onTapAction = { onBackPressed() },
-                    contentDescription = stringResource(R.string.close),
+                    contentDescription = stringResource(R.string.toolbar_go_back),
                     actionType = RowActionIconParams.ActionType.BACK
                 )
             )

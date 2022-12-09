@@ -14,7 +14,6 @@ import com.google.accompanist.navigation.animation.composable
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.LocalSettingsController
 import com.neeva.app.ToolbarConfiguration
-import com.neeva.app.billing.BillingScreen
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.CardsPane
 import com.neeva.app.feedback.FeedbackView
@@ -33,6 +32,7 @@ import com.neeva.app.spaces.EditSpaceDialog
 import com.neeva.app.spaces.SpaceDetail
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.ui.BrowserScaffold
+import com.neeva.app.welcomeflow.WelcomeScreen
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -148,17 +148,11 @@ fun AppNav(
         }
 
         composable(AppNavDestination.FEEDBACK.route) {
-            FeedbackView(
-                currentURLFlow = webLayerModel.currentBrowser.activeTabModel.urlFlow
-            )
+            FeedbackView(currentURLFlow = webLayerModel.currentBrowser.activeTabModel.urlFlow)
         }
 
-        composable(AppNavDestination.BILLING_FLOW.route) {
-            BillingScreen(
-                onDismiss = {
-                    appNavModel.popBackStack()
-                }
-            )
+        composable(AppNavDestination.WELCOME_FLOW.route) {
+            WelcomeScreen(navigateToSignUp = {})
         }
 
         signInFlowNavGraph()

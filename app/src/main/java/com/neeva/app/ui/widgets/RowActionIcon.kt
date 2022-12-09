@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
@@ -67,14 +68,17 @@ fun RowActionIconButton(
     enabled: Boolean = true,
     actionType: RowActionIconParams.ActionType,
     contentDescription: String? = null,
-    size: Dp = Dimensions.SIZE_ICON_MEDIUM
+    size: Dp = Dimensions.SIZE_ICON_MEDIUM,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
+    modifier: Modifier = Modifier
 ) {
     CompositionLocalProvider(
-        LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant
+        LocalContentColor provides color
     ) {
         IconButton(
             onClick = onTapAction,
-            enabled = enabled
+            enabled = enabled,
+            modifier = modifier
         ) {
             RowActionIcon(
                 actionType = actionType,

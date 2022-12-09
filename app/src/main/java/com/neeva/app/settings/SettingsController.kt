@@ -160,7 +160,7 @@ class SettingsControllerImpl(
             },
             R.string.content_filter to { appNavModel.showContentFilterSettings() },
             R.string.settings_licenses to { appNavModel.showLicenses() },
-            R.string.settings_debug_launch_billing_flow to { appNavModel.showBillingFlow() }
+            R.string.settings_debug_launch_welcome_flow to { appNavModel.showWelcomeFlow() }
         )
         if (isSignedOut()) {
             navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showSignInFlow() }

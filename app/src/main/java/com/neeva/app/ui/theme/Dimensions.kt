@@ -17,6 +17,7 @@ object Dimensions {
     val RADIUS_SMALL = 8.dp
     val RADIUS_MEDIUM = 12.dp
     val RADIUS_LARGE = 16.dp
+    val RADIUS_HUGE = 24.dp
 
     /** Minimum size of an accessible touch target. */
     val SIZE_TOUCH_TARGET = 48.dp

@@ -20,7 +20,6 @@ enum class AppNavDestination(
     val slidesOutToward: SlideDirection? = null
 ) {
     BROWSER,
-    WELCOME,
     SIGN_IN_FLOW,
     CARD_GRID(parent = BROWSER, fadesOut = true),
     SPACE_DETAIL(parent = BROWSER, slidesOutToward = SlideDirection.End),
@@ -37,7 +36,7 @@ enum class AppNavDestination(
     CONTENT_FILTER_SETTINGS(parent = SETTINGS, slidesOutToward = SlideDirection.End),
     COOKIE_PREFERENCES(parent = CONTENT_FILTER_SETTINGS, slidesOutToward = SlideDirection.End),
     LICENSES(parent = SETTINGS, slidesOutToward = SlideDirection.End),
-    BILLING_FLOW(parent = PROFILE_SETTINGS);
+    WELCOME_FLOW(parent = PROFILE_SETTINGS);
 
     val route: String = this.name
 

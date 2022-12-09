@@ -11,10 +11,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
-import com.neeva.app.firstrun.widgets.icons.NeevaLogo
+import com.neeva.app.firstrun.widgets.icons.WordMark
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.LandscapePreviewsDark
 import com.neeva.app.ui.NeevaThemePreviewContainer
@@ -28,7 +29,7 @@ fun WelcomeHeader(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        NeevaLogo()
+        WordMark(ColorFilter.tint(MaterialTheme.colorScheme.onSurface))
 
         Spacer(modifier = Modifier.height(24.dp))
 

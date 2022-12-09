@@ -12,10 +12,7 @@ import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 
-class ProfileSettingsPaneData(
-    neevaConstants: NeevaConstants,
-    allowSubscriptionFlow: Boolean = false
-) : SettingsPaneDataInterface {
+class ProfileSettingsPaneData(neevaConstants: NeevaConstants) : SettingsPaneDataInterface {
     // For Profile Settings, the TopAppBar Title is the user's display name.
     override val topAppBarTitleResId: Int = -1
     override val shouldShowUserName: Boolean = true
@@ -30,16 +27,7 @@ class ProfileSettingsPaneData(
             primaryLabelId = R.string.settings_sign_out,
             isDangerousAction = true
         )
-    ).apply {
-        if (allowSubscriptionFlow) {
-            add(
-                SettingsRowData(
-                    type = SettingsRowType.BUTTON,
-                    primaryLabelId = R.string.settings_debug_launch_billing_flow
-                )
-            )
-        }
-    }
+    )
 
     override val data = listOf(
         SettingsGroupData(
