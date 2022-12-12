@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalHistoryManager
+import com.neeva.app.zeroquery.FirstRunZeroQuery
 import com.neeva.app.zeroquery.IncognitoZeroQuery
 import com.neeva.app.zeroquery.RegularProfileZeroQuery
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,11 +77,14 @@ fun SuggestionPane(modifier: Modifier = Modifier, isFirstRun: Boolean) {
                 }
             }
 
+            isFirstRun -> {
+                FirstRunZeroQuery {
+                    CurrentPageRow(browserWrapper)
+                }
+            }
+
             else -> {
-                RegularProfileZeroQuery(
-                    urlBarModel = urlBarModel,
-                    isFirstRun = isFirstRun
-                ) {
+                RegularProfileZeroQuery() {
                     CurrentPageRow(browserWrapper)
                 }
             }

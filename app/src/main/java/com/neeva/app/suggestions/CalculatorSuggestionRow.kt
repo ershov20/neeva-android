@@ -4,10 +4,10 @@
 
 package com.neeva.app.suggestions
 
-import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.R
 import com.neeva.app.ui.LightDarkPreviewContainer
 
@@ -33,7 +33,7 @@ fun CalculatorSuggestionRow_Preview() {
     LightDarkPreviewContainer {
         CalculatorSuggestionRow(
             suggestion = QueryRowSuggestion(
-                url = Uri.parse(""),
+                neevaConstants = LocalNeevaConstants.current,
                 query = "3 + 3",
                 description = "6",
                 drawableID = R.drawable.ic_public_black_24,

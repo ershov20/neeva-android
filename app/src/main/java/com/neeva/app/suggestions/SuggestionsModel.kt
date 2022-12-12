@@ -40,7 +40,8 @@ data class NavSuggestion(
     val position: Int? = null
 )
 
-data class QueryRowSuggestion(
+// Primary constructor is private to ensure url and query are derived from the same source.
+data class QueryRowSuggestion private constructor(
     val url: Uri,
     val query: String,
     val drawableID: Int,
@@ -49,7 +50,51 @@ data class QueryRowSuggestion(
     val imageURL: String? = null,
     val stockInfo: SuggestionsQuery.StockInfo? = null,
     val dictionaryInfo: SuggestionsQuery.DictionaryInfo? = null
-)
+) {
+    /**
+     * @throws IllegalArgumentException if the URL lacks a q query parameter
+     */
+    constructor(
+        url: Uri,
+        drawableID: Int,
+        description: String? = null,
+        annotationType: AnnotationType = AnnotationType.Default,
+        imageURL: String? = null,
+        stockInfo: SuggestionsQuery.StockInfo? = null,
+        dictionaryInfo: SuggestionsQuery.DictionaryInfo? = null
+    ) : this(
+        url,
+        url.getQueryParameter("q") ?: throw IllegalArgumentException(
+            "URL without q parameter cannot be converted to a suggestion"
+        ),
+        drawableID,
+        description,
+        annotationType,
+        imageURL,
+        stockInfo,
+        dictionaryInfo
+    )
+
+    constructor(
+        neevaConstants: NeevaConstants,
+        query: String,
+        drawableID: Int,
+        description: String? = null,
+        annotationType: AnnotationType = AnnotationType.Default,
+        imageURL: String? = null,
+        stockInfo: SuggestionsQuery.StockInfo? = null,
+        dictionaryInfo: SuggestionsQuery.DictionaryInfo? = null
+    ) : this(
+        query.toSearchUri(neevaConstants),
+        query,
+        drawableID,
+        description,
+        annotationType,
+        imageURL,
+        stockInfo,
+        dictionaryInfo
+    )
+}
 
 data class Suggestions(
     val autocompleteSuggestion: NavSuggestion? = null,
@@ -170,7 +215,7 @@ fun SuggestionsQuery.UrlSuggestion.toNavSuggestion() = NavSuggestion(
 
 fun SuggestionsQuery.QuerySuggestion.toQueryRowSuggestion(neevaConstants: NeevaConstants) =
     QueryRowSuggestion(
-        url = this.suggestedQuery.toSearchUri(neevaConstants),
+        neevaConstants = neevaConstants,
         query = this.suggestedQuery,
         drawableID = when {
             this.type == QuerySuggestionType.Standard -> R.drawable.ic_baseline_search_24

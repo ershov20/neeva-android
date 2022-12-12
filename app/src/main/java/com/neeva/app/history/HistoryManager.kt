@@ -165,11 +165,13 @@ class HistoryManager(
 
 fun Site.toSearchSuggest(neevaConstants: NeevaConstants): QueryRowSuggestion? {
     if (!siteURL.startsWith(neevaConstants.appSearchURL)) return null
-    val query = Uri.parse(this.siteURL).getQueryParameter("q") ?: return null
 
-    return QueryRowSuggestion(
-        url = Uri.parse(this.siteURL),
-        query = query,
-        drawableID = R.drawable.ic_baseline_history_24
-    )
+    return try {
+        QueryRowSuggestion(
+            url = Uri.parse(this.siteURL),
+            drawableID = R.drawable.ic_baseline_history_24
+        )
+    } catch (e: IllegalArgumentException) {
+        null
+    }
 }

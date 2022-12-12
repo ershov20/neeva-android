@@ -19,6 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.style.TextOverflow
+import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.R
 import com.neeva.app.storage.favicons.FaviconCache
 import com.neeva.app.storage.favicons.previewFaviconCache
@@ -155,17 +156,17 @@ fun SuggestionList_PreviewFullyLoaded_ShowSearchSuggestions() {
             ),
             queryRowSuggestions = listOf(
                 QueryRowSuggestion(
-                    url = Uri.parse(""),
+                    neevaConstants = LocalNeevaConstants.current,
                     query = "Query 1",
                     drawableID = R.drawable.ic_baseline_search_24
                 ),
                 QueryRowSuggestion(
-                    url = Uri.parse(""),
+                    neevaConstants = LocalNeevaConstants.current,
                     query = "Query 2",
                     drawableID = R.drawable.ic_baseline_search_24
                 ),
                 QueryRowSuggestion(
-                    url = Uri.parse(""),
+                    neevaConstants = LocalNeevaConstants.current,
                     query = "Query 3",
                     drawableID = R.drawable.ic_baseline_search_24
                 ),

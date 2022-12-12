@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 fun QuerySuggestionRow(
     suggestion: QueryRowSuggestion,
     onLoadUrl: (Uri) -> Unit,
-    onEditUrl: (() -> Unit)? = null,
+    onEditUrl: (String) -> Unit,
     onLogSuggestionTap: ((SuggestionType) -> Unit)? = null
 ) {
     val onTapRow = {
@@ -64,7 +64,7 @@ fun QuerySuggestionRow(
                 drawableID = suggestion.drawableID,
                 drawableTint = MaterialTheme.colorScheme.onSurfaceVariant,
                 onTapRow = onTapRow,
-                onEditUrl = onEditUrl
+                onEditUrl = { onEditUrl(suggestion.query) }
             )
         }
     }
