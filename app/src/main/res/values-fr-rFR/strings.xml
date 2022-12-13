@@ -885,4 +885,13 @@
 
     <!-- [Downloads] Action Label Text for the snackbar popup notification to view the newly completed download.  -->
     <string name="download_view">Voir</string>
+
+    <!-- [Menu item] Pin the tab. -->
+    <string name="menu_pin_tab">Épingler l\'onglet</string>
+
+    <!-- [Menu item] Unpin the tab. -->
+    <string name="menu_unpin_tab">Désépingler l\'onglet</string>
+
+    <!-- [Section header] Header for pinned tabs. -->
+    <string name="pinned_tab_header">Épinglé</string>
 </resources>
