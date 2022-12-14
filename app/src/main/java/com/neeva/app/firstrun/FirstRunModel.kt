@@ -316,7 +316,7 @@ class FirstRunModel internal constructor(
             }
             return
         } else if (provider == NeevaUser.SSOProvider.GOOGLE && isNativeGoogleLoginEnabled) {
-            // Fallback to custom tabs for Google sign in if the context is not an Activity
+            // Falls back to logging in using Custom Tabs.
             val signInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(SERVER_CLIENT_ID)
                 .requestServerAuthCode(SERVER_CLIENT_ID, true)
@@ -382,13 +382,8 @@ class FirstRunModel internal constructor(
         result: ActivityResult,
         launchLoginFlowParams: LaunchLoginFlowParams,
     ): Uri? {
-        val data = result.takeIf { it.resultCode == Activity.RESULT_OK }?.data ?: run {
-            Timber.e("ActivityResult was not successful: ${result.resultCode}")
-            return null
-        }
-
         try {
-            val account = googleSignInAccountProvider.getGoogleSignInAccount(data)
+            val account = googleSignInAccountProvider.getGoogleSignInAccount(result.data)
             val idToken = account.result.idToken ?: return null
             val authCode = account.result.serverAuthCode ?: return null
 
@@ -399,7 +394,10 @@ class FirstRunModel internal constructor(
                 authorizationCode = authCode
             )
         } catch (e: ApiException) {
-            Timber.e("Failed to extract signed in account from intent", e)
+            Timber.e(e, "Failed to extract signed in account from intent")
+            return null
+        } catch (e: RuntimeException) {
+            Timber.e(e, "Login API failure")
             return null
         }
     }

@@ -53,6 +53,8 @@ class FirstRunModelTest : BaseTest() {
     private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
     private lateinit var settingsDataModel: SettingsDataModel
 
+    private var signInAccount: GoogleSignInAccount? = null
+
     override fun setUp() {
         super.setUp()
 
@@ -90,7 +92,7 @@ class FirstRunModelTest : BaseTest() {
             sharedPreferencesModel
         )
 
-        val signInAccount = mock<GoogleSignInAccount> {
+        signInAccount = mock {
             on { idToken } doReturn "valid_token"
             on { serverAuthCode } doReturn "valid_code"
         }
@@ -143,6 +145,7 @@ class FirstRunModelTest : BaseTest() {
             val activityResult = mock<ActivityResult> {
                 on { resultCode } doReturn Activity.RESULT_CANCELED
             }
+            signInAccount = null
 
             var onSuccessCalled = false
             val onSuccess = { _: Uri -> onSuccessCalled = true }
