@@ -7,6 +7,7 @@ package com.neeva.app.browsing
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
@@ -47,7 +48,11 @@ class ActivityStarterTest : BaseTest() {
         activityStarter.safeOpenFile(downloadUri, downloadFileMimeType)
 
         val activityStarterIntentUsed = argumentCaptor<Intent>()
-        verify(activityStarter).safeStartActivityForIntent(activityStarterIntentUsed.capture())
+        val optionUsed = argumentCaptor<Bundle>()
+        verify(activityStarter).safeStartActivityForIntent(
+            activityStarterIntentUsed.capture(),
+            optionUsed.capture()
+        )
 
         activityStarterIntentUsed.lastValue.apply {
             expectThat(action).isEqualTo(Intent.ACTION_VIEW)

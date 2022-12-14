@@ -30,6 +30,7 @@ import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.welcomeflow.WelcomeFlowActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -189,7 +190,11 @@ class AppNavModelImpl(
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showSettings() = show(AppNavDestination.SETTINGS)
     override fun showSignInFlow() = show(AppNavDestination.SIGN_IN_FLOW)
-    override fun showWelcomeFlow() = show(AppNavDestination.WELCOME_FLOW)
+    override fun showWelcomeFlow() {
+        activityStarter.safeStartActivityForIntent(
+            Intent(context, WelcomeFlowActivity::class.java)
+        )
+    }
 
     override fun showSpaceDetail(spaceId: String) {
         // We set the detailedSpaceIDFlow value in case we need to fetch the Space.

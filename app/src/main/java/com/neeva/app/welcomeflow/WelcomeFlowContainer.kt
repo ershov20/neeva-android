@@ -19,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -44,18 +43,10 @@ fun WelcomeFlowContainer(
     onBack: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
+    // Since this composable runs in a separate activity from NeevaActivity, we don't have to worry
+    // about setting the status bar color back to the original color.
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(ColorPalette.Brand.Blue, darkIcons = false)
-
-    // TODO(kobec): Currently a temporary solution!
-    //  Will need to eventually separate welcome flow from this activity
-    val originalStatusBarColor = MaterialTheme.colorScheme.background
-    DisposableEffect(true) {
-        onDispose {
-            systemUiController.setStatusBarColor(originalStatusBarColor)
-        }
-    }
-
     Surface(
         modifier = Modifier
             .fillMaxSize()

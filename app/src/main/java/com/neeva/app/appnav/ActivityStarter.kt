@@ -8,6 +8,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import androidx.core.content.FileProvider
 import com.neeva.app.R
 import com.neeva.app.ui.PopupModel
@@ -15,12 +16,11 @@ import java.io.File
 import timber.log.Timber
 
 class ActivityStarter(private val appContext: Context, private val popupModel: PopupModel) {
-    fun safeStartActivityForIntent(intent: Intent) {
+    fun safeStartActivityForIntent(intent: Intent, options: Bundle? = null) {
         try {
             // Because we're using a non-Activity context, the Intent needs to start a new Task.
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-            appContext.startActivity(intent)
+            appContext.startActivity(intent, options)
         } catch (e: ActivityNotFoundException) {
             popupModel.showSnackbar(appContext.getString(R.string.error_generic))
             Timber.e("Failed to start Activity for $intent")

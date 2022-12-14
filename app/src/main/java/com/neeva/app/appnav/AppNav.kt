@@ -32,7 +32,6 @@ import com.neeva.app.spaces.EditSpaceDialog
 import com.neeva.app.spaces.SpaceDetail
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.ui.BrowserScaffold
-import com.neeva.app.welcomeflow.WelcomeScreen
 import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -149,10 +148,6 @@ fun AppNav(
 
         composable(AppNavDestination.FEEDBACK.route) {
             FeedbackView(currentURLFlow = webLayerModel.currentBrowser.activeTabModel.urlFlow)
-        }
-
-        composable(AppNavDestination.WELCOME_FLOW.route) {
-            WelcomeScreen(navigateToSignUp = {})
         }
 
         signInFlowNavGraph()

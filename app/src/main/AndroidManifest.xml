@@ -112,6 +112,15 @@
             android:screenOrientation="portrait"
             android:configChanges="screenSize|screenLayout" />
 
+        <!-- For the Welcome flow, the user has to be in portrait. -->
+        <activity
+            android:name=".welcomeflow.WelcomeFlowActivity"
+            android:exported="false"
+            android:theme="@style/Theme.NeevaSearchBrowser.NoActionBar"
+            android:windowSoftInputMode="stateHidden"
+            android:screenOrientation="portrait"
+            android:configChanges="screenSize|screenLayout" />
+
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
             android:theme="@style/Theme.NeevaSearchBrowser" />
