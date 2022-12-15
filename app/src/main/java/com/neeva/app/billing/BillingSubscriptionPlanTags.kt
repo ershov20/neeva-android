@@ -5,7 +5,12 @@
 package com.neeva.app.billing
 
 object BillingSubscriptionPlanTags {
+    // region Used in this project and Google Play Console
     const val SUB_PRODUCT_ID = "premium"
     const val ANNUAL_PREMIUM_PLAN = "annual-premium"
     const val MONTHLY_PREMIUM_PLAN = "monthly-premium"
+    // endregion
+
+    // Used in this project
+    const val FREE_PLAN = "free"
 }

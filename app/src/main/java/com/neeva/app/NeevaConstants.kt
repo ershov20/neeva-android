@@ -43,6 +43,8 @@ open class NeevaConstants(
 
     val createOktaAccountURL: String = "${appURL}login/create"
 
+    val climatePledgeURL: String = "${appURL}climate-pledge"
+
     val playStoreUri: Uri = Uri.parse("https://play.google.com/store/apps/details?id=com.neeva.app")
 
     open val downloadDirectory: File by lazy {

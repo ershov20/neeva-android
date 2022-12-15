@@ -6,10 +6,13 @@ package com.neeva.app.firstrun.widgets
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.neeva.app.firstrun.widgets.texts.ToggleSignUpText
+import com.neeva.app.ui.theme.Dimensions
 
 @Composable
 fun StickyFooter(
@@ -34,7 +37,8 @@ fun OnboardingStickyFooter(
     StickyFooter(scrollState) {
         ToggleSignUpText(
             signup = signup,
-            onClick = stickyFooterOnClick
+            onClick = stickyFooterOnClick,
+            modifier = Modifier.padding(vertical = Dimensions.PADDING_HUGE)
         )
     }
 }

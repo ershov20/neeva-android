@@ -19,22 +19,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalSettingsDataModel
@@ -48,6 +43,7 @@ import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.userdata.NeevaUser
+
 @Composable
 fun WelcomeScreen(
     navigateToPlans: () -> Unit,
@@ -61,6 +57,7 @@ fun WelcomeScreen(
             loggingConsentState = settingsDataModel.getToggleState(SettingsToggle.LOGGING_CONSENT),
             toggleLoggingConsentState = settingsDataModel
                 .getTogglePreferenceToggler(SettingsToggle.LOGGING_CONSENT),
+            modifier = it
         )
     }
 }
@@ -71,21 +68,22 @@ fun WelcomeScreenContent(
     navigateToSetDefaultBrowser: () -> Unit,
     loggingConsentState: MutableState<Boolean>,
     toggleLoggingConsentState: () -> Unit,
+    modifier: Modifier
 ) {
     val firstRunModel = LocalFirstRunModel.current
     val context = LocalContext.current
 
-    Column(Modifier.padding(horizontal = dimensionResource(id = R.dimen.welcome_flow_padding))) {
+    Column(modifier = modifier) {
         Spacer(Modifier.height(80.dp))
 
-        BenefitsRow(
+        MainBenefit(
             title = stringResource(id = R.string.welcomeflow_privacy_benefit),
             description = stringResource(id = R.string.welcomeflow_privacy_benefit_description)
         )
 
         Spacer(Modifier.height(18.dp))
 
-        BenefitsRow(
+        MainBenefit(
             title = stringResource(id = R.string.welcomeflow_unbiased_benefit),
             description = stringResource(id = R.string.welcomeflow_unbiased_benefit_description)
         )
@@ -208,40 +206,6 @@ internal fun LoginButton(
 }
 
 @Composable
-fun BenefitsRow(title: String, description: String) {
-    ConstraintLayout(Modifier.fillMaxWidth()) {
-        val (check, titleRef, descriptionRef) = createRefs()
-        Icon(
-            painter = painterResource(R.drawable.ic_check_24),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.constrainAs(check) {
-                start.linkTo(parent.start)
-                top.linkTo(parent.top)
-            }
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.constrainAs(titleRef) {
-                top.linkTo(check.top)
-                bottom.linkTo(check.bottom)
-                start.linkTo(check.end, margin = Dimensions.PADDING_LARGE)
-            }
-        )
-        Text(
-            text = description,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.constrainAs(descriptionRef) {
-                start.linkTo(titleRef.start)
-                top.linkTo(titleRef.bottom)
-            }
-        )
-    }
-}
-
-@Composable
 fun ContinueButton(navigateToPlans: () -> Unit, navigateToSetDefaultBrowser: () -> Unit) {
     val subscriptionManager = LocalSubscriptionManager.current
     val subscriptionOfferDetails = subscriptionManager.productDetailsFlow
@@ -253,18 +217,15 @@ fun ContinueButton(navigateToPlans: () -> Unit, navigateToSetDefaultBrowser: () 
         navigateToPlans
     }
 
-    Button(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = stringResource(id = R.string.welcomeflow_lets_go),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(Dimensions.PADDING_MEDIUM)
-        )
-    }
+    WelcomeFlowButton(
+        primaryText = stringResource(id = R.string.welcomeflow_lets_go),
+        onClick = onClick
+    )
 }
 
 @PortraitPreviews
 @Composable
-fun SignInScreen_Light_Preview() {
+fun WelcomeScreen_Light_Preview() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
         WelcomeScreen(navigateToPlans = {}, navigateToSetDefaultBrowser = {})
     }
@@ -272,7 +233,7 @@ fun SignInScreen_Light_Preview() {
 
 @PortraitPreviews
 @Composable
-fun SignInScreen_Dark_Preview() {
+fun WelcomeScreen_Dark_Preview() {
     NeevaThemePreviewContainer(useDarkTheme = true) {
         WelcomeScreen(navigateToPlans = {}, navigateToSetDefaultBrowser = {})
     }

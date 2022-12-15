@@ -64,7 +64,6 @@ class WelcomeFlowActivity : AppCompatActivity() {
     @Inject lateinit var billingClientController: BillingClientController
     @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
-    // TODO(kobec): When we eventually delete FirstRunModel, rename this to WelcomeFlowModel
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var neevaConstants: NeevaConstants
@@ -132,7 +131,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
                     ) {
                         composable(Destinations.WELCOME.name) {
                             WelcomeScreen(
-                                navigateToPlans = { },
+                                navigateToPlans = { navHost.navigate(Destinations.PLANS.name) },
                                 navigateToSetDefaultBrowser = {
                                     navHost.navigate(Destinations.SET_DEFAULT_BROWSER.name)
                                 }
@@ -140,7 +139,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
                         }
 
                         composable(Destinations.PLANS.name) {
-                            BillingScreen(onDismiss = {})
+                            PlansScreen(navigateToCreateAccount = { })
                         }
 
                         composable(Destinations.SET_DEFAULT_BROWSER.name) {

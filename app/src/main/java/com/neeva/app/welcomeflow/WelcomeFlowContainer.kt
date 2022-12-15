@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -41,7 +43,7 @@ import com.neeva.app.ui.widgets.RowActionIconParams
 fun WelcomeFlowContainer(
     headerText: String,
     onBack: (() -> Unit)? = null,
-    content: @Composable () -> Unit
+    content: @Composable (Modifier) -> Unit
 ) {
     // Since this composable runs in a separate activity from NeevaActivity, we don't have to worry
     // about setting the status bar color back to the original color.
@@ -85,7 +87,11 @@ fun WelcomeFlowContainer(
                     ),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    content()
+                    content(
+                        Modifier.padding(
+                            horizontal = dimensionResource(id = R.dimen.welcome_flow_padding)
+                        )
+                    )
                 }
             }
         }

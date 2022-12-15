@@ -19,13 +19,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import com.neeva.app.R
 import com.neeva.app.firstrun.FirstRunConstants
 import com.neeva.app.ui.OneBooleanPreviewContainer
+import com.neeva.app.ui.theme.Dimensions
 
 @Composable
-fun ToggleSignUpText(signup: Boolean, onClick: () -> Unit) {
+fun ToggleSignUpText(signup: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Text(
         style = FirstRunConstants.getSubtextStyle(),
         textAlign = TextAlign.Center,
@@ -54,8 +54,7 @@ fun ToggleSignUpText(signup: Boolean, onClick: () -> Unit) {
                 )
             }
         },
-        modifier = Modifier
-            .padding(vertical = 24.dp)
+        modifier = modifier
             .clickable { onClick() }
             .fillMaxWidth()
             .wrapContentSize(align = Alignment.Center)
@@ -68,6 +67,10 @@ fun ToggleSignUpText(signup: Boolean, onClick: () -> Unit) {
 @Composable
 fun ToggleSignUpTextPreview() {
     OneBooleanPreviewContainer { signup ->
-        ToggleSignUpText(signup) { }
+        ToggleSignUpText(
+            signup = signup,
+            onClick = {},
+            modifier = Modifier.padding(vertical = Dimensions.PADDING_HUGE)
+        )
     }
 }
