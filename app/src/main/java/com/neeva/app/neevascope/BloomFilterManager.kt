@@ -92,8 +92,11 @@ class BloomFilterManager(
 
         try {
             bloomFilter.loadFilter(reddit.localUri)
-        } catch (e: IOException) {
-            Timber.e("Failed to load filter ", e)
+        } catch (throwable: IOException) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to load filter "
+            )
         }
     }
 

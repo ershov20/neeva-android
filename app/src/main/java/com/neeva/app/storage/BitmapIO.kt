@@ -99,11 +99,11 @@ object BitmapIO {
             inputStream = getInputStream(file)
             bufferedStream = BufferedInputStream(inputStream)
             BitmapFactory.decodeStream(bufferedStream)
-        } catch (e: FileNotFoundException) {
-            Timber.d("${e.message}")
+        } catch (throwable: FileNotFoundException) {
+            Timber.d(t = throwable)
             null
-        } catch (e: Exception) {
-            Timber.e("Failed to restore bitmap", e)
+        } catch (throwable: Exception) {
+            Timber.e(t = throwable, message = "Failed to restore bitmap")
             null
         } finally {
             bufferedStream?.closeQuietly()

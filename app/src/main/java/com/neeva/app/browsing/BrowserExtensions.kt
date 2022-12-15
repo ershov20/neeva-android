@@ -12,12 +12,12 @@ import timber.log.Timber
 fun Browser?.takeIfAlive(): Browser? {
     return when {
         this == null -> {
-            Timber.i("Browser is null", Throwable())
+            Timber.i(t = Throwable(), message = "Browser is null")
             null
         }
 
         this.isDestroyed -> {
-            Timber.w("Browser is destroyed", Throwable())
+            Timber.w(t = Throwable(), message = "Browser is destroyed")
             null
         }
 

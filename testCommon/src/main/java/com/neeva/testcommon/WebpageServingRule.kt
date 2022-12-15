@@ -92,15 +92,21 @@ class WebpageServingRule : TestRule {
                             writer.write(output.toByteArray().plus(bytes))
                         } catch (e: FileNotFoundException) {
                             writer.write("HTTP/1.1 404 Not Found\r\n\r\n".toByteArray())
-                        } catch (e: IOException) {
-                            Timber.e("Exception while serving file", e)
+                        } catch (throwable: IOException) {
+                            Timber.e(
+                                t = throwable,
+                                message = "Exception while serving file"
+                            )
                             writer.write("HTTP/1.1 500 Not Implemented\r\n\r\n".toByteArray())
                         }
 
                         writer.flush()
                         writer.close()
-                    } catch (e: Exception) {
-                        Timber.e("Exception caught for this socket", e)
+                    } catch (throwable: Exception) {
+                        Timber.e(
+                            t = throwable,
+                            message = "Exception caught for this socket"
+                        )
                     }
                 }
             }

@@ -393,11 +393,12 @@ class FirstRunModel internal constructor(
                 identityToken = idToken,
                 authorizationCode = authCode
             )
-        } catch (e: ApiException) {
-            Timber.e(e, "Failed to extract signed in account from intent")
+        } catch (throwable: ApiException) {
+            Timber.e(t = throwable, message = "Failed to extract signed in account from intent")
             return null
-        } catch (e: RuntimeException) {
-            Timber.e(e, "Login API failure")
+        } catch (throwable: RuntimeException) {
+            Timber.e(t = throwable, message = "Login API failure")
+
             return null
         }
     }

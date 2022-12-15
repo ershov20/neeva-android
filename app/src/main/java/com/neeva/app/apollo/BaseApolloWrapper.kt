@@ -56,15 +56,24 @@ abstract class BaseApolloWrapper(
                 response.errors?.forEach { Timber.e("\tError: ${it.message}") }
             }
             ApolloResponseSummary(response, null)
-        } catch (e: ApolloNetworkException) {
-            Timber.e("Could not perform operation", e)
-            ApolloResponseSummary(null, e)
-        } catch (e: IllegalStateException) {
-            Timber.e("Could not perform operation", e)
-            ApolloResponseSummary(null, e)
-        } catch (e: ApolloException) {
-            Timber.e("Could not perform operation", e)
-            ApolloResponseSummary(null, e)
+        } catch (throwable: ApolloNetworkException) {
+            Timber.e(
+                t = throwable,
+                message = "Could not perform operation"
+            )
+            ApolloResponseSummary(null, throwable)
+        } catch (throwable: IllegalStateException) {
+            Timber.e(
+                t = throwable,
+                message = "Could not perform operation"
+            )
+            ApolloResponseSummary(null, throwable)
+        } catch (throwable: ApolloException) {
+            Timber.e(
+                t = throwable,
+                message = "Could not perform operation"
+            )
+            ApolloResponseSummary(null, throwable)
         }
     }
 }

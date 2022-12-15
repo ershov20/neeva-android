@@ -155,7 +155,10 @@ class NeevaActivityViewModel(
                 Timber.i("Update check result: ${toolbarConfiguration.value.isUpdateAvailable}")
             }
             .addOnFailureListener {
-                Timber.w("Failed to check for update", it)
+                Timber.w(
+                    t = it,
+                    message = "Failed to check for update"
+                )
             }
     }
 

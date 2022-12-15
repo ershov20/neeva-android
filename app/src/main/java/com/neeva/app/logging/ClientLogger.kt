@@ -224,8 +224,11 @@ class ClientLogger(
                             )
                         )
                     )
-                } catch (e: RemoteException) {
-                    Timber.e("Failed to get installReferrer", e)
+                } catch (throwable: RemoteException) {
+                    Timber.e(
+                        t = throwable,
+                        "Failed to get installReferrer"
+                    )
                 }
 
                 referrerClient.endConnection()

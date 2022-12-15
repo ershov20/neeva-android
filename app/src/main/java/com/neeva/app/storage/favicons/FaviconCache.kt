@@ -88,8 +88,11 @@ abstract class FaviconCache(
                     height = bitmap.height
                 )
             }
-        } catch (e: SecurityException) {
-            Timber.e("Failed to check if bitmap exists: ${file.absolutePath}", e)
+        } catch (throwable: SecurityException) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to check if bitmap exists: ${file.absolutePath}"
+            )
             return@withContext null
         }
 
@@ -188,8 +191,11 @@ abstract class FaviconCache(
                     ?.filterNot { usedFavicons.contains(it.toUri().toString()) }
                     ?.forEach { it.delete() }
             }
-        } catch (e: Exception) {
-            Timber.e("Failed to cleanup favicon directory", e)
+        } catch (throwable: Exception) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to cleanup favicon directory"
+            )
         }
     }
 }

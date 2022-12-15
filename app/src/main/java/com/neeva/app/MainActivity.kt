@@ -62,8 +62,8 @@ class MainActivity : AppCompatActivity() {
             // unmarshalled whenever we try to check for any extras from the Bundle, so it doesn't
             // really matter which we pick.
             also { this?.hasExtra(SearchManager.QUERY) }
-        } catch (e: Exception) {
-            Timber.w("Failed to parse Intent; discarding", e)
+        } catch (throwable: Exception) {
+            Timber.w(t = throwable, message = "Failed to parse Intent; discarding")
             null
         }
     }

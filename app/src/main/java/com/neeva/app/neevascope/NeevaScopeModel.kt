@@ -145,9 +145,12 @@ class NeevaScopeModel(
                 SearchQuery(query = query),
                 userMustBeLoggedIn = false
             ).response?.data
-        } catch (e: Exception) {
+        } catch (throwable: Exception) {
             // TODO(https://github.com/neevaco/neeva-android/issues/826): Show error states
-            Timber.e("Caught exception while performing query. ", e)
+            Timber.e(
+                t = throwable,
+                message = "Caught exception while performing query. "
+            )
         }
 
         return searchResult
@@ -164,9 +167,12 @@ class NeevaScopeModel(
                 CheatsheetInfoQuery(input = input, title = title),
                 userMustBeLoggedIn = false
             ).response?.data
-        } catch (e: Exception) {
+        } catch (throwable: Exception) {
             // TODO(https://github.com/neevaco/neeva-android/issues/826): Show error states
-            Timber.e("Caught exception while performing query. ", e)
+            Timber.e(
+                t = throwable,
+                message = "Caught exception while performing query. "
+            )
         }
 
         return cheatsheetInfo

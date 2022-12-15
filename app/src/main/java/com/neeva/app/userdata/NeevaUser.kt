@@ -138,7 +138,10 @@ class NeevaUserImpl(
             (exception !is ApolloNetworkException && exception !is IllegalStateException)
         ) {
             clearUserInfo()
-            Timber.e("Could not perform UserInfoQuery fetch", exception)
+            Timber.e(
+                t = exception,
+                message = "Could not perform UserInfoQuery fetch"
+            )
             return
         }
 

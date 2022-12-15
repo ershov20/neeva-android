@@ -36,8 +36,11 @@ fun AssetsText(assetFilename: String) {
                     }
                 }
             }
-        } catch (e: Exception) {
-            Timber.tag("AssetsText").e(e, "Failed to open asset")
+        } catch (throwable: Exception) {
+            Timber.tag("AssetsText").e(
+                t = throwable,
+                message = "Failed to open asset"
+            )
         }
 
         value = stringBuilder.toString()

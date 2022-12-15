@@ -684,8 +684,11 @@ class SpaceStore(
         val file = File(directory, id)
         try {
             if (file.exists()) return@withContext file
-        } catch (e: SecurityException) {
-            Timber.e("Failed to check if bitmap exists: ${file.absolutePath}", e)
+        } catch (throwable: SecurityException) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to check if bitmap exists: ${file.absolutePath}"
+            )
             return@withContext null
         }
 

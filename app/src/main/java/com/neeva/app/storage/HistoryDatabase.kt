@@ -157,8 +157,11 @@ abstract class HistoryDatabase : RoomDatabase() {
                         Timber.d("Moved ${file.path} to ${renamedFile.path}")
                     }
                 }
-            } catch (e: Exception) {
-                Timber.e("Failed during import of existing database", e)
+            } catch (throwable: Exception) {
+                Timber.e(
+                    t = throwable,
+                    message = "Failed during import of existing database"
+                )
             } finally {
                 extractedDirectory.deleteRecursively()
             }
@@ -204,8 +207,11 @@ abstract class HistoryDatabase : RoomDatabase() {
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             context.startActivity(sendIntent)
-        } catch (e: Exception) {
-            Timber.e("Failed to export database", e)
+        } catch (throwable: Exception) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to export database"
+            )
             return@withContext
         }
     }

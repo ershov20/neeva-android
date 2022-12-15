@@ -45,9 +45,12 @@ class ActivityStarter(private val appContext: Context, private val popupModel: P
                 .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
             safeStartActivityForIntent(openFileIntent)
-        } catch (e: Exception) {
+        } catch (throwable: Exception) {
             popupModel.showSnackbar(appContext.getString(R.string.error_generic))
-            Timber.e("Failed to open file because of:", e)
+            Timber.e(
+                t = throwable,
+                message = "Failed to open file because of:"
+            )
         }
     }
 }

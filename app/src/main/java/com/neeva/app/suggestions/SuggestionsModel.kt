@@ -168,8 +168,11 @@ class SuggestionsModel(
                 // Report nothing because the Flow itself was cancelled -- probably because the user
                 // continued typing something else.  Keep the old suggestions displayed.
                 return
-            } catch (e: Exception) {
-                Timber.e("Caught exception while performing query.  Removing suggestions", e)
+            } catch (throwable: Exception) {
+                Timber.e(
+                    t = throwable,
+                    message = "Caught exception while performing query.  Removing suggestions"
+                )
             }
         }
 

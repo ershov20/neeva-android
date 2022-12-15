@@ -37,8 +37,11 @@ object ZipUtils {
             }
 
             true
-        } catch (e: Exception) {
-            Timber.e("Failed to unzip $contentUri", e)
+        } catch (throwable: Exception) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to unzip $contentUri"
+            )
             false
         } finally {
             zipStream?.closeQuietly()

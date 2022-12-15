@@ -18,8 +18,11 @@ class CacheCleaner(private val directories: Directories) {
                 .listFiles { _, name -> name.startsWith(IncognitoBrowserWrapper.FOLDER_NAME) }
                 ?.forEach { it.deleteRecursively() }
             Timber.d("Purged incognito data from cache")
-        } catch (e: Exception) {
-            Timber.e("Failed to clean up", e)
+        } catch (throwable: Exception) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to clean up"
+            )
         }
     }
 }

@@ -140,8 +140,11 @@ class FirstRunActivity : AppCompatActivity() {
                                             Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS),
                                             null
                                         )
-                                    } catch (e: ActivityNotFoundException) {
-                                        Timber.e("Could not launch settings", e)
+                                    } catch (throwable: ActivityNotFoundException) {
+                                        Timber.e(
+                                            t = throwable,
+                                            message = "Could not launch settings"
+                                        )
                                         sendUserToBrowser()
                                     }
                                 },

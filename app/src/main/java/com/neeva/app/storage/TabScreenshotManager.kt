@@ -115,8 +115,11 @@ abstract class TabScreenshotManager(
             dir.listFiles()
                 ?.filterNot { liveTabFiles.contains(it) }
                 ?.forEach { it.delete() }
-        } catch (e: Exception) {
-            Timber.e("Failed to cleanup tab screenshot directory", e)
+        } catch (throwable: Exception) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to cleanup tab screenshot directory"
+            )
         }
     }
 
@@ -124,8 +127,11 @@ abstract class TabScreenshotManager(
         try {
             val file = getTabScreenshotFile(tabId)
             if (file.exists()) file.delete()
-        } catch (e: Exception) {
-            Timber.e("Failed to delete thumbnail for $tabId", e)
+        } catch (throwable: Exception) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to delete thumbnail for $tabId"
+            )
         }
     }
 

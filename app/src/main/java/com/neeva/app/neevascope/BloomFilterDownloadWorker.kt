@@ -54,14 +54,23 @@ data class Checksum(
             return try {
                 val jsonAdapter = moshi.adapter(Checksum::class.java)
                 jsonAdapter.fromJson(checksumFile)
-            } catch (e: NullPointerException) {
-                Timber.e("Failed to get JSON adapter for Checksum ", e)
+            } catch (throwable: NullPointerException) {
+                Timber.e(
+                    t = throwable,
+                    message = "Failed to get JSON adapter for Checksum "
+                )
                 null
-            } catch (e: IllegalArgumentException) {
-                Timber.e("Failed to get JSON adapter for Checksum ", e)
+            } catch (throwable: IllegalArgumentException) {
+                Timber.e(
+                    t = throwable,
+                    message = "Failed to get JSON adapter for Checksum "
+                )
                 null
-            } catch (e: IOException) {
-                Timber.e("Failed to load checksum file ", e)
+            } catch (throwable: IOException) {
+                Timber.e(
+                    t = throwable,
+                    message = "Failed to load checksum file "
+                )
                 null
             }
         }
@@ -91,8 +100,11 @@ data class Checksum(
 
                 val digestBytes = digest.digest()
                 return Hex.bytesToStringLowercase(digestBytes)
-            } catch (e: IOException) {
-                Timber.e("Failed to get checksum from file ", e)
+            } catch (throwable: IOException) {
+                Timber.e(
+                    t = throwable,
+                    message = "Failed to get checksum from file "
+                )
                 return ""
             }
         }
@@ -117,11 +129,17 @@ class BloomFilterDownloadWorker(
 
         try {
             reddit.localUri = getFilterBinaryFile("reddit.bin").toUri()
-        } catch (e: IOException) {
-            Timber.e("Failed to get filter file ", e)
+        } catch (throwable: IOException) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to get filter file "
+            )
             return Result.retry()
-        } catch (e: IllegalArgumentException) {
-            Timber.e("Failed to get filter file Uri ", e)
+        } catch (throwable: IllegalArgumentException) {
+            Timber.e(
+                t = throwable,
+                message = "Failed to get filter file Uri "
+            )
             return Result.retry()
         }
 
@@ -191,8 +209,11 @@ class BloomFilterDownloader(
                     if (bloomFilterFile.exists()) bloomFilterFile.delete()
                     tempFile.renameTo(bloomFilterFile)
                 }
-            } catch (e: IOException) {
-                Timber.e("Failed to download filter file ", e)
+            } catch (throwable: IOException) {
+                Timber.e(
+                    t = throwable,
+                    message = "Failed to download filter file "
+                )
                 return
             }
         }

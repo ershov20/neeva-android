@@ -33,7 +33,7 @@ class ScriptInjectionManager(
         // given [tab].
         try {
             tab.registerWebMessageCallback(callbacks, "__neeva_broker", listOf("*"))
-        } catch (e: IllegalArgumentException) {
+        } catch (throwable: IllegalArgumentException) {
             // https://github.com/neevaco/neeva-android/issues/1003
             // It's not clear what we can do when this happens.  Play's crash logging doesn't
             // provide us the error message that WebLayer fires, and as far as I can tell, the
@@ -41,7 +41,10 @@ class ScriptInjectionManager(
             // in TabImpl.java shouldn't fire.
             // Because Cookie Cutter is optional, just drop the exception on the floor to avoid the
             // whole app going down.
-            Timber.e("Failed to initialize Cookie Cutter", e)
+            Timber.e(
+                t = throwable,
+                message = "Failed to initialize Cookie Cutter"
+            )
         }
     }
 
@@ -82,8 +85,11 @@ class ScriptInjectionManager(
             context.assets.open("cookieCutterEngine.js")
                 .bufferedReader()
                 .use { it.readText() }
-        } catch (e: Exception) {
-            Timber.w("Error while fetching cookie cutter engine script, not injecting.", e)
+        } catch (throwable: Exception) {
+            Timber.w(
+                t = throwable,
+                "Error while fetching cookie cutter engine script, not injecting."
+            )
             null
         }
     }
