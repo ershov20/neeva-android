@@ -47,6 +47,7 @@ fun WelcomeFlowContainer(
     // about setting the status bar color back to the original color.
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(ColorPalette.Brand.Blue, darkIcons = false)
+
     Surface(
         modifier = Modifier
             .fillMaxSize()

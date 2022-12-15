@@ -58,6 +58,8 @@ abstract class NeevaUser(val loginToken: LoginToken) {
     abstract fun clearUserInfo()
     abstract fun isSignedOut(): Boolean
     abstract suspend fun fetch(apolloWrapper: ApolloWrapper, context: Context)
+    /** Queues a [job] to run when a user signs in successfully. The [job] will only run once. */
+    abstract fun queueOnSignIn(uniqueJobName: String, job: () -> Unit)
 }
 
 class NeevaUserImpl(
@@ -66,8 +68,14 @@ class NeevaUserImpl(
     loginToken: LoginToken,
     private val billingClientController: BillingClientController
 ) : NeevaUser(loginToken) {
+    private data class OnSignedInJob(
+        val uniqueJobName: String,
+        val job: () -> Unit
+    )
+
     private val moshiJsonAdapter: JsonAdapter<UserInfo> =
         Moshi.Builder().build().adapter(UserInfo::class.java)
+    private val jobsToRun: MutableSet<OnSignedInJob> = mutableSetOf()
 
     init {
         // Load UserInfo from shared preferences at start-up
@@ -104,6 +112,12 @@ class NeevaUserImpl(
         return loginToken.isEmpty()
     }
 
+    override fun queueOnSignIn(uniqueJobName: String, job: () -> Unit) {
+        if (jobsToRun.none { it.uniqueJobName == uniqueJobName }) {
+            jobsToRun.add(OnSignedInJob(uniqueJobName = uniqueJobName, job = job))
+        }
+    }
+
     /**
      * For an error handling flowchart, see: FetchUserInfoFlowChart.md
      */
@@ -134,6 +148,12 @@ class NeevaUserImpl(
             } else {
                 billingClientController.onUserSignedIn()
                 setUserInfo(userQuery.toUserInfo())
+
+                val jobsToRunCopy = jobsToRun.toMutableSet()
+                jobsToRunCopy.forEach { copy ->
+                    copy.job()
+                    jobsToRun.removeAll { job -> copy.uniqueJobName == job.uniqueJobName }
+                }
             }
         }
     }
@@ -169,4 +189,5 @@ class PreviewNeevaUser(
     override fun isSignedOut(): Boolean = false
 
     override suspend fun fetch(apolloWrapper: ApolloWrapper, context: Context) {}
+    override fun queueOnSignIn(uniqueJobName: String, job: () -> Unit) {}
 }

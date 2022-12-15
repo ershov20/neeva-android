@@ -9,6 +9,7 @@ import android.content.Context
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.apollo.UnauthenticatedApolloWrapper
 import com.neeva.app.appnav.ActivityStarter
+import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.billing.billingclient.BillingClientController
 import com.neeva.app.billing.billingclient.BillingClientWrapper
 import com.neeva.app.browsing.ActivityCallbackProvider
@@ -378,6 +379,20 @@ object NeevaAppModule {
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
             settingsDataModel = settingsDataModel
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun providesSubscriptionManager(
+        @ApplicationContext appContext: Context,
+        activityStarter: ActivityStarter,
+        billingClientController: BillingClientController,
+    ): SubscriptionManager {
+        return SubscriptionManager(
+            appContext = appContext,
+            activityStarter = activityStarter,
+            billingClientController = billingClientController
         )
     }
 

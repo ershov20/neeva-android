@@ -6,11 +6,12 @@ package com.neeva.app.billing
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
-import com.neeva.app.appnav.AppNavModel
+import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.billing.BillingSubscriptionPlanTags.SUB_PRODUCT_ID
 import com.neeva.app.billing.billingclient.BillingClientController
 import kotlinx.coroutines.flow.Flow
@@ -23,8 +24,8 @@ import timber.log.Timber
  * Exposes [ProductDetails] and [Purchase] states.
  */
 class SubscriptionManager(
-    private val context: Context,
-    private val appNavModel: AppNavModel,
+    private val appContext: Context,
+    private val activityStarter: ActivityStarter,
     private val billingClientController: BillingClientController,
 ) {
     val productDetailsFlow = billingClientController.productDetailsFlow
@@ -159,8 +160,8 @@ class SubscriptionManager(
         val uri = Uri.parse(
             "https://play.google.com/store/account/subscriptions?" +
                 "sku=$SUB_PRODUCT_ID&" +
-                "package=${context.packageName}"
+                "package=${appContext.packageName}"
         )
-        appNavModel.openUrlViaIntent(uri)
+        activityStarter.safeStartActivityForIntent(Intent(Intent.ACTION_VIEW, uri))
     }
 }

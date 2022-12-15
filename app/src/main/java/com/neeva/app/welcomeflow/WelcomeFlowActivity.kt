@@ -26,20 +26,26 @@ import com.neeva.app.LocalClientLogger
 import com.neeva.app.LocalDispatchers
 import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.LocalNeevaConstants
+import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalSettingsDataModel
+import com.neeva.app.LocalSubscriptionManager
 import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.Transitions
+import com.neeva.app.billing.SubscriptionManager
+import com.neeva.app.billing.billingclient.BillingClientController
 import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.SettingsDataModel
+import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserPane
 import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.userdata.NeevaUser
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import timber.log.Timber
@@ -49,18 +55,22 @@ class WelcomeFlowActivity : AppCompatActivity() {
     companion object {
         internal enum class Destinations {
             WELCOME,
+            PLANS,
             SET_DEFAULT_BROWSER
         }
     }
 
     @Inject lateinit var activityStarter: ActivityStarter
+    @Inject lateinit var billingClientController: BillingClientController
     @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
     // TODO(kobec): When we eventually delete FirstRunModel, rename this to WelcomeFlowModel
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var neevaConstants: NeevaConstants
+    @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var settingsDataModel: SettingsDataModel
+    @Inject lateinit var subscriptionManager: SubscriptionManager
 
     private lateinit var setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
 
@@ -99,7 +109,9 @@ class WelcomeFlowActivity : AppCompatActivity() {
                     LocalDispatchers provides dispatchers,
                     LocalFirstRunModel provides firstRunModel,
                     LocalNeevaConstants provides neevaConstants,
+                    LocalNeevaUser provides neevaUser,
                     LocalSettingsDataModel provides settingsDataModel,
+                    LocalSubscriptionManager provides subscriptionManager,
                 ) {
                     AnimatedNavHost(
                         navController = navHost,
@@ -119,7 +131,16 @@ class WelcomeFlowActivity : AppCompatActivity() {
                         }
                     ) {
                         composable(Destinations.WELCOME.name) {
-                            WelcomeScreen(navigateToSignUp = {})
+                            WelcomeScreen(
+                                navigateToPlans = { },
+                                navigateToSetDefaultBrowser = {
+                                    navHost.navigate(Destinations.SET_DEFAULT_BROWSER.name)
+                                }
+                            )
+                        }
+
+                        composable(Destinations.PLANS.name) {
+                            BillingScreen(onDismiss = {})
                         }
 
                         composable(Destinations.SET_DEFAULT_BROWSER.name) {
@@ -164,6 +185,14 @@ class WelcomeFlowActivity : AppCompatActivity() {
         if (sendUserToBrowserOnResume) {
             sendUserToBrowser()
         }
+        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_BILLING)) {
+            billingClientController.onResume()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        billingClientController.onDestroy()
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {

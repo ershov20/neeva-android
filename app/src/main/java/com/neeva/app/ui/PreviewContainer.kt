@@ -35,11 +35,15 @@ import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalPopupModel
 import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.LocalSharedPreferencesModel
+import com.neeva.app.LocalSubscriptionManager
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.ApolloClientWrapper
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.PreviewAppNavModel
+import com.neeva.app.billing.SubscriptionManager
+import com.neeva.app.billing.billingclient.BillingClientController
+import com.neeva.app.billing.billingclient.BillingClientWrapper
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.OktaSignUpHandler
 import com.neeva.app.logging.ClientLogger
@@ -189,6 +193,26 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         sharedPreferencesModel = previewSharedPreferencesModel
     )
 
+    val previewBillingClientWrapper = BillingClientWrapper(
+        appContext = LocalContext.current,
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers
+    )
+
+    val previewBillingClientController = BillingClientController(
+        authenticatedApolloWrapper = previewApolloWrapper,
+        billingClientWrapper = previewBillingClientWrapper,
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers,
+        settingsDataModel = previewSettingsDataModel
+    )
+
+    val previewSubscriptionManager = SubscriptionManager(
+        appContext = LocalContext.current,
+        activityStarter = previewActivityStarter,
+        billingClientController = previewBillingClientController
+    )
+
     // Provide classes that have no material impact on the Composable previews.  These can still be
     // overridden by previews that need specific state to be displayed.
     CompositionLocalProvider(
@@ -203,8 +227,9 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         LocalNeevaUser provides previewNeevaUser,
         LocalPopupModel provides previewPopupModel,
         LocalNavHostController provides NavHostController(LocalContext.current),
+        LocalSettingsDataModel provides previewSettingsDataModel,
         LocalSharedPreferencesModel provides previewSharedPreferencesModel,
-        LocalSettingsDataModel provides previewSettingsDataModel
+        LocalSubscriptionManager provides previewSubscriptionManager,
     ) {
         content()
     }

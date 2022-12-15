@@ -119,6 +119,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject internal lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Inject lateinit var popupModel: PopupModel
+    @Inject lateinit var subscriptionManager: SubscriptionManager
     @Inject lateinit var spaceStore: SpaceStore
 
     internal val feedbackViewModel: FeedbackViewModel by viewModels()
@@ -198,14 +199,6 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         popupModel = popupModel,
                         activityCallbackProvider = activityCallbackProvider,
                         onTrackingProtectionUpdate = webLayerModel::updateBrowsersCookieCutterConfig
-                    )
-                }
-
-                val subscriptionManager = remember(appNavModel) {
-                    SubscriptionManager(
-                        context = context,
-                        appNavModel = appNavModel!!,
-                        billingClientController = billingClientController
                     )
                 }
 
