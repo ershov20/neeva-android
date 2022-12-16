@@ -29,6 +29,7 @@ import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalBrowserWrapper
 import com.neeva.app.LocalDomainProvider
 import com.neeva.app.LocalNeevaUser
+import com.neeva.app.LocalRateNeevaPromoModel
 import com.neeva.app.LocalRegularProfileZeroQueryViewModel
 import com.neeva.app.NeevaConstants
 import com.neeva.app.R
@@ -39,6 +40,7 @@ import com.neeva.app.ui.layouts.GridLayout
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.collapsingsection.collapsingSection
 import com.neeva.app.ui.widgets.collapsingsection.collapsingThreeStateSection
+import com.neeva.app.zeroquery.RateNeevaPromo.RateNeevaPromo
 
 data class SuggestedSite(
     val site: Site,
@@ -54,16 +56,15 @@ fun RegularProfileZeroQuery(
     val domainProvider = LocalDomainProvider.current
     val appNavModel = LocalAppNavModel.current
     val neevaUser = LocalNeevaUser.current
-
-    val urlBarModel = browserWrapper.urlBarModel
     val zeroQueryModel = LocalRegularProfileZeroQueryViewModel.current
-    val suggestedSearchesWithDefaults by zeroQueryModel.suggestedSearches.collectAsState()
+    val rateNeevaPromoModel = LocalRateNeevaPromoModel.current
+
     val suggestedSitesPlusHome by zeroQueryModel.suggestedSites.collectAsState()
 
     val isSuggestedSitesExpanded by zeroQueryModel.isSuggestedSitesExpanded.collectAsState()
-    val isSuggestedQueriesExpanded by zeroQueryModel.isSuggestedQueriesExpanded.collectAsState()
     val isCommunitySpacesExpanded by zeroQueryModel.isCommunitySpacesExpanded.collectAsState()
     val isSpacesExpanded by zeroQueryModel.isSpacesExpanded.collectAsState()
+    val isRateNeevaVisible by rateNeevaPromoModel.shouldShowRateNeevaPromo.collectAsState(false)
 
     val spaces: List<SpacePlusBitmap> by zeroQueryModel.spaces.collectAsState()
     val communitySpaces: List<SpaceRowPlusBitmap> by zeroQueryModel.communitySpaces.collectAsState()
@@ -116,7 +117,11 @@ fun RegularProfileZeroQuery(
             }
         )
 
-        if (searchSuggestionsUI != null) this.searchSuggestionsUI()
+        if (isRateNeevaVisible) item {
+            RateNeevaPromo()
+        }
+
+        if (searchSuggestionsUI != null) searchSuggestionsUI()
 
         if (neevaUser.isSignedOut() && communitySpaces.isNotEmpty()) {
             item {

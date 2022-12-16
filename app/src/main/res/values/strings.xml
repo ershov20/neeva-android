@@ -48,6 +48,9 @@
     <!-- [General][Dialog] Dismisses the current dialog being presented to the user. -->
     <string name="maybe_later">Maybe later</string>
 
+    <!-- [General][Dialog] Lable for a button to take a positive action -->
+    <string name="lets_do_it">Let\'s do it!</string>
+
     <!-- [General][Button] Triggers showing more items. -->
     <string name="more">More</string>
 
@@ -981,4 +984,19 @@
 
     <!-- [WelcomeFlow] Text in the Plans Screen that denotes the price per month. "mo" stands for month. -->
     <string name="welcomeflow_per_month">%1$s / mo</string>
+    
+    <!--  [RateNeevaPromo] Text for the prompt to gauge user experience before prompting user to review the app.  -->
+    <string name="neeva_experience">How\'s your Neeva experience?</string>
+
+    <!--  [RateNeevaPromo] Text asking if the user wants to provide feedback to Neeva.  -->
+    <string name="send_feedback">We hear you. Send feedback to help us make Neeva better for you!</string>
+
+    <!--  [RateNeevaPromo] Text asking the user to rate Neeva on the Play Store.  -->
+    <string name="rate_on_play_store">Spread the cheer on Play Store? Your review will help Neeva grow.</string>
+
+    <!--  [RateNeevaPromo] Button text indicating negative sentiment towards Neeva app  -->
+    <string name="needs_work">🤔 Needs Work</string>
+
+    <!--  [RateNeevaPromo] Button text indicating positive sentiment towards Neeva app  -->
+    <string name="loving_it">😍 Loving It</string>
 </resources>

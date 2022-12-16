@@ -93,6 +93,16 @@ annotation class PortraitPreviewsDark
 @Preview(widthDp = 731, heightDp = 390, locale = "he")
 annotation class LandscapePreviews
 
+/*
+ * Allows the height of the preview to match the height of the content,
+ */
+@Preview(widthDp = 731, locale = "en")
+@Preview(widthDp = 731, locale = "en", fontScale = 2.0f)
+@Preview(widthDp = 731, locale = "fr")
+@Preview(widthDp = 731, locale = "de")
+@Preview(widthDp = 731, locale = "he")
+annotation class UnboundedLandscapePreviews
+
 @Preview(widthDp = 731, heightDp = 390, locale = "en", uiMode = UI_MODE_NIGHT_YES)
 @Preview(widthDp = 731, heightDp = 390, locale = "en", fontScale = 2.0f, uiMode = UI_MODE_NIGHT_YES)
 @Preview(widthDp = 731, heightDp = 390, locale = "fr", uiMode = UI_MODE_NIGHT_YES)

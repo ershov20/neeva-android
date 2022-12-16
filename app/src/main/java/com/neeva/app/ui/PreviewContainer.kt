@@ -33,6 +33,8 @@ import com.neeva.app.LocalNavHostController
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.LocalNeevaUser
 import com.neeva.app.LocalPopupModel
+import com.neeva.app.LocalRateNeevaPromoModel
+import com.neeva.app.LocalScreenState
 import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.LocalSubscriptionManager
@@ -53,9 +55,11 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.util.ScreenState
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.PreviewNeevaUser
 import com.neeva.app.userdata.PreviewSessionToken
+import com.neeva.app.zeroquery.RateNeevaPromo.RateNeevaPromoModel
 
 /**
  * Show a bunch of previews for the same Composable in a Column to reduce the number of previews has
@@ -192,6 +196,7 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         settingsDataModel = previewSettingsDataModel,
         sharedPreferencesModel = previewSharedPreferencesModel
     )
+    val previewScreenState = ScreenState()
 
     val previewBillingClientWrapper = BillingClientWrapper(
         appContext = LocalContext.current,
@@ -207,6 +212,10 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         settingsDataModel = previewSettingsDataModel
     )
 
+    val previewRateNeevaPromoModel = RateNeevaPromoModel(
+        sharedPreferencesModel = previewSharedPreferencesModel,
+    )
+
     val previewSubscriptionManager = SubscriptionManager(
         appContext = LocalContext.current,
         activityStarter = previewActivityStarter,
@@ -218,17 +227,21 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
     CompositionLocalProvider(
         LocalActivityStarter provides previewActivityStarter,
         LocalAppNavModel provides PreviewAppNavModel(LocalContext.current),
-        LocalClientLogger provides previewClientLogger,
         LocalChromiumVersion provides "XXX.XXX.XXX.XXX",
+        LocalClientLogger provides previewClientLogger,
         LocalDispatchers provides previewDispatchers,
         LocalDomainProvider provides previewDomainProvider,
         LocalFirstRunModel provides previewFirstRunModel,
+        LocalNavHostController provides NavHostController(LocalContext.current),
         LocalNeevaConstants provides previewNeevaConstants,
         LocalNeevaUser provides previewNeevaUser,
         LocalPopupModel provides previewPopupModel,
-        LocalNavHostController provides NavHostController(LocalContext.current),
+        LocalRateNeevaPromoModel provides previewRateNeevaPromoModel,
+        LocalScreenState provides previewScreenState,
+        LocalScreenState provides previewScreenState,
         LocalSettingsDataModel provides previewSettingsDataModel,
         LocalSharedPreferencesModel provides previewSharedPreferencesModel,
+        LocalSubscriptionManager provides previewSubscriptionManager,
         LocalSubscriptionManager provides previewSubscriptionManager,
     ) {
         content()

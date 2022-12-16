@@ -16,14 +16,24 @@ import java.io.File
 import timber.log.Timber
 
 class ActivityStarter(private val appContext: Context, private val popupModel: PopupModel) {
-    fun safeStartActivityForIntent(intent: Intent, options: Bundle? = null) {
+
+    fun safeStartActivityForIntent(
+        intent: Intent,
+        fallback: Intent? = null,
+        options: Bundle? = null
+    ) {
+        // Because we're using a non-Activity context, the Intent needs to start a new Task.
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
         try {
-            // Because we're using a non-Activity context, the Intent needs to start a new Task.
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             appContext.startActivity(intent, options)
         } catch (e: ActivityNotFoundException) {
-            popupModel.showSnackbar(appContext.getString(R.string.error_generic))
-            Timber.e("Failed to start Activity for $intent")
+            if (fallback != null) {
+                safeStartActivityForIntent(fallback, options = options)
+            } else {
+                popupModel.showSnackbar(appContext.getString(R.string.error_generic))
+                Timber.e("Failed to start Activity for $intent")
+            }
         }
     }
 

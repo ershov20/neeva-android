@@ -54,7 +54,7 @@ interface AppNavModel {
     fun openAndroidDefaultBrowserSettings()
     fun showAdditionalLicenses()
 
-    fun openUrlViaIntent(uri: Uri)
+    fun openUrlViaIntent(uri: Uri, fallback: Uri? = null)
 
     // region Dialogs
     fun showAddToSpace()
@@ -98,7 +98,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showWelcomeFlow() {}
     override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}
-    override fun openUrlViaIntent(uri: Uri) {}
+    override fun openUrlViaIntent(uri: Uri, fallback: Uri?) {}
     override fun showAddToSpace() {}
     override fun shareCurrentPage() {}
     override fun shareSpace(space: Space) {}

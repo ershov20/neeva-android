@@ -174,8 +174,8 @@ class AppNavModelImpl(
         )
     }
 
-    override fun openUrlViaIntent(uri: Uri) {
-        activityStarter.safeStartActivityForIntent(Intent(Intent.ACTION_VIEW, uri))
+    override fun openUrlViaIntent(uri: Uri, fallback: Uri?) {
+        activityStarter.safeStartActivityForIntent(uri.toIntent(), fallback?.toIntent())
         showBrowser()
     }
 
@@ -353,3 +353,5 @@ class AppNavModelImpl(
         val TAG = AppNavModelImpl::class.simpleName
     }
 }
+
+private fun Uri.toIntent() = Intent(Intent.ACTION_VIEW, this)

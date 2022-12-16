@@ -225,7 +225,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
         // Nullify the transition animation to hide the fact that we're switching Activities.
         val options = ActivityOptionsCompat.makeCustomAnimation(this, 0, 0).toBundle()
-        activityStarter.safeStartActivityForIntent(newIntent, options)
+        activityStarter.safeStartActivityForIntent(newIntent, options = options)
         finishAndRemoveTask()
     }
 }

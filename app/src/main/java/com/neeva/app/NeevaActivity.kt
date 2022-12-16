@@ -70,8 +70,10 @@ import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.ui.removeViewFromParent
 import com.neeva.app.ui.theme.NeevaTheme
+import com.neeva.app.ui.util.ScreenState
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.widget.NeevaWidgetProvider
+import com.neeva.app.zeroquery.RateNeevaPromo.RateNeevaPromoModel
 import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
@@ -116,11 +118,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @Inject lateinit var historyManager: HistoryManager
     @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
+    @Inject lateinit var rateNeevaPromoModel: RateNeevaPromoModel
     @Inject internal lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var sharedPreferencesModel: SharedPreferencesModel
     @Inject lateinit var popupModel: PopupModel
     @Inject lateinit var subscriptionManager: SubscriptionManager
     @Inject lateinit var spaceStore: SpaceStore
+    @Inject lateinit var screenState: ScreenState
 
     internal val feedbackViewModel: FeedbackViewModel by viewModels()
     internal val webLayerModel: WebLayerModel by viewModels()
@@ -149,6 +153,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (intent.action == Intent.ACTION_MAIN) {
+            rateNeevaPromoModel.incrementLaunches()
+        }
+
         activityCallbackProvider.activityCallbacks = WeakReference(this)
 
         activityViewModel.determineScreenConfiguration(this)
@@ -223,7 +232,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         LocalSharedPreferencesModel provides sharedPreferencesModel,
                         LocalSubscriptionManager provides subscriptionManager,
                         LocalSpaceStore provides spaceStore,
-                        LocalRegularProfileZeroQueryViewModel provides zeroQueryViewModel
+                        LocalRegularProfileZeroQueryViewModel provides zeroQueryViewModel,
+                        LocalScreenState provides screenState,
+                        LocalRateNeevaPromoModel provides rateNeevaPromoModel,
                     ) {
                         ActivityUI(
                             toolbarConfiguration = activityViewModel.toolbarConfiguration,

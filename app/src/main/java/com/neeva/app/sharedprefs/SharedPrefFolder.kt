@@ -100,6 +100,12 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "SHOW_NEEVASCOPE_TOOLTIP_COUNT",
             defaultValue = 5
         )
+
+        val PostFirstRunLaunchCount = SharedPrefKey(
+            App,
+            preferenceKey = "LAUNCH_COUNT",
+            defaultValue = 0
+        )
     }
 
     object FirstRun : SharedPrefFolder("FIRST_RUN") {

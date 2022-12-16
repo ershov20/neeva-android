@@ -35,8 +35,10 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.DialogState
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.ui.util.ScreenState
 import com.neeva.app.ui.widgets.bottomsheetdialog.BottomSheetDialogHost
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.zeroquery.RateNeevaPromo.RateNeevaPromoModel
 import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import kotlinx.coroutines.flow.StateFlow
 
@@ -57,9 +59,11 @@ val LocalNavHostController = compositionLocalOf<NavHostController> { error("Not 
 val LocalNeevaConstants = compositionLocalOf<NeevaConstants> { error("Not set") }
 val LocalNeevaUser = compositionLocalOf<NeevaUser> { error("Not set") }
 val LocalPopupModel = compositionLocalOf<PopupModel> { error("Not set") }
+val LocalRateNeevaPromoModel = compositionLocalOf<RateNeevaPromoModel> { error("not set") }
 val LocalRegularProfileZeroQueryViewModel = compositionLocalOf<RegularProfileZeroQueryViewModel> {
     error("Not set")
 }
+val LocalScreenState = compositionLocalOf<ScreenState> { error("Not set") }
 val LocalSettingsController = compositionLocalOf<SettingsController> { error("Not set") }
 val LocalSettingsDataModel = compositionLocalOf<SettingsDataModel> { error("Not set") }
 val LocalSharedPreferencesModel = compositionLocalOf<SharedPreferencesModel> { error("Not set") }

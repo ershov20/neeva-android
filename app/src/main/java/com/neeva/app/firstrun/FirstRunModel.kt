@@ -93,14 +93,12 @@ class FirstRunModel internal constructor(
             sharedPreferencesModel: SharedPreferencesModel,
             loginToken: LoginToken
         ): Boolean {
-            val isFirstRunDone = SharedPrefFolder.FirstRun.FirstRunDone.get(sharedPreferencesModel)
-
             return when {
                 // User has already signed in.
                 loginToken.isNotEmpty() -> false
 
                 // SharedPreference has been set, so they must have gone through First Run already.
-                isFirstRunDone -> false
+                SharedPrefFolder.FirstRun.FirstRunDone.get(sharedPreferencesModel) -> false
 
                 // Show First Run.
                 else -> true

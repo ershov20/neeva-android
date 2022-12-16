@@ -20,6 +20,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.isNull
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
@@ -49,11 +50,12 @@ class ActivityStarterTest : BaseTest() {
 
         val activityStarterIntentUsed = argumentCaptor<Intent>()
         val optionUsed = argumentCaptor<Bundle>()
+
         verify(activityStarter).safeStartActivityForIntent(
             activityStarterIntentUsed.capture(),
+            isNull(),
             optionUsed.capture()
         )
-
         activityStarterIntentUsed.lastValue.apply {
             expectThat(action).isEqualTo(Intent.ACTION_VIEW)
             expectThat(data).isEqualTo(downloadUri)

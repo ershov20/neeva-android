@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -41,9 +42,10 @@ fun StackableButtons(
     secondaryText: String,
     onTapSecondary: () -> Unit,
     padding: Dp = Dimensions.PADDING_SMALL,
-    modifier: Modifier
+    modifier: Modifier = Modifier,
+    forceStacked: Boolean = false
 ) {
-    var useRowLayout by remember { mutableStateOf(true) }
+    var useRowLayout by remember(forceStacked) { mutableStateOf(!forceStacked) }
 
     val maxButtonLines = if (useRowLayout) 1 else Int.MAX_VALUE
 
@@ -68,7 +70,7 @@ fun StackableButtons(
             onClick = onTapSecondary,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
             colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.background,
+                containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.primary
             )
         ) {
