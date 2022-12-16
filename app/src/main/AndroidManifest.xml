@@ -99,8 +99,14 @@
             android:theme="@style/Theme.NeevaSearchBrowser.NoActionBar"
             android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden"
-            android:configChanges="orientation|screenSize|screenLayout">
-        </activity>
+            android:configChanges="orientation|screenSize|screenLayout" />
+
+        <activity
+            android:name=".singletabbrowser.SingleTabActivity"
+            android:exported="false"
+            android:theme="@style/Theme.NeevaSearchBrowser.NoActionBar"
+            android:windowSoftInputMode="stateHidden"
+            android:configChanges="orientation|screenSize|screenLayout" />
 
         <!-- Lock the user in portrait until we have landscape UX mocks. -->
         <activity

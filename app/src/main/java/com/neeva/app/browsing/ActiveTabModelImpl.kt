@@ -214,6 +214,13 @@ class ActiveTabModelImpl(
             }
         }
 
+        override fun onLoadStateChanged(isLoading: Boolean, shouldShowLoadingUi: Boolean) {
+            if (!isLoading || !shouldShowLoadingUi) {
+                _progressFlow.value = 100
+                tabScreenshotManager.captureAndSaveScreenshot(activeTab)
+            }
+        }
+
         override fun onNavigationStarted(navigation: Navigation) {
             updateNavigationInfo()
             activeTab?.let { tabList.updateTimestamp(it, System.currentTimeMillis()) }

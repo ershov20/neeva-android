@@ -303,7 +303,7 @@ private fun SubscriptionInfo(
 private fun SubscribeText() {
     val context = LocalContext.current
     val firstRunModel = LocalFirstRunModel.current
-    val openURL: (Uri) -> Unit = { uri -> firstRunModel.openInCustomTabs(context, uri) }
+    val openURL: (Uri) -> Unit = { uri -> firstRunModel.openSingleTabActivity(context, uri) }
     val climatePledgeURL = LocalNeevaConstants.current.climatePledgeURL
 
     AnnotatedSpannable(

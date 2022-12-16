@@ -116,7 +116,7 @@ class FirstRunActivity : AppCompatActivity() {
                                     navHost.navigate(Destinations.SET_DEFAULT_BROWSER.name)
                                 },
                                 onOpenUrl = {
-                                    firstRunModel.openInCustomTabs(this@FirstRunActivity, it)
+                                    firstRunModel.openSingleTabActivity(this@FirstRunActivity, it)
                                 },
                                 loggingConsentState =
                                 settingsDataModel

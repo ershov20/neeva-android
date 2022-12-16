@@ -10,8 +10,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.browser.customtabs.CustomTabsClient
-import androidx.browser.customtabs.CustomTabsIntent
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -27,6 +25,7 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.singletabbrowser.SingleTabActivity
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
@@ -160,7 +159,7 @@ class FirstRunModel internal constructor(
      * this URI, the backend assumes that the client has performed some part of the authentication
      * process before contacting it and redirects the user accordingly.
      */
-    private fun getCustomTabsLaunchUri(
+    private fun getAndroidCallbackUri(
         signup: Boolean,
         provider: NeevaUser.SSOProvider,
         loginHint: String = "",
@@ -245,15 +244,10 @@ class FirstRunModel internal constructor(
         }
     }
 
-    fun openInCustomTabs(context: Context, uri: Uri) {
-        val intent = CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .build()
-            .intent
-        intent.setPackage(
-            CustomTabsClient.getPackageName(context, listOf("com.android.chrome"))
-        )
-        intent.data = uri
+    fun openSingleTabActivity(context: Context, uri: Uri) {
+        val intent = Intent()
+            .setClass(context, SingleTabActivity::class.java)
+            .setData(uri)
         if (context !is Activity) {
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
@@ -324,19 +318,14 @@ class FirstRunModel internal constructor(
             googleSignInClient = GoogleSignIn.getClient(context, signInOptions)
             activityResultLauncher.launch(googleSignInClient.signInIntent)
         } else if (useCustomTabs) {
-            val intent = CustomTabsIntent.Builder()
-                .setShowTitle(true)
-                .build()
-                .intent
-                .setPackage(CustomTabsClient.getPackageName(context, listOf("com.android.chrome")))
-                .setData(
-                    getCustomTabsLaunchUri(
-                        signup = signup,
-                        provider = provider,
-                        loginHint = emailProvided ?: ""
-                    )
+            openSingleTabActivity(
+                context,
+                getAndroidCallbackUri(
+                    signup = signup,
+                    provider = provider,
+                    loginHint = emailProvided ?: ""
                 )
-            context.startActivity(intent)
+            )
         } else {
             val intent = Intent(Intent.ACTION_VIEW)
                 .setData(
@@ -365,9 +354,9 @@ class FirstRunModel internal constructor(
         extractLoginUri(result, launchLoginFlowParams)
             ?.let { onSuccess(it) }
             ?: run {
-                openInCustomTabs(
+                openSingleTabActivity(
                     context = context,
-                    uri = getCustomTabsLaunchUri(
+                    uri = getAndroidCallbackUri(
                         signup = launchLoginFlowParams.signup,
                         provider = launchLoginFlowParams.provider,
                         loginHint = launchLoginFlowParams.emailProvided ?: ""
@@ -385,7 +374,7 @@ class FirstRunModel internal constructor(
             val idToken = account.result.idToken ?: return null
             val authCode = account.result.serverAuthCode ?: return null
 
-            return getCustomTabsLaunchUri(
+            return getAndroidCallbackUri(
                 signup = launchLoginFlowParams.signup,
                 provider = launchLoginFlowParams.provider,
                 identityToken = idToken,

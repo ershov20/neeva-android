@@ -114,7 +114,7 @@ fun WelcomeScreenContent(
             modifier = Modifier
                 .defaultMinSize(minHeight = dimensionResource(R.dimen.min_touch_target_size))
                 .fillMaxWidth(),
-            onOpenUrl = { uri -> firstRunModel.openInCustomTabs(context, uri) }
+            onOpenUrl = { uri -> firstRunModel.openSingleTabActivity(context, uri) }
         )
 
         Spacer(Modifier.height(Dimensions.PADDING_HUGE))

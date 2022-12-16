@@ -93,7 +93,7 @@ fun NavGraphBuilder.signInFlowNavGraph() {
 
             SignUpLandingContainer(
                 onOpenUrl = {
-                    firstRunModel.openInCustomTabs(context, it)
+                    firstRunModel.openSingleTabActivity(context, it)
                 },
                 onClose = firstRunModel.getOnCloseOnboarding(signInFlowNavModel::exitSignInFlow),
                 navigateToSignIn = signInFlowNavModel::navigateToSignIn,
