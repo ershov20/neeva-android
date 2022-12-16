@@ -1136,6 +1136,37 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "getLocationSuggestions",
+                        "description": "Returns a list of addresses based on user input",
+                        "args": [
+                            {
+                                "name": "input",
+                                "description": null,
+                                "type": {
+                                    "kind": "INPUT_OBJECT",
+                                    "name": "LocationSuggestionsInput",
+                                    "ofType": null
+                                },
+                                "defaultValue": null
+                            }
+                        ],
+                        "type": {
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "OBJECT",
+                                    "name": "LocationSuggestion",
+                                    "ofType": null
+                                }
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "secondaryResults",
                         "description": null,
                         "args": [
@@ -1856,6 +1887,30 @@
                         "type": {
                             "kind": "SCALAR",
                             "name": "String",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "isInEurope",
+                        "description": "Returns whether the user is in europe",
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Boolean",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "isOutsideUS",
+                        "description": "Returns if the user is outside US",
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Boolean",
                             "ofType": null
                         },
                         "isDeprecated": false,
@@ -11165,6 +11220,86 @@
                 "possibleTypes": null
             },
             {
+                "kind": "OBJECT",
+                "name": "LocationSuggestion",
+                "description": null,
+                "fields": [
+                    {
+                        "name": "placeID",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Int",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "lat",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Float",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "long",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Float",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "displayName",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "inputFields": null,
+                "interfaces": [],
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
+                "kind": "INPUT_OBJECT",
+                "name": "LocationSuggestionsInput",
+                "description": null,
+                "fields": null,
+                "inputFields": [
+                    {
+                        "name": "query",
+                        "description": "Keywords to search for addresses",
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    }
+                ],
+                "interfaces": null,
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
                 "kind": "INPUT_OBJECT",
                 "name": "SecondaryResultsInput",
                 "description": null,
@@ -11708,6 +11843,12 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "Cad",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "Unknown",
                         "description": null,
                         "isDeprecated": false,
@@ -11909,6 +12050,30 @@
                     {
                         "name": "trialDays",
                         "description": "The number of trial days the user is eligible for, if any",
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Int",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "discountedPrice",
+                        "description": "The discounted price (if there is one), multiplied by 100 e.g. 4.99 -> 499",
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Int",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "discountedPriceDuration",
+                        "description": "The duration of the discounted price (if there is one), in months",
                         "args": [],
                         "type": {
                             "kind": "SCALAR",
@@ -12272,6 +12437,18 @@
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
+                    },
+                    {
+                        "name": "googlePlay",
+                        "description": "Google Play-specific subscription information. If the source is not\n'GooglePlay', this will be null.",
+                        "args": [],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "SubscriptionInfoGooglePlay",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
                     }
                 ],
                 "inputFields": null,
@@ -12287,6 +12464,29 @@
                     {
                         "name": "uuid",
                         "description": "If the user has an Apple subscription, this is the user's UUID.",
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "inputFields": null,
+                "interfaces": [],
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
+                "kind": "OBJECT",
+                "name": "SubscriptionInfoGooglePlay",
+                "description": null,
+                "fields": [
+                    {
+                        "name": "obfuscatedUserID",
+                        "description": "If the user has a Google Play subscription, this is the user's UUID.",
                         "args": [],
                         "type": {
                             "kind": "SCALAR",
@@ -12324,6 +12524,12 @@
                     },
                     {
                         "name": "Apple",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "GooglePlay",
                         "description": null,
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -15967,6 +16173,18 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "penaltyShootoutScore",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Int",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "teamID",
                         "description": null,
                         "args": [],
@@ -17907,6 +18125,24 @@
                         "description": null,
                         "isDeprecated": false,
                         "deprecationReason": null
+                    },
+                    {
+                        "name": "SafariPetition",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "NeevaAILandingPage",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "IOSNeevaAIApp",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
                     }
                 ],
                 "possibleTypes": null
@@ -18000,6 +18236,16 @@
                     {
                         "name": "errorCode",
                         "description": null,
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "query",
+                        "description": "Search query; will only be present if feedback was submitted from a search context AND the user decided to share their query with us",
                         "type": {
                             "kind": "SCALAR",
                             "name": "String",
@@ -28210,13 +28456,9 @@
                         "description": "If the user has given a reaction on this doc before.",
                         "args": [],
                         "type": {
-                            "kind": "NON_NULL",
-                            "name": null,
-                            "ofType": {
-                                "kind": "ENUM",
-                                "name": "ReactionState",
-                                "ofType": null
-                            }
+                            "kind": "ENUM",
+                            "name": "ReactionState",
+                            "ofType": null
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -28946,7 +29188,7 @@
                     },
                     {
                         "name": "reactionState",
-                        "description": "If the user has given a reaction on this doc before.",
+                        "description": "# DEPRECATED [15-Nov-2022]\nIf the user has given a reaction on this doc before.",
                         "args": [],
                         "type": {
                             "kind": "ENUM",
@@ -28955,18 +29197,6 @@
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
-                    },
-                    {
-                        "name": "reactionDocID",
-                        "description": "DocID to log/use in reaction and space association. Relevant only for subresults\n\nDEPRECATED\nDate: 2020-04-04\nReplaced by docID field.",
-                        "args": [],
-                        "type": {
-                            "kind": "SCALAR",
-                            "name": "String",
-                            "ofType": null
-                        },
-                        "isDeprecated": true,
-                        "deprecationReason": "No longer supported"
                     },
                     {
                         "name": "debug",
@@ -30030,6 +30260,11 @@
                     },
                     {
                         "kind": "OBJECT",
+                        "name": "TravelEntity",
+                        "ofType": null
+                    },
+                    {
+                        "kind": "OBJECT",
                         "name": "TravelFactGroup",
                         "ofType": null
                     },
@@ -30565,6 +30800,11 @@
                     {
                         "kind": "OBJECT",
                         "name": "TravelShelf",
+                        "ofType": null
+                    },
+                    {
+                        "kind": "OBJECT",
+                        "name": "TravelEntity",
                         "ofType": null
                     },
                     {
@@ -34320,6 +34560,18 @@
                                     "ofType": null
                                 }
                             }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "bestImageURL",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -39546,6 +39798,18 @@
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
+                    },
+                    {
+                        "name": "bestImageURL",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
                     }
                 ],
                 "inputFields": null,
@@ -42647,7 +42911,7 @@
             {
                 "kind": "OBJECT",
                 "name": "Redirect",
-                "description": null,
+                "description": "Redirect is deprecated as its no longer used\n12/1/2022\nDEPRECATED\n* webui: 0.2.626",
                 "fields": [
                     {
                         "name": "redirect",
@@ -50500,6 +50764,18 @@
                         "deprecationReason": null
                     },
                     {
+                        "name": "bestImage",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "ImageObject",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
                         "name": "autoOpen",
                         "description": "If true, the backend thinks it might be better to directly open the page rather than browse through other results.",
                         "args": [],
@@ -50527,6 +50803,18 @@
                                     "ofType": null
                                 }
                             }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "summaryDisplayType",
+                        "description": "How front-end should render the summary (e.g., paragraph, bulleted, sectioned)",
+                        "args": [],
+                        "type": {
+                            "kind": "ENUM",
+                            "name": "SummaryDisplayType",
+                            "ofType": null
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -57407,6 +57695,49 @@
             },
             {
                 "kind": "OBJECT",
+                "name": "StructuredData",
+                "description": null,
+                "fields": [
+                    {
+                        "name": "field",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "stringValue",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "NON_NULL",
+                            "name": null,
+                            "ofType": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
+                            }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "inputFields": null,
+                "interfaces": [],
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
+                "kind": "OBJECT",
                 "name": "Summary",
                 "description": null,
                 "fields": [
@@ -57430,6 +57761,26 @@
                             "kind": "SCALAR",
                             "name": "String",
                             "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "structuredSummary",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "LIST",
+                            "name": null,
+                            "ofType": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "OBJECT",
+                                    "name": "StructuredData",
+                                    "ofType": null
+                                }
+                            }
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -57505,13 +57856,19 @@
                 "interfaces": null,
                 "enumValues": [
                     {
-                        "name": "Unknown",
+                        "name": "Featured",
                         "description": null,
                         "isDeprecated": false,
                         "deprecationReason": null
                     },
                     {
-                        "name": "Featured",
+                        "name": "Forum",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "News",
                         "description": null,
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -57524,6 +57881,53 @@
                     },
                     {
                         "name": "Sectioned",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "Structured",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "possibleTypes": null
+            },
+            {
+                "kind": "ENUM",
+                "name": "SummaryDisplayType",
+                "description": null,
+                "fields": null,
+                "inputFields": null,
+                "interfaces": null,
+                "enumValues": [
+                    {
+                        "name": "Bulleted",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "Forum",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "Paragraph",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "Sectioned",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "Structured",
                         "description": null,
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -59044,6 +59448,47 @@
                 "possibleTypes": null
             },
             {
+                "kind": "OBJECT",
+                "name": "TravelEntity",
+                "description": null,
+                "fields": [
+                    {
+                        "name": "travelEntity",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "TravelEntityData",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "metadata",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "OBJECT",
+                            "name": "ResultMetadata",
+                            "ofType": null
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "inputFields": null,
+                "interfaces": [
+                    {
+                        "kind": "INTERFACE",
+                        "name": "ResultAddressableType",
+                        "ofType": null
+                    }
+                ],
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
                 "kind": "UNION",
                 "name": "TravelProperty",
                 "description": null,
@@ -59124,6 +59569,29 @@
                                     "ofType": null
                                 }
                             }
+                        },
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "inputFields": null,
+                "interfaces": [],
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
+                "kind": "OBJECT",
+                "name": "TravelEntityData",
+                "description": null,
+                "fields": [
+                    {
+                        "name": "property",
+                        "description": null,
+                        "args": [],
+                        "type": {
+                            "kind": "UNION",
+                            "name": "TravelProperty",
+                            "ofType": null
                         },
                         "isDeprecated": false,
                         "deprecationReason": null
@@ -60473,6 +60941,16 @@
                         "defaultValue": null
                     },
                     {
+                        "name": "mobile",
+                        "description": null,
+                        "type": {
+                            "kind": "INPUT_OBJECT",
+                            "name": "ClientLogMobile",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
                         "name": "interactionEvent",
                         "description": "DEPRECATED\nMoving to new interaction input, InteractionEventInput\nVersion:\n- webui: 0.2.18\n- nativeui: 0.2.20\nDate: 12/27/2019.",
                         "type": {
@@ -61371,6 +61849,502 @@
                 ],
                 "interfaces": null,
                 "enumValues": null,
+                "possibleTypes": null
+            },
+            {
+                "kind": "INPUT_OBJECT",
+                "name": "ClientLogMobile",
+                "description": null,
+                "fields": null,
+                "inputFields": [
+                    {
+                        "name": "category",
+                        "description": "Event category",
+                        "type": {
+                            "kind": "ENUM",
+                            "name": "ClientLogMobileCategory",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "event",
+                        "description": "Event name. This should never include any sensitive data.",
+                        "type": {
+                            "kind": "ENUM",
+                            "name": "ClientLogMobileEvent",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "feature",
+                        "description": "Feature area which fired event, i.e. NeevaScope, FastTap.",
+                        "type": {
+                            "kind": "ENUM",
+                            "name": "ClientLogMobileFeature",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "hasUserSignedIn",
+                        "description": "True if any Neeva account has been signed in on this device",
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Boolean",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "journeyID",
+                        "description": "Journey ID that can be used to chain together multiple actions in a journey, i.e. open the NeevaScope and then click on a suggested item.",
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "openTabCount",
+                        "description": "Number of tabs currently open",
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Int",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "position",
+                        "description": "For events that has position attribute, such as click 3rd items on the suggestion list",
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "Int",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    },
+                    {
+                        "name": "source",
+                        "description": "Event source, such as 'Welcome Flow' or 'Settings'",
+                        "type": {
+                            "kind": "SCALAR",
+                            "name": "String",
+                            "ofType": null
+                        },
+                        "defaultValue": null
+                    }
+                ],
+                "interfaces": null,
+                "enumValues": null,
+                "possibleTypes": null
+            },
+            {
+                "kind": "ENUM",
+                "name": "ClientLogMobileEvent",
+                "description": null,
+                "fields": null,
+                "inputFields": null,
+                "interfaces": null,
+                "enumValues": [
+                    {
+                        "name": "Unknown",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "AppCrashWithCrashReporter",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "AppCrashWithPageLoad",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "AppEnterForeground",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "AuthorizeSystemNotification",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "AutocompleteSuggestion",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "BangSuggestion",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "BrowsePlanClick",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "ChoosePlanClick",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "CloseDefaultBrowserPromo",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserInterstitialImp",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserInterstitialRestoreImp",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserOnboardingInterstitialContinue",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserOnboardingInterstitialImp",
+                        "description": "Android Only",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserOnboardingInterstitialOpen",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserOnboardingInterstitialOpenAgain",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserOnboardingInterstitialRemind",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserOnboardingInterstitialSkip",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DefaultBrowserOnboardingInterstitialVideo",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "DenySystemNotification",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "FirstNavigation",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "FirstRunImpression",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "FirstRunOtherSignUpOptions",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "FirstRunPageLoad",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "FirstRunSignin",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "FirstRunSignupWithApple",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "GetStartedInWelcome",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "HistorySuggestion",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "LowMemoryWarning",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "MemorizedSuggestion",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "NoSuggestionQuery",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "NoSuggestionURL",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "OpenDefaultBrowserURL",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "OpenLocalNotification",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "OpenNotification",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PageLoad",
+                        "description": "Android Only",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PersonalSuggestion",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PremiumPurchaseCancel",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PremiumPurchasePending",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PremiumPurchaseUnverified",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PremiumPurchaseVerified",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PreviewModePromoSignup",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PreviousScreenClick",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PromoCardAppear",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "PromoDefaultBrowser",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "QuerySuggestion",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "RegisterNotificationToken",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "RequestInstallReferrer",
+                        "description": "Android Only",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "ResolvedAttributionToken",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "ScreenImpression",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "SetDefaultBrowser",
+                        "description": "Android Only",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "SignInClick",
+                        "description": "Android Only",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "SkipDefaultBrowser",
+                        "description": "Android Only",
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "SpacesRecommendedDetailUIVisited",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "StartExperiment",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "possibleTypes": null
+            },
+            {
+                "kind": "ENUM",
+                "name": "ClientLogMobileCategory",
+                "description": null,
+                "fields": null,
+                "inputFields": null,
+                "interfaces": null,
+                "enumValues": [
+                    {
+                        "name": "Unknown",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "Click",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "Impression",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
+                "possibleTypes": null
+            },
+            {
+                "kind": "ENUM",
+                "name": "ClientLogMobileFeature",
+                "description": null,
+                "fields": null,
+                "inputFields": null,
+                "interfaces": null,
+                "enumValues": [
+                    {
+                        "name": "Unknown",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "FastTap",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "NeevaScope",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    },
+                    {
+                        "name": "NeevaShield",
+                        "description": null,
+                        "isDeprecated": false,
+                        "deprecationReason": null
+                    }
+                ],
                 "possibleTypes": null
             },
             {
