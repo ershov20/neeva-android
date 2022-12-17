@@ -50,6 +50,7 @@ fun WelcomeFlowContainer(
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(ColorPalette.Brand.Blue, darkIcons = false)
 
+    // TODO(kobec): try to use column with more indicator
     Surface(
         modifier = Modifier
             .fillMaxSize()

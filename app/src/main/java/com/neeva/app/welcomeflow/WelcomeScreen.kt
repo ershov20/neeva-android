@@ -14,10 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -88,22 +85,12 @@ fun WelcomeScreenContent(
             description = stringResource(id = R.string.welcomeflow_unbiased_benefit_description)
         )
 
-        Spacer(Modifier.height(64.dp))
+        Spacer(Modifier.height(48.dp))
 
-        ContinueButton(
+        ContinueButtons(
             navigateToPlans = navigateToPlans,
             navigateToSetDefaultBrowser = navigateToSetDefaultBrowser
         )
-
-        Spacer(Modifier.height(10.dp))
-
-        LoginButton(
-            signup = false,
-            navigateToPlans = navigateToPlans,
-            navigateToSetDefaultBrowser = navigateToSetDefaultBrowser
-        )
-
-        Spacer(Modifier.height(Dimensions.PADDING_LARGE))
 
         ConsentCheckbox(
             loggingConsentState = loggingConsentState,
@@ -150,19 +137,18 @@ internal fun ConsentCheckbox(
 // TODO(kobec): I've only wrote the skeleton, but will be unable to confirm if it works when CCT is
 //  working.
 @Composable
-internal fun LoginButton(
-    signup: Boolean,
-    navigateToPlans: () -> Unit,
-    navigateToSetDefaultBrowser: () -> Unit
-) {
+private fun ContinueButtons(navigateToPlans: () -> Unit, navigateToSetDefaultBrowser: () -> Unit) {
     // TODO(kobec): Finish this function when CCT is fixed.
     val firstRunModel = LocalFirstRunModel.current
     val context = LocalContext.current
     val neevaUser = LocalNeevaUser.current
+    val subscriptionManager = LocalSubscriptionManager.current
+    val offers = subscriptionManager.productDetailsFlow.collectAsState().value
+        ?.subscriptionOfferDetails
 
     val params = LaunchLoginFlowParams(
         provider = NeevaUser.SSOProvider.OKTA,
-        signup = signup
+        signup = false
     )
     val resultLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -171,6 +157,8 @@ internal fun LoginButton(
             neevaUser.queueOnSignIn(uniqueJobName = "Welcome Flow: onSuccessfulSignIn") {
                 val userInfo = neevaUser.userInfoFlow.value
                 val subscriptionType = userInfo?.subscriptionType
+                // TODO(kobec): Add subscription source check to ensure users who subscribed to a
+                //  Non-Google-Play source cannot purchase a subscription.
                 if (subscriptionType != null && subscriptionType == SubscriptionType.Basic) {
                     navigateToPlans()
                 } else {
@@ -180,8 +168,17 @@ internal fun LoginButton(
         }
     }
 
-    Button(
-        onClick = {
+    WelcomeFlowStackedButtons(
+        primaryText = stringResource(id = R.string.welcomeflow_lets_go),
+        onPrimaryButton = {
+            if (offers.isNullOrEmpty()) {
+                navigateToSetDefaultBrowser()
+            } else {
+                navigateToPlans()
+            }
+        },
+        secondaryText = stringResource(id = R.string.welcomeflow_i_have_an_account),
+        onSecondaryButton = {
             firstRunModel.launchLoginFlow(
                 context = context,
                 launchLoginFlowParams = LaunchLoginFlowParams(
@@ -190,36 +187,7 @@ internal fun LoginButton(
                 ),
                 activityResultLauncher = resultLauncher
             )
-        },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.background,
-            contentColor = MaterialTheme.colorScheme.primary
-        ),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            text = stringResource(id = R.string.welcomeflow_i_have_an_account),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(Dimensions.PADDING_MEDIUM)
-        )
-    }
-}
-
-@Composable
-fun ContinueButton(navigateToPlans: () -> Unit, navigateToSetDefaultBrowser: () -> Unit) {
-    val subscriptionManager = LocalSubscriptionManager.current
-    val subscriptionOfferDetails = subscriptionManager.productDetailsFlow
-        .collectAsState().value?.subscriptionOfferDetails
-
-    val onClick = if (subscriptionOfferDetails.isNullOrEmpty()) {
-        navigateToSetDefaultBrowser
-    } else {
-        navigateToPlans
-    }
-
-    WelcomeFlowButton(
-        primaryText = stringResource(id = R.string.welcomeflow_lets_go),
-        onClick = onClick
+        }
     )
 }
 

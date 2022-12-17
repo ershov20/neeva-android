@@ -275,8 +275,38 @@
     <!-- [Dialog] Detailed steps to follow in order to switch their default browser. -->
     <string name="switch_default_browser_instructions">1. Go to Settings\n\n2. Tap \"Browser app\"\n\n3. Select Neeva</string>
 
+    <!-- [Dialog] First step in helping the user set Neeva as their default browser. This step leads the user to the Android Default App Settings. -->
+    <string name="switch_default_browser_instructions_1">1. Go to Settings</string>
+
+    <!-- [Dialog] Second step in helping the user set Neeva as their default browser. In Android Default App Settings, there is a section named "Browser App". The user must tap this section to change the default browser app. -->
+    <string name="switch_default_browser_instructions_2">2. Tap \"Browser app\"</string>
+
+    <!-- [Dialog] Third step in helping the user set Neeva as their default browser. After tapping "Browser App", the user is presented with several default browser options to choose from. The user should select "Neeva" as the default browser. -->
+    <string name="switch_default_browser_instructions_3">3. Select Neeva</string>
+
     <!-- [Dialog][Button] Sends the user to the Android device's settings to set their default browser. -->
     <string name="go_to_settings">Go to Settings</string>
+
+    <!-- [DefaultBrowser] Title text for the Protected benefit. This is one of the benefits to setting Neeva as the user's default browser. -->
+    <string name="default_browser_protected_benefit">Protected</string>
+
+    <!-- [DefaultBrowser] Description text for the Protected benefit. One of the benefits to setting Neeva as the user's default browser. -->
+    <string name="default_browser_protected_benefit_description">Open links without trackers and pop-ups</string>
+
+    <!-- [DefaultBrowser] Title text for the Faster benefit. This is one of the benefits to setting Neeva as the user's default browser. -->
+    <string name="default_browser_faster_benefit">Faster</string>
+
+    <!-- [DefaultBrowser] Description text for the Faster benefit. This is one of the benefits to setting Neeva as the user's default browser. -->
+    <string name="default_browser_faster_benefit_description">Browse the web with no ads in your way</string>
+
+    <!-- [DefaultBrowser] Description text that puts the benefits in two sentences in the default browser screen. -->
+    <string name="default_browser_old_os_description">Open links without trackers and pop-ups. Browse the web with no ads in your way.</string>
+
+    <!-- [DefaultBrowser][Button] Text for setting Neeva to be the user's default browser. -->
+    <string name="default_browser_set_button_text">Set Neeva as default browser</string>
+
+    <!-- [DefaultBrowser][Button] Text for setting Neeva to be the user's default browser. -->
+    <string name="default_browser_remind_me_later">Remind me later</string>
 
 
     <!-- [Spaces][Button][a11y] Triggers adding the current web page to the Space with the given name. -->
@@ -903,6 +933,8 @@
 
     <!-- [Section header] Header for pinned tabs. -->
     <string name="pinned_tab_header">Pinned</string>
+
+
 
     <!-- [WelcomeFlow] Text for header in the Welcome screen that describes Neeva. -->
     <string name="welcomeflow_initial_header">Search and browse,\nfree from corporate influence</string>

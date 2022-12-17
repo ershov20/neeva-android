@@ -246,9 +246,7 @@ fun InstructionsForAndroidSettings() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = stringResource(
-                    id = R.string.switch_default_browser_instructions
-                ),
+                text = stringResource(id = R.string.switch_default_browser_instructions),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(Dimensions.PADDING_MEDIUM)
             )

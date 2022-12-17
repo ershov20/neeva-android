@@ -42,8 +42,6 @@ import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
-import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserPane
-import com.neeva.app.storage.HistoryDatabase
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 import dagger.hilt.android.AndroidEntryPoint
@@ -65,7 +63,6 @@ class WelcomeFlowActivity : AppCompatActivity() {
     @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var firstRunModel: FirstRunModel
-    @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var settingsDataModel: SettingsDataModel
@@ -139,13 +136,15 @@ class WelcomeFlowActivity : AppCompatActivity() {
                         }
 
                         composable(Destinations.PLANS.name) {
-                            PlansScreen(navigateToCreateAccount = { })
+                            PlansScreen(
+                                navigateToCreateAccount = {
+                                    // TODO(kobec): add create your account when it's ready
+                                }
+                            )
                         }
 
                         composable(Destinations.SET_DEFAULT_BROWSER.name) {
-                            SetDefaultAndroidBrowserPane(
-                                clientLogger = clientLogger,
-                                onBackPressed = { navHost.popBackStack() },
+                            SetDefaultBrowserScreen(
                                 openAndroidDefaultBrowserSettings = {
                                     sendUserToBrowserOnResume = true
                                     try {
@@ -158,11 +157,8 @@ class WelcomeFlowActivity : AppCompatActivity() {
                                     }
                                 },
                                 setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
-                                showAsDialog = true,
-                                onActivityResultCallback = ::sendUserToBrowser
-                            ) {
-                                sendUserToBrowser()
-                            }
+                                sendUserToBrowser = ::sendUserToBrowser
+                            )
 
                             LaunchedEffect(Unit) {
                                 clientLogger.logCounter(

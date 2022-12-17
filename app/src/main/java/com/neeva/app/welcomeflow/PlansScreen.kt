@@ -224,10 +224,9 @@ private fun SubscriptionInfo(
                 Text(text = subscriptionPlan.name, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(28.dp))
                 WelcomeFlowButton(
-                    primaryText = stringResource(id = R.string.welcomeflow_get_free_plan)
-                ) {
-                    saveSubscriptionPlanChoice()
-                }
+                    primaryText = stringResource(id = R.string.welcomeflow_get_free_plan),
+                    onClick = saveSubscriptionPlanChoice
+                )
             }
 
             ANNUAL_PREMIUM_PLAN -> {
@@ -289,10 +288,9 @@ private fun SubscriptionInfo(
             Spacer(Modifier.height(Dimensions.PADDING_LARGE))
             WelcomeFlowButton(
                 primaryText = stringResource(id = R.string.welcomeflow_try_it_free),
-                secondaryText = stringResource(id = R.string.welcomeflow_free_trial)
-            ) {
-                saveSubscriptionPlanChoice()
-            }
+                secondaryText = stringResource(id = R.string.welcomeflow_free_trial),
+                onClick = saveSubscriptionPlanChoice
+            )
         }
 
         Spacer(Modifier.height(Dimensions.PADDING_LARGE))
