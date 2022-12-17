@@ -138,13 +138,21 @@ class RegularBrowserWrapper(
 
         coroutineScope.launch(dispatchers.io) {
             neevaUser.loginToken.cachedValueFlow.collectLatest {
-                if (neevaUser.isSignedOut()) {
-                    neevaUser.clearUserInfo()
-                } else {
-                    // If Neeva's login cookie changes, we need to refetch the user's data.
-                    neevaUser.fetch(authenticatedApolloWrapper, appContext)
-                }
+                updateUserInfo(ignoreLastFetchTimestamp = true)
             }
+        }
+    }
+
+    suspend fun updateUserInfo(ignoreLastFetchTimestamp: Boolean = false) {
+        if (neevaUser.isSignedOut()) {
+            neevaUser.clearUserInfo()
+        } else {
+            // If Neeva's login cookie changes, we need to refetch the user's data.
+            neevaUser.fetch(
+                authenticatedApolloWrapper,
+                appContext,
+                ignoreLastFetchTimestamp = ignoreLastFetchTimestamp
+            )
         }
     }
 

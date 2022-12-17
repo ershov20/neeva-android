@@ -17,6 +17,7 @@ import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.MutableStateFlow
 import timber.log.Timber
 
@@ -57,7 +58,11 @@ abstract class NeevaUser(val loginToken: LoginToken) {
     abstract fun setUserInfo(newData: UserInfo)
     abstract fun clearUserInfo()
     abstract fun isSignedOut(): Boolean
-    abstract suspend fun fetch(apolloWrapper: ApolloWrapper, context: Context)
+    abstract suspend fun fetch(
+        apolloWrapper: ApolloWrapper,
+        context: Context,
+        ignoreLastFetchTimestamp: Boolean = false
+    )
     /** Queues a [job] to run when a user signs in successfully. The [job] will only run once. */
     abstract fun queueOnSignIn(uniqueJobName: String, job: () -> Unit)
 }
@@ -76,6 +81,9 @@ class NeevaUserImpl(
     private val moshiJsonAdapter: JsonAdapter<UserInfo> =
         Moshi.Builder().build().adapter(UserInfo::class.java)
     private val jobsToRun: MutableSet<OnSignedInJob> = mutableSetOf()
+
+    /** When the last [fetch] was performed. */
+    private var lastFetchTimestamp: Long = 0
 
     init {
         // Load UserInfo from shared preferences at start-up
@@ -121,9 +129,22 @@ class NeevaUserImpl(
     /**
      * For an error handling flowchart, see: FetchUserInfoFlowChart.md
      */
-    override suspend fun fetch(apolloWrapper: ApolloWrapper, context: Context) {
+    override suspend fun fetch(
+        apolloWrapper: ApolloWrapper,
+        context: Context,
+        ignoreLastFetchTimestamp: Boolean
+    ) {
         if (loginToken.isEmpty()) return
         if (!networkHandler.isConnectedToInternet()) return
+
+        // Don't perform a fetch if one was performed recently.
+        val currentTimestamp = System.currentTimeMillis()
+        val elapsed = currentTimestamp - lastFetchTimestamp
+        if (!ignoreLastFetchTimestamp && elapsed <= FETCH_COOLDOWN) {
+            Timber.i("Skipping fetch because one was done recently.")
+            return
+        }
+        lastFetchTimestamp = currentTimestamp
 
         val responseSummary = apolloWrapper.performQuery(
             query = UserInfoQuery(),
@@ -162,6 +183,8 @@ class NeevaUserImpl(
     }
 
     companion object {
+        private val FETCH_COOLDOWN = TimeUnit.MINUTES.toMillis(1)
+
         fun UserInfoQuery.User.toUserInfo(): UserInfo {
             return UserInfo(
                 id = id,
@@ -191,6 +214,11 @@ class PreviewNeevaUser(
 
     override fun isSignedOut(): Boolean = false
 
-    override suspend fun fetch(apolloWrapper: ApolloWrapper, context: Context) {}
+    override suspend fun fetch(
+        apolloWrapper: ApolloWrapper,
+        context: Context,
+        ignoreLastFetchTimestamp: Boolean
+    ) {}
+
     override fun queueOnSignIn(uniqueJobName: String, job: () -> Unit) {}
 }

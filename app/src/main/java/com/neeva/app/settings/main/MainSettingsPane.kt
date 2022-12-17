@@ -6,6 +6,7 @@ package com.neeva.app.settings.main
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import com.neeva.app.LocalChromiumVersion
 import com.neeva.app.LocalNeevaConstants
 import com.neeva.app.NeevaConstants
@@ -18,6 +19,10 @@ import com.neeva.app.ui.PortraitPreviews
 @Composable
 fun MainSettingsPane(settingsController: SettingsController, neevaConstants: NeevaConstants) {
     SettingsPane(settingsController, MainSettingsData(neevaConstants))
+
+    LaunchedEffect(Unit) {
+        settingsController.fetchUserInfo()
+    }
 }
 
 @PortraitPreviews

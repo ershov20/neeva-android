@@ -45,6 +45,7 @@ interface SettingsController {
     fun getOnClickMap(): Map<Int, (() -> Unit)?>
     fun getOnDoubleClickMap(): Map<Int, (() -> Unit)?>
     fun getToggleChangedCallBackMap(): Map<String, (() -> Unit)?>
+    suspend fun fetchUserInfo()
     //endregion
 
     //region Profile Settings
@@ -273,6 +274,10 @@ class SettingsControllerImpl(
         settingsDataModel.setCookieNoticePreferences(preferences)
     }
 
+    override suspend fun fetchUserInfo() {
+        webLayerModel.fetchUserInfo()
+    }
+
     private fun toggleIsAdvancedSettingsAllowed() {
         settingsDataModel.toggleIsAdvancedSettingsAllowed()
     }
@@ -430,5 +435,7 @@ val mockSettingsControllerImpl by lazy {
         override fun openAndroidDefaultBrowserSettings() { }
 
         override fun isAdvancedSettingsAllowed(): Boolean { return true }
+
+        override suspend fun fetchUserInfo() {}
     }
 }

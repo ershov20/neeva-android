@@ -412,4 +412,11 @@ class WebLayerModel internal constructor(
     fun deleteAllArchivedTabs() {
         historyManager.deleteAllArchivedTabs()
     }
+
+    /** Fetches the user's info using their login token (if it's available). */
+    suspend fun fetchUserInfo() {
+        if (initializationState.value == LoadingState.READY) {
+            regularBrowser.updateUserInfo()
+        }
+    }
 }
