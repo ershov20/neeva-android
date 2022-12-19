@@ -4,6 +4,7 @@
 
 package com.neeva.app.cardgrid.tabs
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
@@ -35,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import com.neeva.app.LocalSettingsDataModel
 import com.neeva.app.LocalSharedPreferencesModel
 import com.neeva.app.R
+import com.neeva.app.browsing.AgeGroup
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.TabInfo
 import com.neeva.app.cardgrid.CardGrid
@@ -147,7 +149,7 @@ fun ChronologicalTabGrid(
     CardGrid(
         items = sections,
         computeFirstVisibleItemIndex = { numCellsPerRow ->
-            computeVisibleItemIndex(sections, numCellsPerRow)
+            computeVisibleItemIndex(context, sections, numCellsPerRow)
         },
         emptyComposable = {
             Column {
@@ -219,21 +221,48 @@ fun ArchivedTabsButton(onShowArchivedTabs: () -> Unit) {
     }
 }
 
-fun computeVisibleItemIndex(sections: List<TabGridSection<TabInfo>>, numCells: Int): Int {
-    // Only look in the first section for the selected tab because selected tabs automatically
-    // count as being active today.
-    return sections.firstOrNull()
-        ?.items
+fun computeVisibleItemIndex(
+    context: Context,
+    sections: List<TabGridSection<TabInfo>>,
+    numCells: Int
+): Int {
+    // Look in the Pinned section for the selected tab.
+    val pinnedItems =
+        sections.firstOrNull { it.header == context.getString(AgeGroup.PINNED.resourceId) }?.items
+    val pinnedSelectedTabIndex = pinnedItems
         ?.indexOfFirst { it.isSelected }
+        ?.takeIf { it >= 0 }
         ?.let {
             if (it < numCells) {
                 // If we're showing the first row of the top section, show the section header.
                 0
             } else {
-                // Scroll down directly to the item.
+                // Scroll down directly to the item with plus 1 for the section header.
                 it + 1
             }
-        } ?: 0
+        }
+    if (pinnedSelectedTabIndex != null) return pinnedSelectedTabIndex
+
+    // If there is no selected tab in Pinned section, look in the Today section for selected tab,
+    // because unpinned selected tabs automatically count as being active today.
+    val unpinnedSelectedTabIndex =
+        sections.firstOrNull { it.header == context.getString(AgeGroup.TODAY.resourceId) }
+            ?.items
+            ?.indexOfFirst { it.isSelected }
+            ?.let {
+                // Plus 1 for the Pinned section header
+                val pinnedTabsCount = pinnedItems?.size?.plus(1) ?: 0
+                val selectedTabIndex = it + pinnedTabsCount
+
+                if (selectedTabIndex < numCells) {
+                    // If we're showing the first row of the top section, show the section header.
+                    0
+                } else {
+                    // Scroll down directly to the item with plus 1 for the section header.
+                    selectedTabIndex + 1
+                }
+            } ?: 0
+    return unpinnedSelectedTabIndex
 }
 
 @PortraitPreviews
