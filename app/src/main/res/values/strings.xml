@@ -997,10 +997,10 @@
     <string name="welcomeflow_monthly_premium_plan">Monthly Annual</string>
 
     <!-- [WelcomeFlow] Text indicating the subscription period of the Annual Premium Subscription Plan. -->
-    <string name="welcomeflow_yearly_subscription_period"> /year</string>
+    <string name="welcomeflow_yearly_subscription_period">%1$s /year</string>
 
     <!-- [WelcomeFlow] Text indicating the subscription period of the Monthly Premium Subscription Plan. -->
-    <string name="welcomeflow_monthly_subscription_period"> /month</string>
+    <string name="welcomeflow_monthly_subscription_period">%1$s /month</string>
 
     <!-- [WelcomeFlow] Text for Premium Annual Subscription Plan indicating that the cost is reduced if the user purchases an annual plan over a monthly plan. -->
     <string name="welcomeflow_annual_subscription_savings">Save 30%</string>

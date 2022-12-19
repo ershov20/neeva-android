@@ -231,14 +231,14 @@ private fun SubscriptionInfo(
 
             ANNUAL_PREMIUM_PLAN -> {
                 Row {
-                    Text(
-                        text = subscriptionPlan.price?.annualPrice ?: "",
-                        style = MaterialTheme.typography.titleMedium
+                    val annualPrice = subscriptionPlan.price?.annualPrice ?: ""
+                    val yearlySubscriptionPrice = stringResource(
+                        id = R.string.welcomeflow_yearly_subscription_period,
+                        annualPrice
                     )
-                    Text(
-                        text = stringResource(id = R.string.welcomeflow_yearly_subscription_period),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                    PriceText(
+                        price = annualPrice,
+                        formattedText = yearlySubscriptionPrice
                     )
                 }
                 Spacer(Modifier.height(2.dp))
@@ -264,16 +264,14 @@ private fun SubscriptionInfo(
 
             MONTHLY_PREMIUM_PLAN -> {
                 Row {
-                    Text(
-                        text = subscriptionPlan.price?.monthlyPrice ?: "",
-                        style = MaterialTheme.typography.titleMedium
+                    val monthlyPrice = subscriptionPlan.price?.monthlyPrice ?: ""
+                    val monthlySubscriptionPrice = stringResource(
+                        id = R.string.welcomeflow_monthly_subscription_period,
+                        monthlyPrice
                     )
-                    Text(
-                        text = stringResource(
-                            id = R.string.welcomeflow_monthly_subscription_period
-                        ),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                    PriceText(
+                        price = monthlyPrice,
+                        formattedText = monthlySubscriptionPrice
                     )
                 }
                 Spacer(Modifier.height(2.dp))

@@ -37,7 +37,7 @@ import com.neeva.app.ui.LightDarkPreviewContainer
  * and doesn't correctly pull the local color.
  *
  * If you would like similar functionality without using a HTML base string, use
- * [PartiallyClickableString]
+ * [PartiallyClickableText]
  */
 @Composable
 fun AnnotatedSpannable(
