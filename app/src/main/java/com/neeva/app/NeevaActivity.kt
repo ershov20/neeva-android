@@ -339,6 +339,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         activityViewModel.determineScreenConfiguration(this)
+        screenState.configure(this)
     }
 
     override fun onStart() {
