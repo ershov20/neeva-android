@@ -89,7 +89,7 @@ internal fun PlansScreen(
             subscriptionPlans = subscriptionPlans,
             saveSubscriptionPlanChoice = saveSubscriptionPlanChoice,
             navigateToCreateAccount = navigateToCreateAccount,
-            launchSignUpFlow = {},
+            launchSignUpFlow = { /** TODO(kobec) */ },
             modifier = it
         )
     }
@@ -209,7 +209,7 @@ fun PlansScreenContent(
 
         Spacer(Modifier.size(Dimensions.PADDING_LARGE))
 
-        ToggleSignUpText(signup = false, onClick = launchSignUpFlow)
+        ToggleSignUpText(signup = true, onClick = launchSignUpFlow)
     }
 }
 

@@ -5,6 +5,7 @@
 package com.neeva.app.welcomeflow
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,10 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,27 +62,28 @@ fun WelcomeFlowStackedButtons(
     secondaryText: String,
     onSecondaryButton: () -> Unit = {}
 ) {
+    WelcomeFlowButtonContainer {
+        WelcomeFlowButton(primaryText = primaryText, onClick = onPrimaryButton)
+        Spacer(Modifier.height(18.dp))
+        SecondaryWelcomeFlowButton(text = secondaryText, onClick = onSecondaryButton)
+    }
+}
+
+@Composable
+fun SecondaryWelcomeFlowButton(text: String, onClick: () -> Unit) {
+    TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Text(text = text, style = MaterialTheme.typography.titleMedium)
+    }
+}
+
+@Composable
+internal fun WelcomeFlowButtonContainer(content: @Composable ColumnScope.() -> Unit) {
     Column(
         Modifier
             .fillMaxWidth()
             .padding(vertical = 18.dp)
     ) {
-        WelcomeFlowButton(primaryText = primaryText, onClick = onPrimaryButton)
-        Spacer(Modifier.height(Dimensions.PADDING_MEDIUM))
-        Button(
-            onClick = onSecondaryButton,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.primary
-            ),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = secondaryText,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(Dimensions.PADDING_MEDIUM)
-            )
-        }
+        content()
     }
 }
 

@@ -33,11 +33,11 @@ import com.neeva.app.ui.theme.Dimensions
 // TODO(yusuf/kobe): make the checkbox actually send product & privacy tips
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EmailPromoCheckbox() {
+fun EmailPromoCheckbox(modifier: Modifier = Modifier) {
     var checked by remember { mutableStateOf(true) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
+        modifier = modifier
             .toggleable(
                 value = checked,
                 role = Role.Checkbox,

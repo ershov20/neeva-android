@@ -44,6 +44,7 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.welcomeflow.createaccount.CreateAccountScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import timber.log.Timber
@@ -54,7 +55,9 @@ class WelcomeFlowActivity : AppCompatActivity() {
         internal enum class Destinations {
             WELCOME,
             PLANS,
-            SET_DEFAULT_BROWSER
+            SET_DEFAULT_BROWSER,
+            CREATE_ACCOUNT_WITH_GOOGLE,
+            CREATE_ACCOUNT_WITH_OTHER
         }
     }
 
@@ -138,7 +141,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
                         composable(Destinations.PLANS.name) {
                             PlansScreen(
                                 navigateToCreateAccount = {
-                                    // TODO(kobec): add create your account when it's ready
+                                    navHost.navigate(Destinations.CREATE_ACCOUNT_WITH_GOOGLE.name)
                                 }
                             )
                         }
@@ -167,6 +170,23 @@ class WelcomeFlowActivity : AppCompatActivity() {
                                     attributes = null
                                 )
                             }
+                        }
+
+                        composable(Destinations.CREATE_ACCOUNT_WITH_GOOGLE.name) {
+                            CreateAccountScreen(
+                                launchSignUpFlow = { },
+                                onShowOtherSignUpOptions = {
+                                    navHost.navigate(Destinations.CREATE_ACCOUNT_WITH_OTHER.name)
+                                },
+                                onBack = { navHost.popBackStack() }
+                            )
+                        }
+
+                        composable(Destinations.CREATE_ACCOUNT_WITH_OTHER.name) {
+                            CreateAccountScreen(
+                                launchSignUpFlow = {},
+                                onBack = { navHost.popBackStack() }
+                            )
                         }
                     }
                 }
