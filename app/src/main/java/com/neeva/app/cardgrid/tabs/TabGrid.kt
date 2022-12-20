@@ -62,9 +62,6 @@ fun TabGrid(
     cardsPaneModel: CardsPaneModel,
     modifier: Modifier = Modifier
 ) {
-    val settingsDataModel = LocalSettingsDataModel.current
-    val enableTabContextMenu =
-        settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_TAB_CONTEXT_MENU)
     val tabs: List<TabInfo> by browserWrapper.orderedTabList.collectAsState()
 
     TabGrid(
@@ -72,11 +69,7 @@ fun TabGrid(
         onSelectTab = { tabInfo -> cardsPaneModel.selectTab(browserWrapper, tabInfo) },
         onCloseTabs = { tabInfo -> cardsPaneModel.closeTab(browserWrapper, tabInfo) },
         onShowArchivedTabs = { cardsPaneModel.showArchivedTabs() },
-        onLongPressTab = { tabInfo ->
-            if (enableTabContextMenu) {
-                cardsPaneModel.showContextMenu(browserWrapper, tabInfo)
-            }
-        },
+        onLongPressTab = { tabInfo -> cardsPaneModel.showContextMenu(browserWrapper, tabInfo) },
         tabs = tabs,
         faviconCache = browserWrapper.faviconCache,
         screenshotProvider = browserWrapper::restoreScreenshotOfTab,

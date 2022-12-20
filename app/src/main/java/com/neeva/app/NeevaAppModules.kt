@@ -338,15 +338,13 @@ object NeevaAppModule {
         @ApplicationContext appContext: Context,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
-        sharedPreferencesModel: SharedPreferencesModel,
-        settingsDataModel: SettingsDataModel
+        sharedPreferencesModel: SharedPreferencesModel
     ): BloomFilterManager {
         return BloomFilterManager(
             appContext = appContext,
             coroutineScope = coroutineScope,
             dispatchers = dispatchers,
-            sharedPreferencesModel = sharedPreferencesModel,
-            settingsDataModel = settingsDataModel
+            sharedPreferencesModel = sharedPreferencesModel
         )
     }
 

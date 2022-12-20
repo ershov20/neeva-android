@@ -59,14 +59,6 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 ),
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
-                    settingsToggle = SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    settingsToggle = SettingsToggle.BLOOM_FILTER_DOWNLOAD
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.DEBUG_USE_CUSTOM_TABS_FOR_LOGIN
                 ),
                 SettingsRowData(
@@ -76,10 +68,6 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 SettingsRowData(
                     type = SettingsRowType.TOGGLE,
                     settingsToggle = SettingsToggle.DEBUG_ENABLE_BILLING
-                ),
-                SettingsRowData(
-                    type = SettingsRowType.TOGGLE,
-                    settingsToggle = SettingsToggle.DEBUG_ENABLE_TAB_CONTEXT_MENU
                 )
             )
         ),

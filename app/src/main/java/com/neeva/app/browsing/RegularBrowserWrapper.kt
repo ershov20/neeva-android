@@ -83,8 +83,7 @@ class RegularBrowserWrapper(
         appContext = appContext,
         bloomFilterManager = bloomFilterManager,
         neevaConstants = neevaConstants,
-        sharedPreferencesModel = sharedPreferencesModel,
-        settingsDataModel = settingsDataModel
+        sharedPreferencesModel = sharedPreferencesModel
     ),
     popupModel = popupModel,
     faviconCache = regularFaviconCache,

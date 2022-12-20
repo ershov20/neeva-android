@@ -16,7 +16,6 @@ import com.neeva.app.contentfilter.PreviewContentFilterModel
 import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.settings.SettingsDataModel
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.ui.PopupModel
@@ -45,9 +44,11 @@ class BrowserToolbarModelImpl(
             SharedPrefFolder.FirstRun.DidShowAdBlockOnboarding.get(sharedPreferencesModel)
         val enableTrackingProtection =
             browserWrapper.contentFilterModel.enableTrackingProtection.value
+        val neevaScopeOnboarding =
+            SharedPrefFolder.App.NeevaScopeOnboarding.get(sharedPreferencesModel)
 
-        return settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP) &&
-            popupModel.canShowPromo && (!enableTrackingProtection || didShowAdBlockOnboarding)
+        return neevaScopeOnboarding && popupModel.canShowPromo &&
+            (!enableTrackingProtection || didShowAdBlockOnboarding)
     }
 
     override fun share() = appNavModel.shareCurrentPage()

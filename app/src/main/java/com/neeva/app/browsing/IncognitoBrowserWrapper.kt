@@ -66,8 +66,7 @@ class IncognitoBrowserWrapper private constructor(
         appContext = appContext,
         bloomFilterManager = bloomFilterManager,
         neevaConstants = neevaConstants,
-        sharedPreferencesModel = sharedPreferencesModel,
-        settingsDataModel = settingsDataModel
+        sharedPreferencesModel = sharedPreferencesModel
     ),
     popupModel = popupModel,
     faviconCache = incognitoFaviconCache,

@@ -131,16 +131,6 @@ enum class SettingsToggle(
         defaultValue = false
     ),
 
-    // NeevaScope:
-    ENABLE_NEEVASCOPE_TOOLTIP(
-        primaryLabelId = R.string.settings_debug_enable_neevascope_tooltip,
-        defaultValue = false,
-    ),
-    BLOOM_FILTER_DOWNLOAD(
-        primaryLabelId = R.string.settings_debug_enable_bloomfilter_download,
-        defaultValue = false
-    ),
-
     // Advanced / development settings:
     DEBUG_ENABLE_DISPLAY_TABS_BY_REVERSE_CREATION_TIME(
         primaryLabelId = R.string.settings_debug_tabs_in_reverse,
@@ -168,10 +158,6 @@ enum class SettingsToggle(
     ),
     DEBUG_ENABLE_BILLING(
         primaryLabelId = R.string.settings_debug_enable_billing,
-        defaultValue = false
-    ),
-    DEBUG_ENABLE_TAB_CONTEXT_MENU(
-        primaryLabelId = R.string.settings_debug_enable_tab_context_menu,
         defaultValue = false
     );
 

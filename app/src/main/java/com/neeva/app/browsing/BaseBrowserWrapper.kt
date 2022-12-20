@@ -34,6 +34,7 @@ import com.neeva.app.neevascope.NeevaScopeModel
 import com.neeva.app.publicsuffixlist.DomainProvider
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPrefFolder.App.AutomaticallyArchiveTabs
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
@@ -253,10 +254,7 @@ abstract class BaseBrowserWrapper internal constructor(
 
         coroutineScope.launch {
             urlFlow.collectLatest {
-                if (
-                    settingsDataModel
-                        .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
-                ) {
+                if (SharedPrefFolder.App.NeevaScopeOnboarding.get(sharedPreferencesModel)) {
                     neevaScopeModel.updateUrl(it)
                 }
             }

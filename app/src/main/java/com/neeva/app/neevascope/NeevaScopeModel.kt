@@ -15,8 +15,6 @@ import com.neeva.app.R
 import com.neeva.app.SearchQuery
 import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.browsing.isNeevaUri
-import com.neeva.app.settings.SettingsDataModel
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.storage.favicons.FaviconCache
@@ -60,8 +58,7 @@ class NeevaScopeModel(
     appContext: Context,
     val bloomFilterManager: BloomFilterManager,
     private val neevaConstants: NeevaConstants,
-    private val sharedPreferencesModel: SharedPreferencesModel,
-    private val settingsDataModel: SettingsDataModel
+    private val sharedPreferencesModel: SharedPreferencesModel
 ) {
     companion object {
         private const val MEMORIZED_QUERY_COUNT_THRESHOLD = 5
@@ -358,8 +355,10 @@ class NeevaScopeModel(
                                     sharedPreferencesModel,
                                     true
                                 )
-                                settingsDataModel
-                                    .setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, true)
+                                SharedPrefFolder.App.NeevaScopeOnboarding.set(
+                                    sharedPreferencesModel,
+                                    true
+                                )
                             }
                             onDismiss()
                         },
@@ -379,8 +378,10 @@ class NeevaScopeModel(
                         dismissSheet = {
                             // If user clicks on the X button, don't update SeenNeevaScopeIntro,
                             // because it will load NeevaScope result immediately.
-                            settingsDataModel
-                                .setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, true)
+                            SharedPrefFolder.App.NeevaScopeOnboarding.set(
+                                sharedPreferencesModel,
+                                true
+                            )
                             onDismiss()
                         }
                     )
@@ -391,10 +392,7 @@ class NeevaScopeModel(
                 }
 
                 else -> {
-                    if (
-                        settingsDataModel
-                            .getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
-                    ) {
+                    if (SharedPrefFolder.App.NeevaScopeOnboarding.get(sharedPreferencesModel)) {
                         completeNeevaScopeOnboarding()
                     }
 
@@ -407,9 +405,7 @@ class NeevaScopeModel(
                 }
             }
 
-            if (
-                settingsDataModel.getSettingsToggleValue(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP)
-            ) {
+            if (SharedPrefFolder.App.NeevaScopeOnboarding.get(sharedPreferencesModel)) {
                 if (promoCache[currentUrl]?.showRedditDot == true) {
                     performRedditPromoTransition(PromoTransition.DISMISS_DOT)
                 }
@@ -418,11 +414,9 @@ class NeevaScopeModel(
     }
 
     private fun completeNeevaScopeOnboarding() {
-        settingsDataModel.setToggleState(SettingsToggle.ENABLE_NEEVASCOPE_TOOLTIP, false)
+        SharedPrefFolder.App.NeevaScopeOnboarding.set(sharedPreferencesModel, false)
         // If NeevaScope onboarding is completed, work request of filter download will be cancelled
-        if (settingsDataModel.getSettingsToggleValue(SettingsToggle.BLOOM_FILTER_DOWNLOAD)) {
-            bloomFilterManager.workManager.cancelAllWorkByTag(BLOOM_FILTER_DOWNLOAD_WORK_TAG)
-        }
+        bloomFilterManager.workManager.cancelAllWorkByTag(BLOOM_FILTER_DOWNLOAD_WORK_TAG)
     }
 }
 

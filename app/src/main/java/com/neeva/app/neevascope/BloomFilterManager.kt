@@ -15,8 +15,6 @@ import androidx.work.PeriodicWorkRequest
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.neeva.app.Dispatchers
-import com.neeva.app.settings.SettingsDataModel
-import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import java.io.IOException
@@ -51,15 +49,11 @@ class BloomFilterManager(
     val appContext: Context,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
-    private val sharedPreferencesModel: SharedPreferencesModel,
-    private val settingsDataModel: SettingsDataModel
+    private val sharedPreferencesModel: SharedPreferencesModel
 ) {
     companion object {
         private const val TAG = "BloomFilterDownloadWork"
     }
-
-    val filterDownloadEnabled =
-        settingsDataModel.getSettingsToggleValue(SettingsToggle.BLOOM_FILTER_DOWNLOAD)
 
     val reddit = BloomFilterConfiguration.redditConfiguration
     val bloomFilter = BloomFilter()
@@ -84,9 +78,7 @@ class BloomFilterManager(
      * running queries against the loaded Bloom Filters.
      * */
     private suspend fun load() {
-        if (filterDownloadEnabled) {
-            enqueueBloomFilterDownloadWorkRequest()
-        }
+        enqueueBloomFilterDownloadWorkRequest()
 
         if (reddit.localUri == Uri.EMPTY || !reddit.localUri.toFile().exists()) return
 

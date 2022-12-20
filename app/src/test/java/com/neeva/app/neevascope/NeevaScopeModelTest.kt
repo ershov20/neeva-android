@@ -16,7 +16,6 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.SearchQuery
 import com.neeva.app.billing.billingclient.BillingClientController
 import com.neeva.app.network.NetworkHandler
-import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.type.UserPreference
 import com.neeva.app.userdata.LoginToken
@@ -53,7 +52,6 @@ class NeevaScopeModelTest : BaseTest() {
     private lateinit var neevaUser: NeevaUser
     private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
     private lateinit var sharedPreferencesModel: SharedPreferencesModel
-    private lateinit var settingsDataModel: SettingsDataModel
 
     @Mock private lateinit var billingClientController: BillingClientController
     @Mock private lateinit var bloomFilterManager: BloomFilterManager
@@ -66,7 +64,6 @@ class NeevaScopeModelTest : BaseTest() {
 
         context = ApplicationProvider.getApplicationContext()
         sharedPreferencesModel = SharedPreferencesModel(context)
-        settingsDataModel = SettingsDataModel(sharedPreferencesModel)
 
         val loginToken = LoginToken(
             coroutineScope = coroutineScopeRule.scope,
@@ -102,8 +99,7 @@ class NeevaScopeModelTest : BaseTest() {
             appContext = context,
             bloomFilterManager = bloomFilterManager,
             neevaConstants = neevaConstants,
-            sharedPreferencesModel = sharedPreferencesModel,
-            settingsDataModel = settingsDataModel
+            sharedPreferencesModel = sharedPreferencesModel
         )
     }
 

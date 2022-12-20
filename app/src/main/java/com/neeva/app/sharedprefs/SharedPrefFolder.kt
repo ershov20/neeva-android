@@ -95,6 +95,11 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "SEEN_NEEVASCOPE_INTRO",
             defaultValue = false
         )
+        val NeevaScopeOnboarding = SharedPrefKey(
+            App,
+            preferenceKey = "NEEVASCOPE_ONBOARDING",
+            defaultValue = false
+        )
         val NeevaScopeTooltipCount = SharedPrefKey(
             App,
             preferenceKey = "SHOW_NEEVASCOPE_TOOLTIP_COUNT",
