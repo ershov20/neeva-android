@@ -962,7 +962,7 @@
     <string name="welcomeflow_plans_header">Choose the right plan for you</string>
 
     <!-- [WelcomeFlow] Textual description that you can help fight climate change by subscribing.  -->
-    <string name="welcomeflow_subscribe_and_fight_climate_change"><![CDATA[Subscribe and <a href="%1$s">help</a> and fight climate change]]></string>
+    <string name="welcomeflow_subscribe_and_fight_climate_change"><![CDATA[Subscribe and <a href="%1$s">help</a> fight climate change]]></string>
 
     <!-- [WelcomeFlow] Text for one of the benefits of using Neeva in the Plans Screen. -->
     <string name="welcomeflow_browser_benefit">Browser + ad blocker + tracking prevention</string>
@@ -995,7 +995,7 @@
     <string name="welcomeflow_annual_premium_plan">Premium Annual</string>
 
     <!-- [WelcomeFlow] Name of the Monthly Premium Subscription Plan. -->
-    <string name="welcomeflow_monthly_premium_plan">Monthly Annual</string>
+    <string name="welcomeflow_monthly_premium_plan">Premium Monthly</string>
 
     <!-- [WelcomeFlow] Text indicating the subscription period of the Annual Premium Subscription Plan. -->
     <string name="welcomeflow_yearly_subscription_period">%1$s /year</string>
