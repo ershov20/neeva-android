@@ -894,4 +894,25 @@
 
     <!-- [Section header] Header for pinned tabs. -->
     <string name="pinned_tab_header">Angeheftet</string>
+
+    <!-- [WelcomeFlow] Text for header in the Welcome screen that describes Neeva. -->
+    <string name="welcomeflow_initial_header">Ohne Unternehmenseinflussnahme suchen und browsen</string>
+
+    <!-- [WelcomeFlow] Title text for the Privacy Benefit in the Welcome Screen. -->
+    <string name="welcomeflow_privacy_benefit">Datenschutz</string>
+
+    <!-- [WelcomeFlow] Description text for the Privacy Benefit in the Welcome Screen. -->
+    <string name="welcomeflow_privacy_benefit_description">Anonym suchen und Tracker blockieren</string>
+
+    <!-- [WelcomeFlow] Title text for the Unbiased Benefit in the Welcome Screen. -->
+    <string name="welcomeflow_unbiased_benefit">Unvoreingenommen</string>
+
+    <!-- [WelcomeFlow] Description text for the Unbiased Benefit in the Welcome Screen. -->
+    <string name="welcomeflow_unbiased_benefit_description">Keine Werbetreibenden kontrollieren, was Sie sehen</string>
+
+    <!-- [WelcomeFlow][Button] Starts the Welcome Flow and user setup. -->
+    <string name="welcomeflow_lets_go">Los geht’s</string>
+
+    <!-- [WelcomeFlow][Button] Opens UI to log the user in. -->
+    <string name="welcomeflow_i_have_an_account">Ich habe ein Konto</string>
 </resources>
