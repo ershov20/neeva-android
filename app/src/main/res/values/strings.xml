@@ -1004,7 +1004,7 @@
     <string name="welcomeflow_monthly_subscription_period">%1$s /month</string>
 
     <!-- [WelcomeFlow] Text for Premium Annual Subscription Plan indicating that the cost is reduced if the user purchases an annual plan over a monthly plan. -->
-    <string name="welcomeflow_annual_subscription_savings">Save 30%</string>
+    <string name="welcomeflow_annual_subscription_savings" formatted="false">Save 30%</string>
 
     <!-- [WelcomeFlow] Description Text for Monthly and Annual Premium Subscription Plan indicating that the user can can cancel anytime. -->
     <string name="welcomeflow_cancel_anytime">Cancel anytime</string>

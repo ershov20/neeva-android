@@ -48,6 +48,9 @@
     <!-- [General][Dialog] Dismisses the current dialog being presented to the user. -->
     <string name="maybe_later">Vielleicht später</string>
 
+    <!-- [General][Dialog] Lable for a button to take a positive action -->
+    <string name="lets_do_it">Los geht’s</string>
+
     <!-- [General][Button] Triggers showing more items. -->
     <string name="more">Mehr</string>
 
@@ -272,8 +275,38 @@
     <!-- [Dialog] Detailed steps to follow in order to switch their default browser. -->
     <string name="switch_default_browser_instructions">1. Zu den Einstellungen gehen\n\n2. Auf „Browser-App“ tippen\n\n3. Neeva auswählen</string>
 
+    <!-- [Dialog] First step in helping the user set Neeva as their default browser. This step leads the user to the Android Default App Settings. -->
+    <string name="switch_default_browser_instructions_1">1. Gehen Sie zu „Einstellungen“</string>
+
+    <!-- [Dialog] Second step in helping the user set Neeva as their default browser. In Android Default App Settings, there is a section named "Browser App". The user must tap this section to change the default browser app. -->
+    <string name="switch_default_browser_instructions_2">2. Tippen Sie auf „Browser-App“.</string>
+
+    <!-- [Dialog] Third step in helping the user set Neeva as their default browser. After tapping "Browser App", the user is presented with several default browser options to choose from. The user should select "Neeva" as the default browser. -->
+    <string name="switch_default_browser_instructions_3">3. Wählen Sie Neeva</string>
+
     <!-- [Dialog][Button] Sends the user to the Android device's settings to set their default browser. -->
     <string name="go_to_settings">Gehen Sie zu den Einstellungen</string>
+
+    <!-- [DefaultBrowser] Title text for the Protected benefit. This is one of the benefits to setting Neeva as the user's default browser. -->
+    <string name="default_browser_protected_benefit">Geschützt</string>
+
+    <!-- [DefaultBrowser] Description text for the Protected benefit. One of the benefits to setting Neeva as the user's default browser. -->
+    <string name="default_browser_protected_benefit_description">Links ohne Tracker und Pop-ups öffnen</string>
+
+    <!-- [DefaultBrowser] Title text for the Faster benefit. This is one of the benefits to setting Neeva as the user's default browser. -->
+    <string name="default_browser_faster_benefit">Schneller</string>
+
+    <!-- [DefaultBrowser] Description text for the Faster benefit. This is one of the benefits to setting Neeva as the user's default browser. -->
+    <string name="default_browser_faster_benefit_description">Surfen Sie im Internet, ohne dass Ihnen Werbung im Weg steht</string>
+
+    <!-- [DefaultBrowser] Description text that puts the benefits in two sentences in the default browser screen. -->
+    <string name="default_browser_old_os_description">Öffnen Sie Links ohne Tracker und Pop-ups. Surfen Sie im Internet, ohne dass Ihnen Werbung im Weg steht.</string>
+
+    <!-- [DefaultBrowser][Button] Text for setting Neeva to be the user's default browser. -->
+    <string name="default_browser_set_button_text">Legen Sie Neeva als Ihren Standardbrowser fest</string>
+
+    <!-- [DefaultBrowser][Button] Text for setting Neeva to be the user's default browser. -->
+    <string name="default_browser_remind_me_later">Später erinnern</string>
 
 
     <!-- [Spaces][Button][a11y] Triggers adding the current web page to the Space with the given name. -->
@@ -895,6 +928,8 @@
     <!-- [Section header] Header for pinned tabs. -->
     <string name="pinned_tab_header">Angeheftet</string>
 
+
+
     <!-- [WelcomeFlow] Text for header in the Welcome screen that describes Neeva. -->
     <string name="welcomeflow_initial_header">Ohne Unternehmenseinflussnahme suchen und browsen</string>
 
@@ -915,4 +950,79 @@
 
     <!-- [WelcomeFlow][Button] Opens UI to log the user in. -->
     <string name="welcomeflow_i_have_an_account">Ich habe ein Konto</string>
+
+    <!-- [WelcomeFlow] Text for header in the Subscription Plans screen. -->
+    <string name="welcomeflow_plans_header">Wählen Sie den richtigen Tarif für Sie aus</string>
+
+    <!-- [WelcomeFlow] Textual description that you can help fight climate change by subscribing.  -->
+    <string name="welcomeflow_subscribe_and_fight_climate_change"><![CDATA[Jetzt abonnieren <a href=\"%1$s\">und</a> Klimawandel bekämpfen]]></string>
+
+    <!-- [WelcomeFlow] Text for one of the benefits of using Neeva in the Plans Screen. -->
+    <string name="welcomeflow_browser_benefit">Browser + Werbeblocker + Verhindern von Tracking</string>
+
+    <!-- [WelcomeFlow] Text for one of the Premium Plan benefits of using Neeva in the Plans Screen. -->
+    <string name="welcomeflow_premium_ad_free_search_benefit">Unbegrenzte werbefreie, private Suche</string>
+
+    <!-- [WelcomeFlow] Text for one of the Free Plan benefits of using Neeva in the Plans Screen. -->
+    <string name="welcomeflow_limited_ad_free_search_benefit">Unbegrenzte werbefreie, private Suche</string>
+
+    <!-- [WelcomeFlow] Description Text for the Limited Ad-free Private Search Benefit in the Free Plan in the Plans Screen. -->
+    <string name="welcomeflow_limited_ad_free_search_benefit_description">50 Suchen/Monat</string>
+
+    <!-- [WelcomeFlow] Text for one of the Premium Plan benefits of using Neeva in the Plans Screen. -->
+    <string name="welcomeflow_premium_unlimited_devices_benefit">Unbegrenzte Anzahl von Geräten</string>
+
+    <!-- [WelcomeFlow] Text for one of the Free Plan benefits of using Neeva in the Plans Screen. -->
+    <string name="welcomeflow_limited_devices_benefit">Begrenzte Anzahl von Geräten</string>
+
+    <!-- [WelcomeFlow] Text for one of the Premium Plan benefits of using Neeva in the Plans Screen. -->
+    <string name="welcomeflow_password_vpn_benefit">Passwortmanager + VPN</string>
+
+    <!-- [WelcomeFlow] Name of the Free Subscription Plan. -->
+    <string name="welcomeflow_free_plan">KOSTENLOS</string>
+
+    <!-- [WelcomeFlow] Text for the button to select the Free Subscription Plan. -->
+    <string name="welcomeflow_get_free_plan">Holen Sie sich den KOSTENLOSEN TARIF</string>
+
+    <!-- [WelcomeFlow] Name of the Annual Premium Subscription Plan. -->
+    <string name="welcomeflow_annual_premium_plan">Premium\njährlich</string>
+
+    <!-- [WelcomeFlow] Name of the Monthly Premium Subscription Plan. -->
+    <string name="welcomeflow_monthly_premium_plan">Monatlich Jährlich</string>
+
+    <!-- [WelcomeFlow] Text indicating the subscription period of the Annual Premium Subscription Plan. -->
+    <string name="welcomeflow_yearly_subscription_period">%1$s /Jahr</string>
+
+    <!-- [WelcomeFlow] Text indicating the subscription period of the Monthly Premium Subscription Plan. -->
+    <string name="welcomeflow_monthly_subscription_period">%1$s /Monat</string>
+
+    <!-- [WelcomeFlow] Text for Premium Annual Subscription Plan indicating that the cost is reduced if the user purchases an annual plan over a monthly plan. -->
+    <string name="welcomeflow_annual_subscription_savings" formatted="false">30% sparen</string>
+
+    <!-- [WelcomeFlow] Description Text for Monthly and Annual Premium Subscription Plan indicating that the user can can cancel anytime. -->
+    <string name="welcomeflow_cancel_anytime">Kündigung jederzeit möglich</string>
+
+    <!-- [WelcomeFlow] Button Text indicating that the user can try the Annual or Monthly Premium Plan for free. -->
+    <string name="welcomeflow_try_it_free">Kostenlos testen</string>
+
+    <!-- [WelcomeFlow] Text indicating that there is a free trial period in which the user can try the Annual or Monthly Premium Plan for free. -->
+    <string name="welcomeflow_free_trial">7-tägige kostenlose Testversion</string>
+
+    <!-- [WelcomeFlow] Text in the Plans Screen that denotes the price per month. "mo" stands for month. -->
+    <string name="welcomeflow_per_month">%1$s/Monat</string>
+    
+    <!--  [RateNeevaPromo] Text for the prompt to gauge user experience before prompting user to review the app.  -->
+    <string name="neeva_experience">Wie ist Ihre Erfahrung mit Neeva?</string>
+
+    <!--  [RateNeevaPromo] Text asking if the user wants to provide feedback to Neeva.  -->
+    <string name="send_feedback">Wir verstehen Sie. Senden Sie uns Feedback, damit wir Neeva für Sie besser machen können!</string>
+
+    <!--  [RateNeevaPromo] Text asking the user to rate Neeva on the Play Store.  -->
+    <string name="rate_on_play_store">Begeisterung mit anderen im Play Store teilen? Ihre Bewertung wird Neeva helfen zu wachsen.</string>
+
+    <!--  [RateNeevaPromo] Button text indicating negative sentiment towards Neeva app  -->
+    <string name="needs_work">🤔 Gefällt mir nicht</string>
+
+    <!--  [RateNeevaPromo] Button text indicating positive sentiment towards Neeva app  -->
+    <string name="loving_it">😍 Gefällt mir</string>
 </resources>
