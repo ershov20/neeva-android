@@ -15,15 +15,19 @@ fun SubscriptionRow(
     subscriptionType: SubscriptionType?,
     openUrl: () -> Unit
 ) {
-    val subscriptionString = when (subscriptionType) {
-        SubscriptionType.Basic -> stringResource(id = R.string.subscription_type_basic)
-
-        SubscriptionType.Premium -> stringResource(id = R.string.subscription_type_premium)
-
-        else -> stringResource(id = R.string.subscription_type_unknown)
-    }
+    val subscriptionString = GetSubscriptionString(subscriptionType)
     SettingsLinkRow(
         label = subscriptionString,
         openUrl = openUrl
     )
+}
+
+@Composable
+fun GetSubscriptionString(subscriptionType: SubscriptionType?): String {
+    return when (subscriptionType) {
+        SubscriptionType.Basic -> stringResource(id = R.string.subscription_type_basic)
+        SubscriptionType.Premium -> stringResource(id = R.string.subscription_type_premium)
+        SubscriptionType.Unlimited -> stringResource(id = R.string.subscription_type_unlimited)
+        else -> stringResource(id = R.string.subscription_type_unknown)
+    }
 }

@@ -763,6 +763,7 @@
     <string name="settings_membership_status">Membership status</string>
     <string name="subscription_type_basic">Free Basic</string>
     <string name="subscription_type_premium">Premium</string>
+    <string name="subscription_type_unlimited">Unlimited</string>
     <string name="subscription_type_unknown">Unknown</string>
 
 
@@ -1020,6 +1021,9 @@
 
     <!-- [WelcomeFlow] Header text in the Create Account Screen. -->
     <string name="welcomeflow_create_your_account">Create your account</string>
+
+    <!-- [WelcomeFlow] Text for Settings Row to learn more about the Premium subscription. -->
+    <string name="welcomeflow_learn_more_about_premium">Learn more about Premium</string>
 
 
 

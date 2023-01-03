@@ -60,6 +60,7 @@ fun SpaceHeader(
             secondaryLabel = null,
             painter = pictureUrlPainter(pictureURI = space.ownerPictureURL),
             showSingleLetterPictureIfAvailable = true,
+            subscriptionType = null,
             onClick = null
         )
         if (space.description.isNotEmpty()) {

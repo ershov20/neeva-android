@@ -43,6 +43,7 @@ fun ProfileRowContainer(
                 secondaryLabel = userInfo.email,
                 painter = SSOImagePainter(userInfo.ssoProvider), circlePicture = false,
                 showSingleLetterPictureIfAvailable = false,
+                subscriptionType = userInfo.subscriptionType,
                 onClick = null
             )
         }
@@ -58,6 +59,7 @@ fun ProfileRowContainer(
                 secondaryLabel = userInfo.email,
                 painter = painter,
                 showSingleLetterPictureIfAvailable = true,
+                subscriptionType = userInfo.subscriptionType,
                 onClick = onClick
             )
         }
@@ -71,6 +73,7 @@ fun ProfileRow(
     painter: Painter?,
     circlePicture: Boolean = true,
     showSingleLetterPictureIfAvailable: Boolean,
+    subscriptionType: SubscriptionType?,
     onClick: (() -> Unit)? = null
 ) {
     BaseRowLayout(
@@ -81,6 +84,9 @@ fun ProfileRow(
                 painter = painter, circlePicture = circlePicture,
                 showSingleLetterPictureIfAvailable = showSingleLetterPictureIfAvailable
             )
+        },
+        endComposable = {
+            ProfileSubscription(subscriptionType = subscriptionType)
         }
     ) {
         StackedText(primaryLabel = primaryLabel ?: "", secondaryLabel = secondaryLabel)
