@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
@@ -35,6 +34,7 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.DialogState
 import com.neeva.app.ui.PopupModel
+import com.neeva.app.ui.SnackbarHost
 import com.neeva.app.ui.util.ScreenState
 import com.neeva.app.ui.widgets.bottomsheetdialog.BottomSheetDialogHost
 import com.neeva.app.userdata.NeevaUser
