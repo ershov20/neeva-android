@@ -45,6 +45,7 @@ import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.welcomeflow.createaccount.CreateAccountScreen
+import com.neeva.app.welcomeflow.createaccount.SignInScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import timber.log.Timber
@@ -57,7 +58,8 @@ class WelcomeFlowActivity : AppCompatActivity() {
             PLANS,
             SET_DEFAULT_BROWSER,
             CREATE_ACCOUNT_WITH_GOOGLE,
-            CREATE_ACCOUNT_WITH_OTHER
+            CREATE_ACCOUNT_WITH_OTHER,
+            SIGN_IN
         }
     }
 
@@ -184,6 +186,13 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
                         composable(Destinations.CREATE_ACCOUNT_WITH_OTHER.name) {
                             CreateAccountScreen(
+                                launchSignUpFlow = {},
+                                onBack = { navHost.popBackStack() }
+                            )
+                        }
+
+                        composable(Destinations.SIGN_IN.name) {
+                            SignInScreen(
                                 launchSignUpFlow = {},
                                 onBack = { navHost.popBackStack() }
                             )

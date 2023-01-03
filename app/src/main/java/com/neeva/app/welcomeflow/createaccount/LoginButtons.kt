@@ -34,7 +34,7 @@ import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
-fun LoginButton(provider: NeevaUser.SSOProvider) {
+fun LoginButton(provider: NeevaUser.SSOProvider, signup: Boolean) {
     val firstRunModel = LocalFirstRunModel.current
     val appNavModel = LocalAppNavModel.current
     val context = LocalContext.current
@@ -49,11 +49,13 @@ fun LoginButton(provider: NeevaUser.SSOProvider) {
                 appNavModel.openUrlInNewTab(it)
             }
         },
+        signup = signup
     )
 }
 
 @Composable
 private fun LoginButton(
+    signup: Boolean,
     provider: NeevaUser.SSOProvider,
     onLaunchLoginFlow: (ActivityResultLauncher<Intent>, LaunchLoginFlowParams) -> Unit,
     onLaunchActivityResult: (ActivityResult, LaunchLoginFlowParams) -> Unit,
@@ -71,7 +73,7 @@ private fun LoginButton(
 
     if (provider == NeevaUser.SSOProvider.GOOGLE) {
         LoginButton(
-            text = getSSOProviderOnboardingText(provider, true),
+            text = getSSOProviderOnboardingText(provider, signup),
             startComposable = { SSOProviderButtonIcon(ssoProvider = provider) },
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
@@ -79,7 +81,7 @@ private fun LoginButton(
         )
     } else {
         LoginButton(
-            text = getSSOProviderOnboardingText(provider, true),
+            text = getSSOProviderOnboardingText(provider, signup),
             startComposable = { SSOProviderButtonIcon(ssoProvider = provider) },
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.primary,
@@ -106,7 +108,12 @@ fun getSSOProviderOnboardingText(provider: NeevaUser.SSOProvider, signup: Boolea
                 stringResource(R.string.sign_in_with_google)
             }
 
-        NeevaUser.SSOProvider.OKTA -> stringResource(R.string.sign_up_with_email)
+        NeevaUser.SSOProvider.OKTA ->
+            if (signup) {
+                stringResource(R.string.sign_up_with_email)
+            } else {
+                stringResource(R.string.sign_in_with_email)
+            }
 
         else -> throw IllegalStateException("Unsupported SSO Provider!")
     }

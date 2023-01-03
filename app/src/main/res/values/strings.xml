@@ -524,6 +524,7 @@
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_in_with_microsoft">Sign in with Microsoft</string>
     <string name="sign_in_with_okta">Continue</string>
+    <string name="sign_in_with_email">Sign in with email</string>
 
     <!-- [Sign up][Button] Asks the user for permission to send them promotional materials. -->
     <string name="send_me_product_and_privacy_tips">Send me product &amp; privacy tips</string>
@@ -1021,6 +1022,9 @@
 
     <!-- [WelcomeFlow] Header text in the Create Account Screen. -->
     <string name="welcomeflow_create_your_account">Create your account</string>
+
+    <!-- [WelcomeFlow] Header text in the Sign In Screen. -->
+    <string name="welcomeflow_sign_in_to_neeva">Sign in to Neeva</string>
 
     <!-- [WelcomeFlow] Text for Settings Row to learn more about the Premium subscription. -->
     <string name="welcomeflow_learn_more_about_premium">Learn more about Premium</string>

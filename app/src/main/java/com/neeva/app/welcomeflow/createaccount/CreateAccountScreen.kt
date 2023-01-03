@@ -52,7 +52,7 @@ fun CreateAccountScreen(
 @Composable
 fun SignUpWithGoogleButtons(onOtherOptions: () -> Unit) {
     WelcomeFlowButtonContainer {
-        LoginButton(NeevaUser.SSOProvider.GOOGLE)
+        LoginButton(NeevaUser.SSOProvider.GOOGLE, signup = true)
         Spacer(Modifier.height(18.dp))
         SecondaryWelcomeFlowButton(text = stringResource(id = R.string.sign_up_other_options)) {
             onOtherOptions()
@@ -63,11 +63,11 @@ fun SignUpWithGoogleButtons(onOtherOptions: () -> Unit) {
 @Composable
 fun SignUpWithOtherButtons() {
     WelcomeFlowButtonContainer {
-        LoginButton(NeevaUser.SSOProvider.GOOGLE)
+        LoginButton(NeevaUser.SSOProvider.GOOGLE, signup = true)
         Spacer(Modifier.height(18.dp))
-        LoginButton(NeevaUser.SSOProvider.OKTA)
+        LoginButton(NeevaUser.SSOProvider.OKTA, signup = true)
         Spacer(Modifier.height(18.dp))
-        LoginButton(NeevaUser.SSOProvider.MICROSOFT)
+        LoginButton(NeevaUser.SSOProvider.MICROSOFT, signup = true)
     }
 }
 
