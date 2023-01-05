@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Build the app.
+./gradlew :app:assembleRelease :weblayer_support:assembleRelease task || exit 1
+
 # Can also specify "debug" on the command line.
 mode=${1:-"release"}
 
