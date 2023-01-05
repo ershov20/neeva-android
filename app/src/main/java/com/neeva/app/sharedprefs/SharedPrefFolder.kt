@@ -139,6 +139,16 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "DID_SHOW_AD_BLOCK_ONBOARDING",
             defaultValue = true
         )
+        val ActivityToReturnToAfterLogin = SharedPrefKey(
+            FirstRun,
+            preferenceKey = "ACTIVITY_TO_RETURN_TO_AFTER_LOGIN",
+            defaultValue = ""
+        )
+        val ScreenToReturnToAfterLogin = SharedPrefKey(
+            FirstRun,
+            preferenceKey = "SCREEN_TO_RETURN_TO_AFTER_LOGIN",
+            defaultValue = ""
+        )
     }
 
     object Settings : SharedPrefFolder("SETTINGS")

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.welcomeflow.createaccount
+package com.neeva.app.welcomeflow.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size

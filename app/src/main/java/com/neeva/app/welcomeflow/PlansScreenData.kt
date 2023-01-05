@@ -23,7 +23,7 @@ data class Pricing(
 )
 
 data class SubscriptionPlan(
-    val id: String,
+    val tag: String,
     val name: String,
     val benefits: List<Benefits>,
     val price: Pricing? = null
@@ -58,7 +58,7 @@ object PlansScreenData {
     ): List<SubscriptionPlan> {
         return mutableListOf(
             SubscriptionPlan(
-                id = BillingSubscriptionPlanTags.FREE_PLAN,
+                tag = BillingSubscriptionPlanTags.FREE_PLAN,
                 name = stringResource(id = R.string.welcomeflow_free_plan),
                 benefits = getFreeBenefits()
             )
@@ -71,7 +71,7 @@ object PlansScreenData {
             if (annualPlan != null) {
                 add(
                     SubscriptionPlan(
-                        id = BillingSubscriptionPlanTags.ANNUAL_PREMIUM_PLAN,
+                        tag = BillingSubscriptionPlanTags.ANNUAL_PREMIUM_PLAN,
                         name = stringResource(id = R.string.welcomeflow_annual_premium_plan),
                         benefits = getPremiumBenefits(),
                         price = Pricing(
@@ -89,7 +89,7 @@ object PlansScreenData {
             if (monthlyPlan != null) {
                 add(
                     SubscriptionPlan(
-                        id = BillingSubscriptionPlanTags.MONTHLY_PREMIUM_PLAN,
+                        tag = BillingSubscriptionPlanTags.MONTHLY_PREMIUM_PLAN,
                         name = stringResource(id = R.string.welcomeflow_monthly_premium_plan),
                         benefits = getPremiumBenefits(),
                         price = Pricing(monthlyPrice = getFormattedPrice(monthlyPlan))
@@ -132,18 +132,18 @@ object PlansScreenData {
     internal fun getPreviewSubscriptionPlans(): List<SubscriptionPlan> {
         return listOf(
             SubscriptionPlan(
-                id = BillingSubscriptionPlanTags.FREE_PLAN,
+                tag = BillingSubscriptionPlanTags.FREE_PLAN,
                 name = stringResource(id = R.string.welcomeflow_free_plan),
                 benefits = getFreeBenefits()
             ),
             SubscriptionPlan(
-                id = BillingSubscriptionPlanTags.ANNUAL_PREMIUM_PLAN,
+                tag = BillingSubscriptionPlanTags.ANNUAL_PREMIUM_PLAN,
                 name = stringResource(id = R.string.welcomeflow_annual_premium_plan),
                 benefits = getPremiumBenefits(),
                 price = Pricing(monthlyPrice = "$4.17", annualPrice = "$49.99")
             ),
             SubscriptionPlan(
-                id = BillingSubscriptionPlanTags.MONTHLY_PREMIUM_PLAN,
+                tag = BillingSubscriptionPlanTags.MONTHLY_PREMIUM_PLAN,
                 name = stringResource(id = R.string.welcomeflow_monthly_premium_plan),
                 benefits = getPremiumBenefits(),
                 price = Pricing(monthlyPrice = "$5.99")

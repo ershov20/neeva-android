@@ -129,12 +129,14 @@ class SubscriptionManager(
      * @param activity [Activity] instance.
      * @param tag String representing tags associated with offers and base plans.
      */
-    fun buy(
-        productDetails: ProductDetails,
-        existingPurchases: List<Purchase>?,
-        activity: Activity,
-        tag: String
-    ) {
+    fun buy(activity: Activity, tag: String) {
+        val productDetails = productDetailsFlow.value
+        if (productDetails == null) {
+            Timber.e("Unable to launch Purchase Flow because product details is null.")
+            return
+        }
+        val existingPurchases = purchasesFlow.value
+
         val offerDetails = retrieveEligibleOffers(
             offerDetails = productDetails.subscriptionOfferDetails,
             tag = tag.lowercase()

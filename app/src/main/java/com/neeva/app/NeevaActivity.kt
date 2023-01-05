@@ -331,6 +331,16 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
     }
 
+    private fun showSettings() {
+        lifecycleScope.launch(dispatchers.main) {
+            // Speculative fix for https://github.com/neevaco/neeva-android/issues/939
+            // Wait until the first Compose has completed, which should mean that the NavGraph has
+            // been set up with all of the destinations.
+            firstComposeCompleted.await()
+            appNavModel?.showSettings()
+        }
+    }
+
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         processIntent(intent)
@@ -429,9 +439,10 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                                 popupModel.showSnackbar(getString(R.string.error_generic))
                             }
 
-                            // Send the user to a URL created by appending the [finalPath] to the
-                            // base Neeva URL.
-                            showBrowser()
+                            val screenToReturnTo = firstRunModel.getScreenToReturnToAfterLogin()
+
+                            // Send the user to a URL created by appending the [finalPath] to
+                            // the base Neeva URL.
                             uriToLoad = Uri.parse(neevaConstants.appURL).buildUpon()
                                 .apply { params.finalPath?.let { path(it) } }
                                 .build()
@@ -442,6 +453,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                                 )
                                 firstRunModel.setShouldLogFirstLogin(false)
                             }
+
+                            if (screenToReturnTo.isEmpty()) {
+                                showBrowser()
+                            } else {
+                                // There are no other cases where you want to show a screen other
+                                // than Settings when processing a Login Intent in NeevaActivity.
+                                showSettings()
+                            }
+                            firstRunModel.clearDestinationsToReturnAfterLogin()
                         }
                     }
                 } else {

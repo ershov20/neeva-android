@@ -16,8 +16,11 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityOptionsCompat
+import androidx.navigation.NavHostController
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -44,8 +47,8 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
-import com.neeva.app.welcomeflow.createaccount.CreateAccountScreen
-import com.neeva.app.welcomeflow.createaccount.SignInScreen
+import com.neeva.app.welcomeflow.login.CreateAccountScreen
+import com.neeva.app.welcomeflow.login.SignInScreen
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import timber.log.Timber
@@ -59,8 +62,15 @@ class WelcomeFlowActivity : AppCompatActivity() {
             SET_DEFAULT_BROWSER,
             CREATE_ACCOUNT_WITH_GOOGLE,
             CREATE_ACCOUNT_WITH_OTHER,
-            SIGN_IN
+            SIGN_IN,
+            FINISH_WELCOME_FLOW,
         }
+
+        // region SavedInstanceState keys
+        // Intended to save state when navigating outside of the Neeva App.
+        const val SEND_USER_TO_BROWSER_KEY = "sendUserToBrowserOnResume"
+        const val SELECTED_SUBSCRIPTION_TAG_KEY: String = "selectedSubscriptionPlanTag"
+        // endregion
     }
 
     @Inject lateinit var activityStarter: ActivityStarter
@@ -74,16 +84,18 @@ class WelcomeFlowActivity : AppCompatActivity() {
     @Inject lateinit var subscriptionManager: SubscriptionManager
 
     private lateinit var setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager
+    private lateinit var navHost: NavHostController
 
     private var sendUserToBrowserOnResume: Boolean = false
-    private val sendUserToBrowserOnResumeKey = "sendUserToBrowserOnResume"
+    private var selectedSubscriptionPlanTag: MutableState<String?> = mutableStateOf(null)
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         savedInstanceState?.let {
-            sendUserToBrowserOnResume = it.getBoolean(sendUserToBrowserOnResumeKey)
+            sendUserToBrowserOnResume = it.getBoolean(SEND_USER_TO_BROWSER_KEY)
+            selectedSubscriptionPlanTag.value = it.getString(SELECTED_SUBSCRIPTION_TAG_KEY)
         }
 
         clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
@@ -104,7 +116,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
         setContent {
             NeevaTheme {
-                val navHost = rememberAnimatedNavController()
+                navHost = rememberAnimatedNavController()
                 CompositionLocalProvider(
                     LocalClientLogger provides clientLogger,
                     LocalDispatchers provides dispatchers,
@@ -133,7 +145,9 @@ class WelcomeFlowActivity : AppCompatActivity() {
                     ) {
                         composable(Destinations.WELCOME.name) {
                             WelcomeScreen(
-                                navigateToPlans = { navHost.navigate(Destinations.PLANS.name) },
+                                navigateToPlans = {
+                                    navHost.navigate(Destinations.PLANS.name)
+                                },
                                 navigateToSetDefaultBrowser = {
                                     navHost.navigate(Destinations.SET_DEFAULT_BROWSER.name)
                                 }
@@ -144,6 +158,12 @@ class WelcomeFlowActivity : AppCompatActivity() {
                             PlansScreen(
                                 navigateToCreateAccount = {
                                     navHost.navigate(Destinations.CREATE_ACCOUNT_WITH_GOOGLE.name)
+                                },
+                                navigateToSetDefaultBrowser = {
+                                    navHost.navigate(Destinations.SET_DEFAULT_BROWSER.name)
+                                },
+                                saveSubscriptionPlanChoice = { tag ->
+                                    selectedSubscriptionPlanTag.value = tag
                                 }
                             )
                         }
@@ -176,25 +196,33 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
                         composable(Destinations.CREATE_ACCOUNT_WITH_GOOGLE.name) {
                             CreateAccountScreen(
-                                launchSignUpFlow = { },
+                                setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
                                 onShowOtherSignUpOptions = {
                                     navHost.navigate(Destinations.CREATE_ACCOUNT_WITH_OTHER.name)
                                 },
-                                onBack = { navHost.popBackStack() }
+                                onBack = { navHost.popBackStack() },
+                                navigateToSignIn = { navHost.navigate(Destinations.SIGN_IN.name) },
+                                selectedSubscriptionPlanTag = selectedSubscriptionPlanTag.value
                             )
                         }
 
                         composable(Destinations.CREATE_ACCOUNT_WITH_OTHER.name) {
                             CreateAccountScreen(
-                                launchSignUpFlow = {},
-                                onBack = { navHost.popBackStack() }
+                                setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
+                                onBack = { navHost.popBackStack() },
+                                navigateToSignIn = { navHost.navigate(Destinations.SIGN_IN.name) },
+                                selectedSubscriptionPlanTag = selectedSubscriptionPlanTag.value
                             )
                         }
 
                         composable(Destinations.SIGN_IN.name) {
                             SignInScreen(
-                                launchSignUpFlow = {},
-                                onBack = { navHost.popBackStack() }
+                                setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
+                                onBack = { navHost.popBackStack() },
+                                navigateToCreateAccount = {
+                                    navHost.navigate(Destinations.CREATE_ACCOUNT_WITH_GOOGLE.name)
+                                },
+                                selectedSubscriptionPlanTag = selectedSubscriptionPlanTag.value
                             )
                         }
                     }
@@ -219,8 +247,21 @@ class WelcomeFlowActivity : AppCompatActivity() {
         billingClientController.onDestroy()
     }
 
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        val screenToReturnTo = firstRunModel.getScreenToReturnToAfterLogin()
+        firstRunModel.clearDestinationsToReturnAfterLogin()
+
+        when (screenToReturnTo) {
+            "", Destinations.WELCOME.name -> { }
+            Destinations.FINISH_WELCOME_FLOW.name -> { sendUserToBrowser() }
+            else -> { navHost.navigate(screenToReturnTo) }
+        }
+    }
+
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
-        outState.putBoolean(sendUserToBrowserOnResumeKey, sendUserToBrowserOnResume)
+        outState.putBoolean(SEND_USER_TO_BROWSER_KEY, sendUserToBrowserOnResume)
+        outState.putString(SELECTED_SUBSCRIPTION_TAG_KEY, selectedSubscriptionPlanTag.value)
         super.onSaveInstanceState(outState, outPersistentState)
     }
 

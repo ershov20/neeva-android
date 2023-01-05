@@ -185,17 +185,6 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         popupModel = previewPopupModel
     )
 
-    val previewFirstRunModel = FirstRunModel(
-        clientLogger = previewClientLogger,
-        coroutineScope = coroutineScope,
-        dispatchers = previewDispatchers,
-        loginToken = previewLoginToken,
-        neevaConstants = previewNeevaConstants,
-        oktaSignUpHandler = OktaSignUpHandler(previewNeevaConstants),
-        popupModel = previewPopupModel,
-        settingsDataModel = previewSettingsDataModel,
-        sharedPreferencesModel = previewSharedPreferencesModel
-    )
     val previewScreenState = ScreenState()
 
     val previewBillingClientWrapper = BillingClientWrapper(
@@ -212,14 +201,30 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         settingsDataModel = previewSettingsDataModel
     )
 
-    val previewRateNeevaPromoModel = RateNeevaPromoModel(
-        sharedPreferencesModel = previewSharedPreferencesModel,
-    )
-
     val previewSubscriptionManager = SubscriptionManager(
         appContext = LocalContext.current,
         activityStarter = previewActivityStarter,
         billingClientController = previewBillingClientController
+    )
+
+    val previewFirstRunModel = FirstRunModel(
+        appContext = LocalContext.current,
+        authenticatedApolloWrapper = previewApolloWrapper,
+        clientLogger = previewClientLogger,
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers,
+        loginToken = previewLoginToken,
+        neevaConstants = previewNeevaConstants,
+        neevaUser = previewNeevaUser,
+        oktaSignUpHandler = OktaSignUpHandler(previewNeevaConstants),
+        popupModel = previewPopupModel,
+        settingsDataModel = previewSettingsDataModel,
+        sharedPreferencesModel = previewSharedPreferencesModel,
+        subscriptionManager = previewSubscriptionManager
+    )
+
+    val previewRateNeevaPromoModel = RateNeevaPromoModel(
+        sharedPreferencesModel = previewSharedPreferencesModel,
     )
 
     // Provide classes that have no material impact on the Composable previews.  These can still be

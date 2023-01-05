@@ -78,8 +78,6 @@ fun BillingScreen(onDismiss: () -> Unit) {
                     // Monthly
                     Button(onClick = {
                         subscriptionManager.buy(
-                            productDetails = productDetails,
-                            existingPurchases = purchases,
                             tag = MONTHLY_PREMIUM_PLAN,
                             activity = activity
                         )
@@ -90,8 +88,6 @@ fun BillingScreen(onDismiss: () -> Unit) {
                     // Monthly
                     Button(onClick = {
                         subscriptionManager.buy(
-                            productDetails = productDetails,
-                            existingPurchases = purchases,
                             tag = ANNUAL_PREMIUM_PLAN,
                             activity = activity
                         )

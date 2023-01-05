@@ -63,7 +63,11 @@ abstract class NeevaUser(val loginToken: LoginToken) {
         context: Context,
         ignoreLastFetchTimestamp: Boolean = false
     )
-    /** Queues a [job] to run when a user signs in successfully. The [job] will only run once. */
+    /**
+     * Queues a [job] to run when a user signs in successfully.
+     * If the [uniqueJobName] already exists in the queue, it will be replaced by the new [job].
+     * This [job] will only run once.
+     */
     abstract fun queueOnSignIn(uniqueJobName: String, job: () -> Unit)
 }
 
@@ -121,9 +125,8 @@ class NeevaUserImpl(
     }
 
     override fun queueOnSignIn(uniqueJobName: String, job: () -> Unit) {
-        if (jobsToRun.none { it.uniqueJobName == uniqueJobName }) {
-            jobsToRun.add(OnSignedInJob(uniqueJobName = uniqueJobName, job = job))
-        }
+        jobsToRun.removeIf { it.uniqueJobName == uniqueJobName }
+        jobsToRun.add(OnSignedInJob(uniqueJobName = uniqueJobName, job = job))
     }
 
     /**

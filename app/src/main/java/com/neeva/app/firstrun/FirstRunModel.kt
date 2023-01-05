@@ -19,6 +19,8 @@ import com.google.android.gms.tasks.Task
 import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
+import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.SettingsDataModel
@@ -26,9 +28,11 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.singletabbrowser.SingleTabActivity
+import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -39,41 +43,58 @@ fun interface GoogleSignInAccountProvider {
     fun getGoogleSignInAccount(intent: Intent?): Task<GoogleSignInAccount>
 }
 
+data class ActivityReturnParams(
+    val activityToReturnTo: String,
+    val screenToReturnTo: String
+)
+
 @Singleton
 class FirstRunModel internal constructor(
+    private val appContext: Context,
+    private val authenticatedApolloWrapper: AuthenticatedApolloWrapper,
     private var clientLogger: ClientLogger,
     private val coroutineScope: CoroutineScope,
     private val dispatchers: Dispatchers,
     private val googleSignInAccountProvider: GoogleSignInAccountProvider,
     private val loginToken: LoginToken,
     private val neevaConstants: NeevaConstants,
+    private val neevaUser: NeevaUser,
     private val oktaSignUpHandler: OktaSignUpHandler,
     private val popupModel: PopupModel,
     private val sharedPreferencesModel: SharedPreferencesModel,
-    private val settingsDataModel: SettingsDataModel
+    private val settingsDataModel: SettingsDataModel,
+    private val subscriptionManager: SubscriptionManager
 ) {
     @Inject
     constructor(
+        @ApplicationContext appContext: Context,
+        authenticatedApolloWrapper: AuthenticatedApolloWrapper,
         clientLogger: ClientLogger,
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
         loginToken: LoginToken,
         neevaConstants: NeevaConstants,
+        neevaUser: NeevaUser,
         oktaSignUpHandler: OktaSignUpHandler,
         popupModel: PopupModel,
         settingsDataModel: SettingsDataModel,
-        sharedPreferencesModel: SharedPreferencesModel
+        sharedPreferencesModel: SharedPreferencesModel,
+        subscriptionManager: SubscriptionManager
     ) : this(
+        appContext = appContext,
+        authenticatedApolloWrapper = authenticatedApolloWrapper,
         clientLogger = clientLogger,
         coroutineScope = coroutineScope,
         dispatchers = dispatchers,
         googleSignInAccountProvider = GoogleSignIn::getSignedInAccountFromIntent,
         loginToken = loginToken,
         neevaConstants = neevaConstants,
+        neevaUser = neevaUser,
         oktaSignUpHandler = oktaSignUpHandler,
         popupModel = popupModel,
         sharedPreferencesModel = sharedPreferencesModel,
-        settingsDataModel = settingsDataModel
+        settingsDataModel = settingsDataModel,
+        subscriptionManager = subscriptionManager
     )
 
     companion object {
@@ -338,6 +359,79 @@ class FirstRunModel internal constructor(
                 )
                 .setClass(context, NeevaActivity::class.java)
             context.startActivity(intent)
+        }
+    }
+
+    /**
+     * Sends the user to a screen that can be used to sign up or log in to Neeva via a particular
+     * identify provider.
+     */
+    fun launchLoginFlow(
+        activityReturnParams: ActivityReturnParams,
+        context: Context,
+        launchLoginFlowParams: LaunchLoginFlowParams,
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+        onPremiumAvailable: () -> Unit,
+        onPremiumUnavailable: () -> Unit
+    ) {
+        SharedPrefFolder.FirstRun
+            .ActivityToReturnToAfterLogin.set(
+                sharedPreferencesModel,
+                activityReturnParams.activityToReturnTo
+            )
+        SharedPrefFolder.FirstRun
+            .ScreenToReturnToAfterLogin.set(
+                sharedPreferencesModel,
+                activityReturnParams.screenToReturnTo
+            )
+
+        val offers = subscriptionManager.productDetailsFlow.value?.subscriptionOfferDetails
+
+        neevaUser.queueOnSignIn(uniqueJobName = "Welcome Flow: onSuccessfulSignIn") {
+            coroutineScope.launch(dispatchers.main) {
+                val userInfo = neevaUser.userInfoFlow.value
+                val subscriptionType = userInfo?.subscriptionType
+                // TODO(kobec): Add subscription source check to ensure users who subscribed to a
+                //  Non-Google-Play source cannot purchase a subscription.
+
+                // TODO(kobec): Check purchases too!
+                if (
+                    subscriptionType != null &&
+                    subscriptionType != SubscriptionType.Basic &&
+                    !offers.isNullOrEmpty()
+                ) {
+                    onPremiumAvailable()
+                } else {
+                    onPremiumUnavailable()
+                }
+            }
+        }
+
+        launchLoginFlow(
+            context,
+            launchLoginFlowParams,
+            activityResultLauncher
+        )
+    }
+
+    fun getActivityToReturnToAfterLogin(): String {
+        return SharedPrefFolder.FirstRun.ActivityToReturnToAfterLogin.get(sharedPreferencesModel)
+    }
+
+    fun getScreenToReturnToAfterLogin(): String {
+        return SharedPrefFolder.FirstRun.ScreenToReturnToAfterLogin.get(sharedPreferencesModel)
+    }
+
+    fun clearDestinationsToReturnAfterLogin() {
+        SharedPrefFolder.FirstRun.ActivityToReturnToAfterLogin.set(sharedPreferencesModel, "")
+        SharedPrefFolder.FirstRun.ScreenToReturnToAfterLogin.set(sharedPreferencesModel, "")
+    }
+
+    fun queueFetchNeevaInfo() {
+        coroutineScope.launch(dispatchers.io) {
+            loginToken.cachedValueFlow.collect {
+                neevaUser.fetch(apolloWrapper = authenticatedApolloWrapper, context = appContext)
+            }
         }
     }
 

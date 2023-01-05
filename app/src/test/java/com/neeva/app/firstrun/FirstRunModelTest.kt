@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.Tasks
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.NeevaConstants
+import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.sharedprefs.SharedPreferencesModel
@@ -45,8 +46,10 @@ class FirstRunModelTest : BaseTest() {
     @JvmField
     val coroutineScopeRule = CoroutineScopeRule()
 
+    @Mock private lateinit var neevaUser: NeevaUser
     @Mock private lateinit var oktaSignUpHandler: OktaSignUpHandler
     @Mock private lateinit var previewSessionToken: PreviewSessionToken
+    @Mock private lateinit var subscriptionManager: SubscriptionManager
 
     private lateinit var context: Context
     private lateinit var firstRunModel: FirstRunModel
@@ -98,6 +101,8 @@ class FirstRunModelTest : BaseTest() {
         }
 
         firstRunModel = FirstRunModel(
+            authenticatedApolloWrapper = apolloWrapper,
+            appContext = context,
             clientLogger = clientLogger,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = coroutineScopeRule.dispatchers,
@@ -105,9 +110,11 @@ class FirstRunModelTest : BaseTest() {
             oktaSignUpHandler = oktaSignUpHandler,
             loginToken = loginToken,
             neevaConstants = neevaConstants,
+            neevaUser = neevaUser,
             popupModel = popupModel,
             sharedPreferencesModel = sharedPreferencesModel,
-            settingsDataModel = settingsDataModel
+            settingsDataModel = settingsDataModel,
+            subscriptionManager = subscriptionManager
         )
     }
 

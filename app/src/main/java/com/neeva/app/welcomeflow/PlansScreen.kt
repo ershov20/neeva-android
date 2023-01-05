@@ -52,14 +52,20 @@ import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.AnnotatedSpannable
+import com.neeva.app.welcomeflow.login.launchLoginFlow
 import timber.log.Timber
 
 @Composable
-fun PlansScreen(navigateToCreateAccount: () -> Unit) {
+fun PlansScreen(
+    navigateToCreateAccount: () -> Unit,
+    navigateToSetDefaultBrowser: () -> Unit,
+    saveSubscriptionPlanChoice: (String) -> Unit
+) {
     val subscriptionManager = LocalSubscriptionManager.current
     val subscriptionOfferDetails = subscriptionManager.productDetailsFlow
         .collectAsState().value
         ?.subscriptionOfferDetails
+
     // This screen should only be opened if there are available subscription
     // plans for this device.
     if (subscriptionOfferDetails.isNullOrEmpty()) {
@@ -70,18 +76,20 @@ fun PlansScreen(navigateToCreateAccount: () -> Unit) {
     } else {
         PlansScreen(
             subscriptionPlans = PlansScreenData.getSubscriptionPlans(subscriptionOfferDetails),
-            saveSubscriptionPlanChoice = {},
-            navigateToCreateAccount = navigateToCreateAccount
+            saveSubscriptionPlanChoice = saveSubscriptionPlanChoice,
+            navigateToCreateAccount = navigateToCreateAccount,
+            navigateToSetDefaultBrowser = navigateToSetDefaultBrowser
         )
     }
 }
 
 @Composable
 internal fun PlansScreen(
-    initialTabIndex: Int = 0,
+    initialTabIndex: Int = 1,
     subscriptionPlans: List<SubscriptionPlan>,
     saveSubscriptionPlanChoice: (String) -> Unit,
     navigateToCreateAccount: () -> Unit,
+    navigateToSetDefaultBrowser: () -> Unit
 ) {
     WelcomeFlowContainer(headerText = stringResource(id = R.string.welcomeflow_plans_header)) {
         PlansScreenContent(
@@ -89,7 +97,7 @@ internal fun PlansScreen(
             subscriptionPlans = subscriptionPlans,
             saveSubscriptionPlanChoice = saveSubscriptionPlanChoice,
             navigateToCreateAccount = navigateToCreateAccount,
-            launchSignUpFlow = { /** TODO(kobec) */ },
+            navigateToSetDefaultBrowser = navigateToSetDefaultBrowser,
             modifier = it
         )
     }
@@ -101,11 +109,13 @@ fun PlansScreenContent(
     subscriptionPlans: List<SubscriptionPlan>,
     saveSubscriptionPlanChoice: (String) -> Unit,
     navigateToCreateAccount: () -> Unit,
-    launchSignUpFlow: () -> Unit,
+    navigateToSetDefaultBrowser: () -> Unit,
     modifier: Modifier
 ) {
     var selectedTabIndex by remember { mutableStateOf(initialTabIndex) }
     val subscriptionPlan = subscriptionPlans[selectedTabIndex]
+
+    var showSignInText by remember { mutableStateOf(true) }
 
     Column(modifier) {
         Spacer(Modifier.height(24.dp))
@@ -198,10 +208,13 @@ fun PlansScreenContent(
 
         Spacer(Modifier.height(Dimensions.PADDING_MEDIUM))
 
-        SubscriptionInfo(subscriptionPlan) {
-            saveSubscriptionPlanChoice(subscriptionPlan.id)
-            navigateToCreateAccount()
-        }
+        SubscriptionInfo(
+            subscriptionPlan = subscriptionPlan,
+            onClickContinue = {
+                saveSubscriptionPlanChoice(subscriptionPlan.tag)
+                navigateToCreateAccount()
+            }
+        )
 
         Spacer(Modifier.size(Dimensions.PADDING_SMALL))
 
@@ -209,23 +222,37 @@ fun PlansScreenContent(
 
         Spacer(Modifier.size(Dimensions.PADDING_LARGE))
 
-        ToggleSignUpText(signup = true, onClick = launchSignUpFlow)
+        if (showSignInText) {
+            ToggleSignUpText(
+                signup = true,
+                onClick = launchLoginFlow(
+                    activityToReturnTo = WelcomeFlowActivity::class.java.name,
+                    screenToReturnTo = WelcomeFlowActivity.Companion.Destinations.PLANS.name,
+                    onPremiumAvailable = {
+                        showSignInText = false
+                    },
+                    onPremiumUnavailable = {
+                        navigateToSetDefaultBrowser()
+                    }
+                )
+            )
+        }
     }
 }
 
 @Composable
 private fun SubscriptionInfo(
     subscriptionPlan: SubscriptionPlan,
-    saveSubscriptionPlanChoice: () -> Unit
+    onClickContinue: () -> Unit
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        when (subscriptionPlan.id) {
+        when (subscriptionPlan.tag) {
             FREE_PLAN -> {
                 Text(text = subscriptionPlan.name, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(28.dp))
                 WelcomeFlowButton(
                     primaryText = stringResource(id = R.string.welcomeflow_get_free_plan),
-                    onClick = saveSubscriptionPlanChoice
+                    onClick = onClickContinue
                 )
             }
 
@@ -282,12 +309,12 @@ private fun SubscriptionInfo(
             }
         }
 
-        if (subscriptionPlan.id != FREE_PLAN) {
+        if (subscriptionPlan.tag != FREE_PLAN) {
             Spacer(Modifier.height(Dimensions.PADDING_LARGE))
             WelcomeFlowButton(
                 primaryText = stringResource(id = R.string.welcomeflow_try_it_free),
                 secondaryText = stringResource(id = R.string.welcomeflow_free_trial),
-                onClick = saveSubscriptionPlanChoice
+                onClick = onClickContinue
             )
         }
 
@@ -336,7 +363,8 @@ fun PlansScreen_Free_Light_Preview() {
             initialTabIndex = 0,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
             saveSubscriptionPlanChoice = {},
-            navigateToCreateAccount = {}
+            navigateToCreateAccount = {},
+            navigateToSetDefaultBrowser = {}
         )
     }
 }
@@ -349,7 +377,8 @@ fun PlansScreen_Free_Dark_Preview() {
             initialTabIndex = 0,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
             saveSubscriptionPlanChoice = {},
-            navigateToCreateAccount = {}
+            navigateToCreateAccount = {},
+            navigateToSetDefaultBrowser = {}
         )
     }
 }
@@ -362,7 +391,8 @@ fun PlansScreen_Annual_Light_Preview() {
             initialTabIndex = 1,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
             saveSubscriptionPlanChoice = {},
-            navigateToCreateAccount = {}
+            navigateToCreateAccount = {},
+            navigateToSetDefaultBrowser = {}
         )
     }
 }
@@ -375,7 +405,8 @@ fun PlansScreen_Annual_Dark_Preview() {
             initialTabIndex = 1,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
             saveSubscriptionPlanChoice = {},
-            navigateToCreateAccount = {}
+            navigateToCreateAccount = {},
+            navigateToSetDefaultBrowser = {}
         )
     }
 }
@@ -388,7 +419,8 @@ fun PlansScreen_Monthly_Light_Preview() {
             initialTabIndex = 2,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
             saveSubscriptionPlanChoice = {},
-            navigateToCreateAccount = {}
+            navigateToCreateAccount = {},
+            navigateToSetDefaultBrowser = {}
         )
     }
 }
@@ -401,7 +433,8 @@ fun PlansScreen_Monthly_Dark_Preview() {
             initialTabIndex = 2,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
             saveSubscriptionPlanChoice = {},
-            navigateToCreateAccount = {}
+            navigateToCreateAccount = {},
+            navigateToSetDefaultBrowser = {}
         )
     }
 }

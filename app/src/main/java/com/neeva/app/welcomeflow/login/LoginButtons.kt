@@ -2,13 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app.welcomeflow.createaccount
+package com.neeva.app.welcomeflow.login
 
-import android.content.Intent
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,53 +18,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.neeva.app.LocalAppNavModel
-import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.R
-import com.neeva.app.firstrun.LaunchLoginFlowParams
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
-fun LoginButton(provider: NeevaUser.SSOProvider, signup: Boolean) {
-    val firstRunModel = LocalFirstRunModel.current
-    val appNavModel = LocalAppNavModel.current
-    val context = LocalContext.current
-
-    LoginButton(
-        provider = provider,
-        onLaunchLoginFlow = { launcher, params ->
-            firstRunModel.launchLoginFlow(context, params, launcher)
-        },
-        onLaunchActivityResult = { result, params ->
-            firstRunModel.handleLoginActivityResult(context, result, params) {
-                appNavModel.openUrlInNewTab(it)
-            }
-        },
-        signup = signup
-    )
-}
-
-@Composable
-private fun LoginButton(
-    signup: Boolean,
+fun LoginButton(
+    activityToReturnTo: String,
+    screenToReturnTo: String,
     provider: NeevaUser.SSOProvider,
-    onLaunchLoginFlow: (ActivityResultLauncher<Intent>, LaunchLoginFlowParams) -> Unit,
-    onLaunchActivityResult: (ActivityResult, LaunchLoginFlowParams) -> Unit,
+    signup: Boolean,
+    onPremiumAvailable: () -> Unit,
+    onPremiumUnavailable: () -> Unit
 ) {
-    val launchLoginFlowParams = LaunchLoginFlowParams(
+    val onClick = launchLoginFlow(
+        activityToReturnTo = activityToReturnTo,
+        screenToReturnTo = screenToReturnTo,
         provider = provider,
-        signup = true,
+        onPremiumAvailable = onPremiumAvailable,
+        onPremiumUnavailable = onPremiumUnavailable
     )
-
-    val resultLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result: ActivityResult ->
-        onLaunchActivityResult(result, launchLoginFlowParams)
-    }
 
     if (provider == NeevaUser.SSOProvider.GOOGLE) {
         LoginButton(
@@ -77,7 +47,7 @@ private fun LoginButton(
             startComposable = { SSOProviderButtonIcon(ssoProvider = provider) },
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
-            onClick = { onLaunchLoginFlow(resultLauncher, launchLoginFlowParams) }
+            onClick = onClick
         )
     } else {
         LoginButton(
@@ -86,7 +56,7 @@ private fun LoginButton(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.primary,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-            onClick = { onLaunchLoginFlow(resultLauncher, launchLoginFlowParams) }
+            onClick = onClick
         )
     }
 }
@@ -121,7 +91,7 @@ fun getSSOProviderOnboardingText(provider: NeevaUser.SSOProvider, signup: Boolea
 
 /** Standardized button used for the Welcome Flow. */
 @Composable
-fun LoginButton(
+private fun LoginButton(
     text: String,
     containerColor: Color,
     contentColor: Color,

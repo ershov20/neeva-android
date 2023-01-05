@@ -92,21 +92,8 @@ abstract class SessionToken(
 
     private var requestJob: Job? = null
 
-    fun initializeCookieManager(browser: Browser, requestCookieIfEmpty: Boolean = false) {
-        val cookieManager = browser.takeIfAlive()?.profile?.cookieManager ?: return
-        weakBrowser = WeakReference(browser)
-
+    fun updateBrowserCookieJarWithCachedCookie() {
         coroutineScope.launch(dispatchers.main) {
-            // https://github.com/neevaco/neeva-android/issues/1043
-            // In previous versions of the app, login tokens were persisted in SharedPreferences and
-            // synced into the Browser's CookieManager at initialization.  While we've since
-            // switched to using the Browser's CookieManager as the source of truth, we have to
-            // continue the same practice because the old versions of the app incorrectly defined
-            // the cookie in the Browser's CookieManager as a temporary session cookie, meaning that
-            // it would get wiped when the user restarted the app.
-            // To ensure that users don't have to sign in again after installing a newer version of
-            // the app, we first check if the cookie has been persisted in memory before we try to
-            // sync it back from the browser.
             val restoredValue = cachedValue
             if (restoredValue.isNotEmpty()) {
                 Timber.d("Cached session cookie detected at startup; re-setting in Browser.")
@@ -116,7 +103,26 @@ abstract class SessionToken(
                     }
                 }
             }
+        }
+    }
 
+    fun initializeCookieManager(browser: Browser, requestCookieIfEmpty: Boolean = false) {
+        val cookieManager = browser.takeIfAlive()?.profile?.cookieManager ?: return
+        weakBrowser = WeakReference(browser)
+
+        // https://github.com/neevaco/neeva-android/issues/1043
+        // In previous versions of the app, login tokens were persisted in SharedPreferences and
+        // synced into the Browser's CookieManager at initialization.  While we've since
+        // switched to using the Browser's CookieManager as the source of truth, we have to
+        // continue the same practice because the old versions of the app incorrectly defined
+        // the cookie in the Browser's CookieManager as a temporary session cookie, meaning that
+        // it would get wiped when the user restarted the app.
+        // To ensure that users don't have to sign in again after installing a newer version of
+        // the app, we first check if the cookie has been persisted in memory before we try to
+        // sync it back from the browser.
+        updateBrowserCookieJarWithCachedCookie()
+
+        coroutineScope.launch(dispatchers.main) {
             // Detect and save any changes to the session cookie.
             cookieManager.addCookieChangedCallback(
                 Uri.parse(neevaConstants.appURL),
