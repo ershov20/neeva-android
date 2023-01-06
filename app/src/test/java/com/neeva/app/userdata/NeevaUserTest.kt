@@ -214,6 +214,7 @@ class NeevaUserTest : BaseTest() {
                 flags = emptyList(),
                 featureFlags = emptyList(),
                 authProvider = null,
+                subscription = null,
                 subscriptionType = null
             )
         )

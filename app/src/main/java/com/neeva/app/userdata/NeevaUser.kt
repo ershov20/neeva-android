@@ -12,6 +12,7 @@ import com.neeva.app.billing.billingclient.BillingClientController
 import com.neeva.app.network.NetworkHandler
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.type.SubscriptionSource
 import com.neeva.app.type.SubscriptionType
 import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonClass
@@ -28,7 +29,8 @@ data class UserInfo(
     val email: String? = null,
     val pictureURL: String? = null,
     val ssoProviderString: String = NeevaUser.SSOProvider.UNKNOWN.name,
-    val subscriptionTypeString: String = SubscriptionType.Unknown.name
+    val subscriptionTypeString: String = SubscriptionType.Unknown.name,
+    val subscriptionSourceString: String = SubscriptionSource.UNKNOWN__.name
 ) {
     val ssoProvider: NeevaUser.SSOProvider get() =
         NeevaUser.SSOProvider.values().firstOrNull { it.name == ssoProviderString }
@@ -39,6 +41,10 @@ data class UserInfo(
     val subscriptionType: SubscriptionType get() =
         SubscriptionType.values().firstOrNull { it.name == subscriptionTypeString }
             ?: SubscriptionType.Unknown
+
+    val subscriptionSource: SubscriptionSource get() =
+        SubscriptionSource.values().firstOrNull { it.name == subscriptionSourceString }
+            ?: SubscriptionSource.UNKNOWN__
 }
 
 abstract class NeevaUser(val loginToken: LoginToken) {
@@ -203,7 +209,12 @@ class NeevaUserImpl(
                     SubscriptionType.values()
                         .firstOrNull { it == subscriptionType }
                         ?: SubscriptionType.Unknown
-                    ).name
+                    ).name,
+                subscriptionSourceString = (
+                    SubscriptionSource.values()
+                        .firstOrNull { it == subscription?.source }
+                        ?: SubscriptionSource.UNKNOWN__
+                    ).name,
             )
         }
     }

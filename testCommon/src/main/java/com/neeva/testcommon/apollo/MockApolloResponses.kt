@@ -20,6 +20,7 @@ val RESPONSE_USER_INFO_QUERY = UserInfoQuery.Data(
         flags = emptyList(),
         featureFlags = emptyList(),
         authProvider = NeevaUser.SSOProvider.OKTA.url,
+        subscription = null,
         subscriptionType = SubscriptionType.Basic
     )
 )

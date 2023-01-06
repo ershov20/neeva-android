@@ -15,6 +15,12 @@ query UserInfo {
       stringValue
     }
     authProvider
+    subscription {
+      status
+      canceled
+      plan
+      source
+    }
     subscriptionType
   }
 }

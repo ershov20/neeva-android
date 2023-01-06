@@ -28,6 +28,7 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.singletabbrowser.SingleTabActivity
+import com.neeva.app.type.SubscriptionSource
 import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
@@ -390,15 +391,18 @@ class FirstRunModel internal constructor(
         neevaUser.queueOnSignIn(uniqueJobName = "Welcome Flow: onSuccessfulSignIn") {
             coroutineScope.launch(dispatchers.main) {
                 val userInfo = neevaUser.userInfoFlow.value
-                val subscriptionType = userInfo?.subscriptionType
-                // TODO(kobec): Add subscription source check to ensure users who subscribed to a
-                //  Non-Google-Play source cannot purchase a subscription.
 
-                // TODO(kobec): Check purchases too!
+                val subscriptionSource = userInfo?.subscriptionSource
+                val hasValidSubscriptionSource =
+                    subscriptionSource == SubscriptionSource.GooglePlay ||
+                        subscriptionSource == SubscriptionSource.None
+
+                // TODO(kobec): Check if existing purchases == null too!
                 if (
-                    subscriptionType != null &&
-                    subscriptionType != SubscriptionType.Basic &&
-                    !offers.isNullOrEmpty()
+                    userInfo != null &&
+                    userInfo.subscriptionType == SubscriptionType.Basic &&
+                    hasValidSubscriptionSource &&
+                    offers != null && offers.isNotEmpty()
                 ) {
                     onPremiumAvailable()
                 } else {

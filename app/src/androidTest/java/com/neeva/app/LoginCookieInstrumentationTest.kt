@@ -117,6 +117,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
                     flags = emptyList(),
                     featureFlags = emptyList(),
                     authProvider = NeevaUser.SSOProvider.GOOGLE.name,
+                    subscription = null,
                     subscriptionType = SubscriptionType.Basic
                 )
             )
@@ -186,6 +187,7 @@ class LoginCookieInstrumentationTest : BaseHiltTest() {
                     flags = emptyList(),
                     featureFlags = emptyList(),
                     authProvider = NeevaUser.SSOProvider.GOOGLE.name,
+                    subscription = null,
                     subscriptionType = SubscriptionType.Basic
                 )
             )
