@@ -99,6 +99,9 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         /** Creates a lazy tab for the regular browser profile. */
         const val ACTION_NEW_TAB = "ACTION_NEW_TAB"
 
+        /** Sends the user directly to a specified [AppNavDestination]. */
+        const val ACTION_SHOW_SCREEN = "ACTION_SHOW_SCREEN"
+
         /** Sends the user directly to the SpaceGrid. */
         const val ACTION_SHOW_SPACES = "ACTION_SHOW_SPACES"
 
@@ -184,7 +187,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         spaceStore = spaceStore,
                         onTakeScreenshot = this@NeevaActivity::takeScreenshotForFeedback,
                         neevaConstants = neevaConstants,
-                        neevaUser = neevaUser
+                        neevaUser = neevaUser,
+                        firstRunModel = firstRunModel
                     )
                 }
                 cardsPaneModel = remember(appNavModel) {
@@ -409,6 +413,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 appNavModel?.showCardGrid()
             }
 
+            ACTION_SHOW_SCREEN -> {
+                switchToRegularProfile()
+                processScreenToNavigateTo()
+            }
+
             Intent.ACTION_VIEW -> {
                 switchToRegularProfile()
 
@@ -422,6 +431,8 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         if (params.sessionKey == null || params.retryCode != null) {
                             popupModel.showSnackbar(getString(params.getErrorResourceId()))
                         } else {
+                            // TODO(kobec): Remove redundant cookie manager update when
+                            //  FirstRunActivity is removed.
                             // Update the Browser's cookie jar with the login cookie.
                             val wasCookieJarUpdated = suspendCoroutine { continuation ->
                                 neevaUser.loginToken.updateCookieManager(
@@ -439,29 +450,13 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                                 popupModel.showSnackbar(getString(R.string.error_generic))
                             }
 
-                            val screenToReturnTo = firstRunModel.getScreenToReturnToAfterLogin()
-
                             // Send the user to a URL created by appending the [finalPath] to
                             // the base Neeva URL.
                             uriToLoad = Uri.parse(neevaConstants.appURL).buildUpon()
                                 .apply { params.finalPath?.let { path(it) } }
                                 .build()
 
-                            if (firstRunModel.shouldLogFirstLogin()) {
-                                clientLogger.logCounter(
-                                    LogConfig.Interaction.LOGIN_AFTER_FIRST_RUN, null
-                                )
-                                firstRunModel.setShouldLogFirstLogin(false)
-                            }
-
-                            if (screenToReturnTo.isEmpty()) {
-                                showBrowser()
-                            } else {
-                                // There are no other cases where you want to show a screen other
-                                // than Settings when processing a Login Intent in NeevaActivity.
-                                showSettings()
-                            }
-                            firstRunModel.clearDestinationsToReturnAfterLogin()
+                            processScreenToNavigateTo()
                         }
                     }
                 } else {
@@ -487,6 +482,15 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 isViaIntent = true,
                 onLoadStarted = { showBrowser(forceUserToStayInCardGrid = false) }
             )
+        }
+    }
+
+    private fun processScreenToNavigateTo() {
+        val screenToReturnTo = firstRunModel.getScreenToReturnToAfterLogin()
+        firstRunModel.clearDestinationsToReturnAfterLogin()
+        when (screenToReturnTo) {
+            AppNavDestination.SETTINGS.name -> showSettings()
+            else -> showBrowser()
         }
     }
 

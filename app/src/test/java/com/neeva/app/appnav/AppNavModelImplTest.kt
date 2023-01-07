@@ -13,6 +13,7 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.GoBackResult
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.spaces.SpaceStore
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
@@ -38,6 +39,7 @@ class AppNavModelImplTest : BaseTest() {
     @MockK lateinit var onTakeScreenshot: (callback: () -> Unit) -> Unit
     @MockK lateinit var popupModel: PopupModel
     @MockK lateinit var spaceStore: SpaceStore
+    @MockK lateinit var firstRunModel: FirstRunModel
 
     private lateinit var mockCurrentBrowser: BrowserWrapper
     private lateinit var mockInitializedBrowserFlow: MutableStateFlow<BrowserWrapper>
@@ -85,6 +87,7 @@ class AppNavModelImplTest : BaseTest() {
             webLayerModel = webLayerModel,
             coroutineScope = coroutineScopeRule.scope,
             dispatchers = coroutineScopeRule.dispatchers,
+            firstRunModel = firstRunModel,
             popupModel = popupModel,
             spaceStore = spaceStore,
             onTakeScreenshot = onTakeScreenshot,

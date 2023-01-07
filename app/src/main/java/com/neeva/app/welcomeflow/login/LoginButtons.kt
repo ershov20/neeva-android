@@ -21,24 +21,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.R
+import com.neeva.app.firstrun.LoginReturnParams
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
 fun LoginButton(
-    activityToReturnTo: String,
-    screenToReturnTo: String,
+    loginReturnParams: LoginReturnParams,
+    onPremiumAvailable: () -> Unit,
     provider: NeevaUser.SSOProvider,
     signup: Boolean,
-    onPremiumAvailable: () -> Unit,
-    onPremiumUnavailable: () -> Unit
 ) {
     val onClick = launchLoginFlow(
-        activityToReturnTo = activityToReturnTo,
-        screenToReturnTo = screenToReturnTo,
-        provider = provider,
+        loginReturnParams = loginReturnParams,
         onPremiumAvailable = onPremiumAvailable,
-        onPremiumUnavailable = onPremiumUnavailable
+        provider = provider,
     )
 
     if (provider == NeevaUser.SSOProvider.GOOGLE) {

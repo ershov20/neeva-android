@@ -8,12 +8,15 @@ import android.net.Uri
 import android.text.format.DateUtils
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import com.neeva.app.NeevaActivity
 import com.neeva.app.R
+import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.archived.ArchivingOptionsDialog
 import com.neeva.app.contentfilter.ContentFilterModel
+import com.neeva.app.firstrun.LoginReturnParams
 import com.neeva.app.settings.clearbrowsing.TimeClearingOption
 import com.neeva.app.settings.defaultbrowser.FakeSetDefaultAndroidBrowserManager
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
@@ -161,7 +164,14 @@ class SettingsControllerImpl(
             },
             R.string.content_filter to { appNavModel.showContentFilterSettings() },
             R.string.settings_licenses to { appNavModel.showLicenses() },
-            R.string.settings_debug_launch_welcome_flow to { appNavModel.showWelcomeFlow() }
+            R.string.settings_debug_launch_welcome_flow to {
+                appNavModel.showWelcomeFlow(
+                    LoginReturnParams(
+                        activityToReturnTo = NeevaActivity::class.java.name,
+                        screenToReturnTo = AppNavDestination.SETTINGS.name
+                    )
+                )
+            }
         )
         if (isSignedOut()) {
             navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showSignInFlow() }

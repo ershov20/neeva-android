@@ -33,17 +33,18 @@ import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
-import com.neeva.app.welcomeflow.login.launchLoginFlow
 
 @Composable
 fun WelcomeScreen(
     navigateToPlans: () -> Unit,
+    navigateToSignIn: () -> Unit,
     navigateToSetDefaultBrowser: () -> Unit
 ) {
     val settingsDataModel = LocalSettingsDataModel.current
     WelcomeFlowContainer(headerText = stringResource(id = R.string.welcomeflow_initial_header)) {
         WelcomeScreenContent(
             navigateToPlans = navigateToPlans,
+            navigateToSignIn = navigateToSignIn,
             navigateToSetDefaultBrowser = navigateToSetDefaultBrowser,
             loggingConsentState = settingsDataModel.getToggleState(SettingsToggle.LOGGING_CONSENT),
             toggleLoggingConsentState = settingsDataModel
@@ -56,6 +57,7 @@ fun WelcomeScreen(
 @Composable
 fun WelcomeScreenContent(
     navigateToPlans: () -> Unit,
+    navigateToSignIn: () -> Unit,
     navigateToSetDefaultBrowser: () -> Unit,
     loggingConsentState: MutableState<Boolean>,
     toggleLoggingConsentState: () -> Unit,
@@ -83,6 +85,7 @@ fun WelcomeScreenContent(
 
         ContinueButtons(
             navigateToPlans = navigateToPlans,
+            navigateToSignIn = navigateToSignIn,
             navigateToSetDefaultBrowser = navigateToSetDefaultBrowser
         )
 
@@ -129,7 +132,11 @@ internal fun ConsentCheckbox(
 }
 
 @Composable
-private fun ContinueButtons(navigateToPlans: () -> Unit, navigateToSetDefaultBrowser: () -> Unit) {
+private fun ContinueButtons(
+    navigateToPlans: () -> Unit,
+    navigateToSignIn: () -> Unit,
+    navigateToSetDefaultBrowser: () -> Unit
+) {
     val subscriptionManager = LocalSubscriptionManager.current
     val offers = subscriptionManager.productDetailsFlow.collectAsState().value
         ?.subscriptionOfferDetails
@@ -144,12 +151,7 @@ private fun ContinueButtons(navigateToPlans: () -> Unit, navigateToSetDefaultBro
             }
         },
         secondaryText = stringResource(id = R.string.welcomeflow_i_have_an_account),
-        onSecondaryButton = launchLoginFlow(
-            activityToReturnTo = WelcomeFlowActivity::class.java.name,
-            screenToReturnTo = WelcomeFlowActivity.Companion.Destinations.WELCOME.name,
-            onPremiumAvailable = { navigateToPlans() },
-            onPremiumUnavailable = { navigateToSetDefaultBrowser() }
-        )
+        onSecondaryButton = navigateToSignIn
     )
 }
 
@@ -157,7 +159,7 @@ private fun ContinueButtons(navigateToPlans: () -> Unit, navigateToSetDefaultBro
 @Composable
 fun WelcomeScreen_Light_Preview() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
-        WelcomeScreen(navigateToPlans = {}, navigateToSetDefaultBrowser = {})
+        WelcomeScreen(navigateToPlans = {}, navigateToSignIn = {}, navigateToSetDefaultBrowser = {})
     }
 }
 
@@ -165,6 +167,6 @@ fun WelcomeScreen_Light_Preview() {
 @Composable
 fun WelcomeScreen_Dark_Preview() {
     NeevaThemePreviewContainer(useDarkTheme = true) {
-        WelcomeScreen(navigateToPlans = {}, navigateToSetDefaultBrowser = {})
+        WelcomeScreen(navigateToPlans = {}, navigateToSignIn = {}, navigateToSetDefaultBrowser = {})
     }
 }

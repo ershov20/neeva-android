@@ -20,6 +20,8 @@ import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.browsing.BrowserWrapper
 import com.neeva.app.browsing.WebLayerModel
+import com.neeva.app.firstrun.FirstRunModel
+import com.neeva.app.firstrun.LoginReturnParams
 import com.neeva.app.history.HistorySubpage
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.AddToSpaceUI
@@ -31,6 +33,8 @@ import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.welcomeflow.WelcomeFlowActivity
+import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
+import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,7 +56,8 @@ class AppNavModelImpl(
     private val spaceStore: SpaceStore,
     private val onTakeScreenshot: (callback: () -> Unit) -> Unit,
     private val neevaConstants: NeevaConstants,
-    private val neevaUser: NeevaUser
+    private val neevaUser: NeevaUser,
+    private val firstRunModel: FirstRunModel,
 ) : AppNavModel {
     private val _currentDestination = MutableStateFlow(navController.currentDestination)
     override val currentDestination: StateFlow<NavDestination?>
@@ -188,12 +193,25 @@ class AppNavModelImpl(
     override fun showLicenses() = show(AppNavDestination.LICENSES)
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
-    override fun showSettings() = show(AppNavDestination.SETTINGS)
     override fun showSignInFlow() = show(AppNavDestination.SIGN_IN_FLOW)
-    override fun showWelcomeFlow() {
-        activityStarter.safeStartActivityForIntent(
-            Intent(context, WelcomeFlowActivity::class.java)
+    override fun showWelcomeFlow(loginReturnParams: LoginReturnParams) {
+        val intent = Intent(context, WelcomeFlowActivity::class.java)
+        intent.putExtra(
+            ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
+            loginReturnParams.activityToReturnTo
         )
+        intent.putExtra(
+            SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
+            loginReturnParams.screenToReturnTo
+        )
+        activityStarter.safeStartActivityForIntent(intent)
+    }
+
+    override fun showSettings() = show(AppNavDestination.SETTINGS) {
+        // TODO(kobec): Possibly remove these options when FirstRunActivity is removed...
+        // Keep the back stack shallow by popping everything off back to the root when returning
+        // to the main Settings page.
+        popUpTo(AppNavDestination.SETTINGS.name)
     }
 
     override fun showSpaceDetail(spaceId: String) {

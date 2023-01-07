@@ -121,7 +121,8 @@ class SubscriptionManager(
     }
 
     /**
-     * Use the Google Play Billing Library to make a purchase.
+     * Use the Google Play Billing Library to make a purchase. If the FREE [tag] is passed in, this
+     * function will do nothing.
      *
      * @param productDetails ProductDetails object returned by the library.
      * @param existingPurchases List of current [Purchase] objects needed for upgrades or downgrades.
@@ -129,13 +130,19 @@ class SubscriptionManager(
      * @param activity [Activity] instance.
      * @param tag String representing tags associated with offers and base plans.
      */
-    fun buy(activity: Activity, tag: String) {
+    fun buy(activity: Activity, tag: String?) {
         val productDetails = productDetailsFlow.value
         if (productDetails == null) {
             Timber.e("Unable to launch Purchase Flow because product details is null.")
             return
         }
-        val existingPurchases = purchasesFlow.value
+
+        if (
+            tag != BillingSubscriptionPlanTags.MONTHLY_PREMIUM_PLAN &&
+            tag != BillingSubscriptionPlanTags.ANNUAL_PREMIUM_PLAN
+        ) {
+            return
+        }
 
         val offerDetails = retrieveEligibleOffers(
             offerDetails = productDetails.subscriptionOfferDetails,
@@ -146,6 +153,7 @@ class SubscriptionManager(
 
         // TODO(kobec): add obfuscatedUserID != null &&
         //  check SubscriptionSource == GooglePlayStore or null
+        val existingPurchases = purchasesFlow.value
         if (existingPurchases.isNullOrEmpty()) {
             offerToken?.let {
                 val billingParams = billingFlowParamsBuilder(

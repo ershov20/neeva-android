@@ -44,7 +44,7 @@ fun interface GoogleSignInAccountProvider {
     fun getGoogleSignInAccount(intent: Intent?): Task<GoogleSignInAccount>
 }
 
-data class ActivityReturnParams(
+data class LoginReturnParams(
     val activityToReturnTo: String,
     val screenToReturnTo: String
 )
@@ -363,28 +363,31 @@ class FirstRunModel internal constructor(
         }
     }
 
+    fun setLoginReturnParams(loginReturnParams: LoginReturnParams) {
+        SharedPrefFolder.FirstRun
+            .ActivityToReturnToAfterLogin.set(
+                sharedPreferencesModel,
+                loginReturnParams.activityToReturnTo
+            )
+        SharedPrefFolder.FirstRun
+            .ScreenToReturnToAfterLogin.set(
+                sharedPreferencesModel,
+                loginReturnParams.screenToReturnTo
+            )
+    }
+
     /**
      * Sends the user to a screen that can be used to sign up or log in to Neeva via a particular
      * identify provider.
      */
     fun launchLoginFlow(
-        activityReturnParams: ActivityReturnParams,
+        loginReturnParams: LoginReturnParams,
         context: Context,
         launchLoginFlowParams: LaunchLoginFlowParams,
         activityResultLauncher: ActivityResultLauncher<Intent>,
         onPremiumAvailable: () -> Unit,
-        onPremiumUnavailable: () -> Unit
     ) {
-        SharedPrefFolder.FirstRun
-            .ActivityToReturnToAfterLogin.set(
-                sharedPreferencesModel,
-                activityReturnParams.activityToReturnTo
-            )
-        SharedPrefFolder.FirstRun
-            .ScreenToReturnToAfterLogin.set(
-                sharedPreferencesModel,
-                activityReturnParams.screenToReturnTo
-            )
+        setLoginReturnParams(loginReturnParams)
 
         val offers = subscriptionManager.productDetailsFlow.value?.subscriptionOfferDetails
 
@@ -405,8 +408,6 @@ class FirstRunModel internal constructor(
                     offers != null && offers.isNotEmpty()
                 ) {
                     onPremiumAvailable()
-                } else {
-                    onPremiumUnavailable()
                 }
             }
         }

@@ -8,6 +8,7 @@ import android.content.Context
 import android.net.Uri
 import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
+import com.neeva.app.firstrun.LoginReturnParams
 import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.storage.entities.Space
@@ -47,7 +48,7 @@ interface AppNavModel {
     fun showShareSpaceSheet(spaceId: String)
     fun showSignInFlow()
 
-    fun showWelcomeFlow()
+    fun showWelcomeFlow(loginReturnParams: LoginReturnParams)
     // endregion
 
     // region External screens
@@ -95,7 +96,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {}
     override fun showShareSpaceSheet(spaceId: String) {}
     override fun showSignInFlow() {}
-    override fun showWelcomeFlow() {}
+    override fun showWelcomeFlow(loginReturnParams: LoginReturnParams) {}
     override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}
     override fun openUrlViaIntent(uri: Uri, fallback: Uri?) {}

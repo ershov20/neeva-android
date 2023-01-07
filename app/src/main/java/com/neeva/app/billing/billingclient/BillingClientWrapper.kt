@@ -12,8 +12,8 @@ import com.android.billingclient.api.PurchasesUpdatedListener
 import com.neeva.app.Dispatchers
 import javax.annotation.concurrent.NotThreadSafe
 import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.suspendCancellableCoroutine
 import timber.log.Timber
 
 /** Provides an API to properly manage the [BillingClient] setup. */
@@ -40,24 +40,33 @@ class BillingClientWrapper(
     }
 
     private suspend fun startBillingConnection(): Boolean {
-        return suspendCoroutine { continuation ->
+        return suspendCancellableCoroutine { continuation ->
             billingClient.let {
                 if (it == null) {
                     continuation.resume(false)
-                    return@suspendCoroutine
+                    return@suspendCancellableCoroutine
                 }
 
                 it.startConnection(object : BillingClientStateListener {
                     override fun onBillingSetupFinished(billingResult: BillingResult) {
                         if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                            continuation.resume(true)
+                            if (continuation.isActive) {
+                                continuation.resume(true)
+                            }
                         } else {
-                            continuation.resume(false)
+                            if (continuation.isActive) {
+                                continuation.resume(false)
+                            }
                             Timber.e(errorString(billingResult))
                         }
                     }
                     override fun onBillingServiceDisconnected() {
-                        continuation.resume(false)
+                        // If onBillingSetupFinished() runs and then finishes the continuation,
+                        // we don't want the continuation.resume() to be called on a continuation
+                        // that is inactive.
+                        if (continuation.isActive) {
+                            continuation.resume(false)
+                        }
                         // This function is not reliable.
                         // It does not always get called when the billing service is disconnected.
                         Timber.e("onBillingServiceDisconnected()")

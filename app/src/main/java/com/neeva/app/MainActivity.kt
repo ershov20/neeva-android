@@ -16,13 +16,15 @@ import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.firstrun.FirstRunActivity
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LoginCallbackIntentParams
+import com.neeva.app.logging.ClientLogger
+import com.neeva.app.logging.LogConfig
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.welcomeflow.WelcomeFlowActivity
+import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.FINISH_WELCOME_FLOW
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlinx.coroutines.CoroutineScope
 import timber.log.Timber
 
 /**
@@ -34,7 +36,7 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity() {
 
     @Inject lateinit var authenticatedApolloWrapper: AuthenticatedApolloWrapper
-    @Inject lateinit var applicationCoroutineScope: CoroutineScope
+    @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var loginToken: LoginToken
@@ -71,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         launchActivity(newIntent)
     }
 
-    /** Returns false if it did not handle the login intent. FirstRun will not use this codepath. */
+    /** Returns false if it did not handle the login intent. */
     private fun handleLoginIntentIfExists(intent: Intent): Boolean {
         if (intent.dataString == null || Uri.parse(intent.dataString).scheme != "neeva") {
             return false
@@ -83,15 +85,22 @@ class MainActivity : AppCompatActivity() {
             return false
         }
 
+        // FirstRun will still use this codepath when logging in, but will return false below
+        // and execute its own processing of the login cookie in its own FirstRunActivity.
+        // This log is left here to make sure that we tracked the first login anyways.
+        if (firstRunModel.shouldLogFirstLogin()) {
+            clientLogger.logCounter(LogConfig.Interaction.LOGIN_AFTER_FIRST_RUN, null)
+            firstRunModel.setShouldLogFirstLogin(false)
+        }
+
         val activityClass = getActivityClassToOpen(firstRunModel.getActivityToReturnToAfterLogin())
         val screenToReturnTo = getScreenToOpen(
             activityClass = activityClass,
             screenName = firstRunModel.getScreenToReturnToAfterLogin()
         )
-
-        // If the SharedPreference value is outdated because we renamed a class name or screen name,
-        // clear out the outdated values and launch the app normally.
         if (activityClass == null || screenToReturnTo == null) {
+            // If the SharedPreference value is outdated because we renamed a class name or screen
+            // name, clear out the outdated values and launch the app normally.
             firstRunModel.clearDestinationsToReturnAfterLogin()
             return false
         }
@@ -127,6 +136,10 @@ class MainActivity : AppCompatActivity() {
 
         if (destinationValues == null) {
             return null
+        }
+
+        if (activityClass == WelcomeFlowActivity::class.java && screenName == FINISH_WELCOME_FLOW) {
+            return FINISH_WELCOME_FLOW
         }
 
         return destinationValues.find { it.name == screenName }?.name

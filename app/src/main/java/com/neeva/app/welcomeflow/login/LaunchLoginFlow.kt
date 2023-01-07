@@ -13,17 +13,15 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.neeva.app.LocalFirstRunModel
-import com.neeva.app.firstrun.ActivityReturnParams
 import com.neeva.app.firstrun.LaunchLoginFlowParams
+import com.neeva.app.firstrun.LoginReturnParams
 import com.neeva.app.userdata.NeevaUser
 
 @Composable
 fun launchLoginFlow(
-    activityToReturnTo: String,
-    screenToReturnTo: String,
+    loginReturnParams: LoginReturnParams,
     provider: NeevaUser.SSOProvider? = null,
-    onPremiumAvailable: () -> Unit,
-    onPremiumUnavailable: () -> Unit
+    onPremiumAvailable: () -> Unit
 ): () -> Unit {
     val firstRunModel = LocalFirstRunModel.current
     val context = LocalContext.current
@@ -39,15 +37,14 @@ fun launchLoginFlow(
 
     return {
         firstRunModel.launchLoginFlow(
-            activityReturnParams = ActivityReturnParams(
-                activityToReturnTo = activityToReturnTo,
-                screenToReturnTo = screenToReturnTo
+            loginReturnParams = LoginReturnParams(
+                activityToReturnTo = loginReturnParams.activityToReturnTo,
+                screenToReturnTo = loginReturnParams.screenToReturnTo
             ),
             context = context,
             launchLoginFlowParams = params,
             activityResultLauncher = resultLauncher,
             onPremiumAvailable = onPremiumAvailable,
-            onPremiumUnavailable = onPremiumUnavailable
         )
     }
 }
