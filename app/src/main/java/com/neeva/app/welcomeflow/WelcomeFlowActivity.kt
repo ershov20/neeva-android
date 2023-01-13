@@ -72,6 +72,16 @@ class WelcomeFlowActivity : AppCompatActivity() {
             SIGN_IN,
         }
 
+        /** The primary purpose of using opening this activity. */
+        enum class Purpose {
+            // User only intends to sign-in. Do not show PLANS or SET_DEFAULT_BROWSER Screens.
+            SIGN_IN,
+            // Includes showing PLANS, CREATE_ACCOUNT, and SET_DEFAULT_BROWSER (if necessary).
+            SIGN_UP,
+            // Shows PLANS and SET_DEFAULT_BROWSER (if necessary).
+            BROWSE_PLANS
+        }
+
         // region SavedInstanceState keys
         // Intended to save state when navigating outside of the Neeva App.
         const val SEND_USER_TO_BROWSER_KEY = "SEND_USER_TO_BROWSER"
@@ -83,8 +93,8 @@ class WelcomeFlowActivity : AppCompatActivity() {
         // login flow.
         const val ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY = "ACTIVITY_TO_RETURN_TO"
         const val SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY = "SCREEN_TO_RETURN_TO"
-        /** Determines if a user wants to use this activity only for signing in. */
-        const val SIGN_IN_ONLY = "SIGN_IN_ONLY"
+        /** Key that stores a [Purpose]. */
+        const val WELCOME_FLOW_PURPOSE = "WELCOME_FLOW_PURPOSE"
         // endregion
 
         // Use this as a Screen name parameter to tell this activity to finish after login.
@@ -110,6 +120,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
     private var sendUserToBrowserOnResume: Boolean = false
     private var selectedSubscriptionPlanTag: String? = null
     private var initialLoginParams = mutableStateOf<LoginReturnParams?>(null)
+    private var purpose = mutableStateOf<Purpose?>(null)
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -194,6 +205,8 @@ class WelcomeFlowActivity : AppCompatActivity() {
                                 },
                                 onBack = onBack.takeIf { !firstRunModel.mustShowFirstRun() },
                                 isSignedOut = neevaUser.isSignedOut(),
+                                showFreePlan = firstRunModel.mustShowFirstRun() ||
+                                    purpose.value == Purpose.SIGN_UP
                             )
                         }
 
@@ -333,17 +346,17 @@ class WelcomeFlowActivity : AppCompatActivity() {
             )
         }
 
-        val usingActivityForSignIn = intent?.extras?.getBoolean(SIGN_IN_ONLY) ?: false
-        // SignUp includes showing the user:
-        // Plans Screen
-        // Create Account Screen
-        // Set Default Browser Screen (if it is necessary)
-        val usingActivityForSignUp = !usingActivityForSignIn
+        purpose.value = Purpose
+            .values()
+            .find {
+                it.name == intent?.extras?.getString(WELCOME_FLOW_PURPOSE)
+            }
+
         val canPurchasePremium = isPremiumPurchaseAvailable()
         startDestination = when {
             firstRunModel.mustShowFirstRun() -> Destinations.WELCOME.name
 
-            usingActivityForSignUp -> {
+            purpose.value == Purpose.SIGN_UP -> {
                 // If a user wants to sign up (which is different from sign-in), show Premium plans
                 // before sign-up.
                 if (canPurchasePremium) {
@@ -352,6 +365,10 @@ class WelcomeFlowActivity : AppCompatActivity() {
                     // If a user cannot purchase Premium, skip to signup screen.
                     Destinations.CREATE_ACCOUNT_WITH_GOOGLE.name
                 }
+            }
+
+            purpose.value == Purpose.BROWSE_PLANS -> {
+                Destinations.PLANS.name
             }
 
             // If a user strictly wants to only sign (or any other case), let them use this activity

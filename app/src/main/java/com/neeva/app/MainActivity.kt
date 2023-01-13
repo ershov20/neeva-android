@@ -134,7 +134,6 @@ class MainActivity : AppCompatActivity() {
 
         val newIntent = Intent(this@MainActivity, activityClass)
             .setAction(ACTION_SHOW_SCREEN)
-
         // Send the user to a URL created by appending the [finalPath] to
         // the base Neeva URL.
         newIntent.data = Uri.parse(neevaConstants.appURL).buildUpon()
@@ -192,6 +191,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun launchActivity(intent: Intent) {
+        // Nullify the transition animation to hide the fact that we're switching Activities.
         val options = ActivityOptionsCompat.makeCustomAnimation(this, 0, 0).toBundle()
         ContextCompat.startActivity(this, intent, options)
         finishAndRemoveTask()

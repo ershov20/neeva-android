@@ -12,7 +12,10 @@ import com.neeva.app.settings.SettingsPaneDataInterface
 import com.neeva.app.settings.SettingsRowData
 import com.neeva.app.settings.SettingsRowType
 
-class ProfileSettingsPaneData(neevaConstants: NeevaConstants) : SettingsPaneDataInterface {
+class ProfileSettingsPaneData(
+    neevaConstants: NeevaConstants,
+    hasBasicSubscription: Boolean
+) : SettingsPaneDataInterface {
     // For Profile Settings, the TopAppBar Title is the user's display name.
     override val topAppBarTitleResId: Int = -1
     override val shouldShowUserName: Boolean = true
@@ -21,13 +24,17 @@ class ProfileSettingsPaneData(neevaConstants: NeevaConstants) : SettingsPaneData
             type = SettingsRowType.SUBSCRIPTION,
             primaryLabelId = R.string.settings_membership_status,
             url = Uri.parse(neevaConstants.appMembershipURL)
-        ),
-        SettingsRowData(
-            type = SettingsRowType.BUTTON,
-            primaryLabelId = R.string.settings_sign_out,
-            isDangerousAction = true
         )
-    )
+    ).apply {
+        if (hasBasicSubscription) {
+            add(
+                SettingsRowData(
+                    type = SettingsRowType.BUTTON,
+                    primaryLabelId = R.string.welcomeflow_learn_more_about_premium
+                )
+            )
+        }
+    }
 
     override val data = listOf(
         SettingsGroupData(
@@ -41,8 +48,18 @@ class ProfileSettingsPaneData(neevaConstants: NeevaConstants) : SettingsPaneData
             )
         ),
         SettingsGroupData(
-            R.string.settings_membership_status,
-            subscriptionGroupData
+            titleId = R.string.settings_membership_status,
+            rows = subscriptionGroupData
+        ),
+        SettingsGroupData(
+            titleId = null,
+            rows = listOf(
+                SettingsRowData(
+                    type = SettingsRowType.BUTTON,
+                    primaryLabelId = R.string.settings_sign_out,
+                    isDangerousAction = true
+                )
+            )
         )
     )
 }

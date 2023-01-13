@@ -47,6 +47,7 @@ import com.neeva.app.ui.NeevaThemePreviewContainer
 import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 import com.neeva.app.ui.widgets.StackableButtons
+import com.neeva.app.welcomeflow.WelcomeFlowActivity
 
 @Composable
 fun SpacesIntro(
@@ -169,7 +170,7 @@ fun SpacesIntro(
                         activityToReturnTo = NeevaActivity::class.java.name,
                         screenToReturnTo = AppNavDestination.BROWSER.name
                     ),
-                    signInOnly = true
+                    purpose = WelcomeFlowActivity.Companion.Purpose.SIGN_IN
                 )
             },
             onClickSignUp = {
@@ -178,7 +179,7 @@ fun SpacesIntro(
                         activityToReturnTo = NeevaActivity::class.java.name,
                         screenToReturnTo = AppNavDestination.BROWSER.name
                     ),
-                    signInOnly = false
+                    purpose = WelcomeFlowActivity.Companion.Purpose.SIGN_UP
                 )
             },
             preferredPaddingAroundImage = if (isCalculatingContentHeightWithoutPadding) {

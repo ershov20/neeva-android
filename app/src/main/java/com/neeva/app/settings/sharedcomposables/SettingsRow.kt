@@ -15,6 +15,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
 import com.neeva.app.LocalChromiumVersion
+import com.neeva.app.LocalSubscriptionManager
 import com.neeva.app.R
 import com.neeva.app.contentfilter.ContentFilterModel
 import com.neeva.app.settings.SettingsController
@@ -28,6 +29,7 @@ import com.neeva.app.settings.profile.SubscriptionRow
 import com.neeva.app.settings.sharedcomposables.subcomponents.CheckBoxGroup
 import com.neeva.app.settings.sharedcomposables.subcomponents.CheckBoxItem
 import com.neeva.app.settings.sharedcomposables.subcomponents.SettingsLinkRow
+import com.neeva.app.type.SubscriptionSource
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.NeevaSwitch
 import com.neeva.app.ui.layouts.BaseRowLayout
@@ -70,6 +72,7 @@ fun SettingsRow(
 ) {
     val rowDataValues = getSettingsRowDataValues(rowData)
     val userInfo by settingsController.getNeevaUserInfoFlow().collectAsState()
+    val subscriptionManager = LocalSubscriptionManager.current
 
     when (rowData.type) {
         SettingsRowType.BUTTON -> {
@@ -152,11 +155,20 @@ fun SettingsRow(
 
         SettingsRowType.SUBSCRIPTION -> {
             if (rowData.url != null) {
+                val onClickSubscription = remember(userInfo) {
+                    if (userInfo?.subscriptionSource == SubscriptionSource.GooglePlay) {
+                        {
+                            subscriptionManager.manageSubscriptions()
+                        }
+                    } else {
+                        {
+                            settingsController.openUrl(rowData.url, rowData.openUrlViaIntent)
+                        }
+                    }
+                }
                 SubscriptionRow(
                     subscriptionType = userInfo?.subscriptionType,
-                    openUrl = {
-                        settingsController.openUrl(rowData.url, rowData.openUrlViaIntent)
-                    }
+                    openUrl = onClickSubscription
                 )
             }
         }

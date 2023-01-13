@@ -23,6 +23,7 @@ import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.UserInfo
+import com.neeva.app.welcomeflow.WelcomeFlowActivity
 import java.util.Date
 import java.util.EnumSet
 import kotlinx.coroutines.CoroutineScope
@@ -170,7 +171,7 @@ class SettingsControllerImpl(
                         activityToReturnTo = NeevaActivity::class.java.name,
                         screenToReturnTo = AppNavDestination.SETTINGS.name
                     ),
-                    signInOnly = false
+                    purpose = WelcomeFlowActivity.Companion.Purpose.SIGN_UP
                 )
             }
         )
@@ -181,7 +182,7 @@ class SettingsControllerImpl(
                         activityToReturnTo = NeevaActivity::class.java.name,
                         screenToReturnTo = AppNavDestination.SETTINGS.name
                     ),
-                    signInOnly = false
+                    purpose = WelcomeFlowActivity.Companion.Purpose.SIGN_UP
                 )
             }
         }
@@ -195,7 +196,16 @@ class SettingsControllerImpl(
             R.string.settings_debug_open_50_tabs to { debugOpenManyTabs() },
             R.string.settings_debug_open_500_tabs to { debugOpenManyTabs(500) },
             R.string.settings_debug_export_database to { debugExportDatabase() },
-            R.string.settings_debug_import_database to { debugImportDatabase() }
+            R.string.settings_debug_import_database to { debugImportDatabase() },
+            R.string.welcomeflow_learn_more_about_premium to {
+                appNavModel.showWelcomeFlow(
+                    LoginReturnParams(
+                        activityToReturnTo = NeevaActivity::class.java.name,
+                        screenToReturnTo = AppNavDestination.SETTINGS.name
+                    ),
+                    purpose = WelcomeFlowActivity.Companion.Purpose.BROWSE_PLANS
+                )
+            }
         )
     }
 

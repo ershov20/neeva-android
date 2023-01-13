@@ -13,6 +13,7 @@ import com.neeva.app.overflowmenu.OverflowMenuItemId
 import com.neeva.app.spaces.SpaceEditMode
 import com.neeva.app.storage.entities.Space
 import com.neeva.app.storage.entities.SpaceItem
+import com.neeva.app.welcomeflow.WelcomeFlowActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -47,12 +48,10 @@ interface AppNavModel {
     fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?)
     fun showShareSpaceSheet(spaceId: String)
     fun showSignInFlow()
-
-    /**
-     * @param signInOnly True when user only intends to sign-in. The WelcomeFlow will not show PLANS
-     * or SET_DEFAULT_BROWSER Screens.
-     */
-    fun showWelcomeFlow(loginReturnParams: LoginReturnParams, signInOnly: Boolean)
+    fun showWelcomeFlow(
+        loginReturnParams: LoginReturnParams,
+        purpose: WelcomeFlowActivity.Companion.Purpose
+    )
     // endregion
 
     // region External screens
@@ -100,7 +99,10 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {}
     override fun showShareSpaceSheet(spaceId: String) {}
     override fun showSignInFlow() {}
-    override fun showWelcomeFlow(loginReturnParams: LoginReturnParams, signInOnly: Boolean) {}
+    override fun showWelcomeFlow(
+        loginReturnParams: LoginReturnParams,
+        purpose: WelcomeFlowActivity.Companion.Purpose
+    ) {}
     override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}
     override fun openUrlViaIntent(uri: Uri, fallback: Uri?) {}

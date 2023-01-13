@@ -7,8 +7,10 @@ import com.neeva.app.settings.defaultbrowser.SettingsDefaultAndroidBrowser_Dark_
 import com.neeva.app.settings.defaultbrowser.SettingsDefaultAndroidBrowser_Preview
 import com.neeva.app.settings.main.SettingsMain_Dark_Preview
 import com.neeva.app.settings.main.SettingsMain_Preview
-import com.neeva.app.settings.profile.SettingsProfile_Dark_Preview
-import com.neeva.app.settings.profile.SettingsProfile_Preview
+import com.neeva.app.settings.profile.SettingsProfile_BasicSubscription_Preview
+import com.neeva.app.settings.profile.SettingsProfile_BasicSubscription_Preview_Dark
+import com.neeva.app.settings.profile.SettingsProfile_PremiumSubscription_Preview
+import com.neeva.app.settings.profile.SettingsProfile_PremiumSubscription_Preview_Dark
 import org.junit.Test
 
 class SettingsScreenshotTests : BaseScreenshotTest() {
@@ -33,13 +35,23 @@ class SettingsScreenshotTests : BaseScreenshotTest() {
     }
 
     @Test
-    fun profilePreview_Light() = runScreenshotTest {
-        SettingsProfile_Preview()
+    fun profilePreview_BasicSubscription_Light() = runScreenshotTest {
+        SettingsProfile_BasicSubscription_Preview()
     }
 
     @Test
-    fun profilePreview_Dark() = runScreenshotTest {
-        SettingsProfile_Dark_Preview()
+    fun profilePreview_BasicSubscription_Dark() = runScreenshotTest {
+        SettingsProfile_BasicSubscription_Preview_Dark()
+    }
+
+    @Test
+    fun profilePreview_PremiumSubscription_Light() = runScreenshotTest {
+        SettingsProfile_PremiumSubscription_Preview()
+    }
+
+    @Test
+    fun profilePreview_PremiumSubscription_Dark() = runScreenshotTest {
+        SettingsProfile_PremiumSubscription_Preview_Dark()
     }
 
     @Test

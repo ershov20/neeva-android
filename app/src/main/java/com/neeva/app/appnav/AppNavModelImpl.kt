@@ -35,7 +35,7 @@ import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.welcomeflow.WelcomeFlowActivity
 import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
 import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
-import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.SIGN_IN_ONLY
+import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.WELCOME_FLOW_PURPOSE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -195,7 +195,10 @@ class AppNavModelImpl(
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showSignInFlow() = show(AppNavDestination.SIGN_IN_FLOW)
-    override fun showWelcomeFlow(loginReturnParams: LoginReturnParams, signInOnly: Boolean) {
+    override fun showWelcomeFlow(
+        loginReturnParams: LoginReturnParams,
+        purpose: WelcomeFlowActivity.Companion.Purpose
+    ) {
         val intent = Intent(context, WelcomeFlowActivity::class.java)
         intent.putExtra(
             ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
@@ -205,7 +208,7 @@ class AppNavModelImpl(
             SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
             loginReturnParams.screenToReturnTo
         )
-        intent.putExtra(SIGN_IN_ONLY, signInOnly)
+        intent.putExtra(WELCOME_FLOW_PURPOSE, purpose.name)
 
         activityStarter.safeStartActivityForIntent(intent)
     }
