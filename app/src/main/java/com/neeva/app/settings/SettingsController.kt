@@ -169,12 +169,21 @@ class SettingsControllerImpl(
                     LoginReturnParams(
                         activityToReturnTo = NeevaActivity::class.java.name,
                         screenToReturnTo = AppNavDestination.SETTINGS.name
-                    )
+                    ),
+                    signInOnly = false
                 )
             }
         )
         if (isSignedOut()) {
-            navMap[R.string.settings_sign_in_to_join_neeva] = { appNavModel.showSignInFlow() }
+            navMap[R.string.settings_sign_in_to_join_neeva] = {
+                appNavModel.showWelcomeFlow(
+                    loginReturnParams = LoginReturnParams(
+                        activityToReturnTo = NeevaActivity::class.java.name,
+                        screenToReturnTo = AppNavDestination.SETTINGS.name
+                    ),
+                    signInOnly = false
+                )
+            }
         }
         return navMap
     }

@@ -26,7 +26,7 @@ abstract class SetDefaultAndroidBrowserManager {
 
     abstract fun isRoleManagerAvailable(): Boolean
 
-    abstract fun requestToBeDefaultBrowser(callback: () -> Unit)
+    abstract fun requestToBeDefaultBrowser(callback: (neevaIsDefault: Boolean) -> Unit)
 
     companion object {
         fun create(
@@ -55,5 +55,5 @@ class FakeSetDefaultAndroidBrowserManager : SetDefaultAndroidBrowserManager() {
         return true
     }
 
-    override fun requestToBeDefaultBrowser(callback: () -> Unit) {}
+    override fun requestToBeDefaultBrowser(callback: (Boolean) -> Unit) {}
 }

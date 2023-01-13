@@ -92,15 +92,29 @@ abstract class SessionToken(
 
     private var requestJob: Job? = null
 
-    fun updateBrowserCookieJarWithCachedCookie() {
+    fun updateBrowserCookieJarWithCachedCookie(onFailure: () -> Unit) {
         coroutineScope.launch(dispatchers.main) {
             val restoredValue = cachedValue
             if (restoredValue.isNotEmpty()) {
                 Timber.d("Cached session cookie detected at startup; re-setting in Browser.")
+                // Update the Browser's cookie jar with the login cookie.
                 suspendCoroutine { continuation ->
+                    // The callback for the update cookie manager function returns false when the
+                    // cookie already exists in the browser's cookie jar. This means that if
+                    // the cached cookie is equal to the Browser's cookie, the callback would
+                    // return false even if the Browser's cookie is up to date.
                     updateCookieManager(restoredValue) {
                         continuation.resume(Unit)
                     }
+                }
+
+                // To actually tell if the browser cookie jar is up to date, we have to ask the
+                // browser for our cookie:
+                val (_, cookiePair) = weakBrowser.getCookieFromBrowser()
+                val currentCookieValue = cookiePair?.value ?: ""
+
+                if (currentCookieValue != cachedValue) {
+                    onFailure()
                 }
             }
         }
@@ -120,7 +134,7 @@ abstract class SessionToken(
         // To ensure that users don't have to sign in again after installing a newer version of
         // the app, we first check if the cookie has been persisted in memory before we try to
         // sync it back from the browser.
-        updateBrowserCookieJarWithCachedCookie()
+        updateBrowserCookieJarWithCachedCookie(onFailure = {})
 
         coroutineScope.launch(dispatchers.main) {
             // Detect and save any changes to the session cookie.

@@ -4,20 +4,23 @@
 
 package com.neeva.app
 
+import android.app.ActivityManager
 import android.app.SearchManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
+import com.neeva.app.NeevaActivity.Companion.ACTION_SHOW_SCREEN
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.AppNavDestination
-import com.neeva.app.firstrun.FirstRunActivity
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LoginCallbackIntentParams
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
+import com.neeva.app.singletabbrowser.SingleTabActivity
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
@@ -40,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var dispatchers: Dispatchers
     @Inject lateinit var firstRunModel: FirstRunModel
     @Inject lateinit var loginToken: LoginToken
+    @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var popupModel: PopupModel
 
@@ -48,15 +52,25 @@ class MainActivity : AppCompatActivity() {
 
         val loginHandled = handleLoginIntentIfExists(intent)
         if (!loginHandled) {
-            launchNeevaActivity()
+            // If the SharedPreference value of which Destination to return to after a login is
+            // outdated because the login flow never got handled properly, clear out any potential
+            // outdated shared preference values and launch the app normally.
+            firstRunModel.clearDestinationsToReturnAfterLogin()
+            startUpWithoutLoginIntent()
         }
     }
 
-    private fun launchNeevaActivity() {
-        // TODO(kobec): Remove FirstRunActivity when Premium is ready.
-        val activityClass = if (firstRunModel.mustShowFirstRun()) {
-            FirstRunActivity::class.java
+    private fun startUpWithoutLoginIntent() {
+        val activityClass = if (loginToken.isEmpty() && firstRunModel.mustShowFirstRun()) {
+            WelcomeFlowActivity::class.java
         } else {
+            // In the past, for users who downloaded the app before the FirstRunDone
+            // SharedPreference existed, we decided to skip FirstRun if the user was logged in.
+            // This means that those users have never had the FirstRunDone SharedPreference set to
+            // true.
+            // To ensure that the FirstRunDone SharedPreference stays up to date with who exactly
+            // we want to show FirstRun to, set it to done here.
+            firstRunModel.setFirstRunDone()
             NeevaActivity::class.java
         }
 
@@ -98,22 +112,54 @@ class MainActivity : AppCompatActivity() {
             activityClass = activityClass,
             screenName = firstRunModel.getScreenToReturnToAfterLogin()
         )
+
         if (activityClass == null || screenToReturnTo == null) {
-            // If the SharedPreference value is outdated because we renamed a class name or screen
-            // name, clear out the outdated values and launch the app normally.
-            firstRunModel.clearDestinationsToReturnAfterLogin()
             return false
         }
 
         loginToken.updateCachedCookie(params.sessionKey)
         // Since it is possible that we don't start the NeevaActivity, we need to make sure that the
         // browser cookie jar has the new cached cookie value.
-        loginToken.updateBrowserCookieJarWithCachedCookie()
+        loginToken.updateBrowserCookieJarWithCachedCookie(
+            onFailure = {
+                // Tell the user something went wrong and that they couldn't be signed in.
+                popupModel.showSnackbar(getString(R.string.error_generic))
+            }
+        )
         firstRunModel.queueFetchNeevaInfo()
 
-        val newIntent = Intent(this@MainActivity, activityClass).setAction(Intent.ACTION_MAIN)
+        // At this point, the SingleTabActivity has no further use to the logged in user.
+        // Remove it from Android Recents so the user can't navigate back to it.
+        removeSingleTabActivityFromRecents()
+
+        val newIntent = Intent(this@MainActivity, activityClass)
+            .setAction(ACTION_SHOW_SCREEN)
+
+        // Send the user to a URL created by appending the [finalPath] to
+        // the base Neeva URL.
+        newIntent.data = Uri.parse(neevaConstants.appURL).buildUpon()
+            .apply { params.finalPath?.let { path(it) } }
+            .build()
+
         launchActivity(newIntent)
         return true
+    }
+
+    private fun removeSingleTabActivityFromRecents() {
+        try {
+            val am = this.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
+            val appTasks = am?.appTasks
+            appTasks
+                ?.filter {
+                    it.taskInfo.baseActivity?.className == SingleTabActivity::class.java.name
+                }
+                ?.forEach { it.finishAndRemoveTask() }
+        } catch (e: Exception) {
+            Timber.e(
+                e,
+                "Tried to remove SingleTabActivity from Recents but ran into a problem: "
+            )
+        }
     }
 
     private fun getActivityClassToOpen(activityName: String): Class<out AppCompatActivity>? {

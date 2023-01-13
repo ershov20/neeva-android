@@ -48,7 +48,11 @@ interface AppNavModel {
     fun showShareSpaceSheet(spaceId: String)
     fun showSignInFlow()
 
-    fun showWelcomeFlow(loginReturnParams: LoginReturnParams)
+    /**
+     * @param signInOnly True when user only intends to sign-in. The WelcomeFlow will not show PLANS
+     * or SET_DEFAULT_BROWSER Screens.
+     */
+    fun showWelcomeFlow(loginReturnParams: LoginReturnParams, signInOnly: Boolean)
     // endregion
 
     // region External screens
@@ -96,7 +100,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
     override fun showEditSpaceDialog(mode: SpaceEditMode, spaceItem: SpaceItem?, space: Space?) {}
     override fun showShareSpaceSheet(spaceId: String) {}
     override fun showSignInFlow() {}
-    override fun showWelcomeFlow(loginReturnParams: LoginReturnParams) {}
+    override fun showWelcomeFlow(loginReturnParams: LoginReturnParams, signInOnly: Boolean) {}
     override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}
     override fun openUrlViaIntent(uri: Uri, fallback: Uri?) {}

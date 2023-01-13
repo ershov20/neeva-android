@@ -139,7 +139,8 @@ class FirstRunModelTest : BaseTest() {
                     provider = NeevaUser.SSOProvider.GOOGLE,
                     signup = false,
                     emailProvided = "unused@gmail.com",
-                    passwordProvided = null
+                    passwordProvided = null,
+                    mktEmailOptOut = false
                 )
             )
 
@@ -165,7 +166,8 @@ class FirstRunModelTest : BaseTest() {
                     provider = NeevaUser.SSOProvider.GOOGLE,
                     signup = false,
                     emailProvided = "unused@gmail.com",
-                    passwordProvided = null
+                    passwordProvided = null,
+                    mktEmailOptOut = false
                 )
             )
 

@@ -19,6 +19,7 @@ import com.neeva.app.getString
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.waitFor
 import com.neeva.app.waitForNodeWithText
+import com.neeva.app.welcomeflow.WelcomeFlowActivity
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
@@ -75,7 +76,7 @@ class FirstRunStartupTest : BaseBrowserTest() {
             waitFor { multiActivityTestRule.getNeevaActivity() != null }
             waitFor { activity is NeevaActivity }
             multiActivityTestRule.activities.apply {
-                expectThat(any { it.get() is FirstRunActivity }).isFalse()
+                expectThat(any { it.get() is WelcomeFlowActivity }).isFalse()
                 expectThat(any { it.get() is NeevaActivity }).isTrue()
             }
         }
@@ -92,7 +93,7 @@ class FirstRunStartupTest : BaseBrowserTest() {
             waitFor { multiActivityTestRule.getNeevaActivity() != null }
             waitFor { activity is NeevaActivity }
             multiActivityTestRule.activities.apply {
-                expectThat(any { it.get() is FirstRunActivity }).isFalse()
+                expectThat(any { it.get() is WelcomeFlowActivity }).isFalse()
                 expectThat(any { it.get() is NeevaActivity }).isTrue()
             }
         }
@@ -103,20 +104,20 @@ class FirstRunStartupTest : BaseBrowserTest() {
         activityTestRule.launchActivity(createMainIntent())
 
         androidComposeRule.apply {
-            waitFor { multiActivityTestRule.getFirstRunActivity() != null }
-            waitFor { activity is FirstRunActivity }
+            waitFor { multiActivityTestRule.getWelcomeFlowActivity() != null }
+            waitFor { activity is WelcomeFlowActivity }
             multiActivityTestRule.activities.apply {
-                expectThat(any { it.get() is FirstRunActivity }).isTrue()
+                expectThat(any { it.get() is WelcomeFlowActivity }).isTrue()
                 expectThat(any { it.get() is NeevaActivity }).isFalse()
             }
 
             waitForIdle()
 
             // Get past the first screen.
-            waitForNodeWithText(getString(R.string.get_started)).performClick()
+            waitForNodeWithText(getString(R.string.welcomeflow_lets_go)).performClick()
 
             // Don't set the default browser.
-            waitForNodeWithText(getString(R.string.maybe_later)).performClick()
+            waitForNodeWithText(getString(R.string.default_browser_remind_me_later)).performClick()
 
             // Wait for the browser app to start.
             waitFor { it is NeevaActivity }
@@ -136,10 +137,10 @@ class FirstRunStartupTest : BaseBrowserTest() {
         activityTestRule.launchActivity(createMainIntent())
 
         androidComposeRule.apply {
-            waitFor { multiActivityTestRule.getFirstRunActivity() != null }
-            waitFor { activity is FirstRunActivity }
+            waitFor { multiActivityTestRule.getWelcomeFlowActivity() != null }
+            waitFor { activity is WelcomeFlowActivity }
             multiActivityTestRule.activities.apply {
-                expectThat(any { it.get() is FirstRunActivity }).isTrue()
+                expectThat(any { it.get() is WelcomeFlowActivity }).isTrue()
                 expectThat(any { it.get() is NeevaActivity }).isFalse()
             }
 
@@ -149,10 +150,10 @@ class FirstRunStartupTest : BaseBrowserTest() {
             waitForNodeWithText(getString(R.string.logging_consent)).performClick()
 
             // Get past the first screen.
-            waitForNodeWithText(getString(R.string.get_started)).performClick()
+            waitForNodeWithText(getString(R.string.welcomeflow_lets_go)).performClick()
 
             // Don't set the default browser.
-            waitForNodeWithText(getString(R.string.maybe_later)).performClick()
+            waitForNodeWithText(getString(R.string.default_browser_remind_me_later)).performClick()
 
             // Wait for the browser app to start.
             waitFor { multiActivityTestRule.getNeevaActivity() != null }

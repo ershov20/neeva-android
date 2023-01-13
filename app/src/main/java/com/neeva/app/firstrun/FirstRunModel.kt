@@ -10,6 +10,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.compose.runtime.mutableStateOf
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
@@ -20,11 +21,14 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.billing.BillingSubscriptionPlanTags.ANNUAL_PREMIUM_PLAN
+import com.neeva.app.billing.BillingSubscriptionPlanTags.MONTHLY_PREMIUM_PLAN
 import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
 import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
+import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.singletabbrowser.SingleTabActivity
@@ -33,6 +37,7 @@ import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
+import com.neeva.app.welcomeflow.WelcomeFlowActivity
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -98,6 +103,11 @@ class FirstRunModel internal constructor(
         subscriptionManager = subscriptionManager
     )
 
+    internal val mktEmailOptOutState = mutableStateOf(false)
+    fun toggleMarketingEmailOptOut() {
+        mktEmailOptOutState.value = !mktEmailOptOutState.value
+    }
+
     companion object {
         private const val PREVIEW_MODE_COUNT_THRESHOLD = 10
         private const val SERVER_CLIENT_ID =
@@ -110,20 +120,8 @@ class FirstRunModel internal constructor(
             SharedPrefFolder.FirstRun.ShouldLogFirstLogin.set(sharedPreferencesModel, true)
         }
 
-        fun mustShowFirstRun(
-            sharedPreferencesModel: SharedPreferencesModel,
-            loginToken: LoginToken
-        ): Boolean {
-            return when {
-                // User has already signed in.
-                loginToken.isNotEmpty() -> false
-
-                // SharedPreference has been set, so they must have gone through First Run already.
-                SharedPrefFolder.FirstRun.FirstRunDone.get(sharedPreferencesModel) -> false
-
-                // Show First Run.
-                else -> true
-            }
+        fun mustShowFirstRun(sharedPreferencesModel: SharedPreferencesModel): Boolean {
+            return !SharedPrefFolder.FirstRun.FirstRunDone.get(sharedPreferencesModel)
         }
 
         fun isNeevaLoginUri(uri: Uri, neevaConstants: NeevaConstants): Boolean {
@@ -181,9 +179,10 @@ class FirstRunModel internal constructor(
      * this URI, the backend assumes that the client has performed some part of the authentication
      * process before contacting it and redirects the user accordingly.
      */
-    private fun getAndroidCallbackUri(
+    internal fun getAndroidCallbackUri(
         signup: Boolean,
         provider: NeevaUser.SSOProvider,
+        mktEmailOptOut: Boolean,
         loginHint: String = "",
         identityToken: String = "",
         authorizationCode: String = ""
@@ -205,6 +204,7 @@ class FirstRunModel internal constructor(
             .appendQueryParameter("finalPath", provider.finalPath)
             .appendQueryParameter("signup", signup.toString())
             .appendQueryParameter("ignoreCountryCode", "true")
+            .appendQueryParameter("mktEmailOptOut", mktEmailOptOut.toString())
             .appendQueryParameter("loginCallbackType", "android")
             .appendQueryParameter("identityToken", identityToken)
             .appendQueryParameter("authorizationCode", authorizationCode)
@@ -218,7 +218,7 @@ class FirstRunModel internal constructor(
     }
 
     fun mustShowFirstRun(): Boolean {
-        return mustShowFirstRun(sharedPreferencesModel, loginToken)
+        return mustShowFirstRun(sharedPreferencesModel)
     }
 
     fun setFirstRunDone() {
@@ -307,6 +307,7 @@ class FirstRunModel internal constructor(
         val provider = launchLoginFlowParams.provider
         val signup = launchLoginFlowParams.signup
         val emailProvided = launchLoginFlowParams.emailProvided
+        val mktEmailOptOut = launchLoginFlowParams.mktEmailOptOut
 
         val useCustomTabs = settingsDataModel.getSettingsToggleValue(
             SettingsToggle.DEBUG_USE_CUSTOM_TABS_FOR_LOGIN
@@ -345,7 +346,8 @@ class FirstRunModel internal constructor(
                 getAndroidCallbackUri(
                     signup = signup,
                     provider = provider,
-                    loginHint = emailProvided ?: ""
+                    loginHint = emailProvided ?: "",
+                    mktEmailOptOut = mktEmailOptOut
                 )
             )
         } else {
@@ -432,6 +434,37 @@ class FirstRunModel internal constructor(
         SharedPrefFolder.FirstRun.ScreenToReturnToAfterLogin.set(sharedPreferencesModel, "")
     }
 
+    fun getLoginReturnParameters(
+        setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
+        selectedSubscriptionPlanTag: String?,
+        initialLoginReturnParams: LoginReturnParams?
+    ): LoginReturnParams {
+        if (!setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
+            val isNewUser = mustShowFirstRun()
+            val optedForPremium = selectedSubscriptionPlanTag == ANNUAL_PREMIUM_PLAN ||
+                selectedSubscriptionPlanTag == MONTHLY_PREMIUM_PLAN
+
+            if (isNewUser || optedForPremium) {
+                return LoginReturnParams(
+                    activityToReturnTo = WelcomeFlowActivity::class.java.name,
+                    screenToReturnTo = WelcomeFlowActivity.Companion.Destinations
+                        .SET_DEFAULT_BROWSER.name
+                )
+            }
+        }
+
+        // If an Activity launched an intent to start the WelcomeFlow, it left an explicit Activity
+        // name and screen name to return back to once Login has finished.
+        initialLoginReturnParams?.let {
+            return it
+        }
+
+        return LoginReturnParams(
+            activityToReturnTo = WelcomeFlowActivity::class.java.name,
+            screenToReturnTo = WelcomeFlowActivity.FINISH_WELCOME_FLOW
+        )
+    }
+
     fun queueFetchNeevaInfo() {
         coroutineScope.launch(dispatchers.io) {
             loginToken.cachedValueFlow.collect {
@@ -458,6 +491,7 @@ class FirstRunModel internal constructor(
                     uri = getAndroidCallbackUri(
                         signup = launchLoginFlowParams.signup,
                         provider = launchLoginFlowParams.provider,
+                        mktEmailOptOut = launchLoginFlowParams.mktEmailOptOut,
                         loginHint = launchLoginFlowParams.emailProvided ?: ""
                     )
                 )
@@ -476,6 +510,7 @@ class FirstRunModel internal constructor(
             return getAndroidCallbackUri(
                 signup = launchLoginFlowParams.signup,
                 provider = launchLoginFlowParams.provider,
+                mktEmailOptOut = launchLoginFlowParams.mktEmailOptOut,
                 identityToken = idToken,
                 authorizationCode = authCode
             )
@@ -493,6 +528,7 @@ class FirstRunModel internal constructor(
 data class LaunchLoginFlowParams(
     val provider: NeevaUser.SSOProvider,
     val signup: Boolean,
+    val mktEmailOptOut: Boolean,
     val emailProvided: String? = null,
     val passwordProvided: String? = null
 )

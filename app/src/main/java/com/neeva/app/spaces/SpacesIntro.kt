@@ -36,9 +36,11 @@ import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalAppNavModel
 import com.neeva.app.LocalIsDarkTheme
 import com.neeva.app.LocalSpaceStore
+import com.neeva.app.NeevaActivity
 import com.neeva.app.R
+import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.cardgrid.spaces.SpaceCard
-import com.neeva.app.firstrun.rememberSignInFlowNavModel
+import com.neeva.app.firstrun.LoginReturnParams
 import com.neeva.app.firstrun.widgets.buttons.CloseButton
 import com.neeva.app.ui.LandscapePreviews
 import com.neeva.app.ui.NeevaThemePreviewContainer
@@ -74,7 +76,6 @@ fun SpacesIntro(
             }
             SpacesIntro(
                 includeSpaceCard = includeSpaceCard,
-                dismissSheet = dismissSheet,
                 viewHeight = viewHeight,
                 modifier = Modifier.align(
                     Alignment.Center
@@ -96,11 +97,9 @@ fun SpacesIntro(
 @Composable
 fun SpacesIntro(
     includeSpaceCard: Boolean,
-    dismissSheet: () -> Unit = {},
     viewHeight: Dp,
     modifier: Modifier
 ) {
-    val signInFlowNavModel = rememberSignInFlowNavModel()
     val appNavModel = LocalAppNavModel.current
 
     val preferredPaddingAroundImage = 64.dp
@@ -165,12 +164,22 @@ fun SpacesIntro(
 
         SpacesIntroContent(
             onClickSignIn = {
-                signInFlowNavModel.navigateToSignIn()
-                dismissSheet()
+                appNavModel.showWelcomeFlow(
+                    loginReturnParams = LoginReturnParams(
+                        activityToReturnTo = NeevaActivity::class.java.name,
+                        screenToReturnTo = AppNavDestination.BROWSER.name
+                    ),
+                    signInOnly = true
+                )
             },
             onClickSignUp = {
-                appNavModel.showSignInFlow()
-                dismissSheet()
+                appNavModel.showWelcomeFlow(
+                    loginReturnParams = LoginReturnParams(
+                        activityToReturnTo = NeevaActivity::class.java.name,
+                        screenToReturnTo = AppNavDestination.BROWSER.name
+                    ),
+                    signInOnly = false
+                )
             },
             preferredPaddingAroundImage = if (isCalculatingContentHeightWithoutPadding) {
                 // Since we are calculating the height of content when

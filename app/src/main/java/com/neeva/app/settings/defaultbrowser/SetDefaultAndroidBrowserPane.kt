@@ -68,7 +68,7 @@ fun SetDefaultAndroidBrowserPane(
     openAndroidDefaultBrowserSettings: () -> Unit,
     setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
     showAsDialog: Boolean,
-    onActivityResultCallback: () -> Unit,
+    onActivityResultCallback: (isNeevaDefault: Boolean) -> Unit,
     showZeroQuery: () -> Unit
 ) {
     val isRoleManagerAvailable = setDefaultAndroidBrowserManager.isRoleManagerAvailable()

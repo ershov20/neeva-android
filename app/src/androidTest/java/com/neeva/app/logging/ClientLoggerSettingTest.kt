@@ -15,6 +15,7 @@ import com.neeva.app.PresetSharedPreferencesRule
 import com.neeva.app.R
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.AppNavDestination
+import com.neeva.app.clickOnNodeWithText
 import com.neeva.app.getString
 import com.neeva.app.openOverflowMenuAndClickItem
 import com.neeva.app.toggleUsageLoggingSetting
@@ -88,8 +89,11 @@ class ClientLoggerSettingTest : BaseBrowserTest() {
             // Clear out any existing logged operations.
             testAuthenticatedApolloWrapper.testApolloClientWrapper.performedOperations.clear()
 
-            // Navigate to a screen that triggers a client log.
+            // Navigate to the sign-up screen
             onNodeWithText(getString(R.string.settings_sign_in_to_join_neeva)).performClick()
+
+            // Navigate to a sign-in screen that triggers a client log.
+            clickOnNodeWithText(getString(R.string.sign_in), substring = true)
             waitForIdle()
         }
     }

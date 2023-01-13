@@ -26,8 +26,10 @@ import com.neeva.app.waitForNodeToDisappear
 import com.neeva.app.waitForNodeWithContentDescription
 import com.neeva.app.waitForNodeWithTag
 import com.neeva.app.waitForNodeWithText
+import com.neeva.app.zeroquery.RateNeevaPromo.RateNeevaPromoModel
 import com.neeva.testcommon.WebpageServingRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import javax.inject.Inject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -40,6 +42,9 @@ class RegularProfileZeroQueryTest : BaseBrowserTest() {
     @get:Rule(order = 10000)
     val androidComposeRule = createAndroidComposeRule<NeevaActivity>()
 
+    @Inject
+    lateinit var rateNeevaPromoModel: RateNeevaPromoModel
+
     @Before
     override fun setUp() {
         super.setUp()
@@ -47,6 +52,7 @@ class RegularProfileZeroQueryTest : BaseBrowserTest() {
             activityRule.scenario.moveToState(Lifecycle.State.RESUMED)
             waitForActivityStartup()
             expectBrowserState(isIncognito = false, regularTabCount = 1)
+            rateNeevaPromoModel.dismiss()
         }
     }
 

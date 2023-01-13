@@ -9,7 +9,7 @@ import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
-import com.neeva.app.firstrun.FirstRunActivity
+import com.neeva.app.welcomeflow.WelcomeFlowActivity
 import dagger.hilt.android.testing.HiltTestApplication
 import java.lang.ref.WeakReference
 import org.junit.rules.TestRule
@@ -75,10 +75,10 @@ class MultiActivityTestRule : TestRule {
             ?.get() as? NeevaActivity
     }
 
-    /** Returns the FirstRunActivity that was launched, assuming that it exists. */
-    fun getFirstRunActivity(): FirstRunActivity? {
+    /** Returns the WelcomeFlowActivity that was launched, assuming that it exists. */
+    fun getWelcomeFlowActivity(): WelcomeFlowActivity? {
         return activities
-            .firstOrNull { it.get() is FirstRunActivity }
-            ?.get() as? FirstRunActivity
+            .firstOrNull { it.get() is WelcomeFlowActivity }
+            ?.get() as? WelcomeFlowActivity
     }
 }

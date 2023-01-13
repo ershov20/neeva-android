@@ -54,15 +54,20 @@ object PlansScreenData {
 
     @Composable
     fun getSubscriptionPlans(
-        subscriptionOfferDetails: List<SubscriptionOfferDetails>
+        subscriptionOfferDetails: List<SubscriptionOfferDetails>,
+        showFreePlan: Boolean
     ): List<SubscriptionPlan> {
-        return mutableListOf(
-            SubscriptionPlan(
-                tag = BillingSubscriptionPlanTags.FREE_PLAN,
-                name = stringResource(id = R.string.welcomeflow_free_plan),
-                benefits = getFreeBenefits()
-            )
-        ).apply {
+        return mutableListOf<SubscriptionPlan>().apply {
+            if (showFreePlan) {
+                add(
+                    SubscriptionPlan(
+                        tag = BillingSubscriptionPlanTags.FREE_PLAN,
+                        name = stringResource(id = R.string.welcomeflow_free_plan),
+                        benefits = getFreeBenefits()
+                    )
+                )
+            }
+
             val annualPlan = getSubscriptionPlan(
                 subscriptionOfferDetails = subscriptionOfferDetails,
                 tag = BillingSubscriptionPlanTags.ANNUAL_PREMIUM_PLAN

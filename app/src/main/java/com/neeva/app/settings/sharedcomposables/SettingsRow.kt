@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.neeva.app.BuildConfig
@@ -138,11 +139,14 @@ fun SettingsRow(
         }
 
         SettingsRowType.PROFILE -> {
+            val onClickProfile = remember(userInfo) {
+                settingsController.getOnClickMap()[R.string.settings_sign_in_to_join_neeva]
+            }
             ProfileRowContainer(
                 isSignedOut = settingsController.isSignedOut(),
                 showSSOProviderAsPrimaryLabel = rowData.showSSOProviderAsPrimaryLabel,
                 userInfo = userInfo,
-                onClick = onClick
+                onClick = onClickProfile
             )
         }
 

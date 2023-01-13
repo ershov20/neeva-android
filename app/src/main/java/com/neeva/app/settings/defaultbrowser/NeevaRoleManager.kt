@@ -28,7 +28,7 @@ class NeevaRoleManager(
         }
 
     /** Tracks the callback that will fire when the dialog closes. */
-    private var requestCallback: WeakReference<() -> Unit> = WeakReference(null)
+    private var requestCallback: WeakReference<(Boolean) -> Unit> = WeakReference(null)
 
     private val roleManager = activity.getSystemService(Context.ROLE_SERVICE) as RoleManager
 
@@ -43,7 +43,7 @@ class NeevaRoleManager(
         return true
     }
 
-    override fun requestToBeDefaultBrowser(callback: () -> Unit) {
+    override fun requestToBeDefaultBrowser(callback: (Boolean) -> Unit) {
         if (roleManager.isRoleAvailable(RoleManager.ROLE_BROWSER)) {
             requestCallback = WeakReference(callback)
             androidDefaultBrowserRequester.launch(null)
@@ -55,7 +55,7 @@ class NeevaRoleManager(
     }
 
     private fun onResultAvailable() {
-        requestCallback.get()?.invoke()
+        requestCallback.get()?.invoke(isNeevaTheDefaultBrowser())
         requestCallback = WeakReference(null)
     }
 }

@@ -150,7 +150,11 @@ class FirstRunActivity : AppCompatActivity() {
                                 },
                                 setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
                                 showAsDialog = true,
-                                onActivityResultCallback = ::sendUserToBrowser
+                                onActivityResultCallback = { neevaIsDefault ->
+                                    if (neevaIsDefault) {
+                                        sendUserToBrowser()
+                                    }
+                                }
                             ) {
                                 sendUserToBrowser()
                             }

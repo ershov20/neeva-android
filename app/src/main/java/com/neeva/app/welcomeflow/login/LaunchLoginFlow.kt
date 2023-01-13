@@ -21,14 +21,17 @@ import com.neeva.app.userdata.NeevaUser
 fun launchLoginFlow(
     loginReturnParams: LoginReturnParams,
     provider: NeevaUser.SSOProvider? = null,
-    onPremiumAvailable: () -> Unit
+    onPremiumAvailable: () -> Unit,
+    signup: Boolean,
+    mktEmailOptOut: Boolean
 ): () -> Unit {
     val firstRunModel = LocalFirstRunModel.current
     val context = LocalContext.current
 
     val params = LaunchLoginFlowParams(
         provider = provider ?: NeevaUser.SSOProvider.GOOGLE,
-        signup = false
+        signup = signup,
+        mktEmailOptOut = mktEmailOptOut
     )
 
     val resultLauncher = rememberLauncherForActivityResult(

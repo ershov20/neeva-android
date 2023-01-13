@@ -54,7 +54,6 @@ import com.neeva.app.cardgrid.CardsPaneModelImpl
 import com.neeva.app.cardgrid.SelectedScreen
 import com.neeva.app.feedback.FeedbackViewModel
 import com.neeva.app.firstrun.FirstRunModel
-import com.neeva.app.firstrun.LoginCallbackIntentParams
 import com.neeva.app.history.HistoryManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
@@ -78,8 +77,6 @@ import com.neeva.app.zeroquery.RegularProfileZeroQueryViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.lang.ref.WeakReference
 import javax.inject.Inject
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -395,6 +392,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         }
 
         var uriToLoad: Uri? = null
+        var onLoadStarted = { showBrowser(forceUserToStayInCardGrid = false) }
 
         when (intent?.action) {
             ACTION_NEW_TAB -> {
@@ -416,52 +414,20 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
             ACTION_SHOW_SCREEN -> {
                 switchToRegularProfile()
                 processScreenToNavigateTo()
+                uriToLoad = intent.data
+                // Set onLoadStarted to an empty lambda so that the tab is opened by the user is
+                // sent to the correct screen.
+                onLoadStarted = { }
             }
 
             Intent.ACTION_VIEW -> {
                 switchToRegularProfile()
-
+                // Logs if the app is set as the system's default browser when we are asked to
+                // handle a VIEW Intent.
                 if (setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
                     clientLogger.logCounter(LogConfig.Interaction.OPEN_DEFAULT_BROWSER_URL, null)
                 }
-
-                if (Uri.parse(intent.dataString).scheme == "neeva") {
-                    // An Intent was fired that might have a login cookie.  If it's there, save it.
-                    LoginCallbackIntentParams.fromLoginCallbackIntent(intent)?.let { params ->
-                        if (params.sessionKey == null || params.retryCode != null) {
-                            popupModel.showSnackbar(getString(params.getErrorResourceId()))
-                        } else {
-                            // TODO(kobec): Remove redundant cookie manager update when
-                            //  FirstRunActivity is removed.
-                            // Update the Browser's cookie jar with the login cookie.
-                            val wasCookieJarUpdated = suspendCoroutine { continuation ->
-                                neevaUser.loginToken.updateCookieManager(
-                                    newValue = params.sessionKey
-                                ) {
-                                    continuation.resume(it)
-                                }
-                            }
-
-                            if (!wasCookieJarUpdated) {
-                                // Tell the user something went wrong and that they couldn't be
-                                // signed in.  The only way to gracefully recover here is to send
-                                // the user to the website we were originally going to send them to
-                                // in the hopes that they try signing in again later.
-                                popupModel.showSnackbar(getString(R.string.error_generic))
-                            }
-
-                            // Send the user to a URL created by appending the [finalPath] to
-                            // the base Neeva URL.
-                            uriToLoad = Uri.parse(neevaConstants.appURL).buildUpon()
-                                .apply { params.finalPath?.let { path(it) } }
-                                .build()
-
-                            processScreenToNavigateTo()
-                        }
-                    }
-                } else {
-                    uriToLoad = intent.data
-                }
+                uriToLoad = intent.data
             }
 
             Intent.ACTION_WEB_SEARCH -> {
@@ -480,12 +446,16 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 uri = it,
                 inNewTab = true,
                 isViaIntent = true,
-                onLoadStarted = { showBrowser(forceUserToStayInCardGrid = false) }
+                onLoadStarted = onLoadStarted
             )
         }
     }
 
     private fun processScreenToNavigateTo() {
+        // In case the user signed in from the SpacesIntro Bottom Sheet, remove the bottom sheet
+        // since the user has successfully signed in.
+        popupModel.removeBottomSheet()
+
         val screenToReturnTo = firstRunModel.getScreenToReturnToAfterLogin()
         firstRunModel.clearDestinationsToReturnAfterLogin()
         when (screenToReturnTo) {

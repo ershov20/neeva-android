@@ -87,6 +87,7 @@ fun OnboardingButton(
     )
 }
 
+// TODO(kobec): Delete when deleting FirstRunActivity
 @Composable
 private fun OnboardingButton(
     emailProvided: String? = null,
@@ -101,7 +102,8 @@ private fun OnboardingButton(
         provider = provider,
         signup = signup,
         emailProvided = emailProvided,
-        passwordProvided = passwordProvided
+        passwordProvided = passwordProvided,
+        mktEmailOptOut = false
     )
 
     val resultLauncher = rememberLauncherForActivityResult(

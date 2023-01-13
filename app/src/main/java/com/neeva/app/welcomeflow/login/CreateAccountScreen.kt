@@ -52,7 +52,7 @@ fun CreateAccountScreen(
                 )
             }
             Spacer(Modifier.height(32.dp))
-            EmailPromoCheckbox(Modifier.padding(Dimensions.PADDING_MEDIUM))
+            EmailPromoCheckbox(modifier = Modifier.padding(Dimensions.PADDING_MEDIUM))
             Spacer(Modifier.size(Dimensions.PADDING_LARGE))
             ToggleSignUpText(
                 signup = true,
@@ -73,7 +73,7 @@ fun SignUpWithGoogleButtons(
             loginReturnParams = loginReturnParams,
             onPremiumAvailable = onPremiumAvailable,
             provider = NeevaUser.SSOProvider.GOOGLE,
-            signup = true,
+            signup = true
         )
         Spacer(Modifier.height(18.dp))
         SecondaryWelcomeFlowButton(text = stringResource(id = R.string.sign_up_other_options)) {
@@ -91,21 +91,21 @@ fun SignUpWithOtherButtons(
         LoginButton(
             loginReturnParams = loginReturnParams,
             provider = NeevaUser.SSOProvider.GOOGLE,
-            signup = false,
+            signup = true,
             onPremiumAvailable = onPremiumAvailable,
         )
         Spacer(Modifier.height(18.dp))
         LoginButton(
             loginReturnParams = loginReturnParams,
             provider = NeevaUser.SSOProvider.OKTA,
-            signup = false,
+            signup = true,
             onPremiumAvailable = onPremiumAvailable,
         )
         Spacer(Modifier.height(18.dp))
         LoginButton(
             loginReturnParams = loginReturnParams,
             provider = NeevaUser.SSOProvider.MICROSOFT,
-            signup = false,
+            signup = true,
             onPremiumAvailable = onPremiumAvailable,
         )
     }

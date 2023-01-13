@@ -12,43 +12,38 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
+import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.R
 import com.neeva.app.firstrun.FirstRunConstants
 import com.neeva.app.ui.LightDarkPreviewContainer
 import com.neeva.app.ui.theme.Dimensions
 
-// TODO(yusuf/kobe): make the checkbox actually send product & privacy tips
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EmailPromoCheckbox(modifier: Modifier = Modifier) {
-    var checked by remember { mutableStateOf(true) }
+    val firstRunModel = LocalFirstRunModel.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .toggleable(
-                value = checked,
+                value = !firstRunModel.mktEmailOptOutState.value,
                 role = Role.Checkbox,
-                onValueChange = { checked = !checked }
+                onValueChange = { firstRunModel.toggleMarketingEmailOptOut() }
             )
             .fillMaxWidth()
             .wrapContentSize(align = Alignment.Center)
     ) {
         Checkbox(
-            checked = checked,
-            onCheckedChange = null,
+            // If the checkbox is checked, then the user is NOT opting out from emails.
+            checked = !firstRunModel.mktEmailOptOutState.value,
+            onCheckedChange = { firstRunModel.toggleMarketingEmailOptOut() },
             colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
         )
         Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))

@@ -90,7 +90,7 @@ class ClientLogger(
             return
         }
 
-        if (FirstRunModel.mustShowFirstRun(sharedPreferencesModel, loginToken)) {
+        if (FirstRunModel.mustShowFirstRun(sharedPreferencesModel)) {
             addPendingLog(PendingLog(path, attributes))
             return
         }

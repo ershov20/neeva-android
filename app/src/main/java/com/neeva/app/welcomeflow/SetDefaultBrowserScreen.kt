@@ -37,7 +37,7 @@ import com.neeva.app.ui.theme.NeevaTheme
 fun SetDefaultBrowserScreen(
     openAndroidDefaultBrowserSettings: () -> Unit,
     setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
-    sendUserToBrowser: () -> Unit
+    finishWelcomeFlow: () -> Unit
 ) {
     val clientLogger = LocalClientLogger.current
     val isRoleManagerAvailable = setDefaultAndroidBrowserManager.isRoleManagerAvailable()
@@ -50,7 +50,11 @@ fun SetDefaultBrowserScreen(
                 null
             )
             if (isRoleManagerAvailable) {
-                setDefaultAndroidBrowserManager.requestToBeDefaultBrowser(sendUserToBrowser)
+                setDefaultAndroidBrowserManager.requestToBeDefaultBrowser { neevaIsDefault ->
+                    if (neevaIsDefault) {
+                        finishWelcomeFlow()
+                    }
+                }
             } else {
                 openAndroidDefaultBrowserSettings()
             }
@@ -60,7 +64,7 @@ fun SetDefaultBrowserScreen(
                 LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_REMIND,
                 null
             )
-            sendUserToBrowser()
+            finishWelcomeFlow()
         }
     )
 }

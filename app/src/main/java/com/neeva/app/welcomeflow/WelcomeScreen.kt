@@ -17,7 +17,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,7 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.LocalSettingsDataModel
-import com.neeva.app.LocalSubscriptionManager
 import com.neeva.app.R
 import com.neeva.app.firstrun.LegalFooter
 import com.neeva.app.settings.SettingsToggle
@@ -35,17 +33,12 @@ import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
-fun WelcomeScreen(
-    navigateToPlans: () -> Unit,
-    navigateToSignIn: () -> Unit,
-    navigateToSetDefaultBrowser: () -> Unit
-) {
+fun WelcomeScreen(onContinueInWelcomeScreen: () -> Unit, navigateToSignIn: () -> Unit) {
     val settingsDataModel = LocalSettingsDataModel.current
     WelcomeFlowContainer(headerText = stringResource(id = R.string.welcomeflow_initial_header)) {
         WelcomeScreenContent(
-            navigateToPlans = navigateToPlans,
+            onContinueInWelcomeScreen = onContinueInWelcomeScreen,
             navigateToSignIn = navigateToSignIn,
-            navigateToSetDefaultBrowser = navigateToSetDefaultBrowser,
             loggingConsentState = settingsDataModel.getToggleState(SettingsToggle.LOGGING_CONSENT),
             toggleLoggingConsentState = settingsDataModel
                 .getTogglePreferenceToggler(SettingsToggle.LOGGING_CONSENT),
@@ -56,9 +49,8 @@ fun WelcomeScreen(
 
 @Composable
 fun WelcomeScreenContent(
-    navigateToPlans: () -> Unit,
+    onContinueInWelcomeScreen: () -> Unit,
     navigateToSignIn: () -> Unit,
-    navigateToSetDefaultBrowser: () -> Unit,
     loggingConsentState: MutableState<Boolean>,
     toggleLoggingConsentState: () -> Unit,
     modifier: Modifier
@@ -84,9 +76,8 @@ fun WelcomeScreenContent(
         Spacer(Modifier.height(48.dp))
 
         ContinueButtons(
-            navigateToPlans = navigateToPlans,
-            navigateToSignIn = navigateToSignIn,
-            navigateToSetDefaultBrowser = navigateToSetDefaultBrowser
+            onContinueInWelcomeScreen = onContinueInWelcomeScreen,
+            navigateToSignIn = navigateToSignIn
         )
 
         ConsentCheckbox(
@@ -133,23 +124,12 @@ internal fun ConsentCheckbox(
 
 @Composable
 private fun ContinueButtons(
-    navigateToPlans: () -> Unit,
+    onContinueInWelcomeScreen: () -> Unit,
     navigateToSignIn: () -> Unit,
-    navigateToSetDefaultBrowser: () -> Unit
 ) {
-    val subscriptionManager = LocalSubscriptionManager.current
-    val offers = subscriptionManager.productDetailsFlow.collectAsState().value
-        ?.subscriptionOfferDetails
-
     WelcomeFlowStackedButtons(
         primaryText = stringResource(id = R.string.welcomeflow_lets_go),
-        onPrimaryButton = {
-            if (offers.isNullOrEmpty()) {
-                navigateToSetDefaultBrowser()
-            } else {
-                navigateToPlans()
-            }
-        },
+        onPrimaryButton = onContinueInWelcomeScreen,
         secondaryText = stringResource(id = R.string.welcomeflow_i_have_an_account),
         onSecondaryButton = navigateToSignIn
     )
@@ -159,7 +139,10 @@ private fun ContinueButtons(
 @Composable
 fun WelcomeScreen_Light_Preview() {
     NeevaThemePreviewContainer(useDarkTheme = false) {
-        WelcomeScreen(navigateToPlans = {}, navigateToSignIn = {}, navigateToSetDefaultBrowser = {})
+        WelcomeScreen(
+            navigateToSignIn = {},
+            onContinueInWelcomeScreen = {},
+        )
     }
 }
 
@@ -167,6 +150,9 @@ fun WelcomeScreen_Light_Preview() {
 @Composable
 fun WelcomeScreen_Dark_Preview() {
     NeevaThemePreviewContainer(useDarkTheme = true) {
-        WelcomeScreen(navigateToPlans = {}, navigateToSignIn = {}, navigateToSetDefaultBrowser = {})
+        WelcomeScreen(
+            navigateToSignIn = {},
+            onContinueInWelcomeScreen = {}
+        )
     }
 }

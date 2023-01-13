@@ -36,7 +36,7 @@ import kotlinx.coroutines.launch
  */
 @AndroidEntryPoint
 class SingleTabActivity : AppCompatActivity() {
-    private val viewModel: SingleTabActivityViewModel by viewModels()
+    internal val viewModel: SingleTabActivityViewModel by viewModels()
 
     private lateinit var progressBar: ProgressBar
     private lateinit var toolbar: MaterialToolbar
@@ -110,7 +110,7 @@ class SingleTabActivity : AppCompatActivity() {
 
     private fun cancelAndFinishActivity() {
         setResult(RESULT_CANCELED)
-        finish()
+        finishAndRemoveTask()
     }
 
     private fun loadUrl(url: Uri) {

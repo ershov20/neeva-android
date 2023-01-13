@@ -72,7 +72,7 @@ fun SignIn_Light_Preview() {
             ),
             onPremiumAvailable = { },
             navigateToCreateAccount = { },
-            onBack = { }
+            onBack = { },
         )
     }
 }
@@ -88,7 +88,7 @@ fun SignIn_Dark_Preview() {
             ),
             onPremiumAvailable = { },
             navigateToCreateAccount = { },
-            onBack = { }
+            onBack = { },
         )
     }
 }

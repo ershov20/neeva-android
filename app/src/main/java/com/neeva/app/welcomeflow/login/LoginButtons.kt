@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.neeva.app.LocalFirstRunModel
 import com.neeva.app.R
 import com.neeva.app.firstrun.LoginReturnParams
 import com.neeva.app.ui.theme.Dimensions
@@ -30,12 +31,15 @@ fun LoginButton(
     loginReturnParams: LoginReturnParams,
     onPremiumAvailable: () -> Unit,
     provider: NeevaUser.SSOProvider,
-    signup: Boolean,
+    signup: Boolean
 ) {
+    val mktEmailOptOut = LocalFirstRunModel.current.mktEmailOptOutState.value
     val onClick = launchLoginFlow(
         loginReturnParams = loginReturnParams,
         onPremiumAvailable = onPremiumAvailable,
         provider = provider,
+        signup = signup,
+        mktEmailOptOut = mktEmailOptOut
     )
 
     if (provider == NeevaUser.SSOProvider.GOOGLE) {

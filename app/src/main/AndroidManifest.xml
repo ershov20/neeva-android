@@ -105,8 +105,10 @@
             android:name=".singletabbrowser.SingleTabActivity"
             android:exported="false"
             android:theme="@style/Theme.NeevaSearchBrowser.NoActionBar"
+            android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden"
-            android:configChanges="orientation|screenSize|screenLayout" />
+            android:configChanges="orientation|screenSize|screenLayout"
+            />
 
         <!-- Lock the user in portrait until we have landscape UX mocks. -->
         <activity
@@ -116,7 +118,8 @@
             android:launchMode="singleTask"
             android:windowSoftInputMode="stateHidden"
             android:screenOrientation="portrait"
-            android:configChanges="screenSize|screenLayout" />
+            android:configChanges="screenSize|screenLayout"
+            />
 
         <!-- For the Welcome flow, the user has to be in portrait. -->
         <activity
@@ -126,7 +129,9 @@
             android:windowSoftInputMode="stateHidden"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:configChanges="screenSize|screenLayout" />
+            android:configChanges="screenSize|screenLayout"
+            android:excludeFromRecents="true"
+            />
 
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"

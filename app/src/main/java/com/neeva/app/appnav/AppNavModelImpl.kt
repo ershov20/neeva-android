@@ -35,6 +35,7 @@ import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.welcomeflow.WelcomeFlowActivity
 import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
 import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
+import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.SIGN_IN_ONLY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -194,7 +195,7 @@ class AppNavModelImpl(
     override fun showLocalFeatureFlagsPane() = show(AppNavDestination.LOCAL_FEATURE_FLAGS_SETTINGS)
     override fun showProfileSettings() = show(AppNavDestination.PROFILE_SETTINGS)
     override fun showSignInFlow() = show(AppNavDestination.SIGN_IN_FLOW)
-    override fun showWelcomeFlow(loginReturnParams: LoginReturnParams) {
+    override fun showWelcomeFlow(loginReturnParams: LoginReturnParams, signInOnly: Boolean) {
         val intent = Intent(context, WelcomeFlowActivity::class.java)
         intent.putExtra(
             ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
@@ -204,11 +205,12 @@ class AppNavModelImpl(
             SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
             loginReturnParams.screenToReturnTo
         )
+        intent.putExtra(SIGN_IN_ONLY, signInOnly)
+
         activityStarter.safeStartActivityForIntent(intent)
     }
 
     override fun showSettings() = show(AppNavDestination.SETTINGS) {
-        // TODO(kobec): Possibly remove these options when FirstRunActivity is removed...
         // Keep the back stack shallow by popping everything off back to the root when returning
         // to the main Settings page.
         popUpTo(AppNavDestination.SETTINGS.name)
