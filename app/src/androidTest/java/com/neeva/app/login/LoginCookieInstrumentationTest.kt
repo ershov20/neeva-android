@@ -1,16 +1,23 @@
-// Copyright 2022 Neeva Inc. All rights reserved.
+// Copyright 2023 Neeva Inc. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package com.neeva.app
+package com.neeva.app.login
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import com.neeva.app.BaseHiltTest
+import com.neeva.app.NeevaActivity
+import com.neeva.app.NeevaConstants
+import com.neeva.app.PresetSharedPreferencesRule
+import com.neeva.app.UserInfoQuery
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.startActivity
 import com.neeva.app.type.SubscriptionType
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.userdata.NeevaUserImpl.Companion.toUserInfo
 import com.neeva.app.userdata.UserInfo
+import com.neeva.app.waitFor
 import com.neeva.testcommon.WebpageServingRule
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import dagger.hilt.android.testing.HiltAndroidTest

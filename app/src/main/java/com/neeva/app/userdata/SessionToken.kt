@@ -92,6 +92,11 @@ abstract class SessionToken(
 
     private var requestJob: Job? = null
 
+    /**
+     * If the browser is alive, updates the Browser cookie jar with the [cachedValue].
+     * Does not trigger [onFailure] if the browser is not alive because this method is intended to
+     * be called whenever the browser is initialized too.
+     */
     fun updateBrowserCookieJarWithCachedCookie(onFailure: () -> Unit) {
         coroutineScope.launch(dispatchers.main) {
             val restoredValue = cachedValue
@@ -99,21 +104,20 @@ abstract class SessionToken(
                 Timber.d("Cached session cookie detected at startup; re-setting in Browser.")
                 // Update the Browser's cookie jar with the login cookie.
                 suspendCoroutine { continuation ->
-                    // The callback for the update cookie manager function returns false when the
-                    // cookie already exists in the browser's cookie jar. This means that if
-                    // the cached cookie is equal to the Browser's cookie, the callback would
-                    // return false even if the Browser's cookie is up to date.
+                    // The callback for the update cookie manager function returns false if the
+                    // browser was not alive which means the updateCookieManager call was dropped.
                     updateCookieManager(restoredValue) {
-                        continuation.resume(Unit)
+                        continuation.resume(it)
                     }
                 }
 
-                // To actually tell if the browser cookie jar is up to date, we have to ask the
-                // browser for our cookie:
-                val (_, cookiePair) = weakBrowser.getCookieFromBrowser()
+                // To tell if the browser cookie jar was actually updated, we have to ask the
+                // browser for our cookie and check if the browser was even alive:
+                val (isBrowserAlive, cookiePair) = weakBrowser.getCookieFromBrowser()
                 val currentCookieValue = cookiePair?.value ?: ""
 
-                if (currentCookieValue != cachedValue) {
+                // If the browser was alive and the value was not set, then there is a real problem.
+                if (isBrowserAlive && currentCookieValue != cachedValue) {
                     onFailure()
                 }
             }
