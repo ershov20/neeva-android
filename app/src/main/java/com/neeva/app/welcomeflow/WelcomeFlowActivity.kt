@@ -138,25 +138,9 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
         processIntentParams(intent)
 
-        if (firstRunModel.mustShowFirstRun()) {
-            lifecycleScope.launch(dispatchers.io) {
-                historyDatabase.hostInfoDao().initializeForFirstRun(neevaConstants)
-            }
-            clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
-            clientLogger.logCounter(LogConfig.Interaction.GET_STARTED_IN_WELCOME, null)
-        }
-
-        setupStartScreen()
-
-        // opt new users into strict mode and show ad block onboarding
-        // TODO: remove this when we figure out how we persist default values for new users
-        settingsDataModel.setContentFilterStrength(
-            ContentFilterModel.BlockingStrength.TRACKER_REQUEST
-        )
-        firstRunModel.setAdBlockOnboardingPreference()
+        firstRunInitialization()
 
         val onBack = { onBackPressedDispatcher.onBackPressed() }
-
         setContent {
             NeevaTheme {
                 navHost = rememberAnimatedNavController()
@@ -317,6 +301,23 @@ class WelcomeFlowActivity : AppCompatActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun firstRunInitialization() {
+        if (firstRunModel.mustShowFirstRun()) {
+            lifecycleScope.launch(dispatchers.io) {
+                historyDatabase.hostInfoDao().initializeForFirstRun(neevaConstants)
+            }
+            clientLogger.logCounter(LogConfig.Interaction.FIRST_RUN_IMPRESSION, null)
+            clientLogger.logCounter(LogConfig.Interaction.GET_STARTED_IN_WELCOME, null)
+
+            // opt new users into strict mode and show ad block onboarding
+            // TODO: remove this when we figure out how we persist default values for new users
+            settingsDataModel.setContentFilterStrength(
+                ContentFilterModel.BlockingStrength.TRACKER_REQUEST
+            )
+            firstRunModel.setAdBlockOnboardingPreference()
         }
     }
 
