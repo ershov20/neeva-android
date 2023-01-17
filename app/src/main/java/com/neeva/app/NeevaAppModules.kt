@@ -191,13 +191,17 @@ object NeevaAppModule {
         loginToken: LoginToken,
         sharedPreferencesModel: SharedPreferencesModel,
         networkHandler: NetworkHandler,
-        billingClientController: BillingClientController
+        billingClientController: BillingClientController,
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers
     ): NeevaUser {
         return NeevaUserImpl(
             loginToken = loginToken,
             sharedPreferencesModel = sharedPreferencesModel,
             networkHandler = networkHandler,
-            billingClientController = billingClientController
+            billingClientController = billingClientController,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers
         )
     }
 
@@ -386,11 +390,19 @@ object NeevaAppModule {
         @ApplicationContext appContext: Context,
         activityStarter: ActivityStarter,
         billingClientController: BillingClientController,
+        coroutineScope: CoroutineScope,
+        dispatchers: Dispatchers,
+        neevaUser: NeevaUser,
+        sharedPreferencesModel: SharedPreferencesModel
     ): SubscriptionManager {
         return SubscriptionManager(
             appContext = appContext,
             activityStarter = activityStarter,
-            billingClientController = billingClientController
+            billingClientController = billingClientController,
+            coroutineScope = coroutineScope,
+            dispatchers = dispatchers,
+            neevaUser = neevaUser,
+            sharedPreferencesModel = sharedPreferencesModel
         )
     }
 

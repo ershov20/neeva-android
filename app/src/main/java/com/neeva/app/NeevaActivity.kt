@@ -96,8 +96,11 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
         /** Creates a lazy tab for the regular browser profile. */
         const val ACTION_NEW_TAB = "ACTION_NEW_TAB"
 
-        /** Sends the user directly to a specified [AppNavDestination]. */
-        const val ACTION_SHOW_SCREEN = "ACTION_SHOW_SCREEN"
+        /**
+         * Sends the user directly to a specified [AppNavDestination].
+         * Should be used after a successful login.
+         */
+        const val ACTION_SHOW_SCREEN_AFTER_LOGIN = "ACTION_SHOW_SCREEN_AFTER_LOGIN"
 
         /** Sends the user directly to the SpaceGrid. */
         const val ACTION_SHOW_SPACES = "ACTION_SHOW_SPACES"
@@ -202,6 +205,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                         appNavModel = appNavModel!!,
                         settingsDataModel = settingsDataModel,
                         neevaUser = neevaUser,
+                        firstRunModel = firstRunModel,
                         webLayerModel = webLayerModel,
                         onSignOut = activityViewModel::signOut,
                         setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
@@ -411,7 +415,7 @@ class NeevaActivity : AppCompatActivity(), ActivityCallbacks {
                 appNavModel?.showCardGrid()
             }
 
-            ACTION_SHOW_SCREEN -> {
+            ACTION_SHOW_SCREEN_AFTER_LOGIN -> {
                 switchToRegularProfile()
                 processScreenToNavigateTo()
                 uriToLoad = intent.data

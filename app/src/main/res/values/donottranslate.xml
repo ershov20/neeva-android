@@ -28,7 +28,7 @@
     <string name="settings_debug_use_custom_tabs_for_login">Use Custom Tabs for login</string>
     <string name="settings_debug_enable_native_google_login">Enable native Google login</string>
     <string name="settings_debug_enable_billing">Enable billing testing</string>
-    <string name="settings_debug_launch_welcome_flow">Launch welcome flow</string>
+    <string name="settings_debug_simulate_first_run">Simulate First Run</string>
 
     <!-- Debug strings for Previews -->
     <string name="debug_short_url">www.url.com</string>

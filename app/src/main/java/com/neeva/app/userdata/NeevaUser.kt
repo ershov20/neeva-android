@@ -6,6 +6,7 @@ package com.neeva.app.userdata
 
 import android.content.Context
 import com.apollographql.apollo3.exception.ApolloNetworkException
+import com.neeva.app.Dispatchers
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.apollo.ApolloWrapper
 import com.neeva.app.billing.billingclient.BillingClientController
@@ -19,7 +20,11 @@ import com.squareup.moshi.JsonClass
 import com.squareup.moshi.Moshi
 import java.io.IOException
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 @JsonClass(generateAdapter = true)
@@ -74,10 +79,12 @@ abstract class NeevaUser(val loginToken: LoginToken) {
      * If the [uniqueJobName] already exists in the queue, it will be replaced by the new [job].
      * This [job] will only run once.
      */
-    abstract fun queueOnSignIn(uniqueJobName: String, job: () -> Unit)
+    abstract fun queueOnSignIn(uniqueJobName: String, job: suspend () -> Unit)
 }
 
 class NeevaUserImpl(
+    val coroutineScope: CoroutineScope,
+    val dispatchers: Dispatchers,
     val sharedPreferencesModel: SharedPreferencesModel,
     val networkHandler: NetworkHandler,
     loginToken: LoginToken,
@@ -85,12 +92,13 @@ class NeevaUserImpl(
 ) : NeevaUser(loginToken) {
     private data class OnSignedInJob(
         val uniqueJobName: String,
-        val job: () -> Unit
+        val job: suspend () -> Unit
     )
 
     private val moshiJsonAdapter: JsonAdapter<UserInfo> =
         Moshi.Builder().build().adapter(UserInfo::class.java)
-    private val jobsToRun: MutableSet<OnSignedInJob> = mutableSetOf()
+    private val jobsToRunFlow: MutableStateFlow<Set<OnSignedInJob>> =
+        MutableStateFlow(mutableSetOf())
 
     /** When the last [fetch] was performed. */
     private var lastFetchTimestamp: Long = 0
@@ -104,6 +112,26 @@ class NeevaUserImpl(
             null
         }
         userInfoFlow.value = fetchedUserInfo
+        startSignInJobConsumer()
+    }
+
+    private fun startSignInJobConsumer() {
+        coroutineScope.launch(dispatchers.main) {
+            jobsToRunFlow
+                .combine(userInfoFlow) { jobSet, userInfo ->
+                    if (userInfo == null || jobSet.isEmpty()) {
+                        null
+                    } else {
+                        jobSet
+                    }
+                }
+                .filterNotNull()
+                .collect { jobSet ->
+                    val jobToRun = jobSet.first()
+                    jobToRun.job.invoke()
+                    jobsToRunFlow.value = jobsToRunFlow.value.minus(jobToRun)
+                }
+        }
     }
 
     override fun setUserInfo(newData: UserInfo) {
@@ -130,9 +158,13 @@ class NeevaUserImpl(
         return loginToken.isEmpty()
     }
 
-    override fun queueOnSignIn(uniqueJobName: String, job: () -> Unit) {
-        jobsToRun.removeIf { it.uniqueJobName == uniqueJobName }
-        jobsToRun.add(OnSignedInJob(uniqueJobName = uniqueJobName, job = job))
+    override fun queueOnSignIn(uniqueJobName: String, job: suspend () -> Unit) {
+        coroutineScope.launch(dispatchers.main) {
+            val currentJobs = jobsToRunFlow.value.toMutableSet()
+            currentJobs.removeIf { it.uniqueJobName == uniqueJobName }
+            currentJobs.add(OnSignedInJob(uniqueJobName = uniqueJobName, job = job))
+            jobsToRunFlow.value = currentJobs
+        }
     }
 
     /**
@@ -181,12 +213,6 @@ class NeevaUserImpl(
             } else {
                 billingClientController.onUserSignedIn()
                 setUserInfo(userQuery.toUserInfo())
-
-                val jobsToRunCopy = jobsToRun.toMutableSet()
-                jobsToRunCopy.forEach { copy ->
-                    copy.job()
-                    jobsToRun.removeAll { job -> copy.uniqueJobName == job.uniqueJobName }
-                }
             }
         }
     }
@@ -234,5 +260,5 @@ class PreviewNeevaUser(
         ignoreLastFetchTimestamp: Boolean
     ) {}
 
-    override fun queueOnSignIn(uniqueJobName: String, job: () -> Unit) {}
+    override fun queueOnSignIn(uniqueJobName: String, job: suspend () -> Unit) {}
 }

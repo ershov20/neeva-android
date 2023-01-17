@@ -9,7 +9,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
-import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.UserInfoQuery
 import com.neeva.app.billing.billingclient.BillingClientController
@@ -19,7 +18,6 @@ import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import org.junit.Before
 import org.junit.Rule
@@ -45,7 +43,6 @@ class NeevaUserTest : BaseTest() {
 
     private lateinit var context: Context
     private lateinit var apolloWrapper: TestAuthenticatedApolloWrapper
-    private lateinit var dispatchers: Dispatchers
     private lateinit var mockWebLayerModel: WebLayerModel
     private lateinit var neevaConstants: NeevaConstants
     private lateinit var networkHandler: NetworkHandler
@@ -91,6 +88,8 @@ class NeevaUserTest : BaseTest() {
             NeevaUser.SSOProvider.GOOGLE.name
         )
         neevaUser = NeevaUserImpl(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
             sharedPreferencesModel = sharedPreferencesModel,
             loginToken = loginToken,
             networkHandler = networkHandler,
@@ -100,10 +99,6 @@ class NeevaUserTest : BaseTest() {
     }
 
     private fun setUpMockWeblayerModel() {
-        dispatchers = Dispatchers(
-            main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
-            io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
-        )
         mockWebLayerModel = mock {}
     }
 
@@ -163,6 +158,8 @@ class NeevaUserTest : BaseTest() {
     @Test
     fun clearUser_dataIsEmpty_clearsNeevaUserInfo() {
         val neevaUser = NeevaUserImpl(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
             sharedPreferencesModel = sharedPreferencesModel,
             loginToken = loginToken,
             networkHandler = networkHandler,

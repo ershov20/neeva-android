@@ -14,7 +14,6 @@ class WelcomeFlowNavModel(private val navHost: NavHostController) {
         show(
             WelcomeFlowActivity.Companion.Destinations.CREATE_ACCOUNT_WITH_GOOGLE
         ) {
-            launchSingleTop = true
 
             // Keep the back stack shallow by popping everything off back to the root when returning
             // to the landing page.
@@ -31,7 +30,6 @@ class WelcomeFlowNavModel(private val navHost: NavHostController) {
     }
 
     fun showSignIn() = show(WelcomeFlowActivity.Companion.Destinations.SIGN_IN)
-    fun showWelcome() = show(WelcomeFlowActivity.Companion.Destinations.WELCOME)
     fun showPlans() = show(WelcomeFlowActivity.Companion.Destinations.PLANS)
     fun showSetDefaultBrowser() = show(
         WelcomeFlowActivity.Companion.Destinations.SET_DEFAULT_BROWSER
@@ -41,10 +39,26 @@ class WelcomeFlowNavModel(private val navHost: NavHostController) {
         destination: WelcomeFlowActivity.Companion.Destinations,
         setOptions: NavOptionsBuilder.() -> Unit = {},
     ) {
-        if (navHost.currentDestination?.route == destination.name) return
-        navHost.navigate(destination.name) {
-            launchSingleTop = true
-            setOptions()
+        show(destinationName = destination.name, setOptions = setOptions)
+    }
+
+    internal fun show(
+        destinationName: String,
+        setOptions: NavOptionsBuilder.() -> Unit = {},
+    ) {
+        if (navHost.currentDestination?.route == destinationName) return
+
+        if (isValidDestination(destinationName)) {
+            navHost.navigate(destinationName) {
+                launchSingleTop = true
+                setOptions()
+            }
+        }
+    }
+
+    companion object {
+        internal fun isValidDestination(route: String): Boolean {
+            return WelcomeFlowActivity.Companion.Destinations.values().any { it.name == route }
         }
     }
 }

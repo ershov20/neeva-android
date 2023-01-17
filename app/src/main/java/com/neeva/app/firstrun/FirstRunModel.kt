@@ -21,8 +21,6 @@ import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
-import com.neeva.app.billing.BillingSubscriptionPlanTags.ANNUAL_PREMIUM_PLAN
-import com.neeva.app.billing.BillingSubscriptionPlanTags.MONTHLY_PREMIUM_PLAN
 import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.logging.ClientLogger
 import com.neeva.app.logging.LogConfig
@@ -32,8 +30,6 @@ import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.sharedprefs.SharedPrefFolder
 import com.neeva.app.sharedprefs.SharedPreferencesModel
 import com.neeva.app.singletabbrowser.SingleTabActivity
-import com.neeva.app.type.SubscriptionSource
-import com.neeva.app.type.SubscriptionType
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.LoginToken
 import com.neeva.app.userdata.NeevaUser
@@ -118,6 +114,10 @@ class FirstRunModel internal constructor(
         fun setFirstRunDone(sharedPreferencesModel: SharedPreferencesModel) {
             SharedPrefFolder.FirstRun.FirstRunDone.set(sharedPreferencesModel, true)
             SharedPrefFolder.FirstRun.ShouldLogFirstLogin.set(sharedPreferencesModel, true)
+        }
+
+        fun resetFirstRun(sharedPreferencesModel: SharedPreferencesModel) {
+            SharedPrefFolder.FirstRun.FirstRunDone.set(sharedPreferencesModel, false)
         }
 
         fun mustShowFirstRun(sharedPreferencesModel: SharedPreferencesModel): Boolean {
@@ -223,6 +223,10 @@ class FirstRunModel internal constructor(
 
     fun setFirstRunDone() {
         setFirstRunDone(sharedPreferencesModel)
+    }
+
+    fun resetFirstRun() {
+        resetFirstRun(sharedPreferencesModel)
     }
 
     fun setAdBlockOnboardingPreference() {
@@ -365,6 +369,25 @@ class FirstRunModel internal constructor(
         }
     }
 
+    /**
+     * Sends the user to a screen that can be used to sign up or log in to Neeva via a particular
+     * identify provider. Defines [loginReturnParams] so that the user will be redirected to a
+     * specific activity and screen after a successful login.
+     */
+    fun launchLoginFlow(
+        loginReturnParams: LoginReturnParams,
+        context: Context,
+        launchLoginFlowParams: LaunchLoginFlowParams,
+        activityResultLauncher: ActivityResultLauncher<Intent>,
+    ) {
+        setLoginReturnParams(loginReturnParams)
+        launchLoginFlow(
+            context,
+            launchLoginFlowParams,
+            activityResultLauncher
+        )
+    }
+
     fun setLoginReturnParams(loginReturnParams: LoginReturnParams) {
         SharedPrefFolder.FirstRun
             .ActivityToReturnToAfterLogin.set(
@@ -376,49 +399,6 @@ class FirstRunModel internal constructor(
                 sharedPreferencesModel,
                 loginReturnParams.screenToReturnTo
             )
-    }
-
-    /**
-     * Sends the user to a screen that can be used to sign up or log in to Neeva via a particular
-     * identify provider.
-     */
-    fun launchLoginFlow(
-        loginReturnParams: LoginReturnParams,
-        context: Context,
-        launchLoginFlowParams: LaunchLoginFlowParams,
-        activityResultLauncher: ActivityResultLauncher<Intent>,
-        onPremiumAvailable: () -> Unit,
-    ) {
-        setLoginReturnParams(loginReturnParams)
-
-        val offers = subscriptionManager.productDetailsFlow.value?.subscriptionOfferDetails
-
-        neevaUser.queueOnSignIn(uniqueJobName = "Welcome Flow: onSuccessfulSignIn") {
-            coroutineScope.launch(dispatchers.main) {
-                val userInfo = neevaUser.userInfoFlow.value
-
-                val subscriptionSource = userInfo?.subscriptionSource
-                val hasValidSubscriptionSource =
-                    subscriptionSource == SubscriptionSource.GooglePlay ||
-                        subscriptionSource == SubscriptionSource.None
-
-                // TODO(kobec): Check if existing purchases == null too!
-                if (
-                    userInfo != null &&
-                    userInfo.subscriptionType == SubscriptionType.Basic &&
-                    hasValidSubscriptionSource &&
-                    offers != null && offers.isNotEmpty()
-                ) {
-                    onPremiumAvailable()
-                }
-            }
-        }
-
-        launchLoginFlow(
-            context,
-            launchLoginFlowParams,
-            activityResultLauncher
-        )
     }
 
     fun getActivityToReturnToAfterLogin(): String {
@@ -436,26 +416,30 @@ class FirstRunModel internal constructor(
 
     fun getLoginReturnParameters(
         setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
-        selectedSubscriptionPlanTag: String?,
-        initialLoginReturnParams: LoginReturnParams?
+        destinationToReturnToAfterWelcomeFlow: LoginReturnParams?,
+        hasSelectedPremiumPlan: Boolean
     ): LoginReturnParams {
         if (!setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
             val isNewUser = mustShowFirstRun()
-            val optedForPremium = selectedSubscriptionPlanTag == ANNUAL_PREMIUM_PLAN ||
-                selectedSubscriptionPlanTag == MONTHLY_PREMIUM_PLAN
 
-            if (isNewUser || optedForPremium) {
+            if (isNewUser || hasSelectedPremiumPlan) {
                 return LoginReturnParams(
                     activityToReturnTo = WelcomeFlowActivity::class.java.name,
-                    screenToReturnTo = WelcomeFlowActivity.Companion.Destinations
-                        .SET_DEFAULT_BROWSER.name
+                    screenToReturnTo = WelcomeFlowActivity.Companion.Destinations.PLANS.name
                 )
             }
         }
 
+        if (hasSelectedPremiumPlan) {
+            return LoginReturnParams(
+                activityToReturnTo = WelcomeFlowActivity::class.java.name,
+                screenToReturnTo = WelcomeFlowActivity.Companion.Destinations.PLANS.name
+            )
+        }
+
         // If an Activity launched an intent to start the WelcomeFlow, it left an explicit Activity
         // name and screen name to return back to once Login has finished.
-        initialLoginReturnParams?.let {
+        destinationToReturnToAfterWelcomeFlow?.let {
             return it
         }
 

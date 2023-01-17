@@ -204,7 +204,11 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
     val previewSubscriptionManager = SubscriptionManager(
         appContext = LocalContext.current,
         activityStarter = previewActivityStarter,
-        billingClientController = previewBillingClientController
+        billingClientController = previewBillingClientController,
+        coroutineScope = coroutineScope,
+        dispatchers = previewDispatchers,
+        neevaUser = previewNeevaUser,
+        sharedPreferencesModel = previewSharedPreferencesModel
     )
 
     val previewFirstRunModel = FirstRunModel(

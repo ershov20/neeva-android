@@ -8,6 +8,7 @@ import android.app.Activity
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingFlowParams
+import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.neeva.app.Dispatchers
@@ -144,7 +145,15 @@ class BillingClientController(
         }
     }
 
-    fun launchBillingFlow(activity: Activity, billingParams: BillingFlowParams) {
+    fun launchBillingFlow(
+        activity: Activity,
+        billingParams: BillingFlowParams,
+        onBillingFlowFinished: (BillingResult) -> Unit
+    ) {
+        fetchPurchasesManager.setOnPurchasesCallback {
+            onBillingFlowFinished(it)
+        }
+
         val billingResult = billingClientWrapper.billingClient
             ?.launchBillingFlow(activity, billingParams)
 

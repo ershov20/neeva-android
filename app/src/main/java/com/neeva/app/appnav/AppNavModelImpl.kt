@@ -33,8 +33,8 @@ import com.neeva.app.storage.entities.SpaceItem
 import com.neeva.app.ui.PopupModel
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.welcomeflow.WelcomeFlowActivity
-import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
-import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
+import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.ACTIVITY_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY
+import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.SCREEN_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY
 import com.neeva.app.welcomeflow.WelcomeFlowActivity.Companion.WELCOME_FLOW_PURPOSE
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -201,15 +201,20 @@ class AppNavModelImpl(
     ) {
         val intent = Intent(context, WelcomeFlowActivity::class.java)
         intent.putExtra(
-            ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
+            ACTIVITY_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY,
             loginReturnParams.activityToReturnTo
         )
         intent.putExtra(
-            SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
+            SCREEN_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY,
             loginReturnParams.screenToReturnTo
         )
         intent.putExtra(WELCOME_FLOW_PURPOSE, purpose.name)
+        activityStarter.safeStartActivityForIntent(intent)
+    }
 
+    /** For debug use only. Do not use in production. */
+    override fun showWelcomeFlowForDebugging() {
+        val intent = Intent(context, WelcomeFlowActivity::class.java)
         activityStarter.safeStartActivityForIntent(intent)
     }
 

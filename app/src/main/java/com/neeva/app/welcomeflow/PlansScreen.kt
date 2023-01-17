@@ -56,23 +56,18 @@ import timber.log.Timber
 
 @Composable
 fun PlansScreen(
-    onContinue: () -> Unit,
     navigateToSignIn: () -> Unit,
-    saveSubscriptionPlanChoice: (String) -> Unit,
+    onSelectSubscriptionPlan: (String) -> Unit,
     onBack: (() -> Unit)?,
-    isSignedOut: Boolean,
+    showSignInText: Boolean,
     showFreePlan: Boolean = true
 ) {
     val subscriptionManager = LocalSubscriptionManager.current
     val subscriptionOfferDetails = subscriptionManager.productDetailsFlow
         .collectAsState().value
         ?.subscriptionOfferDetails
-
-    val initialTabIndex = if (showFreePlan) {
-        1
-    } else {
-        0
-    }
+    val selectedSubscriptionTag = subscriptionManager.selectedSubscriptionTagFlow
+        .collectAsState().value
 
     // This screen should only be opened if there are available subscription
     // plans for this device.
@@ -82,16 +77,25 @@ fun PlansScreen(
                 "no available subscriptions to purchase!"
         )
     } else {
+        val subscriptionPlans = PlansScreenData.getSubscriptionPlans(
+            subscriptionOfferDetails = subscriptionOfferDetails,
+            showFreePlan = showFreePlan
+        )
+        val indexOfSelectedPlan = subscriptionPlans
+            .indexOfFirst { it.tag == selectedSubscriptionTag }
+
+        val initialTabIndex = when {
+            indexOfSelectedPlan != -1 -> indexOfSelectedPlan
+            showFreePlan -> 1
+            else -> 0
+        }
+
         PlansScreen(
-            subscriptionPlans = PlansScreenData.getSubscriptionPlans(
-                subscriptionOfferDetails = subscriptionOfferDetails,
-                showFreePlan = showFreePlan
-            ),
-            saveSubscriptionPlanChoice = saveSubscriptionPlanChoice,
-            onContinue = onContinue,
+            subscriptionPlans = subscriptionPlans,
+            onSelectSubscriptionPlan = onSelectSubscriptionPlan,
             navigateToSignIn = navigateToSignIn,
             initialTabIndex = initialTabIndex,
-            isSignedOut = isSignedOut,
+            showSignInText = showSignInText,
             onBack = onBack,
         )
     }
@@ -101,10 +105,9 @@ fun PlansScreen(
 internal fun PlansScreen(
     initialTabIndex: Int = 1,
     subscriptionPlans: List<SubscriptionPlan>,
-    saveSubscriptionPlanChoice: (String) -> Unit,
-    onContinue: () -> Unit,
+    onSelectSubscriptionPlan: (String) -> Unit,
     navigateToSignIn: () -> Unit,
-    isSignedOut: Boolean = false,
+    showSignInText: Boolean = false,
     onBack: (() -> Unit)? = null
 ) {
     WelcomeFlowContainer(
@@ -114,10 +117,9 @@ internal fun PlansScreen(
         PlansScreenContent(
             initialTabIndex = initialTabIndex,
             subscriptionPlans = subscriptionPlans,
-            saveSubscriptionPlanChoice = saveSubscriptionPlanChoice,
-            onContinue = onContinue,
+            onSelectSubscriptionPlan = onSelectSubscriptionPlan,
             navigateToSignIn = navigateToSignIn,
-            showSignInText = isSignedOut,
+            showSignInText = showSignInText,
             modifier = it
         )
     }
@@ -127,8 +129,7 @@ internal fun PlansScreen(
 fun PlansScreenContent(
     initialTabIndex: Int,
     subscriptionPlans: List<SubscriptionPlan>,
-    saveSubscriptionPlanChoice: (String) -> Unit,
-    onContinue: () -> Unit,
+    onSelectSubscriptionPlan: (String) -> Unit,
     navigateToSignIn: () -> Unit,
     showSignInText: Boolean = true,
     modifier: Modifier
@@ -233,8 +234,7 @@ fun PlansScreenContent(
         SubscriptionInfo(
             subscriptionPlan = subscriptionPlan,
             onClickContinue = {
-                saveSubscriptionPlanChoice(subscriptionPlan.tag)
-                onContinue()
+                onSelectSubscriptionPlan(subscriptionPlan.tag)
             }
         )
 
@@ -372,8 +372,7 @@ fun PlansScreen_Free_Light_Preview() {
         PlansScreen(
             initialTabIndex = 0,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
-            saveSubscriptionPlanChoice = {},
-            onContinue = {},
+            onSelectSubscriptionPlan = {},
             navigateToSignIn = {}
         )
     }
@@ -386,8 +385,7 @@ fun PlansScreen_Free_Dark_Preview() {
         PlansScreen(
             initialTabIndex = 0,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
-            saveSubscriptionPlanChoice = {},
-            onContinue = {},
+            onSelectSubscriptionPlan = {},
             navigateToSignIn = {}
         )
     }
@@ -400,8 +398,7 @@ fun PlansScreen_Annual_Light_Preview() {
         PlansScreen(
             initialTabIndex = 1,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
-            saveSubscriptionPlanChoice = {},
-            onContinue = {},
+            onSelectSubscriptionPlan = {},
             navigateToSignIn = {}
         )
     }
@@ -414,8 +411,7 @@ fun PlansScreen_Annual_Dark_Preview() {
         PlansScreen(
             initialTabIndex = 1,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
-            saveSubscriptionPlanChoice = {},
-            onContinue = {},
+            onSelectSubscriptionPlan = {},
             navigateToSignIn = {}
         )
     }
@@ -428,8 +424,7 @@ fun PlansScreen_Monthly_Light_Preview() {
         PlansScreen(
             initialTabIndex = 2,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
-            saveSubscriptionPlanChoice = {},
-            onContinue = {},
+            onSelectSubscriptionPlan = {},
             navigateToSignIn = {}
         )
     }
@@ -442,8 +437,7 @@ fun PlansScreen_Monthly_Dark_Preview() {
         PlansScreen(
             initialTabIndex = 2,
             subscriptionPlans = PlansScreenData.getPreviewSubscriptionPlans(),
-            saveSubscriptionPlanChoice = {},
-            onContinue = {},
+            onSelectSubscriptionPlan = {},
             navigateToSignIn = {}
         )
     }

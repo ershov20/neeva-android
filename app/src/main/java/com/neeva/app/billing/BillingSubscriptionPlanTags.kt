@@ -13,4 +13,8 @@ object BillingSubscriptionPlanTags {
 
     // Used in this project
     const val FREE_PLAN = "free"
+
+    fun isPremiumPlanTag(tag: String): Boolean {
+        return tag == ANNUAL_PREMIUM_PLAN || tag == MONTHLY_PREMIUM_PLAN
+    }
 }

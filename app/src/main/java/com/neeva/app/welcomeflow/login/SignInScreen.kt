@@ -23,7 +23,6 @@ import com.neeva.app.welcomeflow.WelcomeFlowContainer
 @Composable
 fun SignInScreen(
     loginReturnParams: LoginReturnParams,
-    onPremiumAvailable: () -> Unit,
     navigateToCreateAccount: () -> Unit,
     onBack: () -> Unit,
 ) {
@@ -36,21 +35,18 @@ fun SignInScreen(
             WelcomeFlowButtonContainer {
                 LoginButton(
                     loginReturnParams = loginReturnParams,
-                    onPremiumAvailable = onPremiumAvailable,
                     provider = NeevaUser.SSOProvider.GOOGLE,
                     signup = false,
                 )
                 Spacer(Modifier.height(18.dp))
                 LoginButton(
                     loginReturnParams = loginReturnParams,
-                    onPremiumAvailable = onPremiumAvailable,
                     provider = NeevaUser.SSOProvider.OKTA,
                     signup = false,
                 )
                 Spacer(Modifier.height(18.dp))
                 LoginButton(
                     loginReturnParams = loginReturnParams,
-                    onPremiumAvailable = onPremiumAvailable,
                     provider = NeevaUser.SSOProvider.MICROSOFT,
                     signup = false,
                 )
@@ -70,7 +66,6 @@ fun SignIn_Light_Preview() {
                 "",
                 ""
             ),
-            onPremiumAvailable = { },
             navigateToCreateAccount = { },
             onBack = { },
         )
@@ -86,7 +81,6 @@ fun SignIn_Dark_Preview() {
                 "",
                 ""
             ),
-            onPremiumAvailable = { },
             navigateToCreateAccount = { },
             onBack = { },
         )

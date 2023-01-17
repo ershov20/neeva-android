@@ -29,17 +29,15 @@ import com.neeva.app.userdata.NeevaUser
 @Composable
 fun LoginButton(
     loginReturnParams: LoginReturnParams,
-    onPremiumAvailable: () -> Unit,
     provider: NeevaUser.SSOProvider,
-    signup: Boolean
+    signup: Boolean,
 ) {
     val mktEmailOptOut = LocalFirstRunModel.current.mktEmailOptOutState.value
     val onClick = launchLoginFlow(
         loginReturnParams = loginReturnParams,
-        onPremiumAvailable = onPremiumAvailable,
         provider = provider,
         signup = signup,
-        mktEmailOptOut = mktEmailOptOut
+        mktEmailOptOut = mktEmailOptOut,
     )
 
     if (provider == NeevaUser.SSOProvider.GOOGLE) {

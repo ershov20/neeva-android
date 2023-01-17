@@ -28,7 +28,6 @@ import com.neeva.app.welcomeflow.WelcomeFlowContainer
 @Composable
 fun CreateAccountScreen(
     loginReturnParams: LoginReturnParams,
-    onPremiumAvailable: () -> Unit,
     onShowOtherSignUpOptions: (() -> Unit)? = null,
     navigateToSignIn: () -> Unit,
     onBack: () -> Unit,
@@ -42,14 +41,10 @@ fun CreateAccountScreen(
             if (onShowOtherSignUpOptions != null) {
                 SignUpWithGoogleButtons(
                     loginReturnParams = loginReturnParams,
-                    onPremiumAvailable = onPremiumAvailable,
                     onOtherOptions = onShowOtherSignUpOptions,
                 )
             } else {
-                SignUpWithOtherButtons(
-                    loginReturnParams = loginReturnParams,
-                    onPremiumAvailable = onPremiumAvailable,
-                )
+                SignUpWithOtherButtons(loginReturnParams = loginReturnParams)
             }
             Spacer(Modifier.height(32.dp))
             EmailPromoCheckbox(modifier = Modifier.padding(Dimensions.PADDING_MEDIUM))
@@ -65,13 +60,11 @@ fun CreateAccountScreen(
 @Composable
 fun SignUpWithGoogleButtons(
     loginReturnParams: LoginReturnParams,
-    onPremiumAvailable: () -> Unit,
     onOtherOptions: () -> Unit,
 ) {
     WelcomeFlowButtonContainer {
         LoginButton(
             loginReturnParams = loginReturnParams,
-            onPremiumAvailable = onPremiumAvailable,
             provider = NeevaUser.SSOProvider.GOOGLE,
             signup = true
         )
@@ -85,28 +78,24 @@ fun SignUpWithGoogleButtons(
 @Composable
 fun SignUpWithOtherButtons(
     loginReturnParams: LoginReturnParams,
-    onPremiumAvailable: () -> Unit,
 ) {
     WelcomeFlowButtonContainer {
         LoginButton(
             loginReturnParams = loginReturnParams,
             provider = NeevaUser.SSOProvider.GOOGLE,
             signup = true,
-            onPremiumAvailable = onPremiumAvailable,
         )
         Spacer(Modifier.height(18.dp))
         LoginButton(
             loginReturnParams = loginReturnParams,
             provider = NeevaUser.SSOProvider.OKTA,
             signup = true,
-            onPremiumAvailable = onPremiumAvailable,
         )
         Spacer(Modifier.height(18.dp))
         LoginButton(
             loginReturnParams = loginReturnParams,
             provider = NeevaUser.SSOProvider.MICROSOFT,
             signup = true,
-            onPremiumAvailable = onPremiumAvailable,
         )
     }
 }
@@ -120,7 +109,6 @@ fun CreateAccount_GoogleSignIn_Light_Preview() {
                 "",
                 ""
             ),
-            onPremiumAvailable = { },
             onShowOtherSignUpOptions = { },
             navigateToSignIn = { },
             onBack = { },
@@ -137,7 +125,6 @@ fun CreateAccount_GoogleSignIn_Dark_Preview() {
                 "",
                 ""
             ),
-            onPremiumAvailable = { },
             onShowOtherSignUpOptions = { },
             navigateToSignIn = { },
             onBack = { },
@@ -154,7 +141,6 @@ fun CreateAccount_OtherSignIn_Light_Preview() {
                 "",
                 ""
             ),
-            onPremiumAvailable = { },
             navigateToSignIn = { },
             onBack = { },
         )
@@ -170,7 +156,6 @@ fun CreateAccount_OtherSignIn_Dark_Preview() {
                 "",
                 ""
             ),
-            onPremiumAvailable = { },
             navigateToSignIn = { },
             onBack = { },
         )

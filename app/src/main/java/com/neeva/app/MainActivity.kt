@@ -13,7 +13,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
-import com.neeva.app.NeevaActivity.Companion.ACTION_SHOW_SCREEN
+import com.neeva.app.NeevaActivity.Companion.ACTION_SHOW_SCREEN_AFTER_LOGIN
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.firstrun.FirstRunModel
@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity() {
         removeSingleTabActivityFromRecents()
 
         val newIntent = Intent(this@MainActivity, activityClass)
-            .setAction(ACTION_SHOW_SCREEN)
+            .setAction(ACTION_SHOW_SCREEN_AFTER_LOGIN)
         // Send the user to a URL created by appending the [finalPath] to
         // the base Neeva URL.
         newIntent.data = Uri.parse(neevaConstants.appURL).buildUpon()

@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Copyright 2022 Neeva Inc. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 package com.neeva.app.welcomeflow.login
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,9 +17,8 @@ import com.neeva.app.userdata.NeevaUser
 fun launchLoginFlow(
     loginReturnParams: LoginReturnParams,
     provider: NeevaUser.SSOProvider? = null,
-    onPremiumAvailable: () -> Unit,
     signup: Boolean,
-    mktEmailOptOut: Boolean
+    mktEmailOptOut: Boolean,
 ): () -> Unit {
     val firstRunModel = LocalFirstRunModel.current
     val context = LocalContext.current
@@ -46,8 +41,7 @@ fun launchLoginFlow(
             ),
             context = context,
             launchLoginFlowParams = params,
-            activityResultLauncher = resultLauncher,
-            onPremiumAvailable = onPremiumAvailable,
+            activityResultLauncher = resultLauncher
         )
     }
 }

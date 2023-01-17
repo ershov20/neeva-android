@@ -30,6 +30,8 @@ class FetchPurchasesManager(
         .setProductType(BillingClient.ProductType.SUBS)
         .build()
 
+    private var callback: (BillingResult) -> Unit = { }
+
     suspend fun fetchPurchases(): Boolean = suspendCoroutine { fetchContinuation ->
         billingClientController.getBillingClient().let {
             if (it == null) {
@@ -87,6 +89,12 @@ class FetchPurchasesManager(
                     billingResult.debugMessage
             )
         }
+        callback(billingResult)
+        setOnPurchasesCallback {}
+    }
+
+    fun setOnPurchasesCallback(newCallback: (BillingResult) -> Unit) {
+        callback = newCallback
     }
 
     /** Perform new subscription purchases' acknowledgement on the client side. */

@@ -16,6 +16,7 @@ import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.archived.ArchivingOptionsDialog
 import com.neeva.app.contentfilter.ContentFilterModel
+import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LoginReturnParams
 import com.neeva.app.settings.clearbrowsing.TimeClearingOption
 import com.neeva.app.settings.defaultbrowser.FakeSetDefaultAndroidBrowserManager
@@ -91,6 +92,7 @@ class SettingsControllerImpl(
     private val appNavModel: AppNavModel,
     private val settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
+    private val firstRunModel: FirstRunModel,
     private val webLayerModel: WebLayerModel,
     private val onSignOut: () -> Unit,
     private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
@@ -165,14 +167,9 @@ class SettingsControllerImpl(
             },
             R.string.content_filter to { appNavModel.showContentFilterSettings() },
             R.string.settings_licenses to { appNavModel.showLicenses() },
-            R.string.settings_debug_launch_welcome_flow to {
-                appNavModel.showWelcomeFlow(
-                    LoginReturnParams(
-                        activityToReturnTo = NeevaActivity::class.java.name,
-                        screenToReturnTo = AppNavDestination.SETTINGS.name
-                    ),
-                    purpose = WelcomeFlowActivity.Companion.Purpose.SIGN_UP
-                )
+            R.string.settings_debug_simulate_first_run to {
+                firstRunModel.resetFirstRun()
+                appNavModel.showWelcomeFlowForDebugging()
             }
         )
         if (isSignedOut()) {

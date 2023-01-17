@@ -18,12 +18,14 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
+import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -39,6 +41,7 @@ import com.neeva.app.NeevaActivity
 import com.neeva.app.NeevaConstants
 import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.Transitions
+import com.neeva.app.billing.BillingSubscriptionPlanTags.isPremiumPlanTag
 import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.billing.billingclient.BillingClientController
 import com.neeva.app.contentfilter.ContentFilterModel
@@ -55,7 +58,9 @@ import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.welcomeflow.login.CreateAccountScreen
 import com.neeva.app.welcomeflow.login.SignInScreen
 import com.neeva.app.welcomeflow.login.WelcomeFlowNavModel
+import com.neeva.app.welcomeflow.login.WelcomeFlowNavModel.Companion.isValidDestination
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -91,8 +96,8 @@ class WelcomeFlowActivity : AppCompatActivity() {
         // region LoginReturnParams Intent keys
         // Provides keys to store strings in an Intent that other activities use to launch this
         // login flow.
-        const val ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY = "ACTIVITY_TO_RETURN_TO"
-        const val SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY = "SCREEN_TO_RETURN_TO"
+        const val ACTIVITY_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY = "ACTIVITY_TO_RETURN_TO"
+        const val SCREEN_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY = "SCREEN_TO_RETURN_TO"
         /** Key that stores a [Purpose]. */
         const val WELCOME_FLOW_PURPOSE = "WELCOME_FLOW_PURPOSE"
         // endregion
@@ -118,8 +123,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
     private var startDestination = Destinations.WELCOME.name
 
     private var sendUserToBrowserOnResume: Boolean = false
-    private var selectedSubscriptionPlanTag: String? = null
-    private var initialLoginParams = mutableStateOf<LoginReturnParams?>(null)
+    private var destinationToReturnAfterWelcomeFlow = mutableStateOf<LoginReturnParams?>(null)
     private var purpose = mutableStateOf<Purpose?>(null)
 
     @OptIn(ExperimentalAnimationApi::class)
@@ -133,11 +137,9 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
         savedInstanceState?.let {
             sendUserToBrowserOnResume = it.getBoolean(SEND_USER_TO_BROWSER_KEY)
-            selectedSubscriptionPlanTag = it.getString(SELECTED_SUBSCRIPTION_TAG_KEY)
         }
 
-        processIntentParams(intent)
-
+        processIntent(intent)
         firstRunInitialization()
 
         val onBack = { onBackPressedDispatcher.onBackPressed() }
@@ -182,15 +184,15 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
                         composable(Destinations.PLANS.name) {
                             PlansScreen(
-                                onContinue = ::onContinueInPlansScreen,
                                 navigateToSignIn = welcomeFlowNavModel::showSignIn,
-                                saveSubscriptionPlanChoice = { tag ->
-                                    selectedSubscriptionPlanTag = tag
+                                onSelectSubscriptionPlan = ::onSelectSubscriptionPlan,
+                                onBack = onBack.takeIf {
+                                    !firstRunModel.mustShowFirstRun() &&
+                                        subscriptionManager.selectedSubscriptionTag.isEmpty()
                                 },
-                                onBack = onBack.takeIf { !firstRunModel.mustShowFirstRun() },
-                                isSignedOut = neevaUser.isSignedOut(),
+                                showSignInText = neevaUser.isSignedOut(),
                                 showFreePlan = firstRunModel.mustShowFirstRun() ||
-                                    purpose.value == Purpose.SIGN_UP
+                                    purpose.value != Purpose.BROWSE_PLANS
                             )
                         }
 
@@ -225,14 +227,13 @@ class WelcomeFlowActivity : AppCompatActivity() {
                             enterTransition = { EnterTransition.None },
                             exitTransition = { ExitTransition.None }
                         ) {
+                            val selectedSubscriptionTag = subscriptionManager
+                                .selectedSubscriptionTagFlow.collectAsState().value
                             CreateAccountScreen(
-                                loginReturnParams = getLoginReturnParams(initialLoginParams.value),
-                                onPremiumAvailable = {
-                                    subscriptionManager.buy(
-                                        this@WelcomeFlowActivity,
-                                        selectedSubscriptionPlanTag
-                                    )
-                                },
+                                loginReturnParams = getLoginReturnParams(
+                                    destinationToReturnAfterWelcomeFlow.value,
+                                    selectedSubscriptionTag
+                                ),
                                 onShowOtherSignUpOptions = {
                                     welcomeFlowNavModel.showCreateAccountWithOther()
                                 },
@@ -252,14 +253,13 @@ class WelcomeFlowActivity : AppCompatActivity() {
                             enterTransition = { EnterTransition.None },
                             exitTransition = { ExitTransition.None }
                         ) {
+                            val selectedSubscriptionTag = subscriptionManager
+                                .selectedSubscriptionTagFlow.collectAsState().value
                             CreateAccountScreen(
-                                loginReturnParams = getLoginReturnParams(initialLoginParams.value),
-                                onPremiumAvailable = {
-                                    subscriptionManager.buy(
-                                        this@WelcomeFlowActivity,
-                                        selectedSubscriptionPlanTag
-                                    )
-                                },
+                                loginReturnParams = getLoginReturnParams(
+                                    destinationToReturnAfterWelcomeFlow.value,
+                                    selectedSubscriptionTag
+                                ),
                                 navigateToSignIn = welcomeFlowNavModel::showSignIn,
                                 onBack = onBack,
                             )
@@ -277,14 +277,13 @@ class WelcomeFlowActivity : AppCompatActivity() {
                             enterTransition = { EnterTransition.None },
                             exitTransition = { ExitTransition.None }
                         ) {
+                            val selectedSubscriptionTag = subscriptionManager
+                                .selectedSubscriptionTagFlow.collectAsState().value
                             SignInScreen(
-                                loginReturnParams = getLoginReturnParams(initialLoginParams.value),
-                                onPremiumAvailable = {
-                                    subscriptionManager.buy(
-                                        this@WelcomeFlowActivity,
-                                        selectedSubscriptionPlanTag
-                                    )
-                                },
+                                loginReturnParams = getLoginReturnParams(
+                                    destinationToReturnAfterWelcomeFlow.value,
+                                    selectedSubscriptionTag
+                                ),
                                 navigateToCreateAccount = {
                                     welcomeFlowNavModel.showCreateAccountWithGoogle()
                                 },
@@ -322,31 +321,19 @@ class WelcomeFlowActivity : AppCompatActivity() {
     }
 
     private fun isPremiumPurchaseAvailable(): Boolean {
-        val offers = subscriptionManager.productDetailsFlow.value
-            ?.subscriptionOfferDetails
         val billingEnabledInSettings = settingsDataModel.getSettingsToggleValue(
             SettingsToggle.DEBUG_ENABLE_BILLING
         )
-        return offers != null && offers.isNotEmpty() && billingEnabledInSettings
+        return subscriptionManager.isPremiumPurchaseAvailable() && billingEnabledInSettings
     }
 
-    private fun processIntentParams(intent: Intent?) {
-        val activityToReturnToAfterWelcomeFlow = intent?.extras?.getString(
-            ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
-        )
-        val screenToReturnToAfterWelcomeFlow = intent?.extras?.getString(
-            SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY
-        )
-        if (
-            activityToReturnToAfterWelcomeFlow != null &&
-            screenToReturnToAfterWelcomeFlow != null
-        ) {
-            initialLoginParams.value = LoginReturnParams(
-                activityToReturnTo = activityToReturnToAfterWelcomeFlow,
-                screenToReturnTo = screenToReturnToAfterWelcomeFlow
-            )
-        }
+    private fun processIntent(intent: Intent?) {
+        setLoginReturnParams(intent)
+        setStartDestination(intent)
+        navigateToStartDestination()
+    }
 
+    private fun setStartDestination(intent: Intent?) {
         purpose.value = Purpose
             .values()
             .find {
@@ -378,17 +365,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
         }
     }
 
-    private fun getLoginReturnParams(
-        initialLoginReturnParams: LoginReturnParams?
-    ): LoginReturnParams {
-        return firstRunModel.getLoginReturnParameters(
-            setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
-            selectedSubscriptionPlanTag = selectedSubscriptionPlanTag,
-            initialLoginReturnParams = initialLoginReturnParams
-        )
-    }
-
-    private fun setupStartScreen() {
+    private fun navigateToStartDestination() {
         val screenToReturnToAfterLogin = firstRunModel.getScreenToReturnToAfterLogin()
         firstRunModel.clearDestinationsToReturnAfterLogin()
 
@@ -398,7 +375,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
             // If there was a login, navigate to the specified screen.
             loginHappened && isValidDestination(screenToReturnToAfterLogin) -> {
                 if (this::navHost.isInitialized) {
-                    navHost.navigate(screenToReturnToAfterLogin)
+                    welcomeFlowNavModel.show(screenToReturnToAfterLogin)
                 } else {
                     // Since the activity could have died, the navHost might need to be
                     // reinitialized. Make sure it starts on the specified screen.
@@ -419,9 +396,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
                     this::navHost.isInitialized &&
                     navHost.currentBackStackEntry?.destination?.route != startDestination
                 ) {
-                    navHost.navigate(startDestination) {
-                        launchSingleTop = true
-
+                    welcomeFlowNavModel.show(startDestination) {
                         popUpTo(startDestination)
                     }
                 }
@@ -433,8 +408,33 @@ class WelcomeFlowActivity : AppCompatActivity() {
         }
     }
 
-    private fun isValidDestination(route: String): Boolean {
-        return Destinations.values().any { it.name == route }
+    private fun setLoginReturnParams(intent: Intent?) {
+        val activityToReturnToAfterWelcomeFlow = intent?.extras?.getString(
+            ACTIVITY_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY
+        )
+        val screenToReturnToAfterWelcomeFlow = intent?.extras?.getString(
+            SCREEN_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY
+        )
+        if (
+            activityToReturnToAfterWelcomeFlow != null &&
+            screenToReturnToAfterWelcomeFlow != null
+        ) {
+            destinationToReturnAfterWelcomeFlow.value = LoginReturnParams(
+                activityToReturnTo = activityToReturnToAfterWelcomeFlow,
+                screenToReturnTo = screenToReturnToAfterWelcomeFlow
+            )
+        }
+    }
+
+    private fun getLoginReturnParams(
+        destinationToReturnToAfterWelcomeFlow: LoginReturnParams?,
+        selectedSubscriptionTag: String
+    ): LoginReturnParams {
+        return firstRunModel.getLoginReturnParameters(
+            setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
+            destinationToReturnToAfterWelcomeFlow = destinationToReturnToAfterWelcomeFlow,
+            hasSelectedPremiumPlan = isPremiumPlanTag(selectedSubscriptionTag)
+        )
     }
 
     override fun onResume() {
@@ -455,23 +455,19 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        setupStartScreen()
-        processIntentParams(intent = intent)
+        processIntent(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
         outState.putBoolean(SEND_USER_TO_BROWSER_KEY, sendUserToBrowserOnResume)
-        if (selectedSubscriptionPlanTag != null) {
-            outState.putString(SELECTED_SUBSCRIPTION_TAG_KEY, selectedSubscriptionPlanTag)
-        }
 
-        initialLoginParams.value?.let {
+        destinationToReturnAfterWelcomeFlow.value?.let {
             outState.putString(
-                ACTIVITY_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
+                ACTIVITY_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY,
                 it.activityToReturnTo
             )
             outState.putString(
-                SCREEN_TO_RETURN_TO_AFTER_WELCOMEFLOW_KEY,
+                SCREEN_TO_RETURN_TO_AFTER_WELCOME_FLOW_KEY,
                 it.screenToReturnTo
             )
         }
@@ -492,16 +488,46 @@ class WelcomeFlowActivity : AppCompatActivity() {
         }
     }
 
-    private fun onContinueInPlansScreen() {
-        when {
-            neevaUser.isSignedOut() -> {
-                welcomeFlowNavModel.showCreateAccountWithGoogle()
+    private fun onSelectSubscriptionPlan(tag: String) {
+        subscriptionManager.setSubscriptionTagForPremiumPurchase(tag)
+        subscriptionManager.queueBuyPremiumOnSignInIfSelected(
+            activityReference = WeakReference(this@WelcomeFlowActivity),
+            onBillingFlowFinished = {
+                if (it.responseCode == BillingResponseCode.OK) {
+                    // A purchase has been made.
+                    if (!setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
+                        welcomeFlowNavModel.showSetDefaultBrowser()
+                    } else {
+                        finishWelcomeFlow()
+                    }
+                } else {
+                    // No purchase has been made.
+                    welcomeFlowNavModel.showPlans()
+                }
             }
-            !setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser() -> {
-                welcomeFlowNavModel.showSetDefaultBrowser()
+        )
+
+        if (isPremiumPlanTag(tag)) {
+            when {
+                // Happens in FirstRun and when purpose == SIGN_UP
+                neevaUser.isSignedOut() -> {
+                    welcomeFlowNavModel.showCreateAccountWithGoogle()
+                }
+                // Let the result of the BillingFlow decide where the user navigates next.
+                else -> { }
             }
-            else -> {
-                finishWelcomeFlow()
+        } else {
+            // Navigation for when the FREE plan has been selected
+            when {
+                neevaUser.isSignedOut() -> {
+                    welcomeFlowNavModel.showCreateAccountWithGoogle()
+                }
+                !setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser() -> {
+                    welcomeFlowNavModel.showSetDefaultBrowser()
+                }
+                else -> {
+                    finishWelcomeFlow()
+                }
             }
         }
     }
@@ -518,7 +544,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
         clientLogger.sendPendingLogs()
 
         // An activity outside of WelcomeFlowActivity has triggered the WelcomeFlow via intent:
-        val returnToActivityAndScreen = initialLoginParams.value != null
+        val returnToActivityAndScreen = destinationToReturnAfterWelcomeFlow.value != null
 
         val browserIntent = intent.apply {
             setClass(this@WelcomeFlowActivity, NeevaActivity::class.java)
@@ -526,8 +552,8 @@ class WelcomeFlowActivity : AppCompatActivity() {
 
             when {
                 returnToActivityAndScreen -> {
-                    action = NeevaActivity.ACTION_SHOW_SCREEN
-                    initialLoginParams.value?.let {
+                    action = NeevaActivity.ACTION_SHOW_SCREEN_AFTER_LOGIN
+                    destinationToReturnAfterWelcomeFlow.value?.let {
                         firstRunModel.setLoginReturnParams(it)
                     }
                 }

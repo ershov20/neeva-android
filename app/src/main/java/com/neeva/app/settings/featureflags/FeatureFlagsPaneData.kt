@@ -84,7 +84,7 @@ object FeatureFlagsPaneData : SettingsPaneDataInterface {
                 ),
                 SettingsRowData(
                     type = SettingsRowType.BUTTON,
-                    primaryLabelId = R.string.settings_debug_launch_welcome_flow
+                    primaryLabelId = R.string.settings_debug_simulate_first_run
                 ),
             )
         ),

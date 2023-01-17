@@ -52,6 +52,8 @@ interface AppNavModel {
         loginReturnParams: LoginReturnParams,
         purpose: WelcomeFlowActivity.Companion.Purpose
     )
+
+    fun showWelcomeFlowForDebugging()
     // endregion
 
     // region External screens
@@ -103,6 +105,7 @@ class PreviewAppNavModel(context: Context) : AppNavModel {
         loginReturnParams: LoginReturnParams,
         purpose: WelcomeFlowActivity.Companion.Purpose
     ) {}
+    override fun showWelcomeFlowForDebugging() {}
     override fun openAndroidDefaultBrowserSettings() {}
     override fun showAdditionalLicenses() {}
     override fun openUrlViaIntent(uri: Uri, fallback: Uri?) {}

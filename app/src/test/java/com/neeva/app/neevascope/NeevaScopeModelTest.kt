@@ -11,7 +11,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.neeva.app.BaseTest
 import com.neeva.app.CheatsheetInfoQuery
 import com.neeva.app.CoroutineScopeRule
-import com.neeva.app.Dispatchers
 import com.neeva.app.NeevaConstants
 import com.neeva.app.SearchQuery
 import com.neeva.app.billing.billingclient.BillingClientController
@@ -26,7 +25,6 @@ import com.neeva.app.userdata.UserInfo
 import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.StandardTestDispatcher
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,7 +43,6 @@ class NeevaScopeModelTest : BaseTest() {
 
     @Mock private lateinit var previewSessionToken: PreviewSessionToken
 
-    private lateinit var dispatchers: Dispatchers
     private lateinit var neevaScopeModel: NeevaScopeModel
     private lateinit var context: Context
     private lateinit var neevaConstants: NeevaConstants
@@ -74,6 +71,8 @@ class NeevaScopeModelTest : BaseTest() {
         loginToken.updateCachedCookie("NotAnEmptyToken")
 
         neevaUser = NeevaUserImpl(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
             sharedPreferencesModel = SharedPreferencesModel(context),
             loginToken = loginToken,
             networkHandler = networkHandler,
@@ -87,15 +86,10 @@ class NeevaScopeModelTest : BaseTest() {
             neevaConstants = neevaConstants
         )
 
-        dispatchers = Dispatchers(
-            main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
-            io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
-        )
-
         neevaScopeModel = NeevaScopeModel(
             apolloWrapper = apolloWrapper,
             coroutineScope = coroutineScopeRule.scope,
-            dispatchers = dispatchers,
+            dispatchers = coroutineScopeRule.dispatchers,
             appContext = context,
             bloomFilterManager = bloomFilterManager,
             neevaConstants = neevaConstants,

@@ -13,7 +13,6 @@ import com.neeva.app.AddToSpaceMutation
 import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.DeleteSpaceResultByURLMutation
-import com.neeva.app.Dispatchers
 import com.neeva.app.GetSpacesDataQuery
 import com.neeva.app.ListSpacesQuery
 import com.neeva.app.NeevaConstants
@@ -34,7 +33,6 @@ import com.neeva.testcommon.apollo.TestAuthenticatedApolloWrapper
 import com.neeva.testcommon.apollo.TestUnauthenticatedApolloWrapper
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -69,7 +67,6 @@ class SpaceStoreTest : BaseTest() {
     private lateinit var database: HistoryDatabase
     private lateinit var spaceStore: SpaceStore
     private lateinit var file: File
-    private lateinit var dispatchers: Dispatchers
     private lateinit var neevaConstants: NeevaConstants
 
     private lateinit var authenticatedApolloWrapper: TestAuthenticatedApolloWrapper
@@ -93,6 +90,8 @@ class SpaceStoreTest : BaseTest() {
         loginToken.updateCachedCookie("NotAnEmptyToken")
 
         neevaUser = NeevaUserImpl(
+            coroutineScope = coroutineScopeRule.scope,
+            dispatchers = coroutineScopeRule.dispatchers,
             sharedPreferencesModel = sharedPreferencesModel,
             loginToken = loginToken,
             networkHandler = networkHandler,
@@ -110,10 +109,6 @@ class SpaceStoreTest : BaseTest() {
             neevaConstants = neevaConstants
         )
 
-        dispatchers = Dispatchers(
-            main = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
-            io = StandardTestDispatcher(coroutineScopeRule.scope.testScheduler),
-        )
         spaceStore = SpaceStore(
             appContext = context,
             historyDatabase = database,
@@ -123,11 +118,11 @@ class SpaceStoreTest : BaseTest() {
             neevaUser = neevaUser,
             neevaConstants = neevaConstants,
             popupModel = popupModel,
-            dispatchers = dispatchers,
+            dispatchers = coroutineScopeRule.dispatchers,
             directories = Directories(
                 context = context,
                 coroutineScope = coroutineScopeRule.scope,
-                dispatchers = dispatchers
+                dispatchers = coroutineScopeRule.dispatchers
             )
         )
         file = context.cacheDir.resolve("space_store_test")

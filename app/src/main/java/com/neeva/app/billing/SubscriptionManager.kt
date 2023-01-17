@@ -9,14 +9,23 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import com.android.billingclient.api.BillingFlowParams
+import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
+import com.neeva.app.Dispatchers
 import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.billing.BillingSubscriptionPlanTags.SUB_PRODUCT_ID
 import com.neeva.app.billing.billingclient.BillingClientController
+import com.neeva.app.sharedprefs.SharedPrefFolder
+import com.neeva.app.sharedprefs.SharedPreferencesModel
+import com.neeva.app.userdata.NeevaUser
+import java.lang.ref.WeakReference
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 /**
@@ -27,7 +36,16 @@ class SubscriptionManager(
     private val appContext: Context,
     private val activityStarter: ActivityStarter,
     private val billingClientController: BillingClientController,
+    private val coroutineScope: CoroutineScope,
+    private val dispatchers: Dispatchers,
+    private val neevaUser: NeevaUser,
+    private val sharedPreferencesModel: SharedPreferencesModel
 ) {
+    val selectedSubscriptionTag: String
+        get() = SharedPrefFolder.FirstRun.SelectedSubscriptionTag.get(sharedPreferencesModel)
+    val selectedSubscriptionTagFlow: StateFlow<String>
+        get() = SharedPrefFolder.FirstRun.SelectedSubscriptionTag.getFlow(sharedPreferencesModel)
+
     val productDetailsFlow = billingClientController.productDetailsFlow
     val purchasesFlow = billingClientController.purchasesFlow
     val obfuscatedUserIDFlow = billingClientController.obfuscatedUserIDFlow
@@ -47,6 +65,14 @@ class SubscriptionManager(
             }
         }
         .distinctUntilChanged()
+
+    fun isPremiumPurchaseAvailable(): Boolean {
+        val offers = productDetailsFlow.value?.subscriptionOfferDetails
+        val existingPurchases = purchasesFlow.value
+        // TODO(kobec): add obfuscatedUserID != null &&
+        //  check SubscriptionSource == GooglePlayStore or null
+        return existingPurchases.isNullOrEmpty() || offers != null
+    }
 
     /**
      * Retrieves all eligible base plans and offers using tags from ProductDetails.
@@ -123,14 +149,12 @@ class SubscriptionManager(
     /**
      * Use the Google Play Billing Library to make a purchase. If the FREE [tag] is passed in, this
      * function will do nothing.
-     *
-     * @param productDetails ProductDetails object returned by the library.
-     * @param existingPurchases List of current [Purchase] objects needed for upgrades or downgrades.
-     * @param billingClient Instance of [BillingClientController].
-     * @param activity [Activity] instance.
-     * @param tag String representing tags associated with offers and base plans.
      */
-    fun buy(activity: Activity, tag: String?) {
+    private fun buy(
+        activityReference: WeakReference<Activity>,
+        tag: String?,
+        onBillingFlowFinished: (BillingResult) -> Unit
+    ) {
         val productDetails = productDetailsFlow.value
         if (productDetails == null) {
             Timber.e("Unable to launch Purchase Flow because product details is null.")
@@ -151,19 +175,44 @@ class SubscriptionManager(
         val offerToken = leastPricedOfferToken(offerDetails)
         val obfuscatedUserID = billingClientController.obfuscatedUserIDFlow.value
 
-        // TODO(kobec): add obfuscatedUserID != null &&
-        //  check SubscriptionSource == GooglePlayStore or null
-        val existingPurchases = purchasesFlow.value
-        if (existingPurchases.isNullOrEmpty()) {
+        if (isPremiumPurchaseAvailable()) {
             offerToken?.let {
                 val billingParams = billingFlowParamsBuilder(
                     productDetails = productDetails,
                     offerToken = it,
                     obfuscatedUserID = obfuscatedUserID
                 )
-                billingClientController.launchBillingFlow(activity, billingParams.build())
+                activityReference.get()?.let {
+                    billingClientController.launchBillingFlow(
+                        activity = it,
+                        billingParams = billingParams.build(),
+                        onBillingFlowFinished = onBillingFlowFinished
+                    )
+                }
             }
         }
+    }
+
+    fun queueBuyPremiumOnSignInIfSelected(
+        activityReference: WeakReference<Activity>,
+        onBillingFlowFinished: (BillingResult) -> Unit
+    ) {
+        selectedSubscriptionTag
+            .takeIf { it.isNotEmpty() }
+            ?.let {
+                neevaUser.queueOnSignIn(uniqueJobName = QUEUE_BUY_ON_SIGN_IN_JOB_NAME) {
+                    coroutineScope.launch(dispatchers.main) {
+                        buy(
+                            activityReference = activityReference,
+                            tag = it,
+                            onBillingFlowFinished = { billingResult ->
+                                onBillingFlowFinished(billingResult)
+                                clearSelectedSubscriptionTag()
+                            }
+                        )
+                    }
+                }
+            }
     }
 
     fun manageSubscriptions() {
@@ -173,5 +222,21 @@ class SubscriptionManager(
                 "package=${appContext.packageName}"
         )
         activityStarter.safeStartActivityForIntent(Intent(Intent.ACTION_VIEW, uri))
+    }
+
+    fun setSubscriptionTagForPremiumPurchase(tag: String?) {
+        SharedPrefFolder.FirstRun.SelectedSubscriptionTag.set(
+            sharedPreferencesModel,
+            tag ?: "",
+            mustCommitImmediately = true
+        )
+    }
+
+    fun clearSelectedSubscriptionTag() {
+        SharedPrefFolder.FirstRun.SelectedSubscriptionTag.set(sharedPreferencesModel, "")
+    }
+
+    companion object {
+        val QUEUE_BUY_ON_SIGN_IN_JOB_NAME = "WelcomeFlow: QueueBuyOnSuccessfulSignIn"
     }
 }
