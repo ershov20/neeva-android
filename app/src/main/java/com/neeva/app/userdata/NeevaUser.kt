@@ -113,6 +113,12 @@ class NeevaUserImpl(
         }
         userInfoFlow.value = fetchedUserInfo
         startSignInJobConsumer()
+        queueOnSignIn(
+            uniqueJobName = "Fetch ObfuscatedUserID",
+            job = {
+                billingClientController.onUserSignedIn()
+            }
+        )
     }
 
     private fun startSignInJobConsumer() {
@@ -211,7 +217,6 @@ class NeevaUserImpl(
             if (response.hasErrors()) {
                 clearUserInfo()
             } else {
-                billingClientController.onUserSignedIn()
                 setUserInfo(userQuery.toUserInfo())
             }
         }

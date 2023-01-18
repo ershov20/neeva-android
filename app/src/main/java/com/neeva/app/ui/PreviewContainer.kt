@@ -205,9 +205,10 @@ fun PreviewCompositionLocals(content: @Composable () -> Unit) {
         appContext = LocalContext.current,
         activityStarter = previewActivityStarter,
         billingClientController = previewBillingClientController,
-        coroutineScope = coroutineScope,
+        appCoroutineScope = coroutineScope,
         dispatchers = previewDispatchers,
         neevaUser = previewNeevaUser,
+        settingsDataModel = previewSettingsDataModel,
         sharedPreferencesModel = previewSharedPreferencesModel
     )
 

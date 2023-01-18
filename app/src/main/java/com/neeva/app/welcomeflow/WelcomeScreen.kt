@@ -33,7 +33,10 @@ import com.neeva.app.ui.PortraitPreviews
 import com.neeva.app.ui.theme.Dimensions
 
 @Composable
-fun WelcomeScreen(onContinueInWelcomeScreen: () -> Unit, navigateToSignIn: () -> Unit) {
+fun WelcomeScreen(
+    onContinueInWelcomeScreen: (() -> Unit)?,
+    navigateToSignIn: () -> Unit
+) {
     val settingsDataModel = LocalSettingsDataModel.current
     WelcomeFlowContainer(headerText = stringResource(id = R.string.welcomeflow_initial_header)) {
         WelcomeScreenContent(
@@ -49,7 +52,7 @@ fun WelcomeScreen(onContinueInWelcomeScreen: () -> Unit, navigateToSignIn: () ->
 
 @Composable
 fun WelcomeScreenContent(
-    onContinueInWelcomeScreen: () -> Unit,
+    onContinueInWelcomeScreen: (() -> Unit)?,
     navigateToSignIn: () -> Unit,
     loggingConsentState: MutableState<Boolean>,
     toggleLoggingConsentState: () -> Unit,
@@ -124,12 +127,14 @@ internal fun ConsentCheckbox(
 
 @Composable
 private fun ContinueButtons(
-    onContinueInWelcomeScreen: () -> Unit,
+    onContinueInWelcomeScreen: (() -> Unit)?,
     navigateToSignIn: () -> Unit,
 ) {
     WelcomeFlowStackedButtons(
         primaryText = stringResource(id = R.string.welcomeflow_lets_go),
-        onPrimaryButton = onContinueInWelcomeScreen,
+        onPrimaryButton = onContinueInWelcomeScreen ?: {},
+        primaryButtonEnabled = onContinueInWelcomeScreen != null,
+        primaryTextWhenDisabled = stringResource(id = R.string.loading),
         secondaryText = stringResource(id = R.string.welcomeflow_i_have_an_account),
         onSecondaryButton = navigateToSignIn
     )

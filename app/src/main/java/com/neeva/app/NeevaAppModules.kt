@@ -393,15 +393,17 @@ object NeevaAppModule {
         coroutineScope: CoroutineScope,
         dispatchers: Dispatchers,
         neevaUser: NeevaUser,
+        settingsDataModel: SettingsDataModel,
         sharedPreferencesModel: SharedPreferencesModel
     ): SubscriptionManager {
         return SubscriptionManager(
             appContext = appContext,
             activityStarter = activityStarter,
             billingClientController = billingClientController,
-            coroutineScope = coroutineScope,
+            appCoroutineScope = coroutineScope,
             dispatchers = dispatchers,
             neevaUser = neevaUser,
+            settingsDataModel = settingsDataModel,
             sharedPreferencesModel = sharedPreferencesModel
         )
     }

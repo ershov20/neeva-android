@@ -84,6 +84,7 @@ class BillingClientWrapper(
         billingClient?.endConnection()
     }
 
+    /** Returns true if the BillingClient is ready to be used. */
     internal suspend fun retryConnection(): Boolean {
         // BillingClient can only be used once.
         // After calling endConnection(), we must create a new BillingClient.

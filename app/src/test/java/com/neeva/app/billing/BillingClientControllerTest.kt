@@ -9,6 +9,7 @@ import com.neeva.app.BaseTest
 import com.neeva.app.CoroutineScopeRule
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
 import com.neeva.app.billing.billingclient.BillingClientController
+import com.neeva.app.billing.billingclient.BillingClientController.Companion.MAX_ATTEMPTS
 import com.neeva.app.billing.billingclient.BillingClientWrapper
 import com.neeva.app.settings.SettingsDataModel
 import io.mockk.coEvery
@@ -112,8 +113,8 @@ class BillingClientControllerTest : BaseTest() {
             jobs.job3()
         }
         verify(exactly = 1) { jobs.job1() }
-        verify(exactly = billingClientController.MAX_ATTEMPTS) { jobs.job2() }
-        coVerify(exactly = billingClientController.MAX_ATTEMPTS - 1) {
+        verify(exactly = MAX_ATTEMPTS) { jobs.job2() }
+        coVerify(exactly = MAX_ATTEMPTS - 1) {
             billingClientWrapper.retryConnection()
         }
         verify(exactly = 1) { jobs.job3() }

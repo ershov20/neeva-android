@@ -5,11 +5,11 @@
 package com.neeva.app.billing.billingclient
 
 import android.app.Activity
+import android.util.Log
 import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
-import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.neeva.app.Dispatchers
 import com.neeva.app.InitializeGooglePlaySubscriptionMutation
@@ -38,7 +38,7 @@ class BillingClientController(
 ) {
     internal data class BillingClientJob(
         val uniqueJobName: String,
-        val job: suspend () -> Boolean
+        val job: suspend (assumeFailureForNow: Boolean) -> Boolean
     )
 
     private val activeJobSet: MutableSet<String> = mutableSetOf()
@@ -49,23 +49,24 @@ class BillingClientController(
     )
 
     val fetchPurchasesManager = FetchPurchasesManager(
+        billingClientController = this,
         coroutineScope = coroutineScope,
-        dispatchers = dispatchers,
-        billingClientController = this
+        dispatchers = dispatchers
     )
-    val fetchProductDetailsManager = FetchProductDetailsManager(this)
-
-    // Retrying BillingClient Connection
-    internal val MAX_ATTEMPTS = 4
-    private val RETRY_WAIT_TIME_MULTIPLIER = 3.0
-    private var attempts = 0
+    val fetchProductDetailsManager = FetchProductDetailsManager(
+        this,
+        coroutineScope = coroutineScope,
+        dispatchers = dispatchers
+    )
 
     // Flows
-    val purchasesFlow: StateFlow<List<Purchase>> = fetchPurchasesManager.purchasesFlow
-    val productDetailsFlow: StateFlow<ProductDetails?> =
+    val purchasesFlow: StateFlow<List<Purchase>?> = fetchPurchasesManager.purchasesFlow
+    val productDetailsFlowWrapper: StateFlow<ProductDetailsWrapper> =
         fetchProductDetailsManager.productDetailsFlow
     private val _obfuscatedUserIDFlow: MutableStateFlow<String?> = MutableStateFlow(null)
     val obfuscatedUserIDFlow: StateFlow<String?> = _obfuscatedUserIDFlow
+
+    private var attempts = 0
 
     internal fun getBillingClient(): BillingClient? {
         return billingClientWrapper.billingClient
@@ -110,7 +111,7 @@ class BillingClientController(
      *
      * @param [job] should return if the [job] succeeded or not.
      */
-    internal fun queueJobWithRetry(uniqueJobName: String, job: suspend () -> Boolean) {
+    internal fun queueJobWithRetry(uniqueJobName: String, job: suspend (Boolean) -> Boolean) {
         coroutineScope.launch(dispatchers.io) {
             synchronized(activeJobSet) {
                 val hasBeenAdded = activeJobSet.add(uniqueJobName)
@@ -124,12 +125,12 @@ class BillingClientController(
 
     /** Processes one [BillingClientJob] job at a time until the [jobQueue] is empty. */
     private suspend fun processJob(billingClientJob: BillingClientJob) {
-        var success = billingClientJob.job()
+        var success = billingClientJob.job(false)
         attempts += 1
         while (!success && attempts < MAX_ATTEMPTS) {
-            delay(1000L * RETRY_WAIT_TIME_MULTIPLIER.pow(attempts).toLong())
+            delay(getDelay(attempts))
             if (billingClientWrapper.retryConnection()) {
-                success = billingClientJob.job()
+                success = billingClientJob.job(attempts >= ATTEMPTS_TO_ASSUME_FAILURE)
             }
             attempts += 1
         }
@@ -142,6 +143,14 @@ class BillingClientController(
 
         synchronized(activeJobSet) {
             activeJobSet.remove(billingClientJob.uniqueJobName)
+        }
+    }
+
+    private fun getDelay(attempts: Int): Long {
+        return when (attempts) {
+            1 -> 0
+            2 -> FIRST_RETRY_WAIT_TIME
+            else -> 1000L * RETRY_WAIT_TIME_MULTIPLIER.pow(attempts - 1).toLong()
         }
     }
 
@@ -172,6 +181,25 @@ class BillingClientController(
                 userMustBeLoggedIn = true
             ).response?.data?.initializeGooglePlaySubscription
             _obfuscatedUserIDFlow.value = response?.obfuscatedUserID
+            // TODO(kobec): add proper error handling here: https://github.com/neevaco/neeva-android/issues/1197
+            if (obfuscatedUserIDFlow.value == null) {
+                Log.e(
+                    "ObfuscatedUserId",
+                    "InitializeGooglePlaySubscriptionMutation response = $response"
+                )
+            }
         }
+    }
+
+    companion object {
+        // region Retrying BillingClient connection parameters
+        const val SLOW_CONNECTION_WAIT_TIME = 1000L * 60
+        const val MAX_ATTEMPTS = 5
+        const val FIRST_RETRY_WAIT_TIME = 300L
+        const val RETRY_WAIT_TIME_MULTIPLIER = 2.0
+        // If a job fails this many times, we will assume failure for now. We will continue to try the
+        // job in the background until the max attempts have been finished.
+        const val ATTEMPTS_TO_ASSUME_FAILURE = 4
+        // endregion
     }
 }

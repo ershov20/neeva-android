@@ -22,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import com.android.billingclient.api.BillingClient.BillingResponseCode
@@ -176,8 +175,12 @@ class WelcomeFlowActivity : AppCompatActivity() {
                         }
                     ) {
                         composable(Destinations.WELCOME.name) {
+                            val isBillingAvailable = subscriptionManager.isBillingAvailableFlow
+                                .collectAsState().value
                             WelcomeScreen(
-                                onContinueInWelcomeScreen = ::onContinueInWelcomeScreen,
+                                onContinueInWelcomeScreen = getOnContinueInWelcomeScreen(
+                                    isBillingAvailable = isBillingAvailable
+                                ),
                                 navigateToSignIn = welcomeFlowNavModel::showSignIn
                             )
                         }
@@ -320,13 +323,6 @@ class WelcomeFlowActivity : AppCompatActivity() {
         }
     }
 
-    private fun isPremiumPurchaseAvailable(): Boolean {
-        val billingEnabledInSettings = settingsDataModel.getSettingsToggleValue(
-            SettingsToggle.DEBUG_ENABLE_BILLING
-        )
-        return subscriptionManager.isPremiumPurchaseAvailable() && billingEnabledInSettings
-    }
-
     private fun processIntent(intent: Intent?) {
         setLoginReturnParams(intent)
         setStartDestination(intent)
@@ -340,14 +336,15 @@ class WelcomeFlowActivity : AppCompatActivity() {
                 it.name == intent?.extras?.getString(WELCOME_FLOW_PURPOSE)
             }
 
-        val canPurchasePremium = isPremiumPurchaseAvailable()
+        val isBillingAvailable = subscriptionManager.isBillingAvailableFlow.value == true
+
         startDestination = when {
             firstRunModel.mustShowFirstRun() -> Destinations.WELCOME.name
 
             purpose.value == Purpose.SIGN_UP -> {
                 // If a user wants to sign up (which is different from sign-in), show Premium plans
                 // before sign-up.
-                if (canPurchasePremium) {
+                if (isBillingAvailable) {
                     Destinations.PLANS.name
                 } else {
                     // If a user cannot purchase Premium, skip to signup screen.
@@ -474,16 +471,24 @@ class WelcomeFlowActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState, outPersistentState)
     }
 
-    private fun onContinueInWelcomeScreen() {
-        when {
-            isPremiumPurchaseAvailable() -> {
-                welcomeFlowNavModel.showPlans()
-            }
-            !setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser() -> {
-                welcomeFlowNavModel.showSetDefaultBrowser()
-            }
-            else -> {
-                finishWelcomeFlow()
+    private fun getOnContinueInWelcomeScreen(isBillingAvailable: Boolean?): (() -> Unit)? {
+        // If we do not know if the user can purchase premium or not, disable the onContinue button
+        // until we figure it out.
+        if (isBillingAvailable == null) {
+            return null
+        }
+
+        return {
+            when {
+                isBillingAvailable -> {
+                    welcomeFlowNavModel.showPlans()
+                }
+                !setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser() -> {
+                    welcomeFlowNavModel.showSetDefaultBrowser()
+                }
+                else -> {
+                    finishWelcomeFlow()
+                }
             }
         }
     }
@@ -566,9 +571,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
             }
         }
 
-        // Nullify the transition animation to hide the fact that we're switching Activities.
-        val options = ActivityOptionsCompat.makeCustomAnimation(this, 0, 0).toBundle()
-        activityStarter.safeStartActivityForIntent(browserIntent, options = options)
+        activityStarter.safeStartActivityWithoutActivityTransition(browserIntent)
         finishAndRemoveTask()
     }
 }

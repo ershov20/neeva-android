@@ -8,16 +8,31 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.BillingClient.BillingResponseCode
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.QueryProductDetailsParams
+import com.neeva.app.Dispatchers
 import com.neeva.app.billing.BillingSubscriptionPlanTags.SUB_PRODUCT_ID
+import com.neeva.app.billing.billingclient.BillingClientController.Companion.SLOW_CONNECTION_WAIT_TIME
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class FetchProductDetailsManager(private val billingClientController: BillingClientController) {
-    private val _productDetailsFlow: MutableStateFlow<ProductDetails?> = MutableStateFlow(null)
-    val productDetailsFlow: StateFlow<ProductDetails?> = _productDetailsFlow
+data class ProductDetailsWrapper(
+    val productDetails: ProductDetails? = null,
+    val isSet: Boolean = true
+)
+
+class FetchProductDetailsManager(
+    private val billingClientController: BillingClientController,
+    coroutineScope: CoroutineScope,
+    dispatchers: Dispatchers
+) {
+    private val _productDetailsFlow = MutableStateFlow(ProductDetailsWrapper(isSet = false))
+    val productDetailsFlow: StateFlow<ProductDetailsWrapper> = _productDetailsFlow
 
     private val params = QueryProductDetailsParams.newBuilder()
         .setProductList(
@@ -28,8 +43,18 @@ class FetchProductDetailsManager(private val billingClientController: BillingCli
                     .build()
             )
         )
+    private val slowInternetConnectionTimer: Job
 
-    suspend fun fetchProductDetails(): Boolean = suspendCoroutine { fetchContinuation ->
+    init {
+        slowInternetConnectionTimer = coroutineScope.launch(dispatchers.io) {
+            delay(SLOW_CONNECTION_WAIT_TIME)
+            assumeFailureToFetch()
+        }
+    }
+
+    suspend fun fetchProductDetails(
+        shouldAssumeFailureForNow: Boolean
+    ): Boolean = suspendCoroutine { fetchContinuation ->
         billingClientController.getBillingClient().let {
             if (it == null) {
                 Timber.e("BillingClient is null. Was not able to fetch product details.")
@@ -42,12 +67,18 @@ class FetchProductDetailsManager(private val billingClientController: BillingCli
                     billingResult.responseCode == BillingResponseCode.OK &&
                     productDetailsList.isNotEmpty()
                 ) {
+                    slowInternetConnectionTimer.cancel()
                     fetchContinuation.resume(true)
-                    _productDetailsFlow.value = productDetailsList.find { product ->
-                        product.productId == SUB_PRODUCT_ID
-                    }
+                    _productDetailsFlow.value = ProductDetailsWrapper(
+                        productDetails = productDetailsList.find { product ->
+                            product.productId == SUB_PRODUCT_ID
+                        }
+                    )
                 } else {
                     fetchContinuation.resume(false)
+                    if (shouldAssumeFailureForNow) {
+                        assumeFailureToFetch()
+                    }
                     Timber.e(
                         "onProductDetailsResponse: ${billingResult.responseCode}. " +
                             billingResult.debugMessage
@@ -55,5 +86,12 @@ class FetchProductDetailsManager(private val billingClientController: BillingCli
                 }
             }
         }
+    }
+
+    fun assumeFailureToFetch() {
+        _productDetailsFlow.value = ProductDetailsWrapper(
+            productDetails = null,
+            isSet = true
+        )
     }
 }

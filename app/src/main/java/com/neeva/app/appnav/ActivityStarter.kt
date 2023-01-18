@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.FileProvider
 import com.neeva.app.R
 import com.neeva.app.ui.PopupModel
@@ -16,6 +17,14 @@ import java.io.File
 import timber.log.Timber
 
 class ActivityStarter(private val appContext: Context, private val popupModel: PopupModel) {
+
+    fun safeStartActivityWithoutActivityTransition(intent: Intent) {
+        safeStartActivityForIntent(
+            intent = intent,
+            // Nullify the transition animation to hide the fact that we're switching Activities.
+            options = ActivityOptionsCompat.makeCustomAnimation(appContext, 0, 0).toBundle()
+        )
+    }
 
     fun safeStartActivityForIntent(
         intent: Intent,

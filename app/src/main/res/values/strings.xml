@@ -1029,7 +1029,8 @@
     <!-- [WelcomeFlow] Text for Settings Row to learn more about the Premium subscription. -->
     <string name="welcomeflow_learn_more_about_premium">Learn more about Premium</string>
 
-
+    <!-- Text indicating to the user that something (for example: user data, billing services, etc.) are loading or in the process of being fetched. -->
+    <string name="loading">Loading</string>
 
 
     

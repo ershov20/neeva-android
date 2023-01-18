@@ -14,17 +14,20 @@ import com.neeva.app.Dispatchers
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import timber.log.Timber
 
 class FetchPurchasesManager(
+    val billingClientController: BillingClientController,
     val coroutineScope: CoroutineScope,
-    val dispatchers: Dispatchers,
-    val billingClientController: BillingClientController
+    val dispatchers: Dispatchers
 ) : PurchasesUpdatedListener {
-    private val _purchasesFlow: MutableStateFlow<List<Purchase>> = MutableStateFlow(listOf())
-    val purchasesFlow: StateFlow<List<Purchase>> = _purchasesFlow
+    private val _purchasesFlow: MutableStateFlow<List<Purchase>?> = MutableStateFlow(null)
+    val purchasesFlow: StateFlow<List<Purchase>?> = _purchasesFlow
 
     private val params = QueryPurchasesParams.newBuilder()
         .setProductType(BillingClient.ProductType.SUBS)
@@ -32,7 +35,18 @@ class FetchPurchasesManager(
 
     private var callback: (BillingResult) -> Unit = { }
 
-    suspend fun fetchPurchases(): Boolean = suspendCoroutine { fetchContinuation ->
+    private val slowInternetConnectionTimer: Job
+
+    init {
+        slowInternetConnectionTimer = coroutineScope.launch(dispatchers.io) {
+            delay(BillingClientController.SLOW_CONNECTION_WAIT_TIME)
+            assumeFailureToFetch()
+        }
+    }
+
+    suspend fun fetchPurchases(
+        shouldAssumeFailureForNow: Boolean
+    ): Boolean = suspendCoroutine { fetchContinuation ->
         billingClientController.getBillingClient().let {
             if (it == null) {
                 Timber.e("BillingClient is null. Was not able to fetch purchases.")
@@ -42,9 +56,9 @@ class FetchPurchasesManager(
 
             it.queryPurchasesAsync(params) { billingResult, purchaseList ->
                 if (
-                    billingResult.responseCode == BillingClient.BillingResponseCode.OK &&
-                    purchaseList.isNotEmpty()
+                    billingResult.responseCode == BillingClient.BillingResponseCode.OK
                 ) {
+                    slowInternetConnectionTimer.cancel()
                     fetchContinuation.resume(true)
                     // If the BillingClient's last connection is cached, it is possible that
                     // this purchasesList returned is outdated.
@@ -53,13 +67,20 @@ class FetchPurchasesManager(
                     _purchasesFlow.value = purchaseList
                 } else {
                     fetchContinuation.resume(false)
+                    if (shouldAssumeFailureForNow) {
+                        assumeFailureToFetch()
+                    }
                     Timber.e(
                         "queryPurchases has failed with code ${billingResult.responseCode}. " +
-                            billingResult.debugMessage + ". Purchases = $purchaseList"
+                            billingResult.debugMessage
                     )
                 }
             }
         }
+    }
+
+    fun assumeFailureToFetch() {
+        _purchasesFlow.value = emptyList()
     }
 
     override fun onPurchasesUpdated(

@@ -11,11 +11,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityOptionsCompat
-import androidx.core.content.ContextCompat
 import com.neeva.app.NeevaActivity.Companion.ACTION_SHOW_SCREEN_AFTER_LOGIN
 import com.neeva.app.apollo.AuthenticatedApolloWrapper
+import com.neeva.app.appnav.ActivityStarter
 import com.neeva.app.appnav.AppNavDestination
+import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.firstrun.FirstRunModel
 import com.neeva.app.firstrun.LoginCallbackIntentParams
 import com.neeva.app.logging.ClientLogger
@@ -38,6 +38,7 @@ import timber.log.Timber
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    @Inject lateinit var activityStarter: ActivityStarter
     @Inject lateinit var authenticatedApolloWrapper: AuthenticatedApolloWrapper
     @Inject lateinit var clientLogger: ClientLogger
     @Inject lateinit var dispatchers: Dispatchers
@@ -46,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
     @Inject lateinit var popupModel: PopupModel
+    @Inject lateinit var subscriptionManager: SubscriptionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -191,9 +193,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun launchActivity(intent: Intent) {
-        // Nullify the transition animation to hide the fact that we're switching Activities.
-        val options = ActivityOptionsCompat.makeCustomAnimation(this, 0, 0).toBundle()
-        ContextCompat.startActivity(this, intent, options)
+        activityStarter.safeStartActivityWithoutActivityTransition(intent)
         finishAndRemoveTask()
     }
 

@@ -63,9 +63,9 @@ fun PlansScreen(
     showFreePlan: Boolean = true
 ) {
     val subscriptionManager = LocalSubscriptionManager.current
-    val subscriptionOfferDetails = subscriptionManager.productDetailsFlow
+    val subscriptionOfferDetails = subscriptionManager.productDetailsWrapperFlow
         .collectAsState().value
-        ?.subscriptionOfferDetails
+        .productDetails?.subscriptionOfferDetails
     val selectedSubscriptionTag = subscriptionManager.selectedSubscriptionTagFlow
         .collectAsState().value
 

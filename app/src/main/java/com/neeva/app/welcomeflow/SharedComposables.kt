@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,25 +33,41 @@ import com.neeva.app.ui.theme.Dimensions
 internal fun WelcomeFlowButton(
     primaryText: String,
     secondaryText: String? = null,
+    enabled: Boolean = true,
+    primaryTextWhenDisabled: String = "",
     onClick: () -> Unit
 ) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(vertical = Dimensions.PADDING_SMALL)
-        ) {
-            Text(
-                text = primaryText,
-                style = MaterialTheme.typography.titleMedium
-            )
-            if (secondaryText != null) {
-                Text(
-                    text = secondaryText,
-                    style = MaterialTheme.typography.bodyMedium
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (!enabled) {
+                CircularProgressIndicator(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
+                    modifier = Modifier.size(Dimensions.SIZE_ICON_MEDIUM)
                 )
+                Spacer(Modifier.size(Dimensions.PADDING_MEDIUM))
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(vertical = Dimensions.PADDING_SMALL)
+            ) {
+                Text(
+                    text = if (enabled) {
+                        primaryText
+                    } else {
+                        primaryTextWhenDisabled
+                    },
+                    style = MaterialTheme.typography.titleMedium
+                )
+                if (secondaryText != null) {
+                    Text(
+                        text = secondaryText,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }
@@ -58,12 +76,19 @@ internal fun WelcomeFlowButton(
 @Composable
 fun WelcomeFlowStackedButtons(
     primaryText: String,
-    onPrimaryButton: () -> Unit,
+    onPrimaryButton: (() -> Unit)?,
+    primaryButtonEnabled: Boolean = true,
+    primaryTextWhenDisabled: String = "",
     secondaryText: String,
     onSecondaryButton: () -> Unit = {}
 ) {
     WelcomeFlowButtonContainer {
-        WelcomeFlowButton(primaryText = primaryText, onClick = onPrimaryButton)
+        WelcomeFlowButton(
+            primaryText = primaryText,
+            onClick = onPrimaryButton ?: {},
+            enabled = primaryButtonEnabled,
+            primaryTextWhenDisabled = primaryTextWhenDisabled
+        )
         Spacer(Modifier.height(18.dp))
         SecondaryWelcomeFlowButton(text = secondaryText, onClick = onSecondaryButton)
     }
@@ -72,7 +97,11 @@ fun WelcomeFlowStackedButtons(
 @Composable
 fun SecondaryWelcomeFlowButton(text: String, onClick: () -> Unit) {
     TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-        Text(text = text, style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(vertical = Dimensions.PADDING_SMALL)
+        )
     }
 }
 

@@ -4,6 +4,7 @@
 
 package com.neeva.app.firstrun.widgets.texts
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +31,7 @@ import com.neeva.app.ui.theme.Dimensions
 fun EmailPromoCheckbox(modifier: Modifier = Modifier) {
     val firstRunModel = LocalFirstRunModel.current
     Row(
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .toggleable(
@@ -46,7 +48,7 @@ fun EmailPromoCheckbox(modifier: Modifier = Modifier) {
             onCheckedChange = { firstRunModel.toggleMarketingEmailOptOut() },
             colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
         )
-        Spacer(modifier = Modifier.width(Dimensions.PADDING_LARGE))
+        Spacer(modifier = Modifier.width(Dimensions.PADDING_MEDIUM))
         Text(
             text = stringResource(R.string.send_me_product_and_privacy_tips),
             style = FirstRunConstants.getSubtextStyle()

@@ -9,9 +9,11 @@ import android.text.format.DateUtils
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import com.neeva.app.NeevaActivity
+import com.neeva.app.NeevaConstants
 import com.neeva.app.R
 import com.neeva.app.appnav.AppNavDestination
 import com.neeva.app.appnav.AppNavModel
+import com.neeva.app.billing.SubscriptionManager
 import com.neeva.app.browsing.ActivityCallbackProvider
 import com.neeva.app.browsing.WebLayerModel
 import com.neeva.app.cardgrid.archived.ArchivingOptionsDialog
@@ -92,7 +94,9 @@ class SettingsControllerImpl(
     private val appNavModel: AppNavModel,
     private val settingsDataModel: SettingsDataModel,
     private val neevaUser: NeevaUser,
+    private val neevaConstants: NeevaConstants,
     private val firstRunModel: FirstRunModel,
+    private val subscriptionManager: SubscriptionManager,
     private val webLayerModel: WebLayerModel,
     private val onSignOut: () -> Unit,
     private val setDefaultAndroidBrowserManager: SetDefaultAndroidBrowserManager,
@@ -195,13 +199,19 @@ class SettingsControllerImpl(
             R.string.settings_debug_export_database to { debugExportDatabase() },
             R.string.settings_debug_import_database to { debugImportDatabase() },
             R.string.welcomeflow_learn_more_about_premium to {
-                appNavModel.showWelcomeFlow(
-                    LoginReturnParams(
-                        activityToReturnTo = NeevaActivity::class.java.name,
-                        screenToReturnTo = AppNavDestination.SETTINGS.name
-                    ),
-                    purpose = WelcomeFlowActivity.Companion.Purpose.BROWSE_PLANS
-                )
+                val canPurchasePremium = subscriptionManager.isBillingAvailableFlow.value == true &&
+                    subscriptionManager.isPremiumPurchaseAvailableFlow.value == true
+                if (canPurchasePremium) {
+                    appNavModel.showWelcomeFlow(
+                        LoginReturnParams(
+                            activityToReturnTo = NeevaActivity::class.java.name,
+                            screenToReturnTo = AppNavDestination.SETTINGS.name
+                        ),
+                        purpose = WelcomeFlowActivity.Companion.Purpose.BROWSE_PLANS
+                    )
+                } else {
+                    appNavModel.openUrlInNewTab(Uri.parse(neevaConstants.appMembershipURL))
+                }
             }
         )
     }
