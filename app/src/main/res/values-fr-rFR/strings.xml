@@ -522,6 +522,7 @@
     <string name="sign_in_with_google">Se connecter avec Google</string>
     <string name="sign_in_with_microsoft">Se connecter avec Microsoft</string>
     <string name="sign_in_with_okta">Continuer</string>
+    <string name="sign_in_with_email">Se connecter par e-mail</string>
 
     <!-- [Sign up][Button] Asks the user for permission to send them promotional materials. -->
     <string name="send_me_product_and_privacy_tips">Recevoir des conseils sur les produits et la confidentialité</string>
@@ -761,6 +762,7 @@
     <string name="settings_membership_status">Statut d\'abonnement</string>
     <string name="subscription_type_basic">Free Basic</string>
     <string name="subscription_type_premium">Premium</string>
+    <string name="subscription_type_unlimited">Unlimited</string>
     <string name="subscription_type_unknown">inconnue</string>
 
 
@@ -1014,6 +1016,12 @@
 
     <!-- [WelcomeFlow] Header text in the Create Account Screen. -->
     <string name="welcomeflow_create_your_account">Créez votre compte</string>
+
+    <!-- [WelcomeFlow] Header text in the Sign In Screen. -->
+    <string name="welcomeflow_sign_in_to_neeva">Se connecter à Neeva</string>
+
+    <!-- [WelcomeFlow] Text for Settings Row to learn more about the Premium subscription. -->
+    <string name="welcomeflow_learn_more_about_premium">En savoir plus sur Neeva Premium</string>
 
 
 
