@@ -15,7 +15,12 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,6 +57,8 @@ import com.neeva.app.settings.SettingsDataModel
 import com.neeva.app.settings.SettingsToggle
 import com.neeva.app.settings.defaultbrowser.SetDefaultAndroidBrowserManager
 import com.neeva.app.storage.HistoryDatabase
+import com.neeva.app.ui.PopupModel
+import com.neeva.app.ui.SnackbarHost
 import com.neeva.app.ui.theme.NeevaTheme
 import com.neeva.app.userdata.NeevaUser
 import com.neeva.app.welcomeflow.login.CreateAccountScreen
@@ -113,6 +120,7 @@ class WelcomeFlowActivity : AppCompatActivity() {
     @Inject lateinit var historyDatabase: HistoryDatabase
     @Inject lateinit var neevaConstants: NeevaConstants
     @Inject lateinit var neevaUser: NeevaUser
+    @Inject lateinit var popupModel: PopupModel
     @Inject lateinit var settingsDataModel: SettingsDataModel
     @Inject lateinit var subscriptionManager: SubscriptionManager
 
@@ -141,7 +149,6 @@ class WelcomeFlowActivity : AppCompatActivity() {
         processIntent(intent)
         firstRunInitialization()
 
-        val onBack = { onBackPressedDispatcher.onBackPressed() }
         setContent {
             NeevaTheme {
                 navHost = rememberAnimatedNavController()
@@ -157,150 +164,155 @@ class WelcomeFlowActivity : AppCompatActivity() {
                     LocalSettingsDataModel provides settingsDataModel,
                     LocalSubscriptionManager provides subscriptionManager,
                 ) {
-                    AnimatedNavHost(
-                        navController = navHost,
-                        modifier = Modifier.fillMaxSize(),
-                        startDestination = startDestination,
-                        enterTransition = {
-                            Transitions.slideIn(this, AnimatedContentScope.SlideDirection.Start)
-                        },
-                        exitTransition = {
-                            Transitions.slideOut(this, AnimatedContentScope.SlideDirection.Start)
-                        },
-                        popEnterTransition = {
-                            EnterTransition.None
-                        },
-                        popExitTransition = {
-                            ExitTransition.None
-                        }
-                    ) {
-                        composable(Destinations.WELCOME.name) {
-                            val isBillingAvailable = subscriptionManager.isBillingAvailableFlow
-                                .collectAsState().value
-                            WelcomeScreen(
-                                onContinueInWelcomeScreen = getOnContinueInWelcomeScreen(
-                                    isBillingAvailable = isBillingAvailable
-                                ),
-                                navigateToSignIn = welcomeFlowNavModel::showSignIn
+                    WelcomeFlowActivityUI()
+                }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    @Composable
+    private fun WelcomeFlowActivityUI() {
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(hostState = popupModel.snackbarHostState)
+            },
+            modifier = Modifier.fillMaxSize()
+        ) { paddingValues ->
+            Box(modifier = Modifier.padding(paddingValues)) {
+                WelcomeFlowAppNav()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalAnimationApi::class)
+    @Composable
+    fun WelcomeFlowAppNav() {
+        val onBack = { onBackPressedDispatcher.onBackPressed() }
+
+        AnimatedNavHost(
+            navController = navHost,
+            modifier = Modifier.fillMaxSize(),
+            startDestination = startDestination,
+            enterTransition = {
+                Transitions.slideIn(this, AnimatedContentScope.SlideDirection.Start)
+            },
+            exitTransition = {
+                Transitions.slideOut(this, AnimatedContentScope.SlideDirection.Start)
+            },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+        ) {
+            composable(Destinations.WELCOME.name) {
+                val isBillingAvailable = subscriptionManager.isBillingAvailableFlow
+                    .collectAsState().value
+                WelcomeScreen(
+                    onContinueInWelcomeScreen = getOnContinueInWelcomeScreen(
+                        isBillingAvailable = isBillingAvailable
+                    ),
+                    navigateToSignIn = welcomeFlowNavModel::showSignIn
+                )
+            }
+
+            composable(Destinations.PLANS.name) {
+                PlansScreen(
+                    navigateToSignIn = welcomeFlowNavModel::showSignIn,
+                    onSelectSubscriptionPlan = ::onSelectSubscriptionPlan,
+                    onBack = onBack.takeIf {
+                        !firstRunModel.mustShowFirstRun() &&
+                            subscriptionManager.selectedSubscriptionTag.isEmpty()
+                    },
+                    showSignInText = neevaUser.isSignedOut(),
+                    showFreePlan = firstRunModel.mustShowFirstRun() ||
+                        purpose.value != Purpose.BROWSE_PLANS
+                )
+            }
+
+            composable(Destinations.SET_DEFAULT_BROWSER.name) {
+                SetDefaultBrowserScreen(
+                    openAndroidDefaultBrowserSettings = {
+                        sendUserToBrowserOnResume = true
+                        try {
+                            activityStarter.safeStartActivityForIntent(
+                                Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
                             )
+                        } catch (e: ActivityNotFoundException) {
+                            Timber.e("Could not launch settings", e)
+                            finishWelcomeFlow()
                         }
+                    },
+                    setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
+                    finishWelcomeFlow = ::finishWelcomeFlow
+                )
 
-                        composable(Destinations.PLANS.name) {
-                            PlansScreen(
-                                navigateToSignIn = welcomeFlowNavModel::showSignIn,
-                                onSelectSubscriptionPlan = ::onSelectSubscriptionPlan,
-                                onBack = onBack.takeIf {
-                                    !firstRunModel.mustShowFirstRun() &&
-                                        subscriptionManager.selectedSubscriptionTag.isEmpty()
-                                },
-                                showSignInText = neevaUser.isSignedOut(),
-                                showFreePlan = firstRunModel.mustShowFirstRun() ||
-                                    purpose.value != Purpose.BROWSE_PLANS
-                            )
-                        }
+                LaunchedEffect(Unit) {
+                    clientLogger.logCounter(
+                        path = LogConfig.Interaction.DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_IMP,
+                        attributes = null
+                    )
+                }
+            }
 
-                        composable(Destinations.SET_DEFAULT_BROWSER.name) {
-                            SetDefaultBrowserScreen(
-                                openAndroidDefaultBrowserSettings = {
-                                    sendUserToBrowserOnResume = true
-                                    try {
-                                        activityStarter.safeStartActivityForIntent(
-                                            Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS)
-                                        )
-                                    } catch (e: ActivityNotFoundException) {
-                                        Timber.e("Could not launch settings", e)
-                                        finishWelcomeFlow()
-                                    }
-                                },
-                                setDefaultAndroidBrowserManager = setDefaultAndroidBrowserManager,
-                                finishWelcomeFlow = ::finishWelcomeFlow
-                            )
+            composable(
+                route = Destinations.CREATE_ACCOUNT_WITH_GOOGLE.name,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None }
+            ) {
+                val selectedSubscriptionTag = subscriptionManager
+                    .selectedSubscriptionTagFlow.collectAsState().value
+                CreateAccountScreen(
+                    loginReturnParams = getLoginReturnParams(
+                        destinationToReturnAfterWelcomeFlow.value,
+                        selectedSubscriptionTag
+                    ),
+                    onShowOtherSignUpOptions = welcomeFlowNavModel::showCreateAccountWithOther,
+                    navigateToSignIn = welcomeFlowNavModel::showSignIn,
+                    onBack = onBack,
+                )
+                LaunchedEffect(true) {
+                    clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_LANDING, null)
+                }
+            }
 
-                            LaunchedEffect(Unit) {
-                                clientLogger.logCounter(
-                                    path = LogConfig.Interaction
-                                        .DEFAULT_BROWSER_ONBOARDING_INTERSTITIAL_IMP,
-                                    attributes = null
-                                )
-                            }
-                        }
+            composable(
+                route = Destinations.CREATE_ACCOUNT_WITH_OTHER.name,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None }
+            ) {
+                val selectedSubscriptionTag = subscriptionManager
+                    .selectedSubscriptionTagFlow.collectAsState().value
+                CreateAccountScreen(
+                    loginReturnParams = getLoginReturnParams(
+                        destinationToReturnAfterWelcomeFlow.value,
+                        selectedSubscriptionTag
+                    ),
+                    navigateToSignIn = welcomeFlowNavModel::showSignIn,
+                    onBack = onBack,
+                )
 
-                        composable(
-                            route = Destinations.CREATE_ACCOUNT_WITH_GOOGLE.name,
-                            enterTransition = { EnterTransition.None },
-                            exitTransition = { ExitTransition.None }
-                        ) {
-                            val selectedSubscriptionTag = subscriptionManager
-                                .selectedSubscriptionTagFlow.collectAsState().value
-                            CreateAccountScreen(
-                                loginReturnParams = getLoginReturnParams(
-                                    destinationToReturnAfterWelcomeFlow.value,
-                                    selectedSubscriptionTag
-                                ),
-                                onShowOtherSignUpOptions = {
-                                    welcomeFlowNavModel.showCreateAccountWithOther()
-                                },
-                                navigateToSignIn = welcomeFlowNavModel::showSignIn,
-                                onBack = onBack,
-                            )
-                            LaunchedEffect(true) {
-                                clientLogger.logCounter(
-                                    LogConfig.Interaction.AUTH_IMPRESSION_LANDING,
-                                    null
-                                )
-                            }
-                        }
+                LaunchedEffect(true) {
+                    clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_OTHER, null)
+                }
+            }
 
-                        composable(
-                            route = Destinations.CREATE_ACCOUNT_WITH_OTHER.name,
-                            enterTransition = { EnterTransition.None },
-                            exitTransition = { ExitTransition.None }
-                        ) {
-                            val selectedSubscriptionTag = subscriptionManager
-                                .selectedSubscriptionTagFlow.collectAsState().value
-                            CreateAccountScreen(
-                                loginReturnParams = getLoginReturnParams(
-                                    destinationToReturnAfterWelcomeFlow.value,
-                                    selectedSubscriptionTag
-                                ),
-                                navigateToSignIn = welcomeFlowNavModel::showSignIn,
-                                onBack = onBack,
-                            )
+            composable(
+                route = Destinations.SIGN_IN.name,
+                enterTransition = { EnterTransition.None },
+                exitTransition = { ExitTransition.None }
+            ) {
+                val selectedSubscriptionTag = subscriptionManager.selectedSubscriptionTagFlow
+                    .collectAsState().value
+                SignInScreen(
+                    loginReturnParams = getLoginReturnParams(
+                        destinationToReturnAfterWelcomeFlow.value,
+                        selectedSubscriptionTag
+                    ),
+                    navigateToCreateAccount = welcomeFlowNavModel::showCreateAccountWithGoogle,
+                    onBack = onBack,
+                )
 
-                            LaunchedEffect(true) {
-                                clientLogger.logCounter(
-                                    LogConfig.Interaction.AUTH_IMPRESSION_OTHER,
-                                    null
-                                )
-                            }
-                        }
-
-                        composable(
-                            route = Destinations.SIGN_IN.name,
-                            enterTransition = { EnterTransition.None },
-                            exitTransition = { ExitTransition.None }
-                        ) {
-                            val selectedSubscriptionTag = subscriptionManager
-                                .selectedSubscriptionTagFlow.collectAsState().value
-                            SignInScreen(
-                                loginReturnParams = getLoginReturnParams(
-                                    destinationToReturnAfterWelcomeFlow.value,
-                                    selectedSubscriptionTag
-                                ),
-                                navigateToCreateAccount = {
-                                    welcomeFlowNavModel.showCreateAccountWithGoogle()
-                                },
-                                onBack = onBack,
-                            )
-
-                            LaunchedEffect(true) {
-                                clientLogger.logCounter(
-                                    LogConfig.Interaction.AUTH_IMPRESSION_SIGN_IN,
-                                    null
-                                )
-                            }
-                        }
-                    }
+                LaunchedEffect(true) {
+                    clientLogger.logCounter(LogConfig.Interaction.AUTH_IMPRESSION_SIGN_IN, null)
                 }
             }
         }

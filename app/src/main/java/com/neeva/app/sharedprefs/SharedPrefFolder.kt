@@ -149,6 +149,11 @@ sealed class SharedPrefFolder(internal val folderName: String) {
             preferenceKey = "SCREEN_TO_RETURN_TO_AFTER_LOGIN",
             defaultValue = ""
         )
+        val ScreenToReturnToAfterLoginFailure = SharedPrefKey(
+            FirstRun,
+            preferenceKey = "SCREEN_TO_RETURN_TO_AFTER_LOGIN_FAILURE",
+            defaultValue = ""
+        )
         val SelectedSubscriptionTag = SharedPrefKey(
             FirstRun,
             preferenceKey = "SELECTED_SUBSCRIPTION_TAG",

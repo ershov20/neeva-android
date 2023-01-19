@@ -54,16 +54,18 @@ class MainActivity : AppCompatActivity() {
 
         val loginHandled = handleLoginIntentIfExists(intent)
         if (!loginHandled) {
+            val loginIntentOccurredAndFailed = firstRunModel.getScreenToReturnToAfterLoginFailure()
+                .isNotEmpty()
             // If the SharedPreference value of which Destination to return to after a login is
             // outdated because the login flow never got handled properly, clear out any potential
             // outdated shared preference values and launch the app normally.
             firstRunModel.clearDestinationsToReturnAfterLogin()
-            startUpWithoutLoginIntent()
+            startUpWithoutLoginIntent(loginIntentOccurredAndFailed = loginIntentOccurredAndFailed)
         }
     }
 
-    private fun startUpWithoutLoginIntent() {
-        val activityClass = if (loginToken.isEmpty() && firstRunModel.mustShowFirstRun()) {
+    private fun startUpWithoutLoginIntent(loginIntentOccurredAndFailed: Boolean) {
+        var activityClass = if (loginToken.isEmpty() && firstRunModel.mustShowFirstRun()) {
             WelcomeFlowActivity::class.java
         } else {
             // In the past, for users who downloaded the app before the FirstRunDone
@@ -74,6 +76,14 @@ class MainActivity : AppCompatActivity() {
             // we want to show FirstRun to, set it to done here.
             firstRunModel.setFirstRunDone()
             NeevaActivity::class.java
+        }
+
+        // If a login failure happened during FirstRun, return the user to the right screen.
+        if (loginIntentOccurredAndFailed) {
+            activityClass = WelcomeFlowActivity::class.java
+            firstRunModel.setScreenToReturnToAfterLogin(
+                WelcomeFlowActivity.Companion.Destinations.SIGN_IN.name
+            )
         }
 
         // Sanitize any Intents we receive from external sources before it gets passed along to
@@ -91,10 +101,6 @@ class MainActivity : AppCompatActivity() {
 
     /** Returns false if it did not handle the login intent. */
     private fun handleLoginIntentIfExists(intent: Intent): Boolean {
-        if (intent.dataString == null || Uri.parse(intent.dataString).scheme != "neeva") {
-            return false
-        }
-
         val params = LoginCallbackIntentParams.fromLoginCallbackIntent(intent) ?: return false
         if (params.sessionKey == null || params.retryCode != null) {
             popupModel.showSnackbar(getString(params.getErrorResourceId()))
@@ -204,6 +210,11 @@ class MainActivity : AppCompatActivity() {
      */
     private fun Intent?.sanitized(): Intent? {
         return try {
+            // If the intent was a neeva login intent, sanitize it. We are done processing it.
+            if (LoginCallbackIntentParams.fromLoginCallbackIntent(this) != null) {
+                this?.data = null
+            }
+
             // Check for parceling/unmarshalling errors, which can happen if an external app sends
             // an Intent that contains a Parcelable we can't handle.  The Bundle will get
             // unmarshalled whenever we try to check for any extras from the Bundle, so it doesn't

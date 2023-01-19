@@ -47,7 +47,9 @@ fun interface GoogleSignInAccountProvider {
 
 data class LoginReturnParams(
     val activityToReturnTo: String,
-    val screenToReturnTo: String
+    val screenToReturnTo: String,
+    val screenToReturnToAfterFailure: String = WelcomeFlowActivity.Companion.Destinations
+        .SIGN_IN.name,
 )
 
 @Singleton
@@ -399,6 +401,11 @@ class FirstRunModel internal constructor(
                 sharedPreferencesModel,
                 loginReturnParams.screenToReturnTo
             )
+        SharedPrefFolder.FirstRun
+            .ScreenToReturnToAfterLoginFailure.set(
+                sharedPreferencesModel,
+                WelcomeFlowActivity.Companion.Destinations.SIGN_IN.name
+            )
     }
 
     fun getActivityToReturnToAfterLogin(): String {
@@ -407,6 +414,18 @@ class FirstRunModel internal constructor(
 
     fun getScreenToReturnToAfterLogin(): String {
         return SharedPrefFolder.FirstRun.ScreenToReturnToAfterLogin.get(sharedPreferencesModel)
+    }
+
+    fun getScreenToReturnToAfterLoginFailure(): String {
+        return SharedPrefFolder.FirstRun.ScreenToReturnToAfterLoginFailure
+            .get(sharedPreferencesModel)
+    }
+
+    fun setScreenToReturnToAfterLogin(screenToReturnTo: String) {
+        SharedPrefFolder.FirstRun.ScreenToReturnToAfterLogin.set(
+            sharedPreferencesModel,
+            screenToReturnTo
+        )
     }
 
     fun clearDestinationsToReturnAfterLogin() {
@@ -421,11 +440,19 @@ class FirstRunModel internal constructor(
     ): LoginReturnParams {
         if (!setDefaultAndroidBrowserManager.isNeevaTheDefaultBrowser()) {
             val isNewUser = mustShowFirstRun()
-
-            if (isNewUser || hasSelectedPremiumPlan) {
-                return LoginReturnParams(
+            return if (
+                settingsDataModel.getSettingsToggleValue(SettingsToggle.DEBUG_ENABLE_BILLING) &&
+                (isNewUser || hasSelectedPremiumPlan)
+            ) {
+                LoginReturnParams(
                     activityToReturnTo = WelcomeFlowActivity::class.java.name,
                     screenToReturnTo = WelcomeFlowActivity.Companion.Destinations.PLANS.name
+                )
+            } else {
+                LoginReturnParams(
+                    activityToReturnTo = WelcomeFlowActivity::class.java.name,
+                    screenToReturnTo = WelcomeFlowActivity.Companion.Destinations
+                        .SET_DEFAULT_BROWSER.name
                 )
             }
         }
